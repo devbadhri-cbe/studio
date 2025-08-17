@@ -39,9 +39,10 @@ export function Hba1cChart() {
               tickLine={false}
               axisLine={false}
               padding={{ left: 20, right: 20 }}
-              angle={-45}
+              angle={-60}
               textAnchor="end"
-              height={50}
+              height={70}
+              tick={{ fontSize: 12 }}
             />
             <YAxis
               domain={([dataMin, dataMax]) => {
