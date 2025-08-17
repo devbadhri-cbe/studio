@@ -14,6 +14,7 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from './ui/textarea';
 import { calculateAge } from '@/lib/utils';
+import { FormDescription } from './ui/form';
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -49,6 +50,11 @@ export function ProfileCard() {
       setIsSaving(false);
     }, 500);
   };
+  
+  // Watch for changes in the 'dob' field to re-calculate age
+  const dobValue = form.watch('dob');
+  const calculatedAge = calculateAge(dobValue);
+
 
   return (
     <Card className="h-full">
@@ -58,7 +64,7 @@ export function ProfileCard() {
             <UserCircle className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <CardTitle>My Profile {age && `(${age} years)`}</CardTitle>
+            <CardTitle>My Profile</CardTitle>
             <CardDescription>Keep your personal information up to date.</CardDescription>
           </div>
         </div>
@@ -88,6 +94,7 @@ export function ProfileCard() {
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
+                  {calculatedAge !== null && <FormDescription>Your age is {calculatedAge} years.</FormDescription>}
                   <FormMessage />
                 </FormItem>
               )}
