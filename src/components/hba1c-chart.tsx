@@ -85,7 +85,7 @@ export function Hba1cChart() {
             <ReferenceLine y={5.7} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
               <Label value="Prediabetes Threshold (5.7%)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
             </ReferenceLine>
-            <Line type="monotone" dataKey="hba1c" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="hba1c" stroke="hsl(var(--primary))" strokeWidth={2} />
           </LineChart>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
