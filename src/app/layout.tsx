@@ -2,14 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AppProvider } from '@/context/app-context';
 import { Toaster } from '@/components/ui/toaster';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarInset,
-  SidebarHeader,
-  SidebarContent,
-} from '@/components/ui/sidebar';
-import { Header } from '@/components/header';
 import { Logo } from '@/components/logo';
 
 export const metadata: Metadata = {
@@ -31,21 +23,9 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AppProvider>
-          <SidebarProvider>
-            <Sidebar>
-              <SidebarHeader>
-                <div className="flex items-center gap-2">
-                  <Logo className="h-8 w-8 text-primary" />
-                  <span className="text-xl font-semibold font-headline">Glycemic Guardian</span>
-                </div>
-              </SidebarHeader>
-              <SidebarContent />
-            </Sidebar>
-            <SidebarInset>
-              <Header />
-              {children}
-            </SidebarInset>
-          </SidebarProvider>
+          <div className="flex flex-col min-h-screen">
+            {children}
+          </div>
           <Toaster />
         </AppProvider>
       </body>
