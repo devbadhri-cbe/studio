@@ -57,7 +57,7 @@ export function HistoryTable() {
                 const status = getStatus(record.value);
                 return (
                   <TableRow key={record.id}>
-                    <TableCell className="font-medium">{format(new Date(record.date), 'PPP')}</TableCell>
+                    <TableCell className="font-medium">{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
                     <TableCell>{record.value.toFixed(1)}</TableCell>
                     <TableCell>
                       <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>

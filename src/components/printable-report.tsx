@@ -27,7 +27,7 @@ export function PrintableReport() {
           </div>
           <div className="text-right text-sm">
             <p>
-              Report Generated: <strong>{format(new Date(), 'PPP')}</strong>
+              Report Generated: <strong>{format(new Date(), 'dd-MM-yyyy')}</strong>
             </p>
           </div>
         </header>
@@ -41,7 +41,7 @@ export function PrintableReport() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Date of Birth</p>
-              <p className="font-medium">{profile.dob ? format(new Date(profile.dob), 'PPP') : 'N/A'}</p>
+              <p className="font-medium">{profile.dob ? format(new Date(profile.dob), 'dd-MM-yyyy') : 'N/A'}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Age</p>
@@ -75,7 +75,7 @@ export function PrintableReport() {
                 {records.length > 0 ? (
                   records.map((record) => (
                     <TableRow key={record.id}>
-                      <TableCell>{format(new Date(record.date), 'PPP')}</TableCell>
+                      <TableCell>{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
                       <TableCell className="text-right font-mono">{record.value.toFixed(1)}</TableCell>
                     </TableRow>
                   ))

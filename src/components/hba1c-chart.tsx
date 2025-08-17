@@ -35,7 +35,7 @@ export function Hba1cChart() {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick) => format(new Date(tick), 'PPP')}
+              tickFormatter={(tick) => format(new Date(tick), 'dd-MM-yyyy')}
               tickLine={false}
               axisLine={false}
               padding={{ left: 20, right: 20 }}
@@ -59,7 +59,7 @@ export function Hba1cChart() {
                       <div className="grid grid-cols-2 gap-2">
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">Date</span>
-                          <span className="font-bold text-foreground">{format(new Date(label), 'PPP')}</span>
+                          <span className="font-bold text-foreground">{format(new Date(label), 'dd-MM-yyyy')}</span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">HbA1c</span>
