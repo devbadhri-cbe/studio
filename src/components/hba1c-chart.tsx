@@ -1,10 +1,9 @@
 'use client';
 
 import { format } from 'date-fns';
-import { Area, AreaChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Line, LineChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { ChartConfig } from '@/components/ui/chart';
 import { useApp } from '@/context/app-context';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 const chartConfig = {
   hba1c: {
@@ -25,13 +24,7 @@ export function Hba1cChart() {
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         {records.length > 0 ? (
-          <AreaChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
-            <defs>
-              <linearGradient id="colorHba1c" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
+          <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
@@ -92,8 +85,8 @@ export function Hba1cChart() {
             <ReferenceLine y={5.7} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
               <Label value="Prediabetes Threshold (5.7%)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
             </ReferenceLine>
-            <Area type="monotone" dataKey="hba1c" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#colorHba1c)" />
-          </AreaChart>
+            <Line type="monotone" dataKey="hba1c" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+          </LineChart>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
             <p className="text-center text-muted-foreground">No data to display.</p>
