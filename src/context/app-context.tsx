@@ -61,7 +61,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addRecord = (record: Omit<Hba1cRecord, 'id'>) => {
     setRecordsState((prev) => {
       // Ensure date is in ISO format for consistent storage
-      const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString() };
+      const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: profile.medication || 'N/A' };
       const newRecords = [...prev, newRecord].map(r => ({...r, date: new Date(r.date)}));
 
       // When saving to localStorage, date objects are automatically converted to ISO strings

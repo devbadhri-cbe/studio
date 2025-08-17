@@ -49,6 +49,7 @@ export function HistoryTable() {
               <TableHead className="px-2 md:px-4">Date</TableHead>
               <TableHead className="px-2 md:px-4">Result (%)</TableHead>
               <TableHead className="px-2 md:px-4">Status</TableHead>
+              <TableHead className="px-2 md:px-4 hidden md:table-cell">Medication</TableHead>
               <TableHead>
                 <span className="sr-only">Actions</span>
               </TableHead>
@@ -65,6 +66,7 @@ export function HistoryTable() {
                     <TableCell className="px-2 md:px-4">
                       <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>
                     </TableCell>
+                    <TableCell className="px-2 md:px-4 hidden md:table-cell truncate max-w-[150px]">{record.medication || 'N/A'}</TableCell>
                     <TableCell className="px-2 md:px-4">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -84,7 +86,7 @@ export function HistoryTable() {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
+                <TableCell colSpan={5} className="h-24 text-center">
                   No records found.
                 </TableCell>
               </TableRow>

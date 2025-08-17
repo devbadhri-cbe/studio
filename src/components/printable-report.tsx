@@ -13,6 +13,8 @@ export function PrintableReport() {
   if (!isClient) return null;
 
   const age = calculateAge(profile.dob);
+  const sortedRecords = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
 
   return (
     <div className="hidden print-only">
@@ -68,20 +70,22 @@ export function PrintableReport() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Result (%)</TableHead>
+                  <TableHead>Result (%)</TableHead>
+                  <TableHead className='text-right'>Medication</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {records.length > 0 ? (
-                  records.map((record) => (
+                {sortedRecords.length > 0 ? (
+                  sortedRecords.map((record) => (
                     <TableRow key={record.id}>
                       <TableCell>{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
-                      <TableCell className="text-right font-mono">{record.value.toFixed(1)}</TableCell>
+                      <TableCell className="font-mono">{record.value.toFixed(1)}</TableCell>
+                      <TableCell className="text-right">{record.medication || 'N/A'}</TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={2} className="h-24 text-center">
+                    <TableCell colSpan={3} className="h-24 text-center">
                       No records found.
                     </TableCell>
                   </TableRow>

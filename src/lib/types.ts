@@ -8,4 +8,5 @@ export interface Hba1cRecord {
   id: string;
   date: Date | string;
   value: number; // in %
+  medication?: string;
 }
