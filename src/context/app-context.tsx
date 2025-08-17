@@ -10,7 +10,7 @@ interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
   records: Hba1cRecord[];
-  addRecord: (record: Omit<Hba1cRecord, 'id'>) => void;
+  addRecord: (record: Omit<Hba1cRecord, 'id' | 'medication'>) => void;
   removeRecord: (id: string) => void;
   tips: string[];
   setTips: (tips: string[]) => void;
@@ -33,15 +33,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const storedRecords = localStorage.getItem('gg-records');
       if (storedRecords) {
-        // Dates are stored as ISO strings, so we need to parse them back to Date objects
-        setRecordsState(JSON.parse(storedRecords).map((r: Hba1cRecord) => ({ ...r, date: parseISO(r.date as string) })));
+        setRecordsState(JSON.parse(storedRecords));
       }
 
       const storedTips = localStorage.getItem('gg-tips');
       if (storedTips) setTipsState(JSON.parse(storedTips));
     } catch (error) {
       console.error('Failed to parse from localStorage', error);
-      // Reset to default if parsing fails
       localStorage.removeItem('gg-profile');
       localStorage.removeItem('gg-records');
       localStorage.removeItem('gg-tips');
@@ -58,16 +56,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (isClient) localStorage.setItem('gg-tips', JSON.stringify(newTips));
   };
 
-  const addRecord = (record: Omit<Hba1cRecord, 'id'>) => {
+  const addRecord = (record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
     setRecordsState((prev) => {
-      // Ensure date is in ISO format for consistent storage
-      const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: profile.medication || 'N/A' };
-      const newRecords = [...prev, newRecord].map(r => ({...r, date: new Date(r.date)}));
-
-      // When saving to localStorage, date objects are automatically converted to ISO strings
+      const newRecord = { 
+        ...record, 
+        id: Date.now().toString(), 
+        date: new Date(record.date).toISOString(), 
+        medication: profile.medication || 'N/A' 
+      };
+      const newRecords = [...prev, newRecord];
       if (isClient) localStorage.setItem('gg-records', JSON.stringify(newRecords));
-      
-      return newRecords.map(r => ({...r, date: parseISO(r.date as string)}));
+      return newRecords;
     });
   };
 
@@ -78,11 +77,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return newRecords;
     });
   };
-
+  
   const value = {
     profile,
     setProfile,
-    records: records.map(r => ({...r, date: new Date(r.date)})),
+    records: records.map(r => ({...r, date: r.date ? parseISO(r.date as string) : new Date() })),
     addRecord,
     removeRecord,
     tips,
