@@ -1,7 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
-import { Line, LineChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Line, LineChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot } from 'recharts';
 import type { ChartConfig } from '@/components/ui/chart';
 import { useApp } from '@/context/app-context';
 
@@ -15,7 +15,7 @@ const chartConfig = {
 export function Hba1cChart() {
   const { records } = useApp();
 
-  const chartData = records.map((r) => ({
+  const chartData = [...records].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map((r) => ({
     date: r.date,
     hba1c: r.value,
   }));
@@ -85,7 +85,7 @@ export function Hba1cChart() {
             <ReferenceLine y={5.7} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
               <Label value="Prediabetes Threshold (5.7%)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
             </ReferenceLine>
-            <Line type="monotone" dataKey="hba1c" stroke="hsl(var(--primary))" strokeWidth={2} />
+            <Line type="monotone" dataKey="hba1c" stroke="hsl(var(--primary))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--primary))" />} activeDot={{ r: 6 }} />
           </LineChart>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">

@@ -22,8 +22,11 @@ export function HistoryTable() {
   const { records, removeRecord } = useApp();
   const [currentPage, setCurrentPage] = React.useState(1);
 
-  const totalPages = Math.ceil(records.length / RECORDS_PER_PAGE);
-  const sortedRecords = React.useMemo(() => [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [records]);
+  const sortedRecords = React.useMemo(() => {
+    return [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [records]);
+
+  const totalPages = Math.ceil(sortedRecords.length / RECORDS_PER_PAGE);
   
   const paginatedRecords = sortedRecords.slice(
     (currentPage - 1) * RECORDS_PER_PAGE,
