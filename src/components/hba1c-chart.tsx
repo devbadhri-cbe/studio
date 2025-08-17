@@ -25,7 +25,7 @@ export function Hba1cChart() {
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         {records.length > 0 ? (
-          <AreaChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+          <AreaChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
             <defs>
               <linearGradient id="colorHba1c" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
@@ -39,6 +39,9 @@ export function Hba1cChart() {
               tickLine={false}
               axisLine={false}
               padding={{ left: 20, right: 20 }}
+              angle={-45}
+              textAnchor="end"
+              height={50}
             />
             <YAxis
               domain={([dataMin, dataMax]) => {
