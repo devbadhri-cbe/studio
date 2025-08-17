@@ -1,7 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
-import { Area, AreaChart, CartesianGrid, Legend, Rectangle, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { ChartConfig } from '@/components/ui/chart';
 import { useApp } from '@/context/app-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -35,7 +35,7 @@ export function Hba1cChart() {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick) => format(new Date(tick), 'MMM yy')}
+              tickFormatter={(tick) => format(new Date(tick), 'PPP')}
               tickLine={false}
               axisLine={false}
               padding={{ left: 20, right: 20 }}
@@ -85,6 +85,9 @@ export function Hba1cChart() {
                 align="center"
               />
             </ReferenceArea>
+            <ReferenceLine y={5.7} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
+              <Label value="Prediabetes Threshold (5.7%)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
+            </ReferenceLine>
             <Area type="monotone" dataKey="hba1c" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#colorHba1c)" />
           </AreaChart>
         ) : (
