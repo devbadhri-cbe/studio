@@ -2,6 +2,7 @@
 
 import { type Hba1cRecord, type UserProfile } from '@/lib/types';
 import * as React from 'react';
+import { parseISO } from 'date-fns';
 
 const initialProfile: UserProfile = { name: '', dob: '', medication: '' };
 
@@ -32,7 +33,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const storedRecords = localStorage.getItem('gg-records');
       if (storedRecords) {
-        setRecordsState(JSON.parse(storedRecords).map((r: Hba1cRecord) => ({ ...r, date: new Date(r.date) })));
+        // Dates are stored as ISO strings, so we need to parse them back to Date objects
+        setRecordsState(JSON.parse(storedRecords).map((r: Hba1cRecord) => ({ ...r, date: parseISO(r.date as string) })));
       }
 
       const storedTips = localStorage.getItem('gg-tips');
@@ -58,10 +60,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const addRecord = (record: Omit<Hba1cRecord, 'id'>) => {
     setRecordsState((prev) => {
-      const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date) };
-      const newRecords = [...prev, newRecord];
+      // Ensure date is in ISO format for consistent storage
+      const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString() };
+      const newRecords = [...prev, newRecord].map(r => ({...r, date: new Date(r.date)}));
+
+      // When saving to localStorage, date objects are automatically converted to ISO strings
       if (isClient) localStorage.setItem('gg-records', JSON.stringify(newRecords));
-      return newRecords;
+      
+      return newRecords.map(r => ({...r, date: parseISO(r.date as string)}));
     });
   };
 
@@ -76,7 +82,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value = {
     profile,
     setProfile,
-    records,
+    records: records.map(r => ({...r, date: new Date(r.date)})),
     addRecord,
     removeRecord,
     tips,
