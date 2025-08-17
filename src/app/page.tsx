@@ -6,12 +6,10 @@ import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { PrintableReport } from '@/components/printable-report';
-import { calculateAge } from '@/lib/utils';
 import { Hba1cCard } from '@/components/hba1c-card';
 
 export default function Home() {
   const { profile, isClient } = useApp();
-  const age = calculateAge(profile.dob);
 
   if (!isClient) {
     return (
@@ -28,8 +26,7 @@ export default function Home() {
           <div className="mx-auto grid w-full max-w-7xl gap-6">
             <div className="border-b pb-2">
               <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                Welcome, {profile.name || 'User'}
-                {age && ` (${age} years)`}!
+                Welcome, {profile.name || 'User'}!
               </h1>
               <p className="text-muted-foreground">Here is your health dashboard for today.</p>
             </div>

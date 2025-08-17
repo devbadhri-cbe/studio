@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from './ui/textarea';
+import { calculateAge } from '@/lib/utils';
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -26,6 +27,7 @@ export function ProfileCard() {
   const { profile, setProfile } = useApp();
   const [isSaving, setIsSaving] = React.useState(false);
   const { toast } = useToast();
+  const age = calculateAge(profile.dob);
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -56,7 +58,7 @@ export function ProfileCard() {
             <UserCircle className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <CardTitle>My Profile</CardTitle>
+            <CardTitle>My Profile {age && `(${age} years)`}</CardTitle>
             <CardDescription>Keep your personal information up to date.</CardDescription>
           </div>
         </div>
