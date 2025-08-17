@@ -21,7 +21,7 @@ export function Hba1cCard() {
           <ExportButton />
         </div>
       </CardHeader>
-      <CardContent className="grid gap-6">
+      <CardContent className="grid gap-6 px-2 md:px-6">
         <Hba1cChart />
         <HistoryTable />
       </CardContent>

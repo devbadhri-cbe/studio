@@ -46,9 +46,9 @@ export function HistoryTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Result (%)</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="px-2 md:px-4">Date</TableHead>
+              <TableHead className="px-2 md:px-4">Result (%)</TableHead>
+              <TableHead className="px-2 md:px-4">Status</TableHead>
               <TableHead>
                 <span className="sr-only">Actions</span>
               </TableHead>
@@ -60,12 +60,12 @@ export function HistoryTable() {
                 const status = getStatus(record.value);
                 return (
                   <TableRow key={record.id}>
-                    <TableCell className="font-medium">{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
-                    <TableCell>{record.value.toFixed(1)}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-medium px-2 md:px-4">{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
+                    <TableCell className="px-2 md:px-4">{record.value.toFixed(1)}</TableCell>
+                    <TableCell className="px-2 md:px-4">
                       <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="px-2 md:px-4">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button aria-haspopup="true" size="icon" variant="ghost">

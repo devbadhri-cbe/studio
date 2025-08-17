@@ -1,14 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { Header } from '@/components/header';
 import { ProfileCard } from '@/components/profile-card';
-import { Hba1cCard } from '@/components/hba1c-card';
 import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { PrintableReport } from '@/components/printable-report';
 import { calculateAge } from '@/lib/utils';
+import { Hba1cCard } from '@/components/hba1c-card';
 
 export default function Home() {
   const { profile, isClient } = useApp();
@@ -25,11 +24,10 @@ export default function Home() {
   return (
     <>
       <div className="flex min-h-screen w-full flex-col bg-background no-print">
-        <Header />
-        <main className="flex-1 p-4 sm:px-6 sm:py-0 md:gap-8">
+        <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
-            <div className="mt-6 border-b pb-2">
-              <h1 className="text-3xl font-semibold font-headline">
+            <div className="border-b pb-2">
+              <h1 className="text-2xl md:text-3xl font-semibold font-headline">
                 Welcome, {profile.name || 'User'}
                 {age && ` (${age} years)`}!
               </h1>
