@@ -5,8 +5,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { Logo } from '@/components/logo';
 
 export const metadata: Metadata = {
-  title: 'Glycemic Guardian',
-  description: 'Track and manage your HbA1c levels with AI-powered insights.',
+  title: 'Health Guardian',
+  description: 'Track and manage your health metrics with AI-powered insights.',
 };
 
 export default function RootLayout({

@@ -26,7 +26,7 @@ export default function Home() {
         <header className="py-4">
           <div className="flex items-center justify-center gap-2">
             <Logo className="h-8 w-8 text-primary" />
-            <span className="text-2xl md:text-3xl font-semibold font-headline">Glycemic Guardian</span>
+            <span className="text-2xl md:text-3xl font-semibold font-headline">Health Guardian</span>
           </div>
         </header>
         <main className="flex-1 p-4 md:p-6">

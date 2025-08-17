@@ -23,7 +23,7 @@ export function PrintableReport() {
           <div className="flex items-center gap-3">
             <Logo className="h-10 w-10 text-primary" />
             <div>
-              <h1 className="text-2xl font-bold text-primary font-headline">Glycemic Guardian</h1>
+              <h1 className="text-2xl font-bold text-primary font-headline">Health Guardian</h1>
               <p className="text-sm text-muted-foreground">HbA1c Health Report</p>
             </div>
           </div>
@@ -96,7 +96,7 @@ export function PrintableReport() {
         </section>
         <footer className="mt-12 border-t pt-4 text-center text-xs text-muted-foreground">
           <p>This report is generated for personal tracking purposes and should not replace professional medical advice.</p>
-          <p>Glycemic Guardian &copy; {new Date().getFullYear()}</p>
+          <p>Health Guardian &copy; {new Date().getFullYear()}</p>
         </footer>
       </div>
     </div>
