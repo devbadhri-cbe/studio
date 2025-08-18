@@ -60,7 +60,6 @@ interface AppContextType {
   isClient: boolean;
   dashboardView: DashboardView;
   setDashboardView: (view: DashboardView) => void;
-  importData: (data: AppData) => void;
 }
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -208,23 +207,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updateRemoteData({ lipidRecords: newRecords as any[] });
   };
   
-  const importData = (importedData: AppData) => {
-    // Ensure dates are correctly formatted upon import
-    const sanitizedData = {
-      ...importedData,
-      profile: {
-        ...importedData.profile,
-        dob: importedData.profile.dob ? new Date(importedData.profile.dob).toISOString() : '',
-        presentMedicalConditions: (importedData.profile.presentMedicalConditions || []).map(c => ({...c, date: new Date(c.date).toISOString()}))
-      },
-      records: (importedData.records || []).map(r => ({...r, date: new Date(r.date) })),
-      lipidRecords: (importedData.lipidRecords || []).map(r => ({...r, date: new Date(r.date) })),
-    };
-
-    setData(sanitizedData);
-    updateRemoteData(sanitizedData);
-  };
-  
   const value = {
     profile: {
       ...data.profile,
@@ -244,7 +226,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isClient,
     dashboardView: data.dashboardView,
     setDashboardView: handleSetDashboardView,
-    importData,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

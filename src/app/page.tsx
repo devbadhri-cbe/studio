@@ -11,7 +11,6 @@ import { Logo } from '@/components/logo';
 import { Mail, Phone } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LipidCard } from '@/components/lipid-card';
-import { DataManagementButtons } from '@/components/data-management';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView } = useApp();
@@ -34,7 +33,6 @@ export default function Home() {
               <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
             </div>
              <div className="flex items-center gap-4">
-              <DataManagementButtons />
               <div className="text-right text-sm text-muted-foreground">
                 <p className="font-semibold text-foreground">Dr. Badhrinathan N</p>
                 <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-end gap-1.5 hover:text-primary">
