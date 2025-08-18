@@ -3,6 +3,9 @@
 import { type Hba1cRecord, type UserProfile, type LipidRecord } from '@/lib/types';
 import * as React from 'react';
 import { parseISO } from 'date-fns';
+import { auth, db } from '@/lib/firebase';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
 
 const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: '', medication: '' };
 
@@ -26,120 +29,139 @@ interface AppContextType {
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
 
+interface AppData {
+  profile: UserProfile;
+  records: Hba1cRecord[];
+  lipidRecords: LipidRecord[];
+  tips: string[];
+  dashboardView: DashboardView;
+}
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [profile, setProfileState] = React.useState<UserProfile>(initialProfile);
-  const [records, setRecordsState] = React.useState<Hba1cRecord[]>([]);
-  const [lipidRecords, setLipidRecordsState] = React.useState<LipidRecord[]>([]);
-  const [tips, setTipsState] = React.useState<string[]>([]);
+  const [user, setUser] = React.useState<User | null>(null);
+  const [data, setData] = React.useState<AppData>({
+    profile: initialProfile,
+    records: [],
+    lipidRecords: [],
+    tips: [],
+    dashboardView: 'hba1c',
+  });
   const [isClient, setIsClient] = React.useState(false);
-  const [dashboardView, setDashboardView] = React.useState<DashboardView>('hba1c');
 
   React.useEffect(() => {
     setIsClient(true);
-    try {
-      const storedProfile = localStorage.getItem('gg-profile');
-      if (storedProfile) setProfileState(JSON.parse(storedProfile));
-
-      const storedRecords = localStorage.getItem('gg-records');
-      if (storedRecords) {
-        setRecordsState(JSON.parse(storedRecords));
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        await signInAnonymously(auth);
       }
-
-      const storedLipidRecords = localStorage.getItem('gg-lipid-records');
-      if (storedLipidRecords) {
-        setLipidRecordsState(JSON.parse(storedLipidRecords));
-      }
-
-      const storedTips = localStorage.getItem('gg-tips');
-      if (storedTips) setTipsState(JSON.parse(storedTips));
-
-      const storedView = localStorage.getItem('gg-dashboard-view');
-      if (storedView) setDashboardView(storedView as DashboardView);
-
-    } catch (error) {
-      console.error('Failed to parse from localStorage', error);
-      localStorage.removeItem('gg-profile');
-      localStorage.removeItem('gg-records');
-      localStorage.removeItem('gg-lipid-records');
-      localStorage.removeItem('gg-tips');
-      localStorage.removeItem('gg-dashboard-view');
-    }
+    });
+    return () => unsubscribe();
   }, []);
 
+  React.useEffect(() => {
+    if (user) {
+      const docRef = doc(db, 'users', user.uid);
+      const unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const remoteData = docSnap.data() as AppData;
+          setData({
+            ...remoteData,
+            // Ensure dates are parsed correctly
+            records: remoteData.records?.map(r => ({ ...r, date: r.date ? new Date((r.date as any).seconds * 1000) : new Date() })) || [],
+            lipidRecords: remoteData.lipidRecords?.map(r => ({ ...r, date: r.date ? new Date((r.date as any).seconds * 1000) : new Date() })) || [],
+          });
+        } else {
+          // Initialize empty doc for new user
+          const initialData: AppData = {
+            profile: initialProfile,
+            records: [],
+            lipidRecords: [],
+            tips: [],
+            dashboardView: 'hba1c'
+          };
+          setDoc(docRef, initialData);
+          setData(initialData);
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [user]);
+
+  const updateRemoteData = (updatedData: Partial<AppData>) => {
+    if (user) {
+      const docRef = doc(db, 'users', user.uid);
+      // We use setDoc with merge:true to avoid overwriting fields
+      // that are not part of the updatedData object.
+      setDoc(docRef, updatedData, { merge: true });
+    }
+  };
+
   const setProfile = (newProfile: UserProfile) => {
-    setProfileState(newProfile);
-    if (isClient) localStorage.setItem('gg-profile', JSON.stringify(newProfile));
+    setData(prev => ({ ...prev, profile: newProfile }));
+    updateRemoteData({ profile: newProfile });
   };
 
   const setTips = (newTips: string[]) => {
-    setTipsState(newTips);
-    if (isClient) localStorage.setItem('gg-tips', JSON.stringify(newTips));
+    setData(prev => ({ ...prev, tips: newTips }));
+    updateRemoteData({ tips: newTips });
   };
 
   const handleSetDashboardView = (view: DashboardView) => {
-    setDashboardView(view);
-    if(isClient) localStorage.setItem('gg-dashboard-view', view);
-    // Reset tips when view changes
-    setTips([]);
+    setData(prev => ({ ...prev, dashboardView: view, tips: [] })); // Reset tips on view change
+    updateRemoteData({ dashboardView: view, tips: [] });
   }
 
   const addRecord = (record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
-    setRecordsState((prev) => {
-      const newRecord = { 
-        ...record, 
-        id: Date.now().toString(), 
-        date: new Date(record.date).toISOString(), 
-        medication: profile.medication || 'N/A' 
-      };
-      const newRecords = [...prev, newRecord];
-      if (isClient) localStorage.setItem('gg-records', JSON.stringify(newRecords));
-      return newRecords;
-    });
+    const newRecord = { 
+      ...record, 
+      id: Date.now().toString(), 
+      date: new Date(record.date).toISOString(), 
+      medication: data.profile.medication || 'N/A' 
+    };
+    const newRecords = [...data.records, newRecord];
+    setData(prev => ({ ...prev, records: newRecords }));
+    updateRemoteData({ records: newRecords });
   };
 
   const removeRecord = (id: string) => {
-    setRecordsState((prev) => {
-      const newRecords = prev.filter((r) => r.id !== id);
-      if (isClient) localStorage.setItem('gg-records', JSON.stringify(newRecords));
-      return newRecords;
-    });
+    const newRecords = data.records.filter((r) => r.id !== id);
+    setData(prev => ({ ...prev, records: newRecords }));
+    updateRemoteData({ records: newRecords });
   };
 
   const addLipidRecord = (record: Omit<LipidRecord, 'id' | 'medication'>) => {
-    setLipidRecordsState((prev) => {
-      const newRecord = {
-        ...record,
-        id: Date.now().toString(),
-        date: new Date(record.date).toISOString(),
-        medication: profile.medication || 'N/A',
-      };
-      const newRecords = [...prev, newRecord];
-      if (isClient) localStorage.setItem('gg-lipid-records', JSON.stringify(newRecords));
-      return newRecords;
-    });
+    const newRecord = {
+      ...record,
+      id: Date.now().toString(),
+      date: new Date(record.date).toISOString(),
+      medication: data.profile.medication || 'N/A',
+    };
+    const newRecords = [...data.lipidRecords, newRecord];
+    setData(prev => ({ ...prev, lipidRecords: newRecords }));
+    updateRemoteData({ lipidRecords: newRecords });
   };
 
   const removeLipidRecord = (id: string) => {
-    setLipidRecordsState((prev) => {
-      const newRecords = prev.filter((r) => r.id !== id);
-      if (isClient) localStorage.setItem('gg-lipid-records', JSON.stringify(newRecords));
-      return newRecords;
-    });
+    const newRecords = data.lipidRecords.filter((r) => r.id !== id);
+    setData(prev => ({ ...prev, lipidRecords: newRecords }));
+    updateRemoteData({ lipidRecords: newRecords });
   };
   
   const value = {
-    profile,
+    profile: data.profile,
     setProfile,
-    records: records.map(r => ({...r, date: r.date ? parseISO(r.date as string) : new Date() })),
+    records: data.records.map(r => ({...r, date: r.date ? parseISO(r.date as string) : new Date() })),
     addRecord,
     removeRecord,
-    lipidRecords: lipidRecords.map(r => ({...r, date: r.date ? parseISO(r.date as string) : new Date() })),
+    lipidRecords: data.lipidRecords.map(r => ({...r, date: r.date ? parseISO(r.date as string) : new Date() })),
     addLipidRecord,
     removeLipidRecord,
-    tips,
+    tips: data.tips,
     setTips,
     isClient,
-    dashboardView,
+    dashboardView: data.dashboardView,
     setDashboardView: handleSetDashboardView,
   };
 
