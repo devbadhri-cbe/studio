@@ -3,9 +3,9 @@
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition } from '@/lib/types';
 import * as React from 'react';
 import { parseISO } from 'date-fns';
-import { getAuth, signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, Timestamp } from 'firebase/firestore';
-import { app } from '@/lib/firebase';
+import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
+import { doc, getDoc, setDoc, onSnapshot, Timestamp } from 'firebase/firestore';
+import { getAuthInstance, getDbInstance } from '@/lib/firebase';
 
 
 const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: [], medication: '' };
@@ -53,7 +53,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     setIsClient(true);
-    const auth = getAuth(app);
+    const auth = getAuthInstance();
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
@@ -70,7 +70,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     if (user) {
-      const db = getFirestore(app);
+      const db = getDbInstance();
       const docRef = doc(db, 'users', user.uid);
       const unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -86,8 +86,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             lipidRecords: remoteData.lipidRecords?.map(r => ({ ...r, date: r.date ? (r.date as any).toDate() : new Date() })) || [],
           });
         }
-        // If the document doesn't exist, the app will use the default empty state
-        // and a new document will be created when the user first saves data.
       });
       return () => unsubscribe();
     }
@@ -95,7 +93,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateRemoteData = (updatedData: Partial<AppData>) => {
     if (user) {
-      const db = getFirestore(app);
+      const db = getDbInstance();
       const docRef = doc(db, 'users', user.uid);
       const dataToUpdate = { ...updatedData };
       if (dataToUpdate.profile?.presentMedicalConditions) {
