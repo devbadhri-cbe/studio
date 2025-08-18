@@ -2,18 +2,13 @@
 
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition } from '@/lib/types';
 import * as React from 'react';
-import { signInAnonymously, onAuthStateChanged, User, Auth, getAuth } from 'firebase/auth';
-import { doc, onSnapshot, setDoc, Timestamp, Firestore, getFirestore } from 'firebase/firestore';
-import { getFirebaseApp } from '@/lib/firebase';
+import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
+import { doc, onSnapshot, setDoc, Timestamp } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
 
 const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: [], medication: '' };
 
 type DashboardView = 'hba1c' | 'lipids';
-
-interface FirebaseServices {
-  auth: Auth;
-  db: Firestore;
-}
 
 interface AppContextType {
   profile: UserProfile;
@@ -44,7 +39,6 @@ interface AppData {
 }
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [firebaseServices, setFirebaseServices] = React.useState<FirebaseServices | null>(null);
   const [user, setUser] = React.useState<User | null>(null);
   const [data, setData] = React.useState<AppData>({
     profile: initialProfile,
@@ -57,33 +51,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     setIsClient(true);
-    const app = getFirebaseApp();
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    setFirebaseServices({ auth, db });
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        try {
+          await signInAnonymously(auth);
+        } catch (error) {
+          console.error('Anonymous sign-in failed', error);
+        }
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
   React.useEffect(() => {
-    if (firebaseServices) {
-      const { auth } = firebaseServices;
-      const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-        if (currentUser) {
-          setUser(currentUser);
-        } else {
-          try {
-            await signInAnonymously(auth);
-          } catch (error) {
-            console.error('Anonymous sign-in failed', error);
-          }
-        }
-      });
-      return () => unsubscribe();
-    }
-  }, [firebaseServices]);
-
-  React.useEffect(() => {
-    if (user && firebaseServices) {
-      const { db } = firebaseServices;
+    if (user) {
       const docRef = doc(db, 'users', user.uid);
       const unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -99,15 +82,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             tips: remoteData.tips || [],
             dashboardView: remoteData.dashboardView || 'hba1c',
           });
+        } else {
+          // If no data exists, set the initial empty state
+          setData({
+            profile: initialProfile,
+            records: [],
+            lipidRecords: [],
+            tips: [],
+            dashboardView: 'hba1c',
+          });
         }
       });
       return () => unsubscribe();
     }
-  }, [user, firebaseServices]);
+  }, [user]);
 
   const updateRemoteData = async (updatedData: Partial<AppData>) => {
-    if (user && firebaseServices) {
-      const { db } = firebaseServices;
+    if (user) {
       const docRef = doc(db, 'users', user.uid);
       const dataToUpdate: any = { ...updatedData };
       if (dataToUpdate.profile?.presentMedicalConditions) {
@@ -119,6 +110,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (dataToUpdate.lipidRecords) {
         dataToUpdate.lipidRecords = dataToUpdate.lipidRecords.map(r => ({...r, date: Timestamp.fromDate(new Date(r.date))}))
       }
+      // Use setDoc with merge: true to create or update the document
       await setDoc(docRef, dataToUpdate, { merge: true });
     }
   };

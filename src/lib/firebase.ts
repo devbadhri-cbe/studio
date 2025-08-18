@@ -1,4 +1,6 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { Auth, getAuth } from 'firebase/auth';
+import { Firestore, getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   projectId: 'glycemic-guardian-6uxyg',
@@ -10,9 +12,8 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-export const getFirebaseApp = (): FirebaseApp => {
-    if (!getApps().length) {
-        return initializeApp(firebaseConfig);
-    }
-    return getApp();
-};
+const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const auth: Auth = getAuth(app);
+const db: Firestore = getFirestore(app);
+
+export { app, auth, db };
