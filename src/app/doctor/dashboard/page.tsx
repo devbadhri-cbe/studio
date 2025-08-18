@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { mockPatients } from '@/lib/mock-data';
 import type { Patient } from '@/lib/types';
 import { format } from 'date-fns';
+import { AddPatientDialog } from '@/components/add-patient-dialog';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
@@ -60,9 +61,14 @@ export default function DoctorDashboardPage() {
             <p className="text-muted-foreground mb-6">Manage and review your patients' health data.</p>
 
             <Card>
-                <CardHeader>
-                    <CardTitle>Patient List</CardTitle>
-                    <CardDescription>A list of all patients currently under your care.</CardDescription>
+                <CardHeader className="flex flex-row items-center">
+                    <div className="grid gap-2">
+                        <CardTitle>Patient List</CardTitle>
+                        <CardDescription>A list of all patients currently under your care.</CardDescription>
+                    </div>
+                    <div className="ml-auto flex items-center gap-2">
+                        <AddPatientDialog />
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>

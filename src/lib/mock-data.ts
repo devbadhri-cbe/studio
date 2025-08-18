@@ -30,4 +30,11 @@ export const mockPatients: Patient[] = [
     lastLipid: { ldl: 130, date: '2024-01-12' },
     status: 'Needs Review',
   },
+  {
+    id: '5',
+    name: 'Maria Garcia',
+    lastHba1c: { value: 6.1, date: '2024-05-20' },
+    lastLipid: { ldl: 145, date: '2024-05-20' },
+    status: 'Needs Review',
+  },
 ];
