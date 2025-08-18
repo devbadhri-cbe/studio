@@ -55,10 +55,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (storedTips) {
         setTipsState(JSON.parse(storedTips));
       }
-      const storedView = localStorage.getItem('health-dashboard-view');
-      if (storedView) {
-        setDashboardViewState(storedView as DashboardView);
-      }
+      // For simplicity, we'll default to hba1c view and remove the stored view logic for now
     } catch (error) {
       console.error("Failed to parse from localStorage", error);
     }
