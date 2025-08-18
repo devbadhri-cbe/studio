@@ -41,7 +41,7 @@ export function AddRecordDialog() {
   const [open, setOpen] = React.useState(false);
   const [showWarning, setShowWarning] = React.useState(false);
   const [formData, setFormData] = React.useState<z.infer<typeof FormSchema> | null>(null);
-  const { addRecord, records } = useApp();
+  const { addRecord, records, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -82,6 +82,19 @@ export function AddRecordDialog() {
     }
   }
 
+  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!profile.medication) {
+      e.preventDefault();
+      toast({
+        variant: 'destructive',
+        title: 'Medication Required',
+        description: 'Please enter the current medication in the profile before adding a new record.',
+      });
+    } else {
+      setOpen(true);
+    }
+  };
+
   const handleConfirmOverwrite = () => {
     if (formData) {
       handleAddRecord(formData);
@@ -94,7 +107,7 @@ export function AddRecordDialog() {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" className="h-8 gap-1">
+          <Button size="sm" className="h-8 gap-1" onClick={handleTriggerClick}>
             <PlusCircle className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Record</span>
           </Button>

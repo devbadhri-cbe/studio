@@ -32,7 +32,7 @@ const FormSchema = z.object({
 
 export function AddLipidRecordDialog() {
   const [open, setOpen] = React.useState(false);
-  const { addLipidRecord } = useApp();
+  const { addLipidRecord, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -68,11 +68,24 @@ export function AddLipidRecordDialog() {
     });
   };
 
+  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!profile.medication) {
+      e.preventDefault();
+      toast({
+        variant: 'destructive',
+        title: 'Medication Required',
+        description: 'Please enter the current medication in the profile before adding a new record.',
+      });
+    } else {
+      setOpen(true);
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" className="h-8 gap-1">
+          <Button size="sm" className="h-8 gap-1" onClick={handleTriggerClick}>
             <PlusCircle className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Record</span>
           </Button>
