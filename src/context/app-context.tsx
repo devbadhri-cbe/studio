@@ -2,12 +2,45 @@
 
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition } from '@/lib/types';
 import * as React from 'react';
-import { parseISO } from 'date-fns';
+import { parseISO, subMonths, subYears } from 'date-fns';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
 
 const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: [], medication: '' };
+
+const getSampleData = () => {
+  const now = new Date();
+  const sampleProfile: UserProfile = {
+    name: 'Jane Doe',
+    dob: '1985-05-15',
+    presentMedicalConditions: [
+      { id: '1', date: subMonths(now, 12).toISOString(), condition: 'Type 2 Diabetes', icdCode: 'E11.9: Type 2 diabetes mellitus without complications' },
+      { id: '2', date: subMonths(now, 24).toISOString(), condition: 'Hypertension', icdCode: 'I10: Essential (primary) hypertension' },
+    ],
+    medication: 'Metformin 500mg daily, Lisinopril 10mg daily',
+  };
+
+  const sampleHba1cRecords: Omit<Hba1cRecord, 'id'>[] = [
+    { date: subMonths(now, 3), value: 6.8, medication: 'Metformin 500mg daily' },
+    { date: subMonths(now, 6), value: 7.2, medication: 'Metformin 500mg daily' },
+    { date: subMonths(now, 9), value: 7.5, medication: 'Metformin 500mg daily' },
+  ];
+  
+  const sampleLipidRecords: Omit<LipidRecord, 'id'>[] = [
+    { date: subYears(now, 1), ldl: 130, hdl: 45, triglycerides: 180, total: 240, medication: 'Lisinopril 10mg daily' },
+    { date: subYears(now, 2), ldl: 140, hdl: 40, triglycerides: 200, total: 250, medication: 'Lisinopril 10mg daily' },
+  ];
+
+  return {
+    profile: sampleProfile,
+    records: sampleHba1cRecords.map((r, i) => ({ ...r, id: `sample-hba1c-${i}` })),
+    lipidRecords: sampleLipidRecords.map((r, i) => ({ ...r, id: `sample-lipid-${i}` })),
+    tips: [],
+    dashboardView: 'hba1c' as DashboardView,
+  };
+}
+
 
 type DashboardView = 'hba1c' | 'lipids';
 
@@ -80,14 +113,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             lipidRecords: remoteData.lipidRecords?.map(r => ({ ...r, date: r.date ? new Date((r.date as any).seconds * 1000) : new Date() })) || [],
           });
         } else {
-          // Initialize empty doc for new user
-          const initialData: AppData = {
-            profile: initialProfile,
-            records: [],
-            lipidRecords: [],
-            tips: [],
-            dashboardView: 'hba1c'
-          };
+          // Initialize with sample data for new user
+          const initialData = getSampleData();
           setDoc(docRef, initialData);
           setData(initialData);
         }
@@ -102,6 +129,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const dataToUpdate = { ...updatedData };
       if (dataToUpdate.profile?.presentMedicalConditions) {
         dataToUpdate.profile.presentMedicalConditions = dataToUpdate.profile.presentMedicalConditions.map(c => ({...c, date: new Date(c.date)}))
+      }
+      if (dataToUpdate.records) {
+        dataToUpdate.records = dataToUpdate.records.map(r => ({...r, date: new Date(r.date)}))
+      }
+      if (dataToUpdate.lipidRecords) {
+        dataToUpdate.lipidRecords = dataToUpdate.lipidRecords.map(r => ({...r, date: new Date(r.date)}))
       }
       setDoc(docRef, dataToUpdate, { merge: true });
     }
@@ -147,13 +180,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     const newRecords = [...data.records, newRecord];
     setData(prev => ({ ...prev, records: newRecords }));
-    updateRemoteData({ records: newRecords });
+    updateRemoteData({ records: newRecords as any[] });
   };
 
   const removeRecord = (id: string) => {
     const newRecords = data.records.filter((r) => r.id !== id);
     setData(prev => ({ ...prev, records: newRecords }));
-    updateRemoteData({ records: newRecords });
+    updateRemoteData({ records: newRecords as any[] });
   };
 
   const addLipidRecord = (record: Omit<LipidRecord, 'id' | 'medication'>) => {
@@ -165,13 +198,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     const newRecords = [...data.lipidRecords, newRecord];
     setData(prev => ({ ...prev, lipidRecords: newRecords }));
-    updateRemoteData({ lipidRecords: newRecords });
+    updateRemoteData({ lipidRecords: newRecords as any[] });
   };
 
   const removeLipidRecord = (id: string) => {
     const newRecords = data.lipidRecords.filter((r) => r.id !== id);
     setData(prev => ({ ...prev, lipidRecords: newRecords }));
-    updateRemoteData({ lipidRecords: newRecords });
+    updateRemoteData({ lipidRecords: newRecords as any[] });
   };
   
   const value = {
