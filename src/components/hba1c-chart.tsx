@@ -38,11 +38,8 @@ export function Hba1cChart() {
               tick={{ fontSize: 12 }}
             />
             <YAxis
-              domain={([dataMin, dataMax]) => {
-                const min = Math.min(3, dataMin);
-                const max = Math.max(10, dataMax);
-                return [min, max];
-              }}
+              domain={[2, 14]}
+              ticks={[2, 4, 6, 8, 10, 12, 14]}
               allowDecimals={false}
               tickLine={false}
               axisLine={false}
@@ -71,7 +68,7 @@ export function Hba1cChart() {
                 return null;
               }}
             />
-            <ReferenceArea y1={4.0} y2={5.6} stroke="hsl(var(--accent))" strokeOpacity={0.3} fill="hsl(var(--accent))" fillOpacity={0.1}>
+            <ReferenceArea y1={4.0} y2={5.6} stroke="hsl(var(--accent))" strokeOpacity={0.3} fill="transparent" fillOpacity={0}>
               <Legend
                 content={() => (
                   <div className="text-xs text-center text-accent-foreground/70" style={{color: 'hsl(var(--accent))'}}>
