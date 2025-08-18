@@ -1,7 +1,14 @@
+export interface MedicalCondition {
+  id: string;
+  date: string; // Stored as 'YYYY-MM-DD' string
+  condition: string;
+  icdCode?: string;
+}
+
 export interface UserProfile {
   name: string;
   dob: string; // Stored as 'YYYY-MM-DD' string
-  presentMedicalConditions: string;
+  presentMedicalConditions: MedicalCondition[];
   medication: string;
 }
 

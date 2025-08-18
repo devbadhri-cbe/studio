@@ -10,7 +10,7 @@ export function ReminderCard() {
   const { records, lipidRecords, dashboardView, profile } = useApp();
 
   let content;
-  const hasMedicalConditions = !!profile.presentMedicalConditions;
+  const hasMedicalConditions = profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0;
   const age = calculateAge(profile.dob);
 
   if (dashboardView === 'hba1c') {
@@ -92,7 +92,6 @@ export function ReminderCard() {
       } else if (age && age > 40) {
         description = "For your age group, checks every 2 years are recommended. " + description;
       }
-
 
       if (yearsSinceLastTest >= retestYears) {
         content = {

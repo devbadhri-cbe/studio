@@ -15,13 +15,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Textarea } from './ui/textarea';
 import { calculateAge } from '@/lib/utils';
 import { FormDescription } from './ui/form';
+import { MedicalConditionsList } from './medical-conditions-list';
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   dob: z.string().refine((dob) => new Date(dob).toString() !== 'Invalid Date' && new Date(dob) < new Date(), {
     message: 'Please enter a valid date of birth.',
   }),
-  presentMedicalConditions: z.string().optional(),
   medication: z.string().optional(),
 });
 
@@ -29,21 +29,31 @@ export function ProfileCard() {
   const { profile, setProfile } = useApp();
   const [isSaving, setIsSaving] = React.useState(false);
   const { toast } = useToast();
-  const age = calculateAge(profile.dob);
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     values: {
       name: profile.name,
       dob: profile.dob,
-      presentMedicalConditions: profile.presentMedicalConditions,
       medication: profile.medication,
     },
   });
 
+  // This effect ensures the form is re-initialized when the profile data changes
+  React.useEffect(() => {
+    form.reset({
+      name: profile.name,
+      dob: profile.dob,
+      medication: profile.medication,
+    });
+  }, [profile, form]);
+
   const onSubmit = (data: z.infer<typeof profileSchema>) => {
     setIsSaving(true);
-    setProfile(data);
+    setProfile({
+      ...profile,
+      ...data,
+    });
     setTimeout(() => {
       toast({
         title: 'Profile Updated!',
@@ -56,7 +66,6 @@ export function ProfileCard() {
   // Watch for changes in the 'dob' field to re-calculate age
   const dobValue = form.watch('dob');
   const calculatedAge = calculateAge(dobValue);
-
 
   return (
     <Card className="h-full">
@@ -71,7 +80,7 @@ export function ProfileCard() {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -101,19 +110,7 @@ export function ProfileCard() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="presentMedicalConditions"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Present Medical Conditions</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="List any relevant medical conditions..." className="resize-none" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            
             <FormField
               control={form.control}
               name="medication"
@@ -138,6 +135,7 @@ export function ProfileCard() {
             </Button>
           </form>
         </Form>
+        <MedicalConditionsList />
       </CardContent>
     </Card>
   );

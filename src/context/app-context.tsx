@@ -1,19 +1,21 @@
 'use client';
 
-import { type Hba1cRecord, type UserProfile, type LipidRecord } from '@/lib/types';
+import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition } from '@/lib/types';
 import * as React from 'react';
 import { parseISO } from 'date-fns';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
 
-const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: '', medication: '' };
+const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: [], medication: '' };
 
 type DashboardView = 'hba1c' | 'lipids';
 
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
+  addMedicalCondition: (condition: Omit<MedicalCondition, 'id'>) => void;
+  removeMedicalCondition: (id: string) => void;
   records: Hba1cRecord[];
   addRecord: (record: Omit<Hba1cRecord, 'id' | 'medication'>) => void;
   removeRecord: (id: string) => void;
@@ -69,6 +71,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setData({
             ...remoteData,
             // Ensure dates are parsed correctly
+            profile: {
+              ...initialProfile,
+              ...remoteData.profile,
+              presentMedicalConditions: remoteData.profile?.presentMedicalConditions?.map(c => ({...c, date: c.date ? new Date((c.date as any).seconds * 1000).toISOString() : new Date().toISOString() })) || [],
+            },
             records: remoteData.records?.map(r => ({ ...r, date: r.date ? new Date((r.date as any).seconds * 1000) : new Date() })) || [],
             lipidRecords: remoteData.lipidRecords?.map(r => ({ ...r, date: r.date ? new Date((r.date as any).seconds * 1000) : new Date() })) || [],
           });
@@ -92,14 +99,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateRemoteData = (updatedData: Partial<AppData>) => {
     if (user) {
       const docRef = doc(db, 'users', user.uid);
-      // We use setDoc with merge:true to avoid overwriting fields
-      // that are not part of the updatedData object.
-      setDoc(docRef, updatedData, { merge: true });
+      const dataToUpdate = { ...updatedData };
+      if (dataToUpdate.profile?.presentMedicalConditions) {
+        dataToUpdate.profile.presentMedicalConditions = dataToUpdate.profile.presentMedicalConditions.map(c => ({...c, date: new Date(c.date)}))
+      }
+      setDoc(docRef, dataToUpdate, { merge: true });
     }
   };
 
   const setProfile = (newProfile: UserProfile) => {
     setData(prev => ({ ...prev, profile: newProfile }));
+    updateRemoteData({ profile: newProfile });
+  };
+  
+  const addMedicalCondition = (condition: Omit<MedicalCondition, 'id'>) => {
+    const newCondition = { ...condition, id: Date.now().toString() };
+    const updatedConditions = [...data.profile.presentMedicalConditions, newCondition];
+    updatedConditions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const newProfile = { ...data.profile, presentMedicalConditions: updatedConditions };
+    setData(prev => ({ ...prev, profile: newProfile }));
+    updateRemoteData({ profile: newProfile });
+  };
+  
+  const removeMedicalCondition = (id: string) => {
+    const updatedConditions = data.profile.presentMedicalConditions.filter(c => c.id !== id);
+    const newProfile = { ...data.profile, presentMedicalConditions: updatedConditions };
+    setData(prev => ({...prev, profile: newProfile }));
     updateRemoteData({ profile: newProfile });
   };
 
@@ -150,8 +175,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
   
   const value = {
-    profile: data.profile,
+    profile: {
+      ...data.profile,
+      presentMedicalConditions: data.profile.presentMedicalConditions.map(c => ({...c, date: c.date ? parseISO(c.date as string).toISOString() : new Date().toISOString() }))
+    },
     setProfile,
+    addMedicalCondition,
+    removeMedicalCondition,
     records: data.records.map(r => ({...r, date: r.date ? parseISO(r.date as string) : new Date() })),
     addRecord,
     removeRecord,

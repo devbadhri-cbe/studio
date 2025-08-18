@@ -15,7 +15,6 @@ export function PrintableReport() {
   const age = calculateAge(profile.dob);
   const sortedRecords = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-
   return (
     <div className="hidden print-only">
       <div className="p-8">
@@ -49,9 +48,19 @@ export function PrintableReport() {
               <p className="text-sm text-muted-foreground">Age</p>
               <p className="font-medium">{age !== null ? `${age} years` : 'N/A'}</p>
             </div>
-            <div>
+            <div className="col-span-2">
               <p className="text-sm text-muted-foreground">Present Medical Conditions</p>
-              <p className="font-medium">{profile.presentMedicalConditions || 'N/A'}</p>
+              {profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0 ? (
+                <ul className="list-disc pl-5">
+                {profile.presentMedicalConditions.map(c => (
+                  <li key={c.id} className="font-medium">
+                    {c.condition} (Diagnosed: {format(new Date(c.date), 'dd-MM-yyyy')})
+                  </li>
+                ))}
+              </ul>
+              ) : (
+                <p className="font-medium">N/A</p>
+              )}
             </div>
             <div className="col-span-2">
               <p className="text-sm text-muted-foreground">Medication</p>

@@ -41,7 +41,11 @@ export function InsightsCard() {
         userProfile: {
           name: profile.name,
           age: age,
-          presentMedicalConditions: profile.presentMedicalConditions,
+          presentMedicalConditions: profile.presentMedicalConditions.map(c => ({
+            condition: c.condition,
+            date: new Date(c.date).toISOString(),
+            icdCode: c.icdCode
+          })),
           medication: profile.medication,
         },
       });
