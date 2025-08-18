@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { calculateAge } from '@/lib/utils';
+import type { Patient } from '@/lib/types';
 
 const FormSchema = z.object({
   name: z.string().min(2, 'Patient name is required.'),
@@ -31,7 +32,11 @@ const FormSchema = z.object({
   phone: z.string().min(10, 'Please enter a valid phone number.'),
 });
 
-export function AddPatientDialog() {
+interface AddPatientDialogProps {
+    onAddPatient: (patient: Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status'>) => void;
+}
+
+export function AddPatientDialog({ onAddPatient }: AddPatientDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
@@ -49,21 +54,19 @@ export function AddPatientDialog() {
   const dobValue = form.watch('dob');
   const calculatedAge = calculateAge(dobValue);
 
-
-  // NOTE: In a real application, this would call an API to create a new patient in the database.
-  // Here, we'll just simulate the action.
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
-    console.log('New patient data:', data);
+    
+    // Simulate API call
     setTimeout(() => {
+        onAddPatient(data);
         toast({
-            title: 'Patient Added (Simulated)',
+            title: 'Patient Added',
             description: `${data.name} has been added to the patient list.`,
         });
         setIsSubmitting(false);
         setOpen(false);
         form.reset();
-        // Here you would typically trigger a refresh of the patient list.
     }, 1000);
   };
 

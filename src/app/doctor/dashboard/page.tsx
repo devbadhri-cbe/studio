@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -16,6 +17,18 @@ import { AddPatientDialog } from '@/components/add-patient-dialog';
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const doctorName = 'Dr. Badhrinathan N';
+    const [patients, setPatients] = React.useState<Patient[]>(mockPatients);
+
+    const addPatient = (patient: Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status'>) => {
+        const newPatient: Patient = {
+            ...patient,
+            id: (patients.length + 1).toString(),
+            lastHba1c: null,
+            lastLipid: null,
+            status: 'On Track',
+        };
+        setPatients(prevPatients => [newPatient, ...prevPatients]);
+    }
 
     const getStatusVariant = (status: Patient['status']) => {
         switch (status) {
@@ -67,7 +80,7 @@ export default function DoctorDashboardPage() {
                         <CardDescription>A list of all patients currently under your care.</CardDescription>
                     </div>
                     <div className="ml-auto flex items-center gap-2">
-                        <AddPatientDialog />
+                        <AddPatientDialog onAddPatient={addPatient} />
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -82,7 +95,7 @@ export default function DoctorDashboardPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {mockPatients.map((patient) => (
+                            {patients.map((patient) => (
                                 <TableRow key={patient.id}>
                                     <TableCell className="font-medium">{patient.name}</TableCell>
                                     <TableCell>

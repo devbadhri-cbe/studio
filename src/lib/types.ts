@@ -33,6 +33,10 @@ export interface LipidRecord {
 export interface Patient {
   id: string;
   name: string;
+  dob: string;
+  gender: 'male' | 'female' | 'other';
+  email: string;
+  phone: string;
   lastHba1c: {
     value: number;
     date: string;
