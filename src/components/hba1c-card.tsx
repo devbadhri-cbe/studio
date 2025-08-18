@@ -12,7 +12,7 @@ export function Hba1cCard() {
     <Card className="h-full">
       <CardHeader className="flex flex-row items-start">
         <div className="grid gap-2">
-          <CardTitle>HbA1c Progress</CardTitle>
+          <CardTitle>HbA1c Trend</CardTitle>
           <CardDescription>Visualize your HbA1c levels over time.</CardDescription>
         </div>
         <div className="ml-auto flex items-center gap-2">
