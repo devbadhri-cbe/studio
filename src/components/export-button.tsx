@@ -8,11 +8,13 @@ export function ExportButton() {
   const { toast } = useToast();
 
   const handlePrint = () => {
+    // Call window.print() first to ensure it's a direct result of the user click.
+    window.print();
+    // Then show the toast notification.
     toast({
       title: 'Generating Report...',
-      description: "Your browser's print dialog will now open. Select 'Save as PDF' to download.",
+      description: "Your browser's print dialog is open. Select 'Save as PDF' to download.",
     });
-    window.print();
   };
 
   return (
