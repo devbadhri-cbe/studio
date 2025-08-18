@@ -28,7 +28,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Logo className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold md:text-3xl font-headline">Health Guardian</span>
+              <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
             </div>
             <div className="text-right text-sm text-muted-foreground">
               <p className="font-semibold text-foreground">Dr. Badhrinathan N</p>
