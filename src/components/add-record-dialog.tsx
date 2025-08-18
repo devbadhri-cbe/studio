@@ -47,7 +47,7 @@ export function AddRecordDialog() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      value: undefined,
+      value: '' as any,
       date: format(new Date(), 'yyyy-MM-dd'),
     },
   });
@@ -63,7 +63,7 @@ export function AddRecordDialog() {
     });
     setOpen(false);
     form.reset({
-      value: undefined,
+      value: '' as any,
       date: format(new Date(), 'yyyy-MM-dd'),
     });
   };
