@@ -39,6 +39,10 @@ export function AddLipidRecordDialog() {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       date: format(new Date(), 'yyyy-MM-dd'),
+      ldl: '' as any,
+      hdl: '' as any,
+      triglycerides: '' as any,
+      total: '' as any,
     },
   });
 
@@ -57,6 +61,10 @@ export function AddLipidRecordDialog() {
     setOpen(false);
     form.reset({
       date: format(new Date(), 'yyyy-MM-dd'),
+      ldl: '' as any,
+      hdl: '' as any,
+      triglycerides: '' as any,
+      total: '' as any,
     });
   };
 
