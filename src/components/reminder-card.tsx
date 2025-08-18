@@ -1,8 +1,8 @@
 'use client';
 
 import { useApp } from '@/context/app-context';
-import { differenceInMonths, formatDistanceToNow, addMonths, format } from 'date-fns';
-import { Bell, CheckCircle2 } from 'lucide-react';
+import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears } from 'date-fns';
+import { Bell, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 export function ReminderCard() {
@@ -17,26 +17,39 @@ export function ReminderCard() {
     content = {
       icon: <Bell className="h-6 w-6 text-yellow-500" />,
       title: 'Time for your first test!',
-      description: 'Add your first HbA1c record to start tracking.',
+      description: 'Add your first HbA1c record to start tracking your health.',
       color: 'bg-yellow-500/10',
     };
   } else {
     const lastTestDate = new Date(lastRecord.date);
-    const monthsSinceLastTest = differenceInMonths(new Date(), lastTestDate);
-    const nextTestDate = addMonths(lastTestDate, 4);
+    const lastTestValue = lastRecord.value;
+    
+    let status = 'Healthy';
+    let retestMonths = 36; // 3 years for healthy
+    
+    if (lastTestValue >= 5.7 && lastTestValue <= 6.4) {
+      status = 'Prediabetes';
+      retestMonths = 12; // 1 year for prediabetes
+    } else if (lastTestValue >= 6.5) {
+      status = 'Diabetes';
+      retestMonths = 4; // 4 months for diabetes
+    }
 
-    if (monthsSinceLastTest >= 4) {
-      content = {
+    const monthsSinceLastTest = differenceInMonths(new Date(), lastTestDate);
+    const nextTestDate = addMonths(lastTestDate, retestMonths);
+
+    if (monthsSinceLastTest >= retestMonths) {
+       content = {
         icon: <Bell className="h-6 w-6 text-destructive" />,
         title: 'Reminder: Time for your test!',
-        description: `Your last test was ${formatDistanceToNow(lastTestDate)} ago. Please schedule your next one.`,
+        description: `Based on your last result (${status}), it's recommended to test every ${retestMonths} months. Your last test was ${formatDistanceToNow(lastTestDate)} ago.`,
         color: 'bg-destructive/10',
       };
     } else {
-      content = {
+       content = {
         icon: <CheckCircle2 className="h-6 w-6 text-green-500" />,
         title: 'You are on track!',
-        description: `Your next test is due around ${format(nextTestDate, 'MMMM yyyy')}.`,
+        description: `With a status of "${status}", your next recommended test is around ${format(nextTestDate, 'MMMM yyyy')}.`,
         color: 'bg-green-500/10',
       };
     }
