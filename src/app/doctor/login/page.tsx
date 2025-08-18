@@ -20,6 +20,7 @@ const FormSchema = z.object({
 // This is a hardcoded password for demonstration purposes.
 // In a real application, this should be handled by a secure authentication system.
 const DOCTOR_PASSWORD = 'password123';
+const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
 export default function DoctorLoginPage() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function DoctorLoginPage() {
       if (data.password === DOCTOR_PASSWORD) {
         toast({
           title: 'Login Successful',
-          description: "Welcome, Doctor! Redirecting to your dashboard...",
+          description: `Welcome, ${DOCTOR_NAME}! Redirecting to your dashboard...`,
         });
         router.push('/doctor/dashboard');
       } else {
@@ -62,7 +63,7 @@ export default function DoctorLoginPage() {
               <Logo className="h-8 w-8 text-primary" />
               <span className="text-2xl font-bold font-headline">Health Guardian</span>
             </div>
-          <CardTitle className="text-2xl">Doctor Portal</CardTitle>
+          <CardTitle className="text-2xl">{DOCTOR_NAME}'s Portal</CardTitle>
           <CardDescription>Please enter your password to access the dashboard.</CardDescription>
         </CardHeader>
         <CardContent>
