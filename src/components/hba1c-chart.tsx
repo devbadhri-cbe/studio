@@ -32,13 +32,13 @@ export function Hba1cChart() {
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         {records.length > 0 ? (
-          <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
+          <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
               tickFormatter={(tick) => format(new Date(tick), 'dd-MM-yyyy')}
-              tickLine={false}
-              axisLine={false}
+              tickLine={true}
+              axisLine={true}
               padding={{ left: 20, right: 20 }}
               angle={-60}
               textAnchor="end"
@@ -49,8 +49,9 @@ export function Hba1cChart() {
               domain={[2, yAxisMax]}
               ticks={yAxisTicks}
               allowDecimals={false}
-              tickLine={false}
-              axisLine={false}
+              tickLine={true}
+              axisLine={true}
+              label={{ value: '%', angle: -90, position: 'insideLeft' }}
             />
             <Tooltip
               cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
