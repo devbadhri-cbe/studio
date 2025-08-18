@@ -6,14 +6,17 @@ import { Hba1cChart } from './hba1c-chart';
 import { format } from 'date-fns';
 import { calculateAge } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { LdlChart } from './ldl-chart';
+import { Separator } from './ui/separator';
 
 export function PrintableReport() {
-  const { profile, records, isClient } = useApp();
+  const { profile, records, lipidRecords, isClient } = useApp();
 
   if (!isClient) return null;
 
   const age = calculateAge(profile.dob);
-  const sortedRecords = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sortedHba1cRecords = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sortedLipidRecords = [...lipidRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <div className="hidden print-only">
@@ -23,7 +26,7 @@ export function PrintableReport() {
             <Logo className="h-10 w-10 text-primary" />
             <div>
               <h1 className="text-2xl font-bold text-primary font-headline">Health Guardian</h1>
-              <p className="text-sm text-muted-foreground">HbA1c Health Report</p>
+              <p className="text-sm text-muted-foreground">Health Report</p>
             </div>
           </div>
           <div className="text-right text-sm">
@@ -69,15 +72,12 @@ export function PrintableReport() {
           </div>
         </section>
 
-        <section className="my-8">
+        <section className="my-8 break-after-page">
           <h2 className="mb-4 text-xl font-semibold">HbA1c Trend</h2>
           <div className="rounded-lg border p-4">
             <Hba1cChart />
           </div>
-        </section>
-
-        <section className="my-8">
-          <h2 className="mb-4 text-xl font-semibold">Complete History</h2>
+          <h2 className="my-4 text-xl font-semibold">HbA1c History</h2>
           <div className="rounded-lg border">
             <Table>
               <TableHeader>
@@ -88,8 +88,8 @@ export function PrintableReport() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedRecords.length > 0 ? (
-                  sortedRecords.map((record) => (
+                {sortedHba1cRecords.length > 0 ? (
+                  sortedHba1cRecords.map((record) => (
                     <TableRow key={record.id}>
                       <TableCell>{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
                       <TableCell className="font-mono">{record.value.toFixed(1)}</TableCell>
@@ -107,6 +107,49 @@ export function PrintableReport() {
             </Table>
           </div>
         </section>
+
+        <section className="my-8">
+           <h2 className="mb-4 text-xl font-semibold">LDL Cholesterol Trend</h2>
+          <div className="rounded-lg border p-4">
+            <LdlChart />
+          </div>
+          <h2 className="my-4 text-xl font-semibold">Lipid Panel History</h2>
+          <div className="rounded-lg border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>LDL</TableHead>
+                  <TableHead>HDL</TableHead>
+                  <TableHead>Trig.</TableHead>
+                  <TableHead className="text-right">Medication</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedLipidRecords.length > 0 ? (
+                  sortedLipidRecords.map((record) => (
+                    <TableRow key={record.id}>
+                      <TableCell>{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
+                      <TableCell>{record.total}</TableCell>
+                      <TableCell>{record.ldl}</TableCell>
+                      <TableCell>{record.hdl}</TableCell>
+                      <TableCell>{record.triglycerides}</TableCell>
+                      <TableCell className="text-right">{record.medication || 'N/A'}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center">
+                      No records found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </section>
+
         <footer className="mt-12 border-t pt-4 text-center text-xs text-muted-foreground">
           <p>This report is generated for personal tracking purposes and should not replace professional medical advice.</p>
           <p>Health Guardian &copy; {new Date().getFullYear()}</p>

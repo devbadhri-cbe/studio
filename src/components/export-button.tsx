@@ -9,8 +9,8 @@ export function ExportButton() {
 
   const handlePrint = () => {
     toast({
-      title: 'Preparing Report',
-      description: 'Your report is being generated. Please check the print preview.',
+      title: 'Generating Report...',
+      description: "Your browser's print dialog will open. Select 'Save as PDF' to download.",
     });
     setTimeout(() => {
       window.print();
