@@ -17,7 +17,29 @@ import { AddPatientDialog } from '@/components/add-patient-dialog';
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const doctorName = 'Dr. Badhrinathan N';
-    const [patients, setPatients] = React.useState<Patient[]>(mockPatients);
+    const [patients, setPatients] = React.useState<Patient[]>([]);
+
+    React.useEffect(() => {
+        // Load patients from localStorage on component mount
+        try {
+            const storedPatients = localStorage.getItem('doctor-patients');
+            if (storedPatients) {
+                setPatients(JSON.parse(storedPatients));
+            } else {
+                // If no stored patients, initialize with mock data and save it
+                setPatients(mockPatients);
+                localStorage.setItem('doctor-patients', JSON.stringify(mockPatients));
+            }
+        } catch (error) {
+            console.error("Failed to parse patients from localStorage", error);
+            setPatients(mockPatients);
+        }
+    }, []);
+
+    const savePatients = (updatedPatients: Patient[]) => {
+        setPatients(updatedPatients);
+        localStorage.setItem('doctor-patients', JSON.stringify(updatedPatients));
+    }
 
     const viewPatientDashboard = (patient: Patient) => {
         const patientProfile = {
@@ -46,7 +68,8 @@ export default function DoctorDashboardPage() {
             lastLipid: null,
             status: 'On Track',
         };
-        setPatients(prevPatients => [newPatient, ...prevPatients]);
+        const updatedPatients = [newPatient, ...patients];
+        savePatients(updatedPatients);
         // Directly view the new patient's dashboard
         viewPatientDashboard(newPatient);
     }
