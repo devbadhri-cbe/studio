@@ -73,15 +73,15 @@ export function LdlChart() {
               <Legend
                 content={() => (
                   <div className="text-xs text-center text-accent-foreground/70" style={{color: 'hsl(var(--accent))'}}>
-                    Optimal Range (&lt;100 mg/dL)
+                    Near Optimal Range (&lt;100 mg/dL)
                   </div>
                 )}
                 verticalAlign="top"
                 align="center"
               />
             </ReferenceArea>
-            <ReferenceLine y={190} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
-              <Label value="Very High Risk (190 mg/dL)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
+            <ReferenceLine y={70} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
+              <Label value="Ideal Target (<70 mg/dL)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
             </ReferenceLine>
             <Line type="monotone" dataKey="ldl" name="LDL" stroke="hsl(var(--primary))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--primary))" />} activeDot={{ r: 6 }} />
           </LineChart>
