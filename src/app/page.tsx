@@ -11,9 +11,14 @@ import { Logo } from '@/components/logo';
 import { Mail, Phone } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LipidCard } from '@/components/lipid-card';
+import { ExportButton } from '@/components/export-button';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView } = useApp();
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   if (!isClient) {
     return (
@@ -56,16 +61,19 @@ export default function Home() {
                 </h1>
                 <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
               </div>
-              <div className="w-[180px]">
-                <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a view" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
-                    <SelectItem value="lipids">Lipid Dashboard</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center gap-2">
+                <div className="w-[180px]">
+                  <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a view" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
+                      <SelectItem value="lipids">Lipid Dashboard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <ExportButton onClick={handlePrint} />
               </div>
             </div>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

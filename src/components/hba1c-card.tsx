@@ -5,7 +5,6 @@ import { AddRecordDialog } from './add-record-dialog';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Hba1cChart } from './hba1c-chart';
 import { HistoryTable } from './history-table';
-import { ExportButton } from './export-button';
 
 export function Hba1cCard() {
   return (
@@ -18,7 +17,6 @@ export function Hba1cCard() {
         <div className="ml-auto flex items-center gap-2">
           <AddRecordDialog />
           <UploadRecordDialog />
-          <ExportButton />
         </div>
       </CardHeader>
       <CardContent className="grid gap-6 px-2 md:px-6">

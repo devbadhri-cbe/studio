@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AddLipidRecordDialog } from './add-lipid-record-dialog';
 import { LdlChart } from './ldl-chart';
 import { LipidHistoryTable } from './lipid-history-table';
-import { ExportButton } from './export-button';
 
 export function LipidCard() {
   return (
@@ -16,7 +15,6 @@ export function LipidCard() {
         </div>
         <div className="ml-auto flex items-center gap-2">
           <AddLipidRecordDialog />
-          <ExportButton />
         </div>
       </CardHeader>
       <CardContent className="grid gap-6 px-2 md:px-6">
