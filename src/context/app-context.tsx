@@ -84,13 +84,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
         } else {
           // If no data exists, set the initial empty state
-          setData({
+           const newDocData = {
             profile: initialProfile,
             records: [],
             lipidRecords: [],
             tips: [],
             dashboardView: 'hba1c',
-          });
+          };
+          setDoc(doc(db, 'users', user.uid), newDocData);
+          setData(newDocData);
         }
       });
       return () => unsubscribe();
