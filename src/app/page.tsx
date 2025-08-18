@@ -65,7 +65,7 @@ export default function Home() {
                 <div className="w-[180px]">
                   <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a view" />
+                      <SelectValue placeholder="Choose a dashboard" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
