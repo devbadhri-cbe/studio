@@ -7,11 +7,7 @@ import { buttonVariants } from './ui/button';
 export function ExportButton() {
   return (
     <a
-      href="#"
-      onClick={(e) => {
-        e.preventDefault();
-        window.print();
-      }}
+      href="javascript:window.print()"
       className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'h-8 gap-1')}
     >
       <FileDown className="h-3.5 w-3.5" />
