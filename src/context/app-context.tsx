@@ -3,7 +3,7 @@
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition } from '@/lib/types';
 import * as React from 'react';
 
-const initialProfile: UserProfile = { name: 'Jane Doe', dob: '1980-01-01', presentMedicalConditions: [], medication: 'Metformin 500mg' };
+const initialProfile: UserProfile = { name: 'Jane Doe', dob: '1980-01-01', gender: 'female', presentMedicalConditions: [], medication: 'Metformin 500mg' };
 
 type DashboardView = 'hba1c' | 'lipids';
 
@@ -42,6 +42,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const storedProfile = localStorage.getItem('health-profile');
       if (storedProfile) {
         setProfileState(JSON.parse(storedProfile));
+      } else {
+        setProfileState(initialProfile);
       }
       const storedRecords = localStorage.getItem('health-records');
       if (storedRecords) {

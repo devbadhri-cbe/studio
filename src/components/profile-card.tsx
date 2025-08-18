@@ -47,10 +47,12 @@ export function ProfileCard() {
 
   const onSubmit = (data: z.infer<typeof profileSchema>) => {
     setIsSaving(true);
+    // Only medication is updated by the patient. Name and DOB are read-only.
     setProfile({
       ...profile,
-      medication: data.medication, // Only update medication
+      medication: data.medication,
     });
+    // Simulate API call
     setTimeout(() => {
       toast({
         title: 'Medication Updated!',
@@ -112,11 +114,11 @@ export function ProfileCard() {
               name="medication"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Medication</FormLabel>
+                  <FormLabel>Current Medication</FormLabel>
                   <FormControl>
                     <Textarea placeholder="List any relevant medications..." className="resize-none" {...field} />
                   </FormControl>
-                  <FormDescription>You can update your medication here. Click save when done.</FormDescription>
+                  <FormDescription>You can update your current medication here. Click save when done.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
