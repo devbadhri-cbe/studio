@@ -18,10 +18,8 @@ import { FormDescription } from './ui/form';
 import { MedicalConditionsList } from './medical-conditions-list';
 
 const profileSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  dob: z.string().refine((dob) => new Date(dob).toString() !== 'Invalid Date' && new Date(dob) < new Date(), {
-    message: 'Please enter a valid date of birth.',
-  }),
+  name: z.string(),
+  dob: z.string(),
   medication: z.string().optional(),
 });
 
@@ -39,7 +37,6 @@ export function ProfileCard() {
     },
   });
 
-  // This effect ensures the form is re-initialized when the profile data changes
   React.useEffect(() => {
     form.reset({
       name: profile.name,
@@ -52,18 +49,17 @@ export function ProfileCard() {
     setIsSaving(true);
     setProfile({
       ...profile,
-      ...data,
+      medication: data.medication, // Only update medication
     });
     setTimeout(() => {
       toast({
-        title: 'Profile Updated!',
-        description: 'Your information has been saved successfully.',
+        title: 'Medication Updated!',
+        description: 'Your medication information has been saved.',
       });
       setIsSaving(false);
     }, 500);
   };
   
-  // Watch for changes in the 'dob' field to re-calculate age
   const dobValue = form.watch('dob');
   const calculatedAge = calculateAge(dobValue);
 
@@ -90,7 +86,7 @@ export function ProfileCard() {
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Jane Doe" {...field} />
+                    <Input placeholder="e.g., Jane Doe" {...field} readOnly className="cursor-default bg-muted/50"/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -103,7 +99,7 @@ export function ProfileCard() {
                 <FormItem>
                   <FormLabel>Date of Birth</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input type="date" {...field} readOnly className="cursor-default bg-muted/50"/>
                   </FormControl>
                   {calculatedAge !== null && <FormDescription>Your age is {calculatedAge} years.</FormDescription>}
                   <FormMessage />
@@ -120,6 +116,7 @@ export function ProfileCard() {
                   <FormControl>
                     <Textarea placeholder="List any relevant medications..." className="resize-none" {...field} />
                   </FormControl>
+                  <FormDescription>You can update your medication here. Click save when done.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -127,10 +124,10 @@ export function ProfileCard() {
             <Button type="submit" disabled={isSaving} className="w-full">
               {isSaving ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving Medication...
                 </>
               ) : (
-                'Save Changes'
+                'Save Medication'
               )}
             </Button>
           </form>
