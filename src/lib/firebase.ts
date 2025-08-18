@@ -1,6 +1,4 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   projectId: 'glycemic-guardian-6uxyg',
@@ -11,16 +9,10 @@ const firebaseConfig = {
   messagingSenderId: '1023747133263',
 };
 
-// This function ensures that we initialize the app only once.
-const getAppInstance = (): FirebaseApp => {
-  if (!getApps().length) {
-    return initializeApp(firebaseConfig);
-  }
-  return getApp();
+// Initialize Firebase
+export const getFirebaseApp = (): FirebaseApp => {
+    if (!getApps().length) {
+        return initializeApp(firebaseConfig);
+    }
+    return getApp();
 };
-
-const app = getAppInstance();
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-export { app, auth, db };

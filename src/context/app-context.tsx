@@ -2,13 +2,18 @@
 
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition } from '@/lib/types';
 import * as React from 'react';
-import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
-import { doc, onSnapshot, setDoc, Timestamp } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import { signInAnonymously, onAuthStateChanged, User, Auth, getAuth } from 'firebase/auth';
+import { doc, onSnapshot, setDoc, Timestamp, Firestore, getFirestore } from 'firebase/firestore';
+import { getFirebaseApp } from '@/lib/firebase';
 
 const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: [], medication: '' };
 
 type DashboardView = 'hba1c' | 'lipids';
+
+interface FirebaseServices {
+  auth: Auth;
+  db: Firestore;
+}
 
 interface AppContextType {
   profile: UserProfile;
@@ -39,6 +44,7 @@ interface AppData {
 }
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  const [firebaseServices, setFirebaseServices] = React.useState<FirebaseServices | null>(null);
   const [user, setUser] = React.useState<User | null>(null);
   const [data, setData] = React.useState<AppData>({
     profile: initialProfile,
@@ -51,22 +57,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     setIsClient(true);
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        try {
-          await signInAnonymously(auth);
-        } catch (error) {
-          console.error("Anonymous sign-in failed", error);
-        }
-      }
-    });
-    return () => unsubscribe();
+    const app = getFirebaseApp();
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    setFirebaseServices({ auth, db });
   }, []);
 
   React.useEffect(() => {
-    if (user) {
+    if (firebaseServices) {
+      const { auth } = firebaseServices;
+      const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        if (currentUser) {
+          setUser(currentUser);
+        } else {
+          try {
+            await signInAnonymously(auth);
+          } catch (error) {
+            console.error('Anonymous sign-in failed', error);
+          }
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [firebaseServices]);
+
+  React.useEffect(() => {
+    if (user && firebaseServices) {
+      const { db } = firebaseServices;
       const docRef = doc(db, 'users', user.uid);
       const unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -86,10 +103,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       return () => unsubscribe();
     }
-  }, [user]);
+  }, [user, firebaseServices]);
 
   const updateRemoteData = async (updatedData: Partial<AppData>) => {
-    if (user) {
+    if (user && firebaseServices) {
+      const { db } = firebaseServices;
       const docRef = doc(db, 'users', user.uid);
       const dataToUpdate: any = { ...updatedData };
       if (dataToUpdate.profile?.presentMedicalConditions) {
