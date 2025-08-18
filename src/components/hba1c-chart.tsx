@@ -15,10 +15,18 @@ const chartConfig = {
 export function Hba1cChart() {
   const { records } = useApp();
 
-  const chartData = [...records].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map((r) => ({
+  const sortedRecords = [...records].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const latestRecords = sortedRecords.slice(0, 5).reverse();
+  
+  const chartData = latestRecords.map((r) => ({
     date: r.date,
     hba1c: r.value,
   }));
+
+  const maxValue = chartData.reduce((max, r) => r.hba1c > max ? r.hba1c : max, 0);
+  const yAxisMax = Math.ceil(maxValue / 2) * 2 + 2;
+  const yAxisTicks = Array.from({ length: yAxisMax / 2 }, (_, i) => (i + 1) * 2);
+
 
   return (
     <div className="h-[300px] w-full">
@@ -38,8 +46,8 @@ export function Hba1cChart() {
               tick={{ fontSize: 12 }}
             />
             <YAxis
-              domain={[2, 14]}
-              ticks={[2, 4, 6, 8, 10, 12, 14]}
+              domain={[2, yAxisMax]}
+              ticks={yAxisTicks}
               allowDecimals={false}
               tickLine={false}
               axisLine={false}
