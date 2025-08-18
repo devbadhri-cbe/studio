@@ -115,7 +115,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         } else {
           // Initialize with sample data for new user
           const initialData = getSampleData();
-          setDoc(docRef, initialData);
+          const dataToSave = {
+            ...initialData,
+            profile: {
+              ...initialData.profile,
+              presentMedicalConditions: initialData.profile.presentMedicalConditions.map(c => ({...c, date: new Date(c.date)}))
+            },
+            records: initialData.records.map(r => ({...r, date: new Date(r.date as string) })),
+            lipidRecords: initialData.lipidRecords.map(r => ({...r, date: new Date(r.date as string) }))
+          }
+          setDoc(docRef, dataToSave);
           setData(initialData);
         }
       });
