@@ -4,12 +4,14 @@ import { useApp } from '@/context/app-context';
 import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears } from 'date-fns';
 import { Bell, CheckCircle2, Heart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { calculateAge } from '@/lib/utils';
 
 export function ReminderCard() {
   const { records, lipidRecords, dashboardView, profile } = useApp();
 
   let content;
   const hasMedicalConditions = !!profile.presentMedicalConditions;
+  const age = calculateAge(profile.dob);
 
   if (dashboardView === 'hba1c') {
     const sortedRecords = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -35,21 +37,21 @@ export function ReminderCard() {
       } else if (lastTestValue >= 6.5) {
         status = 'Diabetes';
         retestMonths = 4; // Every 3-4 months
-      } else if (hasMedicalConditions) {
-        // Healthy range, but with medical conditions, recommend more frequent checks
+      } else if (hasMedicalConditions || (age && age > 45)) {
+        // Healthy range, but with medical conditions or age > 45, recommend more frequent checks
         retestMonths = 12; // Yearly
       }
 
       const monthsSinceLastTest = differenceInMonths(new Date(), lastTestDate);
       const nextTestDate = addMonths(lastTestDate, retestMonths);
-      const baseDescription = `Based on your last result (${status}), it's recommended to test every ${retestMonths} months. Your last test was ${formatDistanceToNow(lastTestDate)} ago.`;
-      const conditionDescription = hasMedicalConditions ? "Your medical history suggests more frequent monitoring. " : "";
-
+      
+      let baseDescription = `Based on your last result (${status}), and profile, it's recommended to test every ${retestMonths} months. Your last test was ${formatDistanceToNow(lastTestDate)} ago.`;
+      
       if (monthsSinceLastTest >= retestMonths) {
          content = {
           icon: <Bell className="h-6 w-6 text-destructive" />,
           title: 'Reminder: Time for your test!',
-          description: `${conditionDescription}${baseDescription}`,
+          description: baseDescription,
           color: 'bg-destructive/10',
         };
       } else {
@@ -74,17 +76,29 @@ export function ReminderCard() {
       };
     } else {
       const lastTestDate = new Date(lastLipidRecord.date);
-      // More nuanced guideline: check every 5 years for healthy adults, but annually if risks.
-      const retestYears = hasMedicalConditions ? 1 : 5; 
+      // Guidelines: annually with risks, every 2 years if over 40, every 5 years for young/healthy.
+      let retestYears = 5;
+      if (hasMedicalConditions) {
+        retestYears = 1;
+      } else if (age && age > 40) {
+        retestYears = 2;
+      }
+      
       const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
       const nextTestDate = addYears(lastTestDate, retestYears);
-      const conditionDescription = hasMedicalConditions ? "Due to your medical history, annual checks are advised. " : "";
+      let description = `It's recommended to check lipids every ${retestYears === 1 ? 'year' : `${retestYears} years`}. Your last test was ${formatDistanceToNow(lastTestDate)} ago.`;
+      if (hasMedicalConditions) {
+        description = "Due to your medical history, annual checks are advised. " + description;
+      } else if (age && age > 40) {
+        description = "For your age group, checks every 2 years are recommended. " + description;
+      }
+
 
       if (yearsSinceLastTest >= retestYears) {
         content = {
           icon: <Heart className="h-6 w-6 text-destructive" />,
           title: 'Reminder: Time for your lipid panel!',
-          description: `${conditionDescription}It's recommended to check lipids every ${retestYears === 1 ? 'year' : `${retestYears} years`}. Your last test was ${formatDistanceToNow(lastTestDate)} ago.`,
+          description: description,
           color: 'bg-destructive/10',
         };
       } else {
