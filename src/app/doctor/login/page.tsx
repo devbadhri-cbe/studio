@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -39,6 +40,8 @@ export default function DoctorLoginPage() {
     // Simulate an API call
     setTimeout(() => {
       if (data.password === DOCTOR_PASSWORD) {
+        // Set a flag in localStorage to indicate doctor is logged in
+        localStorage.setItem('doctor_logged_in', 'true');
         toast({
           title: 'Login Successful',
           description: `Welcome, ${DOCTOR_NAME}! Redirecting to your dashboard...`,

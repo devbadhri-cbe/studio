@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -17,9 +18,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView } = useApp();
+  const router = useRouter();
 
   if (!isClient) {
     return (
@@ -27,6 +30,11 @@ export default function Home() {
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
+  }
+
+  const isDoctorViewing = () => {
+    // A simple check. In a real app, this would be based on auth roles.
+    return !!localStorage.getItem('doctor_logged_in');
   }
 
   return (
@@ -58,11 +66,12 @@ export default function Home() {
             <div className="flex items-center justify-between border-b pb-2">
               <div>
                 <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                  Welcome, {profile.name || 'User'}!
+                  {isDoctorViewing() ? `${profile.name}'s Dashboard` : `Welcome, ${profile.name || 'User'}!`}
                 </h1>
                 <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
               </div>
               <div className="flex items-center gap-4">
+                 {isDoctorViewing() && <Button onClick={() => router.push('/doctor/dashboard')}>Back to Patient List</Button>}
                 <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
                   <SelectTrigger className="w-auto">
                     <SelectValue />

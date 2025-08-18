@@ -42,6 +42,25 @@ export default function DoctorDashboardPage() {
                 return 'default';
         }
     }
+    
+    const viewPatientDashboard = (patient: Patient) => {
+        // In a real app, you'd fetch patient data. Here we simulate it.
+        const patientData = {
+            profile: {
+                name: patient.name,
+                dob: patient.dob,
+                medication: 'N/A', // This could be expanded
+                presentMedicalConditions: [],
+            },
+            records: patient.lastHba1c ? [{...patient.lastHba1c, id: '1', date: new Date(patient.lastHba1c.date).toISOString()}] : [],
+            lipidRecords: patient.lastLipid ? [{...patient.lastLipid, id: '1', hdl: 0, triglycerides: 0, total: 0, date: new Date(patient.lastLipid.date).toISOString()}] : [],
+        };
+        localStorage.setItem('health-profile', JSON.stringify(patientData.profile));
+        localStorage.setItem('health-records', JSON.stringify(patientData.records));
+        localStorage.setItem('health-lipid-records', JSON.stringify(patientData.lipidRecords));
+        localStorage.removeItem('health-tips'); // Clear tips for new patient
+        router.push('/');
+    }
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -68,10 +87,16 @@ export default function DoctorDashboardPage() {
         </header>
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
-            <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                Patient Overview
-            </h1>
-            <p className="text-muted-foreground mb-6">Manage and review your patients' health data.</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-semibold font-headline">
+                        Patient Overview
+                    </h1>
+                    <p className="text-muted-foreground mb-6">Manage and review your patients' health data.</p>
+                </div>
+                <Button onClick={() => router.push('/')} variant="outline">Back to My Dashboard</Button>
+            </div>
+
 
             <Card>
                 <CardHeader className="flex flex-row items-center">
@@ -117,7 +142,7 @@ export default function DoctorDashboardPage() {
                                         <Button 
                                             variant="outline" 
                                             size="sm"
-                                            onClick={() => router.push('/')} // This will be dynamic later
+                                            onClick={() => viewPatientDashboard(patient)}
                                         >
                                             <Eye className="mr-2 h-4 w-4" />
                                             View Dashboard
