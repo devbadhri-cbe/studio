@@ -8,7 +8,7 @@ import { useApp } from '@/context/app-context';
 import { PrintableReport } from '@/components/printable-report';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
-import { Mail, Phone } from 'lucide-react';
+import { FileDown, Mail, Phone } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import {
   Select,
@@ -17,7 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ExportButton } from '@/components/export-button';
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView } = useApp();
@@ -68,7 +69,7 @@ export default function Home() {
                 <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
               </div>
               <div className="flex items-center gap-4">
-              <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
+                <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
                   <SelectTrigger className="w-[200px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -77,7 +78,10 @@ export default function Home() {
                     <SelectItem value="lipids">Lipid Dashboard</SelectItem>
                   </SelectContent>
                 </Select>
-                <ExportButton onClick={handlePrint} />
+                <button onClick={handlePrint} className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'h-9 gap-1')}>
+                  <FileDown className="h-3.5 w-3.5" />
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Export PDF</span>
+                </button>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
