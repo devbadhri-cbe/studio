@@ -77,31 +77,31 @@ const prompt = ai.definePrompt({
   input: {schema: PersonalizedInsightsInputSchema},
   output: {schema: PersonalizedInsightsOutputSchema},
   tools: [lifestyleTipsTool],
-  prompt: `You are a health advisor providing personalized lifestyle tips to help patients manage their health.
+  prompt: `You are an expert health advisor providing personalized lifestyle tips to help patients manage their health.
 
-  Consider the patient's historical data, previous advice, and current clinical guidelines to generate new tips.
+Your advice should be holistic, considering all available health data. Analyze the patient's age, medical history, and their most recent HbA1c and lipid panel results to generate relevant, actionable tips. Ensure your recommendations are consistent with current clinical guidelines for managing diabetes, prediabetes, and cholesterol.
 
-  Patient Profile:
-  Name: {{{userProfile.name}}}
-  Age: {{{userProfile.age}}}
-  Present Medical Conditions: {{#if userProfile.presentMedicalConditions}}{{#each userProfile.presentMedicalConditions}}{{{this.condition}}} ({{this.date}}), {{/each}}{{else}}None{{/if}}
-  Medication: {{#if userProfile.medication}}{{{userProfile.medication}}}{{else}}None{{/if}}
+Patient Profile:
+Name: {{{userProfile.name}}}
+Age: {{{userProfile.age}}}
+Present Medical Conditions: {{#if userProfile.presentMedicalConditions}}{{#each userProfile.presentMedicalConditions}}{{{this.condition}}} (Diagnosed: {{this.date}}), {{/each}}{{else}}None{{/if}}
+Medication: {{#if userProfile.medication}}{{{userProfile.medication}}}{{else}}None{{/if}}
 
 {{#if hba1cData}}
-HbA1c Data:
+Historical HbA1c Data (most recent first):
 {{#each hba1cData}}
-  - Date: {{{this.date}}}, Value: {{{this.value}}}
+  - Date: {{{this.date}}}, Value: {{{this.value}}}%
 {{/each}}
 {{/if}}
 
 {{#if lipidData}}
-Lipid Data:
+Historical Lipid Data (most recent first):
 {{#each lipidData}}
-  - Date: {{{this.date}}}, LDL: {{{this.ldl}}}, HDL: {{{this.hdl}}}, Triglycerides: {{{this.triglycerides}}}, Total: {{{this.total}}}
+  - Date: {{{this.date}}}, Total: {{{this.total}}}, LDL: {{{this.ldl}}}, HDL: {{{this.hdl}}}, Triglycerides: {{{this.triglycerides}}}
 {{/each}}
 {{/if}}
 
-Previous Tips:
+Previous Tips Provided:
 {{#if previousTips}}
 {{#each previousTips}}
   - {{{this}}}
@@ -110,14 +110,7 @@ Previous Tips:
   No previous tips.
 {{/if}}
 
-Generate a list of lifestyle tips based on the provided data. Ensure that the tips align with current clinical guidelines. If both HbA1c and lipid data are present, provide tips for both. Focus on the data provided (hba1c or lipids).
-
-Output the tips in the following format:
-
-Tips:
-- Tip 1
-- Tip 2
-- Tip 3
+Generate a list of new, personalized lifestyle tips based on a complete analysis of the patient's profile and data. If both HbA1c and lipid data are present, provide integrated tips that address both aspects of their health. The tips should be fresh and not repetitive of previous advice.
 `,
 });
 
@@ -128,6 +121,14 @@ const personalizedInsightsFlow = ai.defineFlow(
     outputSchema: PersonalizedInsightsOutputSchema,
   },
   async input => {
+    // Sort data to ensure the prompt receives the most recent records first
+    if (input.hba1cData) {
+      input.hba1cData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
+    if (input.lipidData) {
+      input.lipidData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
+    
     const {output} = await prompt(input);
     return output!;
   }

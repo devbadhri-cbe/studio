@@ -10,18 +10,18 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 export function InsightsCard() {
-  const { profile, records, lipidRecords, tips, setTips, dashboardView } = useApp();
+  const { profile, records, lipidRecords, tips, setTips } = useApp();
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
 
   const handleGetInsights = async () => {
-    const hasRecords = dashboardView === 'hba1c' ? records.length > 0 : lipidRecords.length > 0;
+    const hasRecords = records.length > 0 || lipidRecords.length > 0;
 
     if (!hasRecords || !profile.name || !profile.dob) {
       toast({
         variant: 'destructive',
         title: 'Unable to get insights',
-        description: 'Please add at least one record and complete your profile first.',
+        description: 'Please add at least one health record and complete your profile first.',
       });
       return;
     }
@@ -31,12 +31,12 @@ export function InsightsCard() {
       const age = calculateAge(profile.dob);
       if (age === null) throw new Error('Could not calculate age.');
 
-      const hba1cData = dashboardView === 'hba1c' ? records.map((r) => ({ date: new Date(r.date).toISOString(), value: r.value })) : undefined;
-      const lipidData = dashboardView === 'lipids' ? lipidRecords.map(r => ({date: new Date(r.date).toISOString(), ldl: r.ldl, hdl: r.hdl, total: r.total, triglycerides: r.triglycerides})) : undefined;
+      const hba1cData = records.map((r) => ({ date: new Date(r.date).toISOString(), value: r.value }));
+      const lipidData = lipidRecords.map(r => ({date: new Date(r.date).toISOString(), ldl: r.ldl, hdl: r.hdl, total: r.total, triglycerides: r.triglycerides}));
       
       const result = await getPersonalizedInsights({
-        hba1cData,
-        lipidData,
+        hba1cData: hba1cData.length > 0 ? hba1cData : undefined,
+        lipidData: lipidData.length > 0 ? lipidData : undefined,
         previousTips: tips,
         userProfile: {
           name: profile.name,
@@ -78,9 +78,7 @@ export function InsightsCard() {
           <div>
             <CardTitle>AI-Powered Insights</CardTitle>
             <CardDescription>
-              {dashboardView === 'hba1c' 
-                ? 'Personalized tips to help you manage your HbA1c.' 
-                : 'Personalized tips for managing your cholesterol.'}
+              Personalized tips to help you manage your overall health.
             </CardDescription>
           </div>
         </div>
