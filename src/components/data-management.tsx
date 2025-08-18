@@ -5,7 +5,6 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from './ui/button';
 import { Download, Upload } from 'lucide-react';
-import Papa from 'papaparse';
 
 export function DataManagementButtons() {
   const { profile, records, lipidRecords, importData } = useApp();
