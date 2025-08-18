@@ -1,3 +1,4 @@
+
 export interface MedicalCondition {
   id: string;
   date: string; // Stored as 'YYYY-MM-DD' string
@@ -27,4 +28,18 @@ export interface LipidRecord {
   triglycerides: number;
   total: number;
   medication?: string;
+}
+
+export interface Patient {
+  id: string;
+  name: string;
+  lastHba1c: {
+    value: number;
+    date: string;
+  } | null;
+  lastLipid: {
+    ldl: number;
+    date: string;
+  } | null;
+  status: 'On Track' | 'Needs Review' | 'Urgent';
 }
