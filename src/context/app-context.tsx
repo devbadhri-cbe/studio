@@ -2,11 +2,8 @@
 
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition } from '@/lib/types';
 import * as React from 'react';
-import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
-import { doc, onSnapshot, setDoc, Timestamp } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
 
-const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: [], medication: '' };
+const initialProfile: UserProfile = { name: 'Jane Doe', dob: '1980-01-01', presentMedicalConditions: [], medication: 'Metformin 500mg' };
 
 type DashboardView = 'hba1c' | 'lipids';
 
@@ -30,123 +27,79 @@ interface AppContextType {
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
 
-interface AppData {
-  profile: UserProfile;
-  records: Hba1cRecord[];
-  lipidRecords: LipidRecord[];
-  tips: string[];
-  dashboardView: DashboardView;
-}
-
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<User | null>(null);
-  const [data, setData] = React.useState<AppData>({
-    profile: initialProfile,
-    records: [],
-    lipidRecords: [],
-    tips: [],
-    dashboardView: 'hba1c',
-  });
+  const [profile, setProfileState] = React.useState<UserProfile>(initialProfile);
+  const [records, setRecordsState] = React.useState<Hba1cRecord[]>([]);
+  const [lipidRecords, setLipidRecordsState] = React.useState<LipidRecord[]>([]);
+  const [tips, setTipsState] = React.useState<string[]>([]);
+  const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('hba1c');
   const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
     setIsClient(true);
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        try {
-          await signInAnonymously(auth);
-        } catch (error) {
-          console.error('Anonymous sign-in failed', error);
-        }
+    // Load from localStorage if available
+    try {
+      const storedProfile = localStorage.getItem('health-profile');
+      if (storedProfile) {
+        setProfileState(JSON.parse(storedProfile));
       }
-    });
-    return () => unsubscribe();
+      const storedRecords = localStorage.getItem('health-records');
+      if (storedRecords) {
+        setRecordsState(JSON.parse(storedRecords));
+      }
+      const storedLipidRecords = localStorage.getItem('health-lipid-records');
+      if (storedLipidRecords) {
+        setLipidRecordsState(JSON.parse(storedLipidRecords));
+      }
+      const storedTips = localStorage.getItem('health-tips');
+      if (storedTips) {
+        setTipsState(JSON.parse(storedTips));
+      }
+      const storedView = localStorage.getItem('health-dashboard-view');
+      if (storedView) {
+        setDashboardViewState(storedView as DashboardView);
+      }
+    } catch (error) {
+      console.error("Failed to parse from localStorage", error);
+    }
   }, []);
 
-  React.useEffect(() => {
-    if (user) {
-      const docRef = doc(db, 'users', user.uid);
-      const unsubscribe = onSnapshot(docRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const remoteData = docSnap.data() as AppData;
-           setData({
-            profile: {
-              ...initialProfile,
-              ...(remoteData.profile || {}),
-              presentMedicalConditions: remoteData.profile?.presentMedicalConditions?.map(c => ({...c, date: c.date ? (c.date as any).toDate().toISOString() : new Date().toISOString() })) || [],
-            },
-            records: remoteData.records?.map(r => ({ ...r, date: r.date ? (r.date as any).toDate().toISOString() : new Date().toISOString() })) || [],
-            lipidRecords: remoteData.lipidRecords?.map(r => ({ ...r, date: r.date ? (r.date as any).toDate().toISOString() : new Date().toISOString() })) || [],
-            tips: remoteData.tips || [],
-            dashboardView: remoteData.dashboardView || 'hba1c',
-          });
-        } else {
-          // If no data exists, set the initial empty state
-           const newDocData = {
-            profile: initialProfile,
-            records: [],
-            lipidRecords: [],
-            tips: [],
-            dashboardView: 'hba1c',
-          };
-          setDoc(doc(db, 'users', user.uid), newDocData);
-          setData(newDocData);
-        }
-      });
-      return () => unsubscribe();
+  const saveDataToLocalStorage = (key: string, data: any) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (error) {
+      console.error(`Failed to save ${key} to localStorage`, error);
     }
-  }, [user]);
+  }
 
-  const updateRemoteData = async (updatedData: Partial<AppData>) => {
-    if (user) {
-      const docRef = doc(db, 'users', user.uid);
-      const dataToUpdate: any = { ...updatedData };
-      if (dataToUpdate.profile?.presentMedicalConditions) {
-        dataToUpdate.profile.presentMedicalConditions = dataToUpdate.profile.presentMedicalConditions.map(c => ({...c, date: Timestamp.fromDate(new Date(c.date))}))
-      }
-      if (dataToUpdate.records) {
-        dataToUpdate.records = dataToUpdate.records.map(r => ({...r, date: Timestamp.fromDate(new Date(r.date))}))
-      }
-      if (dataToUpdate.lipidRecords) {
-        dataToUpdate.lipidRecords = dataToUpdate.lipidRecords.map(r => ({...r, date: Timestamp.fromDate(new Date(r.date))}))
-      }
-      // Use setDoc with merge: true to create or update the document
-      await setDoc(docRef, dataToUpdate, { merge: true });
-    }
-  };
-  
   const setProfile = (newProfile: UserProfile) => {
-    const updatedProfile = { ...data.profile, ...newProfile };
-    setData(prev => ({ ...prev, profile: updatedProfile }));
-    updateRemoteData({ profile: updatedProfile });
+    setProfileState(newProfile);
+    saveDataToLocalStorage('health-profile', newProfile);
   };
   
   const addMedicalCondition = (condition: Omit<MedicalCondition, 'id'>) => {
     const newCondition = { ...condition, id: Date.now().toString() };
-    const updatedConditions = [...data.profile.presentMedicalConditions, newCondition];
+    const updatedConditions = [...profile.presentMedicalConditions, newCondition];
     updatedConditions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const newProfile = { ...data.profile, presentMedicalConditions: updatedConditions };
-    setData(prev => ({ ...prev, profile: newProfile }));
-    updateRemoteData({ profile: newProfile });
+    const newProfile = { ...profile, presentMedicalConditions: updatedConditions };
+    setProfile(newProfile);
   };
   
   const removeMedicalCondition = (id: string) => {
-    const updatedConditions = data.profile.presentMedicalConditions.filter(c => c.id !== id);
-    const newProfile = { ...data.profile, presentMedicalConditions: updatedConditions };
-    setData(prev => ({...prev, profile: newProfile }));
-    updateRemoteData({ profile: newProfile });
+    const updatedConditions = profile.presentMedicalConditions.filter(c => c.id !== id);
+    const newProfile = { ...profile, presentMedicalConditions: updatedConditions };
+    setProfile(newProfile);
   };
 
   const setTips = (newTips: string[]) => {
-    setData(prev => ({ ...prev, tips: newTips }));
-    updateRemoteData({ tips: newTips });
+    setTipsState(newTips);
+    saveDataToLocalStorage('health-tips', newTips);
   };
 
-  const handleSetDashboardView = (view: DashboardView) => {
-    setData(prev => ({ ...prev, dashboardView: view, tips: [] })); // Reset tips on view change
-    updateRemoteData({ dashboardView: view, tips: [] });
+  const setDashboardView = (view: DashboardView) => {
+    setDashboardViewState(view);
+    saveDataToLocalStorage('health-dashboard-view', view);
+    setTips([]); // Reset tips on view change
   }
 
   const addRecord = (record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
@@ -154,17 +107,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ...record, 
       id: Date.now().toString(), 
       date: new Date(record.date).toISOString(), 
-      medication: data.profile.medication || 'N/A' 
+      medication: profile.medication || 'N/A' 
     };
-    const newRecords = [...data.records, newRecord];
-    setData(prev => ({ ...prev, records: newRecords }));
-    updateRemoteData({ records: newRecords as any[] });
+    const newRecords = [...records, newRecord];
+    setRecordsState(newRecords);
+    saveDataToLocalStorage('health-records', newRecords);
   };
 
   const removeRecord = (id: string) => {
-    const newRecords = data.records.filter((r) => r.id !== id);
-    setData(prev => ({ ...prev, records: newRecords }));
-    updateRemoteData({ records: newRecords as any[] });
+    const newRecords = records.filter((r) => r.id !== id);
+    setRecordsState(newRecords);
+    saveDataToLocalStorage('health-records', newRecords);
   };
 
   const addLipidRecord = (record: Omit<LipidRecord, 'id' | 'medication'>) => {
@@ -172,35 +125,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ...record,
       id: Date.now().toString(),
       date: new Date(record.date).toISOString(),
-      medication: data.profile.medication || 'N/A',
+      medication: profile.medication || 'N/A',
     };
-    const newRecords = [...data.lipidRecords, newRecord];
-    setData(prev => ({ ...prev, lipidRecords: newRecords }));
-    updateRemoteData({ lipidRecords: newRecords as any[] });
+    const newRecords = [...lipidRecords, newRecord];
+    setLipidRecordsState(newRecords);
+    saveDataToLocalStorage('health-lipid-records', newRecords);
   };
 
   const removeLipidRecord = (id: string) => {
-    const newRecords = data.lipidRecords.filter((r) => r.id !== id);
-    setData(prev => ({ ...prev, lipidRecords: newRecords }));
-    updateRemoteData({ lipidRecords: newRecords as any[] });
+    const newRecords = lipidRecords.filter((r) => r.id !== id);
+    setLipidRecordsState(newRecords);
+    saveDataToLocalStorage('health-lipid-records', newRecords);
   };
   
   const value = {
-    profile: data.profile,
+    profile,
     setProfile,
     addMedicalCondition,
     removeMedicalCondition,
-    records: data.records,
+    records,
     addRecord,
     removeRecord,
-    lipidRecords: data.lipidRecords,
+    lipidRecords,
     addLipidRecord,
     removeLipidRecord,
-    tips: data.tips,
+    tips,
     setTips,
     isClient,
-    dashboardView: data.dashboardView,
-    setDashboardView: handleSetDashboardView,
+    dashboardView,
+    setDashboardView,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
