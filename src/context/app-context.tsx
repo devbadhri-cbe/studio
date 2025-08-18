@@ -214,10 +214,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ...importedData,
       profile: {
         ...importedData.profile,
-        presentMedicalConditions: importedData.profile.presentMedicalConditions.map(c => ({...c, date: new Date(c.date).toISOString()}))
+        dob: importedData.profile.dob ? new Date(importedData.profile.dob).toISOString() : '',
+        presentMedicalConditions: (importedData.profile.presentMedicalConditions || []).map(c => ({...c, date: new Date(c.date).toISOString()}))
       },
-      records: importedData.records.map(r => ({...r, date: new Date(r.date) })),
-      lipidRecords: importedData.lipidRecords.map(r => ({...r, date: new Date(r.date) })),
+      records: (importedData.records || []).map(r => ({...r, date: new Date(r.date) })),
+      lipidRecords: (importedData.lipidRecords || []).map(r => ({...r, date: new Date(r.date) })),
     };
 
     setData(sanitizedData);
