@@ -36,10 +36,10 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 
 const FormSchema = z.object({
-  value: z.coerce.number().min(1, 'Value is required.').max(25, 'Value seems too high.'),
   date: z.date({
     required_error: 'A date for the result is required.',
   }),
+  value: z.coerce.number().min(1, 'Value is required.').max(25, 'Value seems too high.'),
 });
 
 export function AddRecordDialog() {
@@ -108,19 +108,6 @@ export function AddRecordDialog() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
               <FormField
                 control={form.control}
-                name="value"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>HbA1c Result (%)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.1" placeholder="e.g., 5.7" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
@@ -140,6 +127,9 @@ export function AddRecordDialog() {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
+                          captionLayout="dropdown-buttons"
+                          fromYear={1950}
+                          toYear={new Date().getFullYear()}
                           selected={field.value}
                           onSelect={field.onChange}
                           disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
@@ -147,6 +137,19 @@ export function AddRecordDialog() {
                         />
                       </PopoverContent>
                     </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="value"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>HbA1c Result (%)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.1" placeholder="e.g., 5.7" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

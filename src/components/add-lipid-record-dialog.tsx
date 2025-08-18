@@ -26,13 +26,13 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 
 const FormSchema = z.object({
+  date: z.date({
+    required_error: 'A date for the result is required.',
+  }),
   ldl: z.coerce.number().min(1, 'Value is required.'),
   hdl: z.coerce.number().min(1, 'Value is required.'),
   triglycerides: z.coerce.number().min(1, 'Value is required.'),
   total: z.coerce.number().min(1, 'Value is required.'),
-  date: z.date({
-    required_error: 'A date for the result is required.',
-  }),
 });
 
 export function AddLipidRecordDialog() {
@@ -61,7 +61,7 @@ export function AddLipidRecordDialog() {
     });
     setOpen(false);
     form.reset();
-  }
+  };
 
   return (
     <>
@@ -79,6 +79,41 @@ export function AddLipidRecordDialog() {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Test Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={'outline'}
+                            className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                          >
+                            {field.value ? format(field.value, 'dd-MM-yyyy') : <span>Pick a date</span>}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          captionLayout="dropdown-buttons"
+                          fromYear={1950}
+                          toYear={new Date().getFullYear()}
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -133,38 +168,6 @@ export function AddLipidRecordDialog() {
                   )}
                 />
               </div>
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Test Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={'outline'}
-                            className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
-                          >
-                            {field.value ? format(field.value, 'dd-MM-yyyy') : <span>Pick a date</span>}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <DialogFooter>
                 <Button type="submit">Save Record</Button>
               </DialogFooter>
