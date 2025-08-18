@@ -2,9 +2,8 @@
 
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition } from '@/lib/types';
 import * as React from 'react';
-import { parseISO } from 'date-fns';
 import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc, setDoc, onSnapshot, Timestamp } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, Timestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
 const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: [], medication: '' };
@@ -72,15 +71,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
           const remoteData = docSnap.data() as AppData;
-          setData({
-            ...remoteData,
+           setData({
             profile: {
               ...initialProfile,
-              ...remoteData.profile,
+              ...(remoteData.profile || {}),
               presentMedicalConditions: remoteData.profile?.presentMedicalConditions?.map(c => ({...c, date: c.date ? (c.date as any).toDate().toISOString() : new Date().toISOString() })) || [],
             },
-            records: remoteData.records?.map(r => ({ ...r, date: r.date ? (r.date as any).toDate() : new Date() })) || [],
-            lipidRecords: remoteData.lipidRecords?.map(r => ({ ...r, date: r.date ? (r.date as any).toDate() : new Date() })) || [],
+            records: remoteData.records?.map(r => ({ ...r, date: r.date ? (r.date as any).toDate().toISOString() : new Date().toISOString() })) || [],
+            lipidRecords: remoteData.lipidRecords?.map(r => ({ ...r, date: r.date ? (r.date as any).toDate().toISOString() : new Date().toISOString() })) || [],
+            tips: remoteData.tips || [],
+            dashboardView: remoteData.dashboardView || 'hba1c',
           });
         }
       });
@@ -104,10 +104,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await setDoc(docRef, dataToUpdate, { merge: true });
     }
   };
-
+  
   const setProfile = (newProfile: UserProfile) => {
-    setData(prev => ({ ...prev, profile: newProfile }));
-    updateRemoteData({ profile: newProfile });
+    const updatedProfile = { ...data.profile, ...newProfile };
+    setData(prev => ({ ...prev, profile: updatedProfile }));
+    updateRemoteData({ profile: updatedProfile });
   };
   
   const addMedicalCondition = (condition: Omit<MedicalCondition, 'id'>) => {
@@ -173,17 +174,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
   
   const value = {
-    profile: {
-      ...data.profile,
-      presentMedicalConditions: data.profile.presentMedicalConditions.map(c => ({...c, date: c.date ? parseISO(c.date as string).toISOString() : new Date().toISOString() }))
-    },
+    profile: data.profile,
     setProfile,
     addMedicalCondition,
     removeMedicalCondition,
-    records: data.records.map(r => ({...r, date: r.date ? parseISO(r.date as string) : new Date() })),
+    records: data.records,
     addRecord,
     removeRecord,
-    lipidRecords: data.lipidRecords.map(r => ({...r, date: r.date ? parseISO(r.date as string) : new Date() })),
+    lipidRecords: data.lipidRecords,
     addLipidRecord,
     removeLipidRecord,
     tips: data.tips,
