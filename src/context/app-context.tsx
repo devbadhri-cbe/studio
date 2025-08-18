@@ -4,7 +4,7 @@ import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondi
 import * as React from 'react';
 import { parseISO, subMonths, subYears } from 'date-fns';
 import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, Timestamp } from 'firebase/firestore';
 import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
 
 const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: [], medication: '' };
@@ -103,14 +103,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const remoteData = docSnap.data() as AppData;
           setData({
             ...remoteData,
-            // Ensure dates are parsed correctly
             profile: {
               ...initialProfile,
               ...remoteData.profile,
-              presentMedicalConditions: remoteData.profile?.presentMedicalConditions?.map(c => ({...c, date: c.date ? new Date((c.date as any).seconds * 1000).toISOString() : new Date().toISOString() })) || [],
+              presentMedicalConditions: remoteData.profile?.presentMedicalConditions?.map(c => ({...c, date: c.date ? (c.date as any).toDate().toISOString() : new Date().toISOString() })) || [],
             },
-            records: remoteData.records?.map(r => ({ ...r, date: r.date ? new Date((r.date as any).seconds * 1000) : new Date() })) || [],
-            lipidRecords: remoteData.lipidRecords?.map(r => ({ ...r, date: r.date ? new Date((r.date as any).seconds * 1000) : new Date() })) || [],
+            records: remoteData.records?.map(r => ({ ...r, date: r.date ? (r.date as any).toDate() : new Date() })) || [],
+            lipidRecords: remoteData.lipidRecords?.map(r => ({ ...r, date: r.date ? (r.date as any).toDate() : new Date() })) || [],
           });
         } else {
           // Initialize with sample data for new user
@@ -119,10 +118,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             ...initialData,
             profile: {
               ...initialData.profile,
-              presentMedicalConditions: initialData.profile.presentMedicalConditions.map(c => ({...c, date: new Date(c.date)}))
+              presentMedicalConditions: initialData.profile.presentMedicalConditions.map(c => ({...c, date: Timestamp.fromDate(new Date(c.date))}))
             },
-            records: initialData.records.map(r => ({...r, date: new Date(r.date as string) })),
-            lipidRecords: initialData.lipidRecords.map(r => ({...r, date: new Date(r.date as string) }))
+            records: initialData.records.map(r => ({...r, date: Timestamp.fromDate(new Date(r.date as string)) })),
+            lipidRecords: initialData.lipidRecords.map(r => ({...r, date: Timestamp.fromDate(new Date(r.date as string)) }))
           }
           setDoc(docRef, dataToSave);
           setData(initialData);
@@ -137,13 +136,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const docRef = doc(db, 'users', user.uid);
       const dataToUpdate = { ...updatedData };
       if (dataToUpdate.profile?.presentMedicalConditions) {
-        dataToUpdate.profile.presentMedicalConditions = dataToUpdate.profile.presentMedicalConditions.map(c => ({...c, date: new Date(c.date)}))
+        dataToUpdate.profile.presentMedicalConditions = dataToUpdate.profile.presentMedicalConditions.map(c => ({...c, date: Timestamp.fromDate(new Date(c.date))}))
       }
       if (dataToUpdate.records) {
-        dataToUpdate.records = dataToUpdate.records.map(r => ({...r, date: new Date(r.date)}))
+        dataToUpdate.records = dataToUpdate.records.map(r => ({...r, date: Timestamp.fromDate(new Date(r.date))}))
       }
       if (dataToUpdate.lipidRecords) {
-        dataToUpdate.lipidRecords = dataToUpdate.lipidRecords.map(r => ({...r, date: new Date(r.date)}))
+        dataToUpdate.lipidRecords = dataToUpdate.lipidRecords.map(r => ({...r, date: Timestamp.fromDate(new Date(r.date))}))
       }
       setDoc(docRef, dataToUpdate, { merge: true });
     }
