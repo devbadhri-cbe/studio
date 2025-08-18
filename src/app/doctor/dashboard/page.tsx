@@ -19,6 +19,25 @@ export default function DoctorDashboardPage() {
     const doctorName = 'Dr. Badhrinathan N';
     const [patients, setPatients] = React.useState<Patient[]>(mockPatients);
 
+    const viewPatientDashboard = (patient: Patient) => {
+        const patientProfile = {
+            name: patient.name,
+            dob: patient.dob,
+            gender: patient.gender,
+            medication: '', // Start with no medication
+            presentMedicalConditions: [],
+        };
+        // For new patients, start with empty records
+        const patientRecords = patient.lastHba1c ? [{...patient.lastHba1c, id: '1', date: new Date(patient.lastHba1c.date).toISOString()}] : [];
+        const patientLipidRecords = patient.lastLipid ? [{...patient.lastLipid, id: '1', hdl: 0, ldl: patient.lastLipid.ldl, triglycerides: 0, total: 0, date: new Date(patient.lastLipid.date).toISOString()}] : [];
+
+        localStorage.setItem('health-profile', JSON.stringify(patientProfile));
+        localStorage.setItem('health-records', JSON.stringify(patientRecords));
+        localStorage.setItem('health-lipid-records', JSON.stringify(patientLipidRecords));
+        localStorage.removeItem('health-tips'); // Clear tips for new patient
+        router.push('/');
+    }
+
     const addPatient = (patient: Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status'>) => {
         const newPatient: Patient = {
             ...patient,
@@ -28,6 +47,8 @@ export default function DoctorDashboardPage() {
             status: 'On Track',
         };
         setPatients(prevPatients => [newPatient, ...prevPatients]);
+        // Directly view the new patient's dashboard
+        viewPatientDashboard(newPatient);
     }
 
     const getStatusVariant = (status: Patient['status']) => {
@@ -41,25 +62,6 @@ export default function DoctorDashboardPage() {
             default:
                 return 'default';
         }
-    }
-    
-    const viewPatientDashboard = (patient: Patient) => {
-        // In a real app, you'd fetch patient data. Here we simulate it.
-        const patientData = {
-            profile: {
-                name: patient.name,
-                dob: patient.dob,
-                medication: 'N/A', // This could be expanded
-                presentMedicalConditions: [],
-            },
-            records: patient.lastHba1c ? [{...patient.lastHba1c, id: '1', date: new Date(patient.lastHba1c.date).toISOString()}] : [],
-            lipidRecords: patient.lastLipid ? [{...patient.lastLipid, id: '1', hdl: 0, ldl: patient.lastLipid.ldl, triglycerides: 0, total: 0, date: new Date(patient.lastLipid.date).toISOString()}] : [],
-        };
-        localStorage.setItem('health-profile', JSON.stringify(patientData.profile));
-        localStorage.setItem('health-records', JSON.stringify(patientData.records));
-        localStorage.setItem('health-lipid-records', JSON.stringify(patientData.lipidRecords));
-        localStorage.removeItem('health-tips'); // Clear tips for new patient
-        router.push('/');
     }
 
   return (
