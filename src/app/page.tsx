@@ -17,9 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ExportButton } from '@/components/export-button';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView } = useApp();
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   if (!isClient) {
     return (
@@ -72,6 +77,7 @@ export default function Home() {
                     <SelectItem value="lipids">Lipid Dashboard</SelectItem>
                   </SelectContent>
                 </Select>
+                <ExportButton onClick={handlePrint} />
               </div>
             </div>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

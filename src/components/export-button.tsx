@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { buttonVariants } from './ui/button';
 
 export function ExportButton({ onClick }: { onClick: () => void }) {
-  // This component is currently not in use, but we'll keep the structure for when we re-add it.
   return (
     <button onClick={onClick} className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'h-8 gap-1')}>
       <FileDown className="h-3.5 w-3.5" />
