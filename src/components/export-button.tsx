@@ -6,12 +6,16 @@ import { buttonVariants } from './ui/button';
 
 export function ExportButton() {
   return (
-    <button
-      onClick={() => window.print()}
+    <a
+      href="#"
+      onClick={(e) => {
+        e.preventDefault();
+        window.print();
+      }}
       className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'h-8 gap-1')}
     >
       <FileDown className="h-3.5 w-3.5" />
       <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Export PDF</span>
-    </button>
+    </a>
   );
 }
