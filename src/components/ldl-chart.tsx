@@ -80,8 +80,8 @@ export function LdlChart() {
                 align="center"
               />
             </ReferenceArea>
-            <ReferenceLine y={160} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
-              <Label value="High Risk (160 mg/dL)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
+            <ReferenceLine y={190} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
+              <Label value="Very High Risk (190 mg/dL)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
             </ReferenceLine>
             <Line type="monotone" dataKey="ldl" name="LDL" stroke="hsl(var(--primary))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--primary))" />} activeDot={{ r: 6 }} />
           </LineChart>
