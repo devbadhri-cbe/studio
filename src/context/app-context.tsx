@@ -2,45 +2,13 @@
 
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition } from '@/lib/types';
 import * as React from 'react';
-import { parseISO, subMonths, subYears } from 'date-fns';
-import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, onSnapshot, Timestamp } from 'firebase/firestore';
-import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
+import { parseISO } from 'date-fns';
+import { getAuth, signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, Timestamp } from 'firebase/firestore';
+import { app } from '@/lib/firebase';
+
 
 const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: [], medication: '' };
-
-const getSampleData = () => {
-  const now = new Date();
-  const sampleProfile: UserProfile = {
-    name: 'Jane Doe',
-    dob: '1985-05-15',
-    presentMedicalConditions: [
-      { id: '1', date: subMonths(now, 12).toISOString(), condition: 'Type 2 Diabetes', icdCode: 'E11.9: Type 2 diabetes mellitus without complications' },
-      { id: '2', date: subMonths(now, 24).toISOString(), condition: 'Hypertension', icdCode: 'I10: Essential (primary) hypertension' },
-    ],
-    medication: 'Metformin 500mg daily, Lisinopril 10mg daily',
-  };
-
-  const sampleHba1cRecords: Omit<Hba1cRecord, 'id'>[] = [
-    { date: subMonths(now, 3), value: 6.8, medication: 'Metformin 500mg daily' },
-    { date: subMonths(now, 6), value: 7.2, medication: 'Metformin 500mg daily' },
-    { date: subMonths(now, 9), value: 7.5, medication: 'Metformin 500mg daily' },
-  ];
-  
-  const sampleLipidRecords: Omit<LipidRecord, 'id'>[] = [
-    { date: subYears(now, 1), ldl: 130, hdl: 45, triglycerides: 180, total: 240, medication: 'Lisinopril 10mg daily' },
-    { date: subYears(now, 2), ldl: 140, hdl: 40, triglycerides: 200, total: 250, medication: 'Lisinopril 10mg daily' },
-  ];
-
-  return {
-    profile: sampleProfile,
-    records: sampleHba1cRecords.map((r, i) => ({ ...r, id: `sample-hba1c-${i}` })),
-    lipidRecords: sampleLipidRecords.map((r, i) => ({ ...r, id: `sample-lipid-${i}` })),
-    tips: [],
-    dashboardView: 'hba1c' as DashboardView,
-  };
-}
-
 
 type DashboardView = 'hba1c' | 'lipids';
 
@@ -85,11 +53,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     setIsClient(true);
+    const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
       } else {
-        await signInAnonymously(auth);
+        try {
+          await signInAnonymously(auth);
+        } catch (error) {
+          console.error("Anonymous sign-in failed", error);
+        }
       }
     });
     return () => unsubscribe();
@@ -97,6 +70,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     if (user) {
+      const db = getFirestore(app);
       const docRef = doc(db, 'users', user.uid);
       const unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -111,21 +85,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             records: remoteData.records?.map(r => ({ ...r, date: r.date ? (r.date as any).toDate() : new Date() })) || [],
             lipidRecords: remoteData.lipidRecords?.map(r => ({ ...r, date: r.date ? (r.date as any).toDate() : new Date() })) || [],
           });
-        } else {
-          // Initialize with sample data for new user
-          const initialData = getSampleData();
-          const dataToSave = {
-            ...initialData,
-            profile: {
-              ...initialData.profile,
-              presentMedicalConditions: initialData.profile.presentMedicalConditions.map(c => ({...c, date: Timestamp.fromDate(new Date(c.date))}))
-            },
-            records: initialData.records.map(r => ({...r, date: Timestamp.fromDate(new Date(r.date as string)) })),
-            lipidRecords: initialData.lipidRecords.map(r => ({...r, date: Timestamp.fromDate(new Date(r.date as string)) }))
-          }
-          setDoc(docRef, dataToSave);
-          setData(initialData);
         }
+        // If the document doesn't exist, the app will use the default empty state
+        // and a new document will be created when the user first saves data.
       });
       return () => unsubscribe();
     }
@@ -133,6 +95,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateRemoteData = (updatedData: Partial<AppData>) => {
     if (user) {
+      const db = getFirestore(app);
       const docRef = doc(db, 'users', user.uid);
       const dataToUpdate = { ...updatedData };
       if (dataToUpdate.profile?.presentMedicalConditions) {

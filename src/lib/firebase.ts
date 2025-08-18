@@ -1,7 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 
 // Your web app's Firebase configuration.
 // It's safe to expose this, as security is handled by Firebase Security Rules.
@@ -16,8 +14,6 @@ const firebaseConfig = {
 
 
 // Initialize Firebase for SSR and client-side
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
-const auth = getAuth(app);
+const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-export { db, auth, app };
+export { app };
