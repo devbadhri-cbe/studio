@@ -5,8 +5,7 @@ import * as React from 'react';
 import { parseISO } from 'date-fns';
 import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, onSnapshot, Timestamp } from 'firebase/firestore';
-import { getAuthInstance, getDbInstance } from '@/lib/firebase';
-
+import { auth, db } from '@/lib/firebase';
 
 const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: [], medication: '' };
 
@@ -53,7 +52,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     setIsClient(true);
-    const auth = getAuthInstance();
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
@@ -70,7 +68,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     if (user) {
-      const db = getDbInstance();
       const docRef = doc(db, 'users', user.uid);
       const unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -91,11 +88,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
-  const updateRemoteData = (updatedData: Partial<AppData>) => {
+  const updateRemoteData = async (updatedData: Partial<AppData>) => {
     if (user) {
-      const db = getDbInstance();
       const docRef = doc(db, 'users', user.uid);
-      const dataToUpdate = { ...updatedData };
+      const dataToUpdate: any = { ...updatedData };
       if (dataToUpdate.profile?.presentMedicalConditions) {
         dataToUpdate.profile.presentMedicalConditions = dataToUpdate.profile.presentMedicalConditions.map(c => ({...c, date: Timestamp.fromDate(new Date(c.date))}))
       }
@@ -105,7 +101,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (dataToUpdate.lipidRecords) {
         dataToUpdate.lipidRecords = dataToUpdate.lipidRecords.map(r => ({...r, date: Timestamp.fromDate(new Date(r.date))}))
       }
-      setDoc(docRef, dataToUpdate, { merge: true });
+      await setDoc(docRef, dataToUpdate, { merge: true });
     }
   };
 

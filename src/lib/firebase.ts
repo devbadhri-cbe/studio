@@ -1,5 +1,3 @@
-'use client';
-
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
@@ -21,21 +19,8 @@ const getAppInstance = (): FirebaseApp => {
   return getApp();
 };
 
-let auth: Auth;
-const getAuthInstance = (): Auth => {
-  if (!auth) {
-    auth = getAuth(getAppInstance());
-  }
-  return auth;
-}
+const app = getAppInstance();
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-let db: Firestore;
-const getDbInstance = (): Firestore => {
-  if (!db) {
-    db = getFirestore(getAppInstance());
-  }
-  return db;
-}
-
-
-export { getAppInstance, getAuthInstance, getDbInstance };
+export { app, auth, db };
