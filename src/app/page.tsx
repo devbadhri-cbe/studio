@@ -11,6 +11,7 @@ import { Logo } from '@/components/logo';
 import { Mail, Phone } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LipidCard } from '@/components/lipid-card';
+import { DataManagementButtons } from '@/components/data-management';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView } = useApp();
@@ -32,16 +33,19 @@ export default function Home() {
               <Logo className="h-8 w-8 text-primary" />
               <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
             </div>
-            <div className="text-right text-sm text-muted-foreground">
-              <p className="font-semibold text-foreground">Dr. Badhrinathan N</p>
-              <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-end gap-1.5 hover:text-primary">
-                <Mail className="h-3 w-3" />
-                drbadhri@gmail.com
-              </a>
-              <a href="tel:+919791377716" className="flex items-center justify-end gap-1.5 hover:text-primary">
-                <Phone className="h-3 w-3" />
-                +91 97913 77716
-              </a>
+             <div className="flex items-center gap-4">
+              <DataManagementButtons />
+              <div className="text-right text-sm text-muted-foreground">
+                <p className="font-semibold text-foreground">Dr. Badhrinathan N</p>
+                <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-end gap-1.5 hover:text-primary">
+                  <Mail className="h-3 w-3" />
+                  drbadhri@gmail.com
+                </a>
+                <a href="tel:+919791377716" className="flex items-center justify-end gap-1.5 hover:text-primary">
+                  <Phone className="h-3 w-3" />
+                  +91 97913 77716
+                </a>
+              </div>
             </div>
           </div>
         </header>
