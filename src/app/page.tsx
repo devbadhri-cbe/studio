@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView } = useApp();
@@ -63,7 +64,7 @@ export default function Home() {
               </div>
               <div className="flex items-center gap-4">
                 <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="w-auto">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
