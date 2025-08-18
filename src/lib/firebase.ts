@@ -1,22 +1,27 @@
+// This file was modified by running "cn add"
 'use client';
 
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
 
-// This is a public configuration and is safe to expose.
-// Security is enforced by Firebase Security Rules and App Check.
 const firebaseConfig = {
-  projectId: 'glycemic-guardian-6uxyg',
-  appId: '1:1023747133263:web:fc7ad4f2a467dad6c9ff3a',
-  storageBucket: 'glycemic-guardian-6uxyg.firebasestorage.app',
-  apiKey: 'AIzaSyDRROv81qKWJOF1DlsskWYTzWcyYOXvnl4',
-  authDomain: 'glycemic-guardian-6uxyg.firebaseapp.com',
-  messagingSenderId: '1023747133263',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };
 
 // Initialize Firebase
-const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+let app: FirebaseApp;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp();
+}
+
 const auth: Auth = getAuth(app);
 const db: Firestore = getFirestore(app);
 
