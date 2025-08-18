@@ -8,6 +8,7 @@ import { useApp } from '@/context/app-context';
 import { PrintableReport } from '@/components/printable-report';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
+import { Mail, Phone } from 'lucide-react';
 
 export default function Home() {
   const { profile, isClient } = useApp();
@@ -23,10 +24,23 @@ export default function Home() {
   return (
     <>
       <div className="flex min-h-screen w-full flex-col bg-background no-print">
-        <header className="py-4">
-          <div className="flex items-center justify-center gap-2">
-            <Logo className="h-8 w-8 text-primary" />
-            <span className="text-2xl md:text-3xl font-semibold font-headline">Health Guardian</span>
+        <header className="border-b px-4 py-4 md:px-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Logo className="h-8 w-8 text-primary" />
+              <span className="text-2xl font-semibold md:text-3xl font-headline">Health Guardian</span>
+            </div>
+            <div className="text-right text-sm text-muted-foreground">
+              <p className="font-semibold text-foreground">Dr. Badhrinathan N</p>
+              <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-end gap-1.5 hover:text-primary">
+                <Mail className="h-3 w-3" />
+                drbadhri@gmail.com
+              </a>
+              <a href="tel:+919791377716" className="flex items-center justify-end gap-1.5 hover:text-primary">
+                <Phone className="h-3 w-3" />
+                +91 97913 77716
+              </a>
+            </div>
           </div>
         </header>
         <main className="flex-1 p-4 md:p-6">
