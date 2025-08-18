@@ -10,9 +10,16 @@ import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
 import { Mail, Phone } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function Home() {
-  const { profile, isClient, dashboardView } = useApp();
+  const { profile, isClient, dashboardView, setDashboardView } = useApp();
 
   if (!isClient) {
     return (
@@ -54,6 +61,17 @@ export default function Home() {
                   Welcome, {profile.name || 'User'}!
                 </h1>
                 <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
+              </div>
+              <div className="flex items-center gap-4">
+              <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
+                    <SelectItem value="lipids">Lipid Dashboard</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
