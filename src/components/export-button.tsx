@@ -10,11 +10,9 @@ export function ExportButton() {
   const handlePrint = () => {
     toast({
       title: 'Generating Report...',
-      description: "Your browser's print dialog will open. Select 'Save as PDF' to download.",
+      description: "Your browser's print dialog will now open. Select 'Save as PDF' to download.",
     });
-    setTimeout(() => {
-      window.print();
-    }, 500);
+    window.print();
   };
 
   return (
