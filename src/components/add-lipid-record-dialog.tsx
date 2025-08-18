@@ -67,7 +67,7 @@ export function AddLipidRecordDialog() {
       total: '' as any,
     });
   };
-
+  
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!profile.medication) {
       e.preventDefault();
@@ -76,8 +76,6 @@ export function AddLipidRecordDialog() {
         title: 'Medication Required',
         description: 'Please enter the current medication in the profile before adding a new record.',
       });
-    } else {
-      setOpen(true);
     }
   };
 

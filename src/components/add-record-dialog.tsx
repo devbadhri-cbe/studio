@@ -90,8 +90,6 @@ export function AddRecordDialog() {
         title: 'Medication Required',
         description: 'Please enter the current medication in the profile before adding a new record.',
       });
-    } else {
-      setOpen(true);
     }
   };
 
