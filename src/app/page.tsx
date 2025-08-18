@@ -56,7 +56,7 @@ export default function Home() {
                 <h1 className="text-2xl md:text-3xl font-semibold font-headline">
                   Welcome, {profile.name || 'User'}!
                 </h1>
-                <p className="text-muted-foreground">Here is your health dashboard for today.</p>
+                <p className="text-muted-foreground">Here is your health dashboard for today. Always consult with your clinician before acting on the suggestions below.</p>
               </div>
               <div className="w-[180px]">
                 <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
