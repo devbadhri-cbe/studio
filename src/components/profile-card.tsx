@@ -21,6 +21,7 @@ const profileSchema = z.object({
   dob: z.string().refine((dob) => new Date(dob).toString() !== 'Invalid Date' && new Date(dob) < new Date(), {
     message: 'Please enter a valid date of birth.',
   }),
+  presentMedicalConditions: z.string().optional(),
   medication: z.string().optional(),
 });
 
@@ -35,6 +36,7 @@ export function ProfileCard() {
     values: {
       name: profile.name,
       dob: profile.dob,
+      presentMedicalConditions: profile.presentMedicalConditions,
       medication: profile.medication,
     },
   });
@@ -95,6 +97,19 @@ export function ProfileCard() {
                     <Input type="date" {...field} />
                   </FormControl>
                   {calculatedAge !== null && <FormDescription>Your age is {calculatedAge} years.</FormDescription>}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="presentMedicalConditions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Present Medical Conditions</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="List any relevant medical conditions..." className="resize-none" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

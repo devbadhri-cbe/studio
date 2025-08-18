@@ -4,7 +4,7 @@ import { type Hba1cRecord, type UserProfile, type LipidRecord } from '@/lib/type
 import * as React from 'react';
 import { parseISO } from 'date-fns';
 
-const initialProfile: UserProfile = { name: '', dob: '', medication: '' };
+const initialProfile: UserProfile = { name: '', dob: '', presentMedicalConditions: '', medication: '' };
 
 type DashboardView = 'hba1c' | 'lipids';
 

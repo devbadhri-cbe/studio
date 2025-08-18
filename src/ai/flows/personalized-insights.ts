@@ -34,6 +34,7 @@ const PersonalizedInsightsInputSchema = z.object({
     .object({
       name: z.string().describe('User name.'),
       age: z.number().describe('User age.'),
+      presentMedicalConditions: z.string().optional().describe('User medical conditions.'),
       medication: z.string().optional().describe('User medication if any.'),
     })
     .describe('User profile information including name, age and medication'),
@@ -79,6 +80,7 @@ const prompt = ai.definePrompt({
   Patient Profile:
   Name: {{{userProfile.name}}}
   Age: {{{userProfile.age}}}
+  Present Medical Conditions: {{#if userProfile.presentMedicalConditions}}{{{userProfile.presentMedicalConditions}}}{{else}}None{{/if}}
   Medication: {{#if userProfile.medication}}{{{userProfile.medication}}}{{else}}None{{/if}}
 
 {{#if hba1cData}}

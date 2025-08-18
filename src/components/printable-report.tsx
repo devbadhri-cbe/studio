@@ -50,6 +50,10 @@ export function PrintableReport() {
               <p className="font-medium">{age !== null ? `${age} years` : 'N/A'}</p>
             </div>
             <div>
+              <p className="text-sm text-muted-foreground">Present Medical Conditions</p>
+              <p className="font-medium">{profile.presentMedicalConditions || 'N/A'}</p>
+            </div>
+            <div className="col-span-2">
               <p className="text-sm text-muted-foreground">Medication</p>
               <p className="font-medium">{profile.medication || 'N/A'}</p>
             </div>

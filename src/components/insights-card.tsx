@@ -41,6 +41,7 @@ export function InsightsCard() {
         userProfile: {
           name: profile.name,
           age: age,
+          presentMedicalConditions: profile.presentMedicalConditions,
           medication: profile.medication,
         },
       });

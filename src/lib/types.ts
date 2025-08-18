@@ -1,6 +1,7 @@
 export interface UserProfile {
   name: string;
   dob: string; // Stored as 'YYYY-MM-DD' string
+  presentMedicalConditions: string;
   medication: string;
 }
 
