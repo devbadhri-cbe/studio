@@ -53,7 +53,7 @@ export default function DoctorDashboardPage() {
                 presentMedicalConditions: [],
             },
             records: patient.lastHba1c ? [{...patient.lastHba1c, id: '1', date: new Date(patient.lastHba1c.date).toISOString()}] : [],
-            lipidRecords: patient.lastLipid ? [{...patient.lastLipid, id: '1', hdl: 0, triglycerides: 0, total: 0, date: new Date(patient.lastLipid.date).toISOString()}] : [],
+            lipidRecords: patient.lastLipid ? [{...patient.lastLipid, id: '1', hdl: 0, ldl: patient.lastLipid.ldl, triglycerides: 0, total: 0, date: new Date(patient.lastLipid.date).toISOString()}] : [],
         };
         localStorage.setItem('health-profile', JSON.stringify(patientData.profile));
         localStorage.setItem('health-records', JSON.stringify(patientData.records));
