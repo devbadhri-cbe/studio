@@ -1,57 +1,93 @@
 'use client';
 
 import { useApp } from '@/context/app-context';
-import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears } from 'date-fns';
-import { Bell, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears } from 'date-fns';
+import { Bell, CheckCircle2, Heart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 export function ReminderCard() {
-  const { records } = useApp();
-
-  const sortedRecords = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const lastRecord = sortedRecords[0];
+  const { records, lipidRecords, dashboardView } = useApp();
 
   let content;
 
-  if (!lastRecord) {
-    content = {
-      icon: <Bell className="h-6 w-6 text-yellow-500" />,
-      title: 'Time for your first test!',
-      description: 'Add your first HbA1c record to start tracking your health.',
-      color: 'bg-yellow-500/10',
-    };
-  } else {
-    const lastTestDate = new Date(lastRecord.date);
-    const lastTestValue = lastRecord.value;
-    
-    let status = 'Healthy';
-    let retestMonths = 36; // 3 years for healthy
-    
-    if (lastTestValue >= 5.7 && lastTestValue <= 6.4) {
-      status = 'Prediabetes';
-      retestMonths = 12; // 1 year for prediabetes
-    } else if (lastTestValue >= 6.5) {
-      status = 'Diabetes';
-      retestMonths = 4; // 4 months for diabetes
-    }
+  if (dashboardView === 'hba1c') {
+    const sortedRecords = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const lastRecord = sortedRecords[0];
 
-    const monthsSinceLastTest = differenceInMonths(new Date(), lastTestDate);
-    const nextTestDate = addMonths(lastTestDate, retestMonths);
-
-    if (monthsSinceLastTest >= retestMonths) {
-       content = {
-        icon: <Bell className="h-6 w-6 text-destructive" />,
-        title: 'Reminder: Time for your test!',
-        description: `Based on your last result (${status}), it's recommended to test every ${retestMonths} months. Your last test was ${formatDistanceToNow(lastTestDate)} ago.`,
-        color: 'bg-destructive/10',
+    if (!lastRecord) {
+      content = {
+        icon: <Bell className="h-6 w-6 text-yellow-500" />,
+        title: 'Time for your first HbA1c test!',
+        description: 'Add your first HbA1c record to start tracking your health.',
+        color: 'bg-yellow-500/10',
       };
     } else {
-       content = {
-        icon: <CheckCircle2 className="h-6 w-6 text-green-500" />,
-        title: 'You are on track!',
-        description: `With a status of "${status}", your next recommended test is around ${format(nextTestDate, 'MMMM yyyy')}.`,
-        color: 'bg-green-500/10',
+      const lastTestDate = new Date(lastRecord.date);
+      const lastTestValue = lastRecord.value;
+      
+      let status = 'Healthy';
+      let retestMonths = 36;
+      
+      if (lastTestValue >= 5.7 && lastTestValue <= 6.4) {
+        status = 'Prediabetes';
+        retestMonths = 12;
+      } else if (lastTestValue >= 6.5) {
+        status = 'Diabetes';
+        retestMonths = 4;
+      }
+
+      const monthsSinceLastTest = differenceInMonths(new Date(), lastTestDate);
+      const nextTestDate = addMonths(lastTestDate, retestMonths);
+
+      if (monthsSinceLastTest >= retestMonths) {
+         content = {
+          icon: <Bell className="h-6 w-6 text-destructive" />,
+          title: 'Reminder: Time for your test!',
+          description: `Based on your last result (${status}), it's recommended to test every ${retestMonths} months. Your last test was ${formatDistanceToNow(lastTestDate)} ago.`,
+          color: 'bg-destructive/10',
+        };
+      } else {
+         content = {
+          icon: <CheckCircle2 className="h-6 w-6 text-green-500" />,
+          title: 'You are on track!',
+          description: `With a status of "${status}", your next recommended HbA1c test is around ${format(nextTestDate, 'MMMM yyyy')}.`,
+          color: 'bg-green-500/10',
+        };
+      }
+    }
+  } else { // Lipid view
+    const sortedLipidRecords = [...lipidRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const lastLipidRecord = sortedLipidRecords[0];
+
+    if (!lastLipidRecord) {
+      content = {
+        icon: <Heart className="h-6 w-6 text-yellow-500" />,
+        title: 'Time for your first lipid panel!',
+        description: 'Add your first lipid record to start tracking your cardiovascular health.',
+        color: 'bg-yellow-500/10',
       };
+    } else {
+      const lastTestDate = new Date(lastLipidRecord.date);
+      // Simplified guideline: check every 5 years for healthy adults, more often if risks.
+      const retestYears = 5; 
+      const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
+      const nextTestDate = addYears(lastTestDate, retestYears);
+
+      if (yearsSinceLastTest >= retestYears) {
+        content = {
+          icon: <Heart className="h-6 w-6 text-destructive" />,
+          title: 'Reminder: Time for your lipid panel!',
+          description: `It's generally recommended to check lipids every ${retestYears} years for prevention. Your last test was ${formatDistanceToNow(lastTestDate)} ago.`,
+          color: 'bg-destructive/10',
+        };
+      } else {
+        content = {
+          icon: <CheckCircle2 className="h-6 w-6 text-green-500" />,
+          title: 'You are on track!',
+          description: `Your next recommended lipid panel is around ${format(nextTestDate, 'MMMM yyyy')}. Consult your doctor for personalized advice.`,
+          color: 'bg-green-500/10',
+        };
+      }
     }
   }
 

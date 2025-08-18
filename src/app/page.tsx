@@ -9,9 +9,11 @@ import { PrintableReport } from '@/components/printable-report';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
 import { Mail, Phone } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LipidCard } from '@/components/lipid-card';
 
 export default function Home() {
-  const { profile, isClient } = useApp();
+  const { profile, isClient, dashboardView, setDashboardView } = useApp();
 
   if (!isClient) {
     return (
@@ -45,11 +47,24 @@ export default function Home() {
         </header>
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
-            <div className="border-b pb-2">
-              <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                Welcome, {profile.name || 'User'}!
-              </h1>
-              <p className="text-muted-foreground">Here is your health dashboard for today.</p>
+            <div className="flex items-center justify-between border-b pb-2">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-semibold font-headline">
+                  Welcome, {profile.name || 'User'}!
+                </h1>
+                <p className="text-muted-foreground">Here is your health dashboard for today.</p>
+              </div>
+              <div className="w-[180px]">
+                <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a view" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
+                    <SelectItem value="lipids">Lipid Dashboard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <ReminderCard />
@@ -59,7 +74,7 @@ export default function Home() {
             </div>
             <div className="grid auto-rows-fr grid-cols-1 gap-6 lg:grid-cols-3">
               <div className="lg:col-span-2">
-                <Hba1cCard />
+                {dashboardView === 'hba1c' ? <Hba1cCard /> : <LipidCard />}
               </div>
               <div className="lg:col-span-1">
                 <ProfileCard />

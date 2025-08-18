@@ -10,3 +10,13 @@ export interface Hba1cRecord {
   value: number; // in %
   medication?: string;
 }
+
+export interface LipidRecord {
+  id:string;
+  date: Date | string;
+  ldl: number;
+  hdl: number;
+  triglycerides: number;
+  total: number;
+  medication?: string;
+}

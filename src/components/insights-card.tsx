@@ -10,12 +10,14 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 export function InsightsCard() {
-  const { profile, records, tips, setTips } = useApp();
+  const { profile, records, lipidRecords, tips, setTips, dashboardView } = useApp();
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
 
   const handleGetInsights = async () => {
-    if (records.length < 1 || !profile.name || !profile.dob) {
+    const hasRecords = dashboardView === 'hba1c' ? records.length > 0 : lipidRecords.length > 0;
+
+    if (!hasRecords || !profile.name || !profile.dob) {
       toast({
         variant: 'destructive',
         title: 'Unable to get insights',
@@ -29,8 +31,12 @@ export function InsightsCard() {
       const age = calculateAge(profile.dob);
       if (age === null) throw new Error('Could not calculate age.');
 
+      const hba1cData = dashboardView === 'hba1c' ? records.map((r) => ({ date: new Date(r.date).toISOString(), value: r.value })) : undefined;
+      const lipidData = dashboardView === 'lipids' ? lipidRecords.map(r => ({date: new Date(r.date).toISOString(), ldl: r.ldl, hdl: r.hdl, total: r.total, triglycerides: r.triglycerides})) : undefined;
+      
       const result = await getPersonalizedInsights({
-        hba1cData: records.map((r) => ({ date: new Date(r.date).toISOString(), value: r.value })),
+        hba1cData,
+        lipidData,
         previousTips: tips,
         userProfile: {
           name: profile.name,
@@ -66,7 +72,11 @@ export function InsightsCard() {
           </div>
           <div>
             <CardTitle>AI-Powered Insights</CardTitle>
-            <CardDescription>Personalized tips to help you stay healthy.</CardDescription>
+            <CardDescription>
+              {dashboardView === 'hba1c' 
+                ? 'Personalized tips to help you manage your HbA1c.' 
+                : 'Personalized tips for managing your cholesterol.'}
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
