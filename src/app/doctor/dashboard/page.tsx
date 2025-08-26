@@ -125,6 +125,7 @@ export default function DoctorDashboardPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead className="w-[50px]">S.No.</TableHead>
                                 <TableHead>Patient Name</TableHead>
                                 <TableHead>Last HbA1c (%)</TableHead>
                                 <TableHead>Last LDL (mg/dL)</TableHead>
@@ -133,8 +134,9 @@ export default function DoctorDashboardPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {patients.map((patient) => (
+                            {patients.map((patient, index) => (
                                 <TableRow key={patient.id}>
+                                    <TableCell className="font-medium">{index + 1}</TableCell>
                                     <TableCell className="font-medium">{patient.name}</TableCell>
                                     <TableCell>
                                         {patient.lastHba1c 
