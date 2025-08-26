@@ -37,7 +37,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const age = calculateAge(patient.dob);
   const country = countries.find(c => c.code === patient.country);
   const countryName = country?.name || patient.country;
-  const phoneCode = country?.phoneCode || '';
 
   return (
     <Card className="w-full flex flex-col">
@@ -56,7 +55,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
             </div>
              <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0" />
-                <span className='truncate'>{phoneCode} {patient.phone || 'N/A'}</span>
+                <span className='truncate'>{patient.phone || 'N/A'}</span>
             </div>
              <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4 shrink-0" />

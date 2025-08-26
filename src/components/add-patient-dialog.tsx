@@ -71,6 +71,29 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
     },
   });
   
+  const selectedCountryCode = form.watch('country');
+  const currentPhoneNumber = form.watch('phone');
+
+  React.useEffect(() => {
+    if (selectedCountryCode) {
+        const country = countries.find(c => c.code === selectedCountryCode);
+        if (country) {
+            const countryCode = country.phoneCode;
+            // Only set the country code if the field is empty or doesn't already start with a plausible country code
+            if (!currentPhoneNumber || !currentPhoneNumber.startsWith('+')) {
+                 form.setValue('phone', countryCode, { shouldValidate: true });
+            } else {
+                // If the user changes country, update the country code prefix
+                const oldCodeMatch = currentPhoneNumber.match(/^\+\d+/);
+                if (oldCodeMatch && oldCodeMatch[0] !== countryCode) {
+                    const numberWithoutCode = currentPhoneNumber.substring(oldCodeMatch[0].length).trim();
+                    form.setValue('phone', `${countryCode} ${numberWithoutCode}`, { shouldValidate: true });
+                }
+            }
+        }
+    }
+  }, [selectedCountryCode, form, currentPhoneNumber]);
+  
   React.useEffect(() => {
     if (open) {
         if (isEditMode) {
@@ -232,7 +255,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                     <FormItem>
                         <FormLabel>Phone Number</FormLabel>
                         <FormControl>
-                        <Input type="tel" placeholder="e.g., 4155552671" {...field} />
+                        <Input type="tel" placeholder="Select a country first" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
