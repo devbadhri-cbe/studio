@@ -4,10 +4,10 @@ import type { Patient } from './types';
 export const mockPatients: Patient[] = [
   {
     id: '1',
-    name: 'Jane Doe',
+    name: 'Dr. Alexandria von Schmidt-Brauenstein',
     dob: '1980-01-15',
     gender: 'female',
-    email: 'jane.doe@example.com',
+    email: 'alexandria.schmidt.brauenstein@verylongdomainname.co.uk',
     phone: '123-456-7890',
     lastHba1c: { value: 5.8, date: '2024-05-15' },
     lastLipid: { ldl: 110, date: '2024-03-20' },
