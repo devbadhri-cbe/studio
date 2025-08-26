@@ -9,16 +9,19 @@ import { calculateAge } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { LdlChart } from './ldl-chart';
 import { Mail, Phone, User, VenetianMask } from 'lucide-react';
+import { VitaminDChart } from './vitamin-d-chart';
 
 
 export function PrintableReport() {
-  const { profile, records, lipidRecords, isClient } = useApp();
+  const { profile, records, lipidRecords, vitaminDRecords, isClient } = useApp();
 
   if (!isClient) return null;
 
   const age = calculateAge(profile.dob);
   const sortedHba1cRecords = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const sortedLipidRecords = [...lipidRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sortedVitaminDRecords = [...(vitaminDRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
 
   const parseMedicationString = (medication?: string): { name: string; dosage: string; frequency: string }[] => {
     if (!medication || medication === 'N/A') return [];
@@ -184,6 +187,42 @@ export function PrintableReport() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
+                    No records found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </section>
+
+       <section className="my-8" style={{ pageBreakBefore: 'always' }}>
+        <h2 className="mb-4 text-xl font-semibold">Vitamin D Trend</h2>
+        <div className="rounded-lg border p-4">
+          <VitaminDChart />
+        </div>
+        <h2 className="my-4 text-xl font-semibold">Vitamin D History</h2>
+        <div className="rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Result (ng/mL)</TableHead>
+                <TableHead className='text-right'>Medication</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedVitaminDRecords.length > 0 ? (
+                sortedVitaminDRecords.map((record) => (
+                  <TableRow key={record.id}>
+                    <TableCell>{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
+                    <TableCell className="font-mono">{record.value.toFixed(1)}</TableCell>
+                    <TableCell className="text-right">{parseMedicationString(record.medication).map(m => m.name).join(', ') || 'N/A'}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} className="h-24 text-center">
                     No records found.
                   </TableCell>
                 </TableRow>
