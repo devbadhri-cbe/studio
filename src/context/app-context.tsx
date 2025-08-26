@@ -158,10 +158,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setDashboardViewState(view);
   }
   
-  const getMedicationString = (medication: Medication[]): string => {
+  const getMedicationForRecord = (medication: Medication[]): string => {
     if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
-    const medStrings = medication.map(m => `${m.name} ${m.dosage} ${m.frequency}`);
-    return medStrings.join(', ');
+    try {
+      return JSON.stringify(medication.map(m => ({name: m.name, dosage: m.dosage, frequency: m.frequency})));
+    } catch {
+      return 'N/A';
+    }
   }
 
   const addRecord = React.useCallback((record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
@@ -170,7 +173,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...record, 
         id: Date.now().toString(), 
         date: new Date(record.date).toISOString(), 
-        medication: getMedicationString(profile.medication)
+        medication: getMedicationForRecord(profile.medication)
       };
       const newRecords = [...prevRecords, newRecord];
       const updatedPatient = getUpdatedPatientObject(profile, newRecords, lipidRecords, {});
@@ -194,7 +197,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...record,
         id: Date.now().toString(),
         date: new Date(record.date).toISOString(),
-        medication: getMedicationString(profile.medication),
+        medication: getMedicationForRecord(profile.medication),
       };
       const newRecords = [...prevRecords, newRecord];
       const updatedPatient = getUpdatedPatientObject(profile, records, newRecords, {});

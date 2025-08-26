@@ -133,7 +133,8 @@ export function ProfileCard() {
 
             <div className="space-y-4">
               {fields.map((field, index) => (
-                <div key={field.id} className="grid grid-cols-[1fr_1fr_1fr_auto] items-end gap-2 rounded-md border p-3 relative">
+                <div key={field.id} className="flex items-start gap-3 rounded-md border p-3 relative">
+                  <span className="font-medium text-muted-foreground mt-9">{index + 1}.</span>
                    <Button 
                       type="button"
                       variant="ghost" 
@@ -143,45 +144,47 @@ export function ProfileCard() {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  <FormField
-                    control={form.control}
-                    name={`medication.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Medicine</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Metformin" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`medication.${index}.dosage`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Dosage</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., 500mg" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                   <FormField
-                    control={form.control}
-                    name={`medication.${index}.frequency`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Frequency</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Twice a day" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1">
+                    <FormField
+                      control={form.control}
+                      name={`medication.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Medicine</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Metformin" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`medication.${index}.dosage`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Dosage</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., 500mg" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name={`medication.${index}.frequency`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Frequency</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Twice a day" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
               ))}
             </div>

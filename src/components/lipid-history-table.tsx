@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -41,6 +42,21 @@ export function LipidHistoryTable() {
     (currentPage - 1) * RECORDS_PER_PAGE,
     currentPage * RECORDS_PER_PAGE
   );
+
+  const parseMedicationString = (medication?: string): { name: string; dosage: string; frequency: string }[] => {
+    if (!medication || medication === 'N/A') return [];
+    try {
+      const meds = JSON.parse(medication);
+      if (Array.isArray(meds)) return meds;
+      return [];
+    } catch (e) {
+      const parts = medication.split(', ');
+      return parts.map(part => {
+        const [name = '', dosage = '', frequency = ''] = part.split(' ');
+        return { name, dosage, frequency };
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col">
@@ -121,9 +137,19 @@ export function LipidHistoryTable() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <p className="rounded-md border bg-muted p-4 text-sm font-medium">
-              {selectedRecord?.medication || 'No medication was recorded for this test.'}
-            </p>
+             {selectedRecord?.medication && selectedRecord.medication !== 'N/A' ? (
+                <ol className="list-decimal list-inside space-y-2 rounded-md border bg-muted p-4 text-sm font-medium">
+                  {parseMedicationString(selectedRecord.medication).map((med, index) => (
+                    <li key={index}>
+                      {med.name} {med.dosage} - {med.frequency}
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="rounded-md border bg-muted p-4 text-sm font-medium">
+                  No medication was recorded for this test.
+                </p>
+              )}
           </div>
         </DialogContent>
       </Dialog>
