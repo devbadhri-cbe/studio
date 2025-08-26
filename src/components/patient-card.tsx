@@ -95,33 +95,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 {age ? `${age} years old` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
             </CardDescription>
           </div>
-           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0 ml-2" onClick={handleActionClick}>
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" onClick={handleActionClick}>
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={() => onView(patient)}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={onEdit}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit Details
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                    onSelect={() => onDelete(patient)}
-                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Patient
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
         </div>
       </CardHeader>
       
@@ -169,9 +142,33 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         <Badge variant={statusVariant} className={statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}>
             {patient.status}
         </Badge>
-        <Button variant="link" size="sm" className="h-auto p-0" onClick={(e) => { e.stopPropagation(); onView(patient); }}>
-            View Dashboard
-        </Button>
+         <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0" onClick={handleActionClick}>
+                    <span className="sr-only">Open menu</span>
+                    <MoreHorizontal className="h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" onClick={handleActionClick}>
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem onSelect={() => onView(patient)}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onEdit}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit Details
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                    onSelect={() => onDelete(patient)}
+                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Patient
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
       </CardFooter>
     </Card>
   );
