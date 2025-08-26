@@ -28,11 +28,11 @@ export function ProfileCard() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6 text-sm">
-        <div className="space-y-4 rounded-lg border bg-card p-4">
+      <CardContent className="space-y-4 text-sm">
+        <div className="space-y-3 rounded-lg border bg-card p-4">
             <div className="flex items-center gap-3">
                 <UserCircle className="h-5 w-5 shrink-0 text-muted-foreground" />
-                <p className="font-medium">{profile.name || 'N/A'}</p>
+                <p className="font-semibold text-lg">{profile.name || 'N/A'}</p>
             </div>
              <div className="flex items-center gap-3">
                 <VenetianMask className="h-5 w-5 shrink-0 text-muted-foreground" />
@@ -60,7 +60,7 @@ export function ProfileCard() {
                 <h3 className="font-medium">Present Medical Conditions</h3>
             </div>
             {profile.presentMedicalConditions.length > 0 ? (
-                <ul className="space-y-2">
+                <ul className="space-y-1">
                     {profile.presentMedicalConditions.map((condition) => (
                         <li key={condition.id} className="text-xs text-muted-foreground border-l-2 border-primary pl-3">
                             <span className="font-semibold text-foreground">{condition.condition}</span>
@@ -79,7 +79,7 @@ export function ProfileCard() {
                 <h3 className="font-medium">Current Medication</h3>
             </div>
             {profile.medication.length > 0 ? (
-                <ul className="space-y-2">
+                <ul className="space-y-1">
                     {profile.medication.map((med) => (
                          <li key={med.id} className="text-xs text-muted-foreground border-l-2 border-primary pl-3">
                             <span className="font-semibold text-foreground">{med.name}</span> ({med.dosage}, {med.frequency})
