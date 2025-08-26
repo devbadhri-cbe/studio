@@ -1,121 +1,23 @@
 
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, UserCircle, PlusCircle, Trash2, FlaskConical } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill } from 'lucide-react';
 import * as React from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import * as z from 'zod';
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
-import { useToast } from '@/hooks/use-toast';
 import { calculateAge } from '@/lib/utils';
-import { FormDescription } from './ui/form';
 import { MedicalConditionsList } from './medical-conditions-list';
+import { countries } from '@/lib/countries';
 import { Separator } from './ui/separator';
-import { checkDrugInteractions } from '@/ai/flows/drug-interaction-check';
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
-
-
-const profileSchema = z.object({
-  name: z.string(),
-  dob: z.string(),
-  medication: z.array(
-    z.object({
-      name: z.string().min(1, 'Medicine name is required.'),
-      dosage: z.string().min(1, 'Dosage is required.'),
-      frequency: z.string().min(1, 'Frequency is required.'),
-    })
-  ),
-});
 
 export function ProfileCard() {
-  const { profile, setProfile } = useApp();
-  const [isSaving, setIsSaving] = React.useState(false);
-  const [isCheckingInteractions, setIsCheckingInteractions] = React.useState(false);
-  const [interactionResult, setInteractionResult] = React.useState<string | null>(null);
+  const { profile } = useApp();
 
-  const { toast } = useToast();
-
-  const form = useForm<z.infer<typeof profileSchema>>({
-    resolver: zodResolver(profileSchema),
-    values: {
-      name: profile.name,
-      dob: profile.dob,
-      medication: Array.isArray(profile.medication) ? profile.medication.map(({id, ...rest}) => rest) : [],
-    },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'medication',
-  });
-
-  React.useEffect(() => {
-    form.reset({
-      name: profile.name,
-      dob: profile.dob,
-      medication: Array.isArray(profile.medication) ? profile.medication.map(({id, ...rest}) => rest) : [],
-    });
-  }, [profile, form]);
-
-  const onSubmit = (data: z.infer<typeof profileSchema>) => {
-    setIsSaving(true);
-    const updatedMedication = data.medication.map((med, index) => ({
-        id: (profile.medication && profile.medication[index]?.id) || Date.now().toString() + index,
-        ...med
-    }));
-    setProfile({
-      ...profile,
-      medication: updatedMedication,
-    });
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: 'Medication Updated!',
-        description: 'Your medication information has been saved.',
-      });
-      setIsSaving(false);
-    }, 500);
-  };
+  const calculatedAge = calculateAge(profile.dob);
+  const countryName = countries.find(c => c.code === profile.country)?.name || profile.country;
   
-  const handleCheckInteractions = async () => {
-    const currentMedications = form.getValues('medication');
-    if (currentMedications.length < 2) {
-      toast({
-        variant: 'destructive',
-        title: 'Not enough medications',
-        description: 'You need at least two medications to check for interactions.',
-      });
-      return;
-    }
-
-    setIsCheckingInteractions(true);
-    try {
-      const medicationNames = currentMedications.map(m => `${m.name} ${m.dosage}`);
-      const result = await checkDrugInteractions({ medications: medicationNames });
-      setInteractionResult(result.interactionSummary);
-    } catch (error) {
-      console.error('Error checking drug interactions:', error);
-      toast({
-        variant: 'destructive',
-        title: 'An error occurred',
-        description: 'Could not check for drug interactions at this time.',
-      });
-    } finally {
-      setIsCheckingInteractions(false);
-    }
-  };
-
-  const dobValue = form.watch('dob');
-  const calculatedAge = calculateAge(dobValue);
-
   return (
-    <>
     <Card className="h-full">
       <CardHeader>
         <div className="flex items-center gap-3">
@@ -124,164 +26,89 @@ export function ProfileCard() {
           </div>
           <div>
             <CardTitle>My Profile</CardTitle>
-            <CardDescription>Keep your personal information up to date.</CardDescription>
+            <CardDescription>Your personal and medical information.</CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Jane Doe" {...field} readOnly className="cursor-default bg-muted/50"/>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="dob"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Date of Birth</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} readOnly className="cursor-default bg-muted/50"/>
-                  </FormControl>
-                  {calculatedAge !== null && <FormDescription>Your age is {calculatedAge} years.</FormDescription>}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <Separator />
-            
-            <div>
-              <h3 className="font-medium">Current Medication</h3>
-              <p className="text-sm text-muted-foreground">Manage your list of medications.</p>
-            </div>
-
-            <div className="space-y-4">
-              {fields.map((field, index) => (
-                <div key={field.id} className="flex items-start gap-3 rounded-md border p-3 relative">
-                  <span className="font-medium text-muted-foreground mt-9">{index + 1}.</span>
-                   <Button 
-                      type="button"
-                      variant="ghost" 
-                      size="icon" 
-                      className="absolute -top-3 -right-3 h-6 w-6 bg-destructive/20 text-destructive hover:bg-destructive/30"
-                      onClick={() => remove(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1">
-                    <FormField
-                      control={form.control}
-                      name={`medication.${index}.name`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Medicine</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., Metformin" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`medication.${index}.dosage`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Dosage</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., 500mg" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                     <FormField
-                      control={form.control}
-                      name={`medication.${index}.frequency`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Frequency</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., Twice a day" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+      <CardContent className="space-y-6 text-sm">
+        <div className="space-y-4 rounded-lg border bg-card p-4">
+            <div className="flex items-start gap-3">
+                <UserCircle className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
+                <div>
+                    <p className="text-xs text-muted-foreground">Name</p>
+                    <p className="font-medium">{profile.name || 'N/A'}</p>
                 </div>
-              ))}
             </div>
+             <div className="flex items-start gap-3">
+                <VenetianMask className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
+                <div>
+                    <p className="text-xs text-muted-foreground">Age & Gender</p>
+                    <p className="font-medium">
+                        {calculatedAge !== null ? `${calculatedAge} years` : 'N/A'}, <span className="capitalize">{profile.gender || 'N/A'}</span>
+                    </p>
+                </div>
+            </div>
+             <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
+                <div>
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="font-medium">{profile.email || 'N/A'}</p>
+                </div>
+            </div>
+            <div className="flex items-start gap-3">
+                <Phone className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
+                <div>
+                    <p className="text-xs text-muted-foreground">Phone</p>
+                    <p className="font-medium">{profile.phone || 'N/A'}</p>
+                </div>
+            </div>
+             <div className="flex items-start gap-3">
+                <Globe className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
+                <div>
+                    <p className="text-xs text-muted-foreground">Country</p>
+                    <p className="font-medium">{countryName}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <div className="flex items-center gap-3 mb-2">
+                <Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <h3 className="font-medium">Present Medical Conditions</h3>
+            </div>
+            {profile.presentMedicalConditions.length > 0 ? (
+                <ul className="space-y-2">
+                    {profile.presentMedicalConditions.map((condition) => (
+                        <li key={condition.id} className="text-xs text-muted-foreground border-l-2 border-primary pl-3">
+                            <span className="font-semibold text-foreground">{condition.condition}</span>
+                            {condition.icdCode && ` (${condition.icdCode})`}
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p className="text-xs text-muted-foreground pl-8">No conditions recorded.</p>
+            )}
+        </div>
 
-             <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={() => append({ name: '', dosage: '', frequency: '' })}
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Medication
-            </Button>
-            
-            <div className="flex gap-2">
-                <Button type="submit" disabled={isSaving} className="flex-1">
-                {isSaving ? (
-                    <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
-                    </>
-                ) : (
-                    'Save Medication'
-                )}
-                </Button>
-                <Button 
-                    type="button" 
-                    variant="secondary"
-                    onClick={handleCheckInteractions} 
-                    disabled={isCheckingInteractions || fields.length < 2}
-                    className="flex-1"
-                >
-                {isCheckingInteractions ? (
-                    <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Checking...
-                    </>
-                ) : (
-                    <>
-                    <FlaskConical className="mr-2 h-4 w-4" />
-                    Check Interactions
-                    </>
-                )}
-                </Button>
+        <div>
+            <div className="flex items-center gap-3 mb-2">
+                <Pill className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <h3 className="font-medium">Current Medication</h3>
             </div>
-          </form>
-        </Form>
-        <MedicalConditionsList />
+            {profile.medication.length > 0 ? (
+                <ul className="space-y-2">
+                    {profile.medication.map((med) => (
+                         <li key={med.id} className="text-xs text-muted-foreground border-l-2 border-primary pl-3">
+                            <span className="font-semibold text-foreground">{med.name}</span> ({med.dosage}, {med.frequency})
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                 <p className="text-xs text-muted-foreground pl-8">No medication recorded.</p>
+            )}
+        </div>
+
       </CardContent>
     </Card>
-    <AlertDialog open={!!interactionResult} onOpenChange={(open) => !open && setInteractionResult(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Potential Drug Interaction Analysis</AlertDialogTitle>
-            <AlertDialogDescription className="whitespace-pre-wrap text-foreground">
-              {interactionResult}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setInteractionResult(null)}>Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
   );
 }

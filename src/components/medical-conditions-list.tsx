@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -21,6 +22,8 @@ const FormSchema = z.object({
   date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
 });
 
+// THIS COMPONENT IS NO LONGER USED, BUT KEPT FOR REFERENCE.
+// The logic has been moved to the doctor's dashboard when editing a patient.
 export function MedicalConditionsList() {
   const { profile, addMedicalCondition, removeMedicalCondition } = useApp();
   const [isAdding, setIsAdding] = React.useState(false);
