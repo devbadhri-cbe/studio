@@ -1,7 +1,7 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2 } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
+import { DrugInteractionDialog } from './drug-interaction-dialog';
 
 const MedicationSchema = z.object({
   name: z.string().min(2, 'Medication name is required.'),
@@ -197,11 +198,21 @@ export function ProfileCard() {
                     <Pill className="h-5 w-5 shrink-0 text-muted-foreground" />
                     <h3 className="font-medium">Current Medication</h3>
                 </div>
-                {!isAddingMedication && (
-                    <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setIsAddingMedication(true)}>
-                        <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add
-                    </Button>
-                )}
+                <div className="flex items-center gap-1">
+                    <DrugInteractionDialog
+                        medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
+                        disabled={profile.medication.length < 2}
+                    >
+                        <Button size="xs" variant="outline" className="h-7 px-2" disabled={profile.medication.length < 2}>
+                            <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Check
+                        </Button>
+                    </DrugInteractionDialog>
+                     {!isAddingMedication && (
+                        <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setIsAddingMedication(true)}>
+                            <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add
+                        </Button>
+                    )}
+                </div>
             </div>
              {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} />}
             {profile.medication.length > 0 ? (
