@@ -29,9 +29,13 @@ const FormSchema = z.object({
   name: z.string().min(2, 'Patient name is required.'),
   gender: z.enum(['male', 'female', 'other'], { required_error: 'Gender is required.' }),
   dob: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
-  email: z.string().email('Please enter a valid email address.'),
-  phone: z.string().min(10, 'Please enter a valid phone number.'),
+  email: z.string().email('Please enter a valid email address.').optional().or(z.literal('')),
+  phone: z.string().min(10, 'Please enter a valid phone number.').optional().or(z.literal('')),
+}).refine((data) => data.email || data.phone, {
+    message: "Either email or phone number is required.",
+    path: ["email"], // you can use any path here, as the message is general
 });
+
 
 type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions'>
 
@@ -87,8 +91,15 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
     
+    // Ensure optional fields that are empty are passed correctly
+    const submissionData = {
+        ...data,
+        email: data.email || '',
+        phone: data.phone || '',
+    };
+    
     setTimeout(() => {
-        onSave(data, patient?.id);
+        onSave(submissionData, patient?.id);
         toast({
             title: isEditMode ? 'Patient Updated' : 'Patient Added',
             description: `${data.name}'s details have been ${isEditMode ? 'updated' : 'added'}.`,
