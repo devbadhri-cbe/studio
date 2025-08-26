@@ -232,7 +232,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                     <FormItem>
                         <FormLabel>Phone Number</FormLabel>
                         <FormControl>
-                        <Input type="tel" placeholder="e.g., +14155552671" {...field} />
+                        <Input type="tel" placeholder="e.g., 4155552671" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
