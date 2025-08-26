@@ -19,24 +19,19 @@ interface PatientCardProps {
   onDelete: (patient: Patient) => void;
 }
 
-const getStatusVariant = (status: Patient['status']) => {
-    switch (status) {
-        case 'Urgent':
-            return 'destructive';
-        case 'Needs Review':
-            return 'secondary';
-        case 'On Track':
-            return 'outline';
-        default:
-            return 'default';
-    }
-}
-
 const formatPhoneNumber = (phone: string, countryCode: string): string => {
     const country = countries.find(c => c.code === countryCode);
     if (!phone || !country) return phone || 'N/A';
 
-    const phoneDigits = phone.replace(country.phoneCode, '').replace(/\D/g, '');
+    let phoneDigits = phone.replace(country.phoneCode, '').replace(/\D/g, '');
+    
+    // Handle cases where country code might not be in the input string
+    if (phone.startsWith(country.phoneCode)) {
+      phoneDigits = phone.substring(country.phoneCode.length).replace(/\D/g, '');
+    } else {
+      phoneDigits = phone.replace(/\D/g, '');
+    }
+
 
     switch (countryCode) {
         case 'US':
@@ -53,8 +48,23 @@ const formatPhoneNumber = (phone: string, countryCode: string): string => {
             return `${country.phoneCode} ${phoneDigits}`;
     }
     
-    return phone;
+    // Fallback for numbers that don't match expected length
+    return `${country.phoneCode} ${phoneDigits}`;
 }
+
+const getStatusVariant = (status: Patient['status']) => {
+    switch (status) {
+        case 'Urgent':
+            return 'destructive';
+        case 'Needs Review':
+            return 'secondary';
+        case 'On Track':
+            return 'outline';
+        default:
+            return 'default';
+    }
+}
+
 
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
   const statusVariant = getStatusVariant(patient.status);
@@ -66,21 +76,22 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   return (
     <Card className="w-full flex flex-col">
       <CardHeader>
-        <CardTitle className="truncate">{patient.name}</CardTitle>
-        <CardDescription>
-            {age ? `${age} years old` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
+        <CardTitle className="truncate">{formattedPhone}</CardTitle>
+        <CardDescription className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            <span className="truncate">{patient.name}</span>
         </CardDescription>
       </CardHeader>
       
       <CardContent className="space-y-4 text-sm">
         <div className="space-y-2 text-muted-foreground">
+            <div className="flex items-center gap-2">
+                <VenetianMask className="h-4 w-4 shrink-0" />
+                <span className="truncate">{age ? `${age} years old` : 'N/A'}, <span className="capitalize">{patient.gender}</span></span>
+            </div>
              <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0" />
                 <span className="truncate">{patient.email || 'N/A'}</span>
-            </div>
-             <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0" />
-                <span className='truncate'>{formattedPhone}</span>
             </div>
              <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4 shrink-0" />
