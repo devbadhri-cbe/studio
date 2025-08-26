@@ -33,7 +33,7 @@ const FormSchema = z.object({
 });
 
 interface AddPatientDialogProps {
-    onAddPatient: (patient: Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status'>) => void;
+    onAddPatient: (patient: Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions'>) => void;
 }
 
 export function AddPatientDialog({ onAddPatient }: AddPatientDialogProps) {

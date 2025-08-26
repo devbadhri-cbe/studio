@@ -42,35 +42,52 @@ export default function DoctorDashboardPage() {
     }
 
     const viewPatientDashboard = (patient: Patient) => {
+        // Find existing full patient data from localStorage to get all details
+        const allPatients: Patient[] = JSON.parse(localStorage.getItem('doctor-patients') || '[]');
+        const fullPatient = allPatients.find(p => p.id === patient.id);
+
+        if (!fullPatient) {
+            // This should not happen if the patient is in the list
+            console.error('Could not find full patient data for ID:', patient.id);
+            return;
+        }
+
         const patientProfile = {
-            name: patient.name,
-            dob: patient.dob,
-            gender: patient.gender,
-            medication: '', // Start with no medication
-            presentMedicalConditions: [],
+            name: fullPatient.name,
+            dob: fullPatient.dob,
+            gender: fullPatient.gender,
+            // Use existing medication and conditions, don't clear them
+            medication: fullPatient.medication || '', 
+            presentMedicalConditions: fullPatient.presentMedicalConditions || [],
         };
-        // For new patients, start with empty records
-        const patientRecords = patient.lastHba1c ? [{...patient.lastHba1c, id: '1', date: new Date(patient.lastHba1c.date).toISOString()}] : [];
-        const patientLipidRecords = patient.lastLipid ? [{...patient.lastLipid, id: '1', hdl: 0, ldl: patient.lastLipid.ldl, triglycerides: 0, total: 0, date: new Date(patient.lastLipid.date).toISOString()}] : [];
+        
+        // Use existing records, don't create new ones from last values
+        const patientRecords = fullPatient.records || (fullPatient.lastHba1c ? [{...fullPatient.lastHba1c, id: '1', date: new Date(fullPatient.lastHba1c.date).toISOString()}] : []);
+        const patientLipidRecords = fullPatient.lipidRecords || (fullPatient.lastLipid ? [{...fullPatient.lastLipid, id: '1', hdl: 0, ldl: fullPatient.lastLipid.ldl, triglycerides: 0, total: 0, date: new Date(fullPatient.lastLipid.date).toISOString()}] : []);
 
         localStorage.setItem('health-profile', JSON.stringify(patientProfile));
         localStorage.setItem('health-records', JSON.stringify(patientRecords));
         localStorage.setItem('health-lipid-records', JSON.stringify(patientLipidRecords));
-        localStorage.removeItem('health-tips'); // Clear tips for new patient
+        localStorage.removeItem('health-tips'); // Clear tips for new patient view
+        
         router.push('/');
     }
 
-    const addPatient = (patient: Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status'>) => {
+    const addPatient = (patient: Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions'>) => {
         const newPatient: Patient = {
             ...patient,
-            id: (patients.length + 1).toString(),
+            id: Date.now().toString(),
             lastHba1c: null,
             lastLipid: null,
             status: 'On Track',
+            records: [],
+            lipidRecords: [],
+            medication: '',
+            presentMedicalConditions: [],
         };
         const updatedPatients = [newPatient, ...patients];
         savePatients(updatedPatients);
-        // Directly view the new patient's dashboard
+        // Directly view the new patient's dashboard to set the context correctly
         viewPatientDashboard(newPatient);
     }
 

@@ -47,4 +47,9 @@ export interface Patient {
     date: string;
   } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
+  // Add full record history to the patient object
+  records?: Hba1cRecord[];
+  lipidRecords?: LipidRecord[];
+  medication?: string;
+  presentMedicalConditions?: MedicalCondition[];
 }
