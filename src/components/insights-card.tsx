@@ -9,6 +9,7 @@ import { Lightbulb, Loader2 } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { format } from 'date-fns';
 
 export function InsightsCard() {
   const { profile, records, lipidRecords, tips, setTips } = useApp();
@@ -46,7 +47,7 @@ export function InsightsCard() {
           age: age,
           presentMedicalConditions: profile.presentMedicalConditions.map(c => ({
             condition: c.condition,
-            date: new Date(c.date).toISOString(),
+            date: format(new Date(c.date), 'MMMM d, yyyy'),
             icdCode: c.icdCode
           })),
           medication: medicationString,
