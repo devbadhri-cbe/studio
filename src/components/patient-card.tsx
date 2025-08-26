@@ -76,10 +76,10 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   return (
     <Card className="w-full flex flex-col">
       <CardHeader>
-        <CardTitle className="truncate">{formattedPhone}</CardTitle>
+        <CardTitle className="truncate">{patient.name}</CardTitle>
         <CardDescription className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span className="truncate">{patient.name}</span>
+            <Phone className="h-4 w-4" />
+            <span className="truncate">{formattedPhone}</span>
         </CardDescription>
       </CardHeader>
       
