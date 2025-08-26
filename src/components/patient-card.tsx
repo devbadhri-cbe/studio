@@ -3,11 +3,13 @@
 
 import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, User, VenetianMask, Mail, Phone, Droplet, Activity } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { calculateAge } from '@/lib/utils';
+import { Separator } from './ui/separator';
 
 interface PatientCardProps {
   patient: Patient;
@@ -31,14 +33,60 @@ const getStatusVariant = (status: Patient['status']) => {
 
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
   const statusVariant = getStatusVariant(patient.status);
+  const age = calculateAge(patient.dob);
 
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-        <CardTitle className="text-base font-medium truncate pr-2">{patient.name}</CardTitle>
+    <Card className="w-full flex flex-col">
+      <CardHeader>
+        <CardTitle>{patient.name}</CardTitle>
+        <CardDescription>
+            {age ? `${age} years old` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="space-y-4 text-sm">
+        <div className="space-y-2 text-muted-foreground">
+             <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 shrink-0" />
+                <span className="truncate">{patient.email || 'N/A'}</span>
+            </div>
+             <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 shrink-0" />
+                <span>{patient.phone || 'N/A'}</span>
+            </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-2">
+            <div className="flex items-center gap-2">
+                <Droplet className="h-4 w-4 shrink-0 text-primary" />
+                <span className="font-medium">Last HbA1c:</span>
+                <span>
+                    {patient.lastHba1c 
+                        ? `${patient.lastHba1c.value.toFixed(1)}% on ${format(new Date(patient.lastHba1c.date), 'dd-MM-yy')}` 
+                        : 'N/A'}
+                </span>
+            </div>
+            <div className="flex items-center gap-2">
+                 <Activity className="h-4 w-4 shrink-0 text-primary" />
+                <span className="font-medium">Last LDL:</span>
+                 <span>
+                    {patient.lastLipid 
+                        ? `${patient.lastLipid.ldl} mg/dL on ${format(new Date(patient.lastLipid.date), 'dd-MM-yy')}`
+                        : 'N/A'}
+                </span>
+            </div>
+        </div>
+      </CardContent>
+
+      <CardFooter className="mt-auto flex items-center justify-between bg-muted/50 p-4">
+        <Badge variant={statusVariant} className={statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}>
+            {patient.status}
+        </Badge>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0 flex-shrink-0">
+                <Button variant="ghost" className="h-8 w-8 p-0">
                     <span className="sr-only">Open menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                 </Button>
@@ -47,11 +95,11 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuItem onSelect={() => onView(patient)}>
                     <Eye className="mr-2 h-4 w-4" />
-                    View
+                    View Dashboard
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={onEdit}>
                     <Pencil className="mr-2 h-4 w-4" />
-                    Edit
+                    Edit Details
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
@@ -59,42 +107,11 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                     className="text-destructive focus:text-destructive focus:bg-destructive/10"
                 >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
+                    Delete Patient
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm text-muted-foreground">
-            <Badge variant={statusVariant} className={statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}>
-                {patient.status}
-            </Badge>
-            <div className="text-right flex-shrink-0">
-                <p className="truncate">{patient.email}</p>
-                <p>{patient.phone}</p>
-            </div>
-        </div>
-        <div className="mt-4 border-t pt-4">
-            <div className="flex flex-wrap justify-between gap-4">
-                <div className="text-sm">
-                    <p className="text-muted-foreground">Last HbA1c</p>
-                    <p className="font-medium">
-                        {patient.lastHba1c 
-                            ? `${patient.lastHba1c.value.toFixed(1)}% on ${format(new Date(patient.lastHba1c.date), 'dd-MM-yyyy')}` 
-                            : 'N/A'}
-                    </p>
-                </div>
-                <div className="text-sm text-right">
-                    <p className="text-muted-foreground">Last LDL</p>
-                    <p className="font-medium">
-                        {patient.lastLipid 
-                            ? `${patient.lastLipid.ldl} mg/dL on ${format(new Date(patient.lastLipid.date), 'dd-MM-yyyy')}`
-                            : 'N/A'}
-                    </p>
-                </div>
-            </div>
-        </div>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }
