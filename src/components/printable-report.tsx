@@ -8,8 +8,6 @@ import { format } from 'date-fns';
 import { calculateAge } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { LdlChart } from './ldl-chart';
-import { Button } from './ui/button';
-import { Printer } from 'lucide-react';
 
 export function PrintableReport() {
   const { profile, records, lipidRecords, isClient } = useApp();
@@ -43,10 +41,6 @@ export function PrintableReport() {
           </div>
         </div>
         <div className="text-right text-sm">
-           <Button variant="ghost" onClick={() => window.print()} className="flex items-center gap-2 print:hidden">
-              <Printer className="h-4 w-4" />
-              <span>Report Generated: <strong>{format(new Date(), 'dd-MM-yyyy')}</strong></span>
-            </Button>
             <p className="hidden print:block">
               Report Generated: <strong>{format(new Date(), 'dd-MM-yyyy')}</strong>
             </p>

@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { PrintableReport } from '@/components/printable-report';
+import { ShareButton } from '@/components/share-button';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
@@ -84,7 +85,7 @@ export default function Home() {
                       <SelectItem value="lipids">Lipid Dashboard</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button onClick={() => window.print()} variant="outline">Export PDF</Button>
+                  <ShareButton />
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
