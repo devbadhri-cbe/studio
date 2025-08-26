@@ -67,17 +67,17 @@ export default function Home() {
           </header>
           <main className="flex-1 p-4 md:p-6">
             <div className="mx-auto grid w-full max-w-7xl gap-6">
-              <div className="flex items-center justify-between border-b pb-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-2 gap-4">
                 <div>
                   <h1 className="text-2xl md:text-3xl font-semibold font-headline">
                     {pageTitle}
                   </h1>
                   <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
                 </div>
-                <div className="flex items-center gap-4">
-                  {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')}>Back to Patient List</Button>}
+                <div className="flex w-full sm:w-auto items-center justify-end gap-2">
+                  {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')} className="flex-1 sm:flex-initial">Back to Patient List</Button>}
                   <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
-                    <SelectTrigger className="w-auto">
+                    <SelectTrigger className="w-auto flex-1 sm:flex-initial">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -88,13 +88,15 @@ export default function Home() {
                   <ShareButton />
                 </div>
               </div>
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <ReminderCard />
-                <div className="lg:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="md:col-span-2 lg:col-span-1">
+                   <ReminderCard />
+                </div>
+                <div className="md:col-span-2">
                   <InsightsCard />
                 </div>
               </div>
-              <div className="grid auto-rows-fr grid-cols-1 gap-6 lg:grid-cols-3">
+              <div className="grid auto-rows-fr grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
                   {dashboardView === 'hba1c' ? <Hba1cCard /> : <LipidCard />}
                 </div>
