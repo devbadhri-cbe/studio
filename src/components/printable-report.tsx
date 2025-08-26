@@ -1,241 +1,128 @@
-
 'use client';
 
+import * as React from 'react';
+import { ProfileCard } from '@/components/profile-card';
+import { InsightsCard } from '@/components/insights-card';
+import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
-import { Logo } from './logo';
-import { Hba1cChart } from './hba1c-chart';
-import { format } from 'date-fns';
-import { calculateAge } from '@/lib/utils';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { LdlChart } from './ldl-chart';
-import { Mail, Phone, User, VenetianMask } from 'lucide-react';
-import { VitaminDChart } from './vitamin-d-chart';
+import { Hba1cCard } from '@/components/hba1c-card';
+import { Logo } from '@/components/logo';
+import { Mail, Phone } from 'lucide-react';
+import { LipidCard } from '@/components/lipid-card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { VitaminDCard } from '@/components/vitamin-d-card';
 
+export default function Home() {
+  const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
+  const router = useRouter();
 
-export function PrintableReport() {
-  const { profile, records, lipidRecords, vitaminDRecords, isClient } = useApp();
+  if (!isClient) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+  
+  const pageTitle = isDoctorLoggedIn 
+    ? `${profile.name}'s Dashboard` 
+    : `Welcome, ${profile.name || 'User'}!`;
 
-  if (!isClient) return null;
-
-  const age = calculateAge(profile.dob);
-  const sortedHba1cRecords = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const sortedLipidRecords = [...lipidRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const sortedVitaminDRecords = [...(vitaminDRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-
-  const parseMedicationString = (medication?: string): { name: string; dosage: string; frequency: string }[] => {
-    if (!medication || medication === 'N/A') return [];
-    try {
-      const meds = JSON.parse(medication);
-      if (Array.isArray(meds)) return meds;
-      return [];
-    } catch (e) {
-      return [];
+  const renderDashboard = () => {
+    switch (dashboardView) {
+      case 'hba1c':
+        return <Hba1cCard />;
+      case 'lipids':
+        return <LipidCard />;
+      case 'vitaminD':
+        return <VitaminDCard />;
+      default:
+        return <Hba1cCard />;
     }
-  };
-
+  }
 
   return (
-    <div className="p-8">
-      <header className="flex items-center justify-between border-b pb-4">
-        <div className="flex items-center gap-3">
-          <Logo className="h-10 w-10 text-primary" />
-          <div>
-            <h1 className="text-2xl font-bold text-primary font-headline">Health Guardian</h1>
-            <p className="text-sm text-muted-foreground">Health Report</p>
+    <>
+      <div className="flex min-h-screen w-full flex-col bg-background">
+         <header className="border-b px-4 py-4 md:px-6 flex flex-col items-center gap-2">
+          <div className="w-full flex items-center justify-center relative">
+              <div className="flex items-center gap-2">
+                  <Logo className="h-8 w-8 text-primary" />
+                  <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
+              </div>
+               <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
+                   <ThemeToggle />
+                  {!isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/login')}>Doctor Portal</Button>}
+              </div>
           </div>
-        </div>
-        <div className="text-right text-sm">
-            <p>
-              Report Generated: <strong>{format(new Date(), 'dd-MM-yyyy')}</strong>
-            </p>
-        </div>
+
+          {isDoctorLoggedIn && (
+              <div className="text-center text-sm text-muted-foreground">
+                  <p className="font-semibold text-foreground">{doctorName}</p>
+                  <div className="flex items-center justify-center gap-4">
+                      <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
+                          <Mail className="h-3 w-3" />
+                          drbadhri@gmail.com
+                      </a>
+                      <a href="tel:+919791377716" className="flex items-center gap-1.5 hover:text-primary">
+                          <Phone className="h-3 w-3" />
+                          +91 97913 77716
+                      </a>
+                  </div>
+              </div>
+          )}
       </header>
-
-      <section className="my-8">
-        <h2 className="mb-4 text-xl font-semibold">Patient Information</h2>
-        <div className="space-y-4 rounded-lg border bg-card p-6">
-            <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-                 <div className="flex items-start gap-3">
-                    <User className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
-                    <div>
-                        <p className="text-sm text-muted-foreground">Name</p>
-                        <p className="font-medium">{profile.name || 'N/A'}</p>
-                    </div>
-                </div>
-                 <div className="flex items-start gap-3">
-                    <VenetianMask className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
-                    <div>
-                        <p className="text-sm text-muted-foreground">Age & Gender</p>
-                        <p className="font-medium">
-                            {age !== null ? `${age} years` : 'N/A'}, <span className="capitalize">{profile.gender || 'N/A'}</span>
-                        </p>
-                    </div>
-                </div>
-                <div className="flex items-start gap-3">
-                    <Mail className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
-                    <div>
-                        <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="font-medium">{profile.email || 'N/A'}</p>
-                    </div>
-                </div>
-                <div className="flex items-start gap-3">
-                    <Phone className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
-                    <div>
-                        <p className="text-sm text-muted-foreground">Phone</p>
-                        <p className="font-medium">{profile.phone || 'N/A'}</p>
-                    </div>
-                </div>
+        <main className="flex-1 p-4 md:p-6">
+          <div className="mx-auto grid w-full max-w-7xl gap-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-2 gap-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-semibold font-headline">
+                  {pageTitle}
+                </h1>
+                <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
+              </div>
+              <div className="flex w-full sm:w-auto items-center justify-end gap-2">
+                {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')} className="flex-1 sm:flex-initial">Patient List</Button>}
+                <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD')}>
+                  <SelectTrigger className="w-auto flex-1 sm:flex-initial">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
+                    <SelectItem value="lipids">Lipid Dashboard</SelectItem>
+                    <SelectItem value="vitaminD">Vitamin D Dashboard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className='border-t pt-4'>
-                <p className="mb-2 text-sm font-semibold text-muted-foreground">Present Medical Conditions</p>
-                {profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0 ? (
-                <ul className="list-disc space-y-1 pl-5">
-                {profile.presentMedicalConditions.map(c => (
-                    <li key={c.id} className="text-sm font-medium">
-                    {c.condition} (Diagnosed: {format(new Date(c.date), 'dd-MM-yyyy')})
-                    </li>
-                ))}
-                </ul>
-                ) : (
-                <p className="text-sm font-medium">N/A</p>
-                )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="md:col-span-2 lg:col-span-1">
+                 <ReminderCard />
+              </div>
+              <div className="md:col-span-2">
+                <InsightsCard />
+              </div>
             </div>
-            <div className='border-t pt-4'>
-                <p className="mb-2 text-sm font-semibold text-muted-foreground">Current Medication</p>
-                {profile.medication && profile.medication.length > 0 ? (
-                <ul className="list-disc space-y-1 pl-5">
-                    {profile.medication.map(med => (
-                    <li key={med.id} className="text-sm font-medium">
-                        {med.name} {med.dosage} - {med.frequency}
-                    </li>
-                    ))}
-                </ul>
-                ) : (
-                <p className="text-sm font-medium">N/A</p>
-                )}
+            <div className="grid auto-rows-fr grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                {renderDashboard()}
+              </div>
+              <div className="lg:col-span-1">
+                <ProfileCard />
+              </div>
             </div>
-        </div>
-      </section>
-
-      <section className="my-8" style={{ pageBreakBefore: 'always' }}>
-        <h2 className="mb-4 text-xl font-semibold">HbA1c Trend</h2>
-        <div className="rounded-lg border p-4">
-          <Hba1cChart />
-        </div>
-        <h2 className="my-4 text-xl font-semibold">HbA1c History</h2>
-        <div className="rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Result (%)</TableHead>
-                <TableHead className='text-right'>Medication</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedHba1cRecords.length > 0 ? (
-                sortedHba1cRecords.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell>{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
-                    <TableCell className="font-mono">{record.value.toFixed(1)}</TableCell>
-                    <TableCell className="text-right">{parseMedicationString(record.medication).map(m => m.name).join(', ') || 'N/A'}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
-                    No records found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </section>
-
-      <section className="my-8" style={{ pageBreakBefore: 'always' }}>
-          <h2 className="mb-4 text-xl font-semibold">LDL Cholesterol Trend</h2>
-        <div className="rounded-lg border p-4">
-          <LdlChart />
-        </div>
-        <h2 className="my-4 text-xl font-semibold">Lipid Panel History</h2>
-        <div className="rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>LDL</TableHead>
-                <TableHead>HDL</TableHead>
-                <TableHead>Trig.</TableHead>
-                <TableHead className="text-right">Medication</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedLipidRecords.length > 0 ? (
-                sortedLipidRecords.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell>{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
-                    <TableCell>{record.total}</TableCell>
-                    <TableCell>{record.ldl}</TableCell>
-                    <TableCell>{record.hdl}</TableCell>
-                    <TableCell>{record.triglycerides}</TableCell>
-                    <TableCell className="text-right">{parseMedicationString(record.medication).map(m => m.name).join(', ') || 'N/A'}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
-                    No records found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </section>
-
-       <section className="my-8" style={{ pageBreakBefore: 'always' }}>
-        <h2 className="mb-4 text-xl font-semibold">Vitamin D Trend</h2>
-        <div className="rounded-lg border p-4">
-          <VitaminDChart />
-        </div>
-        <h2 className="my-4 text-xl font-semibold">Vitamin D History</h2>
-        <div className="rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Result (ng/mL)</TableHead>
-                <TableHead className='text-right'>Medication</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedVitaminDRecords.length > 0 ? (
-                sortedVitaminDRecords.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell>{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
-                    <TableCell className="font-mono">{record.value.toFixed(1)}</TableCell>
-                    <TableCell className="text-right">{parseMedicationString(record.medication).map(m => m.name).join(', ') || 'N/A'}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
-                    No records found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </section>
-
-      <footer className="mt-12 border-t pt-4 text-center text-xs text-muted-foreground">
-        <p>This report is generated for personal tracking purposes and should not replace professional medical advice.</p>
-        <p>Health Guardian &copy; {new Date().getFullYear()}</p>
-      </footer>
-    </div>
+          </div>
+        </main>
+      </div>
+    </>
   );
 }

@@ -66,26 +66,4 @@
   body {
     @apply bg-background text-foreground;
   }
-  @media print {
-    body, html {
-      background-color: white !important;
-      -webkit-print-color-adjust: exact;
-    }
-    .print-only {
-      display: block !important;
-    }
-    .no-print {
-      display: none !important;
-    }
-    .print\:hidden {
-      display: none !important;
-    }
-    .print\:block {
-        display: block !important;
-    }
-    @page {
-      size: A4;
-      margin: 1cm;
-    }
-  }
 }

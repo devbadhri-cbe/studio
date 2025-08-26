@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { PrintableReport } from '@/components/printable-report';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { VitaminDCard } from '@/components/vitamin-d-card';
 
@@ -54,84 +53,76 @@ export default function Home() {
 
   return (
     <>
-      <div className="main-content no-print">
-        <div className="flex min-h-screen w-full flex-col bg-background">
-           <header className="border-b px-4 py-4 md:px-6 flex flex-col items-center gap-2">
-            <div className="w-full flex items-center justify-center relative">
-                <div className="flex items-center gap-2">
-                    <Logo className="h-8 w-8 text-primary" />
-                    <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
-                </div>
-                 <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
-                     <ThemeToggle />
-                    {!isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/login')}>Doctor Portal</Button>}
-                </div>
-            </div>
+      <div className="flex min-h-screen w-full flex-col bg-background">
+         <header className="border-b px-4 py-4 md:px-6 flex flex-col items-center gap-2">
+          <div className="w-full flex items-center justify-center relative">
+              <div className="flex items-center gap-2">
+                  <Logo className="h-8 w-8 text-primary" />
+                  <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
+              </div>
+               <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
+                   <ThemeToggle />
+                  {!isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/login')}>Doctor Portal</Button>}
+              </div>
+          </div>
 
-            {isDoctorLoggedIn && (
-                <div className="text-center text-sm text-muted-foreground">
-                    <p className="font-semibold text-foreground">{doctorName}</p>
-                    <div className="flex items-center justify-center gap-4">
-                        <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
-                            <Mail className="h-3 w-3" />
-                            drbadhri@gmail.com
-                        </a>
-                        <a href="tel:+919791377716" className="flex items-center gap-1.5 hover:text-primary">
-                            <Phone className="h-3 w-3" />
-                            +91 97913 77716
-                        </a>
-                    </div>
-                </div>
-            )}
-        </header>
-          <main className="flex-1 p-4 md:p-6">
-            <div className="mx-auto grid w-full max-w-7xl gap-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-2 gap-4">
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                    {pageTitle}
-                  </h1>
-                  <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
-                </div>
-                <div className="flex w-full sm:w-auto items-center justify-end gap-2">
-                  {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')} className="flex-1 sm:flex-initial">Patient List</Button>}
-                  <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD')}>
-                    <SelectTrigger className="w-auto flex-1 sm:flex-initial">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
-                      <SelectItem value="lipids">Lipid Dashboard</SelectItem>
-                      <SelectItem value="vitaminD">Vitamin D Dashboard</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button onClick={() => window.print()} variant="outline">
-                    Print / Save PDF
-                  </Button>
-                </div>
+          {isDoctorLoggedIn && (
+              <div className="text-center text-sm text-muted-foreground">
+                  <p className="font-semibold text-foreground">{doctorName}</p>
+                  <div className="flex items-center justify-center gap-4">
+                      <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
+                          <Mail className="h-3 w-3" />
+                          drbadhri@gmail.com
+                      </a>
+                      <a href="tel:+919791377716" className="flex items-center gap-1.5 hover:text-primary">
+                          <Phone className="h-3 w-3" />
+                          +91 97913 77716
+                      </a>
+                  </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="md:col-span-2 lg:col-span-1">
-                   <ReminderCard />
-                </div>
-                <div className="md:col-span-2">
-                  <InsightsCard />
-                </div>
+          )}
+      </header>
+        <main className="flex-1 p-4 md:p-6">
+          <div className="mx-auto grid w-full max-w-7xl gap-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-2 gap-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-semibold font-headline">
+                  {pageTitle}
+                </h1>
+                <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
               </div>
-              <div className="grid auto-rows-fr grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                  {renderDashboard()}
-                </div>
-                <div className="lg:col-span-1">
-                  <ProfileCard />
-                </div>
+              <div className="flex w-full sm:w-auto items-center justify-end gap-2">
+                {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')} className="flex-1 sm:flex-initial">Patient List</Button>}
+                <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD')}>
+                  <SelectTrigger className="w-auto flex-1 sm:flex-initial">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
+                    <SelectItem value="lipids">Lipid Dashboard</SelectItem>
+                    <SelectItem value="vitaminD">Vitamin D Dashboard</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          </main>
-        </div>
-      </div>
-      <div className="print-only">
-        <PrintableReport />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="md:col-span-2 lg:col-span-1">
+                 <ReminderCard />
+              </div>
+              <div className="md:col-span-2">
+                <InsightsCard />
+              </div>
+            </div>
+            <div className="grid auto-rows-fr grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                {renderDashboard()}
+              </div>
+              <div className="lg:col-span-1">
+                <ProfileCard />
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     </>
   );
