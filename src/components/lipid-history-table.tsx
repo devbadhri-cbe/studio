@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from './ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 const RECORDS_PER_PAGE = 5;
 
@@ -36,6 +36,7 @@ export function LipidHistoryTable() {
   return (
     <div className="flex flex-col">
       <div className="rounded-lg border">
+        <TooltipProvider>
         <Table>
           <TableHeader>
             <TableRow>
@@ -53,27 +54,35 @@ export function LipidHistoryTable() {
             {paginatedRecords.length > 0 ? (
               paginatedRecords.map((record) => {
                 return (
-                  <TableRow key={record.id}>
-                    <TableCell className="font-medium px-2 md:px-4">{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
-                    <TableCell className="px-2 md:px-4">{record.total}</TableCell>
-                    <TableCell className="px-2 md:px-4">{record.ldl}</TableCell>
-                    <TableCell className="px-2 md:px-4">{record.hdl}</TableCell>
-                    <TableCell className="px-2 md:px-4">{record.triglycerides}</TableCell>
-                    <TableCell className="px-2 md:px-4">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onSelect={() => removeLipidRecord(record.id)}>Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
+                  <Tooltip key={record.id} delayDuration={100}>
+                    <TooltipTrigger asChild>
+                    <TableRow>
+                      <TableCell className="font-medium px-2 md:px-4">{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
+                      <TableCell className="px-2 md:px-4">{record.total}</TableCell>
+                      <TableCell className="px-2 md:px-4">{record.ldl}</TableCell>
+                      <TableCell className="px-2 md:px-4">{record.hdl}</TableCell>
+                      <TableCell className="px-2 md:px-4">{record.triglycerides}</TableCell>
+                      <TableCell className="px-2 md:px-4">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Toggle menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onSelect={() => removeLipidRecord(record.id)}>Delete</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" align="center">
+                      <p className="text-xs text-muted-foreground">Medication when tested:</p>
+                      <p className="font-semibold">{record.medication || 'N/A'}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )
               })
             ) : (
@@ -85,6 +94,7 @@ export function LipidHistoryTable() {
             )}
           </TableBody>
         </Table>
+        </TooltipProvider>
       </div>
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-end space-x-2">
