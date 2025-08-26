@@ -103,7 +103,7 @@ export function InsightsCard() {
             <p>No insights yet. Generate insights based on your records.</p>
           </div>
         )}
-        <Button onClick={handleGetInsights} disabled={isLoading} className="mt-6 w-full">
+        <Button onClick={handleGetInsights} disabled={isLoading} className="mt-6 w-full" size="sm">
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

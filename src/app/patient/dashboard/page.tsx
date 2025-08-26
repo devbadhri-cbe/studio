@@ -63,7 +63,7 @@ export default function Home() {
               </div>
                <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
                    <ThemeToggle />
-                  {!isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/login')}>Doctor Portal</Button>}
+                  {!isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/login')} size="sm">Doctor Portal</Button>}
               </div>
           </div>
 
@@ -96,7 +96,7 @@ export default function Home() {
                 {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')} className="flex-1 sm:flex-initial">Patient List</Button>}
                 <UploadRecordDialog />
                 <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD')}>
-                  <SelectTrigger className="w-auto flex-1 sm:flex-initial">
+                  <SelectTrigger className="w-auto flex-1 sm:flex-initial h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

@@ -263,7 +263,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 />
               </div>
               <DialogFooter>
-                 <Button type="submit" disabled={isSubmitting}>
+                 <Button type="submit" disabled={isSubmitting} size="sm">
                     {isSubmitting ? (
                         <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

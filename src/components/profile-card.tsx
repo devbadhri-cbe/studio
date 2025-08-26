@@ -165,7 +165,7 @@ export function ProfileCard() {
                     <h3 className="font-medium">Present Medical Conditions</h3>
                 </div>
                  {!isAddingCondition && (
-                    <Button size="xs" variant="outline" className="h-6 px-2" onClick={() => setIsAddingCondition(true)}>
+                    <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setIsAddingCondition(true)}>
                         <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add
                     </Button>
                 )}
@@ -198,7 +198,7 @@ export function ProfileCard() {
                     <h3 className="font-medium">Current Medication</h3>
                 </div>
                 {!isAddingMedication && (
-                    <Button size="xs" variant="outline" className="h-6 px-2" onClick={() => setIsAddingMedication(true)}>
+                    <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setIsAddingMedication(true)}>
                         <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add
                     </Button>
                 )}
@@ -227,5 +227,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    

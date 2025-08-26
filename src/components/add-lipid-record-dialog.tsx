@@ -84,7 +84,7 @@ export function AddLipidRecordDialog() {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" className="h-8 gap-1" onClick={handleTriggerClick}>
+          <Button size="sm" className="gap-1" onClick={handleTriggerClick}>
             <PlusCircle className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Record</span>
           </Button>

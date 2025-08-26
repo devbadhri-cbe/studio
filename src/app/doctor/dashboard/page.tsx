@@ -139,7 +139,7 @@ export default function DoctorDashboardPage() {
                     </h1>
                     <p className="text-muted-foreground">Manage and review your patients' health data.</p>
                 </div>
-                <Button onClick={() => router.push('/patient/dashboard')} variant="outline" className="hidden sm:inline-flex">My Patient Dashboard</Button>
+                <Button onClick={() => router.push('/patient/dashboard')} variant="outline" size="sm" className="hidden sm:inline-flex">My Patient Dashboard</Button>
             </div>
 
 
@@ -161,7 +161,7 @@ export default function DoctorDashboardPage() {
                             />
                         </div>
                         <PatientFormDialog onSave={handleSavePatient}>
-                            <Button size="sm" className="h-9 gap-1 w-full sm:w-auto">
+                            <Button size="sm" className="gap-1 w-full sm:w-auto">
                                 <UserPlus className="h-3.5 w-3.5" />
                                 <span className="whitespace-nowrap">Add Patient</span>
                             </Button>

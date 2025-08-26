@@ -1,3 +1,4 @@
+
 'use client';
 
 import { labResultUpload } from '@/ai/flows/lab-result-upload';
@@ -89,7 +90,7 @@ export function UploadRecordDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="h-8 gap-1">
+        <Button size="sm" variant="outline" className="gap-1">
           <UploadCloud className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Upload Result</span>
         </Button>
@@ -115,7 +116,7 @@ export function UploadRecordDialog() {
                 </AlertDescription>
               </Alert>
               <div className="mt-4 flex items-center justify-center">
-                <Button asChild variant="default">
+                <Button asChild variant="default" size="sm">
                   <label htmlFor="file-upload">
                     <UploadCloud className="mr-2 h-4 w-4" />
                     Choose File
