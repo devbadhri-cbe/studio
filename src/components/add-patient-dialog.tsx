@@ -29,7 +29,7 @@ const FormSchema = z.object({
   gender: z.enum(['male', 'female', 'other'], { required_error: 'Gender is required.' }),
   dob: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
   email: z.string().email('Please enter a valid email address.').optional().or(z.literal('')),
-  phone: z.string().min(1, 'Phone number is required.').refine(val => /^\+[1-9]\d{1,14}$/.test(val), 'Please enter a valid international phone number (e.g., +14155552671).'),
+  phone: z.string().min(1, 'Phone number is required.').refine(val => /^\+\d{1,15}$/.test(val), 'Please enter a valid international phone number (e.g., +14155552671).'),
 }).refine((data) => data.email || data.phone, {
     message: "Either email or phone number is required.",
     path: ["email"], // you can use any path here, as the message is general
