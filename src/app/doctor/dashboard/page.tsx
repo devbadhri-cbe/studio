@@ -137,7 +137,7 @@ export default function DoctorDashboardPage() {
                     </h1>
                     <p className="text-muted-foreground">Manage and review your patients' health data.</p>
                 </div>
-                <Button onClick={() => router.push('/patient/dashboard')} variant="outline" className="hidden sm:inline-flex">Back to My Dashboard</Button>
+                <Button onClick={() => router.push('/patient/dashboard')} variant="outline" className="hidden sm:inline-flex">My Patient Dashboard</Button>
             </div>
 
 
