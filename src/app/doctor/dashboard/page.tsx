@@ -5,28 +5,49 @@ import * as React from 'react';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Mail, Phone, Eye } from 'lucide-react';
+import { Mail, Phone, Eye, MoreHorizontal, UserPlus, Pencil, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { mockPatients } from '@/lib/mock-data';
 import type { Patient } from '@/lib/types';
 import { format } from 'date-fns';
-import { AddPatientDialog } from '@/components/add-patient-dialog';
+import { PatientFormDialog } from '@/components/add-patient-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+
+type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions'>
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
+    const { toast } = useToast();
     const doctorName = 'Dr. Badhrinathan N';
     const [patients, setPatients] = React.useState<Patient[]>([]);
+    const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
 
     React.useEffect(() => {
-        // Load patients from localStorage on component mount
         try {
             const storedPatients = localStorage.getItem('doctor-patients');
             if (storedPatients) {
                 setPatients(JSON.parse(storedPatients));
             } else {
-                // If no stored patients, initialize with mock data and save it
                 setPatients(mockPatients);
                 localStorage.setItem('doctor-patients', JSON.stringify(mockPatients));
             }
@@ -37,29 +58,49 @@ export default function DoctorDashboardPage() {
     }, []);
 
     const savePatients = (updatedPatients: Patient[]) => {
-        setPatients(updatedPatients);
-        localStorage.setItem('doctor-patients', JSON.stringify(updatedPatients));
+        const sortedPatients = updatedPatients.sort((a, b) => {
+            // Simple sort by name for now, can be made more complex
+            return a.name.localeCompare(b.name);
+        });
+        setPatients(sortedPatients);
+        localStorage.setItem('doctor-patients', JSON.stringify(sortedPatients));
     }
 
     const viewPatientDashboard = (patient: Patient) => {
         router.push(`/patient/${patient.id}`);
     }
 
-    const addPatient = (patient: Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions'>) => {
-        const newPatient: Patient = {
-            ...patient,
-            id: Date.now().toString(),
-            lastHba1c: null,
-            lastLipid: null,
-            status: 'On Track',
-            records: [],
-            lipidRecords: [],
-            medication: [],
-            presentMedicalConditions: [],
-        };
-        const updatedPatients = [newPatient, ...patients];
+    const handleSavePatient = (patientData: PatientFormData, patientId?: string) => {
+        if (patientId) { // Editing existing patient
+            const updatedPatients = patients.map(p => 
+                p.id === patientId ? { ...p, ...patientData } : p
+            );
+            savePatients(updatedPatients);
+        } else { // Adding new patient
+            const newPatient: Patient = {
+                ...patientData,
+                id: Date.now().toString(),
+                lastHba1c: null,
+                lastLipid: null,
+                status: 'On Track',
+                records: [],
+                lipidRecords: [],
+                medication: [],
+                presentMedicalConditions: [],
+            };
+            const updatedPatients = [newPatient, ...patients];
+            savePatients(updatedPatients);
+        }
+    };
+    
+    const removePatient = (patientId: string) => {
+        const updatedPatients = patients.filter(p => p.id !== patientId);
         savePatients(updatedPatients);
-        viewPatientDashboard(newPatient);
+        setPatientToDelete(null);
+        toast({
+            title: 'Patient Deleted',
+            description: 'The patient has been removed from the list.'
+        });
     }
 
     const getStatusVariant = (status: Patient['status']) => {
@@ -76,6 +117,7 @@ export default function DoctorDashboardPage() {
     }
 
   return (
+    <>
     <div className="flex min-h-screen w-full flex-col bg-background">
        <header className="border-b px-4 py-4 md:px-6">
           <div className="flex items-center justify-between">
@@ -118,7 +160,12 @@ export default function DoctorDashboardPage() {
                         <CardDescription>A list of all patients currently under your care.</CardDescription>
                     </div>
                     <div className="ml-auto flex items-center gap-2">
-                        <AddPatientDialog onAddPatient={addPatient} />
+                        <PatientFormDialog onSave={handleSavePatient}>
+                            <Button size="sm" className="h-8 gap-1">
+                                <UserPlus className="h-3.5 w-3.5" />
+                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Patient</span>
+                            </Button>
+                        </PatientFormDialog>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -154,14 +201,38 @@ export default function DoctorDashboardPage() {
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button 
-                                            variant="outline" 
-                                            size="sm"
-                                            onClick={() => viewPatientDashboard(patient)}
-                                        >
-                                            <Eye className="mr-2 h-4 w-4" />
-                                            View Dashboard
-                                        </Button>
+                                         <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    aria-haspopup="true"
+                                                    size="icon"
+                                                    variant="ghost"
+                                                >
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                    <span className="sr-only">Toggle menu</span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuItem onSelect={() => viewPatientDashboard(patient)}>
+                                                    <Eye className="mr-2 h-4 w-4" />
+                                                    View
+                                                </DropdownMenuItem>
+                                                <PatientFormDialog patient={patient} onSave={handleSavePatient}>
+                                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                        <Pencil className="mr-2 h-4 w-4" />
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                </PatientFormDialog>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem 
+                                                    onSelect={() => setPatientToDelete(patient)} 
+                                                    className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -172,5 +243,27 @@ export default function DoctorDashboardPage() {
         </div>
       </main>
     </div>
+
+    <AlertDialog open={!!patientToDelete} onOpenChange={() => setPatientToDelete(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the patient record for <span className="font-semibold">{patientToDelete?.name}</span> and remove all associated data.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                    onClick={() => patientToDelete && removePatient(patientToDelete.id)}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                    Continue
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
+

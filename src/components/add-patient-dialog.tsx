@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UserPlus, Loader2 } from 'lucide-react';
+import { UserPlus, Loader2, Pencil } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -32,18 +33,30 @@ const FormSchema = z.object({
   phone: z.string().min(10, 'Please enter a valid phone number.'),
 });
 
-interface AddPatientDialogProps {
-    onAddPatient: (patient: Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions'>) => void;
+type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions'>
+
+interface PatientFormDialogProps {
+    patient?: Patient;
+    onSave: (patient: PatientFormData, patientId?: string) => void;
+    children: React.ReactNode;
 }
 
-export function AddPatientDialog({ onAddPatient }: AddPatientDialogProps) {
+export function PatientFormDialog({ patient, onSave, children }: PatientFormDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
 
+  const isEditMode = !!patient;
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: {
+    defaultValues: isEditMode ? {
+      name: patient.name,
+      gender: patient.gender,
+      dob: patient.dob,
+      email: patient.email,
+      phone: patient.phone
+    } : {
       name: '',
       dob: '',
       email: '',
@@ -51,38 +64,51 @@ export function AddPatientDialog({ onAddPatient }: AddPatientDialogProps) {
     },
   });
   
+  React.useEffect(() => {
+    if (open) {
+        form.reset(isEditMode ? {
+            name: patient.name,
+            gender: patient.gender,
+            dob: patient.dob,
+            email: patient.email,
+            phone: patient.phone
+        } : {
+            name: '',
+            dob: '',
+            email: '',
+            phone: '',
+        });
+    }
+  }, [open, form, isEditMode, patient]);
+  
   const dobValue = form.watch('dob');
   const calculatedAge = calculateAge(dobValue);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
     
-    // Simulate API call
     setTimeout(() => {
-        onAddPatient(data);
+        onSave(data, patient?.id);
         toast({
-            title: 'Patient Added',
-            description: `${data.name} has been added to the patient list.`,
+            title: isEditMode ? 'Patient Updated' : 'Patient Added',
+            description: `${data.name}'s details have been ${isEditMode ? 'updated' : 'added'}.`,
         });
         setIsSubmitting(false);
         setOpen(false);
-        form.reset();
     }, 1000);
   };
 
   return (
-    <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" className="h-8 gap-1">
-            <UserPlus className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Patient</span>
-          </Button>
+          {children}
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add New Patient</DialogTitle>
-            <DialogDescription>Enter the new patient's details to create their profile.</DialogDescription>
+            <DialogTitle>{isEditMode ? 'Edit Patient Details' : 'Add New Patient'}</DialogTitle>
+            <DialogDescription>
+              {isEditMode ? "Update the patient's profile information." : "Enter the new patient's details to create their profile."}
+            </DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -168,10 +194,10 @@ export function AddPatientDialog({ onAddPatient }: AddPatientDialogProps) {
                     {isSubmitting ? (
                         <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Adding...
+                        Saving...
                         </>
                     ) : (
-                        'Add Patient'
+                        isEditMode ? 'Save Changes' : 'Add Patient'
                     )}
                 </Button>
               </DialogFooter>
@@ -179,6 +205,5 @@ export function AddPatientDialog({ onAddPatient }: AddPatientDialogProps) {
           </Form>
         </DialogContent>
       </Dialog>
-    </>
   );
 }
