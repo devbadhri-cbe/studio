@@ -5,7 +5,7 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { useParams, useRouter } from 'next/navigation';
 import type { Patient } from '@/lib/types';
-import Home from '@/app/page';
+import PatientDashboard from '@/app/patient/dashboard/page';
 
 export default function PatientDashboardPage() {
     const { setPatientData } = useApp();
@@ -69,5 +69,5 @@ export default function PatientDashboardPage() {
     }
     
     // Once data is loaded and there's no error, render the main Home/Dashboard component
-    return <Home />;
+    return <PatientDashboard />;
 }
