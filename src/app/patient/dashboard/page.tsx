@@ -20,7 +20,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { PrintableReport } from '@/components/printable-report';
-import { ShareButton } from '@/components/share-button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { VitaminDCard } from '@/components/vitamin-d-card';
 
@@ -106,7 +105,9 @@ export default function Home() {
                       <SelectItem value="vitaminD">Vitamin D Dashboard</SelectItem>
                     </SelectContent>
                   </Select>
-                  <ShareButton />
+                  <Button onClick={() => window.print()} variant="outline">
+                    Print / Save PDF
+                  </Button>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
