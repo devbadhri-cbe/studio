@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -67,6 +68,11 @@ export function MedicalConditionsList() {
       setIsSubmitting(false);
     }
   };
+  
+  const sortedConditions = React.useMemo(() => {
+    return [...profile.presentMedicalConditions].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  }, [profile.presentMedicalConditions]);
+  const totalConditions = sortedConditions.length;
 
   return (
     <div className="space-y-4">
@@ -129,10 +135,11 @@ export function MedicalConditionsList() {
       )}
 
       <div className="space-y-2">
-        {profile.presentMedicalConditions.length > 0 ? (
-          profile.presentMedicalConditions.map((item) => (
-            <div key={item.id} className="flex items-center justify-between rounded-md border p-3">
-              <div>
+        {sortedConditions.length > 0 ? (
+          sortedConditions.map((item, index) => (
+            <div key={item.id} className="flex items-start gap-3 rounded-md border p-3">
+              <span className="font-medium text-muted-foreground">{totalConditions - index}.</span>
+              <div className='flex-1'>
                 <p className="font-medium">{item.condition}</p>
                 <p className="text-sm text-muted-foreground">
                   Diagnosed: {format(new Date(item.date), 'MMMM d, yyyy')}
