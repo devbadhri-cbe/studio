@@ -54,8 +54,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       name: patient.name,
       dob: patient.dob,
       gender: patient.gender,
-      medication: patient.medication || [],
-      presentMedicalConditions: patient.presentMedicalConditions || []
+      medication: Array.isArray(patient.medication) ? patient.medication : [],
+      presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : []
     };
     setProfileState(patientProfile);
     setRecordsState(patient.records || []);
@@ -89,7 +89,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       phone: '', // Not available in profile, needs to be handled
       records: currentRecords,
       lipidRecords: currentLipidRecords,
-      medication: currentProfile.medication,
+      medication: Array.isArray(currentProfile.medication) ? currentProfile.medication : [],
       presentMedicalConditions: currentProfile.presentMedicalConditions,
       lastHba1c: null, // these will be recalculated
       lastLipid: null,
@@ -159,9 +159,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   
   const getMedicationString = (medication: Medication[]): string => {
-    if (!medication || medication.length === 0) return 'N/A';
-    const firstMed = medication[0];
-    return `${firstMed.name} ${firstMed.dosage}, ${firstMed.frequency}`;
+    if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
+    const medStrings = medication.map(m => `${m.name} ${m.dosage} ${m.frequency}`);
+    return medStrings.join(', ');
   }
 
   const addRecord = React.useCallback((record: Omit<Hba1cRecord, 'id' | 'medication'>) => {

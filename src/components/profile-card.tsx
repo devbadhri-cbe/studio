@@ -40,7 +40,7 @@ export function ProfileCard() {
     values: {
       name: profile.name,
       dob: profile.dob,
-      medication: profile.medication.map(({id, ...rest}) => rest), // Omit id for form
+      medication: Array.isArray(profile.medication) ? profile.medication.map(({id, ...rest}) => rest) : [],
     },
   });
 
@@ -53,14 +53,14 @@ export function ProfileCard() {
     form.reset({
       name: profile.name,
       dob: profile.dob,
-      medication: profile.medication.map(({id, ...rest}) => rest),
+      medication: Array.isArray(profile.medication) ? profile.medication.map(({id, ...rest}) => rest) : [],
     });
   }, [profile, form]);
 
   const onSubmit = (data: z.infer<typeof profileSchema>) => {
     setIsSaving(true);
     const updatedMedication = data.medication.map((med, index) => ({
-        id: profile.medication[index]?.id || Date.now().toString() + index,
+        id: (profile.medication && profile.medication[index]?.id) || Date.now().toString() + index,
         ...med
     }));
     setProfile({
