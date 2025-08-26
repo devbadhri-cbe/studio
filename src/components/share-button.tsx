@@ -32,10 +32,17 @@ export function ShareButton() {
                 title: 'Report Shared',
                 description: 'Your health report has been shared successfully.',
             });
-        } catch (err) {
-            console.error('Share failed:', err);
-            // The user may have cancelled the share action, so we don't necessarily show an error.
-            // Or it could be an actual error. For now, we'll log it.
+        } catch (err: any) {
+            // Check if the error is an AbortError, which occurs when the user cancels the share dialog.
+            // In that case, we can safely ignore it.
+            if (err.name !== 'AbortError') {
+              console.error('Share failed:', err);
+              toast({
+                variant: 'destructive',
+                title: 'Sharing Failed',
+                description: 'Could not share the report at this time.',
+              });
+            }
         }
     } else {
         // Fallback for browsers that don't support the Web Share API
