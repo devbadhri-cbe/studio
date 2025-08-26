@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreHorizontal, Eye } from 'lucide-react';
 
 import { useApp } from '@/context/app-context';
 import { Button } from '@/components/ui/button';
@@ -15,13 +15,22 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from './ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import type { Hba1cRecord } from '@/lib/types';
 
 const RECORDS_PER_PAGE = 5;
 
 export function HistoryTable() {
   const { records, removeRecord } = useApp();
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [selectedRecord, setSelectedRecord] = React.useState<Hba1cRecord | null>(null);
 
   const sortedRecords = React.useMemo(() => {
     return [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -50,48 +59,41 @@ export function HistoryTable() {
               <TableHead className="px-2 md:px-4">Date</TableHead>
               <TableHead className="px-2 md:px-4">Result (%)</TableHead>
               <TableHead className="px-2 md:px-4">Status</TableHead>
-              <TableHead>
-                <span className="sr-only">Actions</span>
-              </TableHead>
+              <TableHead className="text-right px-2 md:px-4">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TooltipProvider>
             <TableBody>
               {paginatedRecords.length > 0 ? (
                 paginatedRecords.map((record) => {
                   const status = getStatus(record.value);
                   return (
-                    <Tooltip key={record.id} delayDuration={100}>
-                      <TooltipTrigger asChild>
-                        <TableRow>
-                          <TableCell className="font-medium px-2 md:px-4">
-                            {format(new Date(record.date), 'dd-MM-yyyy')}
-                          </TableCell>
-                          <TableCell className="px-2 md:px-4">{record.value.toFixed(1)}</TableCell>
-                          <TableCell className="px-2 md:px-4">
-                            <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>
-                          </TableCell>
-                          <TableCell className="px-2 md:px-4">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                  <span className="sr-only">Toggle menu</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem onSelect={() => removeRecord(record.id)}>Delete</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" align="center">
-                        <p className="text-xs text-muted-foreground">Medication when tested:</p>
-                        <p className="font-semibold">{record.medication || 'N/A'}</p>
-                      </TooltipContent>
-                    </Tooltip>
+                    <TableRow key={record.id}>
+                      <TableCell className="font-medium px-2 md:px-4">
+                        {format(new Date(record.date), 'dd-MM-yyyy')}
+                      </TableCell>
+                      <TableCell className="px-2 md:px-4">{record.value.toFixed(1)}</TableCell>
+                      <TableCell className="px-2 md:px-4">
+                        <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right px-2 md:px-4">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Toggle menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                             <DropdownMenuItem onSelect={() => setSelectedRecord(record)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Medication
+                             </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => removeRecord(record.id)}>Delete</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
                   )
                 })
               ) : (
@@ -102,7 +104,6 @@ export function HistoryTable() {
                 </TableRow>
               )}
             </TableBody>
-          </TooltipProvider>
         </Table>
       </div>
       {totalPages > 1 && (
@@ -118,6 +119,22 @@ export function HistoryTable() {
           </Button>
         </div>
       )}
+
+      <Dialog open={!!selectedRecord} onOpenChange={(open) => !open && setSelectedRecord(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Medication Details</DialogTitle>
+            <DialogDescription>
+              Medication taken at the time of the test on {selectedRecord ? format(new Date(selectedRecord.date), 'MMMM d, yyyy') : ''}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="rounded-md border bg-muted p-4 text-sm font-medium">
+              {selectedRecord?.medication || 'No medication was recorded for this test.'}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
