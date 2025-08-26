@@ -54,6 +54,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       name: patient.name,
       dob: patient.dob,
       gender: patient.gender,
+      email: patient.email,
+      phone: patient.phone,
       medication: Array.isArray(patient.medication) ? patient.medication : [],
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : []
     };
@@ -85,8 +87,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       name: currentProfile.name,
       dob: currentProfile.dob,
       gender: currentProfile.gender,
-      email: '', // Not available in profile, needs to be handled
-      phone: '', // Not available in profile, needs to be handled
+      email: currentProfile.email || '',
+      phone: currentProfile.phone || '',
       records: currentRecords,
       lipidRecords: currentLipidRecords,
       medication: Array.isArray(currentProfile.medication) ? currentProfile.medication : [],

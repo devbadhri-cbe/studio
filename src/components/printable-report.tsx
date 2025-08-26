@@ -8,6 +8,8 @@ import { format } from 'date-fns';
 import { calculateAge } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { LdlChart } from './ldl-chart';
+import { Mail, Phone, User, Cake, VenetianMask } from 'lucide-react';
+
 
 export function PrintableReport() {
   const { profile, records, lipidRecords, isClient } = useApp();
@@ -49,51 +51,65 @@ export function PrintableReport() {
 
       <section className="my-8">
         <h2 className="mb-4 text-xl font-semibold">Patient Information</h2>
-        <div className="space-y-4 rounded-lg border p-4">
-            <div className="grid grid-cols-4 gap-x-8 gap-y-4">
-                 <div>
-                    <p className="text-sm text-muted-foreground">Name</p>
-                    <p className="font-medium">{profile.name || 'N/A'}</p>
+        <div className="space-y-4 rounded-lg border p-6 bg-card">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                 <div className="flex items-center gap-3">
+                    <User className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                        <p className="text-sm text-muted-foreground">Name</p>
+                        <p className="font-medium">{profile.name || 'N/A'}</p>
+                    </div>
                 </div>
-                <div>
-                    <p className="text-sm text-muted-foreground">Date of Birth</p>
-                    <p className="font-medium">{profile.dob ? format(new Date(profile.dob), 'dd-MM-yyyy') : 'N/A'}</p>
+                 <div className="flex items-center gap-3">
+                    <VenetianMask className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                        <p className="text-sm text-muted-foreground">Age & Gender</p>
+                        <p className="font-medium">
+                            {age !== null ? `${age} years` : 'N/A'}, <span className="capitalize">{profile.gender || 'N/A'}</span>
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <p className="text-sm text-muted-foreground">Age</p>
-                    <p className="font-medium">{age !== null ? `${age} years` : 'N/A'}</p>
+                <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                        <p className="text-sm text-muted-foreground">Email</p>
+                        <p className="font-medium">{profile.email || 'N/A'}</p>
+                    </div>
                 </div>
-                 <div>
-                    <p className="text-sm text-muted-foreground">Gender</p>
-                    <p className="font-medium capitalize">{profile.gender || 'N/A'}</p>
+                <div className="flex items-center gap-3">
+                    <Phone className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                        <p className="text-sm text-muted-foreground">Phone</p>
+                        <p className="font-medium">{profile.phone || 'N/A'}</p>
+                    </div>
                 </div>
             </div>
-            <div className='pt-2'>
-                <p className="text-sm text-muted-foreground">Present Medical Conditions</p>
+            <div className='pt-4 border-t'>
+                <p className="text-sm font-semibold text-muted-foreground mb-2">Present Medical Conditions</p>
                 {profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0 ? (
-                <ul className="list-disc pl-5">
+                <ul className="list-disc pl-5 space-y-1">
                 {profile.presentMedicalConditions.map(c => (
-                    <li key={c.id} className="font-medium">
+                    <li key={c.id} className="font-medium text-sm">
                     {c.condition} (Diagnosed: {format(new Date(c.date), 'dd-MM-yyyy')})
                     </li>
                 ))}
                 </ul>
                 ) : (
-                <p className="font-medium">N/A</p>
+                <p className="font-medium text-sm">N/A</p>
                 )}
             </div>
-            <div className='pt-2'>
-                <p className="text-sm text-muted-foreground">Current Medication</p>
+            <div className='pt-4 border-t'>
+                <p className="text-sm font-semibold text-muted-foreground mb-2">Current Medication</p>
                 {profile.medication && profile.medication.length > 0 ? (
-                <ul className="list-disc pl-5">
+                <ul className="list-disc pl-5 space-y-1">
                     {profile.medication.map(med => (
-                    <li key={med.id} className="font-medium">
+                    <li key={med.id} className="font-medium text-sm">
                         {med.name} {med.dosage} - {med.frequency}
                     </li>
                     ))}
                 </ul>
                 ) : (
-                <p className="font-medium">N/A</p>
+                <p className="font-medium text-sm">N/A</p>
                 )}
             </div>
         </div>

@@ -1,4 +1,5 @@
 
+
 export interface MedicalCondition {
   id: string;
   date: string; // Stored as 'YYYY-MM-DD' string
@@ -18,6 +19,8 @@ export interface UserProfile {
   name: string;
   dob: string; // Stored as 'YYYY-MM-DD' string
   gender: 'male' | 'female' | 'other';
+  email?: string;
+  phone?: string;
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
 }
