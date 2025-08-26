@@ -11,6 +11,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { calculateAge } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { countries } from '@/lib/countries';
+import * as React from 'react';
+
 
 interface PatientCardProps {
   patient: Patient;
@@ -70,9 +72,21 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const country = countries.find(c => c.code === patient.country);
   const countryName = country?.name || patient.country;
   const formattedPhone = formatPhoneNumber(patient.phone, patient.country);
+  
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Don't navigate if the user is clicking on a button or the dropdown menu
+    if ((e.target as HTMLElement).closest('button, [role="menu"]')) {
+      return;
+    }
+    onView(patient);
+  };
+  
+  const handleActionClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
 
   return (
-    <Card className="w-full flex flex-col">
+    <Card className="w-full flex flex-col cursor-pointer hover:border-primary/50 transition-colors" onClick={handleCardClick}>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -83,12 +97,12 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
           </div>
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0 ml-2">
+                <Button variant="ghost" className="h-8 w-8 p-0 ml-2" onClick={handleActionClick}>
                     <span className="sr-only">Open menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" onClick={handleActionClick}>
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuItem onSelect={() => onView(patient)}>
                     <Eye className="mr-2 h-4 w-4" />
@@ -155,7 +169,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         <Badge variant={statusVariant} className={statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}>
             {patient.status}
         </Badge>
-        <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => onView(patient)}>
+        <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={(e) => { e.stopPropagation(); onView(patient); }}>
             View Dashboard
         </Button>
       </CardFooter>
