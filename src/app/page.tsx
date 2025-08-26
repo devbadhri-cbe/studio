@@ -22,15 +22,8 @@ import { useRouter } from 'next/navigation';
 import { PrintableReport } from '@/components/printable-report';
 
 export default function Home() {
-  const { profile, isClient, dashboardView, setDashboardView } = useApp();
+  const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
   const router = useRouter();
-  const [isDoctorLoggedIn, setIsDoctorLoggedIn] = React.useState(false);
-
-  React.useEffect(() => {
-    // A simple check. In a real app, this would be based on auth roles.
-    setIsDoctorLoggedIn(!!localStorage.getItem('doctor_logged_in'));
-  }, []);
-
 
   if (!isClient) {
     return (
@@ -39,6 +32,10 @@ export default function Home() {
       </div>
     );
   }
+  
+  const pageTitle = isDoctorLoggedIn 
+    ? `${profile.name}'s Dashboard` 
+    : `Welcome, ${profile.name || 'User'}!`;
 
   return (
     <>
@@ -52,7 +49,7 @@ export default function Home() {
              <div className="flex items-center gap-4">
               {isDoctorLoggedIn ? (
                   <div className="text-right text-sm text-muted-foreground">
-                      <p className="font-semibold text-foreground">Dr. Badhrinathan N</p>
+                      <p className="font-semibold text-foreground">{doctorName}</p>
                       <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-end gap-1.5 hover:text-primary">
                           <Mail className="h-3 w-3" />
                           drbadhri@gmail.com
@@ -71,7 +68,7 @@ export default function Home() {
             <div className="flex items-center justify-between border-b pb-2">
               <div>
                 <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                  {isDoctorLoggedIn ? `${profile.name}'s Dashboard` : `Welcome, ${profile.name || 'User'}!`}
+                  {pageTitle}
                 </h1>
                 <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
               </div>

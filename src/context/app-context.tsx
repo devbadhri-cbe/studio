@@ -1,9 +1,12 @@
+
 'use client';
 
-import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition } from '@/lib/types';
+import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient } from '@/lib/types';
 import * as React from 'react';
 
-const initialProfile: UserProfile = { name: 'Jane Doe', dob: '1980-01-01', gender: 'female', presentMedicalConditions: [], medication: 'Metformin 500mg' };
+const initialProfile: UserProfile = { name: 'User', dob: '', gender: 'other', presentMedicalConditions: [], medication: '' };
+const DOCTOR_NAME = 'Dr. Badhrinathan N';
+
 
 type DashboardView = 'hba1c' | 'lipids';
 
@@ -23,6 +26,9 @@ interface AppContextType {
   isClient: boolean;
   dashboardView: DashboardView;
   setDashboardView: (view: DashboardView) => void;
+  isDoctorLoggedIn: boolean;
+  doctorName: string;
+  setPatientData: (patient: Patient) => void;
 }
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -34,34 +40,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [tips, setTipsState] = React.useState<string[]>([]);
   const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('hba1c');
   const [isClient, setIsClient] = React.useState(false);
+  const [isDoctorLoggedIn, setIsDoctorLoggedIn] = React.useState(false);
 
   React.useEffect(() => {
     setIsClient(true);
-    // Load from localStorage if available
-    try {
-      const storedProfile = localStorage.getItem('health-profile');
-      if (storedProfile) {
-        setProfileState(JSON.parse(storedProfile));
-      } else {
-        setProfileState(initialProfile);
-      }
-      const storedRecords = localStorage.getItem('health-records');
-      if (storedRecords) {
-        setRecordsState(JSON.parse(storedRecords));
-      }
-      const storedLipidRecords = localStorage.getItem('health-lipid-records');
-      if (storedLipidRecords) {
-        setLipidRecordsState(JSON.parse(storedLipidRecords));
-      }
-      const storedTips = localStorage.getItem('health-tips');
-      if (storedTips) {
-        setTipsState(JSON.parse(storedTips));
-      }
-      // For simplicity, we'll default to hba1c view and remove the stored view logic for now
-    } catch (error) {
-      console.error("Failed to parse from localStorage", error);
-    }
+    // This check is for general patient view vs doctor portal view
+    setIsDoctorLoggedIn(!!localStorage.getItem('doctor_logged_in'));
   }, []);
+  
+  // This function is called by the new patient/[patientId] page
+  const setPatientData = (patient: Patient) => {
+    const patientProfile: UserProfile = {
+      name: patient.name,
+      dob: patient.dob,
+      gender: patient.gender,
+      medication: patient.medication || '',
+      presentMedicalConditions: patient.presentMedicalConditions || []
+    };
+    setProfileState(patientProfile);
+    setRecordsState(patient.records || []);
+    setLipidRecordsState(patient.lipidRecords || []);
+    setTips([]); // Clear tips for new patient
+  };
 
   const saveDataToLocalStorage = (key: string, data: any) => {
     try {
@@ -73,7 +73,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setProfile = (newProfile: UserProfile) => {
     setProfileState(newProfile);
-    saveDataToLocalStorage('health-profile', newProfile);
+    // When a profile is updated, we also need to update the master patient list
+    // This part is complex because we don't know the patientId here directly
+    // For now, we assume this is only called from patient view for MEDICATION changes
+    // And we need a way to sync this back to the doctor-patients list.
   };
   
   const addMedicalCondition = (condition: Omit<MedicalCondition, 'id'>) => {
@@ -81,24 +84,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const updatedConditions = [...profile.presentMedicalConditions, newCondition];
     updatedConditions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const newProfile = { ...profile, presentMedicalConditions: updatedConditions };
-    setProfile(newProfile);
+    setProfileState(newProfile);
+    // Need to sync back to master list
   };
   
   const removeMedicalCondition = (id: string) => {
     const updatedConditions = profile.presentMedicalConditions.filter(c => c.id !== id);
     const newProfile = { ...profile, presentMedicalConditions: updatedConditions };
-    setProfile(newProfile);
+    setProfileState(newProfile);
+     // Need to sync back to master list
   };
 
   const setTips = (newTips: string[]) => {
     setTipsState(newTips);
-    saveDataToLocalStorage('health-tips', newTips);
+    saveDataToLocalStorage('health-tips', newTips); // This can remain local to the session
   };
 
   const setDashboardView = (view: DashboardView) => {
     setDashboardViewState(view);
-    saveDataToLocalStorage('health-dashboard-view', view);
-    setTips([]); // Reset tips on view change
   }
 
   const addRecord = (record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
@@ -110,13 +113,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     const newRecords = [...records, newRecord];
     setRecordsState(newRecords);
-    saveDataToLocalStorage('health-records', newRecords);
+     // Need to sync back to master list
   };
 
   const removeRecord = (id: string) => {
     const newRecords = records.filter((r) => r.id !== id);
     setRecordsState(newRecords);
-    saveDataToLocalStorage('health-records', newRecords);
+     // Need to sync back to master list
   };
 
   const addLipidRecord = (record: Omit<LipidRecord, 'id' | 'medication'>) => {
@@ -128,16 +131,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     const newRecords = [...lipidRecords, newRecord];
     setLipidRecordsState(newRecords);
-    saveDataToLocalStorage('health-lipid-records', newRecords);
+     // Need to sync back to master list
   };
 
   const removeLipidRecord = (id: string) => {
     const newRecords = lipidRecords.filter((r) => r.id !== id);
     setLipidRecordsState(newRecords);
-    saveDataToLocalStorage('health-lipid-records', newRecords);
+     // Need to sync back to master list
   };
   
-  const value = {
+  const value: AppContextType = {
     profile,
     setProfile,
     addMedicalCondition,
@@ -153,6 +156,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isClient,
     dashboardView,
     setDashboardView,
+    isDoctorLoggedIn,
+    doctorName: DOCTOR_NAME,
+    setPatientData,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -42,35 +42,7 @@ export default function DoctorDashboardPage() {
     }
 
     const viewPatientDashboard = (patient: Patient) => {
-        // Find existing full patient data from localStorage to get all details
-        const allPatients: Patient[] = JSON.parse(localStorage.getItem('doctor-patients') || '[]');
-        const fullPatient = allPatients.find(p => p.id === patient.id);
-
-        if (!fullPatient) {
-            // This should not happen if the patient is in the list
-            console.error('Could not find full patient data for ID:', patient.id);
-            return;
-        }
-
-        const patientProfile = {
-            name: fullPatient.name,
-            dob: fullPatient.dob,
-            gender: fullPatient.gender,
-            // Use existing medication and conditions, don't clear them
-            medication: fullPatient.medication || '', 
-            presentMedicalConditions: fullPatient.presentMedicalConditions || [],
-        };
-        
-        // Use existing records, don't create new ones from last values
-        const patientRecords = fullPatient.records || (fullPatient.lastHba1c ? [{...fullPatient.lastHba1c, id: '1', date: new Date(fullPatient.lastHba1c.date).toISOString()}] : []);
-        const patientLipidRecords = fullPatient.lipidRecords || (fullPatient.lastLipid ? [{...fullPatient.lastLipid, id: '1', hdl: 0, ldl: fullPatient.lastLipid.ldl, triglycerides: 0, total: 0, date: new Date(fullPatient.lastLipid.date).toISOString()}] : []);
-
-        localStorage.setItem('health-profile', JSON.stringify(patientProfile));
-        localStorage.setItem('health-records', JSON.stringify(patientRecords));
-        localStorage.setItem('health-lipid-records', JSON.stringify(patientLipidRecords));
-        localStorage.removeItem('health-tips'); // Clear tips for new patient view
-        
-        router.push('/');
+        router.push(`/patient/${patient.id}`);
     }
 
     const addPatient = (patient: Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions'>) => {
@@ -87,7 +59,6 @@ export default function DoctorDashboardPage() {
         };
         const updatedPatients = [newPatient, ...patients];
         savePatients(updatedPatients);
-        // Directly view the new patient's dashboard to set the context correctly
         viewPatientDashboard(newPatient);
     }
 
