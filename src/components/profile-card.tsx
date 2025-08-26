@@ -2,7 +2,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, UserCircle, PlusCircle, Trash2 } from 'lucide-react';
+import { Loader2, UserCircle, PlusCircle, Trash2, FlaskConical } from 'lucide-react';
 import * as React from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import * as z from 'zod';
@@ -17,6 +17,9 @@ import { calculateAge } from '@/lib/utils';
 import { FormDescription } from './ui/form';
 import { MedicalConditionsList } from './medical-conditions-list';
 import { Separator } from './ui/separator';
+import { checkDrugInteractions } from '@/ai/flows/drug-interaction-check';
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
+
 
 const profileSchema = z.object({
   name: z.string(),
@@ -33,6 +36,9 @@ const profileSchema = z.object({
 export function ProfileCard() {
   const { profile, setProfile } = useApp();
   const [isSaving, setIsSaving] = React.useState(false);
+  const [isCheckingInteractions, setIsCheckingInteractions] = React.useState(false);
+  const [interactionResult, setInteractionResult] = React.useState<string | null>(null);
+
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof profileSchema>>({
@@ -77,10 +83,39 @@ export function ProfileCard() {
     }, 500);
   };
   
+  const handleCheckInteractions = async () => {
+    const currentMedications = form.getValues('medication');
+    if (currentMedications.length < 2) {
+      toast({
+        variant: 'destructive',
+        title: 'Not enough medications',
+        description: 'You need at least two medications to check for interactions.',
+      });
+      return;
+    }
+
+    setIsCheckingInteractions(true);
+    try {
+      const medicationNames = currentMedications.map(m => `${m.name} ${m.dosage}`);
+      const result = await checkDrugInteractions({ medications: medicationNames });
+      setInteractionResult(result.interactionSummary);
+    } catch (error) {
+      console.error('Error checking drug interactions:', error);
+      toast({
+        variant: 'destructive',
+        title: 'An error occurred',
+        description: 'Could not check for drug interactions at this time.',
+      });
+    } finally {
+      setIsCheckingInteractions(false);
+    }
+  };
+
   const dobValue = form.watch('dob');
   const calculatedAge = calculateAge(dobValue);
 
   return (
+    <>
     <Card className="h-full">
       <CardHeader>
         <div className="flex items-center gap-3">
@@ -199,21 +234,54 @@ export function ProfileCard() {
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Medication
             </Button>
-
-
-            <Button type="submit" disabled={isSaving} className="w-full">
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving Medication...
-                </>
-              ) : (
-                'Save Medication'
-              )}
-            </Button>
+            
+            <div className="flex gap-2">
+                <Button type="submit" disabled={isSaving} className="flex-1">
+                {isSaving ? (
+                    <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                    </>
+                ) : (
+                    'Save Medication'
+                )}
+                </Button>
+                <Button 
+                    type="button" 
+                    variant="secondary"
+                    onClick={handleCheckInteractions} 
+                    disabled={isCheckingInteractions || fields.length < 2}
+                    className="flex-1"
+                >
+                {isCheckingInteractions ? (
+                    <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Checking...
+                    </>
+                ) : (
+                    <>
+                    <FlaskConical className="mr-2 h-4 w-4" />
+                    Check Interactions
+                    </>
+                )}
+                </Button>
+            </div>
           </form>
         </Form>
         <MedicalConditionsList />
       </CardContent>
     </Card>
+    <AlertDialog open={!!interactionResult} onOpenChange={(open) => !open && setInteractionResult(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Potential Drug Interaction Analysis</AlertDialogTitle>
+            <AlertDialogDescription className="whitespace-pre-wrap text-foreground">
+              {interactionResult}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setInteractionResult(null)}>Close</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
