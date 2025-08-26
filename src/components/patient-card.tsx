@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, User, VenetianMask, Mail, Phone, Droplet, Activity } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, User, VenetianMask, Mail, Phone, Droplet, Activity, Globe } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge } from '@/lib/utils';
@@ -53,6 +53,10 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
              <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0" />
                 <span>{patient.phone || 'N/A'}</span>
+            </div>
+             <div className="flex items-center gap-2">
+                <Globe className="h-4 w-4 shrink-0" />
+                <span>{patient.country || 'N/A'}</span>
             </div>
         </div>
 

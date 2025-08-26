@@ -4,7 +4,7 @@
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication } from '@/lib/types';
 import * as React from 'react';
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', presentMedicalConditions: [], medication: [] };
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', presentMedicalConditions: [], medication: [] };
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
 
@@ -55,6 +55,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dob: patient.dob,
       gender: patient.gender,
       email: patient.email,
+      country: patient.country,
       phone: patient.phone,
       medication: Array.isArray(patient.medication) ? patient.medication : [],
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : []
@@ -88,6 +89,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dob: currentProfile.dob,
       gender: currentProfile.gender,
       email: currentProfile.email || '',
+      country: currentProfile.country,
       phone: currentProfile.phone || '',
       records: currentRecords,
       lipidRecords: currentLipidRecords,

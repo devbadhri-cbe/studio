@@ -23,16 +23,18 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { calculateAge } from '@/lib/utils';
 import type { Patient } from '@/lib/types';
+import { countries } from '@/lib/countries';
 
 const FormSchema = z.object({
   name: z.string().min(2, 'Patient name is required.'),
   gender: z.enum(['male', 'female', 'other'], { required_error: 'Gender is required.' }),
   dob: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
   email: z.string().email('Please enter a valid email address.').optional().or(z.literal('')),
-  phone: z.string().min(1, 'Phone number is required.').refine(val => /^\+\d{1,15}$/.test(val), 'Please enter a valid international phone number (e.g., +14155552671).'),
+  country: z.string().min(1, 'Country is required.'),
+  phone: z.string().min(5, 'A valid phone number is required.'),
 }).refine((data) => data.email || data.phone, {
     message: "Either email or phone number is required.",
-    path: ["email"], // you can use any path here, as the message is general
+    path: ["email"],
 });
 
 
@@ -58,33 +60,38 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
       gender: patient.gender,
       dob: patient.dob,
       email: patient.email,
-      phone: patient.phone || '+'
+      country: patient.country,
+      phone: patient.phone
     } : {
       name: '',
       dob: '',
       email: '',
-      phone: '+',
+      country: '',
+      phone: '',
     },
   });
   
   React.useEffect(() => {
-    if (open && isEditMode) {
-        form.reset({
-            name: patient.name,
-            gender: patient.gender,
-            dob: patient.dob,
-            email: patient.email,
-            phone: patient.phone || '+'
-        });
-    }
-     if (open && !isEditMode) {
-        form.reset({
-            name: '',
-            gender: undefined,
-            dob: '',
-            email: '',
-            phone: '+',
-        });
+    if (open) {
+        if (isEditMode) {
+             form.reset({
+                name: patient.name,
+                gender: patient.gender,
+                dob: patient.dob,
+                email: patient.email,
+                country: patient.country,
+                phone: patient.phone
+            });
+        } else {
+            form.reset({
+                name: '',
+                gender: undefined,
+                dob: '',
+                email: '',
+                country: '',
+                phone: '',
+            });
+        }
     }
   }, [open, form, isEditMode, patient]);
   
@@ -195,19 +202,43 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input type="tel" placeholder="e.g., +14155552671" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+               <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Country</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select country" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {countries.map(c => (
+                            <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                        <Input type="tel" placeholder="e.g., +14155552671" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+              </div>
               <DialogFooter>
                  <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? (

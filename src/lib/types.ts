@@ -20,6 +20,7 @@ export interface UserProfile {
   dob: string; // Stored as 'YYYY-MM-DD' string
   gender: 'male' | 'female' | 'other';
   email?: string;
+  country: string;
   phone?: string;
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
@@ -48,6 +49,7 @@ export interface Patient {
   dob: string;
   gender: 'male' | 'female' | 'other';
   email: string;
+  country: string;
   phone: string;
   lastHba1c: {
     value: number;
