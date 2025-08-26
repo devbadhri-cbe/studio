@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation';
 import { PrintableReport } from '@/components/printable-report';
 import { ShareButton } from '@/components/share-button';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { VitaminDCard } from '@/components/vitamin-d-card';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
@@ -38,6 +39,19 @@ export default function Home() {
   const pageTitle = isDoctorLoggedIn 
     ? `${profile.name}'s Dashboard` 
     : `Welcome, ${profile.name || 'User'}!`;
+
+  const renderDashboard = () => {
+    switch (dashboardView) {
+      case 'hba1c':
+        return <Hba1cCard />;
+      case 'lipids':
+        return <LipidCard />;
+      case 'vitaminD':
+        return <VitaminDCard />;
+      default:
+        return <Hba1cCard />;
+    }
+  }
 
   return (
     <>
@@ -82,13 +96,14 @@ export default function Home() {
                 </div>
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2">
                   {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')} className="flex-1 sm:flex-initial">Patient List</Button>}
-                  <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids')}>
+                  <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD')}>
                     <SelectTrigger className="w-auto flex-1 sm:flex-initial">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
                       <SelectItem value="lipids">Lipid Dashboard</SelectItem>
+                      <SelectItem value="vitaminD">Vitamin D Dashboard</SelectItem>
                     </SelectContent>
                   </Select>
                   <ShareButton />
@@ -104,7 +119,7 @@ export default function Home() {
               </div>
               <div className="grid auto-rows-fr grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                  {dashboardView === 'hba1c' ? <Hba1cCard /> : <LipidCard />}
+                  {renderDashboard()}
                 </div>
                 <div className="lg:col-span-1">
                   <ProfileCard />

@@ -1,14 +1,15 @@
+
 'use client';
 
 import { useApp } from '@/context/app-context';
 import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears } from 'date-fns';
-import { Bell, CheckCircle2, Heart, Droplet } from 'lucide-react';
+import { Bell, CheckCircle2, Heart, Droplet, Sun } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { calculateAge } from '@/lib/utils';
 import { Separator } from './ui/separator';
 
 export function ReminderCard() {
-  const { records, lipidRecords, profile } = useApp();
+  const { records, lipidRecords, vitaminDRecords, profile } = useApp();
 
   const hasMedicalConditions = profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0;
   const age = calculateAge(profile.dob);
@@ -100,6 +101,42 @@ export function ReminderCard() {
     }
   }
 
+  // Vitamin D Logic
+  const sortedVitaminDRecords = [...(vitaminDRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const lastVitaminDRecord = sortedVitaminDRecords[0];
+  let vitaminDContent;
+
+  if (!lastVitaminDRecord) {
+    vitaminDContent = {
+        icon: <Sun className="h-5 w-5 text-yellow-500" />,
+        title: 'Time for your first Vitamin D test!',
+        description: 'Add a record to start tracking.',
+        color: 'bg-yellow-500/10',
+    };
+  } else {
+      const lastTestDate = new Date(lastVitaminDRecord.date);
+      const retestYears = 1; // General recommendation is yearly, can be more frequent if deficient
+      const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
+      const nextTestDate = addYears(lastTestDate, retestYears);
+
+      if (yearsSinceLastTest >= retestYears) {
+          vitaminDContent = {
+              icon: <Sun className="h-5 w-5 text-destructive" />,
+              title: 'Vitamin D Test Due',
+              description: `Last test was ${formatDistanceToNow(lastTestDate)} ago. Retesting is recommended.`,
+              color: 'bg-destructive/10',
+          };
+      } else {
+          vitaminDContent = {
+              icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+              title: 'Vitamin D On Track',
+              description: `Next test is around ${format(nextTestDate, 'MMM yyyy')}.`,
+              color: 'bg-green-500/10',
+          };
+      }
+  }
+
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -131,6 +168,16 @@ export function ReminderCard() {
           <div>
             <p className="font-semibold">{lipidContent.title}</p>
             <p className="text-sm text-muted-foreground">{lipidContent.description}</p>
+          </div>
+        </div>
+        <Separator />
+        <div className="flex items-center gap-4">
+          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${vitaminDContent.color}`}>
+            {vitaminDContent.icon}
+          </div>
+          <div>
+            <p className="font-semibold">{vitaminDContent.title}</p>
+            <p className="text-sm text-muted-foreground">{vitaminDContent.description}</p>
           </div>
         </div>
       </CardContent>

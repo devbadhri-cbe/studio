@@ -26,6 +26,7 @@ export interface UserProfile {
   phone?: string;
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
+  vitaminDRecords?: VitaminDRecord[];
 }
 
 export interface Hba1cRecord {
@@ -45,6 +46,13 @@ export interface LipidRecord {
   medication?: string;
 }
 
+export interface VitaminDRecord {
+  id: string;
+  date: Date | string;
+  value: number; // in ng/mL
+  medication?: string;
+}
+
 export interface Patient {
   id: string;
   name: string;
@@ -61,10 +69,15 @@ export interface Patient {
     ldl: number;
     date: string;
   } | null;
+  lastVitaminD?: {
+    value: number;
+    date: string;
+  } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
   // Add full record history to the patient object
   records?: Hba1cRecord[];
   lipidRecords?: LipidRecord[];
+  vitaminDRecords?: VitaminDRecord[];
   medication?: Medication[];
   presentMedicalConditions?: MedicalCondition[];
 }
