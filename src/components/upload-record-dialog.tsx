@@ -97,7 +97,7 @@ export function UploadRecordDialog() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Upload Lab Result</DialogTitle>
-          <DialogDescription>Let AI read your lab result screenshot. We'll extract the HbA1c value, date, and verify your name.</DialogDescription>
+          <DialogDescription>Let AI read your lab result document. We'll extract the HbA1c value, date, and verify your name from an image or PDF.</DialogDescription>
         </DialogHeader>
         <div className="py-4">
           {isUploading ? (
@@ -111,7 +111,7 @@ export function UploadRecordDialog() {
               <Alert>
                 <AlertTitle>Important!</AlertTitle>
                 <AlertDescription>
-                  For best results, use a clear, uncropped screenshot or photo of your lab report. Ensure your name, the test date, and HbA1c value are visible.
+                  For best results, use a clear, uncropped image or a text-based PDF of your lab report. Ensure your name, the test date, and HbA1c value are visible.
                 </AlertDescription>
               </Alert>
               <div className="mt-4 flex items-center justify-center">
@@ -119,7 +119,7 @@ export function UploadRecordDialog() {
                   <label htmlFor="file-upload">
                     <UploadCloud className="mr-2 h-4 w-4" />
                     Choose File
-                    <input id="file-upload" type="file" className="sr-only" accept="image/*" onChange={handleFileChange} />
+                    <input id="file-upload" type="file" className="sr-only" accept="image/*,application/pdf" onChange={handleFileChange} />
                   </label>
                 </Button>
               </div>
