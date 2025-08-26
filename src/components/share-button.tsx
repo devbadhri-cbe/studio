@@ -30,7 +30,7 @@ export function ShareButton() {
             await navigator.share(shareData);
         } catch (err: any) {
             // If the user cancels the share dialog, the browser throws an AbortError.
-            // We can safely ignore this error.
+            // We can safely ignore this error, as it's expected user behavior.
             if (err.name !== 'AbortError') {
               console.error('Share failed:', err);
               toast({
