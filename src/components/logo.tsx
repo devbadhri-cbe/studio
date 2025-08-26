@@ -21,14 +21,7 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
             fillOpacity="0.1" 
         />
         <path 
-            d="M16 10V22" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-        />
-        <path 
-            d="M10 16H22" 
+            d="M8 16H12L14 10L18 22L20 16H24"
             stroke="currentColor" 
             strokeWidth="2" 
             strokeLinecap="round" 
