@@ -49,47 +49,53 @@ export function PrintableReport() {
 
       <section className="my-8">
         <h2 className="mb-4 text-xl font-semibold">Patient Information</h2>
-        <div className="grid grid-cols-2 gap-4 rounded-lg border p-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Name</p>
-            <p className="font-medium">{profile.name || 'N/A'}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Date of Birth</p>
-            <p className="font-medium">{profile.dob ? format(new Date(profile.dob), 'dd-MM-yyyy') : 'N/A'}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Age</p>
-            <p className="font-medium">{age !== null ? `${age} years` : 'N/A'}</p>
-          </div>
-          <div className="col-span-2">
-            <p className="text-sm text-muted-foreground">Present Medical Conditions</p>
-            {profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0 ? (
-              <ul className="list-disc pl-5">
-              {profile.presentMedicalConditions.map(c => (
-                <li key={c.id} className="font-medium">
-                  {c.condition} (Diagnosed: {format(new Date(c.date), 'dd-MM-yyyy')})
-                </li>
-              ))}
-            </ul>
-            ) : (
-              <p className="font-medium">N/A</p>
-            )}
-          </div>
-          <div className="col-span-2">
-            <p className="text-sm text-muted-foreground">Current Medication</p>
-              {profile.medication && profile.medication.length > 0 ? (
-              <ul className="list-disc pl-5">
-                {profile.medication.map(med => (
-                  <li key={med.id} className="font-medium">
-                    {med.name} {med.dosage} - {med.frequency}
-                  </li>
+        <div className="space-y-4 rounded-lg border p-4">
+            <div className="grid grid-cols-4 gap-x-8 gap-y-4">
+                 <div>
+                    <p className="text-sm text-muted-foreground">Name</p>
+                    <p className="font-medium">{profile.name || 'N/A'}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-muted-foreground">Date of Birth</p>
+                    <p className="font-medium">{profile.dob ? format(new Date(profile.dob), 'dd-MM-yyyy') : 'N/A'}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-muted-foreground">Age</p>
+                    <p className="font-medium">{age !== null ? `${age} years` : 'N/A'}</p>
+                </div>
+                 <div>
+                    <p className="text-sm text-muted-foreground">Gender</p>
+                    <p className="font-medium capitalize">{profile.gender || 'N/A'}</p>
+                </div>
+            </div>
+            <div className='pt-2'>
+                <p className="text-sm text-muted-foreground">Present Medical Conditions</p>
+                {profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0 ? (
+                <ul className="list-disc pl-5">
+                {profile.presentMedicalConditions.map(c => (
+                    <li key={c.id} className="font-medium">
+                    {c.condition} (Diagnosed: {format(new Date(c.date), 'dd-MM-yyyy')})
+                    </li>
                 ))}
-              </ul>
-            ) : (
-              <p className="font-medium">N/A</p>
-            )}
-          </div>
+                </ul>
+                ) : (
+                <p className="font-medium">N/A</p>
+                )}
+            </div>
+            <div className='pt-2'>
+                <p className="text-sm text-muted-foreground">Current Medication</p>
+                {profile.medication && profile.medication.length > 0 ? (
+                <ul className="list-disc pl-5">
+                    {profile.medication.map(med => (
+                    <li key={med.id} className="font-medium">
+                        {med.name} {med.dosage} - {med.frequency}
+                    </li>
+                    ))}
+                </ul>
+                ) : (
+                <p className="font-medium">N/A</p>
+                )}
+            </div>
         </div>
       </section>
 
