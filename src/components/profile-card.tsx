@@ -30,42 +30,27 @@ export function ProfileCard() {
       </CardHeader>
       <CardContent className="space-y-6 text-sm">
         <div className="space-y-4 rounded-lg border bg-card p-4">
-            <div className="flex items-start gap-3">
-                <UserCircle className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
-                <div>
-                    <p className="text-xs text-muted-foreground">Name</p>
-                    <p className="font-medium">{profile.name || 'N/A'}</p>
-                </div>
+            <div className="flex items-center gap-3">
+                <UserCircle className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <p className="font-medium">{profile.name || 'N/A'}</p>
             </div>
-             <div className="flex items-start gap-3">
-                <VenetianMask className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
-                <div>
-                    <p className="text-xs text-muted-foreground">Age & Gender</p>
-                    <p className="font-medium">
-                        {calculatedAge !== null ? `${calculatedAge} years` : 'N/A'}, <span className="capitalize">{profile.gender || 'N/A'}</span>
-                    </p>
-                </div>
+             <div className="flex items-center gap-3">
+                <VenetianMask className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <p className="font-medium">
+                    {calculatedAge !== null ? `${calculatedAge} years` : 'N/A'}, <span className="capitalize">{profile.gender || 'N/A'}</span>
+                </p>
             </div>
-             <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
-                <div>
-                    <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="font-medium">{profile.email || 'N/A'}</p>
-                </div>
+             <div className="flex items-center gap-3">
+                <Mail className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <p className="font-medium">{profile.email || 'N/A'}</p>
             </div>
-            <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
-                <div>
-                    <p className="text-xs text-muted-foreground">Phone</p>
-                    <p className="font-medium">{profile.phone || 'N/A'}</p>
-                </div>
+            <div className="flex items-center gap-3">
+                <Phone className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <p className="font-medium">{profile.phone || 'N/A'}</p>
             </div>
-             <div className="flex items-start gap-3">
-                <Globe className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
-                <div>
-                    <p className="text-xs text-muted-foreground">Country</p>
-                    <p className="font-medium">{countryName}</p>
-                </div>
+             <div className="flex items-center gap-3">
+                <Globe className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <p className="font-medium">{countryName}</p>
             </div>
         </div>
         
