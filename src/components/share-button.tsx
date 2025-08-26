@@ -26,23 +26,28 @@ export function ShareButton() {
     };
 
     if (isShareSupported) {
-        try {
-            await navigator.share(shareData);
-        } catch (err: any) {
-            // If the user cancels the share dialog, the browser throws an AbortError.
-            // We can safely ignore this error, as it's expected user behavior.
-            if (err.name !== 'AbortError') {
-              console.error('Share failed:', err);
-              toast({
-                variant: 'destructive',
-                title: 'Sharing Failed',
-                description: 'Could not share the report at this time.',
-              });
-            }
+      try {
+        await navigator.share(shareData);
+        // Success toast is optional, can be distracting if the user shares often.
+        // toast({
+        //     title: 'Report Shared',
+        //     description: 'Your health report has been shared successfully.',
+        // });
+      } catch (err: any) {
+        // This error is thrown when the user cancels the share dialog.
+        // We can safely ignore it, as it's expected user behavior.
+        if (err.name !== 'AbortError') {
+          console.error('Share failed:', err);
+          toast({
+            variant: 'destructive',
+            title: 'Sharing Failed',
+            description: 'Could not share the report at this time.',
+          });
         }
+      }
     } else {
-        // Fallback for browsers that don't support the Web Share API
-        window.print();
+      // Fallback for browsers that don't support the Web Share API
+      window.print();
     }
   };
 
