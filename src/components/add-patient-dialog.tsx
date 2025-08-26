@@ -29,7 +29,7 @@ const FormSchema = z.object({
   gender: z.enum(['male', 'female', 'other'], { required_error: 'Gender is required.' }),
   dob: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
   email: z.string().email('Please enter a valid email address.').optional().or(z.literal('')),
-  phone: z.string().min(10, 'Please enter a valid phone number.').optional().or(z.literal('')),
+  phone: z.string().min(1, 'Phone number is required.').refine(val => /^\+[1-9]\d{1,14}$/.test(val), 'Please enter a valid international phone number (e.g., +14155552671).'),
 }).refine((data) => data.email || data.phone, {
     message: "Either email or phone number is required.",
     path: ["email"], // you can use any path here, as the message is general
@@ -58,12 +58,12 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
       gender: patient.gender,
       dob: patient.dob,
       email: patient.email,
-      phone: patient.phone
+      phone: patient.phone || '+'
     } : {
       name: '',
       dob: '',
       email: '',
-      phone: '',
+      phone: '+',
     },
   });
   
@@ -74,7 +74,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
             gender: patient.gender,
             dob: patient.dob,
             email: patient.email,
-            phone: patient.phone
+            phone: patient.phone || '+'
         });
     }
      if (open && !isEditMode) {
@@ -83,7 +83,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
             gender: undefined,
             dob: '',
             email: '',
-            phone: '',
+            phone: '+',
         });
     }
   }, [open, form, isEditMode, patient]);
@@ -202,7 +202,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
-                      <Input type="tel" placeholder="e.g., +1234567890" {...field} />
+                      <Input type="tel" placeholder="e.g., +14155552671" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
