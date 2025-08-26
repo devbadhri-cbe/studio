@@ -29,28 +29,28 @@ export function ProfileCard() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
-        <div className="space-y-3 rounded-lg border bg-card p-4">
+        <div className="space-y-2 rounded-lg border bg-card p-4">
             <div className="flex items-center gap-3">
                 <UserCircle className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <p className="font-semibold text-lg">{profile.name || 'N/A'}</p>
             </div>
              <div className="flex items-center gap-3">
                 <VenetianMask className="h-5 w-5 shrink-0 text-muted-foreground" />
-                <p className="font-medium">
+                <p>
                     {calculatedAge !== null ? `${calculatedAge} years` : 'N/A'}, <span className="capitalize">{profile.gender || 'N/A'}</span>
                 </p>
             </div>
              <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 shrink-0 text-muted-foreground" />
-                <p className="font-medium">{profile.email || 'N/A'}</p>
+                <p>{profile.email || 'N/A'}</p>
             </div>
             <div className="flex items-center gap-3">
                 <Phone className="h-5 w-5 shrink-0 text-muted-foreground" />
-                <p className="font-medium">{profile.phone || 'N/A'}</p>
+                <p>{profile.phone || 'N/A'}</p>
             </div>
              <div className="flex items-center gap-3">
                 <Globe className="h-5 w-5 shrink-0 text-muted-foreground" />
-                <p className="font-medium">{countryName}</p>
+                <p>{countryName}</p>
             </div>
         </div>
         
