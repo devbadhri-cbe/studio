@@ -169,7 +169,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         <Badge variant={statusVariant} className={statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}>
             {patient.status}
         </Badge>
-        <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={(e) => { e.stopPropagation(); onView(patient); }}>
+        <Button variant="link" size="sm" className="h-auto p-0 text-sm hover:no-underline" onClick={(e) => { e.stopPropagation(); onView(patient); }}>
             View Dashboard
         </Button>
       </CardFooter>
