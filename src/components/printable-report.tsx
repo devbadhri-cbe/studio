@@ -41,7 +41,7 @@ export function PrintableReport() {
           </div>
         </div>
         <div className="text-right text-sm">
-            <p className="hidden print:block">
+            <p>
               Report Generated: <strong>{format(new Date(), 'dd-MM-yyyy')}</strong>
             </p>
         </div>
