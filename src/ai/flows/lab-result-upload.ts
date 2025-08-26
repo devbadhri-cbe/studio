@@ -1,7 +1,8 @@
+
 'use server';
 
 /**
- * @fileOverview This flow extracts HbA1c data and date from a lab result screenshot, verifies the user's name,
+ * @fileOverview This flow extracts HbA1c, Lipid Panel, and Vitamin D data from a lab result screenshot, verifies the user's name,
  * and returns the extracted information.
  *
  * - labResultUpload - A function that handles the lab result upload process.
@@ -23,11 +24,19 @@ const LabResultUploadInputSchema = z.object({
 export type LabResultUploadInput = z.infer<typeof LabResultUploadInputSchema>;
 
 const LabResultUploadOutputSchema = z.object({
-  hba1cResult: z.string().describe('The HbA1c result extracted from the lab result.'),
-  date: z.string().describe('The date the lab result was taken.'),
+  date: z.string().describe('The date the lab result was taken (YYYY-MM-DD format).'),
   nameVerified: z.boolean().describe('Whether the name on the lab result matches the user provided name.'),
+  hba1cValue: z.number().optional().describe('The HbA1c result extracted from the lab result (as a number).'),
+  lipidPanel: z.object({
+    ldl: z.number().optional().describe('LDL cholesterol level.'),
+    hdl: z.number().optional().describe('HDL cholesterol level.'),
+    triglycerides: z.number().optional().describe('Triglycerides level.'),
+    total: z.number().optional().describe('Total cholesterol level.'),
+  }).optional().describe('The lipid panel results extracted.'),
+  vitaminDValue: z.number().optional().describe('The Vitamin D result extracted from the lab result (as a number).'),
 });
 export type LabResultUploadOutput = z.infer<typeof LabResultUploadOutputSchema>;
+
 
 export async function labResultUpload(input: LabResultUploadInput): Promise<LabResultUploadOutput> {
   return labResultUploadFlow(input);
@@ -39,9 +48,14 @@ const prompt = ai.definePrompt({
   output: {schema: LabResultUploadOutputSchema},
   prompt: `You are an expert medical assistant specializing in extracting information from lab results.
 
-You will extract the HbA1c result and the date the lab result was taken from the image. You will also verify that the name on the lab result matches the user provided name.
+You will extract the test date and verify that the name on the lab result matches the user provided name.
 
-Return the extracted HbA1c result, the date, and whether the name was verified.
+Then, you will scan the document for the following biomarkers. If a biomarker is present, extract its value. If it's not present, leave the field empty.
+- HbA1c (as a percentage value)
+- Lipid Panel (LDL, HDL, Triglycerides, Total Cholesterol)
+- Vitamin D (as a numerical value)
+
+Return the extracted information in the specified format. The date should be in YYYY-MM-DD format.
 
 Lab Result Image: {{media url=photoDataUri}}
 User Name: {{{name}}}`,

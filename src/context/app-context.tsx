@@ -10,6 +10,12 @@ const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
 type DashboardView = 'hba1c' | 'lipids' | 'vitaminD';
 
+interface BatchRecords {
+    hba1c?: Omit<Hba1cRecord, 'id' | 'medication'>;
+    lipid?: Omit<LipidRecord, 'id' | 'medication'>;
+    vitaminD?: Omit<VitaminDRecord, 'id' | 'medication'>;
+}
+
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
@@ -26,6 +32,7 @@ interface AppContextType {
   vitaminDRecords: VitaminDRecord[];
   addVitaminDRecord: (record: Omit<VitaminDRecord, 'id' | 'medication'>) => void;
   removeVitaminDRecord: (id: string) => void;
+  addBatchRecords: (records: BatchRecords) => void;
   tips: string[];
   setTips: (tips: string[]) => void;
   isClient: boolean;
@@ -305,6 +312,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, [profile, records, lipidRecords, getUpdatedPatientObject, syncPatientDataToLocalStorage]);
 
+  const addBatchRecords = React.useCallback((batch: BatchRecords) => {
+    const newMedication = getMedicationForRecord(profile.medication);
+    let newHba1cRecords = [...records];
+    let newLipidRecords = [...lipidRecords];
+    let newVitaminDRecords = [...vitaminDRecords];
+
+    if (batch.hba1c) {
+        const newRecord: Hba1cRecord = {
+            ...batch.hba1c,
+            id: `hba1c-${Date.now()}`,
+            medication: newMedication
+        };
+        newHba1cRecords.push(newRecord);
+        setRecordsState(newHba1cRecords);
+    }
+    if (batch.lipid) {
+        const newRecord: LipidRecord = {
+            ldl: 0, 
+            hdl: 0, 
+            triglycerides: 0, 
+            total: 0,
+            ...batch.lipid,
+            id: `lipid-${Date.now()}`,
+            medication: newMedication
+        };
+        newLipidRecords.push(newRecord);
+        setLipidRecordsState(newLipidRecords);
+    }
+    if (batch.vitaminD) {
+        const newRecord: VitaminDRecord = {
+            ...batch.vitaminD,
+            id: `vitd-${Date.now()}`,
+            medication: newMedication
+        };
+        newVitaminDRecords.push(newRecord);
+        setVitaminDRecordsState(newVitaminDRecords);
+    }
+
+    const updatedPatient = getUpdatedPatientObject(profile, newHba1cRecords, newLipidRecords, newVitaminDRecords, {});
+    syncPatientDataToLocalStorage(updatedPatient);
+
+  }, [profile, records, lipidRecords, vitaminDRecords, getUpdatedPatientObject, syncPatientDataToLocalStorage]);
+
   
   const value: AppContextType = {
     profile,
@@ -322,6 +372,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     vitaminDRecords,
     addVitaminDRecord,
     removeVitaminDRecord,
+    addBatchRecords,
     tips,
     setTips,
     isClient,
