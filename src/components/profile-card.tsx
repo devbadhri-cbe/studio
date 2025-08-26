@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useApp } from '@/context/app-context';
 import { calculateAge } from '@/lib/utils';
 import { countries } from '@/lib/countries';
-import { Separator } from './ui/separator';
 
 export function ProfileCard() {
   const { profile } = useApp();
