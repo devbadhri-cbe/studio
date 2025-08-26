@@ -18,16 +18,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
@@ -40,8 +30,6 @@ const FormSchema = z.object({
 
 export function AddRecordDialog() {
   const [open, setOpen] = React.useState(false);
-  const [showWarning, setShowWarning] = React.useState(false);
-  const [formData, setFormData] = React.useState<z.infer<typeof FormSchema> | null>(null);
   const { addRecord, records, profile } = useApp();
   const { toast } = useToast();
 
@@ -71,13 +59,15 @@ export function AddRecordDialog() {
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     const newDate = new Date(data.date);
-    // Adjust for timezone differences by comparing date strings
     const newDateString = newDate.toDateString();
     const dateExists = records.some((record) => new Date(record.date).toDateString() === newDateString);
 
     if (dateExists) {
-      setFormData(data);
-      setShowWarning(true);
+        toast({
+            variant: 'destructive',
+            title: 'Duplicate Entry',
+            description: 'A record for this date already exists. Please choose a different date.',
+        });
     } else {
       handleAddRecord(data);
     }
@@ -94,19 +84,11 @@ export function AddRecordDialog() {
     }
   };
 
-  const handleConfirmOverwrite = () => {
-    if (formData) {
-      handleAddRecord(formData);
-    }
-    setShowWarning(false);
-    setFormData(null);
-  };
-
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" className="gap-1" onClick={handleTriggerClick}>
+          <Button size="sm" className="h-9 gap-1" onClick={handleTriggerClick}>
             <PlusCircle className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Record</span>
           </Button>
@@ -151,20 +133,6 @@ export function AddRecordDialog() {
           </Form>
         </DialogContent>
       </Dialog>
-      <AlertDialog open={showWarning} onOpenChange={setShowWarning}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Duplicate Date Warning</AlertDialogTitle>
-            <AlertDialogDescription>
-              A record for this date already exists. Do you want to add this new record anyway?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setFormData(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmOverwrite}>Continue</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

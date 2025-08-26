@@ -30,7 +30,7 @@ const FormSchema = z.object({
 
 export function AddVitaminDRecordDialog() {
   const [open, setOpen] = React.useState(false);
-  const { addVitaminDRecord, profile } = useApp();
+  const { addVitaminDRecord, profile, vitaminDRecords } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -42,6 +42,19 @@ export function AddVitaminDRecordDialog() {
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    const newDate = new Date(data.date);
+    const newDateString = newDate.toDateString();
+    const dateExists = vitaminDRecords.some((record) => new Date(record.date).toDateString() === newDateString);
+
+    if (dateExists) {
+      toast({
+        variant: 'destructive',
+        title: 'Duplicate Entry',
+        description: 'A Vitamin D record for this date already exists. Please choose a different date.',
+      });
+      return;
+    }
+
     addVitaminDRecord({
       date: new Date(data.date).toISOString(),
       value: data.value,
@@ -72,7 +85,7 @@ export function AddVitaminDRecordDialog() {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" className="gap-1" onClick={handleTriggerClick}>
+          <Button size="sm" className="h-9 gap-1" onClick={handleTriggerClick}>
             <PlusCircle className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Record</span>
           </Button>
