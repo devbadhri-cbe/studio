@@ -38,7 +38,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   return (
     <Card className="w-full flex flex-col">
       <CardHeader>
-        <CardTitle>{patient.name}</CardTitle>
+        <CardTitle className="truncate">{patient.name}</CardTitle>
         <CardDescription>
             {age ? `${age} years old` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
         </CardDescription>
@@ -62,7 +62,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
             <div className="flex items-center gap-2">
                 <Droplet className="h-4 w-4 shrink-0 text-primary" />
                 <span className="font-medium">Last HbA1c:</span>
-                <span>
+                <span className="truncate">
                     {patient.lastHba1c 
                         ? `${patient.lastHba1c.value.toFixed(1)}% on ${format(new Date(patient.lastHba1c.date), 'dd-MM-yy')}` 
                         : 'N/A'}
@@ -71,7 +71,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
             <div className="flex items-center gap-2">
                  <Activity className="h-4 w-4 shrink-0 text-primary" />
                 <span className="font-medium">Last LDL:</span>
-                 <span>
+                 <span className="truncate">
                     {patient.lastLipid 
                         ? `${patient.lastLipid.ldl} mg/dL on ${format(new Date(patient.lastLipid.date), 'dd-MM-yy')}`
                         : 'N/A'}
