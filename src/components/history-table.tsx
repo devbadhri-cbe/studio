@@ -44,50 +44,50 @@ export function HistoryTable() {
   return (
     <div className="flex flex-col">
       <div className="rounded-lg border">
-        <TooltipProvider>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="px-2 md:px-4">Date</TableHead>
-                <TableHead className="px-2 md:px-4">Result (%)</TableHead>
-                <TableHead className="px-2 md:px-4">Status</TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="px-2 md:px-4">Date</TableHead>
+              <TableHead className="px-2 md:px-4">Result (%)</TableHead>
+              <TableHead className="px-2 md:px-4">Status</TableHead>
+              <TableHead>
+                <span className="sr-only">Actions</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TooltipProvider>
             <TableBody>
               {paginatedRecords.length > 0 ? (
                 paginatedRecords.map((record) => {
                   const status = getStatus(record.value);
                   return (
                     <Tooltip key={record.id} delayDuration={100}>
-                      <TableRow>
-                        <TableCell className="font-medium px-2 md:px-4">
-                           <TooltipTrigger asChild>
-                              <span>{format(new Date(record.date), 'dd-MM-yyyy')}</span>
-                           </TooltipTrigger>
-                        </TableCell>
-                        <TableCell className="px-2 md:px-4">{record.value.toFixed(1)}</TableCell>
-                        <TableCell className="px-2 md:px-4">
-                          <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>
-                        </TableCell>
-                        <TableCell className="px-2 md:px-4">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button aria-haspopup="true" size="icon" variant="ghost">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem onSelect={() => removeRecord(record.id)}>Delete</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                       <TooltipContent side="top" align="center">
+                      <TooltipTrigger asChild>
+                        <TableRow>
+                          <TableCell className="font-medium px-2 md:px-4">
+                            {format(new Date(record.date), 'dd-MM-yyyy')}
+                          </TableCell>
+                          <TableCell className="px-2 md:px-4">{record.value.toFixed(1)}</TableCell>
+                          <TableCell className="px-2 md:px-4">
+                            <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>
+                          </TableCell>
+                          <TableCell className="px-2 md:px-4">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Toggle menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem onSelect={() => removeRecord(record.id)}>Delete</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="center">
                         <p className="text-xs text-muted-foreground">Medication when tested:</p>
                         <p className="font-semibold">{record.medication || 'N/A'}</p>
                       </TooltipContent>
@@ -102,8 +102,8 @@ export function HistoryTable() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
-        </TooltipProvider>
+          </TooltipProvider>
+        </Table>
       </div>
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-end space-x-2">
