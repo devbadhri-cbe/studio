@@ -45,6 +45,7 @@ export function InsightsCard() {
         userProfile: {
           name: profile.name,
           age: age,
+          gender: profile.gender,
           presentMedicalConditions: profile.presentMedicalConditions.map(c => ({
             condition: c.condition,
             date: format(new Date(c.date), 'MMMM d, yyyy'),

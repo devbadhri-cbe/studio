@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -34,6 +35,7 @@ const PersonalizedInsightsInputSchema = z.object({
     .object({
       name: z.string().describe('User name.'),
       age: z.number().describe('User age.'),
+      gender: z.enum(['male', 'female', 'other']).describe('User gender.'),
       presentMedicalConditions: z.array(z.object({
         date: z.string(),
         condition: z.string(),
@@ -41,7 +43,7 @@ const PersonalizedInsightsInputSchema = z.object({
       })).optional().describe('User medical conditions.'),
       medication: z.string().optional().describe('User medication if any.'),
     })
-    .describe('User profile information including name, age and medication'),
+    .describe('User profile information including name, age, gender and medication'),
 });
 export type PersonalizedInsightsInput = z.infer<typeof PersonalizedInsightsInputSchema>;
 
@@ -79,11 +81,12 @@ const prompt = ai.definePrompt({
   tools: [lifestyleTipsTool],
   prompt: `You are an expert health advisor providing personalized lifestyle tips to help patients manage their health.
 
-Your advice should be holistic, considering all available health data. Analyze the patient's age, medical history, and their most recent HbA1c and lipid panel results to generate relevant, actionable tips. Ensure your recommendations are consistent with current clinical guidelines for managing diabetes, prediabetes, and cholesterol.
+Your advice should be holistic, considering all available health data. Analyze the patient's age, gender, medical history, and their most recent HbA1c and lipid panel results to generate relevant, actionable tips. Ensure your recommendations are consistent with current clinical guidelines for managing diabetes, prediabetes, and cholesterol.
 
 Patient Profile:
 Name: {{{userProfile.name}}}
 Age: {{{userProfile.age}}}
+Gender: {{{userProfile.gender}}}
 Present Medical Conditions: {{#if userProfile.presentMedicalConditions}}{{#each userProfile.presentMedicalConditions}}{{{this.condition}}} (Diagnosed: {{this.date}}), {{/each}}{{else}}None{{/if}}
 Medication: {{#if userProfile.medication}}{{{userProfile.medication}}}{{else}}None{{/if}}
 
