@@ -3,13 +3,13 @@
 
 import { useApp } from '@/context/app-context';
 import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears } from 'date-fns';
-import { Bell, CheckCircle2, Heart, Droplet, Sun } from 'lucide-react';
+import { Bell, CheckCircle2, Heart, Droplet, Sun, Activity } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { calculateAge } from '@/lib/utils';
 import { Separator } from './ui/separator';
 
 export function ReminderCard() {
-  const { records, lipidRecords, vitaminDRecords, profile } = useApp();
+  const { records, lipidRecords, vitaminDRecords, thyroidRecords, profile } = useApp();
 
   const hasMedicalConditions = profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0;
   const age = calculateAge(profile.dob);
@@ -136,6 +136,42 @@ export function ReminderCard() {
       }
   }
 
+  // Thyroid Logic
+  const sortedThyroidRecords = [...(thyroidRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const lastThyroidRecord = sortedThyroidRecords[0];
+  let thyroidContent;
+
+  if (!lastThyroidRecord) {
+      thyroidContent = {
+          icon: <Activity className="h-5 w-5 text-yellow-500" />,
+          title: 'Time for your first Thyroid Panel!',
+          description: 'Add a record to start tracking.',
+          color: 'bg-yellow-500/10',
+      };
+  } else {
+      const lastTestDate = new Date(lastThyroidRecord.date);
+      // Retesting for thyroid is highly variable, but we'll use a general 1-year reminder.
+      const retestYears = 1;
+      const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
+      const nextTestDate = addYears(lastTestDate, retestYears);
+
+      if (yearsSinceLastTest >= retestYears) {
+          thyroidContent = {
+              icon: <Activity className="h-5 w-5 text-destructive" />,
+              title: 'Thyroid Panel Due',
+              description: `Last test was ${formatDistanceToNow(lastTestDate)} ago. Retesting is recommended.`,
+              color: 'bg-destructive/10',
+          };
+      } else {
+          thyroidContent = {
+              icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+              title: 'Thyroid On Track',
+              description: `Next test is around ${format(nextTestDate, 'MMM yyyy')}.`,
+              color: 'bg-green-500/10',
+          };
+      }
+  }
+
 
   return (
     <Card className="h-full">
@@ -178,6 +214,16 @@ export function ReminderCard() {
           <div>
             <p className="font-semibold">{vitaminDContent.title}</p>
             <p className="text-sm text-muted-foreground">{vitaminDContent.description}</p>
+          </div>
+        </div>
+        <Separator />
+        <div className="flex items-center gap-4">
+          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${thyroidContent.color}`}>
+            {thyroidContent.icon}
+          </div>
+          <div>
+            <p className="font-semibold">{thyroidContent.title}</p>
+            <p className="text-sm text-muted-foreground">{thyroidContent.description}</p>
           </div>
         </div>
       </CardContent>

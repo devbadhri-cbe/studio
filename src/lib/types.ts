@@ -27,6 +27,7 @@ export interface UserProfile {
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
   vitaminDRecords?: VitaminDRecord[];
+  thyroidRecords?: ThyroidRecord[];
 }
 
 export interface Hba1cRecord {
@@ -53,6 +54,15 @@ export interface VitaminDRecord {
   medication?: string;
 }
 
+export interface ThyroidRecord {
+  id: string;
+  date: Date | string;
+  tsh: number;
+  t3: number;
+  t4: number;
+  medication?: string;
+}
+
 export interface Patient {
   id: string;
   name: string;
@@ -73,11 +83,16 @@ export interface Patient {
     value: number;
     date: string;
   } | null;
+  lastThyroid?: {
+    tsh: number;
+    date: string;
+  } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
   // Add full record history to the patient object
   records?: Hba1cRecord[];
   lipidRecords?: LipidRecord[];
   vitaminDRecords?: VitaminDRecord[];
+  thyroidRecords?: ThyroidRecord[];
   medication?: Medication[];
   presentMedicalConditions?: MedicalCondition[];
 }

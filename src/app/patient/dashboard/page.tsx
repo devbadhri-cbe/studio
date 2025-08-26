@@ -23,6 +23,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { VitaminDCard } from '@/components/vitamin-d-card';
 import { UploadRecordDialog } from '@/components/upload-record-dialog';
 import { ReportCard } from '@/components/report-card';
+import { ThyroidCard } from '@/components/thyroid-card';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
@@ -48,6 +49,8 @@ export default function Home() {
         return <LipidCard />;
       case 'vitaminD':
         return <VitaminDCard />;
+      case 'thyroid':
+        return <ThyroidCard />;
       case 'report':
         return <ReportCard />;
       default:
@@ -98,7 +101,7 @@ export default function Home() {
               <div className="flex w-full sm:w-auto items-center justify-end gap-2">
                 {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')} className="flex-1 sm:flex-initial" size="sm">Patient List</Button>}
                 <UploadRecordDialog />
-                <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD' | 'report')}>
+                <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report')}>
                   <SelectTrigger className="w-auto flex-1 sm:flex-initial h-9">
                     <SelectValue />
                   </SelectTrigger>
@@ -106,6 +109,7 @@ export default function Home() {
                     <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
                     <SelectItem value="lipids">Lipid Dashboard</SelectItem>
                     <SelectItem value="vitaminD">Vitamin D Dashboard</SelectItem>
+                    <SelectItem value="thyroid">Thyroid Dashboard</SelectItem>
                     <SelectItem value="report">Comprehensive Report</SelectItem>
                   </SelectContent>
                 </Select>

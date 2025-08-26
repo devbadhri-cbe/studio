@@ -8,15 +8,17 @@ import { VitaminDChart } from './vitamin-d-chart';
 import { Separator } from './ui/separator';
 import { useApp } from '@/context/app-context';
 import { format } from 'date-fns';
-import { Droplet, Heart, Sun } from 'lucide-react';
+import { Droplet, Heart, Sun, Activity } from 'lucide-react';
+import { ThyroidChart } from './thyroid-chart';
 
 
 export function ReportCard() {
-  const { records, lipidRecords, vitaminDRecords } = useApp();
+  const { records, lipidRecords, vitaminDRecords, thyroidRecords } = useApp();
 
   const latestHba1c = [...records].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestLipid = [...lipidRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestVitaminD = [...vitaminDRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  const latestThyroid = [...(thyroidRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
 
   return (
@@ -31,7 +33,7 @@ export function ReportCard() {
         
         <section>
           <CardTitle className="text-lg mb-2">Latest Results</CardTitle>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">HbA1c</CardTitle>
@@ -74,6 +76,20 @@ export function ReportCard() {
                 ) : <p className="text-sm text-muted-foreground">No data</p>}
               </CardContent>
             </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">TSH</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                 {latestThyroid ? (
+                    <>
+                     <div className="text-2xl font-bold">{latestThyroid.tsh.toFixed(2)} <span className="text-base font-normal text-muted-foreground">μIU/mL</span></div>
+                     <p className="text-xs text-muted-foreground">on {format(new Date(latestThyroid.date), 'dd MMM yyyy')}</p>
+                    </>
+                ) : <p className="text-sm text-muted-foreground">No data</p>}
+              </CardContent>
+            </Card>
           </div>
         </section>
 
@@ -97,9 +113,15 @@ export function ReportCard() {
           <CardTitle className="text-lg mb-4">Vitamin D Trend</CardTitle>
           <VitaminDChart />
         </section>
+        
+        <Separator />
+
+        <section>
+          <CardTitle className="text-lg mb-4">TSH Trend</CardTitle>
+          <ThyroidChart />
+        </section>
 
       </CardContent>
     </Card>
   );
 }
-

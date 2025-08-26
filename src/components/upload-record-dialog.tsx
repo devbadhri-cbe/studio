@@ -4,7 +4,7 @@
 import { labResultUpload, type LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, CheckCircle, XCircle, FileText, FlaskConical, Sun, Droplet } from 'lucide-react';
+import { Loader2, UploadCloud, CheckCircle, XCircle, FileText, FlaskConical, Sun, Droplet, Activity } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from './ui/dialog';
@@ -78,12 +78,13 @@ export function UploadRecordDialog() {
   const handleConfirm = () => {
     if (!extractedData) return;
 
-    const { hba1cValue, lipidPanel, vitaminDValue, date } = extractedData;
+    const { hba1cValue, lipidPanel, vitaminDValue, thyroidPanel, date } = extractedData;
     
     addBatchRecords({
       hba1c: hba1cValue ? { value: hba1cValue, date } : undefined,
       lipid: lipidPanel ? { ...lipidPanel, date } : undefined,
       vitaminD: vitaminDValue ? { value: vitaminDValue, date } : undefined,
+      thyroid: thyroidPanel ? { ...thyroidPanel, date } : undefined,
     });
     
     toast({
@@ -123,7 +124,7 @@ export function UploadRecordDialog() {
 
   const renderConfirmationView = () => {
     if (!extractedData) return null;
-    const hasAnyData = extractedData.hba1cValue || extractedData.lipidPanel || extractedData.vitaminDValue;
+    const hasAnyData = extractedData.hba1cValue || extractedData.lipidPanel || extractedData.vitaminDValue || extractedData.thyroidPanel;
     
     return (
         <div>
@@ -205,6 +206,28 @@ export function UploadRecordDialog() {
                         </div>
                     </div>
                 )}
+                 {extractedData.thyroidPanel && (
+                     <div className="rounded-md border p-2 space-y-2">
+                        <div className="flex items-center gap-3">
+                             <Activity className="h-5 w-5 text-primary/80" />
+                             <p className="font-semibold">Thyroid Panel</p>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                             <div className="rounded-md bg-muted/50 p-2">
+                                <p className="font-semibold">TSH (μIU/mL)</p>
+                                <p>{extractedData.thyroidPanel.tsh || 'N/A'}</p>
+                            </div>
+                            <div className="rounded-md bg-muted/50 p-2">
+                                <p className="font-semibold">T3 (ng/dL)</p>
+                                <p>{extractedData.thyroidPanel.t3 || 'N/A'}</p>
+                            </div>
+                            <div className="rounded-md bg-muted/50 p-2">
+                                <p className="font-semibold">T4 (μg/dL)</p>
+                                <p>{extractedData.thyroidPanel.t4 || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 
                 {!hasAnyData && (
                     <p className="text-center text-muted-foreground text-sm py-4">No specific biomarker data could be extracted. Please check the document or enter manually.</p>
@@ -225,7 +248,7 @@ export function UploadRecordDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="gap-1">
+        <Button size="sm" variant="outline" className="h-9 gap-1">
           <UploadCloud className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Upload Result</span>
         </Button>
@@ -236,7 +259,7 @@ export function UploadRecordDialog() {
           <DialogDescription>
              {extractedData 
                 ? 'Please review the extracted information below and confirm to add it to your records.'
-                : 'Let AI read your lab result. It will extract HbA1c, Lipids, and Vitamin D values.'
+                : 'Let AI read your lab result. It will extract HbA1c, Lipids, Vitamin D, and Thyroid values.'
              }
           </DialogDescription>
         </DialogHeader>

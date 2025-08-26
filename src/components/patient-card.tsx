@@ -128,10 +128,10 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
             </div>
             <div className="flex items-center gap-2">
                  <Activity className="h-4 w-4 shrink-0 text-primary" />
-                <span className="font-medium">Last LDL:</span>
+                <span className="font-medium">Last TSH:</span>
                  <span className="truncate">
-                    {patient.lastLipid 
-                        ? `${patient.lastLipid.ldl} mg/dL on ${format(new Date(patient.lastLipid.date), 'dd-MM-yy')}`
+                    {patient.lastThyroid 
+                        ? `${patient.lastThyroid.tsh.toFixed(2)} on ${format(new Date(patient.lastThyroid.date), 'dd-MM-yy')}`
                         : 'N/A'}
                 </span>
             </div>

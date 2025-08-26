@@ -13,9 +13,13 @@ export const mockPatients: Patient[] = [
     lastHba1c: { value: 5.8, date: '2024-05-15' },
     lastLipid: { ldl: 110, date: '2024-03-20' },
     lastVitaminD: { value: 25, date: '2024-01-10' },
+    lastThyroid: { tsh: 4.5, date: '2024-06-10'},
     status: 'Needs Review',
     vitaminDRecords: [
         { id: 'vd1', date: '2024-01-10', value: 25 },
+    ],
+    thyroidRecords: [
+        { id: 't1', date: '2024-06-10', tsh: 4.5, t3: 150, t4: 8.5 },
     ]
   },
   {
@@ -29,6 +33,7 @@ export const mockPatients: Patient[] = [
     lastHba1c: { value: 7.2, date: '2024-06-01' },
     lastLipid: null,
     lastVitaminD: { value: 18, date: '2023-12-01' },
+    lastThyroid: null,
     status: 'Urgent',
     vitaminDRecords: [
         { id: 'vd2', date: '2023-12-01', value: 18 },
@@ -45,9 +50,13 @@ export const mockPatients: Patient[] = [
     lastHba1c: { value: 5.4, date: '2024-04-10' },
     lastLipid: { ldl: 95, date: '2024-04-10' },
     lastVitaminD: { value: 45, date: '2024-02-20' },
+    lastThyroid: { tsh: 2.1, date: '2024-05-01' },
     status: 'On Track',
     vitaminDRecords: [
       { id: 'vd3', date: '2024-02-20', value: 45 },
+    ],
+    thyroidRecords: [
+      { id: 't2', date: '2024-05-01', tsh: 2.1, t3: 160, t4: 9.0 },
     ]
   },
    {
@@ -61,6 +70,7 @@ export const mockPatients: Patient[] = [
     lastHba1c: null,
     lastLipid: { ldl: 130, date: '2024-01-12' },
     lastVitaminD: null,
+    lastThyroid: null,
     status: 'Needs Review',
   },
   {
@@ -74,9 +84,13 @@ export const mockPatients: Patient[] = [
     lastHba1c: { value: 6.1, date: '2024-05-20' },
     lastLipid: { ldl: 145, date: '2024-05-20' },
     lastVitaminD: { value: 32, date: '2024-03-01' },
+    lastThyroid: { tsh: 0.2, date: '2024-06-20' },
     status: 'Needs Review',
     vitaminDRecords: [
        { id: 'vd4', date: '2024-03-01', value: 32 },
+    ],
+    thyroidRecords: [
+       { id: 't3', date: '2024-06-20', tsh: 0.2, t3: 180, t4: 10.0 },
     ]
   },
 ];
