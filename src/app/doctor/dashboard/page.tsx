@@ -54,7 +54,7 @@ export default function DoctorDashboardPage() {
             status: 'On Track',
             records: [],
             lipidRecords: [],
-            medication: '',
+            medication: [],
             presentMedicalConditions: [],
         };
         const updatedPatients = [newPatient, ...patients];

@@ -1,10 +1,10 @@
 
 'use client';
 
-import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient } from '@/lib/types';
+import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication } from '@/lib/types';
 import * as React from 'react';
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', presentMedicalConditions: [], medication: '' };
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', presentMedicalConditions: [], medication: [] };
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
 
@@ -54,7 +54,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       name: patient.name,
       dob: patient.dob,
       gender: patient.gender,
-      medication: patient.medication || '',
+      medication: patient.medication || [],
       presentMedicalConditions: patient.presentMedicalConditions || []
     };
     setProfileState(patientProfile);
@@ -63,7 +63,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTips([]); // Clear tips for new patient
   }, []);
 
-  const syncPatientDataToLocalStorage = (updatedPatient: Patient) => {
+  const syncPatientDataToLocalStorage = React.useCallback((updatedPatient: Patient) => {
     try {
         const storedPatients = localStorage.getItem('doctor-patients');
         if (storedPatients) {
@@ -77,20 +77,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
         console.error('Failed to sync patient data to localStorage', error);
     }
-  }
+  }, []);
 
-  const getUpdatedPatientObject = (updates: Partial<Patient>): Patient => {
+  const getUpdatedPatientObject = React.useCallback((currentProfile: UserProfile, currentRecords: Hba1cRecord[], currentLipidRecords: LipidRecord[], updates: Partial<Patient>): Patient => {
     const currentPatient: Patient = {
-      id: profile.id,
-      name: profile.name,
-      dob: profile.dob,
-      gender: profile.gender,
+      id: currentProfile.id,
+      name: currentProfile.name,
+      dob: currentProfile.dob,
+      gender: currentProfile.gender,
       email: '', // Not available in profile, needs to be handled
       phone: '', // Not available in profile, needs to be handled
-      records: records,
-      lipidRecords: lipidRecords,
-      medication: profile.medication,
-      presentMedicalConditions: profile.presentMedicalConditions,
+      records: currentRecords,
+      lipidRecords: currentLipidRecords,
+      medication: currentProfile.medication,
+      presentMedicalConditions: currentProfile.presentMedicalConditions,
       lastHba1c: null, // these will be recalculated
       lastLipid: null,
       status: 'On Track', // this will be recalculated
@@ -120,33 +120,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     currentPatient.status = status;
 
     return currentPatient;
-  }
+  }, []);
   
-  const setProfile = (newProfile: UserProfile) => {
+  const setProfile = React.useCallback((newProfile: UserProfile) => {
     setProfileState(newProfile);
-    const updatedPatient = getUpdatedPatientObject({ 
-      medication: newProfile.medication 
-    });
+    const updatedPatient = getUpdatedPatientObject(newProfile, records, lipidRecords, {});
     syncPatientDataToLocalStorage(updatedPatient);
-  };
+  }, [getUpdatedPatientObject, records, lipidRecords, syncPatientDataToLocalStorage]);
   
-  const addMedicalCondition = (condition: Omit<MedicalCondition, 'id'>) => {
+  const addMedicalCondition = React.useCallback((condition: Omit<MedicalCondition, 'id'>) => {
     const newCondition = { ...condition, id: Date.now().toString() };
-    const updatedConditions = [...profile.presentMedicalConditions, newCondition];
-    updatedConditions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const newProfile = { ...profile, presentMedicalConditions: updatedConditions };
-    setProfileState(newProfile);
-    const updatedPatient = getUpdatedPatientObject({ presentMedicalConditions: updatedConditions });
-    syncPatientDataToLocalStorage(updatedPatient);
-  };
+    setProfileState(prevProfile => {
+        const updatedConditions = [...prevProfile.presentMedicalConditions, newCondition];
+        updatedConditions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        const newProfile = { ...prevProfile, presentMedicalConditions: updatedConditions };
+        const updatedPatient = getUpdatedPatientObject(newProfile, records, lipidRecords, {});
+        syncPatientDataToLocalStorage(updatedPatient);
+        return newProfile;
+    });
+  }, [getUpdatedPatientObject, records, lipidRecords, syncPatientDataToLocalStorage]);
   
-  const removeMedicalCondition = (id: string) => {
-    const updatedConditions = profile.presentMedicalConditions.filter(c => c.id !== id);
-    const newProfile = { ...profile, presentMedicalConditions: updatedConditions };
-    setProfileState(newProfile);
-    const updatedPatient = getUpdatedPatientObject({ presentMedicalConditions: updatedConditions });
-    syncPatientDataToLocalStorage(updatedPatient);
-  };
+  const removeMedicalCondition = React.useCallback((id: string) => {
+    setProfileState(prevProfile => {
+        const updatedConditions = prevProfile.presentMedicalConditions.filter(c => c.id !== id);
+        const newProfile = { ...prevProfile, presentMedicalConditions: updatedConditions };
+        const updatedPatient = getUpdatedPatientObject(newProfile, records, lipidRecords, {});
+        syncPatientDataToLocalStorage(updatedPatient);
+        return newProfile;
+    });
+  }, [getUpdatedPatientObject, records, lipidRecords, syncPatientDataToLocalStorage]);
 
   const setTips = (newTips: string[]) => {
     setTipsState(newTips);
@@ -155,46 +157,60 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setDashboardView = (view: DashboardView) => {
     setDashboardViewState(view);
   }
+  
+  const getMedicationString = (medication: Medication[]): string => {
+    if (!medication || medication.length === 0) return 'N/A';
+    const firstMed = medication[0];
+    return `${firstMed.name} ${firstMed.dosage}, ${firstMed.frequency}`;
+  }
 
-  const addRecord = (record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
-    const newRecord = { 
-      ...record, 
-      id: Date.now().toString(), 
-      date: new Date(record.date).toISOString(), 
-      medication: profile.medication || 'N/A' 
-    };
-    const newRecords = [...records, newRecord];
-    setRecordsState(newRecords);
-    const updatedPatient = getUpdatedPatientObject({ records: newRecords });
-    syncPatientDataToLocalStorage(updatedPatient);
-  };
+  const addRecord = React.useCallback((record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
+    setRecordsState(prevRecords => {
+      const newRecord = { 
+        ...record, 
+        id: Date.now().toString(), 
+        date: new Date(record.date).toISOString(), 
+        medication: getMedicationString(profile.medication)
+      };
+      const newRecords = [...prevRecords, newRecord];
+      const updatedPatient = getUpdatedPatientObject(profile, newRecords, lipidRecords, {});
+      syncPatientDataToLocalStorage(updatedPatient);
+      return newRecords;
+    });
+  }, [profile, lipidRecords, getUpdatedPatientObject, syncPatientDataToLocalStorage]);
 
-  const removeRecord = (id: string) => {
-    const newRecords = records.filter((r) => r.id !== id);
-    setRecordsState(newRecords);
-    const updatedPatient = getUpdatedPatientObject({ records: newRecords });
-    syncPatientDataToLocalStorage(updatedPatient);
-  };
+  const removeRecord = React.useCallback((id: string) => {
+    setRecordsState(prevRecords => {
+      const newRecords = prevRecords.filter((r) => r.id !== id);
+      const updatedPatient = getUpdatedPatientObject(profile, newRecords, lipidRecords, {});
+      syncPatientDataToLocalStorage(updatedPatient);
+      return newRecords;
+    });
+  }, [profile, lipidRecords, getUpdatedPatientObject, syncPatientDataToLocalStorage]);
 
-  const addLipidRecord = (record: Omit<LipidRecord, 'id' | 'medication'>) => {
-    const newRecord = {
-      ...record,
-      id: Date.now().toString(),
-      date: new Date(record.date).toISOString(),
-      medication: profile.medication || 'N/A',
-    };
-    const newRecords = [...lipidRecords, newRecord];
-    setLipidRecordsState(newRecords);
-    const updatedPatient = getUpdatedPatientObject({ lipidRecords: newRecords });
-    syncPatientDataToLocalStorage(updatedPatient);
-  };
+  const addLipidRecord = React.useCallback((record: Omit<LipidRecord, 'id' | 'medication'>) => {
+    setLipidRecordsState(prevRecords => {
+      const newRecord = {
+        ...record,
+        id: Date.now().toString(),
+        date: new Date(record.date).toISOString(),
+        medication: getMedicationString(profile.medication),
+      };
+      const newRecords = [...prevRecords, newRecord];
+      const updatedPatient = getUpdatedPatientObject(profile, records, newRecords, {});
+      syncPatientDataToLocalStorage(updatedPatient);
+      return newRecords;
+    });
+  }, [profile, records, getUpdatedPatientObject, syncPatientDataToLocalStorage]);
 
-  const removeLipidRecord = (id: string) => {
-    const newRecords = lipidRecords.filter((r) => r.id !== id);
-    setLipidRecordsState(newRecords);
-    const updatedPatient = getUpdatedPatientObject({ lipidRecords: newRecords });
-    syncPatientDataToLocalStorage(updatedPatient);
-  };
+  const removeLipidRecord = React.useCallback((id: string) => {
+    setLipidRecordsState(prevRecords => {
+      const newRecords = prevRecords.filter((r) => r.id !== id);
+      const updatedPatient = getUpdatedPatientObject(profile, records, newRecords, {});
+      syncPatientDataToLocalStorage(updatedPatient);
+      return newRecords;
+    });
+  }, [profile, records, getUpdatedPatientObject, syncPatientDataToLocalStorage]);
   
   const value: AppContextType = {
     profile,

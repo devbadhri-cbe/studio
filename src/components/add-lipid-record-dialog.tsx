@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -69,7 +70,7 @@ export function AddLipidRecordDialog() {
   };
   
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication) {
+    if (!profile.medication || profile.medication.length === 0) {
       e.preventDefault();
       toast({
         variant: 'destructive',

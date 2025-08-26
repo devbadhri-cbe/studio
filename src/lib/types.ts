@@ -6,13 +6,20 @@ export interface MedicalCondition {
   icdCode?: string;
 }
 
+export interface Medication {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+}
+
 export interface UserProfile {
   id: string; // Add patient ID to profile for easier lookup
   name: string;
   dob: string; // Stored as 'YYYY-MM-DD' string
   gender: 'male' | 'female' | 'other';
   presentMedicalConditions: MedicalCondition[];
-  medication: string;
+  medication: Medication[];
 }
 
 export interface Hba1cRecord {
@@ -51,6 +58,6 @@ export interface Patient {
   // Add full record history to the patient object
   records?: Hba1cRecord[];
   lipidRecords?: LipidRecord[];
-  medication?: string;
+  medication?: Medication[];
   presentMedicalConditions?: MedicalCondition[];
 }

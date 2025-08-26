@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useApp } from '@/context/app-context';
@@ -67,7 +68,17 @@ export function PrintableReport() {
             </div>
             <div className="col-span-2">
               <p className="text-sm text-muted-foreground">Medication</p>
-              <p className="font-medium">{profile.medication || 'N/A'}</p>
+               {profile.medication && profile.medication.length > 0 ? (
+                <ul className="list-disc pl-5">
+                  {profile.medication.map(med => (
+                    <li key={med.id} className="font-medium">
+                      {med.name} {med.dosage} - {med.frequency}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="font-medium">N/A</p>
+              )}
             </div>
           </div>
         </section>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { getPersonalizedInsights } from '@/ai/flows/personalized-insights';
@@ -34,6 +35,8 @@ export function InsightsCard() {
       const hba1cData = records.map((r) => ({ date: new Date(r.date).toISOString(), value: r.value }));
       const lipidData = lipidRecords.map(r => ({date: new Date(r.date).toISOString(), ldl: r.ldl, hdl: r.hdl, total: r.total, triglycerides: r.triglycerides}));
       
+      const medicationString = profile.medication.map(m => `${m.name} ${m.dosage} ${m.frequency}`).join(', ');
+
       const result = await getPersonalizedInsights({
         hba1cData: hba1cData.length > 0 ? hba1cData : undefined,
         lipidData: lipidData.length > 0 ? lipidData : undefined,
@@ -46,7 +49,7 @@ export function InsightsCard() {
             date: new Date(c.date).toISOString(),
             icdCode: c.icdCode
           })),
-          medication: profile.medication,
+          medication: medicationString,
         },
       });
       if (result.tips) {

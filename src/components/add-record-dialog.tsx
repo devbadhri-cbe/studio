@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -83,12 +84,12 @@ export function AddRecordDialog() {
   }
 
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication) {
+    if (!profile.medication || profile.medication.length === 0) {
       e.preventDefault();
       toast({
         variant: 'destructive',
         title: 'Medication Required',
-        description: 'Please enter the current medication in the profile before adding a new record.',
+        description: 'Please enter at least one medication in the profile before adding a new record.',
       });
     }
   };
