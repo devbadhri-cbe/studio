@@ -1,7 +1,7 @@
 
 'use client';
 
-import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication } from '@/lib/types';
+import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type Theme } from '@/lib/types';
 import * as React from 'react';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', presentMedicalConditions: [], medication: [] };
@@ -29,6 +29,8 @@ interface AppContextType {
   isDoctorLoggedIn: boolean;
   doctorName: string;
   setPatientData: (patient: Patient) => void;
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
 }
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -41,12 +43,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('hba1c');
   const [isClient, setIsClient] = React.useState(false);
   const [isDoctorLoggedIn, setIsDoctorLoggedIn] = React.useState(false);
+  const [theme, setThemeState] = React.useState<Theme>('system');
+
 
   React.useEffect(() => {
     setIsClient(true);
     // This check is for general patient view vs doctor portal view
     setIsDoctorLoggedIn(!!localStorage.getItem('doctor_logged_in'));
+    const storedTheme = localStorage.getItem('theme') as Theme | null;
+    if (storedTheme) {
+      setThemeState(storedTheme);
+    }
   }, []);
+
+  React.useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.add(systemTheme);
+      return;
+    }
+    root.classList.add(theme);
+  }, [theme]);
   
   const setPatientData = React.useCallback((patient: Patient) => {
     const patientProfile: UserProfile = {
@@ -161,6 +181,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setDashboardView = (view: DashboardView) => {
     setDashboardViewState(view);
   }
+
+  const setTheme = (theme: Theme) => {
+    localStorage.setItem('theme', theme);
+    setThemeState(theme);
+  }
   
   const getMedicationForRecord = (medication: Medication[]): string => {
     if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
@@ -238,6 +263,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isDoctorLoggedIn,
     doctorName: DOCTOR_NAME,
     setPatientData,
+    theme,
+    setTheme,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -250,3 +277,5 @@ export function useApp() {
   }
   return context;
 }
+
+    

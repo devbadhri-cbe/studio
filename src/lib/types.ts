@@ -1,5 +1,7 @@
 
 
+export type Theme = 'light' | 'dark' | 'system';
+
 export interface MedicalCondition {
   id: string;
   date: string; // Stored as 'YYYY-MM-DD' string
@@ -66,3 +68,5 @@ export interface Patient {
   medication?: Medication[];
   presentMedicalConditions?: MedicalCondition[];
 }
+
+    

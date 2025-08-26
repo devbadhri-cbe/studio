@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { PrintableReport } from '@/components/printable-report';
 import { ShareButton } from '@/components/share-button';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
@@ -49,6 +50,7 @@ export default function Home() {
                 <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
               </div>
               <div className="flex items-center gap-4">
+                 <ThemeToggle />
                 {isDoctorLoggedIn ? (
                     <div className="text-right text-sm text-muted-foreground">
                         <p className="font-semibold text-foreground">{doctorName}</p>
@@ -114,3 +116,5 @@ export default function Home() {
     </>
   );
 }
+
+    
