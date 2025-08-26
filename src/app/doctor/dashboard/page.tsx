@@ -136,7 +136,7 @@ export default function DoctorDashboardPage() {
                         <TableBody>
                             {patients.map((patient, index) => (
                                 <TableRow key={patient.id}>
-                                    <TableCell className="font-medium">{index + 1}</TableCell>
+                                    <TableCell className="font-medium">{patients.length - index}</TableCell>
                                     <TableCell className="font-medium">{patient.name}</TableCell>
                                     <TableCell>
                                         {patient.lastHba1c 
