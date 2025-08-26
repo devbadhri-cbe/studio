@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { VitaminDCard } from '@/components/vitamin-d-card';
+import { UploadRecordDialog } from '@/components/upload-record-dialog';
 
 export default function Home() {
   const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
@@ -93,6 +94,7 @@ export default function Home() {
               </div>
               <div className="flex w-full sm:w-auto items-center justify-end gap-2">
                 {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')} className="flex-1 sm:flex-initial">Patient List</Button>}
+                <UploadRecordDialog />
                 <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD')}>
                   <SelectTrigger className="w-auto flex-1 sm:flex-initial">
                     <SelectValue />
