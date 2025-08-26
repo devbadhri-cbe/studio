@@ -1,10 +1,9 @@
 
-
 'use client';
 
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UserPlus, Loader2, Pencil } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -42,7 +41,7 @@ type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status'
 interface PatientFormDialogProps {
     patient?: Patient;
     onSave: (patient: PatientFormData, patientId?: string) => void;
-    children: React.ReactNode;
+    children: React.ReactNode | ((props: { openDialog: () => void }) => React.ReactNode);
 }
 
 export function PatientFormDialog({ patient, onSave, children }: PatientFormDialogProps) {
@@ -69,15 +68,19 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
   });
   
   React.useEffect(() => {
-    if (open) {
-        form.reset(isEditMode ? {
+    if (open && isEditMode) {
+        form.reset({
             name: patient.name,
             gender: patient.gender,
             dob: patient.dob,
             email: patient.email,
             phone: patient.phone
-        } : {
+        });
+    }
+     if (open && !isEditMode) {
+        form.reset({
             name: '',
+            gender: undefined,
             dob: '',
             email: '',
             phone: '',
@@ -91,7 +94,6 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
     
-    // Ensure optional fields that are empty are passed correctly
     const submissionData = {
         ...data,
         email: data.email || '',
@@ -109,11 +111,17 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
     }, 1000);
   };
 
+  const openDialog = () => setOpen(true);
+
   return (
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          {children}
-        </DialogTrigger>
+         {typeof children === 'function' ? (
+            children({ openDialog })
+        ) : (
+            <DialogTrigger asChild>
+                {children}
+            </DialogTrigger>
+        )}
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{isEditMode ? 'Edit Patient Details' : 'Add New Patient'}</DialogTitle>
