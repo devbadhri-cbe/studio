@@ -49,7 +49,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
   
   // This function is called by the new patient/[patientId] page
-  const setPatientData = (patient: Patient) => {
+  const setPatientData = React.useCallback((patient: Patient) => {
     const patientProfile: UserProfile = {
       name: patient.name,
       dob: patient.dob,
@@ -61,7 +61,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setRecordsState(patient.records || []);
     setLipidRecordsState(patient.lipidRecords || []);
     setTips([]); // Clear tips for new patient
-  };
+  }, []);
 
   const saveDataToLocalStorage = (key: string, data: any) => {
     try {
