@@ -109,24 +109,22 @@ export default function DoctorDashboardPage() {
   return (
     <>
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <header className="border-b px-4 py-4 md:px-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Logo className="h-8 w-8 text-primary" />
-              <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
-            </div>
-             <div className="flex items-center gap-4">
-                <div className="text-right text-sm text-muted-foreground">
-                  <p className="font-semibold text-foreground">{doctorName}</p>
-                  <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-end gap-1.5 hover:text-primary">
-                    <Mail className="h-3 w-3" />
-                    drbadhri@gmail.com
-                  </a>
-                  <a href="tel:+919791377716" className="flex items-center justify-end gap-1.5 hover:text-primary">
-                    <Phone className="h-3 w-3" />
-                    +91 97913 77716
-                  </a>
-                </div>
+       <header className="border-b px-4 py-4 md:px-6 flex flex-col items-center gap-2">
+          <div className="flex items-center gap-2">
+            <Logo className="h-8 w-8 text-primary" />
+            <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
+          </div>
+          <div className="text-center text-sm text-muted-foreground">
+            <p className="font-semibold text-foreground">{doctorName}</p>
+            <div className="flex items-center justify-center gap-4">
+              <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
+                <Mail className="h-3 w-3" />
+                drbadhri@gmail.com
+              </a>
+              <a href="tel:+919791377716" className="flex items-center gap-1.5 hover:text-primary">
+                <Phone className="h-3 w-3" />
+                +91 97913 77716
+              </a>
             </div>
           </div>
         </header>
