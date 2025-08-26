@@ -1,0 +1,105 @@
+
+'use client';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Hba1cChart } from './hba1c-chart';
+import { LdlChart } from './ldl-chart';
+import { VitaminDChart } from './vitamin-d-chart';
+import { Separator } from './ui/separator';
+import { useApp } from '@/context/app-context';
+import { format } from 'date-fns';
+import { Droplet, Heart, Sun } from 'lucide-react';
+
+
+export function ReportCard() {
+  const { records, lipidRecords, vitaminDRecords } = useApp();
+
+  const latestHba1c = [...records].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  const latestLipid = [...lipidRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  const latestVitaminD = [...vitaminDRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+
+
+  return (
+    <Card className="h-full">
+      <CardHeader>
+        <div className="grid gap-2">
+          <CardTitle>Comprehensive Health Report</CardTitle>
+          <CardDescription>An overview of your key health metrics and trends.</CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-8 px-2 md:px-6">
+        
+        <section>
+          <CardTitle className="text-lg mb-2">Latest Results</CardTitle>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">HbA1c</CardTitle>
+                <Droplet className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                {latestHba1c ? (
+                    <>
+                     <div className="text-2xl font-bold">{latestHba1c.value}%</div>
+                     <p className="text-xs text-muted-foreground">on {format(new Date(latestHba1c.date), 'dd MMM yyyy')}</p>
+                    </>
+                ) : <p className="text-sm text-muted-foreground">No data</p>}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">LDL Cholesterol</CardTitle>
+                <Heart className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                 {latestLipid ? (
+                    <>
+                     <div className="text-2xl font-bold">{latestLipid.ldl} <span className="text-base font-normal text-muted-foreground">mg/dL</span></div>
+                     <p className="text-xs text-muted-foreground">on {format(new Date(latestLipid.date), 'dd MMM yyyy')}</p>
+                    </>
+                ) : <p className="text-sm text-muted-foreground">No data</p>}
+              </CardContent>
+            </Card>
+             <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Vitamin D</CardTitle>
+                <Sun className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                 {latestVitaminD ? (
+                    <>
+                     <div className="text-2xl font-bold">{latestVitaminD.value} <span className="text-base font-normal text-muted-foreground">ng/mL</span></div>
+                     <p className="text-xs text-muted-foreground">on {format(new Date(latestVitaminD.date), 'dd MMM yyyy')}</p>
+                    </>
+                ) : <p className="text-sm text-muted-foreground">No data</p>}
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <Separator />
+        
+        <section>
+          <CardTitle className="text-lg mb-4">HbA1c Trend</CardTitle>
+          <Hba1cChart />
+        </section>
+
+        <Separator />
+
+        <section>
+          <CardTitle className="text-lg mb-4">LDL Cholesterol Trend</CardTitle>
+          <LdlChart />
+        </section>
+
+        <Separator />
+
+        <section>
+          <CardTitle className="text-lg mb-4">Vitamin D Trend</CardTitle>
+          <VitaminDChart />
+        </section>
+
+      </CardContent>
+    </Card>
+  );
+}
+

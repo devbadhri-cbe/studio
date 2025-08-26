@@ -8,7 +8,7 @@ const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'ot
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
 
-type DashboardView = 'hba1c' | 'lipids' | 'vitaminD';
+type DashboardView = 'hba1c' | 'lipids' | 'vitaminD' | 'report';
 
 interface BatchRecords {
     hba1c?: Omit<Hba1cRecord, 'id' | 'medication'>;
