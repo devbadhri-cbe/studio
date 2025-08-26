@@ -61,35 +61,35 @@ export function HistoryTable() {
               paginatedRecords.map((record) => {
                 const status = getStatus(record.value);
                 return (
-                  <Tooltip key={record.id} delayDuration={100}>
-                    <TooltipTrigger asChild>
-                      <TableRow>
+                  <TableRow key={record.id}>
+                    <Tooltip delayDuration={100}>
+                      <TooltipTrigger asChild>
                         <TableCell className="font-medium px-2 md:px-4">{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
-                        <TableCell className="px-2 md:px-4">{record.value.toFixed(1)}</TableCell>
-                        <TableCell className="px-2 md:px-4">
-                          <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>
-                        </TableCell>
-                        <TableCell className="px-2 md:px-4">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button aria-haspopup="true" size="icon" variant="ghost">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem onSelect={() => removeRecord(record.id)}>Delete</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    </TooltipTrigger>
-                     <TooltipContent side="top" align="center">
-                      <p className="text-xs text-muted-foreground">Medication when tested:</p>
-                      <p className="font-semibold">{record.medication || 'N/A'}</p>
-                    </TooltipContent>
-                  </Tooltip>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="center">
+                        <p className="text-xs text-muted-foreground">Medication when tested:</p>
+                        <p className="font-semibold">{record.medication || 'N/A'}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <TableCell className="px-2 md:px-4">{record.value.toFixed(1)}</TableCell>
+                    <TableCell className="px-2 md:px-4">
+                      <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>
+                    </TableCell>
+                    <TableCell className="px-2 md:px-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem onSelect={() => removeRecord(record.id)}>Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
                 )
               })
             ) : (
