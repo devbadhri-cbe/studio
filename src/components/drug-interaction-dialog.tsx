@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from './ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { ScrollArea } from './ui/scroll-area';
 
 interface DrugInteractionDialogProps {
   medications: string[];
@@ -76,23 +77,25 @@ export function DrugInteractionDialog({ medications, disabled, children }: DrugI
             AI-powered analysis of potential interactions for the current medication list.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4 space-y-4">
-          {isLoading && (
-            <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p>Analyzing interactions...</p>
+        <ScrollArea className="max-h-[60vh] -mx-6 px-6">
+            <div className="py-4 space-y-4">
+            {isLoading && (
+                <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p>Analyzing interactions...</p>
+                </div>
+            )}
+            {result && (
+                <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
+                    <ShieldAlert className="h-4 w-4 !text-destructive" />
+                    <AlertTitle className="text-destructive">Interaction Summary</AlertTitle>
+                    <AlertDescription className="text-destructive/90 whitespace-pre-wrap">
+                        {result}
+                    </AlertDescription>
+                </Alert>
+            )}
             </div>
-          )}
-          {result && (
-            <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
-                <ShieldAlert className="h-4 w-4 !text-destructive" />
-                <AlertTitle className="text-destructive">Interaction Summary</AlertTitle>
-                <AlertDescription className="text-destructive/90 whitespace-pre-wrap">
-                    {result}
-                </AlertDescription>
-            </Alert>
-          )}
-        </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
