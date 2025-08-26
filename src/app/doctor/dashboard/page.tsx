@@ -7,20 +7,9 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Mail, Phone, Eye, MoreHorizontal, UserPlus, Pencil, Trash2, Search } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { mockPatients } from '@/lib/mock-data';
 import type { Patient } from '@/lib/types';
-import { format } from 'date-fns';
 import { PatientFormDialog } from '@/components/add-patient-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -107,19 +96,6 @@ export default function DoctorDashboardPage() {
             description: 'The patient has been removed from the list.'
         });
     }
-
-    const getStatusVariant = (status: Patient['status']) => {
-        switch (status) {
-            case 'Urgent':
-                return 'destructive';
-            case 'Needs Review':
-                return 'secondary';
-            case 'On Track':
-                return 'outline';
-            default:
-                return 'default';
-        }
-    }
     
     const filteredPatients = patients.filter(patient => {
         const query = searchQuery.toLowerCase();
@@ -193,78 +169,7 @@ export default function DoctorDashboardPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="hidden md:block">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[50px]">S.No.</TableHead>
-                                    <TableHead>Patient Name</TableHead>
-                                    <TableHead>Last HbA1c (%)</TableHead>
-                                    <TableHead>Last LDL (mg/dL)</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead><span className="sr-only">Actions</span></TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredPatients.map((patient, index) => (
-                                    <TableRow key={patient.id}>
-                                        <TableCell className="font-medium">{filteredPatients.length - index}</TableCell>
-                                        <TableCell className="font-medium">{patient.name}</TableCell>
-                                        <TableCell>
-                                            {patient.lastHba1c 
-                                                ? `${patient.lastHba1c.value.toFixed(1)} on ${format(new Date(patient.lastHba1c.date), 'dd-MM-yyyy')}` 
-                                                : 'N/A'}
-                                        </TableCell>
-                                        <TableCell>
-                                            {patient.lastLipid 
-                                                ? `${patient.lastLipid.ldl} on ${format(new Date(patient.lastLipid.date), 'dd-MM-yyyy')}`
-                                                : 'N/A'}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant={getStatusVariant(patient.status)} className={getStatusVariant(patient.status) === 'outline' ? 'border-green-500 text-green-600' : ''}>
-                                                {patient.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem onSelect={() => viewPatientDashboard(patient)}>
-                                                        <Eye className="mr-2 h-4 w-4" />
-                                                        View
-                                                    </DropdownMenuItem>
-                                                    <PatientFormDialog patient={patient} onSave={handleSavePatient}>
-                                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                                            <Pencil className="mr-2 h-4 w-4" />
-                                                            Edit
-                                                        </DropdownMenuItem>
-                                                    </PatientFormDialog>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem 
-                                                        onSelect={() => setPatientToDelete(patient)} 
-                                                        className="text-destructive focus:text-destructive focus:bg-destructive/10">
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        Delete
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                    <div className="grid gap-4 md:hidden">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {filteredPatients.map((patient) => (
                              <PatientFormDialog key={patient.id} patient={patient} onSave={handleSavePatient}>
                                 {({ openDialog }) => (
@@ -306,5 +211,3 @@ export default function DoctorDashboardPage() {
     </>
   );
 }
-
-    
