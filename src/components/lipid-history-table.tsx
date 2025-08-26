@@ -37,63 +37,65 @@ export function LipidHistoryTable() {
     <div className="flex flex-col">
       <div className="rounded-lg border">
         <TooltipProvider>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="px-2 md:px-4">Date</TableHead>
-              <TableHead className="px-2 md:px-4">Total</TableHead>
-              <TableHead className="px-2 md:px-4">LDL</TableHead>
-              <TableHead className="px-2 md:px-4">HDL</TableHead>
-              <TableHead className="px-2 md:px-4">Trig.</TableHead>
-              <TableHead>
-                <span className="sr-only">Actions</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedRecords.length > 0 ? (
-              paginatedRecords.map((record) => {
-                return (
-                  <Tooltip key={record.id} delayDuration={100}>
-                    <TooltipTrigger asChild>
-                      <TableRow>
-                        <TableCell className="font-medium px-2 md:px-4">{format(new Date(record.date), 'dd-MM-yyyy')}</TableCell>
-                        <TableCell className="px-2 md:px-4">{record.total}</TableCell>
-                        <TableCell className="px-2 md:px-4">{record.ldl}</TableCell>
-                        <TableCell className="px-2 md:px-4">{record.hdl}</TableCell>
-                        <TableCell className="px-2 md:px-4">{record.triglycerides}</TableCell>
-                        <TableCell className="px-2 md:px-4">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button aria-haspopup="true" size="icon" variant="ghost">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem onSelect={() => removeLipidRecord(record.id)}>Delete</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    </TooltipTrigger>
-                     <TooltipContent side="top" align="center">
-                        <p className="text-xs text-muted-foreground">Medication when tested:</p>
-                        <p className="font-semibold">{record.medication || 'N/A'}</p>
-                      </TooltipContent>
-                  </Tooltip>
-                )
-              })
-            ) : (
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  No records found.
-                </TableCell>
+                <TableHead className="px-2 md:px-4">Date</TableHead>
+                <TableHead className="px-2 md:px-4">Total</TableHead>
+                <TableHead className="px-2 md:px-4">LDL</TableHead>
+                <TableHead className="px-2 md:px-4">HDL</TableHead>
+                <TableHead className="px-2 md:px-4">Trig.</TableHead>
+                <TableHead>
+                  <span className="sr-only">Actions</span>
+                </TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {paginatedRecords.length > 0 ? (
+                paginatedRecords.map((record) => {
+                  return (
+                    <Tooltip key={record.id} delayDuration={100}>
+                      <TableRow>
+                          <TableCell className="font-medium px-2 md:px-4">
+                           <TooltipTrigger asChild>
+                              <span>{format(new Date(record.date), 'dd-MM-yyyy')}</span>
+                           </TooltipTrigger>
+                          </TableCell>
+                          <TableCell className="px-2 md:px-4">{record.total}</TableCell>
+                          <TableCell className="px-2 md:px-4">{record.ldl}</TableCell>
+                          <TableCell className="px-2 md:px-4">{record.hdl}</TableCell>
+                          <TableCell className="px-2 md:px-4">{record.triglycerides}</TableCell>
+                          <TableCell className="px-2 md:px-4">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Toggle menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem onSelect={() => removeLipidRecord(record.id)}>Delete</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                      </TableRow>
+                       <TooltipContent side="top" align="center">
+                          <p className="text-xs text-muted-foreground">Medication when tested:</p>
+                          <p className="font-semibold">{record.medication || 'N/A'}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                  )
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    No records found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </TooltipProvider>
       </div>
       {totalPages > 1 && (
