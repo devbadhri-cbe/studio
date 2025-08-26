@@ -32,11 +32,36 @@ const getStatusVariant = (status: Patient['status']) => {
     }
 }
 
+const formatPhoneNumber = (phone: string, countryCode: string): string => {
+    const country = countries.find(c => c.code === countryCode);
+    if (!phone || !country) return phone || 'N/A';
+
+    const phoneDigits = phone.replace(country.phoneCode, '').replace(/\D/g, '');
+
+    switch (countryCode) {
+        case 'US':
+            if (phoneDigits.length === 10) {
+                return `(${phoneDigits.substring(0, 3)}) ${phoneDigits.substring(3, 6)}-${phoneDigits.substring(6)}`;
+            }
+            break;
+        case 'IN':
+             if (phoneDigits.length === 10) {
+                return `${country.phoneCode} ${phoneDigits.substring(0, 5)} ${phoneDigits.substring(5)}`;
+            }
+            break;
+        default:
+            return `${country.phoneCode} ${phoneDigits}`;
+    }
+    
+    return phone;
+}
+
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
   const statusVariant = getStatusVariant(patient.status);
   const age = calculateAge(patient.dob);
   const country = countries.find(c => c.code === patient.country);
   const countryName = country?.name || patient.country;
+  const formattedPhone = formatPhoneNumber(patient.phone, patient.country);
 
   return (
     <Card className="w-full flex flex-col">
@@ -55,7 +80,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
             </div>
              <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0" />
-                <span className='truncate'>{patient.phone || 'N/A'}</span>
+                <span className='truncate'>{formattedPhone}</span>
             </div>
              <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4 shrink-0" />
