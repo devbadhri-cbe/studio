@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { calculateAge } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { LdlChart } from './ldl-chart';
-import { Mail, Phone, User, Cake, VenetianMask } from 'lucide-react';
+import { Mail, Phone, User, VenetianMask } from 'lucide-react';
 
 
 export function PrintableReport() {
@@ -51,17 +51,17 @@ export function PrintableReport() {
 
       <section className="my-8">
         <h2 className="mb-4 text-xl font-semibold">Patient Information</h2>
-        <div className="space-y-4 rounded-lg border p-6 bg-card">
-            <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                 <div className="flex items-center gap-3">
-                    <User className="h-5 w-5 text-muted-foreground" />
+        <div className="space-y-4 rounded-lg border bg-card p-6">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
+                 <div className="flex items-start gap-3">
+                    <User className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
                     <div>
                         <p className="text-sm text-muted-foreground">Name</p>
                         <p className="font-medium">{profile.name || 'N/A'}</p>
                     </div>
                 </div>
-                 <div className="flex items-center gap-3">
-                    <VenetianMask className="h-5 w-5 text-muted-foreground" />
+                 <div className="flex items-start gap-3">
+                    <VenetianMask className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
                     <div>
                         <p className="text-sm text-muted-foreground">Age & Gender</p>
                         <p className="font-medium">
@@ -69,47 +69,47 @@ export function PrintableReport() {
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Mail className="h-5 w-5 text-muted-foreground" />
+                <div className="flex items-start gap-3">
+                    <Mail className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
                     <div>
                         <p className="text-sm text-muted-foreground">Email</p>
                         <p className="font-medium">{profile.email || 'N/A'}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-muted-foreground" />
+                <div className="flex items-start gap-3">
+                    <Phone className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
                     <div>
                         <p className="text-sm text-muted-foreground">Phone</p>
                         <p className="font-medium">{profile.phone || 'N/A'}</p>
                     </div>
                 </div>
             </div>
-            <div className='pt-4 border-t'>
-                <p className="text-sm font-semibold text-muted-foreground mb-2">Present Medical Conditions</p>
+            <div className='border-t pt-4'>
+                <p className="mb-2 text-sm font-semibold text-muted-foreground">Present Medical Conditions</p>
                 {profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0 ? (
-                <ul className="list-disc pl-5 space-y-1">
+                <ul className="list-disc space-y-1 pl-5">
                 {profile.presentMedicalConditions.map(c => (
-                    <li key={c.id} className="font-medium text-sm">
+                    <li key={c.id} className="text-sm font-medium">
                     {c.condition} (Diagnosed: {format(new Date(c.date), 'dd-MM-yyyy')})
                     </li>
                 ))}
                 </ul>
                 ) : (
-                <p className="font-medium text-sm">N/A</p>
+                <p className="text-sm font-medium">N/A</p>
                 )}
             </div>
-            <div className='pt-4 border-t'>
-                <p className="text-sm font-semibold text-muted-foreground mb-2">Current Medication</p>
+            <div className='border-t pt-4'>
+                <p className="mb-2 text-sm font-semibold text-muted-foreground">Current Medication</p>
                 {profile.medication && profile.medication.length > 0 ? (
-                <ul className="list-disc pl-5 space-y-1">
+                <ul className="list-disc space-y-1 pl-5">
                     {profile.medication.map(med => (
-                    <li key={med.id} className="font-medium text-sm">
+                    <li key={med.id} className="text-sm font-medium">
                         {med.name} {med.dosage} - {med.frequency}
                     </li>
                     ))}
                 </ul>
                 ) : (
-                <p className="font-medium text-sm">N/A</p>
+                <p className="text-sm font-medium">N/A</p>
                 )}
             </div>
         </div>
