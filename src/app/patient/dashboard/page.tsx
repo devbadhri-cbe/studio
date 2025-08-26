@@ -93,7 +93,7 @@ export default function Home() {
                 <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
               </div>
               <div className="flex w-full sm:w-auto items-center justify-end gap-2">
-                {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')} className="flex-1 sm:flex-initial">Patient List</Button>}
+                {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')} className="flex-1 sm:flex-initial" size="sm">Patient List</Button>}
                 <UploadRecordDialog />
                 <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD')}>
                   <SelectTrigger className="w-auto flex-1 sm:flex-initial h-9">
