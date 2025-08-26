@@ -15,6 +15,8 @@ interface AppContextType {
   setProfile: (profile: UserProfile) => void;
   addMedicalCondition: (condition: Omit<MedicalCondition, 'id'>) => void;
   removeMedicalCondition: (id: string) => void;
+  addMedication: (medication: Omit<Medication, 'id'>) => void;
+  removeMedication: (id: string) => void;
   records: Hba1cRecord[];
   addRecord: (record: Omit<Hba1cRecord, 'id' | 'medication'>) => void;
   removeRecord: (id: string) => void;
@@ -153,8 +155,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [getUpdatedPatientObject, records, lipidRecords, syncPatientDataToLocalStorage]);
   
   const addMedicalCondition = React.useCallback((condition: Omit<MedicalCondition, 'id'>) => {
-    const newCondition = { ...condition, id: Date.now().toString() };
     setProfileState(prevProfile => {
+        const newCondition = { ...condition, id: Date.now().toString() };
         const updatedConditions = [...prevProfile.presentMedicalConditions, newCondition];
         updatedConditions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         const newProfile = { ...prevProfile, presentMedicalConditions: updatedConditions };
@@ -173,6 +175,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return newProfile;
     });
   }, [getUpdatedPatientObject, records, lipidRecords, syncPatientDataToLocalStorage]);
+
+   const addMedication = React.useCallback((medication: Omit<Medication, 'id'>) => {
+    setProfileState(prevProfile => {
+      const newMedication = { ...medication, id: Date.now().toString() };
+      const updatedMedications = [...prevProfile.medication, newMedication];
+      const newProfile = { ...prevProfile, medication: updatedMedications };
+      const updatedPatient = getUpdatedPatientObject(newProfile, records, lipidRecords, {});
+      syncPatientDataToLocalStorage(updatedPatient);
+      return newProfile;
+    });
+  }, [getUpdatedPatientObject, records, lipidRecords, syncPatientDataToLocalStorage]);
+
+  const removeMedication = React.useCallback((id: string) => {
+    setProfileState(prevProfile => {
+      const updatedMedications = prevProfile.medication.filter(m => m.id !== id);
+      const newProfile = { ...prevProfile, medication: updatedMedications };
+      const updatedPatient = getUpdatedPatientObject(newProfile, records, lipidRecords, {});
+      syncPatientDataToLocalStorage(updatedPatient);
+      return newProfile;
+    });
+  }, [getUpdatedPatientObject, records, lipidRecords, syncPatientDataToLocalStorage]);
+
 
   const setTips = (newTips: string[]) => {
     setTipsState(newTips);
@@ -249,6 +273,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setProfile,
     addMedicalCondition,
     removeMedicalCondition,
+    addMedication,
+    removeMedication,
     records,
     addRecord,
     removeRecord,
