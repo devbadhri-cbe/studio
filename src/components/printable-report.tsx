@@ -43,15 +43,13 @@ export function PrintableReport() {
           </div>
         </div>
         <div className="text-right text-sm">
-           <Button variant="ghost" onClick={() => window.print()} className="no-print flex items-center gap-2">
+           <Button variant="ghost" onClick={() => window.print()} className="flex items-center gap-2 print:hidden">
               <Printer className="h-4 w-4" />
               <span>Report Generated: <strong>{format(new Date(), 'dd-MM-yyyy')}</strong></span>
             </Button>
-            <div className="print-only">
-              <p>
-                Report Generated: <strong>{format(new Date(), 'dd-MM-yyyy')}</strong>
-              </p>
-            </div>
+            <p className="hidden print:block">
+              Report Generated: <strong>{format(new Date(), 'dd-MM-yyyy')}</strong>
+            </p>
         </div>
       </header>
 
