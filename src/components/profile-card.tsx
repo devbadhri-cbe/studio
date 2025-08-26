@@ -7,7 +7,6 @@ import * as React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { calculateAge } from '@/lib/utils';
-import { MedicalConditionsList } from './medical-conditions-list';
 import { countries } from '@/lib/countries';
 import { Separator } from './ui/separator';
 
