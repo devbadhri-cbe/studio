@@ -33,12 +33,12 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const statusVariant = getStatusVariant(patient.status);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-base font-medium">{patient.name}</CardTitle>
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+        <CardTitle className="text-base font-medium truncate pr-2">{patient.name}</CardTitle>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
+                <Button variant="ghost" className="h-8 w-8 p-0 flex-shrink-0">
                     <span className="sr-only">Open menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                 </Button>
@@ -65,17 +65,17 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         </DropdownMenu>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm text-muted-foreground">
             <Badge variant={statusVariant} className={statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}>
                 {patient.status}
             </Badge>
-            <div className="text-right">
-                <p>{patient.email}</p>
+            <div className="text-right flex-shrink-0">
+                <p className="truncate">{patient.email}</p>
                 <p>{patient.phone}</p>
             </div>
         </div>
         <div className="mt-4 border-t pt-4">
-            <div className="flex justify-between">
+            <div className="flex flex-wrap justify-between gap-4">
                 <div className="text-sm">
                     <p className="text-muted-foreground">Last HbA1c</p>
                     <p className="font-medium">
