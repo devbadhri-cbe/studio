@@ -28,14 +28,9 @@ export function ShareButton() {
     if (isShareSupported) {
         try {
             await navigator.share(shareData);
-            // Success toast is optional, can be distracting if the user shares often.
-            // toast({
-            //     title: 'Report Shared',
-            //     description: 'Your health report has been shared successfully.',
-            // });
         } catch (err: any) {
-            // Check if the error is an AbortError, which occurs when the user cancels the share dialog.
-            // In that case, we can safely ignore it.
+            // If the user cancels the share dialog, the browser throws an AbortError.
+            // We can safely ignore this error.
             if (err.name !== 'AbortError') {
               console.error('Share failed:', err);
               toast({
