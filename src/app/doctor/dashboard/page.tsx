@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Mail, Phone, Eye, MoreHorizontal, UserPlus, Pencil, Trash2 } from 'lucide-react';
+import { Mail, Phone, Eye, MoreHorizontal, UserPlus, Pencil, Trash2, Search } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
 
 type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions'>
 
@@ -41,6 +42,8 @@ export default function DoctorDashboardPage() {
     const doctorName = 'Dr. Badhrinathan N';
     const [patients, setPatients] = React.useState<Patient[]>([]);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
+    const [searchQuery, setSearchQuery] = React.useState('');
+
 
     React.useEffect(() => {
         try {
@@ -115,6 +118,10 @@ export default function DoctorDashboardPage() {
                 return 'default';
         }
     }
+    
+    const filteredPatients = patients.filter(patient =>
+        patient.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   return (
     <>
@@ -160,6 +167,16 @@ export default function DoctorDashboardPage() {
                         <CardDescription>A list of all patients currently under your care.</CardDescription>
                     </div>
                     <div className="ml-auto flex items-center gap-2">
+                         <div className="relative">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                type="search"
+                                placeholder="Search by name..."
+                                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
                         <PatientFormDialog onSave={handleSavePatient}>
                             <Button size="sm" className="h-8 gap-1">
                                 <UserPlus className="h-3.5 w-3.5" />
@@ -181,9 +198,9 @@ export default function DoctorDashboardPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {patients.map((patient, index) => (
+                            {filteredPatients.map((patient, index) => (
                                 <TableRow key={patient.id}>
-                                    <TableCell className="font-medium">{patients.length - index}</TableCell>
+                                    <TableCell className="font-medium">{filteredPatients.length - index}</TableCell>
                                     <TableCell className="font-medium">{patient.name}</TableCell>
                                     <TableCell>
                                         {patient.lastHba1c 
@@ -266,4 +283,3 @@ export default function DoctorDashboardPage() {
     </>
   );
 }
-
