@@ -57,7 +57,7 @@ const recalculatePatientStatus = (patient: Patient): Patient => {
 export const getPatients = async (): Promise<Patient[]> => {
     const querySnapshot = await getDocs(collection(db, PATIENTS_COLLECTION));
     const patients = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Patient));
-    return patients;
+    return patients.sort((a, b) => a.name.localeCompare(b.name));
 };
 
 // Fetch a single patient
@@ -75,7 +75,7 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
 export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number }): Promise<Patient> => {
     const { weight, ...restOfPatientData } = patientData;
 
-    const newPatientObject: Omit<Patient, 'id'> = {
+    let newPatientObject: Omit<Patient, 'id'> = {
         ...restOfPatientData,
         lastHba1c: null,
         lastLipid: null,
@@ -95,16 +95,19 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
 
     if (weight) {
         newPatientObject.weightRecords = [{
-            id: 'initial-weight',
+            id: `weight-${Date.now()}`,
             date: new Date().toISOString(),
             value: weight,
         }];
     }
     
-    const patientWithStatus = recalculatePatientStatus(newPatientObject as Patient);
+    let patientToSave = recalculatePatientStatus(newPatientObject as Patient);
+    
+    // Remove the id property before saving
+    const { id, ...saveData } = patientToSave;
 
-    const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), patientWithStatus);
-    return { id: docRef.id, ...patientWithStatus };
+    const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), saveData);
+    return { id: docRef.id, ...saveData };
 };
 
 // Update an existing patient
@@ -133,7 +136,9 @@ export const updatePatient = async (patientId: string, patientData: Partial<Pati
     
     updatedData = recalculatePatientStatus(updatedData);
     
-    await setDoc(docRef, updatedData);
+    const { id, ...saveData } = updatedData;
+
+    await setDoc(docRef, saveData);
     return updatedData;
 };
 
@@ -143,3 +148,5 @@ export const deletePatient = async (id: string): Promise<void> => {
     const docRef = doc(db, PATIENTS_COLLECTION, id);
     await deleteDoc(docRef);
 };
+
+    
