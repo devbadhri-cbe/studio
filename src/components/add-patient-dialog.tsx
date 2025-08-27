@@ -72,8 +72,8 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
       email: '',
       country: '',
       phone: '',
-      height: undefined,
-      weight: undefined
+      height: '' as any,
+      weight: '' as any,
     },
   });
   
@@ -107,13 +107,13 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 name: patient.name,
                 gender: patient.gender,
                 dob: patient.dob,
-                email: patient.email,
+                email: patient.email || '',
                 country: patient.country,
-                phone: patient.phone,
-                height: patient.height,
+                phone: patient.phone || '',
+                height: patient.height || '' as any,
                 weight: patient.weightRecords && patient.weightRecords.length > 0
                   ? [...patient.weightRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].value
-                  : undefined,
+                  : '' as any,
             });
         } else {
             form.reset({
@@ -123,8 +123,8 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 email: '',
                 country: '',
                 phone: '',
-                height: undefined,
-                weight: undefined,
+                height: '' as any,
+                weight: '' as any,
             });
         }
     }
@@ -140,6 +140,8 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
         ...data,
         email: data.email || '',
         phone: data.phone || '',
+        height: data.height || undefined,
+        weight: data.weight || undefined,
     };
 
     if (data.weight) {
