@@ -128,10 +128,6 @@ export default function DoctorDashboardPage() {
                 <Mail className="h-3 w-3" />
                 drbadhri@gmail.com
               </a>
-              <a href="tel:+919791377716" className="flex items-center gap-1.5 hover:text-primary">
-                <Phone className="h-3 w-3" />
-                +91 97913 77716
-              </a>
             </div>
           </div>
         </header>
