@@ -22,6 +22,7 @@ export default function AppRootPage() {
         router.replace('/doctor/dashboard');
       } else {
         setIsDoctorLoggedIn(false);
+        // If no doctor is logged in, we can stop loading and show the patient login page.
         setIsLoading(false);
       }
     });
@@ -29,17 +30,18 @@ export default function AppRootPage() {
     return () => unsubscribe();
   }, [router, setIsDoctorLoggedIn]);
   
-  // This handles client-side check for patient login via localStorage
-   React.useEffect(() => {
-    if (isClient && !isDoctorLoggedInFromContext) {
-      const patientId = localStorage.getItem('patient_id');
-      if (patientId) {
-        router.replace(`/patient/${patientId}`);
-      } else {
-        setIsLoading(false);
-      }
-    }
-  }, [isClient, router, isDoctorLoggedInFromContext]);
+  // This logic is being removed to prevent automatic login for patients.
+  // The app should always start at the login page if no one is authenticated.
+  // React.useEffect(() => {
+  //   if (isClient && !isDoctorLoggedInFromContext) {
+  //     const patientId = localStorage.getItem('patient_id');
+  //     if (patientId) {
+  //       router.replace(`/patient/${patientId}`);
+  //     } else {
+  //       setIsLoading(false);
+  //     }
+  //   }
+  // }, [isClient, router, isDoctorLoggedInFromContext]);
 
 
   if (!isClient || isLoading) {
