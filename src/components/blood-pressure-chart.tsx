@@ -82,15 +82,10 @@ export function BloodPressureChart() {
               }}
             />
              <ReferenceArea y1={80} y2={130} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
-              <Label value="Goal" position="insideTopLeft" fill="hsl(var(--accent))" fontSize={12} />
             </ReferenceArea>
 
-            <ReferenceLine y={80} stroke="hsl(var(--accent))" strokeDasharray="3 3">
-                <Label value="Diastolic Goal (<80)" position="insideBottomLeft" fill="hsl(var(--accent))" fontSize={10} />
-            </ReferenceLine>
-            <ReferenceLine y={130} stroke="hsl(var(--primary))" strokeDasharray="3 3">
-                <Label value="Systolic Goal (<130)" position="insideTopLeft" fill="hsl(var(--primary))" fontSize={10} />
-            </ReferenceLine>
+            <ReferenceLine y={80} stroke="hsl(var(--accent))" strokeDasharray="3 3" />
+            <ReferenceLine y={130} stroke="hsl(var(--primary))" strokeDasharray="3 3" />
             
             <Line type="monotone" dataKey='systolic' stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} activeDot={{ r: 6 }} name="Systolic"/>
             <Line type="monotone" dataKey='diastolic' stroke="hsl(var(--accent))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--accent))' }} activeDot={{ r: 6 }} name="Diastolic"/>
