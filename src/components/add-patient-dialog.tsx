@@ -32,13 +32,15 @@ const FormSchema = z.object({
   email: z.string().email('Please enter a valid email address.').optional().or(z.literal('')),
   country: z.string().min(1, 'Country is required.'),
   phone: z.string().min(5, 'A valid phone number is required.'),
+  height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional(),
+  weight: z.coerce.number().min(2, 'Weight must be at least 2kg.').optional(),
 }).refine((data) => data.email || data.phone, {
     message: "Either email or phone number is required.",
     path: ["email"],
 });
 
 
-type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD'>
+type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD' | 'weightRecords'>
 
 interface PatientFormDialogProps {
     patient?: Patient;
@@ -61,13 +63,17 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
       dob: patient.dob,
       email: patient.email,
       country: patient.country,
-      phone: patient.phone
+      phone: patient.phone,
+      height: patient.height,
+      weight: patient.weightRecords?.[0]?.value,
     } : {
       name: '',
       dob: '',
       email: '',
       country: '',
       phone: '',
+      height: undefined,
+      weight: undefined
     },
   });
   
@@ -103,7 +109,11 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 dob: patient.dob,
                 email: patient.email,
                 country: patient.country,
-                phone: patient.phone
+                phone: patient.phone,
+                height: patient.height,
+                weight: patient.weightRecords && patient.weightRecords.length > 0
+                  ? [...patient.weightRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].value
+                  : undefined,
             });
         } else {
             form.reset({
@@ -113,6 +123,8 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 email: '',
                 country: '',
                 phone: '',
+                height: undefined,
+                weight: undefined,
             });
         }
     }
@@ -124,11 +136,19 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
     
-    const submissionData = {
+    const submissionData: any = {
         ...data,
         email: data.email || '',
         phone: data.phone || '',
     };
+
+    if (data.weight) {
+        submissionData.weightRecords = [{
+            id: 'initial',
+            date: new Date().toISOString(),
+            value: data.weight
+        }];
+    }
     
     setTimeout(() => {
         onSave(submissionData, patient?.id);
@@ -212,6 +232,36 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                   )}
                 />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                    control={form.control}
+                    name="height"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Height (cm)</FormLabel>
+                            <FormControl>
+                                <Input type="number" placeholder="e.g., 175" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="weight"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Weight (kg)</FormLabel>
+                            <FormControl>
+                                <Input type="number" step="0.1" placeholder="e.g., 70" {...field} />
+                            </FormControl>
+                             <FormDescription className='text-xs'>This will create a new weight record.</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
                 name="email"

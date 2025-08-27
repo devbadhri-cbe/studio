@@ -16,6 +16,13 @@ export interface Medication {
   frequency: string;
 }
 
+export interface WeightRecord {
+  id: string;
+  date: Date | string;
+  value: number; // in kg
+  medication?: string;
+}
+
 export interface UserProfile {
   id: string; // Add patient ID to profile for easier lookup
   name: string;
@@ -24,10 +31,12 @@ export interface UserProfile {
   email?: string;
   country: string;
   phone?: string;
+  height?: number; // in cm
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
   vitaminDRecords?: VitaminDRecord[];
   thyroidRecords?: ThyroidRecord[];
+  weightRecords?: WeightRecord[];
 }
 
 export interface Hba1cRecord {
@@ -71,6 +80,8 @@ export interface Patient {
   email: string;
   country: string;
   phone: string;
+  height?: number; // in cm
+  bmi?: number;
   lastHba1c: {
     value: number;
     date: string;
@@ -93,6 +104,7 @@ export interface Patient {
   lipidRecords?: LipidRecord[];
   vitaminDRecords?: VitaminDRecord[];
   thyroidRecords?: ThyroidRecord[];
+  weightRecords?: WeightRecord[];
   medication?: Medication[];
   presentMedicalConditions?: MedicalCondition[];
 }

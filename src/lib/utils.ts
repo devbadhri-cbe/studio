@@ -19,3 +19,15 @@ export function calculateAge(dob: string): number | null {
     return null;
   }
 }
+
+export function calculateBmi(weight: number, height: number): number | null {
+  if (!weight || !height || height === 0) return null;
+  try {
+    const heightInMeters = height / 100;
+    const bmi = weight / (heightInMeters * heightInMeters);
+    return parseFloat(bmi.toFixed(1));
+  } catch (e) {
+    console.error("Could not calculate BMI", e);
+    return null;
+  }
+}

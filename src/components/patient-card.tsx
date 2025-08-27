@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, User, VenetianMask, Mail, Phone, Droplet, Activity, Globe, Sun } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, User, VenetianMask, Mail, Phone, Droplet, Activity, Globe, Sun, TrendingUp } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge } from '@/lib/utils';
@@ -93,6 +93,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
             <CardTitle className="truncate">{patient.name}</CardTitle>
             <CardDescription className="truncate text-xs">
                 {age ? `${age} years old` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
+                 {patient.bmi && <span className="font-semibold"> (BMI: {patient.bmi})</span>}
             </CardDescription>
           </div>
         </div>

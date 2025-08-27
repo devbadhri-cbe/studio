@@ -81,6 +81,8 @@ export default function DoctorDashboardPage() {
                 records: [],
                 lipidRecords: [],
                 vitaminDRecords: [],
+                thyroidRecords: [],
+                weightRecords: [],
                 medication: [],
                 presentMedicalConditions: [],
             };

@@ -35,6 +35,15 @@ export default function PatientDashboardPage() {
                 const patient = patients.find(p => p.id === patientId);
 
                 if (patient) {
+                    // Ensure all optional record arrays exist
+                    patient.records = patient.records || [];
+                    patient.lipidRecords = patient.lipidRecords || [];
+                    patient.vitaminDRecords = patient.vitaminDRecords || [];
+                    patient.thyroidRecords = patient.thyroidRecords || [];
+                    patient.weightRecords = patient.weightRecords || [];
+                    patient.medication = patient.medication || [];
+                    patient.presentMedicalConditions = patient.presentMedicalConditions || [];
+                    
                     setPatientData(patient);
                 } else {
                     setError(`Patient with ID ${patientId} not found.`);

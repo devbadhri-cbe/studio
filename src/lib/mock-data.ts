@@ -10,6 +10,8 @@ export const mockPatients: Patient[] = [
     email: 'alexandria.schmidt.brauenstein@verylongdomainname.co.uk',
     country: 'GB',
     phone: '+442079460958',
+    height: 165,
+    bmi: 22.9,
     lastHba1c: { value: 5.8, date: '2024-05-15' },
     lastLipid: { ldl: 110, date: '2024-03-20' },
     lastVitaminD: { value: 25, date: '2024-01-10' },
@@ -20,6 +22,9 @@ export const mockPatients: Patient[] = [
     ],
     thyroidRecords: [
         { id: 't1', date: '2024-06-10', tsh: 4.5, t3: 150, t4: 8.5 },
+    ],
+    weightRecords: [
+      { id: 'w1', date: '2024-01-10', value: 62.5 },
     ]
   },
   {
@@ -30,6 +35,8 @@ export const mockPatients: Patient[] = [
     email: 'john.smith@example.com',
     country: 'US',
     phone: '+19876543210',
+    height: 180,
+    bmi: 27.8,
     lastHba1c: { value: 7.2, date: '2024-06-01' },
     lastLipid: null,
     lastVitaminD: { value: 18, date: '2023-12-01' },
@@ -37,6 +44,9 @@ export const mockPatients: Patient[] = [
     status: 'Urgent',
     vitaminDRecords: [
         { id: 'vd2', date: '2023-12-01', value: 18 },
+    ],
+     weightRecords: [
+      { id: 'w2', date: '2024-01-10', value: 90 },
     ]
   },
   {
@@ -47,6 +57,8 @@ export const mockPatients: Patient[] = [
     email: 'emily.white@example.com',
     country: 'CA',
     phone: '+16475551234',
+    height: 170,
+    bmi: 21.5,
     lastHba1c: { value: 5.4, date: '2024-04-10' },
     lastLipid: { ldl: 95, date: '2024-04-10' },
     lastVitaminD: { value: 45, date: '2024-02-20' },
@@ -57,6 +69,9 @@ export const mockPatients: Patient[] = [
     ],
     thyroidRecords: [
       { id: 't2', date: '2024-05-01', tsh: 2.1, t3: 160, t4: 9.0 },
+    ],
+     weightRecords: [
+      { id: 'w3', date: '2024-01-10', value: 62 },
     ]
   },
    {
@@ -67,11 +82,16 @@ export const mockPatients: Patient[] = [
     email: 'michael.brown@example.com',
     country: 'AU',
     phone: '+61491570110',
+    height: 178,
+    bmi: 26.6,
     lastHba1c: null,
     lastLipid: { ldl: 130, date: '2024-01-12' },
     lastVitaminD: null,
     lastThyroid: null,
     status: 'Needs Review',
+     weightRecords: [
+      { id: 'w4', date: '2024-01-10', value: 84 },
+    ]
   },
   {
     id: '5',
@@ -81,6 +101,8 @@ export const mockPatients: Patient[] = [
     email: 'maria.garcia@example.com',
     country: 'IN',
     phone: '+919876543210',
+    height: 158,
+    bmi: 24.8,
     lastHba1c: { value: 6.1, date: '2024-05-20' },
     lastLipid: { ldl: 145, date: '2024-05-20' },
     lastVitaminD: { value: 32, date: '2024-03-01' },
@@ -91,6 +113,9 @@ export const mockPatients: Patient[] = [
     ],
     thyroidRecords: [
        { id: 't3', date: '2024-06-20', tsh: 0.2, t3: 180, t4: 10.0 },
+    ],
+    weightRecords: [
+      { id: 'w5', date: '2024-01-10', value: 62 },
     ]
   },
 ];

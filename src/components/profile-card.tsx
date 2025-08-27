@@ -1,7 +1,7 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
-import { calculateAge } from '@/lib/utils';
+import { calculateAge, calculateBmi } from '@/lib/utils';
 import { countries } from '@/lib/countries';
 import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
@@ -18,6 +18,7 @@ import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 import { DrugInteractionDialog } from './drug-interaction-dialog';
+import { Separator } from './ui/separator';
 
 const MedicationSchema = z.object({
   name: z.string().min(2, 'Medication name is required.'),
@@ -101,15 +102,45 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: z.infer<typ
   );
 }
 
+const WeightSchema = z.object({
+    value: z.coerce.number().min(2, 'Weight must be at least 2kg.'),
+    date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
+});
+
+function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof WeightSchema>) => void, onCancel: () => void }) {
+    const form = useForm<z.infer<typeof WeightSchema>>({
+        resolver: zodResolver(WeightSchema),
+        defaultValues: { value: '' as any, date: format(new Date(), 'yyyy-MM-dd') },
+    });
+
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
+                <div className="grid grid-cols-2 gap-2">
+                    <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+                <div className="flex justify-end gap-2">
+                    <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+                    <Button type="submit" size="sm">Save</Button>
+                </div>
+            </form>
+        </Form>
+    );
+}
 
 export function ProfileCard() {
-  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication } = useApp();
+  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
+  const [isAddingWeight, setIsAddingWeight] = React.useState(false);
 
   const calculatedAge = calculateAge(profile.dob);
   const countryName = countries.find(c => c.code === profile.country)?.name || profile.country;
-  
+  const sortedWeights = React.useMemo(() => [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [weightRecords]);
+  const latestWeight = sortedWeights[0];
+  const bmi = calculateBmi(latestWeight?.value, profile.height || 0);
+
   const handleSaveCondition = async (data: z.infer<typeof ConditionSchema>, icdCode?: string) => {
     addMedicalCondition({ ...data, date: new Date(data.date).toISOString(), icdCode });
     setIsAddingCondition(false);
@@ -118,6 +149,11 @@ export function ProfileCard() {
   const handleSaveMedication = (data: z.infer<typeof MedicationSchema>) => {
     addMedication(data);
     setIsAddingMedication(false);
+  }
+
+  const handleSaveWeight = (data: z.infer<typeof WeightSchema>) => {
+      addWeightRecord(data);
+      setIsAddingWeight(false);
   }
 
   return (
@@ -145,6 +181,20 @@ export function ProfileCard() {
                     {calculatedAge !== null ? `${calculatedAge} years` : 'N/A'}, <span className="capitalize">{profile.gender || 'N/A'}</span>
                 </p>
             </div>
+            <div className="flex items-center gap-3 text-muted-foreground">
+                <Ruler className="h-5 w-5 shrink-0" />
+                <p>{profile.height ? `${profile.height} cm` : 'N/A'}</p>
+            </div>
+            <div className="flex items-center gap-3 text-muted-foreground">
+                <TrendingUp className="h-5 w-5 shrink-0" />
+                 <p>
+                    {latestWeight ? `${latestWeight.value} kg` : 'N/A'}
+                    {bmi && <span className="ml-2 font-semibold text-foreground">(BMI: {bmi})</span>}
+                </p>
+            </div>
+
+             <Separator className="my-2" />
+
              <div className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="h-5 w-5 shrink-0" />
                 <p>{profile.email || 'N/A'}</p>
@@ -157,6 +207,38 @@ export function ProfileCard() {
                 <Globe className="h-5 w-5 shrink-0" />
                 <p>{countryName}</p>
             </div>
+        </div>
+
+        <div>
+             <div className="flex items-center justify-between gap-3 mb-2">
+                <div className='flex items-center gap-3'>
+                    <TrendingUp className="h-5 w-5 shrink-0 text-muted-foreground" />
+                    <h3 className="font-medium">Weight Records</h3>
+                </div>
+                 {!isAddingWeight && (
+                    <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setIsAddingWeight(true)}>
+                        <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add
+                    </Button>
+                )}
+            </div>
+            {isAddingWeight && <WeightForm onSave={handleSaveWeight} onCancel={() => setIsAddingWeight(false)} />}
+            {sortedWeights.length > 0 ? (
+                 <ul className="space-y-1 mt-2">
+                    {sortedWeights.slice(0, 3).map((weight) => (
+                        <li key={weight.id} className="group flex items-start gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                           <div className="flex-1">
+                                <span className="font-semibold text-foreground">{weight.value} kg</span>
+                                <span className="block text-xs">on {format(new Date(weight.date), 'dd-MMM-yyyy')}</span>
+                           </div>
+                           <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeWeightRecord(weight.id)}>
+                               <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                           </Button>
+                        </li>
+                    ))}
+                 </ul>
+            ) : (
+                !isAddingWeight && <p className="text-xs text-muted-foreground pl-8">No weight recorded.</p>
+            )}
         </div>
         
         <div>
