@@ -1,3 +1,4 @@
+
 'use client';
 
 import { format } from 'date-fns';
@@ -77,23 +78,16 @@ export function Hba1cChart() {
                 return null;
               }}
             />
-            <ReferenceArea y1={4.0} y2={5.6} stroke="hsl(var(--accent))" strokeOpacity={0.3} fill="transparent" fillOpacity={0}>
-              <Legend
-                content={() => (
-                  <div className="text-xs text-center text-accent-foreground/70" style={{color: 'hsl(var(--accent))'}}>
-                    Healthy Range (4.0-5.6%)
-                  </div>
-                )}
-                verticalAlign="top"
-                align="center"
-              />
+            <ReferenceArea y1={0} y2={5.6} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
+               <Label value="Healthy" position="insideTopLeft" fill="hsl(var(--accent))" fontSize={12} />
             </ReferenceArea>
-             <ReferenceLine y={5.7} stroke="hsl(var(--destructive))" strokeOpacity={0.5} strokeDasharray="3 3">
-              <Label value="Prediabetes (5.7%)" position="top" fill="hsl(var(--destructive))" fontSize={10} />
-            </ReferenceLine>
-            <ReferenceLine y={6.5} stroke="hsl(var(--destructive))" strokeOpacity={0.8} strokeDasharray="3 3">
-              <Label value="Diabetes (6.5%)" position="top" fill="hsl(var(--destructive))" fontSize={10} />
-            </ReferenceLine>
+            <ReferenceArea y1={5.7} y2={6.4} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
+               <Label value="Prediabetes" position="insideTopLeft" fill="hsl(var(--chart-3))" fontSize={12} />
+            </ReferenceArea>
+            <ReferenceArea y1={6.5} y2={yAxisMax} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
+              <Label value="Diabetes" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={12} />
+            </ReferenceArea>
+
             <Line type="monotone" dataKey="hba1c" stroke="hsl(var(--primary))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--primary))" />} activeDot={{ r: 6 }} />
           </LineChart>
         ) : (
