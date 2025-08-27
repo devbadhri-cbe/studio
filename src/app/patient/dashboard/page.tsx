@@ -64,29 +64,31 @@ export default function Home() {
   return (
     <>
       <div className="flex min-h-screen w-full flex-col bg-background">
-         <header className="border-b px-4 py-4 md:px-6 flex flex-col items-center gap-2">
-          <div className="w-full flex items-center justify-center relative">
-              <div className="flex items-center gap-2">
-                  <Logo className="h-8 w-8 text-primary" />
-                  <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
-              </div>
-               <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
-                   <ThemeToggle />
-                  {!isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/login')} size="sm">Doctor Portal</Button>}
-              </div>
-          </div>
+         <header className="border-b px-4 py-4 md:px-6">
+            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2">
+                <div className="w-full flex items-center justify-center relative">
+                    <div className="flex items-center gap-2">
+                        <Logo className="h-8 w-8 text-primary" />
+                        <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
+                    </div>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
+                        <ThemeToggle />
+                        {!isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/login')} size="sm">Doctor Portal</Button>}
+                    </div>
+                </div>
 
-          {isDoctorLoggedIn && (
-              <div className="text-center text-sm text-muted-foreground">
-                  <p className="font-semibold text-foreground">{doctorName}</p>
-                  <div className="flex items-center justify-center gap-4">
-                      <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
-                          <Mail className="h-3 w-3" />
-                          drbadhri@gmail.com
-                      </a>
-                  </div>
-              </div>
-          )}
+                {isDoctorLoggedIn && (
+                    <div className="text-center text-sm text-muted-foreground">
+                        <p className="font-semibold text-foreground">{doctorName}</p>
+                        <div className="flex items-center justify-center gap-4">
+                            <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
+                                <Mail className="h-3 w-3" />
+                                drbadhri@gmail.com
+                            </a>
+                        </div>
+                    </div>
+                )}
+            </div>
       </header>
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
