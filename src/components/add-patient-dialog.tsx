@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -40,7 +41,7 @@ const FormSchema = z.object({
 });
 
 
-type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD' | 'thyroidRecords' | 'lastThyroid' | 'weightRecords' | 'bloodPressureRecords' | 'lastBloodPressure'>
+type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD' | 'thyroidRecords' | 'lastThyroid' | 'weightRecords' | 'bloodPressureRecords' | 'lastBloodPressure' | 'bmi'> & { weight?: number };
 
 interface PatientFormDialogProps {
     patient?: Patient;
@@ -68,6 +69,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
       weight: patient.weightRecords?.[0]?.value,
     } : {
       name: '',
+      gender: undefined,
       dob: '',
       email: '',
       country: '',
@@ -136,21 +138,13 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
     
-    const submissionData: any = {
+    const submissionData: PatientFormData = {
         ...data,
         email: data.email || '',
         phone: data.phone || '',
         height: data.height || undefined,
         weight: data.weight || undefined,
     };
-
-    if (data.weight) {
-        submissionData.weightRecords = [{
-            id: 'initial',
-            date: new Date().toISOString(),
-            value: data.weight
-        }];
-    }
     
     setTimeout(() => {
         onSave(submissionData, patient?.id);

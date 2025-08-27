@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -25,7 +26,7 @@ import { PatientCard } from '@/components/patient-card';
 import { addPatient, deletePatient, getPatients, updatePatient } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
-type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD' | 'thyroidRecords' | 'lastThyroid' | 'weightRecords' | 'lastBloodPressure' | 'bloodPressureRecords' | 'bmi'>;
+type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD' | 'thyroidRecords' | 'lastThyroid' | 'weightRecords' | 'bloodPressureRecords' | 'lastBloodPressure' | 'bmi'> & { weight?: number };
 
 export default function DoctorDashboardPage() {
     const router = useRouter();

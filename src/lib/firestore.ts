@@ -1,8 +1,9 @@
 
+
 'use client';
 
 import { db } from './firebase';
-import { collection, getDocs, doc, getDoc, addDoc, setDoc, deleteDoc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc, setDoc, deleteDoc, updateDoc, query } from 'firebase/firestore';
 import type { Patient, Hba1cRecord, LipidRecord, VitaminDRecord, ThyroidRecord, BloodPressureRecord, WeightRecord } from './types';
 import { calculateBmi } from './utils';
 
@@ -71,9 +72,11 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
 };
 
 // Add a new patient
-export const addPatient = async (patientData: Omit<Patient, 'id'>): Promise<Patient> => {
+export const addPatient = async (patientData: Omit<Patient, 'id' | 'weightRecords'> & { weight?: number }): Promise<Patient> => {
+    const { weight, ...restOfPatientData } = patientData;
+
     const newPatient: Omit<Patient, 'id'> = {
-        ...patientData,
+        ...restOfPatientData,
         lastHba1c: null,
         lastLipid: null,
         lastVitaminD: null,
@@ -84,11 +87,19 @@ export const addPatient = async (patientData: Omit<Patient, 'id'>): Promise<Pati
         lipidRecords: [],
         vitaminDRecords: [],
         thyroidRecords: [],
-        weightRecords: patientData.weightRecords || [],
+        weightRecords: [],
         bloodPressureRecords: [],
         medication: [],
         presentMedicalConditions: [],
     };
+
+    if (weight) {
+        newPatient.weightRecords = [{
+            id: 'initial-weight',
+            date: new Date().toISOString(),
+            value: weight,
+        }];
+    }
     
     const patientWithStatus = recalculatePatientStatus(newPatient as Patient);
 
