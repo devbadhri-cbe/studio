@@ -8,7 +8,7 @@ import { useApp } from '@/context/app-context';
 export function BloodPressureChart() {
   const { bloodPressureRecords } = useApp();
 
-  const sortedRecords = [...(bloodPressureRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const sortedRecords = [...(bloodPressureRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(a.date).getTime());
   
   const oneYearAgo = subYears(new Date(), 1);
   
@@ -82,22 +82,6 @@ export function BloodPressureChart() {
               }}
             />
             
-            <ReferenceLine y={120} stroke="hsl(var(--chart-2))" strokeDasharray="3 3">
-                <Label value="Elevated" position="right" fill="hsl(var(--chart-2))" fontSize={10} />
-            </ReferenceLine>
-            <ReferenceLine y={130} stroke="hsl(var(--chart-3))" strokeDasharray="3 3">
-                 <Label value="Stage 1" position="right" fill="hsl(var(--chart-3))" fontSize={10} />
-            </ReferenceLine>
-             <ReferenceLine y={140} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
-                <Label value="Stage 2" position="right" fill="hsl(var(--destructive))" fontSize={10} />
-            </ReferenceLine>
-             <ReferenceLine y={80} stroke="hsl(var(--chart-3))" strokeDasharray="3 3">
-                <Label value="Stage 1" position="right" fill="hsl(var(--chart-3))" fontSize={10} />
-            </ReferenceLine>
-            <ReferenceLine y={90} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
-                <Label value="Stage 2" position="right" fill="hsl(var(--destructive))" fontSize={10} />
-            </ReferenceLine>
-
             <Line type="monotone" dataKey='systolic' stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} activeDot={{ r: 6 }} name="Systolic"/>
             <Line type="monotone" dataKey='diastolic' stroke="hsl(var(--accent))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--accent))' }} activeDot={{ r: 6 }} name="Diastolic"/>
           </ComposedChart>
