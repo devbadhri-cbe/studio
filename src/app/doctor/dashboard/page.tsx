@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
 
 
-type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD'>
+type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD' | 'thyroidRecords' | 'lastThyroid' | 'weightRecords'>
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
@@ -77,6 +77,7 @@ export default function DoctorDashboardPage() {
                 lastHba1c: null,
                 lastLipid: null,
                 lastVitaminD: null,
+                lastThyroid: null,
                 status: 'On Track',
                 records: [],
                 lipidRecords: [],

@@ -39,7 +39,7 @@ interface AppContextType {
   addThyroidRecord: (record: Omit<ThyroidRecord, 'id' | 'medication'>) => void;
   removeThyroidRecord: (id: string) => void;
   weightRecords: WeightRecord[];
-  addWeightRecord: (record: Omit<WeightRecord, 'id' | 'medication'>) => void;
+  addWeightRecord: (record: Omit<WeightRecord, 'id'>) => void;
   removeWeightRecord: (id: string) => void;
   addBatchRecords: (records: BatchRecords) => void;
   tips: string[];
@@ -366,7 +366,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, [profile, records, lipidRecords, vitaminDRecords, weightRecords, getUpdatedPatientObject, syncPatientDataToLocalStorage]);
   
-  const addWeightRecord = React.useCallback((record: Omit<WeightRecord, 'id' | 'medication'>) => {
+  const addWeightRecord = React.useCallback((record: Omit<WeightRecord, 'id'>) => {
     setWeightRecordsState(prevRecords => {
         const newRecord = {
             ...record,

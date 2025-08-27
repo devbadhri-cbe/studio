@@ -20,7 +20,7 @@ export function calculateAge(dob: string): number | null {
   }
 }
 
-export function calculateBmi(weight: number, height: number): number | null {
+export function calculateBmi(weight: number | undefined, height: number | undefined): number | null {
   if (!weight || !height || height === 0) return null;
   try {
     const heightInMeters = height / 100;

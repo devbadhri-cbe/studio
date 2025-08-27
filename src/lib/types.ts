@@ -34,9 +34,6 @@ export interface UserProfile {
   height?: number; // in cm
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
-  vitaminDRecords?: VitaminDRecord[];
-  thyroidRecords?: ThyroidRecord[];
-  weightRecords?: WeightRecord[];
 }
 
 export interface Hba1cRecord {
@@ -100,13 +97,13 @@ export interface Patient {
   } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
   // Add full record history to the patient object
-  records?: Hba1cRecord[];
-  lipidRecords?: LipidRecord[];
-  vitaminDRecords?: VitaminDRecord[];
-  thyroidRecords?: ThyroidRecord[];
-  weightRecords?: WeightRecord[];
-  medication?: Medication[];
-  presentMedicalConditions?: MedicalCondition[];
+  records: Hba1cRecord[];
+  lipidRecords: LipidRecord[];
+  vitaminDRecords: VitaminDRecord[];
+  thyroidRecords: ThyroidRecord[];
+  weightRecords: WeightRecord[];
+  medication: Medication[];
+  presentMedicalConditions: MedicalCondition[];
 }
 
     

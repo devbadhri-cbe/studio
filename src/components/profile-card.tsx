@@ -117,7 +117,7 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
                 <div className="grid grid-cols-2 gap-2">
-                    <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
                 <div className="flex justify-end gap-2">
