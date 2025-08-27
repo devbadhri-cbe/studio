@@ -4,7 +4,7 @@
 import { getPersonalizedInsights } from '@/ai/flows/personalized-insights';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { calculateAge } from '@/lib/utils';
+import { calculateAge, calculateBmi } from '@/lib/utils';
 import { Lightbulb, Loader2 } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { format } from 'date-fns';
 
 export function InsightsCard() {
-  const { profile, records, lipidRecords, tips, setTips } = useApp();
+  const { profile, records, lipidRecords, tips, setTips, weightRecords } = useApp();
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
 
@@ -38,6 +38,9 @@ export function InsightsCard() {
       
       const medicationString = profile.medication.map(m => `${m.name} ${m.dosage} ${m.frequency}`).join(', ');
 
+      const latestWeight = [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+      const bmi = calculateBmi(latestWeight?.value, profile.height);
+
       const result = await getPersonalizedInsights({
         hba1cData: hba1cData.length > 0 ? hba1cData : undefined,
         lipidData: lipidData.length > 0 ? lipidData : undefined,
@@ -46,6 +49,7 @@ export function InsightsCard() {
           name: profile.name,
           age: age,
           gender: profile.gender,
+          bmi: bmi || undefined,
           presentMedicalConditions: profile.presentMedicalConditions.map(c => ({
             condition: c.condition,
             date: format(new Date(c.date), 'MMMM d, yyyy'),
