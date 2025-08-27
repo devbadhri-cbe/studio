@@ -41,11 +41,9 @@ const FormSchema = z.object({
 });
 
 
-type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD' | 'thyroidRecords' | 'lastThyroid' | 'weightRecords' | 'bloodPressureRecords' | 'lastBloodPressure' | 'bmi'> & { weight?: number };
-
 interface PatientFormDialogProps {
     patient?: Patient;
-    onSave: (patient: PatientFormData, patientId?: string) => void;
+    onSave: (patient: Partial<Patient> & { weight?: number }, patientId?: string) => void;
     children: React.ReactNode | ((props: { openDialog: () => void }) => React.ReactNode);
 }
 
@@ -58,16 +56,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: isEditMode ? {
-      name: patient.name,
-      gender: patient.gender,
-      dob: patient.dob,
-      email: patient.email,
-      country: patient.country,
-      phone: patient.phone,
-      height: patient.height,
-      weight: patient.weightRecords?.[0]?.value,
-    } : {
+    defaultValues: {
       name: '',
       gender: undefined,
       dob: '',
@@ -104,7 +93,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
   
   React.useEffect(() => {
     if (open) {
-        if (isEditMode) {
+        if (isEditMode && patient) {
              form.reset({
                 name: patient.name,
                 gender: patient.gender,
@@ -138,7 +127,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
     
-    const submissionData: PatientFormData = {
+    const submissionData: Partial<Patient> & { weight?: number } = {
         ...data,
         email: data.email || '',
         phone: data.phone || '',
@@ -148,10 +137,6 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
     
     setTimeout(() => {
         onSave(submissionData, patient?.id);
-        toast({
-            title: isEditMode ? 'Patient Updated' : 'Patient Added',
-            description: `${data.name}'s details have been ${isEditMode ? 'updated' : 'added'}.`,
-        });
         setIsSubmitting(false);
         setOpen(false);
     }, 1000);
@@ -236,7 +221,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                         <FormItem>
                             <FormLabel>Height (cm)</FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="e.g., 175" {...field} />
+                                <Input type="number" placeholder="e.g., 175" {...field} value={field.value ?? ''} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -249,7 +234,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                         <FormItem>
                             <FormLabel>Weight (kg)</FormLabel>
                             <FormControl>
-                                <Input type="number" step="0.1" placeholder="e.g., 70" {...field} />
+                                <Input type="number" step="0.1" placeholder="e.g., 70" {...field} value={field.value ?? ''} />
                             </FormControl>
                              <FormDescription className='text-xs'>This will create a new weight record.</FormDescription>
                             <FormMessage />

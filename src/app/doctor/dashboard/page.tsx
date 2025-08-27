@@ -26,8 +26,6 @@ import { PatientCard } from '@/components/patient-card';
 import { addPatient, deletePatient, getPatients, updatePatient } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
-type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD' | 'thyroidRecords' | 'lastThyroid' | 'weightRecords' | 'bloodPressureRecords' | 'lastBloodPressure' | 'bmi'> & { weight?: number };
-
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
@@ -61,18 +59,18 @@ export default function DoctorDashboardPage() {
         router.push(`/patient/${patient.id}`);
     }
 
-    const handleSavePatient = async (patientData: PatientFormData, patientId?: string) => {
+    const handleSavePatient = async (patientData: Partial<Patient> & { weight?: number }, patientId?: string) => {
         try {
             if (patientId) { // Editing existing patient
-                const updatedPatient = await updatePatient(patientId, patientData, patients.find(p => p.id === patientId));
+                const updatedPatient = await updatePatient(patientId, patientData);
                 setPatients(patients.map(p => p.id === patientId ? updatedPatient : p));
                  toast({
                     title: 'Patient Updated',
                     description: `${updatedPatient.name}'s details have been updated.`,
                 });
             } else { // Adding new patient
-                const newPatient = await addPatient(patientData);
-                setPatients([newPatient, ...patients]);
+                const newPatient = await addPatient(patientData as Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number });
+                setPatients([newPatient, ...patients].sort((a,b) => a.name.localeCompare(b.name)));
                  toast({
                     title: 'Patient Added',
                     description: `${newPatient.name}'s details have been added.`,

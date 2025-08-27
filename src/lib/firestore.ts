@@ -3,8 +3,8 @@
 'use client';
 
 import { db } from './firebase';
-import { collection, getDocs, doc, getDoc, addDoc, setDoc, deleteDoc, updateDoc, query } from 'firebase/firestore';
-import type { Patient, Hba1cRecord, LipidRecord, VitaminDRecord, ThyroidRecord, BloodPressureRecord, WeightRecord } from './types';
+import { collection, getDocs, doc, getDoc, addDoc, setDoc, deleteDoc, updateDoc, query, orderBy } from 'firebase/firestore';
+import type { Patient } from './types';
 import { calculateBmi } from './utils';
 
 const PATIENTS_COLLECTION = 'patients';
@@ -55,9 +55,10 @@ const recalculatePatientStatus = (patient: Patient): Patient => {
 
 // Fetch all patients
 export const getPatients = async (): Promise<Patient[]> => {
-    const q = query(collection(db, PATIENTS_COLLECTION));
+    const q = query(collection(db, PATIENTS_COLLECTION), orderBy('name', 'asc'));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Patient));
+    const patients = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Patient));
+    return patients;
 };
 
 // Fetch a single patient
@@ -72,10 +73,10 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
 };
 
 // Add a new patient
-export const addPatient = async (patientData: Omit<Patient, 'id' | 'weightRecords'> & { weight?: number }): Promise<Patient> => {
+export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number }): Promise<Patient> => {
     const { weight, ...restOfPatientData } = patientData;
 
-    const newPatient: Omit<Patient, 'id'> = {
+    const newPatientObject: Omit<Patient, 'id'> = {
         ...restOfPatientData,
         lastHba1c: null,
         lastLipid: null,
@@ -94,41 +95,47 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'weightRecord
     };
 
     if (weight) {
-        newPatient.weightRecords = [{
+        newPatientObject.weightRecords = [{
             id: 'initial-weight',
             date: new Date().toISOString(),
             value: weight,
         }];
     }
     
-    const patientWithStatus = recalculatePatientStatus(newPatient as Patient);
+    const patientWithStatus = recalculatePatientStatus(newPatientObject as Patient);
 
     const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), patientWithStatus);
     return { id: docRef.id, ...patientWithStatus };
 };
 
 // Update an existing patient
-export const updatePatient = async (patientId: string, patientData: Partial<Omit<Patient, 'id'>>, existingPatient?: Patient): Promise<Patient> => {
+export const updatePatient = async (patientId: string, patientData: Partial<Patient>): Promise<Patient> => {
     const docRef = doc(db, PATIENTS_COLLECTION, patientId);
     
-    // If we have the full patient object, we can recalculate status
-    if (existingPatient) {
-        let updatedData = { ...existingPatient, ...patientData };
-        updatedData = recalculatePatientStatus(updatedData);
-        await setDoc(docRef, updatedData);
-        return updatedData;
-    } else {
-        // Otherwise, just update the provided fields
-        await updateDoc(docRef, patientData);
-        const updatedDoc = await getDoc(docRef);
-        const finalPatient = { id: updatedDoc.id, ...updatedDoc.data() } as Patient;
-        // Recalculate status after fetching the full document
-        const patientWithStatus = recalculatePatientStatus(finalPatient);
-        if(JSON.stringify(patientWithStatus) !== JSON.stringify(finalPatient)) {
-            await setDoc(docRef, patientWithStatus);
-        }
-        return patientWithStatus;
+    // Fetch the existing patient data first
+    const existingPatient = await getPatient(patientId);
+    if (!existingPatient) {
+        throw new Error("Patient not found");
     }
+
+    let updatedData: Patient = { ...existingPatient, ...patientData };
+
+    // Handle new weight record if provided
+    const newWeight = (patientData as any).weight;
+    if (newWeight) {
+        const newWeightRecord = {
+            id: `weight-${Date.now()}`,
+            date: new Date().toISOString(),
+            value: newWeight,
+        };
+        updatedData.weightRecords = [...(updatedData.weightRecords || []), newWeightRecord];
+        delete (updatedData as any).weight; // Remove temporary weight field
+    }
+    
+    updatedData = recalculatePatientStatus(updatedData);
+    
+    await setDoc(docRef, updatedData);
+    return updatedData;
 };
 
 
