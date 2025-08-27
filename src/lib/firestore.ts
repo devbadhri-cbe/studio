@@ -54,7 +54,7 @@ const recalculatePatientStatus = (patient: Patient): Patient => {
 
 // Fetch all patients
 export const getPatients = async (): Promise<Patient[]> => {
-    const q = query(collection(db, PATIENTS_COLLECTION), orderBy('name', 'asc'));
+    const q = query(collection(db, PATIENTS_COLLECTION));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Patient));
 };
