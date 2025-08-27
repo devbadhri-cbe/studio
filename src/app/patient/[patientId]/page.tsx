@@ -4,12 +4,16 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { useParams, useRouter } from 'next/navigation';
-import type { Patient } from '@/lib/types';
 import PatientDashboard from '@/app/patient/dashboard/page';
+import { getPatient } from '@/lib/firestore';
+import { useToast } from '@/hooks/use-toast';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export default function PatientDashboardPage() {
-    const { setPatientData, isDoctorLoggedIn } = useApp();
+    const { setPatientData } = useApp();
     const router = useRouter();
+    const { toast } = useToast();
     const params = useParams();
     const patientId = params.patientId as string;
     const [isLoading, setIsLoading] = React.useState(true);
@@ -18,49 +22,37 @@ export default function PatientDashboardPage() {
     React.useEffect(() => {
         if (!patientId) return;
 
-        try {
-            const storedPatients = localStorage.getItem('doctor-patients');
-            const doctorLoggedIn = localStorage.getItem('doctor_logged_in');
-
-            // Use both the app context and local storage for a robust check
-            if (!doctorLoggedIn && !isDoctorLoggedIn) {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const patient = await getPatient(patientId);
+                    if (patient) {
+                        setPatientData(patient);
+                    } else {
+                        setError(`Patient with ID ${patientId} not found.`);
+                    }
+                } catch (e) {
+                    console.error("Failed to load patient data:", e);
+                    setError('Failed to load patient data.');
+                    toast({
+                        variant: 'destructive',
+                        title: 'Error',
+                        description: 'Could not fetch patient data from the cloud.'
+                    });
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
                 setError('Access denied. Please log in as a doctor.');
                 setIsLoading(false);
                 // Optional: redirect to login
                 // router.push('/doctor/login');
-                return;
             }
+        });
 
-            if (storedPatients) {
-                const patients: Patient[] = JSON.parse(storedPatients);
-                const patient = patients.find(p => p.id === patientId);
+        return () => unsubscribe();
 
-                if (patient) {
-                    // Ensure all optional record arrays exist
-                    patient.records = patient.records || [];
-                    patient.lipidRecords = patient.lipidRecords || [];
-                    patient.vitaminDRecords = patient.vitaminDRecords || [];
-                    patient.thyroidRecords = patient.thyroidRecords || [];
-                    patient.weightRecords = patient.weightRecords || [];
-                    patient.bloodPressureRecords = patient.bloodPressureRecords || [];
-                    patient.medication = patient.medication || [];
-                    patient.presentMedicalConditions = patient.presentMedicalConditions || [];
-                    
-                    setPatientData(patient);
-                } else {
-                    setError(`Patient with ID ${patientId} not found.`);
-                }
-            } else {
-                setError('No patient data found.');
-            }
-        } catch (e) {
-            console.error("Failed to load patient data:", e);
-            setError('Failed to load patient data.');
-        } finally {
-            setIsLoading(false);
-        }
-
-    }, [patientId, setPatientData, router, isDoctorLoggedIn]);
+    }, [patientId, setPatientData, router, toast]);
 
     if (isLoading) {
         return (
@@ -73,8 +65,9 @@ export default function PatientDashboardPage() {
     
     if (error) {
          return (
-            <div className="flex h-screen items-center justify-center bg-background text-destructive">
+            <div className="flex h-screen flex-col items-center justify-center bg-background text-destructive text-center p-4">
                 <p>{error}</p>
+                <Button onClick={() => router.push('/doctor/login')} className="mt-4">Go to Login</Button>
             </div>
         );
     }

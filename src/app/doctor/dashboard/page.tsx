@@ -5,9 +5,8 @@ import * as React from 'react';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Mail, Phone, Eye, MoreHorizontal, UserPlus, Pencil, Trash2, Search } from 'lucide-react';
+import { Mail, Search, UserPlus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockPatients } from '@/lib/mock-data';
 import type { Patient } from '@/lib/types';
 import { PatientFormDialog } from '@/components/add-patient-dialog';
 import {
@@ -23,85 +22,88 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
+import { addPatient, deletePatient, getPatients, updatePatient } from '@/lib/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
-
-type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD' | 'thyroidRecords' | 'lastThyroid' | 'weightRecords' | 'lastBloodPressure' | 'bloodPressureRecords'>
+type PatientFormData = Omit<Patient, 'id' | 'lastHba1c' | 'lastLipid' | 'status' | 'records' | 'lipidRecords' | 'medication' | 'presentMedicalConditions' | 'vitaminDRecords' | 'lastVitaminD' | 'thyroidRecords' | 'lastThyroid' | 'weightRecords' | 'lastBloodPressure' | 'bloodPressureRecords' | 'bmi'>;
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
     const doctorName = 'Dr. Badhrinathan N';
     const [patients, setPatients] = React.useState<Patient[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
     const [searchQuery, setSearchQuery] = React.useState('');
 
-
     React.useEffect(() => {
-        try {
-            const storedPatients = localStorage.getItem('doctor-patients');
-            if (storedPatients) {
-                setPatients(JSON.parse(storedPatients));
-            } else {
-                setPatients(mockPatients);
-                localStorage.setItem('doctor-patients', JSON.stringify(mockPatients));
+        const fetchPatients = async () => {
+            try {
+                const fetchedPatients = await getPatients();
+                setPatients(fetchedPatients);
+            } catch (error) {
+                console.error("Failed to fetch patients from Firestore", error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Failed to load patient data from the cloud."
+                });
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            console.error("Failed to parse patients from localStorage", error);
-            setPatients(mockPatients);
-        }
-    }, []);
+        };
 
-    const savePatients = (updatedPatients: Patient[]) => {
-        const sortedPatients = updatedPatients.sort((a, b) => {
-            // Simple sort by name for now, can be made more complex
-            return a.name.localeCompare(b.name);
-        });
-        setPatients(sortedPatients);
-        localStorage.setItem('doctor-patients', JSON.stringify(sortedPatients));
-    }
+        fetchPatients();
+    }, [toast]);
 
     const viewPatientDashboard = (patient: Patient) => {
         router.push(`/patient/${patient.id}`);
     }
 
-    const handleSavePatient = (patientData: PatientFormData, patientId?: string) => {
-        if (patientId) { // Editing existing patient
-            const updatedPatients = patients.map(p => 
-                p.id === patientId ? { ...p, ...patientData } : p
-            );
-            savePatients(updatedPatients);
-        } else { // Adding new patient
-            const newPatient: Patient = {
-                ...patientData,
-                id: Date.now().toString(),
-                lastHba1c: null,
-                lastLipid: null,
-                lastVitaminD: null,
-                lastThyroid: null,
-                lastBloodPressure: null,
-                status: 'On Track',
-                records: [],
-                lipidRecords: [],
-                vitaminDRecords: [],
-                thyroidRecords: [],
-                weightRecords: [],
-                bloodPressureRecords: [],
-                medication: [],
-                presentMedicalConditions: [],
-            };
-            const updatedPatients = [newPatient, ...patients];
-            savePatients(updatedPatients);
+    const handleSavePatient = async (patientData: PatientFormData, patientId?: string) => {
+        try {
+            if (patientId) { // Editing existing patient
+                const updatedPatient = await updatePatient(patientId, patientData, patients.find(p => p.id === patientId));
+                setPatients(patients.map(p => p.id === patientId ? updatedPatient : p));
+                 toast({
+                    title: 'Patient Updated',
+                    description: `${updatedPatient.name}'s details have been updated.`,
+                });
+            } else { // Adding new patient
+                const newPatient = await addPatient(patientData);
+                setPatients([newPatient, ...patients]);
+                 toast({
+                    title: 'Patient Added',
+                    description: `${newPatient.name}'s details have been added.`,
+                });
+            }
+        } catch (error) {
+             console.error("Failed to save patient:", error);
+             toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not save patient details. Please try again.',
+             });
         }
     };
     
-    const removePatient = (patientId: string) => {
-        const updatedPatients = patients.filter(p => p.id !== patientId);
-        savePatients(updatedPatients);
-        setPatientToDelete(null);
-        toast({
-            title: 'Patient Deleted',
-            description: 'The patient has been removed from the list.'
-        });
+    const removePatient = async (patientId: string) => {
+        try {
+            await deletePatient(patientId);
+            setPatients(patients.filter(p => p.id !== patientId));
+            setPatientToDelete(null);
+            toast({
+                title: 'Patient Deleted',
+                description: 'The patient has been removed from the list.'
+            });
+        } catch (error) {
+             console.error("Failed to delete patient:", error);
+             toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not delete patient. Please try again.',
+             });
+        }
     }
     
     const filteredPatients = patients.filter(patient => {
@@ -143,7 +145,6 @@ export default function DoctorDashboardPage() {
                 <Button onClick={() => router.push('/patient/dashboard')} variant="outline" size="sm" className="hidden sm:inline-flex">My Patient Dashboard</Button>
             </div>
 
-
             <Card>
                 <CardHeader className="flex flex-col md:flex-row md:items-center gap-4">
                     <div className="grid gap-2 flex-1">
@@ -170,20 +171,26 @@ export default function DoctorDashboardPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {filteredPatients.map((patient) => (
-                             <PatientFormDialog key={patient.id} patient={patient} onSave={handleSavePatient}>
-                                {({ openDialog }) => (
-                                    <PatientCard
-                                        patient={patient}
-                                        onView={viewPatientDashboard}
-                                        onEdit={openDialog}
-                                        onDelete={setPatientToDelete}
-                                    />
-                                )}
-                             </PatientFormDialog>
-                        ))}
-                    </div>
+                    {isLoading ? (
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-[300px] w-full" />)}
+                        </div>
+                    ) : (
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                            {filteredPatients.map((patient) => (
+                                 <PatientFormDialog key={patient.id} patient={patient} onSave={handleSavePatient}>
+                                    {({ openDialog }) => (
+                                        <PatientCard
+                                            patient={patient}
+                                            onView={viewPatientDashboard}
+                                            onEdit={openDialog}
+                                            onDelete={setPatientToDelete}
+                                        />
+                                    )}
+                                 </PatientFormDialog>
+                            ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
