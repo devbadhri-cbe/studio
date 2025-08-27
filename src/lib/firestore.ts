@@ -3,17 +3,26 @@
 'use client';
 
 import { db } from './firebase';
-import { collection, getDocs, doc, getDoc, addDoc, setDoc, deleteDoc, updateDoc, query } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc, setDoc, deleteDoc, query } from 'firebase/firestore';
 import type { Patient } from './types';
 import { calculateBmi } from './utils';
+import { MOCK_PATIENTS } from './mock-data';
+import { Hba1cRecord } from './types';
+import { LipidRecord } from './types';
+import { VitaminDRecord } from './types';
+import { ThyroidRecord } from './types';
+import { WeightRecord } from './types';
+import { BloodPressureRecord } from './types';
+import { MedicalCondition } from './types';
+import { Medication } from './types';
+
+let patientsStore: Patient[] = [...MOCK_PATIENTS];
 
 const PATIENTS_COLLECTION = 'patients';
 
-// Helper function to recalculate patient status and latest readings
 const recalculatePatientStatus = (patient: Patient): Patient => {
     const updatedPatient = { ...patient };
     
-    // Sort records to find the latest
     const sortedHba1c = [...(updatedPatient.records || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const sortedLipids = [...(updatedPatient.lipidRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const sortedVitaminD = [...(updatedPatient.vitaminDRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -21,21 +30,18 @@ const recalculatePatientStatus = (patient: Patient): Patient => {
     const sortedBloodPressure = [...(updatedPatient.bloodPressureRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const sortedWeight = [...(updatedPatient.weightRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    // Update latest readings
     updatedPatient.lastHba1c = sortedHba1c[0] ? { value: sortedHba1c[0].value, date: new Date(sortedHba1c[0].date).toISOString() } : null;
     updatedPatient.lastLipid = sortedLipids[0] ? { ldl: sortedLipids[0].ldl, date: new Date(sortedLipids[0].date).toISOString() } : null;
     updatedPatient.lastVitaminD = sortedVitaminD[0] ? { value: sortedVitaminD[0].value, date: new Date(sortedVitaminD[0].date).toISOString() } : null;
     updatedPatient.lastThyroid = sortedThyroid[0] ? { tsh: sortedThyroid[0].tsh, date: new Date(sortedThyroid[0].date).toISOString() } : null;
     updatedPatient.lastBloodPressure = sortedBloodPressure[0] ? { systolic: sortedBloodPressure[0].systolic, diastolic: sortedBloodPressure[0].diastolic, date: new Date(sortedBloodPressure[0].date).toISOString() } : null;
     
-    // Update BMI
     if (updatedPatient.height && sortedWeight.length > 0) {
         updatedPatient.bmi = calculateBmi(sortedWeight[0].value, updatedPatient.height);
     } else {
         updatedPatient.bmi = undefined;
     }
 
-    // Recalculate Status
     let status: Patient['status'] = 'On Track';
     if (updatedPatient.lastHba1c && updatedPatient.lastHba1c.value >= 7.0) status = 'Urgent';
     else if (updatedPatient.lastBloodPressure && (updatedPatient.lastBloodPressure.systolic >= 140 || updatedPatient.lastBloodPressure.diastolic >= 90)) status = 'Urgent';
@@ -52,30 +58,26 @@ const recalculatePatientStatus = (patient: Patient): Patient => {
     return updatedPatient;
 };
 
-
 // Fetch all patients
 export const getPatients = async (): Promise<Patient[]> => {
-    const querySnapshot = await getDocs(collection(db, PATIENTS_COLLECTION));
-    const patients = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Patient));
-    return patients.sort((a, b) => a.name.localeCompare(b.name));
+    console.log("Using mock data: getPatients");
+    return Promise.resolve(patientsStore.sort((a, b) => a.name.localeCompare(b.name)));
 };
 
 // Fetch a single patient
 export const getPatient = async (id: string): Promise<Patient | null> => {
-    const docRef = doc(db, PATIENTS_COLLECTION, id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() } as Patient;
-    } else {
-        return null;
-    }
+    console.log(`Using mock data: getPatient for id ${id}`);
+    const patient = patientsStore.find(p => p.id === id) || null;
+    return Promise.resolve(patient);
 };
 
 // Add a new patient
 export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number }): Promise<Patient> => {
+    console.log("Using mock data: addPatient");
     const { weight, ...restOfPatientData } = patientData;
 
-    let newPatientObject: Omit<Patient, 'id'> = {
+    let newPatientObject: Patient = {
+        id: Date.now().toString(),
         ...restOfPatientData,
         lastHba1c: null,
         lastLipid: null,
@@ -83,14 +85,14 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
         lastThyroid: null,
         lastBloodPressure: null,
         status: 'On Track',
-        records: [],
-        lipidRecords: [],
-        vitaminDRecords: [],
-        thyroidRecords: [],
-        weightRecords: [],
-        bloodPressureRecords: [],
-        medication: [],
-        presentMedicalConditions: [],
+        records: [] as Hba1cRecord[],
+        lipidRecords: [] as LipidRecord[],
+        vitaminDRecords: [] as VitaminDRecord[],
+        thyroidRecords: [] as ThyroidRecord[],
+        weightRecords: [] as WeightRecord[],
+        bloodPressureRecords: [] as BloodPressureRecord[],
+        medication: [] as Medication[],
+        presentMedicalConditions: [] as MedicalCondition[],
     };
 
     if (weight) {
@@ -101,28 +103,22 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
         }];
     }
     
-    let patientToSave = recalculatePatientStatus(newPatientObject as Patient);
+    let patientToSave = recalculatePatientStatus(newPatientObject);
     
-    // Remove the id property before saving
-    const { id, ...saveData } = patientToSave;
-
-    const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), saveData);
-    return { id: docRef.id, ...saveData };
+    patientsStore.push(patientToSave);
+    return Promise.resolve(patientToSave);
 };
 
 // Update an existing patient
 export const updatePatient = async (patientId: string, patientData: Partial<Patient>): Promise<Patient> => {
-    const docRef = doc(db, PATIENTS_COLLECTION, patientId);
-    
-    // Fetch the existing patient data first
-    const existingPatient = await getPatient(patientId);
+    console.log(`Using mock data: updatePatient for id ${patientId}`);
+    let existingPatient = patientsStore.find(p => p.id === patientId);
     if (!existingPatient) {
-        throw new Error("Patient not found");
+        throw new Error("Patient not found in mock data");
     }
 
     let updatedData: Patient = { ...existingPatient, ...patientData };
 
-    // Handle new weight record if provided
     const newWeight = (patientData as any).weight;
     if (newWeight) {
         const newWeightRecord = {
@@ -131,22 +127,19 @@ export const updatePatient = async (patientId: string, patientData: Partial<Pati
             value: newWeight,
         };
         updatedData.weightRecords = [...(updatedData.weightRecords || []), newWeightRecord];
-        delete (updatedData as any).weight; // Remove temporary weight field
+        delete (updatedData as any).weight;
     }
     
     updatedData = recalculatePatientStatus(updatedData);
     
-    const { id, ...saveData } = updatedData;
-
-    await setDoc(docRef, saveData);
-    return updatedData;
+    patientsStore = patientsStore.map(p => p.id === patientId ? updatedData : p);
+    return Promise.resolve(updatedData);
 };
 
 
 // Delete a patient
 export const deletePatient = async (id: string): Promise<void> => {
-    const docRef = doc(db, PATIENTS_COLLECTION, id);
-    await deleteDoc(docRef);
+    console.log(`Using mock data: deletePatient for id ${id}`);
+    patientsStore = patientsStore.filter(p => p.id !== id);
+    return Promise.resolve();
 };
-
-    
