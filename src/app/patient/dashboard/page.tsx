@@ -8,7 +8,7 @@ import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
-import { Mail, Phone } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import {
   Select,
@@ -73,6 +73,7 @@ export default function Home() {
                     </div>
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
                         <ThemeToggle />
+                        {!isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/login')}>Doctor Portal</Button>}
                     </div>
                 </div>
 
@@ -99,7 +100,6 @@ export default function Home() {
                 <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
               </div>
               <div className="flex w-full sm:w-auto items-center justify-end gap-2">
-                {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')} size="sm">Patient List</Button>}
                 <UploadRecordDialog />
                 <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}>
                   <SelectTrigger className="w-auto flex-1 sm:flex-initial h-9">
