@@ -7,11 +7,10 @@ import { useParams, useRouter } from 'next/navigation';
 import PatientDashboard from '@/app/patient/dashboard/page';
 import { getPatient } from '@/lib/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { Button } from '@/components/ui/button';
 
 export default function PatientDashboardPage() {
-    const { setPatientData } = useApp();
+    const { setPatientData, isDoctorLoggedIn } = useApp();
     const router = useRouter();
     const { toast } = useToast();
     const params = useParams();
@@ -22,37 +21,39 @@ export default function PatientDashboardPage() {
     React.useEffect(() => {
         if (!patientId) return;
 
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                try {
-                    const patient = await getPatient(patientId);
-                    if (patient) {
-                        setPatientData(patient);
-                    } else {
-                        setError(`Patient with ID ${patientId} not found.`);
-                    }
-                } catch (e) {
-                    console.error("Failed to load patient data:", e);
-                    setError('Failed to load patient data.');
-                    toast({
-                        variant: 'destructive',
-                        title: 'Error',
-                        description: 'Could not fetch patient data from the cloud.'
-                    });
-                } finally {
-                    setIsLoading(false);
-                }
-            } else {
-                setError('Access denied. Please log in as a doctor.');
+        const verifyAccessAndLoadData = async () => {
+            const loggedInPatientId = localStorage.getItem('patient_id');
+            const isDoctor = isDoctorLoggedIn || localStorage.getItem('doctor_logged_in') === 'true';
+
+            if (!isDoctor && loggedInPatientId !== patientId) {
+                setError('Access Denied. You are not authorized to view this page.');
                 setIsLoading(false);
-                // Optional: redirect to login
-                // router.push('/doctor/login');
+                return;
             }
-        });
 
-        return () => unsubscribe();
+            try {
+                const patient = await getPatient(patientId);
+                if (patient) {
+                    setPatientData(patient);
+                } else {
+                    setError(`Patient with ID ${patientId} not found.`);
+                }
+            } catch (e) {
+                console.error("Failed to load patient data:", e);
+                setError('Failed to load patient data.');
+                toast({
+                    variant: 'destructive',
+                    title: 'Error',
+                    description: 'Could not fetch patient data from the cloud.'
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-    }, [patientId, setPatientData, router, toast]);
+        verifyAccessAndLoadData();
+
+    }, [patientId, setPatientData, router, toast, isDoctorLoggedIn]);
 
     if (isLoading) {
         return (
@@ -67,11 +68,10 @@ export default function PatientDashboardPage() {
          return (
             <div className="flex h-screen flex-col items-center justify-center bg-background text-destructive text-center p-4">
                 <p>{error}</p>
-                <Button onClick={() => router.push('/doctor/login')} className="mt-4">Go to Login</Button>
+                <Button onClick={() => router.push('/')} className="mt-4">Go to Login</Button>
             </div>
         );
     }
     
-    // Once data is loaded and there's no error, render the main Home/Dashboard component
     return <PatientDashboard />;
 }
