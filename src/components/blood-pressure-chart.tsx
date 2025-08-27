@@ -1,15 +1,22 @@
 
 'use client';
 
-import { format } from 'date-fns';
+import { format, subYears } from 'date-fns';
 import { ComposedChart, Area, Line, CartesianGrid, Label, Rectangle, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useApp } from '@/context/app-context';
 
 export function BloodPressureChart() {
   const { bloodPressureRecords } = useApp();
 
-  const sortedRecords = [...(bloodPressureRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const latestRecords = sortedRecords.slice(0, 5).reverse();
+  const sortedRecords = [...(bloodPressureRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
+  const oneYearAgo = subYears(new Date(), 1);
+  
+  let latestRecords = sortedRecords.filter(r => new Date(r.date) >= oneYearAgo);
+
+  if (latestRecords.length < 5 && sortedRecords.length > 0) {
+      latestRecords = sortedRecords.slice(-5);
+  }
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
