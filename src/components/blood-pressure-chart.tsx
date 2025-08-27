@@ -2,7 +2,7 @@
 'use client';
 
 import { format, subYears } from 'date-fns';
-import { ComposedChart, Area, Line, CartesianGrid, Label, Rectangle, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { ComposedChart, Area, Line, CartesianGrid, Label, Rectangle, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine } from 'recharts';
 import { useApp } from '@/context/app-context';
 
 export function BloodPressureChart() {
@@ -20,7 +20,8 @@ export function BloodPressureChart() {
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
-    bp: [r.systolic, r.diastolic],
+    systolic: r.systolic,
+    diastolic: r.diastolic,
   }));
 
   const yAxisMax = 200;
@@ -44,6 +45,7 @@ export function BloodPressureChart() {
               tick={{ fontSize: 12 }}
             />
             <YAxis
+              dataKey="systolic"
               domain={[40, yAxisMax]}
               ticks={yAxisTicks}
               allowDecimals={false}
@@ -55,7 +57,8 @@ export function BloodPressureChart() {
               cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
               content={({ active, payload, label }) => {
                 if (active && payload && payload.length) {
-                  const bpValue = payload[0].value as [number, number];
+                  const systolicValue = payload.find(p => p.dataKey === 'systolic')?.value;
+                  const diastolicValue = payload.find(p => p.dataKey === 'diastolic')?.value;
                   return (
                     <div className="rounded-lg border bg-background p-2 shadow-sm">
                       <div className="grid grid-cols-2 gap-2">
@@ -65,8 +68,10 @@ export function BloodPressureChart() {
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">BP</span>
-                          <span className="font-bold" style={{ color: 'hsl(var(--chart-5))' }}>
-                            {bpValue[0]} / {bpValue[1]}
+                           <span className="font-bold">
+                            <span style={{ color: 'hsl(var(--primary))' }}>{systolicValue}</span>
+                            <span className="text-muted-foreground"> / </span>
+                            <span style={{ color: 'hsl(var(--accent))' }}>{diastolicValue}</span>
                           </span>
                         </div>
                       </div>
@@ -77,23 +82,24 @@ export function BloodPressureChart() {
               }}
             />
             
-            {/* Reference Areas for BP Categories */}
-            <ReferenceArea y1={0} y2={80} x1={0} x2={120} stroke="hsl(var(--accent))" strokeOpacity={0.3} fill="hsl(var(--accent))" fillOpacity={0.1}>
-              <Label value="Normal" position="insideTopLeft" fill="hsl(var(--accent))" fontSize={10} />
-            </ReferenceArea>
-             <ReferenceArea y1={0} y2={80} x1={120} x2={130} stroke="hsl(var(--chart-2))" strokeOpacity={0.3} fill="hsl(var(--chart-2))" fillOpacity={0.1}>
-              <Label value="Elevated" position="insideTopLeft" fill="hsl(var(--chart-2))" fontSize={10} />
-            </ReferenceArea>
-             <ReferenceArea y1={80} y2={90} x1={130} x2={140} stroke="hsl(var(--chart-3))" strokeOpacity={0.3} fill="hsl(var(--chart-3))" fillOpacity={0.1}>
-              <Label value="Stage 1" position="insideTopLeft" fill="hsl(var(--chart-3))" fontSize={10} />
-            </ReferenceArea>
-             <ReferenceArea y1={90} y2={yAxisMax} x1={140} x2={yAxisMax} stroke="hsl(var(--destructive))" strokeOpacity={0.3} fill="hsl(var(--destructive))" fillOpacity={0.1}>
-              <Label value="Stage 2" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
-            </ReferenceArea>
+            <ReferenceLine y={120} stroke="hsl(var(--chart-2))" strokeDasharray="3 3">
+                <Label value="Elevated" position="right" fill="hsl(var(--chart-2))" fontSize={10} />
+            </ReferenceLine>
+            <ReferenceLine y={130} stroke="hsl(var(--chart-3))" strokeDasharray="3 3">
+                 <Label value="Stage 1" position="right" fill="hsl(var(--chart-3))" fontSize={10} />
+            </ReferenceLine>
+             <ReferenceLine y={140} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
+                <Label value="Stage 2" position="right" fill="hsl(var(--destructive))" fontSize={10} />
+            </ReferenceLine>
+             <ReferenceLine y={80} stroke="hsl(var(--chart-3))" strokeDasharray="3 3">
+                <Label value="Stage 1" position="right" fill="hsl(var(--chart-3))" fontSize={10} />
+            </ReferenceLine>
+            <ReferenceLine y={90} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
+                <Label value="Stage 2" position="right" fill="hsl(var(--destructive))" fontSize={10} />
+            </ReferenceLine>
 
-            <Area type="monotone" dataKey="bp" stroke="hsl(var(--chart-5))" fill="hsl(var(--chart-5))" fillOpacity={0.3} />
-            <Line type="monotone" dataKey={(v) => v.bp[0]} stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} activeDot={{ r: 6 }} name="Systolic"/>
-            <Line type="monotone" dataKey={(v) => v.bp[1]} stroke="hsl(var(--accent))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--accent))' }} activeDot={{ r: 6 }} name="Diastolic"/>
+            <Line type="monotone" dataKey='systolic' stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} activeDot={{ r: 6 }} name="Systolic"/>
+            <Line type="monotone" dataKey='diastolic' stroke="hsl(var(--accent))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--accent))' }} activeDot={{ r: 6 }} name="Diastolic"/>
           </ComposedChart>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
