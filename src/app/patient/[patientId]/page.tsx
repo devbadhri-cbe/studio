@@ -8,7 +8,7 @@ import type { Patient } from '@/lib/types';
 import PatientDashboard from '@/app/patient/dashboard/page';
 
 export default function PatientDashboardPage() {
-    const { setPatientData } = useApp();
+    const { setPatientData, isDoctorLoggedIn } = useApp();
     const router = useRouter();
     const params = useParams();
     const patientId = params.patientId as string;
@@ -22,7 +22,8 @@ export default function PatientDashboardPage() {
             const storedPatients = localStorage.getItem('doctor-patients');
             const doctorLoggedIn = localStorage.getItem('doctor_logged_in');
 
-            if (!doctorLoggedIn) {
+            // Use both the app context and local storage for a robust check
+            if (!doctorLoggedIn && !isDoctorLoggedIn) {
                 setError('Access denied. Please log in as a doctor.');
                 setIsLoading(false);
                 // Optional: redirect to login
@@ -59,7 +60,7 @@ export default function PatientDashboardPage() {
             setIsLoading(false);
         }
 
-    }, [patientId, setPatientData, router]);
+    }, [patientId, setPatientData, router, isDoctorLoggedIn]);
 
     if (isLoading) {
         return (
