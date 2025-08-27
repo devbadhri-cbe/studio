@@ -8,12 +8,13 @@ import { getFirestore } from "firebase/firestore";
 // This is a placeholder for your Firebase configuration.
 // In a real application, you should use environment variables to store your config.
 const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
-  projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_YOUR_STORAGE_BUCKET",
-  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID"
+  "projectId": "glycemic-guardian-6uxyg",
+  "appId": "1:1023747133263:web:fc7ad4f2a467dad6c9ff3a",
+  "storageBucket": "glycemic-guardian-6uxyg.firebasestorage.app",
+  "apiKey": "AIzaSyDRROv81qKWJOF1DlsskWYTzWcyYOXvnl4",
+  "authDomain": "glycemic-guardian-6uxyg.firebaseapp.com",
+  "measurementId": "",
+  "messagingSenderId": "1023747133263"
 };
 
 // Initialize Firebase
