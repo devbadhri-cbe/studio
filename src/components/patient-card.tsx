@@ -5,13 +5,14 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, User, VenetianMask, Mail, Phone, Droplet, Activity, Globe, Sun, TrendingUp, Zap } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, User, VenetianMask, Mail, Phone, Droplet, Activity, Globe, Sun, TrendingUp, Zap, Clipboard } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { countries } from '@/lib/countries';
 import * as React from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 
 interface PatientCardProps {
@@ -67,6 +68,7 @@ const getStatusVariant = (status: Patient['status']) => {
 
 
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
+  const { toast } = useToast();
   const statusVariant = getStatusVariant(patient.status);
   const age = calculateAge(patient.dob);
   const country = countries.find(c => c.code === patient.country);
@@ -84,6 +86,16 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
+
+  const handleCopyId = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(patient.id);
+    toast({
+      title: 'Patient ID Copied',
+      description: `ID "${patient.id}" has been copied to your clipboard.`,
+    });
+  };
+
 
   return (
     <Card className="w-full flex flex-col cursor-pointer hover:border-primary/50 transition-colors" onClick={handleCardClick}>
@@ -168,6 +180,10 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 <DropdownMenuItem onSelect={onEdit}>
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit Details
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleCopyId}>
+                    <Clipboard className="mr-2 h-4 w-4" />
+                    Copy Patient ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
