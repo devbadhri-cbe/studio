@@ -8,14 +8,16 @@ import { useApp } from '@/context/app-context';
 export function BloodPressureChart() {
   const { bloodPressureRecords } = useApp();
 
-  const sortedRecords = [...(bloodPressureRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(a.date).getTime());
+  const sortedRecords = [...(bloodPressureRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
   const oneYearAgo = subYears(new Date(), 1);
   
   let latestRecords = sortedRecords.filter(r => new Date(r.date) >= oneYearAgo);
 
-  if (latestRecords.length < 5 && sortedRecords.length > 0) {
-      latestRecords = sortedRecords.slice(-5);
+  if (latestRecords.length < 5 && sortedRecords.length >= 5) {
+      latestRecords = sortedRecords.slice(sortedRecords.length - 5);
+  } else if (sortedRecords.length < 5) {
+      latestRecords = sortedRecords;
   }
   
   const chartData = latestRecords.map((r) => ({
