@@ -12,12 +12,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { format } from 'date-fns';
 
 export function InsightsCard() {
-  const { profile, records, lipidRecords, tips, setTips, weightRecords } = useApp();
+  const { profile, records, lipidRecords, bloodPressureRecords, tips, setTips, weightRecords } = useApp();
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
 
   const handleGetInsights = async () => {
-    const hasRecords = records.length > 0 || lipidRecords.length > 0;
+    const hasRecords = records.length > 0 || lipidRecords.length > 0 || bloodPressureRecords.length > 0;
 
     if (!hasRecords || !profile.name || !profile.dob) {
       toast({
@@ -35,6 +35,7 @@ export function InsightsCard() {
 
       const hba1cData = records.map((r) => ({ date: new Date(r.date).toISOString(), value: r.value }));
       const lipidData = lipidRecords.map(r => ({date: new Date(r.date).toISOString(), ldl: r.ldl, hdl: r.hdl, total: r.total, triglycerides: r.triglycerides}));
+      const bloodPressureData = bloodPressureRecords.map(r => ({date: new Date(r.date).toISOString(), systolic: r.systolic, diastolic: r.diastolic}));
       
       const medicationString = profile.medication.map(m => `${m.name} ${m.dosage} ${m.frequency}`).join(', ');
 
@@ -44,6 +45,7 @@ export function InsightsCard() {
       const result = await getPersonalizedInsights({
         hba1cData: hba1cData.length > 0 ? hba1cData : undefined,
         lipidData: lipidData.length > 0 ? lipidData : undefined,
+        bloodPressureData: bloodPressureData.length > 0 ? bloodPressureData : undefined,
         previousTips: tips,
         userProfile: {
           name: profile.name,

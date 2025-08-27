@@ -41,6 +41,7 @@ export default function PatientDashboardPage() {
                     patient.vitaminDRecords = patient.vitaminDRecords || [];
                     patient.thyroidRecords = patient.thyroidRecords || [];
                     patient.weightRecords = patient.weightRecords || [];
+                    patient.bloodPressureRecords = patient.bloodPressureRecords || [];
                     patient.medication = patient.medication || [];
                     patient.presentMedicalConditions = patient.presentMedicalConditions || [];
                     

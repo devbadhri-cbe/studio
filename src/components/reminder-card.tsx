@@ -3,13 +3,13 @@
 
 import { useApp } from '@/context/app-context';
 import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears } from 'date-fns';
-import { Bell, CheckCircle2, Heart, Droplet, Sun, Activity } from 'lucide-react';
+import { Bell, CheckCircle2, Heart, Droplet, Sun, Activity, Zap } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { calculateAge } from '@/lib/utils';
 import { Separator } from './ui/separator';
 
 export function ReminderCard() {
-  const { records, lipidRecords, vitaminDRecords, thyroidRecords, profile } = useApp();
+  const { records, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, profile } = useApp();
 
   const hasMedicalConditions = profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0;
   const age = calculateAge(profile.dob);
@@ -172,6 +172,45 @@ export function ReminderCard() {
       }
   }
 
+  // Blood Pressure Logic
+  const sortedBloodPressureRecords = [...(bloodPressureRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const lastBloodPressureRecord = sortedBloodPressureRecords[0];
+  let bloodPressureContent;
+
+  if (!lastBloodPressureRecord) {
+      bloodPressureContent = {
+          icon: <Zap className="h-5 w-5 text-yellow-500" />,
+          title: 'Time for your first BP check!',
+          description: 'Add a record to start tracking.',
+          color: 'bg-yellow-500/10',
+      };
+  } else {
+      const lastTestDate = new Date(lastBloodPressureRecord.date);
+      let retestYears = 1; // General recommendation is yearly, more often if high
+      if (lastBloodPressureRecord.systolic > 130 || lastBloodPressureRecord.diastolic > 80) {
+        retestYears = 0; // Effectively recommending more frequent checks
+      }
+      
+      const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
+      const nextTestDate = addYears(lastTestDate, retestYears);
+
+      if (yearsSinceLastTest >= retestYears) {
+          bloodPressureContent = {
+              icon: <Zap className="h-5 w-5 text-destructive" />,
+              title: 'Blood Pressure Check Due',
+              description: `Last check was ${formatDistanceToNow(lastTestDate)} ago. Retesting is recommended.`,
+              color: 'bg-destructive/10',
+          };
+      } else {
+          bloodPressureContent = {
+              icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+              title: 'Blood Pressure On Track',
+              description: `Next check is around ${format(nextTestDate, 'MMM yyyy')}.`,
+              color: 'bg-green-500/10',
+          };
+      }
+  }
+
 
   return (
     <Card className="h-full">
@@ -224,6 +263,16 @@ export function ReminderCard() {
           <div>
             <p className="font-semibold">{thyroidContent.title}</p>
             <p className="text-sm text-muted-foreground">{thyroidContent.description}</p>
+          </div>
+        </div>
+        <Separator />
+        <div className="flex items-center gap-4">
+          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${bloodPressureContent.color}`}>
+            {bloodPressureContent.icon}
+          </div>
+          <div>
+            <p className="font-semibold">{bloodPressureContent.title}</p>
+            <p className="text-sm text-muted-foreground">{bloodPressureContent.description}</p>
           </div>
         </div>
       </CardContent>

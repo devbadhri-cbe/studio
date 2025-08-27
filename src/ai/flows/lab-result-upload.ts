@@ -39,6 +39,10 @@ const LabResultUploadOutputSchema = z.object({
       t3: z.number().optional().describe('T3 level.'),
       t4: z.number().optional().describe('T4 level.'),
   }).optional().describe('The thyroid panel results extracted.'),
+  bloodPressure: z.object({
+      systolic: z.number().optional().describe('Systolic blood pressure.'),
+      diastolic: z.number().optional().describe('Diastolic blood pressure.'),
+  }).optional().describe('The blood pressure results extracted.'),
 });
 export type LabResultUploadOutput = z.infer<typeof LabResultUploadOutputSchema>;
 
@@ -60,6 +64,7 @@ Then, you will scan the document for the following biomarkers. If a biomarker is
 - Lipid Panel (LDL, HDL, Triglycerides, Total Cholesterol)
 - Vitamin D (as a numerical value)
 - Thyroid Panel (TSH, T3, T4)
+- Blood Pressure (Systolic, Diastolic)
 
 Return the extracted information in the specified format. The date should be in YYYY-MM-DD format.
 

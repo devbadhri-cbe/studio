@@ -15,6 +15,7 @@ export const mockPatients: Patient[] = [
     lastLipid: { ldl: 110, date: '2024-03-20' },
     lastVitaminD: { value: 25, date: '2024-01-10' },
     lastThyroid: { tsh: 4.5, date: '2024-06-10'},
+    lastBloodPressure: { systolic: 135, diastolic: 85, date: '2024-06-15' },
     status: 'Needs Review',
     records: [],
     lipidRecords: [],
@@ -28,6 +29,9 @@ export const mockPatients: Patient[] = [
     ],
     weightRecords: [
       { id: 'w1', date: '2024-01-10', value: 62.5 },
+    ],
+    bloodPressureRecords: [
+        { id: 'bp1', date: '2024-06-15', systolic: 135, diastolic: 85 },
     ]
   },
   {
@@ -43,6 +47,7 @@ export const mockPatients: Patient[] = [
     lastLipid: null,
     lastVitaminD: { value: 18, date: '2023-12-01' },
     lastThyroid: null,
+    lastBloodPressure: { systolic: 145, diastolic: 92, date: '2024-06-01' },
     status: 'Urgent',
     records: [],
     lipidRecords: [],
@@ -54,6 +59,9 @@ export const mockPatients: Patient[] = [
     thyroidRecords: [],
      weightRecords: [
       { id: 'w2', date: '2024-01-10', value: 90 },
+    ],
+    bloodPressureRecords: [
+        { id: 'bp2', date: '2024-06-01', systolic: 145, diastolic: 92 },
     ]
   },
   {
@@ -69,6 +77,7 @@ export const mockPatients: Patient[] = [
     lastLipid: { ldl: 95, date: '2024-04-10' },
     lastVitaminD: { value: 45, date: '2024-02-20' },
     lastThyroid: { tsh: 2.1, date: '2024-05-01' },
+    lastBloodPressure: { systolic: 118, diastolic: 78, date: '2024-05-10' },
     status: 'On Track',
     records: [],
     lipidRecords: [],
@@ -82,6 +91,9 @@ export const mockPatients: Patient[] = [
     ],
      weightRecords: [
       { id: 'w3', date: '2024-01-10', value: 62 },
+    ],
+    bloodPressureRecords: [
+        { id: 'bp3', date: '2024-05-10', systolic: 118, diastolic: 78 },
     ]
   },
    {
@@ -97,6 +109,7 @@ export const mockPatients: Patient[] = [
     lastLipid: { ldl: 130, date: '2024-01-12' },
     lastVitaminD: null,
     lastThyroid: null,
+    lastBloodPressure: null,
     status: 'Needs Review',
     records: [],
     lipidRecords: [],
@@ -105,7 +118,8 @@ export const mockPatients: Patient[] = [
     thyroidRecords: [],
      weightRecords: [
       { id: 'w4', date: '2024-01-10', value: 84 },
-    ]
+    ],
+    bloodPressureRecords: []
   },
   {
     id: '5',
@@ -120,6 +134,7 @@ export const mockPatients: Patient[] = [
     lastLipid: { ldl: 145, date: '2024-05-20' },
     lastVitaminD: { value: 32, date: '2024-03-01' },
     lastThyroid: { tsh: 0.2, date: '2024-06-20' },
+    lastBloodPressure: { systolic: 125, diastolic: 82, date: '2024-06-25' },
     status: 'Needs Review',
     records: [],
     lipidRecords: [],
@@ -133,6 +148,9 @@ export const mockPatients: Patient[] = [
     ],
     weightRecords: [
       { id: 'w5', date: '2024-01-10', value: 62 },
+    ],
+    bloodPressureRecords: [
+      { id: 'bp4', date: '2024-06-25', systolic: 125, diastolic: 82 },
     ]
   },
 ];

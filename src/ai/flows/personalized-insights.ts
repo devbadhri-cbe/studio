@@ -27,6 +27,14 @@ const PersonalizedInsightsInputSchema = z.object({
     }))
     .optional()
     .describe('Array of historical lipid data.'),
+  bloodPressureData: z
+    .array(z.object({
+        date: z.string(),
+        systolic: z.number(),
+        diastolic: z.number(),
+    }))
+    .optional()
+    .describe('Array of historical blood pressure data.'),
   previousTips: z
     .array(z.string())
     .optional()
@@ -82,7 +90,7 @@ const prompt = ai.definePrompt({
   tools: [lifestyleTipsTool],
   prompt: `You are an expert health advisor providing personalized lifestyle tips to help patients manage their health.
 
-Your advice should be holistic, considering all available health data. Analyze the patient's age, gender, medical history, BMI, and their most recent HbA1c and lipid panel results to generate relevant, actionable tips. Ensure your recommendations are consistent with current clinical guidelines for managing diabetes, prediabetes, and cholesterol.
+Your advice should be holistic, considering all available health data. Analyze the patient's age, gender, medical history, BMI, and their most recent HbA1c, lipid panel, and blood pressure results to generate relevant, actionable tips. Ensure your recommendations are consistent with current clinical guidelines for managing diabetes, prediabetes, cholesterol, and hypertension.
 
 Patient Profile:
 Name: {{{userProfile.name}}}
@@ -106,6 +114,13 @@ Historical Lipid Data (most recent first):
 {{/each}}
 {{/if}}
 
+{{#if bloodPressureData}}
+Historical Blood Pressure Data (most recent first):
+{{#each bloodPressureData}}
+    - Date: {{{this.date}}}, Systolic: {{{this.systolic}}}, Diastolic: {{{this.diastolic}}}
+{{/each}}
+{{/if}}
+
 Previous Tips Provided:
 {{#if previousTips}}
 {{#each previousTips}}
@@ -115,7 +130,7 @@ Previous Tips Provided:
   No previous tips.
 {{/if}}
 
-Generate a list of new, personalized lifestyle tips based on a complete analysis of the patient's profile and data. If both HbA1c and lipid data are present, provide integrated tips that address both aspects of their health. The tips should be fresh and not repetitive of previous advice.
+Generate a list of new, personalized lifestyle tips based on a complete analysis of the patient's profile and data. If multiple biomarkers are present, provide integrated tips that address all aspects of their health. The tips should be fresh and not repetitive of previous advice.
 `,
 });
 
@@ -132,6 +147,9 @@ const personalizedInsightsFlow = ai.defineFlow(
     }
     if (input.lipidData) {
       input.lipidData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
+    if (input.bloodPressureData) {
+        input.bloodPressureData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
     
     const {output} = await prompt(input);

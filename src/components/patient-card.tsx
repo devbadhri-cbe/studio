@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, User, VenetianMask, Mail, Phone, Droplet, Activity, Globe, Sun, TrendingUp } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, User, VenetianMask, Mail, Phone, Droplet, Activity, Globe, Sun, TrendingUp, Zap } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge } from '@/lib/utils';
@@ -128,11 +128,11 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </span>
             </div>
             <div className="flex items-center gap-2">
-                 <Activity className="h-4 w-4 shrink-0 text-primary" />
-                <span className="font-medium">Last TSH:</span>
+                 <Zap className="h-4 w-4 shrink-0 text-primary" />
+                <span className="font-medium">Last BP:</span>
                  <span className="truncate">
-                    {patient.lastThyroid 
-                        ? `${patient.lastThyroid.tsh.toFixed(2)} on ${format(new Date(patient.lastThyroid.date), 'dd-MM-yy')}`
+                    {patient.lastBloodPressure 
+                        ? `${patient.lastBloodPressure.systolic}/${patient.lastBloodPressure.diastolic} on ${format(new Date(patient.lastBloodPressure.date), 'dd-MM-yy')}`
                         : 'N/A'}
                 </span>
             </div>

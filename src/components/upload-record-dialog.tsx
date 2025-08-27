@@ -4,7 +4,7 @@
 import { labResultUpload, type LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, CheckCircle, XCircle, FileText, FlaskConical, Sun, Droplet, Activity } from 'lucide-react';
+import { Loader2, UploadCloud, CheckCircle, XCircle, FileText, FlaskConical, Sun, Droplet, Activity, Zap } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from './ui/dialog';
@@ -78,13 +78,14 @@ export function UploadRecordDialog() {
   const handleConfirm = () => {
     if (!extractedData) return;
 
-    const { hba1cValue, lipidPanel, vitaminDValue, thyroidPanel, date } = extractedData;
+    const { hba1cValue, lipidPanel, vitaminDValue, thyroidPanel, bloodPressure, date } = extractedData;
     
     addBatchRecords({
       hba1c: hba1cValue ? { value: hba1cValue, date } : undefined,
       lipid: lipidPanel ? { ...lipidPanel, date } : undefined,
       vitaminD: vitaminDValue ? { value: vitaminDValue, date } : undefined,
       thyroid: thyroidPanel ? { ...thyroidPanel, date } : undefined,
+      bloodPressure: bloodPressure ? { ...bloodPressure, date } : undefined,
     });
     
     toast({
@@ -124,7 +125,7 @@ export function UploadRecordDialog() {
 
   const renderConfirmationView = () => {
     if (!extractedData) return null;
-    const hasAnyData = extractedData.hba1cValue || extractedData.lipidPanel || extractedData.vitaminDValue || extractedData.thyroidPanel;
+    const hasAnyData = extractedData.hba1cValue || extractedData.lipidPanel || extractedData.vitaminDValue || extractedData.thyroidPanel || extractedData.bloodPressure;
     
     return (
         <div>
@@ -175,6 +176,15 @@ export function UploadRecordDialog() {
                            <div>
                                <p className="font-semibold">Vitamin D</p>
                                <p>{extractedData.vitaminDValue} ng/mL</p>
+                           </div>
+                       </div>
+                    )}
+                     {extractedData.bloodPressure && (
+                        <div className="flex items-center gap-3 rounded-md border p-2">
+                           <Zap className="h-5 w-5 text-primary/80" />
+                           <div>
+                               <p className="font-semibold">Blood Pressure</p>
+                               <p>{extractedData.bloodPressure.systolic}/{extractedData.bloodPressure.diastolic} mmHg</p>
                            </div>
                        </div>
                     )}

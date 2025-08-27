@@ -69,6 +69,15 @@ export interface ThyroidRecord {
   medication?: string;
 }
 
+export interface BloodPressureRecord {
+  id: string;
+  date: Date | string;
+  systolic: number;
+  diastolic: number;
+  medication?: string;
+}
+
+
 export interface Patient {
   id: string;
   name: string;
@@ -95,6 +104,11 @@ export interface Patient {
     tsh: number;
     date: string;
   } | null;
+  lastBloodPressure?: {
+    systolic: number;
+    diastolic: number;
+    date: string;
+  } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
   // Add full record history to the patient object
   records: Hba1cRecord[];
@@ -102,6 +116,7 @@ export interface Patient {
   vitaminDRecords: VitaminDRecord[];
   thyroidRecords: ThyroidRecord[];
   weightRecords: WeightRecord[];
+  bloodPressureRecords: BloodPressureRecord[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
 }
