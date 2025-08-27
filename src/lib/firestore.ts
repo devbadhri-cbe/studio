@@ -3,7 +3,7 @@
 'use client';
 
 import { db } from './firebase';
-import { collection, getDocs, doc, getDoc, addDoc, setDoc, deleteDoc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc, setDoc, deleteDoc, updateDoc, query } from 'firebase/firestore';
 import type { Patient } from './types';
 import { calculateBmi } from './utils';
 
@@ -55,8 +55,7 @@ const recalculatePatientStatus = (patient: Patient): Patient => {
 
 // Fetch all patients
 export const getPatients = async (): Promise<Patient[]> => {
-    const q = query(collection(db, PATIENTS_COLLECTION), orderBy('name', 'asc'));
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocs(collection(db, PATIENTS_COLLECTION));
     const patients = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Patient));
     return patients;
 };

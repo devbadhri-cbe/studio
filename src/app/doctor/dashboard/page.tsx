@@ -70,7 +70,7 @@ export default function DoctorDashboardPage() {
                 });
             } else { // Adding new patient
                 const newPatient = await addPatient(patientData as Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number });
-                setPatients([newPatient, ...patients].sort((a,b) => a.name.localeCompare(b.name)));
+                setPatients([newPatient, ...patients]);
                  toast({
                     title: 'Patient Added',
                     description: `${newPatient.name}'s details have been added.`,
