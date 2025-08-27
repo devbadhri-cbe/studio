@@ -73,7 +73,7 @@ export default function Home() {
                     </div>
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
                         <ThemeToggle />
-                        {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')}>Doctor Portal</Button>}
+                        <Button onClick={() => router.push('/doctor/dashboard')}>Doctor Portal</Button>
                     </div>
                 </div>
 
