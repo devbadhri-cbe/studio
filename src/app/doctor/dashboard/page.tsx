@@ -35,25 +35,26 @@ export default function DoctorDashboardPage() {
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
     const [searchQuery, setSearchQuery] = React.useState('');
 
-    React.useEffect(() => {
-        const fetchPatients = async () => {
-            try {
-                const fetchedPatients = await getPatients();
-                setPatients(fetchedPatients);
-            } catch (error) {
-                console.error("Failed to fetch patients from Firestore", error);
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Failed to load patient data from the cloud."
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchPatients();
+    const fetchPatients = React.useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const fetchedPatients = await getPatients();
+            setPatients(fetchedPatients);
+        } catch (error) {
+            console.error("Failed to fetch patients from Firestore", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to load patient data from the cloud."
+            });
+        } finally {
+            setIsLoading(false);
+        }
     }, [toast]);
+
+    React.useEffect(() => {
+        fetchPatients();
+    }, [fetchPatients]);
 
     const viewPatientDashboard = (patient: Patient) => {
         router.push(`/patient/${patient.id}`);
@@ -69,12 +70,12 @@ export default function DoctorDashboardPage() {
                     description: `${updatedPatient.name}'s details have been updated.`,
                 });
             } else { // Adding new patient
-                const newPatient = await addPatient(patientData as Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number });
-                setPatients(prevPatients => [newPatient, ...prevPatients].sort((a,b) => a.name.localeCompare(b.name)));
-                 toast({
+                await addPatient(patientData as Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number });
+                toast({
                     title: 'Patient Added',
-                    description: `${newPatient.name}'s details have been added.`,
+                    description: `${patientData.name}'s details have been added.`,
                 });
+                await fetchPatients(); // Re-fetch the entire list to include the new patient
             }
         } catch (error) {
              console.error("Failed to save patient:", error);
@@ -218,3 +219,5 @@ export default function DoctorDashboardPage() {
     </>
   );
 }
+
+    
