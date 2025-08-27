@@ -32,7 +32,7 @@ export function Hba1cChart() {
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         {records.length > 0 ? (
-          <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 20 }}>
+          <LineChart data={chartData} margin={{ top: 20, right: 20, left: 10, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
@@ -88,8 +88,11 @@ export function Hba1cChart() {
                 align="center"
               />
             </ReferenceArea>
-            <ReferenceLine y={5.7} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
-              <Label value="Prediabetes Threshold (5.7%)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
+             <ReferenceLine y={5.7} stroke="hsl(var(--destructive))" strokeOpacity={0.5} strokeDasharray="3 3">
+              <Label value="Prediabetes (5.7%)" position="top" fill="hsl(var(--destructive))" fontSize={10} />
+            </ReferenceLine>
+            <ReferenceLine y={6.5} stroke="hsl(var(--destructive))" strokeOpacity={0.8} strokeDasharray="3 3">
+              <Label value="Diabetes (6.5%)" position="top" fill="hsl(var(--destructive))" fontSize={10} />
             </ReferenceLine>
             <Line type="monotone" dataKey="hba1c" stroke="hsl(var(--primary))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--primary))" />} activeDot={{ r: 6 }} />
           </LineChart>
