@@ -70,7 +70,7 @@ export default function DoctorDashboardPage() {
                 });
             } else { // Adding new patient
                 const newPatient = await addPatient(patientData as Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number });
-                setPatients(prevPatients => [newPatient, ...prevPatients]);
+                setPatients(prevPatients => [newPatient, ...prevPatients].sort((a,b) => a.name.localeCompare(b.name)));
                  toast({
                     title: 'Patient Added',
                     description: `${newPatient.name}'s details have been added.`,
@@ -218,5 +218,3 @@ export default function DoctorDashboardPage() {
     </>
   );
 }
-
-    
