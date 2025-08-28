@@ -25,27 +25,60 @@ export default function PatientDashboardPage() {
             const loggedInPatientId = localStorage.getItem('patient_id');
             const isDoctor = isDoctorLoggedIn || localStorage.getItem('doctor_logged_in') === 'true';
 
-            // If not the doctor and not the correct logged-in patient, redirect to login
-            if (!isDoctor && loggedInPatientId !== patientId) {
-                router.replace('/');
+            // If a doctor is logged in, they can access any patient dashboard
+            if (isDoctor) {
+                try {
+                    const patient = await getPatient(patientId);
+                    if (patient) {
+                        setPatientData(patient);
+                    } else {
+                        setError(`Patient with ID ${patientId} not found.`);
+                    }
+                } catch (e) {
+                    console.error("Failed to load patient data:", e);
+                    setError('Failed to load patient data.');
+                } finally {
+                    setIsLoading(false);
+                }
+                return;
+            }
+            
+            // If it's a patient, check if they are already logged in via localStorage
+            if (loggedInPatientId === patientId) {
+                 try {
+                    const patient = await getPatient(patientId);
+                    if (patient) {
+                        setPatientData(patient);
+                    } else {
+                        setError(`Patient with ID ${patientId} not found.`);
+                        localStorage.removeItem('patient_id'); // Clean up invalid ID
+                    }
+                } catch (e) {
+                    console.error("Failed to load patient data:", e);
+                    setError('Failed to load patient data.');
+                } finally {
+                    setIsLoading(false);
+                }
                 return;
             }
 
+            // If not logged in as a doctor or the correct patient,
+            // treat this as a direct link access attempt.
+            // We'll fetch the patient data to verify the ID is valid,
+            // then set it in localStorage to "log them in".
             try {
                 const patient = await getPatient(patientId);
                 if (patient) {
+                    localStorage.setItem('patient_id', patient.id);
                     setPatientData(patient);
                 } else {
-                    setError(`Patient with ID ${patientId} not found.`);
+                    setError(`No patient found for this link. Please check the ID and try again.`);
+                    router.replace('/'); // Redirect to patient login if ID is invalid
                 }
             } catch (e) {
-                console.error("Failed to load patient data:", e);
-                setError('Failed to load patient data.');
-                toast({
-                    variant: 'destructive',
-                    title: 'Error',
-                    description: 'Could not fetch patient data from the cloud.'
-                });
+                console.error("Direct link access failed:", e);
+                setError('An error occurred while trying to load the dashboard.');
+                 router.replace('/');
             } finally {
                 setIsLoading(false);
             }
