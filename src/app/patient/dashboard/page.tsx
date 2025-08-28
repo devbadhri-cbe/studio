@@ -201,7 +201,7 @@ export default function PatientDashboard() {
                         </Select>
                     </TooltipTrigger>
                     <TooltipContent>
-                        <p>Change View</p>
+                        <p>Select Dashboard</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
