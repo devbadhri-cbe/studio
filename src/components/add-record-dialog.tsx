@@ -41,7 +41,20 @@ export function AddRecordDialog() {
     },
   });
 
-  const handleAddRecord = (data: z.infer<typeof FormSchema>) => {
+  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    const newDate = new Date(data.date);
+    const newDateString = newDate.toDateString();
+    const dateExists = records.some((record) => new Date(record.date).toDateString() === newDateString);
+
+    if (dateExists) {
+      toast({
+        variant: 'destructive',
+        title: 'Duplicate Entry',
+        description: 'A record for this date already exists. Please choose a different date.',
+      });
+      return;
+    }
+    
     addRecord({
       date: new Date(data.date).toISOString(),
       value: data.value,
@@ -56,22 +69,6 @@ export function AddRecordDialog() {
       date: format(new Date(), 'yyyy-MM-dd'),
     });
   };
-
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    const newDate = new Date(data.date);
-    const newDateString = newDate.toDateString();
-    const dateExists = records.some((record) => new Date(record.date).toDateString() === newDateString);
-
-    if (dateExists) {
-        toast({
-            variant: 'destructive',
-            title: 'Duplicate Entry',
-            description: 'A record for this date already exists. Please choose a different date.',
-        });
-    } else {
-      handleAddRecord(data);
-    }
-  }
 
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!profile.medication || profile.medication.length === 0) {
