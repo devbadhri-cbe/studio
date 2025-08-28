@@ -29,10 +29,10 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
   const { toast } = useToast();
 
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (open && typeof window !== 'undefined') {
       setLoginLink(`${window.location.origin}/patient/${patient.id}`);
     }
-  }, [patient.id]);
+  }, [patient.id, open]);
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -56,7 +56,7 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="flex items-center justify-center rounded-lg bg-white p-4">
-            {loginLink && <QRCode value={loginLink} size={160} />}
+            {loginLink ? <QRCode value={loginLink} size={160} /> : <div className="h-[160px] w-[160px] bg-gray-200 animate-pulse" />}
           </div>
 
           <div className="space-y-2">
