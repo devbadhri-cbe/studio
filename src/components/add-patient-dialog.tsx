@@ -143,7 +143,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                                         </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                        {countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                                          {countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
