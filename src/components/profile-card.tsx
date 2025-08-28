@@ -1,7 +1,7 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, SpellCheck } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 import { DrugInteractionDialog } from './drug-interaction-dialog';
 import { Separator } from './ui/separator';
+import { spellCheckMedication } from '@/ai/flows/medication-spell-check';
 
 const MedicationSchema = z.object({
   medicationName: z.string().min(2, 'Medication name is required.'),
@@ -27,6 +28,9 @@ const MedicationSchema = z.object({
 });
 
 function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
+  const { toast } = useToast();
+  const [isChecking, setIsChecking] = React.useState(false);
+
   const form = useForm<z.infer<typeof MedicationSchema>>({
     resolver: zodResolver(MedicationSchema),
     defaultValues: { medicationName: '', dosage: '', frequency: '' },
@@ -40,11 +44,51 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
     });
   };
 
+  const handleSpellCheck = async () => {
+    const medicationName = form.getValues('medicationName');
+    if (!medicationName || medicationName.length < 3) return;
+
+    setIsChecking(true);
+    try {
+      const result = await spellCheckMedication({ medicationName });
+      if (result.wasCorrected) {
+        form.setValue('medicationName', result.correctedName);
+        toast({
+            title: "Auto-corrected",
+            description: `"${medicationName}" was corrected to "${result.correctedName}".`,
+        });
+      }
+    } catch (error) {
+      console.error("Spell check failed:", error);
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
         <div className="grid grid-cols-3 gap-2">
-          <FormField control={form.control} name="medicationName" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Name" {...field} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
+           <FormField 
+            control={form.control} 
+            name="medicationName" 
+            render={({ field }) => ( 
+                <FormItem>
+                    <FormControl>
+                        <div className="relative">
+                            <Input 
+                                placeholder="Name" 
+                                {...field} 
+                                onBlur={handleSpellCheck} 
+                                autoComplete="off"
+                            />
+                            {isChecking && <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin text-muted-foreground" />}
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem> 
+            )} 
+          />
           <FormField control={form.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage" {...field} /></FormControl><FormMessage /></FormItem> )} />
           <FormField control={form.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency" {...field} /></FormControl><FormMessage /></FormItem> )} />
         </div>
