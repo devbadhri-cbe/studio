@@ -8,7 +8,7 @@ import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
-import { ClipboardList, Mail, Upload, User, Loader2 } from 'lucide-react';
+import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import {
   Select,
@@ -182,19 +182,27 @@ export default function PatientDashboard() {
                 </div>
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
-                  <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}>
-                    <SelectTrigger className="w-auto flex-1 sm:flex-initial h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
-                      <SelectItem value="lipids">Lipid Dashboard</SelectItem>
-                      <SelectItem value="vitaminD">Vitamin D Dashboard</SelectItem>
-                      <SelectItem value="thyroid">Thyroid Dashboard</SelectItem>
-                      <SelectItem value="hypertension">Hypertension Dashboard</SelectItem>
-                      <SelectItem value="report">Comprehensive Report</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}>
+                            <SelectTrigger className="w-9 h-9 p-0">
+                                <span className="sr-only">Change View</span>
+                                <LayoutGrid className="w-4 h-4 mx-auto" />
+                            </SelectTrigger>
+                            <SelectContent>
+                            <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
+                            <SelectItem value="lipids">Lipid Dashboard</SelectItem>
+                            <SelectItem value="vitaminD">Vitamin D Dashboard</SelectItem>
+                            <SelectItem value="thyroid">Thyroid Dashboard</SelectItem>
+                            <SelectItem value="hypertension">Hypertension Dashboard</SelectItem>
+                            <SelectItem value="report">Comprehensive Report</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Change View</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </div>
