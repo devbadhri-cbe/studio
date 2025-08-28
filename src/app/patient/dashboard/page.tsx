@@ -77,28 +77,23 @@ export default function PatientDashboard() {
       <div className="flex min-h-screen w-full flex-col bg-background">
          <header className="border-b px-4 py-4 md:px-6">
             <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2">
-              <div className="w-full flex md:flex-col items-center justify-between md:justify-center gap-2">
-                <div className="flex flex-col items-start md:items-center">
-                    <div className="flex items-center gap-2">
-                        <Logo className="h-8 w-8 text-primary" />
-                        <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
-                    </div>
-
-                     {isDoctor && (
-                        <div className="w-full text-left md:text-center text-sm text-muted-foreground mt-2">
-                            <p className="font-semibold text-foreground">{doctorName}</p>
-                            <div className="flex items-center justify-start md:justify-center gap-4">
-                                <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
-                                    <Mail className="h-3 w-3" />
-                                    drbadhri@gmail.com
-                                </a>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
+              <div className="w-full flex justify-center">
                 <div className="flex items-center gap-2">
-                    {isDoctor && (
+                    <Logo className="h-8 w-8 text-primary" />
+                    <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
+                </div>
+              </div>
+
+             {isDoctor && (
+                <div className="w-full flex items-center justify-between text-sm text-muted-foreground mt-2">
+                    <div>
+                        <p className="font-semibold text-foreground">{doctorName}</p>
+                        <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
+                            <Mail className="h-3 w-3" />
+                            drbadhri@gmail.com
+                        </a>
+                    </div>
+                     <div className="flex items-center gap-2">
                         <Tooltip>
                             <TooltipTrigger asChild>
                             <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="outline">
@@ -110,10 +105,10 @@ export default function PatientDashboard() {
                             <p>Patient List</p>
                             </TooltipContent>
                         </Tooltip>
-                    )}
-                    <ThemeToggle />
+                        <ThemeToggle />
+                    </div>
                 </div>
-              </div>
+            )}
             </div>
       </header>
         <main className="flex-1 p-4 md:p-6">
