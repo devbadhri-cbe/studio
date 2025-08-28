@@ -178,7 +178,7 @@ export default function PatientDashboard() {
                   <h1 className="text-2xl md:text-3xl font-semibold font-headline">
                     {pageTitle}
                   </h1>
-                  <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
+                  <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
                 </div>
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
