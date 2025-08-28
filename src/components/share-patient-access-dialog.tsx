@@ -30,11 +30,12 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
 
   React.useEffect(() => {
     if (open && typeof window !== 'undefined') {
-      // The browser is incorrectly reporting port 6000. We will forcefully replace it
-      // with the correct port 9000 for the dev environment.
-      const rawUrl = `${window.location.protocol}//${window.location.host}/`;
-      const correctedUrl = rawUrl.replace(':6000', ':9000');
-      setLoginLink(correctedUrl);
+      // The browser is incorrectly reporting port 6000 in this dev environment.
+      // Forcefully construct the correct URL with port 9000.
+      const host = window.location.host; // e.g., 6000-firebase-studio-....
+      const correctedHost = host.replace(/^6000-/, '9000-');
+      const url = `https://${correctedHost}/`;
+      setLoginLink(url);
     }
   }, [open]);
 
