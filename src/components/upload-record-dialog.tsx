@@ -98,7 +98,7 @@ export function UploadRecordDialog() {
   };
 
   const renderInitialView = () => (
-    <>
+    <div className="flex-1">
       <Alert>
         <AlertTitle>Important!</AlertTitle>
         <AlertDescription>
@@ -114,11 +114,11 @@ export function UploadRecordDialog() {
           </label>
         </Button>
       </div>
-    </>
+    </div>
   );
 
   const renderUploadingView = () => (
-     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
+     <div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground h-40">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p>Analyzing your document...</p>
         <p className="text-xs">This may take a moment.</p>
@@ -130,9 +130,9 @@ export function UploadRecordDialog() {
     const hasAnyData = extractedData.hba1cValue || extractedData.lipidPanel || extractedData.vitaminDValue || extractedData.thyroidPanel || extractedData.bloodPressure;
     
     return (
-        <div className="flex flex-col h-full">
-            <ScrollArea className="max-h-[60vh] pr-6 -mr-6">
-                <div className="space-y-4">
+        <>
+            <ScrollArea className="flex-1 -mx-6">
+                <div className="px-6 py-4 space-y-4">
                     <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
                         {extractedData.nameVerified ? (
                             <CheckCircle className="h-5 w-5 text-green-500" />
@@ -255,7 +255,7 @@ export function UploadRecordDialog() {
                     Confirm & Add Records
                 </Button>
             </DialogFooter>
-        </div>
+        </>
     );
   }
 
@@ -284,12 +284,8 @@ export function UploadRecordDialog() {
              }
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4 flex-1 min-h-0">
-          {isUploading ? renderUploadingView() : extractedData ? renderConfirmationView() : renderInitialView()}
-        </div>
+        {isUploading ? renderUploadingView() : extractedData ? renderConfirmationView() : renderInitialView()}
       </DialogContent>
     </Dialog>
   );
 }
-
-    
