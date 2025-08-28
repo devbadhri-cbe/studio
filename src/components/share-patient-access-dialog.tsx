@@ -30,20 +30,18 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
 
   React.useEffect(() => {
     if (open && typeof window !== 'undefined') {
-      // The browser is incorrectly reporting port 6000 in this dev environment.
-      // Forcefully construct the correct URL with port 9000.
-      const host = window.location.host; // e.g., 6000-firebase-studio-....
-      const correctedHost = host.replace(/^6000-/, '9000-');
-      const url = `https://${correctedHost}/`;
-      setLoginLink(url);
+       const host = window.location.host;
+       const correctedHost = host.replace(/^6000-/, '9000-');
+       const url = `https://${correctedHost}/patient/${patient.id}`;
+       setLoginLink(url);
     }
-  }, [open]);
+  }, [open, patient.id]);
 
-  const copyToClipboard = (text: string, label: string) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: `${label} Copied`,
-      description: `${label} has been copied to your clipboard.`,
+      title: `Link Copied`,
+      description: `The patient dashboard link has been copied.`,
     });
   };
 
@@ -56,7 +54,7 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
         <DialogHeader>
           <DialogTitle>Share Access for {patient.name}</DialogTitle>
           <DialogDescription>
-            Share the QR code or login link with the patient. They will need to enter their Patient ID to log in.
+            Share this unique QR code or link with the patient for direct, one-click access to their dashboard.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -65,26 +63,13 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="login-link">Login Page Link</Label>
+            <Label htmlFor="login-link">Patient's Dashboard Link</Label>
             <div className="flex gap-2">
               <Input id="login-link" value={loginLink} readOnly />
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => copyToClipboard(loginLink, 'Login Link')}
-              >
-                <Clipboard className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="patient-id">Patient ID</Label>
-            <div className="flex gap-2">
-              <Input id="patient-id" value={patient.id} readOnly />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => copyToClipboard(patient.id, 'Patient ID')}
+                onClick={() => copyToClipboard(loginLink)}
               >
                 <Clipboard className="h-4 w-4" />
               </Button>

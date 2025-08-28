@@ -41,31 +41,23 @@ export default function PatientDashboardPage() {
                 return;
             }
 
-            // Flow for a patient accessing the dashboard.
-            // We verify their "logged-in" status via localStorage.
-            const storedPatientId = localStorage.getItem('patient_id');
-
-            if (storedPatientId === patientId) {
-                 try {
-                    const patient = await getPatient(patientId);
-                    if (patient) {
-                        setPatientData(patient);
-                    } else {
-                        // This case can happen if the patient was deleted after login.
-                        setError(`Patient with ID ${patientId} not found.`);
-                        localStorage.removeItem('patient_id');
-                    }
-                } catch (e) {
-                    console.error("Failed to load patient data for patient:", e);
-                    setError('Failed to load your dashboard. Please try logging in again.');
+            // Flow for a patient accessing via direct link.
+            // This acts as the "login" mechanism for patients.
+            try {
+                const patient = await getPatient(patientId);
+                if (patient) {
+                    localStorage.setItem('patient_id', patient.id);
+                    setPatientData(patient);
+                } else {
+                    setError(`No patient found with ID ${patientId}. Please check the link.`);
                     localStorage.removeItem('patient_id');
-                } finally {
-                    setIsLoading(false);
                 }
-            } else {
-                // If the stored ID doesn't match, or doesn't exist, the user is not authenticated for this page.
-                // Redirect them to the login page.
-                router.replace('/'); 
+            } catch (e) {
+                console.error("Failed to load patient data for patient:", e);
+                setError('Could not load your dashboard. Please try again or contact your doctor.');
+                localStorage.removeItem('patient_id');
+            } finally {
+                setIsLoading(false);
             }
         };
 
