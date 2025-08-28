@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -6,7 +5,6 @@ import { useApp } from '@/context/app-context';
 import { useParams, useRouter } from 'next/navigation';
 import PatientDashboard from '@/app/patient/dashboard/page';
 import { getPatient } from '@/lib/firestore';
-import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 
 export default function PatientDashboardPage() {
@@ -20,10 +18,11 @@ export default function PatientDashboardPage() {
     React.useEffect(() => {
         if (!patientId || !isClient) return;
 
-        const verifyAccessAndLoadData = async () => {
+        const loadData = async () => {
             setIsLoading(true);
             setError(null);
-            
+
+            // Flow for a logged-in doctor viewing a patient's dashboard
             if (isDoctorLoggedIn) {
                 try {
                     const patient = await getPatient(patientId);
@@ -40,18 +39,22 @@ export default function PatientDashboardPage() {
                 }
                 return;
             }
-            
-            // This flow is for a patient accessing via a direct link.
+
+            // This is the new, robust flow for a patient accessing via a direct link.
             try {
+                // First, fetch the patient data using the ID from the URL.
                 const patient = await getPatient(patientId);
+                
                 if (patient) {
-                    // "Log in" the patient by setting their data in context & local storage.
+                    // If the patient is found, "log them in" by setting their data
+                    // in the application context and local storage.
                     localStorage.setItem('patient_id', patient.id);
                     setPatientData(patient);
                 } else {
-                    // If the ID from the link is invalid, show an error.
-                    setError(`No patient found with this ID. Please check the link or ID and try again.`);
-                    router.push('/'); // Redirect to login if patient not found
+                    // If the patient ID is invalid, show an error and redirect to the login page.
+                    setError(`No patient found with this ID. Redirecting to login...`);
+                    // Using a timeout to allow the user to read the error message.
+                    setTimeout(() => router.push('/'), 2000); 
                 }
             } catch (e) {
                 console.error("Direct link access failed:", e);
@@ -61,7 +64,7 @@ export default function PatientDashboardPage() {
             }
         };
 
-        verifyAccessAndLoadData();
+        loadData();
 
     }, [patientId, setPatientData, router, isDoctorLoggedIn, isClient]);
 
@@ -83,5 +86,6 @@ export default function PatientDashboardPage() {
         );
     }
     
+    // If there are no errors and loading is complete, render the dashboard.
     return <PatientDashboard />;
 }
