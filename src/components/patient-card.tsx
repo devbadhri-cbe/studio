@@ -3,9 +3,9 @@
 
 import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, User, VenetianMask, Mail, Phone, Droplet, Activity, Globe, Sun, TrendingUp, Zap, Clipboard } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Clipboard, Globe } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge } from '@/lib/utils';
@@ -76,7 +76,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const formattedPhone = formatPhoneNumber(patient.phone, patient.country);
   
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Don't navigate if the user is clicking on a button or the dropdown menu
     if ((e.target as HTMLElement).closest('button, [role="menu"]')) {
       return;
     }
@@ -98,73 +97,17 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
 
 
   return (
-    <Card className="w-full flex flex-col cursor-pointer hover:border-primary/50 transition-colors" onClick={handleCardClick}>
-      <CardHeader>
+    <Card className="w-full flex flex-col cursor-pointer hover:border-primary/50 transition-colors group" onClick={handleCardClick}>
+      <CardHeader className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="truncate">{patient.name}</CardTitle>
-            <CardDescription className="truncate text-xs">
+            <CardTitle className="text-lg">{patient.name}</CardTitle>
+            <p className="text-xs text-muted-foreground">
                 {age ? `${age} years old` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
-                 {patient.bmi && <span className="font-semibold"> (BMI: {patient.bmi})</span>}
-            </CardDescription>
+                 {patient.bmi && <span className="font-semibold"> (BMI: {patient.bmi.toFixed(1)})</span>}
+            </p>
           </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4 text-sm">
-        <div className="space-y-2 text-muted-foreground">
-            <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0" />
-                <span className="truncate">{formattedPhone}</span>
-            </div>
-             <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 shrink-0" />
-                <span className="truncate">{patient.email || 'N/A'}</span>
-            </div>
-             <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 shrink-0" />
-                <span className="truncate">{countryName}</span>
-            </div>
-        </div>
-
-        <Separator />
-
-        <div className="space-y-2">
-            <div className="flex items-center gap-2">
-                <Droplet className="h-4 w-4 shrink-0 text-primary" />
-                <span className="font-medium">Last HbA1c:</span>
-                <span className="truncate">
-                    {patient.lastHba1c 
-                        ? `${patient.lastHba1c.value.toFixed(1)}% on ${format(new Date(patient.lastHba1c.date), 'dd-MM-yy')}` 
-                        : 'N/A'}
-                </span>
-            </div>
-            <div className="flex items-center gap-2">
-                 <Zap className="h-4 w-4 shrink-0 text-primary" />
-                <span className="font-medium">Last BP:</span>
-                 <span className="truncate">
-                    {patient.lastBloodPressure 
-                        ? `${patient.lastBloodPressure.systolic}/${patient.lastBloodPressure.diastolic} on ${format(new Date(patient.lastBloodPressure.date), 'dd-MM-yy')}`
-                        : 'N/A'}
-                </span>
-            </div>
-             <div className="flex items-center gap-2">
-                 <Sun className="h-4 w-4 shrink-0 text-primary" />
-                <span className="font-medium">Last Vit D:</span>
-                 <span className="truncate">
-                    {patient.lastVitaminD 
-                        ? `${patient.lastVitaminD.value} ng/mL on ${format(new Date(patient.lastVitaminD.date), 'dd-MM-yy')}`
-                        : 'N/A'}
-                </span>
-            </div>
-        </div>
-      </CardContent>
-
-      <CardFooter className="mt-auto flex items-center justify-between bg-muted/50 p-4">
-        <Badge variant={statusVariant} className={statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}>
-            {patient.status}
-        </Badge>
-         <DropdownMenu>
+           <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="w-8 h-8 p-0" onClick={handleActionClick}>
                     <span className="sr-only">Open menu</span>
@@ -195,7 +138,51 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-      </CardFooter>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="p-4 pt-0 space-y-3 text-sm flex-1">
+        <div className="space-y-1.5 text-muted-foreground text-xs">
+            <div className="flex items-center gap-2">
+                <Phone className="h-3 w-3 shrink-0" />
+                <span className="truncate">{formattedPhone}</span>
+            </div>
+             <div className="flex items-center gap-2">
+                <Mail className="h-3 w-3 shrink-0" />
+                <span className="truncate">{patient.email || 'N/A'}</span>
+            </div>
+             <div className="flex items-center gap-2">
+                <Globe className="h-3 w-3 shrink-0" />
+                <span className="truncate">{countryName}</span>
+            </div>
+        </div>
+
+        <Separator />
+
+        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
+                <Droplet className="h-4 w-4 mb-1 text-primary" />
+                <span className="font-semibold">{patient.lastHba1c ? `${patient.lastHba1c.value.toFixed(1)}%` : 'N/A'}</span>
+                <span className="text-muted-foreground text-[10px]">HbA1c</span>
+            </div>
+            <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
+                <Zap className="h-4 w-4 mb-1 text-primary" />
+                 <span className="font-semibold">{patient.lastBloodPressure ? `${patient.lastBloodPressure.systolic}/${patient.lastBloodPressure.diastolic}` : 'N/A'}</span>
+                <span className="text-muted-foreground text-[10px]">BP</span>
+            </div>
+            <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
+                <Sun className="h-4 w-4 mb-1 text-primary" />
+                <span className="font-semibold">{patient.lastVitaminD ? `${patient.lastVitaminD.value}` : 'N/A'}</span>
+                <span className="text-muted-foreground text-[10px]">Vit D</span>
+            </div>
+        </div>
+      </CardContent>
+
+      <div className="p-4 pt-0">
+        <Badge variant={statusVariant} className={`w-full justify-center ${statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
+            {patient.status}
+        </Badge>
+      </div>
     </Card>
   );
 }
