@@ -93,7 +93,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 const oldCodeMatch = currentPhoneNumber.match(/^\\+\\d+/);
                 if (oldCodeMatch && oldCodeMatch[0] !== countryCode) {
                     const numberWithoutCode = currentPhoneNumber.substring(oldCodeMatch[0].length).trim();
-                    form.setValue('phone', `${countryCode} ${numberWithoutCode}`, { shouldValidate: true });
+                    form.setValue('phone', `${countryCode} ${numberWithoutCode}`, { shouldValidate: false });
                 }
             }
         }
@@ -378,3 +378,5 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
       </Dialog>
   );
 }
+
+    
