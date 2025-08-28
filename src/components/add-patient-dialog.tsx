@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -169,19 +168,19 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                             <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
                             <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Current Weight (kg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 70" {...field} /></FormControl><FormMessage /></FormItem> )} />
                         </div>
+
+                        <div className="flex justify-end gap-2 pt-4">
+                            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {patient ? 'Save Changes' : 'Add Patient'}
+                            </Button>
+                        </div>
                     </form>
                 </Form>
                 </div>
             </ScrollArea>
         </div>
-        
-        <DialogFooter className="p-6 pt-4 border-t">
-          <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button type="submit" form="patient-form" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {patient ? 'Save Changes' : 'Add Patient'}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
