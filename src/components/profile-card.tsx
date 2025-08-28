@@ -412,7 +412,7 @@ export function ProfileCard() {
                 <div className="flex items-center gap-1">
                     <DrugInteractionDialog
                         medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                        disabled={profile.medication.length < 2 || isMedicationNil}
+                        disabled={isCheckingSpelling || profile.medication.length < 2 || isMedicationNil}
                         onOpenChange={(open) => {
                             if (open) {
                                 setMedicationChanged(false);
@@ -504,3 +504,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
