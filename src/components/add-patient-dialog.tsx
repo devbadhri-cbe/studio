@@ -88,7 +88,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
         if (country) {
             const countryCode = country.phoneCode;
             if (!currentPhoneNumber || !currentPhoneNumber.startsWith('+')) {
-                 form.setValue('phone', countryCode, { shouldValidate: true });
+                 form.setValue('phone', countryCode, { shouldValidate: false, shouldDirty: true });
             } else {
                 const oldCodeMatch = currentPhoneNumber.match(/^\\+\\d+/);
                 if (oldCodeMatch && oldCodeMatch[0] !== countryCode) {
@@ -380,3 +380,4 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
       </Dialog>
   );
 }
+
