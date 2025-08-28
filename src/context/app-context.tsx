@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type Theme, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord } from '@/lib/types';
@@ -286,7 +285,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const updates: Partial<Patient> = {};
     const date = batch.hba1c?.date || batch.lipid?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date;
 
-    if (!date) return;
+    if (!date) {
+      toast({
+        variant: "destructive",
+        title: "Missing Date",
+        description: "The uploaded document must contain a valid test date."
+      })
+      return;
+    };
     
     // The date from AI comes as YYYY-MM-DD, so we add T00:00:00 to ensure it's parsed as local midnight.
     const newRecordDate = new Date(date + 'T00:00:00');
@@ -410,3 +416,5 @@ export function useApp() {
   }
   return context;
 }
+
+    
