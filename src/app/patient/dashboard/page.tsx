@@ -185,8 +185,7 @@ export default function PatientDashboard() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                         <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}>
-                            <SelectTrigger className="w-9 h-9 p-0">
-                                <span className="sr-only">Change View</span>
+                            <SelectTrigger className="w-9 h-9 p-0" icon={null}>
                                 <div className="flex h-full w-full items-center justify-center">
                                     <LayoutGrid className="w-4 h-4" />
                                 </div>
