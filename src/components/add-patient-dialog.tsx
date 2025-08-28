@@ -199,7 +199,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
         const countryData = countries.find(c => c.code === watchCountry);
         const currentPhone = form.getValues('phone');
         if (countryData && (!currentPhone || !countries.some(c => currentPhone.startsWith(c.phoneCode)))) {
-             form.setValue('phone', countryData.phoneCode, { shouldValidate: currentPhone?.length >= 5 });
+             form.setValue('phone', countryData.phoneCode, { shouldValidate: !!currentPhone && currentPhone.length >= 5 });
         }
     }
   }, [watchCountry, form]);
@@ -284,12 +284,13 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
         </DialogTrigger>
       )}
       <DialogContent className="max-w-3xl w-full max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-4 border-b">
+        <DialogHeader className="p-6 pb-4 border-b shrink-0">
           <DialogTitle>{patient ? 'Edit Patient' : 'Add New Patient'}</DialogTitle>
           <DialogDescription>
             Fill out the form below to {patient ? 'update the patient\'s details' : 'add a new patient to your list'}.
           </DialogDescription>
         </DialogHeader>
+        
         <ScrollArea className="flex-1 min-h-0">
             <div className="px-6 py-4">
                 <Form {...form}>
@@ -336,7 +337,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                     </div>
 
                     <Separator />
-                    <h3 className="text-lg font-medium">Contact & Location</h3>
+                    <h3 className="text-lg font-medium">Contact &amp; Location</h3>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                          <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="john.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
@@ -410,7 +411,8 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 </Form>
             </div>
         </ScrollArea>
-        <DialogFooter className="p-6 pt-4 border-t">
+        
+        <DialogFooter className="p-6 pt-4 border-t shrink-0">
             <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
             <Button type="submit" form="patient-form" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
