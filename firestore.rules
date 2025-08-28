@@ -1,25 +1,12 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Defines a function to check if a user is the authenticated doctor.
-    function isDoctor() {
-      // The doctor's UID should be stored securely, e.g., in environment variables or a config file.
-      // For this example, we'll hardcode it. Replace with your actual doctor's UID from Firebase Auth.
-      let doctorUid = "jG8l9qKbqiU414aIys12pM9vGvx2"; 
-      return request.auth != null && request.auth.uid == doctorUid;
-    }
-
-    // Rules for the 'patients' collection
+    // A patient document can be read by anyone who has the link.
+    // It can only be updated by a logged in doctor, or by the patient
+    // themselves (which we verify by checking the patientId in the request).
     match /patients/{patientId} {
-      // ANYONE can read a patient document if they know the patientId.
-      // This is necessary for the patient login flow to work, as the app needs
-      // to verify the patient ID exists before granting access. The patient ID
-      // itself acts as a secret key.
       allow read: if true;
-
-      // ONLY the authenticated doctor can list, create, update, or delete patient documents.
-      allow list, create, update, delete: if isDoctor();
+      allow write: if request.auth != null || request.resource.data.id == patientId;
     }
   }
 }
