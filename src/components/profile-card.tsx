@@ -20,6 +20,7 @@ import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 import { DrugInteractionDialog } from './drug-interaction-dialog';
 import { Separator } from './ui/separator';
 import { spellCheckMedication } from '@/ai/flows/medication-spell-check';
+import { ToastAction } from './ui/toast';
 
 const MedicationSchema = z.object({
   medicationName: z.string().min(2, 'Medication name is required.'),
@@ -52,10 +53,10 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
     try {
       const result = await spellCheckMedication({ medicationName });
       if (result.wasCorrected) {
-        form.setValue('medicationName', result.correctedName);
         toast({
-            title: "Auto-corrected",
-            description: `"${medicationName}" was corrected to "${result.correctedName}".`,
+            title: "Spelling Suggestion",
+            description: `Did you mean "${result.correctedName}"?`,
+            action: <ToastAction altText="Update" onClick={() => form.setValue('medicationName', result.correctedName)}>Update</ToastAction>
         });
       }
     } catch (error) {
