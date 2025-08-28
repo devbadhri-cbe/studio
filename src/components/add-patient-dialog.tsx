@@ -199,7 +199,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
         const countryData = countries.find(c => c.code === watchCountry);
         const currentPhone = form.getValues('phone');
         if (countryData && (!currentPhone || !countries.some(c => currentPhone.startsWith(c.phoneCode)))) {
-             form.setValue('phone', countryData.phoneCode, { shouldValidate: currentPhone.length >= 5 });
+             form.setValue('phone', countryData.phoneCode, { shouldValidate: currentPhone?.length >= 5 });
         }
     }
   }, [watchCountry, form]);
@@ -421,3 +421,5 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
     </Dialog>
   );
 }
+
+    
