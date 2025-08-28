@@ -20,8 +20,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from './ui/dropdown-menu';
+import { Input } from './ui/input';
+import { Separator } from './ui/separator';
 
 // A simple SVG for WhatsApp icon
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -39,30 +40,31 @@ interface SharePatientAccessDialogProps {
 export function SharePatientAccessDialog({ patient, children }: SharePatientAccessDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [dashboardLink, setDashboardLink] = React.useState('');
+  const [loginPageLink, setLoginPageLink] = React.useState('');
   const { toast } = useToast();
 
   React.useEffect(() => {
     if (open && typeof window !== 'undefined') {
        const host = window.location.host.replace(/^6000-/, '9000-');
        const protocol = window.location.protocol;
-       const url = `${protocol}//${host}/patient/${patient.id}`;
-       setDashboardLink(url);
+       setDashboardLink(`${protocol}//${host}/patient/${patient.id}`);
+       setLoginPageLink(`${protocol}//${host}/`);
     }
   }, [open, patient.id]);
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, subject: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: 'Link Copied',
-      description: 'The dashboard link has been copied to your clipboard.',
+      title: `${subject} Copied`,
+      description: `The ${subject.toLowerCase()} has been copied to your clipboard.`,
     });
   };
 
   const shareActions = [
     {
-        label: 'Copy Link',
+        label: 'Copy Dashboard Link',
         icon: <Clipboard className="mr-2 h-4 w-4" />,
-        action: () => copyToClipboard(dashboardLink)
+        action: () => copyToClipboard(dashboardLink, 'Dashboard Link')
     },
     {
         label: 'Open in New Tab',
@@ -141,6 +143,31 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
                 ))}
             </DropdownMenuContent>
            </DropdownMenu>
+
+            <Separator />
+
+            <div className="space-y-3">
+                 <h4 className="text-sm font-medium text-center text-muted-foreground">Manual Entry Fallback</h4>
+                <div className="space-y-1">
+                    <label className="text-xs font-medium text-muted-foreground">Login Page Link</label>
+                    <div className="flex items-center gap-2">
+                        <Input value={loginPageLink} readOnly className="h-8 text-xs" />
+                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => copyToClipboard(loginPageLink, "Login Link")}>
+                            <Copy className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+                 <div className="space-y-1">
+                    <label className="text-xs font-medium text-muted-foreground">Patient ID</label>
+                    <div className="flex items-center gap-2">
+                        <Input value={patient.id} readOnly className="h-8 text-xs" />
+                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => copyToClipboard(patient.id, "Patient ID")}>
+                             <Copy className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
         </div>
       </DialogContent>
     </Dialog>
