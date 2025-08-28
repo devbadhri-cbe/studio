@@ -8,7 +8,7 @@ import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
-import { Mail } from 'lucide-react';
+import { ClipboardList, Mail } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import {
   Select,
@@ -25,6 +25,7 @@ import { UploadRecordDialog } from '@/components/upload-record-dialog';
 import { ReportCard } from '@/components/report-card';
 import { ThyroidCard } from '@/components/thyroid-card';
 import { HypertensionCard } from '@/components/hypertension-card';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function PatientDashboard() {
   const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
@@ -83,7 +84,19 @@ export default function PatientDashboard() {
                     </div>
                     <div className="flex items-center gap-4">
                         <ThemeToggle />
-                        {isDoctor && <Button onClick={() => router.push('/doctor/dashboard')} size="sm">Patient List</Button>}
+                        {isDoctor && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                               <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="outline">
+                                  <ClipboardList className="h-4 w-4" />
+                                  <span className="sr-only">Patient List</span>
+                               </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Patient List</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
                     </div>
                 </div>
 
