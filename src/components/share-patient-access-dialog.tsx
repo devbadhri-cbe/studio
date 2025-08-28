@@ -17,6 +17,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Clipboard } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from './ui/separator';
 
 interface SharePatientAccessDialogProps {
   patient: Patient;
@@ -25,23 +26,29 @@ interface SharePatientAccessDialogProps {
 
 export function SharePatientAccessDialog({ patient, children }: SharePatientAccessDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const [loginLink, setLoginLink] = React.useState('');
+  const [dashboardLink, setDashboardLink] = React.useState('');
+  const [loginPageLink, setLoginPageLink] = React.useState('');
   const { toast } = useToast();
 
   React.useEffect(() => {
     if (open && typeof window !== 'undefined') {
        const host = window.location.host;
        const correctedHost = host.replace(/^6000-/, '9000-');
-       const url = `https://${correctedHost}/patient/${patient.id}`;
-       setLoginLink(url);
+       const protocol = window.location.protocol;
+
+       const directUrl = `${protocol}//${correctedHost}/patient/${patient.id}`;
+       setDashboardLink(directUrl);
+
+       const loginUrl = `${protocol}//${correctedHost}/patient/login`;
+       setLoginPageLink(loginUrl);
     }
   }, [open, patient.id]);
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: `Link Copied`,
-      description: `The patient dashboard link has been copied.`,
+      title: `${label} Copied`,
+      description: `The ${label.toLowerCase()} has been copied to your clipboard.`,
     });
   };
 
@@ -59,17 +66,49 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="flex items-center justify-center rounded-lg bg-white p-4">
-            {loginLink ? <QRCode value={loginLink} size={160} /> : <div className="h-[160px] w-[160px] bg-gray-200 animate-pulse" />}
+            {dashboardLink ? <QRCode value={dashboardLink} size={160} /> : <div className="h-[160px] w-[160px] bg-gray-200 animate-pulse" />}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="login-link">Patient's Dashboard Link</Label>
+            <Label htmlFor="dashboard-link">Patient's Dashboard Link (Direct Access)</Label>
             <div className="flex gap-2">
-              <Input id="login-link" value={loginLink} readOnly />
+              <Input id="dashboard-link" value={dashboardLink} readOnly />
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => copyToClipboard(loginLink)}
+                onClick={() => copyToClipboard(dashboardLink, 'Dashboard Link')}
+              >
+                <Clipboard className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          <Separator />
+          
+          <p className="text-sm text-muted-foreground text-center">Or share these for manual login:</p>
+          
+          <div className="space-y-2">
+            <Label htmlFor="login-page-link">Patient Login Page</Label>
+            <div className="flex gap-2">
+              <Input id="login-page-link" value={loginPageLink} readOnly />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => copyToClipboard(loginPageLink, 'Login Page Link')}
+              >
+                <Clipboard className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+           <div className="space-y-2">
+            <Label htmlFor="patient-id">Patient ID</Label>
+            <div className="flex gap-2">
+              <Input id="patient-id" value={patient.id} readOnly />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => copyToClipboard(patient.id, 'Patient ID')}
               >
                 <Clipboard className="h-4 w-4" />
               </Button>
