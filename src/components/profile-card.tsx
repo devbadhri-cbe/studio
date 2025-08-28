@@ -294,31 +294,26 @@ export function ProfileCard() {
     <Card className="h-full">
       <CardHeader>
         <div className="flex items-center gap-3">
-            <div className="relative">
-                <Avatar className="h-10 w-10">
-                    <AvatarImage src={profile.photoUrl} />
-                    <AvatarFallback>
-                        <User className="h-5 w-5" />
-                    </AvatarFallback>
-                </Avatar>
-                <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button 
-                          size="icon" 
-                          variant="outline" 
-                          className="absolute -bottom-2 -right-2 h-6 w-6 rounded-full bg-background"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={isUploading}
-                        >
-                            {isUploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Upload Photo</p>
-                    </TooltipContent>
-                </Tooltip>
-            </div>
+             <Tooltip>
+                <TooltipTrigger asChild>
+                    <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="relative rounded-full"
+                    >
+                        <Avatar className="h-10 w-10 cursor-pointer">
+                            <AvatarImage src={profile.photoUrl} />
+                            <AvatarFallback>
+                                {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Upload className="h-5 w-5" />}
+                            </AvatarFallback>
+                        </Avatar>
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>Upload Photo</p>
+                </TooltipContent>
+            </Tooltip>
+            <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
           <div>
             <CardTitle>My Profile</CardTitle>
             <CardDescription>Your personal and medical information.</CardDescription>
