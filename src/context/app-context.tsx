@@ -5,6 +5,8 @@
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type Theme, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', presentMedicalConditions: [], medication: [] };
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
@@ -78,23 +80,47 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     setIsClient(true);
+    
+    // Check for doctor's auth state once when the app loads
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+            setIsDoctorLoggedInState(true);
+            localStorage.setItem('doctor_logged_in', 'true');
+        } else {
+            setIsDoctorLoggedInState(false);
+            localStorage.removeItem('doctor_logged_in');
+        }
+    });
+
+    // Check for saved theme
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    if (savedTheme) {
+        setThemeState(savedTheme);
+    }
+
+    return () => unsubscribe();
   }, []);
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
       setIsDoctorLoggedInState(isLoggedIn);
+      if (isLoggedIn) {
+        localStorage.setItem('doctor_logged_in', 'true');
+      } else {
+        localStorage.removeItem('doctor_logged_in');
+      }
   }
 
   React.useEffect(() => {
+    if (!isClient) return;
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
 
+    let currentTheme = theme;
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      root.classList.add(systemTheme);
-      return;
+      currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
-    root.classList.add(theme);
-  }, [theme]);
+    root.classList.add(currentTheme);
+  }, [theme, isClient]);
   
   const setPatientData = React.useCallback((patient: Patient) => {
     const patientProfile: UserProfile = {

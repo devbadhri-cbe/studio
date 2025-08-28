@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 
 export default function PatientDashboardPage() {
-    const { setPatientData, isDoctorLoggedIn } = useApp();
+    const { setPatientData, isDoctorLoggedIn, isClient } = useApp();
     const router = useRouter();
     const { toast } = useToast();
     const params = useParams();
@@ -19,11 +19,11 @@ export default function PatientDashboardPage() {
     const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
-        if (!patientId) return;
+        if (!patientId || !isClient) return;
 
         const verifyAccessAndLoadData = async () => {
-            // A doctor can access any patient's dashboard
-            if (isDoctorLoggedIn || localStorage.getItem('doctor_logged_in') === 'true') {
+            // A doctor is logged in via Firebase Auth, they have access.
+            if (isDoctorLoggedIn) {
                 try {
                     const patient = await getPatient(patientId);
                     if (patient) {
@@ -32,7 +32,7 @@ export default function PatientDashboardPage() {
                         setError(`Patient with ID ${patientId} not found.`);
                     }
                 } catch (e) {
-                    console.error("Failed to load patient data:", e);
+                    console.error("Failed to load patient data for doctor:", e);
                     setError('Failed to load patient data.');
                 } finally {
                     setIsLoading(false);
@@ -40,22 +40,22 @@ export default function PatientDashboardPage() {
                 return;
             }
             
-            // For patients, we first try to load data using the ID from the URL
+            // This handles the patient flow, using the ID from the URL as the source of truth.
             try {
                 const patient = await getPatient(patientId);
                 if (patient) {
-                    // If patient exists, we "log them in" by setting localStorage
+                    // "Log in" the patient by setting their data in the app context and local storage.
                     localStorage.setItem('patient_id', patient.id);
                     setPatientData(patient);
                 } else {
-                    // If the ID from the link is invalid, redirect to login
+                    // If the ID from the link is invalid, show an error.
                     setError(`No patient found for this link. Please check the ID and try again.`);
-                    router.replace('/'); 
                 }
             } catch (e) {
                 console.error("Direct link access failed:", e);
-                setError('An error occurred while trying to load the dashboard.');
-                 router.replace('/');
+                // This can happen if Firestore rules deny access, which might be the case for an unauthenticated user on mobile.
+                // The key is to fetch data and then set state, rather than relying on state first.
+                setError('An error occurred while trying to load the dashboard. This may be due to a permission issue.');
             } finally {
                 setIsLoading(false);
             }
@@ -63,7 +63,7 @@ export default function PatientDashboardPage() {
 
         verifyAccessAndLoadData();
 
-    }, [patientId, setPatientData, router, toast, isDoctorLoggedIn]);
+    }, [patientId, setPatientData, router, toast, isDoctorLoggedIn, isClient]);
 
     if (isLoading) {
         return (
