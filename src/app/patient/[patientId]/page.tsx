@@ -22,7 +22,10 @@ export default function PatientDashboardPage() {
         if (!patientId || !isClient) return;
 
         const verifyAccessAndLoadData = async () => {
-            // A doctor is logged in via Firebase Auth, they have access.
+            setIsLoading(true);
+            setError(null);
+            
+            // This flow is for when a doctor is already logged in and navigating
             if (isDoctorLoggedIn) {
                 try {
                     const patient = await getPatient(patientId);
@@ -40,22 +43,24 @@ export default function PatientDashboardPage() {
                 return;
             }
             
-            // This handles the patient flow, using the ID from the URL as the source of truth.
+            // This flow is for a patient accessing via a direct link.
+            // No prior auth session is expected.
             try {
                 const patient = await getPatient(patientId);
                 if (patient) {
-                    // "Log in" the patient by setting their data in the app context and local storage.
+                    // "Log in" the patient by setting their data in context & local storage.
                     localStorage.setItem('patient_id', patient.id);
                     setPatientData(patient);
                 } else {
                     // If the ID from the link is invalid, show an error.
-                    setError(`No patient found for this link. Please check the ID and try again.`);
+                    setError(`No patient found with this ID. Please check the link or ID and try again.`);
                 }
             } catch (e) {
                 console.error("Direct link access failed:", e);
-                // This can happen if Firestore rules deny access, which might be the case for an unauthenticated user on mobile.
-                // The key is to fetch data and then set state, rather than relying on state first.
-                setError('An error occurred while trying to load the dashboard. Please check your connection or permissions.');
+                // This can happen if Firestore rules deny access, which is a key security feature.
+                // However, for this app's logic, we assume patient documents are readable if the ID is known.
+                // A persistent failure here could indicate a Firestore rules misconfiguration.
+                setError('An error occurred while trying to load the dashboard. Please check your connection and try again.');
             } finally {
                 setIsLoading(false);
             }
@@ -63,7 +68,7 @@ export default function PatientDashboardPage() {
 
         verifyAccessAndLoadData();
 
-    }, [patientId, setPatientData, router, toast, isDoctorLoggedIn, isClient]);
+    }, [patientId, setPatientData, router, isDoctorLoggedIn, isClient]);
 
     if (isLoading) {
         return (
