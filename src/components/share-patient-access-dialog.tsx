@@ -15,7 +15,7 @@ import {
 } from './ui/dialog';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Clipboard, QrCode } from 'lucide-react';
+import { Clipboard } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface SharePatientAccessDialogProps {
