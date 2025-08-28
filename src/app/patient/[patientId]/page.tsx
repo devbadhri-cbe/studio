@@ -55,7 +55,7 @@ export default function PatientDashboardPage() {
                 console.error("Direct link access failed:", e);
                 // This can happen if Firestore rules deny access, which might be the case for an unauthenticated user on mobile.
                 // The key is to fetch data and then set state, rather than relying on state first.
-                setError('An error occurred while trying to load the dashboard. This may be due to a permission issue.');
+                setError('An error occurred while trying to load the dashboard. Please check your connection or permissions.');
             } finally {
                 setIsLoading(false);
             }
