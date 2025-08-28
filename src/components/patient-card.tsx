@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Clipboard, Globe, Link, User, Share2 } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge } from '@/lib/utils';
@@ -99,9 +99,9 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                     <User className="h-5 w-5" />
                 </AvatarFallback>
              </Avatar>
-             <div>
-                <CardTitle className="text-lg">{patient.name}</CardTitle>
-                <p className="text-xs text-muted-foreground">
+             <div className="flex-1 min-w-0">
+                <CardTitle className="text-lg truncate">{patient.name}</CardTitle>
+                <p className="text-xs text-muted-foreground truncate">
                     {age ? `${age} years old` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
                     {patient.bmi && <span className="font-semibold"> (BMI: {patient.bmi.toFixed(1)})</span>}
                 </p>
@@ -180,7 +180,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         </div>
       </CardContent>
 
-      <div className="p-4 pt-0">
+      <div className="p-4 pt-0 mt-auto">
         <Badge variant={statusVariant} className={`w-full justify-center ${statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
             {patient.status}
         </Badge>
