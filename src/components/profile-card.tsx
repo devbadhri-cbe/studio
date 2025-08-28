@@ -24,6 +24,7 @@ import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
 import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from './ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { storage } from '@/lib/firebase';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 
 const MedicationSchema = z.object({
@@ -301,15 +302,22 @@ export function ProfileCard() {
                     </AvatarFallback>
                 </Avatar>
                 <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
-                <Button 
-                  size="icon" 
-                  variant="outline" 
-                  className="absolute -bottom-2 -right-2 h-6 w-6 rounded-full bg-background"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                >
-                    {isUploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
-                </Button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button 
+                          size="icon" 
+                          variant="outline" 
+                          className="absolute -bottom-2 -right-2 h-6 w-6 rounded-full bg-background"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                        >
+                            {isUploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Upload Photo</p>
+                    </TooltipContent>
+                </Tooltip>
             </div>
           <div>
             <CardTitle>My Profile</CardTitle>
@@ -378,9 +386,14 @@ export function ProfileCard() {
                                 <span className="font-semibold text-foreground">{weight.value} kg</span>
                                 <span className="block text-xs">on {format(new Date(weight.date), 'dd-MMM-yyyy')}</span>
                            </div>
-                           <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeWeightRecord(weight.id)}>
-                               <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                           </Button>
+                           <Tooltip>
+                            <TooltipTrigger asChild>
+                               <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeWeightRecord(weight.id)}>
+                                   <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                               </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete record</TooltipContent>
+                           </Tooltip>
                         </li>
                     ))}
                  </ul>
@@ -411,9 +424,14 @@ export function ProfileCard() {
                                 {condition.icdCode && <span className='block text-xs'>ICD-10: {condition.icdCode}</span>}
                                 <span className="block text-xs">Diagnosed: {format(new Date(condition.date), 'dd-MMM-yyyy')}</span>
                             </div>
-                            <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedicalCondition(condition.id)}>
-                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                            </Button>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedicalCondition(condition.id)}>
+                                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Delete condition</TooltipContent>
+                            </Tooltip>
                         </li>
                     ))}
                 </ul>
@@ -458,9 +476,14 @@ export function ProfileCard() {
                              {med.name.toLowerCase() === 'nil' ? (
                                 <div className="flex-1 flex justify-between items-center">
                                     <span className="font-semibold text-foreground">Nil - No medication</span>
-                                    <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => removeMedication(med.id)}>
-                                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                    </Button>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => removeMedication(med.id)}>
+                                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>Delete entry</TooltipContent>
+                                    </Tooltip>
                                 </div>
                              ) : (
                                 <>
@@ -468,9 +491,14 @@ export function ProfileCard() {
                                         <span className="font-semibold text-foreground">{med.name}</span>
                                         <span className='block'>({med.dosage}, {med.frequency})</span>
                                     </div>
-                                    <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedication(med.id)}>
-                                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                    </Button>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedication(med.id)}>
+                                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>Delete medication</TooltipContent>
+                                    </Tooltip>
                                 </>
                              )}
                         </li>
