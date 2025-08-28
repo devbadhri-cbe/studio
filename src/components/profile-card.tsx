@@ -388,12 +388,12 @@ export function ProfileCard() {
                             <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Check
                         </Button>
                     </DrugInteractionDialog>
-                     {!isAddingMedication && !isMedicationNil && (
+                     {!isAddingMedication && profile.medication.length === 0 && (
                         <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setMedicationNil()}>
                            Nil
                         </Button>
                     )}
-                     {!isAddingMedication && (
+                     {!isAddingMedication && !isMedicationNil && (
                         <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setIsAddingMedication(true)}>
                             <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add
                         </Button>
