@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Separator } from './ui/separator';
 import { format } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { ScrollArea } from './ui/scroll-area';
 
 
 export function UploadRecordDialog() {
@@ -129,121 +130,123 @@ export function UploadRecordDialog() {
     const hasAnyData = extractedData.hba1cValue || extractedData.lipidPanel || extractedData.vitaminDValue || extractedData.thyroidPanel || extractedData.bloodPressure;
     
     return (
-        <div>
-            <div className="space-y-4">
-                <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
-                    {extractedData.nameVerified ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                    ) : (
-                        <XCircle className="h-5 w-5 text-destructive" />
-                    )}
-                    <div>
-                        <p className="font-semibold">Name Verification</p>
-                        <p className="text-sm text-muted-foreground">
-                            {extractedData.nameVerified
-                                ? `Name "${profile.name}" successfully matched.`
-                                : `Name on document does not match "${profile.name}".`
-                            }
-                        </p>
-                    </div>
-                </div>
-                 <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
-                    <FileText className="h-5 w-5 text-primary" />
-                     <div>
-                        <p className="font-semibold">Report Date</p>
-                        <p className="text-sm text-muted-foreground">
-                            {format(new Date(extractedData.date), 'MMMM d, yyyy')}
-                        </p>
-                    </div>
-                 </div>
-
-                <Separator />
-
-                <h4 className="font-medium text-center text-muted-foreground">Extracted Results</h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                    {extractedData.hba1cValue && (
-                         <div className="flex items-center gap-3 rounded-md border p-2">
-                            <Droplet className="h-5 w-5 text-primary/80" />
-                            <div>
-                                <p className="font-semibold">HbA1c</p>
-                                <p>{extractedData.hba1cValue}%</p>
-                            </div>
+        <div className="flex flex-col h-full">
+            <ScrollArea className="max-h-[60vh] pr-6 -mr-6">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
+                        {extractedData.nameVerified ? (
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                        ) : (
+                            <XCircle className="h-5 w-5 text-destructive" />
+                        )}
+                        <div>
+                            <p className="font-semibold">Name Verification</p>
+                            <p className="text-sm text-muted-foreground">
+                                {extractedData.nameVerified
+                                    ? `Name "${profile.name}" successfully matched.`
+                                    : `Name on document does not match "${profile.name}".`
+                                }
+                            </p>
                         </div>
-                    )}
-                    {extractedData.vitaminDValue && (
-                        <div className="flex items-center gap-3 rounded-md border p-2">
-                           <Sun className="h-5 w-5 text-primary/80" />
-                           <div>
-                               <p className="font-semibold">Vitamin D</p>
-                               <p>{extractedData.vitaminDValue} ng/mL</p>
+                    </div>
+                     <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
+                        <FileText className="h-5 w-5 text-primary" />
+                         <div>
+                            <p className="font-semibold">Report Date</p>
+                            <p className="text-sm text-muted-foreground">
+                                {format(new Date(extractedData.date), 'MMMM d, yyyy')}
+                            </p>
+                        </div>
+                     </div>
+
+                    <Separator />
+
+                    <h4 className="font-medium text-center text-muted-foreground">Extracted Results</h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        {extractedData.hba1cValue && (
+                             <div className="flex items-center gap-3 rounded-md border p-2">
+                                <Droplet className="h-5 w-5 text-primary/80" />
+                                <div>
+                                    <p className="font-semibold">HbA1c</p>
+                                    <p>{extractedData.hba1cValue}%</p>
+                                </div>
+                            </div>
+                        )}
+                        {extractedData.vitaminDValue && (
+                            <div className="flex items-center gap-3 rounded-md border p-2">
+                               <Sun className="h-5 w-5 text-primary/80" />
+                               <div>
+                                   <p className="font-semibold">Vitamin D</p>
+                                   <p>{extractedData.vitaminDValue} ng/mL</p>
+                               </div>
                            </div>
-                       </div>
-                    )}
-                     {extractedData.bloodPressure && (
-                        <div className="flex items-center gap-3 rounded-md border p-2">
-                           <Zap className="h-5 w-5 text-primary/80" />
-                           <div>
-                               <p className="font-semibold">Blood Pressure</p>
-                               <p>{extractedData.bloodPressure.systolic}/{extractedData.bloodPressure.diastolic} mmHg</p>
+                        )}
+                         {extractedData.bloodPressure && (
+                            <div className="flex items-center gap-3 rounded-md border p-2">
+                               <Zap className="h-5 w-5 text-primary/80" />
+                               <div>
+                                   <p className="font-semibold">Blood Pressure</p>
+                                   <p>{extractedData.bloodPressure.systolic}/{extractedData.bloodPressure.diastolic} mmHg</p>
+                               </div>
                            </div>
-                       </div>
+                        )}
+                    </div>
+
+                    {extractedData.lipidPanel && (
+                         <div className="rounded-md border p-2 space-y-2">
+                            <div className="flex items-center gap-3">
+                                 <FlaskConical className="h-5 w-5 text-primary/80" />
+                                 <p className="font-semibold">Lipid Panel (mg/dL)</p>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs">
+                                 <div className="rounded-md bg-muted/50 p-2">
+                                    <p className="font-semibold">Total</p>
+                                    <p>{extractedData.lipidPanel.total || 'N/A'}</p>
+                                </div>
+                                <div className="rounded-md bg-muted/50 p-2">
+                                    <p className="font-semibold">LDL</p>
+                                    <p>{extractedData.lipidPanel.ldl || 'N/A'}</p>
+                                </div>
+                                <div className="rounded-md bg-muted/50 p-2">
+                                    <p className="font-semibold">HDL</p>
+                                    <p>{extractedData.lipidPanel.hdl || 'N/A'}</p>
+                                </div>
+                                 <div className="rounded-md bg-muted/50 p-2">
+                                    <p className="font-semibold">Trig.</p>
+                                    <p>{extractedData.lipidPanel.triglycerides || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                     {extractedData.thyroidPanel && (
+                         <div className="rounded-md border p-2 space-y-2">
+                            <div className="flex items-center gap-3">
+                                 <Activity className="h-5 w-5 text-primary/80" />
+                                 <p className="font-semibold">Thyroid Panel</p>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                                 <div className="rounded-md bg-muted/50 p-2">
+                                    <p className="font-semibold">TSH (μIU/mL)</p>
+                                    <p>{extractedData.thyroidPanel.tsh || 'N/A'}</p>
+                                </div>
+                                <div className="rounded-md bg-muted/50 p-2">
+                                    <p className="font-semibold">T3 (ng/dL)</p>
+                                    <p>{extractedData.thyroidPanel.t3 || 'N/A'}</p>
+                                </div>
+                                <div className="rounded-md bg-muted/50 p-2">
+                                    <p className="font-semibold">T4 (μg/dL)</p>
+                                    <p>{extractedData.thyroidPanel.t4 || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {!hasAnyData && (
+                        <p className="text-center text-muted-foreground text-sm py-4">No specific biomarker data could be extracted. Please check the document or enter manually.</p>
                     )}
                 </div>
-
-                {extractedData.lipidPanel && (
-                     <div className="rounded-md border p-2 space-y-2">
-                        <div className="flex items-center gap-3">
-                             <FlaskConical className="h-5 w-5 text-primary/80" />
-                             <p className="font-semibold">Lipid Panel (mg/dL)</p>
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs">
-                             <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">Total</p>
-                                <p>{extractedData.lipidPanel.total || 'N/A'}</p>
-                            </div>
-                            <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">LDL</p>
-                                <p>{extractedData.lipidPanel.ldl || 'N/A'}</p>
-                            </div>
-                            <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">HDL</p>
-                                <p>{extractedData.lipidPanel.hdl || 'N/A'}</p>
-                            </div>
-                             <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">Trig.</p>
-                                <p>{extractedData.lipidPanel.triglycerides || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                 {extractedData.thyroidPanel && (
-                     <div className="rounded-md border p-2 space-y-2">
-                        <div className="flex items-center gap-3">
-                             <Activity className="h-5 w-5 text-primary/80" />
-                             <p className="font-semibold">Thyroid Panel</p>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                             <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">TSH (μIU/mL)</p>
-                                <p>{extractedData.thyroidPanel.tsh || 'N/A'}</p>
-                            </div>
-                            <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">T3 (ng/dL)</p>
-                                <p>{extractedData.thyroidPanel.t3 || 'N/A'}</p>
-                            </div>
-                            <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">T4 (μg/dL)</p>
-                                <p>{extractedData.thyroidPanel.t4 || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                
-                {!hasAnyData && (
-                    <p className="text-center text-muted-foreground text-sm py-4">No specific biomarker data could be extracted. Please check the document or enter manually.</p>
-                )}
-            </div>
+            </ScrollArea>
             <DialogFooter className="pt-6">
                 <DialogClose asChild>
                     <Button variant="ghost">Cancel</Button>
@@ -271,7 +274,7 @@ export function UploadRecordDialog() {
                 <p>Upload Result</p>
             </TooltipContent>
       </Tooltip>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Upload Lab Result</DialogTitle>
           <DialogDescription>
@@ -281,7 +284,7 @@ export function UploadRecordDialog() {
              }
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
+        <div className="py-4 flex-1 min-h-0">
           {isUploading ? renderUploadingView() : extractedData ? renderConfirmationView() : renderInitialView()}
         </div>
       </DialogContent>
