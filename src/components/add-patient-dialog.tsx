@@ -283,11 +283,11 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
           {children}
         </DialogTrigger>
       )}
-      <DialogContent className="max-w-3xl w-full max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-4 border-b shrink-0">
+      <DialogContent className="max-w-lg w-full max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="p-6 pb-4 border-b">
           <DialogTitle>{patient ? 'Edit Patient' : 'Add New Patient'}</DialogTitle>
           <DialogDescription>
-            Fill out the form below to {patient ? 'update the patient\'s details' : 'add a new patient to your list'}.
+            Fill out the form below to {patient ? 'update the patient\'s details' : 'add a new patient'}.
           </DialogDescription>
         </DialogHeader>
         
@@ -296,122 +296,124 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 <Form {...form}>
                 <form id="patient-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     
-                    <div className="flex flex-col sm:flex-row items-center gap-6">
+                    <div className="grid grid-cols-1 gap-6">
+                      <FormField
+                          control={form.control}
+                          name="photoUrl"
+                          render={() => (
+                              <FormItem className="flex flex-col items-center gap-2">
+                                  <FormLabel>Profile Photo</FormLabel>
+                                  <FormControl>
+                                      <button 
+                                          type="button"
+                                          onClick={() => document.getElementById('photo-upload-input')?.click()}
+                                          disabled={isUploading}
+                                          className="relative rounded-full group shrink-0"
+                                      >
+                                          <Avatar className="h-24 w-24">
+                                              <AvatarImage src={photoPreview} />
+                                              <AvatarFallback>
+                                                  {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : 
+                                                      <>
+                                                          <User className="h-10 w-10 text-muted-foreground group-hover:hidden" />
+                                                          <Upload className="h-10 w-10 text-muted-foreground hidden group-hover:block" />
+                                                      </>
+                                                  }
+                                              </AvatarFallback>
+                                          </Avatar>
+                                      </button>
+                                  </FormControl>
+                                  <Input id="photo-upload-input" type="file" className="hidden" onChange={handlePhotoUpload} accept="image/*" />
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+
+                      <Separator />
+
+                      <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex items-center space-x-2 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
+                      </div>
+                      
+                      <Separator />
+
+                      <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
-                            name="photoUrl"
-                            render={() => (
-                                <FormItem>
-                                    <FormControl>
-                                        <button 
-                                            type="button"
-                                            onClick={() => document.getElementById('photo-upload-input')?.click()}
-                                            disabled={isUploading}
-                                            className="relative rounded-full group shrink-0"
-                                        >
-                                            <Avatar className="h-24 w-24">
-                                                <AvatarImage src={photoPreview} />
-                                                <AvatarFallback>
-                                                    {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : 
-                                                        <>
-                                                            <User className="h-10 w-10 text-muted-foreground group-hover:hidden" />
-                                                            <Upload className="h-10 w-10 text-muted-foreground hidden group-hover:block" />
-                                                        </>
-                                                    }
-                                                </AvatarFallback>
-                                            </Avatar>
-                                        </button>
-                                    </FormControl>
-                                    <Input id="photo-upload-input" type="file" className="hidden" onChange={handlePhotoUpload} accept="image/*" />
-                                    <FormMessage />
-                                </FormItem>
+                            name="country"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Country</FormLabel>
+                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select a country" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
                             )}
-                        />
-                        <div className="w-full space-y-4">
-                            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex items-center space-x-2 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
-                            </div>
-                        </div>
-                    </div>
+                          />
+                        <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                      </div>
+                      
+                      <Separator />
+                    
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                           <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                           <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 70" {...field} /></FormControl><FormDescription>Enter the latest weight to add a new record.</FormDescription><FormMessage /></FormItem> )} />
+                      </div>
+                      
+                      <Separator />
+                      
+                       <div>
+                          <div className="flex justify-between items-center mb-2">
+                              <h3 className="text-base font-medium">Medication</h3>
+                              <div className="flex items-center gap-2">
+                                   <DrugInteractionDialog medications={form.watch('medication')?.map(m => `${m.name} ${m.dosage}`) || []} disabled={form.watch('medication')?.length < 2}>
+                                       <Button type="button" size="sm" variant="outline" disabled={form.watch('medication')?.length < 2}><ShieldAlert className="mr-2 h-4 w-4" />Check</Button>
+                                   </DrugInteractionDialog>
+                                   <Button type="button" size="sm" variant="outline" onClick={() => appendMed({ name: '', dosage: '', frequency: '' })}><PlusCircle className="mr-2 h-4 w-4" />Add</Button>
+                              </div>
+                          </div>
+                          <div className="space-y-2">
+                              {medFields.map((field, index) => (
+                                  <MedicationItemForm key={field.id} form={form} fieldName="medication" index={index} remove={removeMed} isChecking={isCheckingMedication} setIsChecking={setIsCheckingMedication} openPopover={openMedicationPopover} setOpenPopover={setOpenMedicationPopover} />
+                              ))}
+                               {medFields.length === 0 && <p className="text-sm text-center text-muted-foreground py-2">No medications added.</p>}
+                          </div>
+                       </div>
+                       
+                       <Separator />
 
-                    <Separator />
-                    <h3 className="text-lg font-medium">Contact & Location</h3>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                         <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="john.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                          <FormField
-                              control={form.control}
-                              name="country"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Country</FormLabel>
-                                   <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select a country" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                         <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                    </div>
-                    
-                     <Separator />
-                    <h3 className="text-lg font-medium">Physical Measurements</h3>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                         <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                         <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 70" {...field} /></FormControl><FormDescription>Enter the latest weight. It will be added as a new record.</FormDescription><FormMessage /></FormItem> )} />
-                    </div>
-                    
-                    <Separator />
-                    
-                     <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <h3 className="text-lg font-medium">Medication</h3>
-                            <div className="flex items-center gap-2">
-                                 <DrugInteractionDialog medications={form.watch('medication')?.map(m => `${m.name} ${m.dosage}`) || []} disabled={form.watch('medication')?.length < 2}>
-                                     <Button type="button" size="sm" variant="outline" disabled={form.watch('medication')?.length < 2}><ShieldAlert className="mr-2 h-4 w-4" />Check Interactions</Button>
-                                 </DrugInteractionDialog>
-                                 <Button type="button" size="sm" variant="outline" onClick={() => appendMed({ name: '', dosage: '', frequency: '' })}><PlusCircle className="mr-2 h-4 w-4" />Add</Button>
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            {medFields.map((field, index) => (
-                                <MedicationItemForm key={field.id} form={form} fieldName="medication" index={index} remove={removeMed} isChecking={isCheckingMedication} setIsChecking={setIsCheckingMedication} openPopover={openMedicationPopover} setOpenPopover={setOpenMedicationPopover} />
-                            ))}
-                             {medFields.length === 0 && <p className="text-sm text-center text-muted-foreground py-2">No medications added.</p>}
-                        </div>
-                     </div>
-                     
-                     <Separator />
-
-                    <div>
-                        <div className="flex justify-between items-center mb-2">
-                             <h3 className="text-lg font-medium">Medical Conditions</h3>
-                             <Button type="button" size="sm" variant="outline" onClick={() => appendCond({ condition: '', date: new Date().toISOString().split('T')[0] })}><PlusCircle className="mr-2 h-4 w-4" />Add</Button>
-                        </div>
-                        <div className="space-y-2">
-                           {condFields.map((field, index) => (
-                                <ConditionItemForm key={field.id} form={form} fieldName="presentMedicalConditions" index={index} remove={removeCond} onSuggestIcd={handleSuggestIcdCode} />
-                           ))}
-                           {condFields.length === 0 && <p className="text-sm text-center text-muted-foreground py-2">No medical conditions added.</p>}
-                        </div>
+                      <div>
+                          <div className="flex justify-between items-center mb-2">
+                               <h3 className="text-base font-medium">Medical Conditions</h3>
+                               <Button type="button" size="sm" variant="outline" onClick={() => appendCond({ condition: '', date: new Date().toISOString().split('T')[0] })}><PlusCircle className="mr-2 h-4 w-4" />Add</Button>
+                          </div>
+                          <div className="space-y-2">
+                             {condFields.map((field, index) => (
+                                  <ConditionItemForm key={field.id} form={form} fieldName="presentMedicalConditions" index={index} remove={removeCond} onSuggestIcd={handleSuggestIcdCode} />
+                             ))}
+                             {condFields.length === 0 && <p className="text-sm text-center text-muted-foreground py-2">No medical conditions added.</p>}
+                          </div>
+                      </div>
                     </div>
                 </form>
                 </Form>
             </div>
         </ScrollArea>
         
-        <DialogFooter className="p-6 pt-4 border-t shrink-0 bg-background">
+        <DialogFooter className="p-6 pt-4 border-t">
             <div className="w-full flex justify-end gap-2">
                 <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
                 <Button type="submit" form="patient-form" disabled={isSubmitting}>
@@ -424,3 +426,4 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
     </Dialog>
   );
 }
+
