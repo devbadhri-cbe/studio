@@ -25,7 +25,7 @@ import { UploadRecordDialog } from '@/components/upload-record-dialog';
 import { ReportCard } from '@/components/report-card';
 import { ThyroidCard } from '@/components/thyroid-card';
 import { HypertensionCard } from '@/components/hypertension-card';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function PatientDashboard() {
   const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
@@ -73,7 +73,7 @@ export default function PatientDashboard() {
   }
 
   return (
-    <>
+    <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
          <header className="border-b px-4 py-4 md:px-6">
             <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2">
@@ -161,6 +161,6 @@ export default function PatientDashboard() {
           </div>
         </main>
       </div>
-    </>
+    </TooltipProvider>
   );
 }
