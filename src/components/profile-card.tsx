@@ -44,10 +44,14 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
     });
     form.reset();
   };
+  
+  const handleUpdateMedicationName = (name: string) => {
+    form.setValue('medicationName', name);
+  }
 
   const handleSpellCheck = async () => {
     const medicationName = form.getValues('medicationName');
-    if (medicationName.length < 3) return; // Don't check for very short strings
+    if (medicationName.length < 3) return;
 
     setIsCheckingSpelling(true);
     try {
@@ -57,7 +61,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
             title: "Spelling Suggestion",
             description: `Did you mean "${result.correctedName}"?`,
             action: (
-                <Button variant="outline" size="sm" onClick={() => form.setValue('medicationName', result.correctedName)}>
+                <Button variant="outline" size="sm" onClick={() => handleUpdateMedicationName(result.correctedName)}>
                     Update
                 </Button>
             ),
@@ -65,7 +69,6 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
       }
     } catch (error) {
       console.error("Medication spell check failed", error);
-      // Fail silently, don't bother the user
     } finally {
       setIsCheckingSpelling(false);
     }
@@ -85,7 +88,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
                             <Input 
                                 placeholder="Name" 
                                 {...field}
-                                onBlur={handleSpellCheck} // Check spelling when user leaves the field
+                                onBlur={handleSpellCheck}
                                 autoComplete="off"
                             />
                              {isCheckingSpelling && <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin" />}
