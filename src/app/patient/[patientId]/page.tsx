@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -40,27 +41,31 @@ export default function PatientDashboardPage() {
                 return;
             }
 
-            // This is the new, robust flow for a patient accessing via a direct link.
-            try {
-                // First, fetch the patient data using the ID from the URL.
-                const patient = await getPatient(patientId);
-                
-                if (patient) {
-                    // If the patient is found, "log them in" by setting their data
-                    // in the application context and local storage.
-                    localStorage.setItem('patient_id', patient.id);
-                    setPatientData(patient);
-                } else {
-                    // If the patient ID is invalid, show an error and redirect to the login page.
-                    setError(`No patient found with this ID. Redirecting to login...`);
-                    // Using a timeout to allow the user to read the error message.
-                    setTimeout(() => router.push('/'), 2000); 
+            // Flow for a patient accessing the dashboard.
+            // We verify their "logged-in" status via localStorage.
+            const storedPatientId = localStorage.getItem('patient_id');
+
+            if (storedPatientId === patientId) {
+                 try {
+                    const patient = await getPatient(patientId);
+                    if (patient) {
+                        setPatientData(patient);
+                    } else {
+                        // This case can happen if the patient was deleted after login.
+                        setError(`Patient with ID ${patientId} not found.`);
+                        localStorage.removeItem('patient_id');
+                    }
+                } catch (e) {
+                    console.error("Failed to load patient data for patient:", e);
+                    setError('Failed to load your dashboard. Please try logging in again.');
+                    localStorage.removeItem('patient_id');
+                } finally {
+                    setIsLoading(false);
                 }
-            } catch (e) {
-                console.error("Direct link access failed:", e);
-                setError('An error occurred while trying to load the dashboard. Please check your connection and try again.');
-            } finally {
-                setIsLoading(false);
+            } else {
+                // If the stored ID doesn't match, or doesn't exist, the user is not authenticated for this page.
+                // Redirect them to the login page.
+                router.replace('/'); 
             }
         };
 
