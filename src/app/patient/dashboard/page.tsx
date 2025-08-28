@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { VitaminDCard } from '@/components/vitamin-d-card';
 import { UploadRecordDialog } from '@/components/upload-record-dialog';
 import { ReportCard } from '@/components/report-card';
@@ -83,7 +82,6 @@ export default function PatientDashboard() {
                         <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
                     </div>
                     <div className="flex items-center gap-4">
-                        <ThemeToggle />
                         {isDoctor && (
                           <Tooltip>
                             <TooltipTrigger asChild>
