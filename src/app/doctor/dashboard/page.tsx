@@ -117,14 +117,14 @@ export default function DoctorDashboardPage() {
   return (
     <>
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <header className="border-b px-4 py-4 md:px-6 flex flex-col items-center gap-2">
+       <header className="border-b px-4 py-4 md:px-6 flex flex-col items-start md:items-center gap-2">
           <div className="flex items-center gap-2">
             <Logo className="h-8 w-8 text-primary" />
             <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
           </div>
-          <div className="text-center text-sm text-muted-foreground">
+          <div className="text-left md:text-center text-sm text-muted-foreground">
             <p className="font-semibold text-lg text-foreground">{doctorName}</p>
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-start md:justify-center gap-4">
               <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
                 <Mail className="h-3 w-3" />
                 drbadhri@gmail.com
