@@ -1,9 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // A patient document can be read by anyone who has the link.
-    // It can only be updated by a logged in doctor, or by the patient
-    // themselves (which we verify by checking the patientId in the request).
+    // A patient document can be read by anyone who knows the patientId,
+    // or by an authenticated user (the doctor).
+    // A patient document can be written to by an authenticated user (the doctor),
+    // or if the incoming data's ID matches the document's ID (the patient).
     match /patients/{patientId} {
       allow read: if true;
       allow write: if request.auth != null || request.resource.data.id == patientId;
