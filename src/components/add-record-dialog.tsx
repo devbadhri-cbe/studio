@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { PlusCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -42,9 +42,14 @@ export function AddRecordDialog() {
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    const newDate = new Date(data.date);
-    const newDateString = newDate.toDateString();
-    const dateExists = records.some((record) => new Date(record.date).toDateString() === newDateString);
+    // Dates from the form are 'yyyy-MM-dd' strings, representing local dates.
+    // Stored dates are ISO strings (UTC). We need to compare them consistently.
+    const newDateString = data.date;
+    const dateExists = records.some((record) => {
+        // Parse the stored ISO string and format it to 'yyyy-MM-dd' in UTC to avoid timezone shifts.
+        const storedDate = format(parseISO(record.date as string), 'yyyy-MM-dd');
+        return storedDate === newDateString;
+    });
 
     if (dateExists) {
       toast({

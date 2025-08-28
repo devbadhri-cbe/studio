@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -42,9 +42,11 @@ export function AddVitaminDRecordDialog() {
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    const newDate = new Date(data.date);
-    const newDateString = newDate.toDateString();
-    const dateExists = vitaminDRecords.some((record) => new Date(record.date).toDateString() === newDateString);
+    const newDateString = data.date;
+    const dateExists = vitaminDRecords.some((record) => {
+        const storedDate = format(parseISO(record.date as string), 'yyyy-MM-dd');
+        return storedDate === newDateString;
+    });
 
     if (dateExists) {
       toast({
