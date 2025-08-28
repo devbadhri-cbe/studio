@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
@@ -22,8 +21,6 @@ import { DrugInteractionDialog } from './drug-interaction-dialog';
 import { Separator } from './ui/separator';
 import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
 import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from './ui/popover';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { storage } from '@/lib/firebase';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 
@@ -229,14 +226,11 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
 }
 
 export function ProfileCard() {
-  const { profile, setProfile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
+  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [isAddingWeight, setIsAddingWeight] = React.useState(false);
   const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
-  const [isUploading, setIsUploading] = React.useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
 
   const calculatedAge = calculateAge(profile.dob);
   const countryName = countries.find(c => c.code === profile.country)?.name || profile.country;
@@ -261,64 +255,11 @@ export function ProfileCard() {
       setIsAddingWeight(false);
   }
 
-  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    try {
-        const fileRef = ref(storage, `profile_photos/${profile.id}/${Date.now()}_${file.name}`);
-        const snapshot = await uploadBytes(fileRef, file);
-        const downloadUrl = await getDownloadURL(snapshot.ref);
-        
-        setProfile({ ...profile, photoUrl: downloadUrl });
-        
-        toast({
-            title: 'Photo Uploaded',
-            description: 'Your profile picture has been updated.',
-        });
-    } catch (error) {
-        console.error("Photo upload failed:", error);
-        toast({
-            variant: 'destructive',
-            title: 'Upload Failed',
-            description: 'Could not upload photo. Please try again.',
-        });
-    } finally {
-        setIsUploading(false);
-    }
-  };
-
-
   return (
     <Card className="h-full">
       <CardHeader>
         <div className="flex items-center gap-3">
-             <Tooltip>
-                <TooltipTrigger asChild>
-                    <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className="relative rounded-full group"
-                    >
-                        <Avatar className="h-10 w-10 cursor-pointer">
-                            <AvatarImage src={profile.photoUrl} />
-                            <AvatarFallback>
-                                {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : 
-                                    <>
-                                        <User className="h-5 w-5 text-muted-foreground group-hover:hidden" />
-                                        <Upload className="h-5 w-5 text-muted-foreground hidden group-hover:block" />
-                                    </>
-                                }
-                            </AvatarFallback>
-                        </Avatar>
-                    </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>Upload Photo</p>
-                </TooltipContent>
-            </Tooltip>
-            <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
+          <UserCircle className="h-10 w-10 shrink-0 text-muted-foreground" />
           <div>
             <CardTitle>My Profile</CardTitle>
             <CardDescription>Your personal and medical information.</CardDescription>
@@ -327,11 +268,7 @@ export function ProfileCard() {
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         <div className="space-y-2 rounded-lg border bg-card p-4">
-            <div className="flex items-center gap-3">
-                <UserCircle className="h-5 w-5 shrink-0 text-muted-foreground" />
-                <p className="font-semibold text-lg">{profile.name || 'N/A'}</p>
-            </div>
-             <div className="flex items-center gap-3 text-muted-foreground">
+            <div className="flex items-center gap-3 text-muted-foreground">
                 <VenetianMask className="h-5 w-5 shrink-0" />
                 <p>
                     {calculatedAge !== null ? `${calculatedAge} years` : 'N/A'}, <span className="capitalize">{profile.gender || 'N/A'}</span>

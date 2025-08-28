@@ -8,7 +8,7 @@ import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
-import { ClipboardList, Mail } from 'lucide-react';
+import { ClipboardList, Mail, Upload, User, Loader2 } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import {
   Select,
@@ -26,20 +26,25 @@ import { ThyroidCard } from '@/components/thyroid-card';
 import { HypertensionCard } from '@/components/hypertension-card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
 
 export default function PatientDashboard() {
-  const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
+  const { profile, setProfile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
   const router = useRouter();
-  
-  // Use a separate state to track doctor login status on the client
+  const { toast } = useToast();
+
   const [isDoctor, setIsDoctor] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    // This ensures we check the actual login status from context and local storage
     const doctorStatus = isDoctorLoggedIn || localStorage.getItem('doctor_logged_in') === 'true';
     setIsDoctor(doctorStatus);
   }, [isDoctorLoggedIn]);
-
 
   if (!isClient) {
     return (
@@ -48,10 +53,38 @@ export default function PatientDashboard() {
       </div>
     );
   }
-  
-  const pageTitle = isDoctor 
-    ? `${profile.name}'s Dashboard` 
+
+  const pageTitle = isDoctor
+    ? `${profile.name}'s Dashboard`
     : `Welcome, ${profile.name || 'User'}!`;
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+        const fileRef = ref(storage, `profile_photos/${profile.id}/${Date.now()}_${file.name}`);
+        const snapshot = await uploadBytes(fileRef, file);
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        
+        setProfile({ ...profile, photoUrl: downloadUrl });
+        
+        toast({
+            title: 'Photo Uploaded',
+            description: 'Your profile picture has been updated.',
+        });
+    } catch (error) {
+        console.error("Photo upload failed:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Upload Failed',
+            description: 'Could not upload photo. Please try again.',
+        });
+    } finally {
+        setIsUploading(false);
+    }
+  };
 
   const renderDashboard = () => {
     switch (dashboardView) {
@@ -113,28 +146,56 @@ export default function PatientDashboard() {
       </header>
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-2 gap-4">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                  {pageTitle}
-                </h1>
-                <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
-              </div>
-              <div className="flex w-full sm:w-auto items-center justify-end gap-2">
-                <UploadRecordDialog />
-                <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}>
-                  <SelectTrigger className="w-auto flex-1 sm:flex-initial h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
-                    <SelectItem value="lipids">Lipid Dashboard</SelectItem>
-                    <SelectItem value="vitaminD">Vitamin D Dashboard</SelectItem>
-                    <SelectItem value="thyroid">Thyroid Dashboard</SelectItem>
-                    <SelectItem value="hypertension">Hypertension Dashboard</SelectItem>
-                    <SelectItem value="report">Comprehensive Report</SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="flex items-stretch border-b pb-4 gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                    <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="relative rounded-full group shrink-0"
+                    >
+                        <Avatar className="h-24 w-24 cursor-pointer">
+                            <AvatarImage src={profile.photoUrl} />
+                            <AvatarFallback>
+                                {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : 
+                                    <>
+                                        <User className="h-10 w-10 text-muted-foreground group-hover:hidden" />
+                                        <Upload className="h-10 w-10 text-muted-foreground hidden group-hover:block" />
+                                    </>
+                                }
+                            </AvatarFallback>
+                        </Avatar>
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>Upload Photo</p>
+                </TooltipContent>
+              </Tooltip>
+              <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 flex-1">
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-semibold font-headline">
+                    {pageTitle}
+                  </h1>
+                  <p className="text-muted-foreground">Here is your health dashboard. Always consult with your clinician before acting on the suggestions below.</p>
+                </div>
+                <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
+                  <UploadRecordDialog />
+                  <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}>
+                    <SelectTrigger className="w-auto flex-1 sm:flex-initial h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
+                      <SelectItem value="lipids">Lipid Dashboard</SelectItem>
+                      <SelectItem value="vitaminD">Vitamin D Dashboard</SelectItem>
+                      <SelectItem value="thyroid">Thyroid Dashboard</SelectItem>
+                      <SelectItem value="hypertension">Hypertension Dashboard</SelectItem>
+                      <SelectItem value="report">Comprehensive Report</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
             
