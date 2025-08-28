@@ -30,9 +30,9 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
 
   React.useEffect(() => {
     if (open && typeof window !== 'undefined') {
-      setLoginLink(`${window.location.origin}/patient/${patient.id}`);
+      setLoginLink(`${window.location.origin}/`);
     }
-  }, [patient.id, open]);
+  }, [open]);
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -51,7 +51,7 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
         <DialogHeader>
           <DialogTitle>Share Access for {patient.name}</DialogTitle>
           <DialogDescription>
-            Share this link, ID, or QR code with the patient to give them access to their dashboard.
+            Share the QR code or login link with the patient. They will need to enter their Patient ID to log in.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -60,7 +60,7 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="login-link">Login Link</Label>
+            <Label htmlFor="login-link">Login Page Link</Label>
             <div className="flex gap-2">
               <Input id="login-link" value={loginLink} readOnly />
               <Button
