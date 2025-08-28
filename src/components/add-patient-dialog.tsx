@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from './ui/button';
@@ -37,7 +37,7 @@ const FormSchema = z.object({
   name: z.string().min(2, { message: "Name is required." }),
   dob: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "A valid date is required." }),
   gender: z.enum(['male', 'female', 'other'], { required_error: "Gender is required." }),
-  email: z.string().email({ message: "Please enter a valid email." }),
+  email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')),
   country: z.string().min(1, { message: "Country is required." }),
   phone: z.string().min(5, { message: "Phone number is too short." }),
   height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional(),
@@ -107,13 +107,15 @@ const MedicationItemForm = ({ form, fieldName, index, remove, isChecking, setIsC
                                             {isChecking && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
                                         </div>
                                     </PopoverAnchor>
+                                    {suggestion && (
                                     <PopoverContent className="w-auto p-2">
                                         <div className="flex items-center gap-2 text-sm">
                                             <span>Did you mean:</span>
                                             <Button
                                                 variant="link"
                                                 className="p-0 h-auto font-semibold"
-                                                onClick={() => {
+                                                onClick={(e) => {
+                                                    e.preventDefault();
                                                     form.setValue(`${fieldName}.${index}.name`, suggestion);
                                                     setOpenPopover(null);
                                                 }}
@@ -122,6 +124,7 @@ const MedicationItemForm = ({ form, fieldName, index, remove, isChecking, setIsC
                                             </Button>
                                         </div>
                                     </PopoverContent>
+                                    )}
                                 </Popover>
                             </FormControl>
                             <FormMessage />
@@ -190,16 +193,16 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
   });
 
   const watchCountry = form.watch('country');
-  const watchPhone = form.watch('phone');
 
   React.useEffect(() => {
     if (watchCountry) {
         const countryData = countries.find(c => c.code === watchCountry);
-        if (countryData && !watchPhone?.startsWith(countryData.phoneCode)) {
-            form.setValue('phone', countryData.phoneCode);
+        const currentPhone = form.getValues('phone');
+        if (countryData && (!currentPhone || !countries.some(c => currentPhone.startsWith(c.phoneCode)))) {
+             form.setValue('phone', countryData.phoneCode);
         }
     }
-  }, [watchCountry, watchPhone, form]);
+  }, [watchCountry, form]);
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -336,7 +339,26 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                      <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="john.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                     <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent><SelectItem value="">Select a country</SelectItem>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem> )} />
+                      <FormField
+                          control={form.control}
+                          name="country"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Country</FormLabel>
+                               <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a country" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                      <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 </div>
                 
