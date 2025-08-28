@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Clipboard, Globe, Link } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Clipboard, Globe, Link, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge } from '@/lib/utils';
@@ -13,6 +13,7 @@ import { Separator } from './ui/separator';
 import { countries } from '@/lib/countries';
 import * as React from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 
 interface PatientCardProps {
@@ -110,12 +111,20 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     <Card className="w-full flex flex-col cursor-pointer hover:border-primary/50 transition-colors group" onClick={handleCardClick}>
       <CardHeader className="p-4">
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg">{patient.name}</CardTitle>
-            <p className="text-xs text-muted-foreground">
-                {age ? `${age} years old` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
-                 {patient.bmi && <span className="font-semibold"> (BMI: {patient.bmi.toFixed(1)})</span>}
-            </p>
+          <div className="flex-1 flex items-center gap-3">
+             <Avatar>
+                <AvatarImage src={patient.photoUrl} />
+                <AvatarFallback>
+                    <User className="h-5 w-5" />
+                </AvatarFallback>
+             </Avatar>
+             <div>
+                <CardTitle className="text-lg">{patient.name}</CardTitle>
+                <p className="text-xs text-muted-foreground">
+                    {age ? `${age} years old` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
+                    {patient.bmi && <span className="font-semibold"> (BMI: {patient.bmi.toFixed(1)})</span>}
+                </p>
+             </div>
           </div>
            <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -32,6 +32,7 @@ export interface UserProfile {
   country: string;
   phone?: string;
   height?: number; // in cm
+  photoUrl?: string;
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
 }
@@ -87,6 +88,7 @@ export interface Patient {
   country: string;
   phone: string;
   height?: number; // in cm
+  photoUrl?: string;
   bmi?: number;
   lastHba1c: {
     value: number;

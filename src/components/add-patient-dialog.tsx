@@ -4,9 +4,10 @@
 
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2, User, Upload } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -25,6 +26,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { calculateAge } from '@/lib/utils';
 import type { Patient } from '@/lib/types';
 import { countries } from '@/lib/countries';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+
 
 const FormSchema = z.object({
   name: z.string().min(2, 'Patient name is required.'),
@@ -35,6 +40,7 @@ const FormSchema = z.object({
   phone: z.string().min(5, 'A valid phone number is required.'),
   height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional(),
   weight: z.coerce.number().min(2, 'Weight must be at least 2kg.').optional(),
+  photoUrl: z.string().url().optional(),
 }).refine((data) => data.email || data.phone, {
     message: "Either email or phone number is required.",
     path: ["email"],
@@ -50,7 +56,10 @@ interface PatientFormDialogProps {
 export function PatientFormDialog({ patient, onSave, children }: PatientFormDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
   const { toast } = useToast();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const isEditMode = !!patient;
 
@@ -65,6 +74,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
       phone: '',
       height: '' as any,
       weight: '' as any,
+      photoUrl: '',
     },
   });
   
@@ -76,12 +86,10 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
         const country = countries.find(c => c.code === selectedCountryCode);
         if (country) {
             const countryCode = country.phoneCode;
-            // Only set the country code if the field is empty or doesn't already start with a plausible country code
             if (!currentPhoneNumber || !currentPhoneNumber.startsWith('+')) {
                  form.setValue('phone', countryCode, { shouldValidate: true });
             } else {
-                // If the user changes country, update the country code prefix
-                const oldCodeMatch = currentPhoneNumber.match(/^\+\d+/);
+                const oldCodeMatch = currentPhoneNumber.match(/^\\+\\d+/);
                 if (oldCodeMatch && oldCodeMatch[0] !== countryCode) {
                     const numberWithoutCode = currentPhoneNumber.substring(oldCodeMatch[0].length).trim();
                     form.setValue('phone', `${countryCode} ${numberWithoutCode}`, { shouldValidate: true });
@@ -105,7 +113,13 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 weight: patient.weightRecords && patient.weightRecords.length > 0
                   ? [...patient.weightRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].value
                   : '' as any,
+                photoUrl: patient.photoUrl || '',
             });
+            if (patient.photoUrl) {
+                setPhotoPreview(patient.photoUrl);
+            } else {
+                setPhotoPreview(null);
+            }
         } else {
             form.reset({
                 name: '',
@@ -116,13 +130,45 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 phone: '',
                 height: '' as any,
                 weight: '' as any,
+                photoUrl: '',
             });
+            setPhotoPreview(null);
         }
     }
   }, [open, form, isEditMode, patient]);
   
   const dobValue = form.watch('dob');
   const calculatedAge = calculateAge(dobValue);
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+        const fileRef = ref(storage, `profile_photos/${Date.now()}_${file.name}`);
+        const snapshot = await uploadBytes(fileRef, file);
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        
+        form.setValue('photoUrl', downloadUrl, { shouldValidate: true });
+        setPhotoPreview(URL.createObjectURL(file));
+        
+        toast({
+            title: 'Photo Uploaded',
+            description: 'The profile picture has been uploaded successfully.',
+        });
+    } catch (error) {
+        console.error("Photo upload failed:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Upload Failed',
+            description: 'Could not upload photo. Please try again.',
+        });
+    } finally {
+        setIsUploading(false);
+    }
+  };
+
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
@@ -133,6 +179,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
         phone: data.phone || '',
         height: data.height || undefined,
         weight: data.weight || undefined,
+        photoUrl: data.photoUrl || undefined,
     };
     
     setTimeout(() => {
@@ -162,6 +209,23 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-20 w-20">
+                    <AvatarImage src={photoPreview || undefined} alt="Patient photo" />
+                    <AvatarFallback>
+                        <User className="h-10 w-10 text-muted-foreground" />
+                    </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                    <FormLabel>Profile Photo</FormLabel>
+                    <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
+                    <Button type="button" variant="outline" size="sm" className="w-full mt-2" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                        {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                        {isUploading ? 'Uploading...' : 'Change Photo'}
+                    </Button>
+                </div>
+              </div>
+
               <FormField
                 control={form.control}
                 name="name"
@@ -294,7 +358,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 />
               </div>
               <DialogFooter>
-                 <Button type="submit" disabled={isSubmitting} size="sm">
+                 <Button type="submit" disabled={isSubmitting || isUploading} size="sm">
                     {isSubmitting ? (
                         <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

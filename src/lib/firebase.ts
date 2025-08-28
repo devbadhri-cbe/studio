@@ -4,13 +4,14 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // This is a placeholder for your Firebase configuration.
 // In a real application, you should use environment variables to store your config.
 const firebaseConfig = {
   "projectId": "glycemic-guardian-6uxyg",
   "appId": "1:1023747133263:web:fc7ad4f2a467dad6c9ff3a",
-  "storageBucket": "glycemic-guardian-6uxyg.firebasestorage.app",
+  "storageBucket": "glycemic-guardian-6uxyg.appspot.com",
   "apiKey": "AIzaSyDRROv81qKWJOF1DlsskWYTzWcyYOXvnl4",
   "authDomain": "glycemic-guardian-6uxyg.firebaseapp.com",
   "measurementId": "",
@@ -21,5 +22,6 @@ const firebaseConfig = {
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-export { app, auth, db };
+export { app, auth, db, storage };

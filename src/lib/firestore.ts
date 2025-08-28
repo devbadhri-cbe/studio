@@ -60,7 +60,7 @@ export const getPatients = async (): Promise<Patient[]> => {
     const patientsCollection = collection(db, PATIENTS_COLLECTION);
     const patientsSnapshot = await getDocs(patientsCollection);
     const patientsList = patientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Patient));
-    return patientsList.sort((a, b) => a.name.localeCompare(b.name));
+    return patientsList.map(recalculatePatientStatus).sort((a, b) => a.name.localeCompare(b.name));
 };
 
 // Fetch a single patient
@@ -68,7 +68,8 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
     const patientDocRef = doc(db, PATIENTS_COLLECTION, id);
     const patientDoc = await getDoc(patientDocRef);
     if (patientDoc.exists()) {
-        return { id: patientDoc.id, ...patientDoc.data() } as Patient;
+        const patientData = { id: patientDoc.id, ...patientDoc.data() } as Patient;
+        return recalculatePatientStatus(patientData);
     }
     return null;
 };

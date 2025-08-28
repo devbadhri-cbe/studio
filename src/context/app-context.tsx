@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type Theme, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord } from '@/lib/types';
@@ -105,6 +106,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       country: patient.country,
       phone: patient.phone,
       height: patient.height,
+      photoUrl: patient.photoUrl,
       medication: Array.isArray(patient.medication) ? patient.medication : [],
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
     };

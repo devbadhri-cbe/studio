@@ -1,7 +1,7 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler } from 'lucide-react';
+import { User, UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +21,7 @@ import { DrugInteractionDialog } from './drug-interaction-dialog';
 import { Separator } from './ui/separator';
 import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
 import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from './ui/popover';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 
 const MedicationSchema = z.object({
@@ -258,9 +259,12 @@ export function ProfileCard() {
     <Card className="h-full">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <UserCircle className="h-6 w-6 text-primary" />
-          </div>
+            <Avatar className="h-10 w-10">
+                <AvatarImage src={profile.photoUrl} />
+                <AvatarFallback>
+                    <User className="h-5 w-5" />
+                </AvatarFallback>
+            </Avatar>
           <div>
             <CardTitle>My Profile</CardTitle>
             <CardDescription>Your personal and medical information.</CardDescription>
