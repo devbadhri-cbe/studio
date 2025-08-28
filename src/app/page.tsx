@@ -9,7 +9,7 @@ import { auth } from '@/lib/firebase';
 import PatientLoginPage from './patient/login/page';
 
 export default function AppRootPage() {
-  const { isClient, setIsDoctorLoggedIn, isDoctorLoggedIn: isDoctorLoggedInFromContext } = useApp();
+  const { isClient, setIsDoctorLoggedIn } = useApp();
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -30,19 +30,6 @@ export default function AppRootPage() {
     return () => unsubscribe();
   }, [router, setIsDoctorLoggedIn]);
   
-  // This logic is being removed to prevent automatic login for patients.
-  // The app should always start at the login page if no one is authenticated.
-  // React.useEffect(() => {
-  //   if (isClient && !isDoctorLoggedInFromContext) {
-  //     const patientId = localStorage.getItem('patient_id');
-  //     if (patientId) {
-  //       router.replace(`/patient/${patientId}`);
-  //     } else {
-  //       setIsLoading(false);
-  //     }
-  //   }
-  // }, [isClient, router, isDoctorLoggedInFromContext]);
-
 
   if (!isClient || isLoading) {
     return (
