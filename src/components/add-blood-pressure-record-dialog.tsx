@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, startOfDay } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -44,10 +44,11 @@ export function AddBloodPressureRecordDialog() {
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    const newDateString = data.date;
+    const newDate = new Date(data.date + 'T00:00:00');
+
     const dateExists = bloodPressureRecords.some((record) => {
-        const storedDate = format(parseISO(record.date as string), 'yyyy-MM-dd');
-        return storedDate === newDateString;
+        const storedDate = startOfDay(parseISO(record.date as string));
+        return storedDate.getTime() === newDate.getTime();
     });
 
     if (dateExists) {
@@ -60,7 +61,7 @@ export function AddBloodPressureRecordDialog() {
     }
     
     addBloodPressureRecord({
-      date: new Date(data.date).toISOString(),
+      date: newDate.toISOString(),
       systolic: data.systolic,
       diastolic: data.diastolic,
     });
