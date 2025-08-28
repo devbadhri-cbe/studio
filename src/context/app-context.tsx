@@ -25,6 +25,7 @@ interface AppContextType {
   removeMedicalCondition: (id: string) => void;
   addMedication: (medication: Omit<Medication, 'id'>) => void;
   removeMedication: (id: string) => void;
+  setMedicationNil: () => void;
   records: Hba1cRecord[];
   addRecord: (record: Omit<Hba1cRecord, 'id' | 'medication'>) => void;
   removeRecord: (id: string) => void;
@@ -155,7 +156,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
    const addMedication = (medication: Omit<Medication, 'id'>) => {
     const newMedication = { ...medication, id: Date.now().toString() };
-    const updatedMedication = [...profile.medication, newMedication];
+    const updatedMedication = [...profile.medication.filter(m => m.name.toLowerCase() !== 'nil'), newMedication];
     setProfileState(p => ({ ...p, medication: updatedMedication }));
     updatePatientData(profile.id, { medication: updatedMedication });
   };
@@ -165,6 +166,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setProfileState(p => ({ ...p, medication: updatedMedication }));
     updatePatientData(profile.id, { medication: updatedMedication });
   };
+
+  const setMedicationNil = () => {
+    const nilMedication = [{ id: 'nil', name: 'Nil', dosage: '', frequency: '' }];
+    setProfileState(p => ({...p, medication: nilMedication}));
+    updatePatientData(profile.id, { medication: nilMedication });
+  }
 
   const addRecord = (record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
@@ -304,6 +311,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     removeMedicalCondition,
     addMedication,
     removeMedication,
+    setMedicationNil,
     records,
     addRecord,
     removeRecord,

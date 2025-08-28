@@ -227,7 +227,7 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
 }
 
 export function ProfileCard() {
-  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord } = useApp();
+  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [isAddingWeight, setIsAddingWeight] = React.useState(false);
@@ -237,6 +237,8 @@ export function ProfileCard() {
   const sortedWeights = React.useMemo(() => [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [weightRecords]);
   const latestWeight = sortedWeights[0];
   const bmi = calculateBmi(latestWeight?.value, profile.height || 0);
+  const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
+
 
   const handleSaveCondition = async (data: z.infer<typeof ConditionSchema>, icdCode?: string) => {
     addMedicalCondition({ ...data, date: new Date(data.date).toISOString(), icdCode });
@@ -380,13 +382,18 @@ export function ProfileCard() {
                 <div className="flex items-center gap-1">
                     <DrugInteractionDialog
                         medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                        disabled={profile.medication.length < 2}
+                        disabled={profile.medication.length < 2 || isMedicationNil}
                     >
-                        <Button size="xs" variant="outline" className="h-7 px-2" disabled={profile.medication.length < 2}>
+                        <Button size="xs" variant="outline" className="h-7 px-2" disabled={profile.medication.length < 2 || isMedicationNil}>
                             <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Check
                         </Button>
                     </DrugInteractionDialog>
                      {!isAddingMedication && (
+                        <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setMedicationNil()}>
+                           Nil
+                        </Button>
+                    )}
+                     {!isAddingMedication && !isMedicationNil && (
                         <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setIsAddingMedication(true)}>
                             <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add
                         </Button>
@@ -398,13 +405,24 @@ export function ProfileCard() {
                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
                          <li key={med.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                            <div className='flex-1'>
-                                <span className="font-semibold text-foreground">{med.name}</span>
-                                <span className='block'>({med.dosage}, {med.frequency})</span>
-                            </div>
-                             <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedication(med.id)}>
-                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                            </Button>
+                             {med.name.toLowerCase() === 'nil' ? (
+                                <div className="flex-1 flex justify-between items-center">
+                                    <span className="font-semibold text-foreground">Nil - No medication</span>
+                                    <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => removeMedication(med.id)}>
+                                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                    </Button>
+                                </div>
+                             ) : (
+                                <>
+                                    <div className='flex-1'>
+                                        <span className="font-semibold text-foreground">{med.name}</span>
+                                        <span className='block'>({med.dosage}, {med.frequency})</span>
+                                    </div>
+                                    <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedication(med.id)}>
+                                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                    </Button>
+                                </>
+                             )}
                         </li>
                     ))}
                 </ul>
