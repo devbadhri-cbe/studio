@@ -192,18 +192,11 @@ export default function PatientDashboard() {
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
                    <DropdownMenu open={open} onOpenChange={setOpen}>
-                      <Tooltip>
-                        <TooltipTrigger asChild onMouseOver={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-                            <DropdownMenuTrigger asChild>
-                                <Button size="icon" variant="outline" className="w-9 h-9 p-0">
-                                    <GaugeCircle className="w-4 h-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Select Dashboard</p>
-                        </TooltipContent>
-                      </Tooltip>
+                        <DropdownMenuTrigger asChild onMouseOver={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+                            <Button size="icon" variant="outline" className="w-9 h-9 p-0">
+                                <GaugeCircle className="w-4 h-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
                       <DropdownMenuContent onMouseOver={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
                         {Object.entries(dashboardOptions).map(([key, value]) => (
                             <DropdownMenuItem 
