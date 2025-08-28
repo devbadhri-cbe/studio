@@ -7,6 +7,8 @@ import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { toast } from '@/hooks/use-toast';
+import { startOfDay, parseISO } from 'date-fns';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', presentMedicalConditions: [], medication: [] };
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
@@ -284,41 +286,64 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const updates: Partial<Patient> = {};
     const date = batch.hba1c?.date || batch.lipid?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date;
 
-    if (!date) return; // Cannot add records without a date
+    if (!date) return;
+    
+    // The date from AI comes as YYYY-MM-DD, so we add T00:00:00 to ensure it's parsed as local midnight.
+    const newRecordDate = new Date(date + 'T00:00:00');
+
+    let duplicatesFound = false;
 
     if (batch.hba1c && batch.hba1c.value) {
-      const newRecord: Hba1cRecord = { ...batch.hba1c, id: `hba1c-${Date.now()}`, medication: newMedication };
-      const newHba1cRecords = [...records, newRecord];
-      setRecordsState(newHba1cRecords);
-      updates.records = newHba1cRecords;
+      const dateExists = records.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+      if (!dateExists) {
+        const newRecord: Hba1cRecord = { ...batch.hba1c, id: `hba1c-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+        updates.records = [...records, newRecord];
+        setRecordsState(updates.records);
+      } else { duplicatesFound = true; }
     }
     if (batch.lipid && batch.lipid.ldl && batch.lipid.hdl && batch.lipid.triglycerides && batch.lipid.total) {
-      const newRecord: LipidRecord = { ...batch.lipid, id: `lipid-${Date.now()}`, medication: newMedication };
-      const newLipidRecords = [...lipidRecords, newRecord];
-      setLipidRecordsState(newLipidRecords);
-      updates.lipidRecords = newLipidRecords;
+      const dateExists = lipidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+      if (!dateExists) {
+        const newRecord: LipidRecord = { ...batch.lipid, id: `lipid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+        updates.lipidRecords = [...lipidRecords, newRecord];
+        setLipidRecordsState(updates.lipidRecords);
+      } else { duplicatesFound = true; }
     }
     if (batch.vitaminD && batch.vitaminD.value) {
-      const newRecord: VitaminDRecord = { ...batch.vitaminD, id: `vitd-${Date.now()}`, medication: newMedication };
-      const newVitaminDRecords = [...vitaminDRecords, newRecord];
-      setVitaminDRecordsState(newVitaminDRecords);
-      updates.vitaminDRecords = newVitaminDRecords;
+      const dateExists = vitaminDRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+      if (!dateExists) {
+        const newRecord: VitaminDRecord = { ...batch.vitaminD, id: `vitd-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+        updates.vitaminDRecords = [...vitaminDRecords, newRecord];
+        setVitaminDRecordsState(updates.vitaminDRecords);
+      } else { duplicatesFound = true; }
     }
     if (batch.thyroid && batch.thyroid.tsh && batch.thyroid.t3 && batch.thyroid.t4) {
-      const newRecord: ThyroidRecord = { ...batch.thyroid, id: `thyroid-${Date.now()}`, medication: newMedication };
-      const newThyroidRecords = [...thyroidRecords, newRecord];
-      setThyroidRecordsState(newThyroidRecords);
-      updates.thyroidRecords = newThyroidRecords;
+      const dateExists = thyroidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+      if (!dateExists) {
+        const newRecord: ThyroidRecord = { ...batch.thyroid, id: `thyroid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+        updates.thyroidRecords = [...thyroidRecords, newRecord];
+        setThyroidRecordsState(updates.thyroidRecords);
+      } else { duplicatesFound = true; }
     }
     if (batch.bloodPressure && batch.bloodPressure.systolic && batch.bloodPressure.diastolic) {
-      const newRecord: BloodPressureRecord = { ...batch.bloodPressure, id: `bp-${Date.now()}`, medication: newMedication };
-      const newBloodPressureRecords = [...bloodPressureRecords, newRecord];
-      setBloodPressureRecordsState(newBloodPressureRecords);
-      updates.bloodPressureRecords = newBloodPressureRecords;
+       const dateExists = bloodPressureRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+       if (!dateExists) {
+        const newRecord: BloodPressureRecord = { ...batch.bloodPressure, id: `bp-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+        updates.bloodPressureRecords = [...bloodPressureRecords, newRecord];
+        setBloodPressureRecordsState(updates.bloodPressureRecords);
+      } else { duplicatesFound = true; }
     }
     
     if (Object.keys(updates).length > 0) {
         updatePatientData(profile.id, updates);
+    }
+    
+    if (duplicatesFound) {
+      toast({
+        variant: "destructive",
+        title: "Duplicate Record Found",
+        description: "Some records were not added because an entry for that date already exists."
+      })
     }
   };
 
