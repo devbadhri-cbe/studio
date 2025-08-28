@@ -20,6 +20,8 @@ import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 import { DrugInteractionDialog } from './drug-interaction-dialog';
 import { Separator } from './ui/separator';
 import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
+import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from './ui/popover';
+
 
 const MedicationSchema = z.object({
   medicationName: z.string().min(2, 'Medication name is required.'),
@@ -28,13 +30,48 @@ const MedicationSchema = z.object({
 });
 
 function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
-  const { toast } = useToast();
   const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
+  const [suggestion, setSuggestion] = React.useState<string | null>(null);
+  const [isSuggestionOpen, setIsSuggestionOpen] = React.useState(false);
+  const [ignoredSuggestions, setIgnoredSuggestions] = React.useState<string[]>([]);
+
 
   const form = useForm<z.infer<typeof MedicationSchema>>({
     resolver: zodResolver(MedicationSchema),
     defaultValues: { medicationName: '', dosage: '', frequency: '' },
   });
+  
+  const handleUpdateMedicationName = (name: string) => {
+    form.setValue('medicationName', name);
+    setIsSuggestionOpen(false);
+  }
+
+  const handleSpellCheck = async () => {
+    const medicationName = form.getValues('medicationName');
+    if (medicationName.length < 3 || ignoredSuggestions.includes(medicationName.toLowerCase())) {
+        setSuggestion(null);
+        setIsSuggestionOpen(false);
+        return;
+    };
+
+    setIsCheckingSpelling(true);
+    try {
+      const result = await checkMedicationSpelling({ medicationName });
+      if (result.correctedName && result.correctedName.toLowerCase() !== medicationName.toLowerCase()) {
+        setSuggestion(result.correctedName);
+        setIsSuggestionOpen(true);
+      } else {
+        setSuggestion(null);
+        setIsSuggestionOpen(false);
+      }
+    } catch (error) {
+      console.error("Medication spell check failed", error);
+      setSuggestion(null);
+      setIsSuggestionOpen(false);
+    } finally {
+      setIsCheckingSpelling(false);
+    }
+  }
 
   const handleSave = (data: z.infer<typeof MedicationSchema>) => {
     onSave({
@@ -43,35 +80,17 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
       frequency: data.frequency,
     });
     form.reset();
+    setIgnoredSuggestions([]);
   };
-  
-  const handleUpdateMedicationName = (name: string) => {
-    form.setValue('medicationName', name);
-  }
 
-  const handleSpellCheck = async () => {
-    const medicationName = form.getValues('medicationName');
-    if (medicationName.length < 3) return;
-
-    setIsCheckingSpelling(true);
-    try {
-      const result = await checkMedicationSpelling({ medicationName });
-      if (result.correctedName && result.correctedName.toLowerCase() !== medicationName.toLowerCase()) {
-        toast({
-            title: "Spelling Suggestion",
-            description: `Did you mean "${result.correctedName}"?`,
-            action: (
-                <Button variant="outline" size="sm" onClick={() => handleUpdateMedicationName(result.correctedName)}>
-                    Update
-                </Button>
-            ),
-        });
-      }
-    } catch (error) {
-      console.error("Medication spell check failed", error);
-    } finally {
-      setIsCheckingSpelling(false);
+  const handlePopoverOpenChange = (open: boolean) => {
+    if (!open) {
+        const medicationName = form.getValues('medicationName');
+        if (medicationName && !ignoredSuggestions.includes(medicationName.toLowerCase())) {
+            setIgnoredSuggestions([...ignoredSuggestions, medicationName.toLowerCase()]);
+        }
     }
+    setIsSuggestionOpen(open);
   }
 
   return (
@@ -84,15 +103,32 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
             render={({ field }) => ( 
                 <FormItem>
                     <FormControl>
-                        <div className="relative">
-                            <Input 
-                                placeholder="Name" 
-                                {...field}
-                                onBlur={handleSpellCheck}
-                                autoComplete="off"
-                            />
-                             {isCheckingSpelling && <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin" />}
-                        </div>
+                        <Popover open={isSuggestionOpen} onOpenChange={handlePopoverOpenChange}>
+                            <PopoverAnchor asChild>
+                                <div className="relative">
+                                    <Input 
+                                        placeholder="Name" 
+                                        {...field}
+                                        onBlur={handleSpellCheck}
+                                        autoComplete="off"
+                                    />
+                                    {isCheckingSpelling && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
+                                </div>
+                            </PopoverAnchor>
+                            <PopoverContent className="w-auto p-2" onOpenAutoFocus={(e) => e.preventDefault()}>
+                                <div className="flex items-center gap-2 text-sm">
+                                    <span className="text-muted-foreground">Did you mean:</span>
+                                    <Button
+                                        variant="link"
+                                        size="sm"
+                                        onClick={() => handleUpdateMedicationName(suggestion!)}
+                                        className="p-0 h-auto font-semibold"
+                                    >
+                                        {suggestion}
+                                    </Button>
+                                </div>
+                            </PopoverContent>
+                        </Popover>
                     </FormControl>
                     <FormMessage />
                 </FormItem> 
@@ -102,7 +138,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
           <FormField control={form.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency" {...field} /></FormControl><FormMessage /></FormItem> )} />
         </div>
         <div className="flex justify-end gap-2">
-          <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+          <Button type="button" size="sm" variant="ghost" onClick={() => { onCancel(); setIgnoredSuggestions([]); }}>Cancel</Button>
           <Button type="submit" size="sm">Save</Button>
         </div>
       </form>
