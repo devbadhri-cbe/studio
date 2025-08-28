@@ -405,7 +405,7 @@ export function ProfileCard() {
                          <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button size="icon" variant="outline" className="h-7 w-7" disabled={isCheckingSpelling || profile.medication.length < 2 || isMedicationNil}>
-                                    {isCheckingSpelling ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+                                    <ShieldAlert className="h-4 w-4" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -462,7 +462,7 @@ export function ProfileCard() {
                                     </div>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover-opacity-100" onClick={() => removeMedication(med.id)}>
+                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedication(med.id)}>
                                             <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                         </Button>
                                       </TooltipTrigger>
