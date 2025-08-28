@@ -26,7 +26,7 @@ import { ReportCard } from '@/components/report-card';
 import { ThyroidCard } from '@/components/thyroid-card';
 import { HypertensionCard } from '@/components/hypertension-card';
 
-export default function Home() {
+export default function PatientDashboard() {
   const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
   const router = useRouter();
 
