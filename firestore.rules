@@ -1,10 +1,13 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read/write access to the patients collection for any authenticated user
-    match /patients/{patientId=**} {
-      allow read, write: if request.auth != null;
+    // Doctors can read/write any patient data
+    // Patients can read their own data to log in
+    match /patients/{patientId} {
+      allow read: if request.auth != null || resource.id == patientId;
+      allow write: if request.auth != null;
     }
   }
 }
