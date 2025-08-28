@@ -30,6 +30,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
+import { updatePatient } from '@/lib/firestore';
 
 export default function PatientDashboard() {
   const { profile, setProfile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
@@ -60,7 +61,7 @@ export default function PatientDashboard() {
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file || !profile.id) return;
 
     setIsUploading(true);
     try {
@@ -68,6 +69,7 @@ export default function PatientDashboard() {
         const snapshot = await uploadBytes(fileRef, file);
         const downloadUrl = await getDownloadURL(snapshot.ref);
         
+        await updatePatient(profile.id, { photoUrl: downloadUrl });
         setProfile({ ...profile, photoUrl: downloadUrl });
         
         toast({
