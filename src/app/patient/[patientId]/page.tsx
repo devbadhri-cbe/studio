@@ -25,9 +25,9 @@ export default function PatientDashboardPage() {
             const loggedInPatientId = localStorage.getItem('patient_id');
             const isDoctor = isDoctorLoggedIn || localStorage.getItem('doctor_logged_in') === 'true';
 
+            // If not the doctor and not the correct logged-in patient, redirect to login
             if (!isDoctor && loggedInPatientId !== patientId) {
-                setError('Access Denied. You are not authorized to view this page.');
-                setIsLoading(false);
+                router.replace('/');
                 return;
             }
 
