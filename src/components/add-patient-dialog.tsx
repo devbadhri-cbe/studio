@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import type { Patient, MedicalCondition, Medication } from '@/lib/types';
+import type { Patient } from '@/lib/types';
 import {
   Dialog,
   DialogContent,
@@ -337,7 +337,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                     </div>
 
                     <Separator />
-                    <h3 className="text-lg font-medium">Contact &amp; Location</h3>
+                    <h3 className="text-lg font-medium">Contact & Location</h3>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                          <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="john.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
@@ -412,12 +412,12 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
         </ScrollArea>
         
         <DialogFooter className="p-6 pt-4 border-t shrink-0 bg-background">
-            <div className="w-full flex flex-col gap-2">
-                <Button type="submit" form="patient-form" disabled={isSubmitting} className="w-full">
+            <div className="w-full flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                <Button type="submit" form="patient-form" disabled={isSubmitting}>
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {patient ? 'Save Changes' : 'Add Patient'}
                 </Button>
-                <Button variant="ghost" onClick={() => setOpen(false)} className="w-full">Cancel</Button>
             </div>
         </DialogFooter>
       </DialogContent>
