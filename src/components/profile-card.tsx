@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 import { DrugInteractionDialog } from './drug-interaction-dialog';
 import { Separator } from './ui/separator';
+import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
 
 const MedicationSchema = z.object({
   medicationName: z.string().min(2, 'Medication name is required.'),
@@ -27,6 +28,8 @@ const MedicationSchema = z.object({
 });
 
 function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
+  const { toast } = useToast();
+  const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
 
   const form = useForm<z.infer<typeof MedicationSchema>>({
     resolver: zodResolver(MedicationSchema),
@@ -39,7 +42,34 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
       dosage: data.dosage,
       frequency: data.frequency,
     });
+    form.reset();
   };
+
+  const handleSpellCheck = async () => {
+    const medicationName = form.getValues('medicationName');
+    if (medicationName.length < 3) return; // Don't check for very short strings
+
+    setIsCheckingSpelling(true);
+    try {
+      const result = await checkMedicationSpelling({ medicationName });
+      if (result.correctedName && result.correctedName.toLowerCase() !== medicationName.toLowerCase()) {
+        toast({
+            title: "Spelling Suggestion",
+            description: `Did you mean "${result.correctedName}"?`,
+            action: (
+                <Button variant="outline" size="sm" onClick={() => form.setValue('medicationName', result.correctedName)}>
+                    Update
+                </Button>
+            ),
+        });
+      }
+    } catch (error) {
+      console.error("Medication spell check failed", error);
+      // Fail silently, don't bother the user
+    } finally {
+      setIsCheckingSpelling(false);
+    }
+  }
 
   return (
     <Form {...form}>
@@ -51,11 +81,15 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
             render={({ field }) => ( 
                 <FormItem>
                     <FormControl>
-                        <Input 
-                            placeholder="Name" 
-                            {...field}
-                            autoComplete="off"
-                        />
+                        <div className="relative">
+                            <Input 
+                                placeholder="Name" 
+                                {...field}
+                                onBlur={handleSpellCheck} // Check spelling when user leaves the field
+                                autoComplete="off"
+                            />
+                             {isCheckingSpelling && <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin" />}
+                        </div>
                     </FormControl>
                     <FormMessage />
                 </FormItem> 
