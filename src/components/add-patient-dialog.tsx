@@ -23,7 +23,6 @@ import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { countries } from '@/lib/countries';
 import { Loader2 } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
-import { useToast } from '@/hooks/use-toast';
 
 const FormSchema = z.object({
   name: z.string().min(2, { message: "Name is required." }),
@@ -32,22 +31,20 @@ const FormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')),
   country: z.string().min(1, { message: "Country is required." }),
   phone: z.string().min(5, { message: "Phone number is too short." }),
-  height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional(),
-  weight: z.coerce.number().min(2, 'Weight must be at least 2kg.').optional(),
+  height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional().or(z.literal('')),
+  weight: z.coerce.number().min(2, 'Weight must be at least 2kg.').optional().or(z.literal('')),
 });
 
 
 interface PatientFormDialogProps {
     patient?: Patient;
-    onSave: (patient: Partial<Patient> & { weight?: number }, patientId?: string) => void;
+    onSave: (patient: Partial<Patient> & { weight?: number | string }, patientId?: string) => void;
     children: React.ReactNode | ((props: { openDialog: () => void }) => React.ReactNode);
 }
 
 export function PatientFormDialog({ patient, onSave, children }: PatientFormDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -58,11 +55,11 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
       email: patient?.email || '',
       country: patient?.country || '',
       phone: patient?.phone || '',
-      height: patient?.height || undefined,
-      weight: undefined,
+      height: patient?.height || '',
+      weight: '',
     },
   });
-
+  
   const watchCountry = form.watch('country');
 
   React.useEffect(() => {
@@ -77,7 +74,6 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
   
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
-    // This now correctly only includes the fields in the simplified form
     const patientDataToSave = {
         id: patient?.id,
         name: data.name,
@@ -105,8 +101,8 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
             email: patient?.email || '',
             country: patient?.country || '',
             phone: patient?.phone || '',
-            height: patient?.height || undefined,
-            weight: undefined,
+            height: patient?.height || '',
+            weight: '',
           });
       }
   }, [open, patient, form]);
@@ -130,51 +126,54 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 min-h-0">
-            <div className="px-6 py-4">
-              <Form {...form}>
-                <form id="patient-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                      <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex items-center space-x-2 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
-                    </div>
-                    
-                    <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <FormField
-                          control={form.control}
-                          name="country"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Country</FormLabel>
-                               <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select a country" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                    </div>
-                                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                         <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                         <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Current Weight (kg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 70" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                    </div>
-                </form>
-              </Form>
-            </div>
-        </ScrollArea>
+        <div className="flex-1 min-h-0">
+            <ScrollArea className="h-full">
+                <div className="px-6 py-4">
+                <Form {...form}>
+                    <form id="patient-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex items-center space-x-2 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="country"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Country</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a country" />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                    {countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                        <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        </div>
+                        
+                        <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
+
+                                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Current Weight (kg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 70" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        </div>
+                    </form>
+                </Form>
+                </div>
+            </ScrollArea>
+        </div>
         
         <DialogFooter className="p-6 pt-4 border-t">
           <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
