@@ -1,7 +1,7 @@
 
 'use client';
 
-import { User, UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Upload } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Edit } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +22,7 @@ import { Separator } from './ui/separator';
 import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
 import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from './ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { EditProfileDialog } from './edit-profile-dialog';
 
 
 const MedicationSchema = z.object({
@@ -270,12 +271,26 @@ export function ProfileCard() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <div className="flex items-center gap-3">
-          <UserCircle className="h-10 w-10 shrink-0 text-muted-foreground" />
-          <div>
-            <CardTitle>My Profile</CardTitle>
-            <CardDescription>Your personal and medical information.</CardDescription>
-          </div>
+        <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <UserCircle className="h-10 w-10 shrink-0 text-muted-foreground" />
+              <div>
+                <CardTitle>My Profile</CardTitle>
+                <CardDescription>Your personal and medical information.</CardDescription>
+              </div>
+            </div>
+            <EditProfileDialog>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                            <Edit className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Edit Profile</p>
+                    </TooltipContent>
+                </Tooltip>
+            </EditProfileDialog>
         </div>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
@@ -504,6 +519,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    
-    
