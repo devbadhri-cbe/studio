@@ -75,9 +75,9 @@ export default function PatientDashboard() {
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
-         <header className="border-b px-4 py-4 md:px-6">
+         <header className="border-b px-4 md:px-6">
             <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2">
-              <div className="w-full flex justify-center">
+              <div className="w-full flex justify-center py-6">
                 <div className="flex items-center gap-2">
                     <Logo className="h-8 w-8 text-primary" />
                     <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
@@ -85,7 +85,7 @@ export default function PatientDashboard() {
               </div>
 
              {isDoctor && (
-                <div className="w-full flex items-center justify-between text-sm text-muted-foreground mt-2">
+                <div className="w-full flex items-center justify-between text-sm text-muted-foreground pb-4">
                     <div>
                         <p className="font-semibold text-foreground">{doctorName}</p>
                         <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
