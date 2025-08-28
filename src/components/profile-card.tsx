@@ -29,8 +29,7 @@ const MedicationSchema = z.object({
   frequency: z.string().min(1, 'Frequency is required.'),
 });
 
-function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
-  const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
+function MedicationForm({ onSave, onCancel, isCheckingSpelling, setIsCheckingSpelling }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void, isCheckingSpelling: boolean, setIsCheckingSpelling: (isChecking: boolean) => void }) {
   const [suggestion, setSuggestion] = React.useState<string | null>(null);
   const [isSuggestionOpen, setIsSuggestionOpen] = React.useState(false);
   const [ignoredSuggestions, setIgnoredSuggestions] = React.useState<string[]>([]);
@@ -112,7 +111,6 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
                                         onBlur={handleSpellCheck}
                                         autoComplete="off"
                                     />
-                                    {isCheckingSpelling && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
                                 </div>
                             </PopoverAnchor>
                             <PopoverContent className="w-auto p-2" onOpenAutoFocus={(e) => e.preventDefault()}>
@@ -231,6 +229,7 @@ export function ProfileCard() {
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [isAddingWeight, setIsAddingWeight] = React.useState(false);
+  const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
 
   const calculatedAge = calculateAge(profile.dob);
   const countryName = countries.find(c => c.code === profile.country)?.name || profile.country;
@@ -384,8 +383,9 @@ export function ProfileCard() {
                         medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
                         disabled={profile.medication.length < 2 || isMedicationNil}
                     >
-                        <Button size="xs" variant="outline" className="h-7 px-2" disabled={profile.medication.length < 2 || isMedicationNil}>
-                            <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Check
+                        <Button size="xs" variant="outline" className="h-7 px-2" disabled={profile.medication.length < 2 || isMedicationNil || isCheckingSpelling}>
+                            {isCheckingSpelling ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <ShieldAlert className="h-3.5 w-3.5 mr-1" />}
+                             Check
                         </Button>
                     </DrugInteractionDialog>
                      {!isAddingMedication && profile.medication.length === 0 && (
@@ -400,7 +400,7 @@ export function ProfileCard() {
                     )}
                 </div>
             </div>
-             {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} />}
+             {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} isCheckingSpelling={isCheckingSpelling} setIsCheckingSpelling={setIsCheckingSpelling} />}
             {profile.medication.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
