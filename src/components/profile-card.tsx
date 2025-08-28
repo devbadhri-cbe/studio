@@ -299,12 +299,17 @@ export function ProfileCard() {
                     <button 
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isUploading}
-                        className="relative rounded-full"
+                        className="relative rounded-full group"
                     >
                         <Avatar className="h-10 w-10 cursor-pointer">
                             <AvatarImage src={profile.photoUrl} />
                             <AvatarFallback>
-                                {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Upload className="h-5 w-5" />}
+                                {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : 
+                                    <>
+                                        <User className="h-5 w-5 text-muted-foreground group-hover:hidden" />
+                                        <Upload className="h-5 w-5 text-muted-foreground hidden group-hover:block" />
+                                    </>
+                                }
                             </AvatarFallback>
                         </Avatar>
                     </button>
@@ -451,7 +456,7 @@ export function ProfileCard() {
                              Check
                         </Button>
                     </DrugInteractionDialog>
-                     {!isAddingMedication && profile.medication.length === 0 && (
+                     {profile.medication.length === 0 && !isAddingMedication && (
                         <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setMedicationNil()}>
                            Nil
                         </Button>
@@ -508,3 +513,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
