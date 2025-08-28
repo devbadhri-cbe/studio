@@ -11,12 +11,11 @@ import { Logo } from '@/components/logo';
 import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid, UploadCloud, GaugeCircle } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { VitaminDCard } from '@/components/vitamin-d-card';
@@ -40,6 +39,7 @@ export default function PatientDashboard() {
   const [isDoctor, setIsDoctor] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
     const doctorStatus = isDoctorLoggedIn || localStorage.getItem('doctor_logged_in') === 'true';
@@ -103,6 +103,15 @@ export default function PatientDashboard() {
       default:
         return <Hba1cCard />;
     }
+  }
+  
+  const dashboardOptions = {
+    hba1c: 'HbA1c Dashboard',
+    lipids: 'Lipid Dashboard',
+    vitaminD: 'Vitamin D Dashboard',
+    thyroid: 'Thyroid Dashboard',
+    hypertension: 'Hypertension Dashboard',
+    report: 'Comprehensive Report',
   }
 
   return (
@@ -182,28 +191,31 @@ export default function PatientDashboard() {
                 </div>
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}>
-                            <SelectTrigger className="w-9 h-9 p-0" icon={null}>
-                                <div className="flex h-full w-full items-center justify-center">
+                   <DropdownMenu open={open} onOpenChange={setOpen}>
+                      <Tooltip>
+                        <TooltipTrigger asChild onMouseOver={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+                            <DropdownMenuTrigger asChild>
+                                <Button size="icon" variant="outline" className="w-9 h-9 p-0">
                                     <GaugeCircle className="w-4 h-4" />
-                                </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                            <SelectItem value="hba1c">HbA1c Dashboard</SelectItem>
-                            <SelectItem value="lipids">Lipid Dashboard</SelectItem>
-                            <SelectItem value="vitaminD">Vitamin D Dashboard</SelectItem>
-                            <SelectItem value="thyroid">Thyroid Dashboard</SelectItem>
-                            <SelectItem value="hypertension">Hypertension Dashboard</SelectItem>
-                            <SelectItem value="report">Comprehensive Report</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Select Dashboard</p>
-                    </TooltipContent>
-                  </Tooltip>
+                                </Button>
+                            </DropdownMenuTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Select Dashboard</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <DropdownMenuContent onMouseOver={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+                        {Object.entries(dashboardOptions).map(([key, value]) => (
+                            <DropdownMenuItem 
+                                key={key}
+                                onSelect={() => setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}
+                                className={dashboardView === key ? 'bg-accent' : ''}
+                            >
+                                {value}
+                            </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
               </div>
             </div>
