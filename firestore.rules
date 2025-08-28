@@ -1,10 +1,9 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow reads and writes to the patients collection only for authenticated users
-    match /patients/{patientId} {
+    // Allow read/write access to the patients collection for any authenticated user
+    match /patients/{patientId=**} {
       allow read, write: if request.auth != null;
     }
   }

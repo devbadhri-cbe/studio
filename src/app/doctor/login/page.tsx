@@ -16,6 +16,7 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useApp } from '@/context/app-context';
 
 const FormSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -27,6 +28,7 @@ const DOCTOR_NAME = 'Dr. Badhrinathan N';
 export default function DoctorLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { setIsDoctorLoggedIn } = useApp();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -41,6 +43,8 @@ export default function DoctorLoginPage() {
     setIsSubmitting(true);
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
+      setIsDoctorLoggedIn(true);
+      localStorage.setItem('doctor_logged_in', 'true');
       toast({
         title: 'Login Successful',
         description: `Welcome, ${DOCTOR_NAME}! Redirecting to your dashboard...`,
