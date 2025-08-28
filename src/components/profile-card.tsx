@@ -1,12 +1,13 @@
 
 'use client';
 
-import { User, UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler } from 'lucide-react';
+import { User, UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Upload } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
@@ -22,6 +23,7 @@ import { Separator } from './ui/separator';
 import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
 import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from './ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { storage } from '@/lib/firebase';
 
 
 const MedicationSchema = z.object({
@@ -226,11 +228,14 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
 }
 
 export function ProfileCard() {
-  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
+  const { profile, setProfile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [isAddingWeight, setIsAddingWeight] = React.useState(false);
   const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const calculatedAge = calculateAge(profile.dob);
   const countryName = countries.find(c => c.code === profile.country)?.name || profile.country;
@@ -255,16 +260,57 @@ export function ProfileCard() {
       setIsAddingWeight(false);
   }
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+        const fileRef = ref(storage, `profile_photos/${profile.id}/${Date.now()}_${file.name}`);
+        const snapshot = await uploadBytes(fileRef, file);
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        
+        setProfile({ ...profile, photoUrl: downloadUrl });
+        
+        toast({
+            title: 'Photo Uploaded',
+            description: 'Your profile picture has been updated.',
+        });
+    } catch (error) {
+        console.error("Photo upload failed:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Upload Failed',
+            description: 'Could not upload photo. Please try again.',
+        });
+    } finally {
+        setIsUploading(false);
+    }
+  };
+
+
   return (
     <Card className="h-full">
       <CardHeader>
         <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-                <AvatarImage src={profile.photoUrl} />
-                <AvatarFallback>
-                    <User className="h-5 w-5" />
-                </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+                <Avatar className="h-10 w-10">
+                    <AvatarImage src={profile.photoUrl} />
+                    <AvatarFallback>
+                        <User className="h-5 w-5" />
+                    </AvatarFallback>
+                </Avatar>
+                <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
+                <Button 
+                  size="icon" 
+                  variant="outline" 
+                  className="absolute -bottom-2 -right-2 h-6 w-6 rounded-full bg-background"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                    {isUploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                </Button>
+            </div>
           <div>
             <CardTitle>My Profile</CardTitle>
             <CardDescription>Your personal and medical information.</CardDescription>
@@ -387,7 +433,7 @@ export function ProfileCard() {
                         medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
                         disabled={profile.medication.length < 2 || isMedicationNil}
                     >
-                        <Button size="xs" variant="outline" className="h-7 px-2" disabled={profile.medication.length < 2 || isMedicationNil || isCheckingSpelling}>
+                        <Button size="xs" variant="outline" className="h-7 px-2" disabled={isCheckingSpelling}>
                             {isCheckingSpelling ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <ShieldAlert className="h-3.5 w-3.5 mr-1" />}
                              Check
                         </Button>
