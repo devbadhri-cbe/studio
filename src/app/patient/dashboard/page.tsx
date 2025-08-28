@@ -86,7 +86,7 @@ export default function PatientDashboard() {
                          {isDoctor && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="outline" className="h-9 w-9">
+                                <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="outline">
                                     <ClipboardList className="h-4 w-4" />
                                     <span className="sr-only">Patient List</span>
                                 </Button>

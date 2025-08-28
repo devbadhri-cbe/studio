@@ -128,7 +128,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
           </div>
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="w-8 h-8 p-0" onClick={handleActionClick}>
+                <Button variant="ghost" size="icon" onClick={handleActionClick}>
                     <span className="sr-only">Open menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                 </Button>
