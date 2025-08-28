@@ -309,9 +309,16 @@ export function ProfileCard() {
                     <h3 className="font-medium">Weight Records</h3>
                 </div>
                  {!isAddingWeight && (
-                    <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setIsAddingWeight(true)}>
-                        <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add
-                    </Button>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setIsAddingWeight(true)}>
+                                <PlusCircle className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Add Weight Record</p>
+                        </TooltipContent>
+                    </Tooltip>
                 )}
             </div>
             {isAddingWeight && <WeightForm onSave={handleSaveWeight} onCancel={() => setIsAddingWeight(false)} />}
@@ -346,9 +353,16 @@ export function ProfileCard() {
                     <h3 className="font-medium">Present Medical Conditions</h3>
                 </div>
                  {!isAddingCondition && (
-                    <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setIsAddingCondition(true)}>
-                        <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add
-                    </Button>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setIsAddingCondition(true)}>
+                                <PlusCircle className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Add Condition</p>
+                        </TooltipContent>
+                    </Tooltip>
                 )}
             </div>
              {isAddingCondition && <MedicalConditionForm onSave={handleSaveCondition} onCancel={() => setIsAddingCondition(false)} />}
@@ -399,9 +413,16 @@ export function ProfileCard() {
                         </Button>
                     )}
                      {!isAddingMedication && !isMedicationNil && (
-                        <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setIsAddingMedication(true)}>
-                            <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add
-                        </Button>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setIsAddingMedication(true)}>
+                                    <PlusCircle className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Add Medication</p>
+                            </TooltipContent>
+                        </Tooltip>
                     )}
                 </div>
             </div>
@@ -450,5 +471,7 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
 
     
