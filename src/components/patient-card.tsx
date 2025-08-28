@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Clipboard, Globe, Link, User } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Clipboard, Globe, Link, User, Share2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge } from '@/lib/utils';
@@ -14,6 +14,7 @@ import { countries } from '@/lib/countries';
 import * as React from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { SharePatientAccessDialog } from './share-patient-access-dialog';
 
 
 interface PatientCardProps {
@@ -77,7 +78,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const formattedPhone = formatPhoneNumber(patient.phone, patient.country);
   
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if ((e.target as HTMLElement).closest('button, [role="menu"]')) {
+    if ((e.target as HTMLElement).closest('button, [role="menuitem"], [role="dialog"]')) {
       return;
     }
     onView(patient);
@@ -86,26 +87,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
-
-  const handleCopyId = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(patient.id);
-    toast({
-      title: 'Patient ID Copied',
-      description: `ID "${patient.id}" has been copied to your clipboard.`,
-    });
-  };
-
-  const handleCopyLink = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const link = `${window.location.origin}/patient/${patient.id}`;
-    navigator.clipboard.writeText(link);
-    toast({
-      title: 'Patient Link Copied',
-      description: 'The login link has been copied to your clipboard.',
-    });
-  };
-
 
   return (
     <Card className="w-full flex flex-col cursor-pointer hover:border-primary/50 transition-colors group" onClick={handleCardClick}>
@@ -143,14 +124,12 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit Details
                 </DropdownMenuItem>
-                 <DropdownMenuItem onSelect={handleCopyLink}>
-                    <Link className="mr-2 h-4 w-4" />
-                    Copy Login Link
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={handleCopyId}>
-                    <Clipboard className="mr-2 h-4 w-4" />
-                    Copy Patient ID
-                </DropdownMenuItem>
+                 <SharePatientAccessDialog patient={patient}>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                       <Share2 className="mr-2 h-4 w-4" />
+                        Share Patient Access
+                    </DropdownMenuItem>
+                </SharePatientAccessDialog>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                     onSelect={() => onDelete(patient)}
