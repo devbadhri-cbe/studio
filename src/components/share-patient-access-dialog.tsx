@@ -15,7 +15,7 @@ import {
 } from './ui/dialog';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Clipboard } from 'lucide-react';
+import { Clipboard, Share } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from './ui/separator';
 
@@ -28,6 +28,7 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
   const [open, setOpen] = React.useState(false);
   const [dashboardLink, setDashboardLink] = React.useState('');
   const [loginPageLink, setLoginPageLink] = React.useState('');
+  const [isShareSupported, setIsShareSupported] = React.useState(false);
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -41,6 +42,10 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
 
        const loginUrl = `${protocol}//${correctedHost}/patient/login`;
        setLoginPageLink(loginUrl);
+
+       if (navigator.share) {
+         setIsShareSupported(true);
+       }
     }
   }, [open, patient.id]);
 
@@ -51,6 +56,25 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
       description: `The ${label.toLowerCase()} has been copied to your clipboard.`,
     });
   };
+
+  const handleShare = async () => {
+    if (!navigator.share) return;
+
+    try {
+        await navigator.share({
+            title: `Health Guardian Access for ${patient.name}`,
+            text: `Here is the one-click access link to your Health Guardian dashboard.`,
+            url: dashboardLink,
+        });
+    } catch (error) {
+        console.error('Error sharing:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Sharing Failed',
+            description: 'Could not open the share dialog. Please try copying the link instead.',
+        });
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -64,10 +88,17 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
             Share this unique QR code or link with the patient for direct, one-click access to their dashboard.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 pt-4">
           <div className="flex items-center justify-center rounded-lg bg-white p-4">
             {dashboardLink ? <QRCode value={dashboardLink} size={160} /> : <div className="h-[160px] w-[160px] bg-gray-200 animate-pulse" />}
           </div>
+
+          {isShareSupported && (
+            <Button className="w-full" onClick={handleShare}>
+              <Share className="mr-2 h-4 w-4" />
+              Share Access Link
+            </Button>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="dashboard-link">Patient's Dashboard Link (Direct Access)</Label>
