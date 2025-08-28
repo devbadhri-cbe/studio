@@ -17,13 +17,11 @@ export function InsightsCard() {
   const { toast } = useToast();
 
   const handleGetInsights = async () => {
-    const hasRecords = records.length > 0 || lipidRecords.length > 0 || bloodPressureRecords.length > 0;
-
-    if (!hasRecords || !profile.name || !profile.dob) {
+    if (!profile.name || !profile.dob) {
       toast({
         variant: 'destructive',
         title: 'Unable to get insights',
-        description: 'Please add at least one health record and complete your profile first.',
+        description: 'Please complete your profile (name and date of birth) first.',
       });
       return;
     }
