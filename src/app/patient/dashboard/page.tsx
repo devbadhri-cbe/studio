@@ -77,12 +77,12 @@ export default function PatientDashboard() {
       <div className="flex min-h-screen w-full flex-col bg-background">
          <header className="border-b px-4 py-4 md:px-6">
             <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2">
-                <div className="w-full flex flex-col md:flex-row items-center justify-between gap-2">
+                <div className="w-full flex items-center justify-center relative">
                     <div className="flex items-center gap-2">
                         <Logo className="h-8 w-8 text-primary" />
                         <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="absolute right-0 flex items-center gap-2">
                          {isDoctor && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
