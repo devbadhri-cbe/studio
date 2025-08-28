@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 export default function PatientDashboardPage() {
     const { setPatientData, isDoctorLoggedIn, isClient } = useApp();
     const router = useRouter();
-    const { toast } = useToast();
     const params = useParams();
     const patientId = params.patientId as string;
     const [isLoading, setIsLoading] = React.useState(true);
@@ -25,7 +24,6 @@ export default function PatientDashboardPage() {
             setIsLoading(true);
             setError(null);
             
-            // This flow is for when a doctor is already logged in and navigating
             if (isDoctorLoggedIn) {
                 try {
                     const patient = await getPatient(patientId);
@@ -44,7 +42,6 @@ export default function PatientDashboardPage() {
             }
             
             // This flow is for a patient accessing via a direct link.
-            // No prior auth session is expected.
             try {
                 const patient = await getPatient(patientId);
                 if (patient) {
@@ -54,12 +51,10 @@ export default function PatientDashboardPage() {
                 } else {
                     // If the ID from the link is invalid, show an error.
                     setError(`No patient found with this ID. Please check the link or ID and try again.`);
+                    router.push('/'); // Redirect to login if patient not found
                 }
             } catch (e) {
                 console.error("Direct link access failed:", e);
-                // This can happen if Firestore rules deny access, which is a key security feature.
-                // However, for this app's logic, we assume patient documents are readable if the ID is known.
-                // A persistent failure here could indicate a Firestore rules misconfiguration.
                 setError('An error occurred while trying to load the dashboard. Please check your connection and try again.');
             } finally {
                 setIsLoading(false);
