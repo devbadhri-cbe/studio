@@ -402,15 +402,26 @@ export function ProfileCard() {
                         medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
                         disabled={profile.medication.length < 2 || isMedicationNil}
                     >
-                        <Button size="xs" variant="outline" className="h-7 px-2" disabled={isCheckingSpelling}>
-                            {isCheckingSpelling ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <ShieldAlert className="h-3.5 w-3.5 mr-1" />}
-                             Check
-                        </Button>
+                         <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button size="icon" variant="outline" className="h-7 w-7" disabled={isCheckingSpelling || profile.medication.length < 2 || isMedicationNil}>
+                                    {isCheckingSpelling ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Check Drug Interactions</p>
+                            </TooltipContent>
+                        </Tooltip>
                     </DrugInteractionDialog>
                      {profile.medication.length === 0 && !isAddingMedication && (
-                        <Button size="xs" variant="outline" className="h-7 px-2" onClick={() => setMedicationNil()}>
-                           Nil
-                        </Button>
+                        <Tooltip>
+                           <TooltipTrigger asChild>
+                               <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setMedicationNil()}>
+                                   Nil
+                               </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>Set medication to Nil</TooltipContent>
+                        </Tooltip>
                     )}
                      {!isAddingMedication && !isMedicationNil && (
                         <Tooltip>
@@ -451,7 +462,7 @@ export function ProfileCard() {
                                     </div>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedication(med.id)}>
+                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover-opacity-100" onClick={() => removeMedication(med.id)}>
                                             <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                         </Button>
                                       </TooltipTrigger>
@@ -471,7 +482,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    
-
-    
