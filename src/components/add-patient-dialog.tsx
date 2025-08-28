@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -80,7 +79,6 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
   });
   
   const selectedCountryCode = form.watch('country');
-  const currentPhoneNumber = form.watch('phone');
 
   React.useEffect(() => {
     if (selectedCountryCode) {
@@ -111,11 +109,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                   : '' as any,
                 photoUrl: patient.photoUrl || '',
             });
-            if (patient.photoUrl) {
-                setPhotoPreview(patient.photoUrl);
-            } else {
-                setPhotoPreview(null);
-            }
+            setPhotoPreview(patient.photoUrl || null);
         } else {
             form.reset({
                 name: '',
@@ -194,7 +188,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 {children}
             </DialogTrigger>
         )}
-        <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle>{isEditMode ? 'Edit Patient Details' : 'Add New Patient'}</DialogTitle>
             <DialogDescription>
@@ -235,7 +229,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                         </FormItem>
                         )}
                     />
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField
                         control={form.control}
                         name="dob"
@@ -273,7 +267,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                         )}
                         />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
                             name="height"
@@ -316,7 +310,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                         </FormItem>
                         )}
                     />
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField
                         control={form.control}
                         name="country"
@@ -357,8 +351,8 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 </Form>
             </ScrollArea>
           </div>
-           <DialogFooter className="flex-shrink-0">
-                <Button type="submit" form={formId} disabled={isSubmitting || isUploading} size="sm">
+           <DialogFooter className="flex-shrink-0 pt-4">
+                <Button type="submit" form={formId} disabled={isSubmitting || isUploading} className="w-full sm:w-auto">
                 {isSubmitting ? (
                     <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -373,5 +367,3 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
       </Dialog>
   );
 }
-
-    
