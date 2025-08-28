@@ -21,22 +21,30 @@ import { DrugInteractionDialog } from './drug-interaction-dialog';
 import { Separator } from './ui/separator';
 
 const MedicationSchema = z.object({
-  name: z.string().min(2, 'Medication name is required.'),
+  medicationName: z.string().min(2, 'Medication name is required.'),
   dosage: z.string().min(1, 'Dosage is required.'),
   frequency: z.string().min(1, 'Frequency is required.'),
 });
 
-function MedicationForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof MedicationSchema>) => void, onCancel: () => void }) {
+function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
   const form = useForm<z.infer<typeof MedicationSchema>>({
     resolver: zodResolver(MedicationSchema),
-    defaultValues: { name: '', dosage: '', frequency: '' },
+    defaultValues: { medicationName: '', dosage: '', frequency: '' },
   });
+
+  const handleSave = (data: z.infer<typeof MedicationSchema>) => {
+    onSave({
+      name: data.medicationName,
+      dosage: data.dosage,
+      frequency: data.frequency,
+    });
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
+      <form onSubmit={form.handleSubmit(handleSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
         <div className="grid grid-cols-3 gap-2">
-          <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Name" {...field} /></FormControl><FormMessage /></FormItem> )} />
+          <FormField control={form.control} name="medicationName" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Name" {...field} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
           <FormField control={form.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage" {...field} /></FormControl><FormMessage /></FormItem> )} />
           <FormField control={form.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency" {...field} /></FormControl><FormMessage /></FormItem> )} />
         </div>
@@ -146,7 +154,7 @@ export function ProfileCard() {
     setIsAddingCondition(false);
   };
   
-  const handleSaveMedication = (data: z.infer<typeof MedicationSchema>) => {
+  const handleSaveMedication = (data: { name: string; dosage: string; frequency: string; }) => {
     addMedication(data);
     setIsAddingMedication(false);
   }
@@ -320,3 +328,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
