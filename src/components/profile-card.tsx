@@ -280,16 +280,16 @@ export function ProfileCard() {
               </div>
             </div>
             <EditProfileDialog>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                            <Edit className="h-4 w-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Edit Profile</p>
-                    </TooltipContent>
-                </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Edit Profile</p>
+                </TooltipContent>
+              </Tooltip>
             </EditProfileDialog>
         </div>
       </CardHeader>
@@ -519,3 +519,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
