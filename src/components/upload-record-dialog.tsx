@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Separator } from './ui/separator';
 import { format } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 
 export function UploadRecordDialog() {
@@ -257,12 +258,19 @@ export function UploadRecordDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="h-9 gap-1">
-          <UploadCloud className="h-3.5 w-3.5" />
-          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Upload Result</span>
-        </Button>
-      </DialogTrigger>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <DialogTrigger asChild>
+                    <Button size="icon" variant="outline">
+                        <UploadCloud className="h-4 w-4" />
+                        <span className="sr-only">Upload Result</span>
+                    </Button>
+                </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>Upload Result</p>
+            </TooltipContent>
+      </Tooltip>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Upload Lab Result</DialogTitle>
@@ -280,3 +288,5 @@ export function UploadRecordDialog() {
     </Dialog>
   );
 }
+
+    
