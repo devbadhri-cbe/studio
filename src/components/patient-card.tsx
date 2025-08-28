@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Clipboard, Globe } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Clipboard, Globe, Link } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge } from '@/lib/utils';
@@ -95,6 +95,16 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     });
   };
 
+  const handleCopyLink = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const link = `${window.location.origin}/patient/${patient.id}`;
+    navigator.clipboard.writeText(link);
+    toast({
+      title: 'Patient Link Copied',
+      description: 'The login link has been copied to your clipboard.',
+    });
+  };
+
 
   return (
     <Card className="w-full flex flex-col cursor-pointer hover:border-primary/50 transition-colors group" onClick={handleCardClick}>
@@ -123,6 +133,10 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 <DropdownMenuItem onSelect={onEdit}>
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit Details
+                </DropdownMenuItem>
+                 <DropdownMenuItem onSelect={handleCopyLink}>
+                    <Link className="mr-2 h-4 w-4" />
+                    Copy Login Link
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={handleCopyId}>
                     <Clipboard className="mr-2 h-4 w-4" />
