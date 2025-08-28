@@ -125,8 +125,8 @@ export function EditProfileDialog({ children }: EditProfileDialogProps) {
       <DialogTrigger asChild>
           {children}
       </DialogTrigger>
-      <DialogContent className="w-full max-w-lg max-h-[90vh] flex flex-col p-0 sm:p-0">
-        <DialogHeader className="p-4 sm:p-6 pb-4 border-b">
+      <DialogContent className="w-full max-w-lg max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="p-6 pb-4 border-b">
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
             Update your personal details below. Your name cannot be changed.
@@ -135,7 +135,7 @@ export function EditProfileDialog({ children }: EditProfileDialogProps) {
         
         <div className="flex-1 min-h-0">
             <ScrollArea className="h-full">
-                <div className="p-4 sm:p-6">
+                <div className="p-6">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                            
