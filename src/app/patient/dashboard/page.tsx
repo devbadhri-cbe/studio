@@ -8,7 +8,7 @@ import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
-import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid, UploadCloud } from 'lucide-react';
+import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid, UploadCloud, GaugeCircle } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import {
   Select,
@@ -187,7 +187,7 @@ export default function PatientDashboard() {
                         <Select value={dashboardView} onValueChange={(value) => setDashboardView(value as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}>
                             <SelectTrigger className="w-9 h-9 p-0" icon={null}>
                                 <div className="flex h-full w-full items-center justify-center">
-                                    <LayoutGrid className="w-4 h-4" />
+                                    <GaugeCircle className="w-4 h-4" />
                                 </div>
                             </SelectTrigger>
                             <SelectContent>
