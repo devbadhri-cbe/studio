@@ -87,18 +87,13 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
         const country = countries.find(c => c.code === selectedCountryCode);
         if (country) {
             const countryCode = country.phoneCode;
-            if (!currentPhoneNumber || !currentPhoneNumber.startsWith('+')) {
-                 form.setValue('phone', countryCode, { shouldValidate: false, shouldDirty: true });
-            } else {
-                const oldCodeMatch = currentPhoneNumber.match(/^\\+\\d+/);
-                if (oldCodeMatch && oldCodeMatch[0] !== countryCode) {
-                    const numberWithoutCode = currentPhoneNumber.substring(oldCodeMatch[0].length).trim();
-                    form.setValue('phone', `${countryCode} ${numberWithoutCode}`, { shouldValidate: false });
-                }
+            const currentNumber = form.getValues('phone');
+            if (!currentNumber || !currentNumber.startsWith(countryCode)) {
+                 form.setValue('phone', countryCode, { shouldValidate: true, shouldDirty: true });
             }
         }
     }
-  }, [selectedCountryCode, form, currentPhoneNumber]);
+  }, [selectedCountryCode, form]);
   
   React.useEffect(() => {
     if (open) {
@@ -200,7 +195,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
             </DialogTrigger>
         )}
         <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
-          <DialogHeader>
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>{isEditMode ? 'Edit Patient Details' : 'Add New Patient'}</DialogTitle>
             <DialogDescription>
               {isEditMode ? "Update the patient's profile information." : "Enter the new patient's details to create their profile."}
@@ -261,7 +256,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Gender</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select gender" />
@@ -328,7 +323,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Country</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select country" />
@@ -362,7 +357,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                 </Form>
             </ScrollArea>
           </div>
-           <DialogFooter>
+           <DialogFooter className="flex-shrink-0">
                 <Button type="submit" form={formId} disabled={isSubmitting || isUploading} size="sm">
                 {isSubmitting ? (
                     <>
