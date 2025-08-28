@@ -231,6 +231,7 @@ export function ProfileCard() {
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [isAddingWeight, setIsAddingWeight] = React.useState(false);
   const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
+  const [medicationChanged, setMedicationChanged] = React.useState(false);
 
   const calculatedAge = calculateAge(profile.dob);
   const countryName = countries.find(c => c.code === profile.country)?.name || profile.country;
@@ -248,6 +249,17 @@ export function ProfileCard() {
   const handleSaveMedication = (data: { name: string; dosage: string; frequency: string; }) => {
     addMedication(data);
     setIsAddingMedication(false);
+    setMedicationChanged(true);
+  }
+
+  const handleRemoveMedication = (id: string) => {
+    removeMedication(id);
+    setMedicationChanged(true);
+  }
+  
+  const handleSetMedicationNil = () => {
+      setMedicationNil();
+      setMedicationChanged(true);
   }
 
   const handleSaveWeight = (data: z.infer<typeof WeightSchema>) => {
@@ -401,10 +413,20 @@ export function ProfileCard() {
                     <DrugInteractionDialog
                         medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
                         disabled={profile.medication.length < 2 || isMedicationNil}
+                        onOpenChange={(open) => {
+                            if (open) {
+                                setMedicationChanged(false);
+                            }
+                        }}
                     >
                          <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button size="icon" variant="outline" className="h-7 w-7" disabled={isCheckingSpelling || profile.medication.length < 2 || isMedicationNil}>
+                                <Button 
+                                    size="icon" 
+                                    variant="outline" 
+                                    className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-blue-500/20' : ''}`}
+                                    disabled={isCheckingSpelling || profile.medication.length < 2 || isMedicationNil}
+                                >
                                     <ShieldAlert className="h-4 w-4" />
                                 </Button>
                             </TooltipTrigger>
@@ -416,7 +438,7 @@ export function ProfileCard() {
                      {profile.medication.length === 0 && !isAddingMedication && (
                         <Tooltip>
                            <TooltipTrigger asChild>
-                               <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setMedicationNil()}>
+                               <Button size="icon" variant="outline" className="h-7 w-7" onClick={handleSetMedicationNil}>
                                    Nil
                                </Button>
                            </TooltipTrigger>
@@ -447,7 +469,7 @@ export function ProfileCard() {
                                     <span className="font-semibold text-foreground">Nil - No medication</span>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => removeMedication(med.id)}>
+                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => handleRemoveMedication(med.id)}>
                                             <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                         </Button>
                                       </TooltipTrigger>
@@ -462,7 +484,7 @@ export function ProfileCard() {
                                     </div>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedication(med.id)}>
+                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => handleRemoveMedication(med.id)}>
                                             <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                         </Button>
                                       </TooltipTrigger>

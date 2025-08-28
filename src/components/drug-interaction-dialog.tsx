@@ -21,9 +21,10 @@ interface DrugInteractionDialogProps {
   medications: string[];
   disabled?: boolean;
   children: React.ReactNode;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function DrugInteractionDialog({ medications, disabled, children }: DrugInteractionDialogProps) {
+export function DrugInteractionDialog({ medications, disabled, children, onOpenChange }: DrugInteractionDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<string | null>(null);
@@ -55,18 +56,23 @@ export function DrugInteractionDialog({ medications, disabled, children }: DrugI
     }
   };
   
-  React.useEffect(() => {
-    if (open) {
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if(onOpenChange) {
+        onOpenChange(newOpen);
+    }
+    
+    if (newOpen) {
       handleInteractionCheck();
     } else {
         // Reset on close
         setResult(null);
         setIsLoading(false);
     }
-  }, [open]);
+  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild disabled={disabled}>
         {children}
       </DialogTrigger>
