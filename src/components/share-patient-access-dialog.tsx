@@ -30,7 +30,9 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
 
   React.useEffect(() => {
     if (open && typeof window !== 'undefined') {
-      setLoginLink(`${window.location.origin}/`);
+      // Reconstruct the URL to ensure it has the correct port, especially in development environments.
+      const url = `${window.location.protocol}//${window.location.host}/`;
+      setLoginLink(url);
     }
   }, [open]);
 
