@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
-import { Clipboard, Mail, MessageSquare, ExternalLink, Share2, Copy } from 'lucide-react';
+import { Clipboard, Mail, MessageSquare, ExternalLink, Share2, Copy, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -41,6 +41,7 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
   const [open, setOpen] = React.useState(false);
   const [dashboardLink, setDashboardLink] = React.useState('');
   const [loginPageLink, setLoginPageLink] = React.useState('');
+  const qrRef = React.useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -59,6 +60,31 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
       description: `The ${subject.toLowerCase()} has been copied to your clipboard.`,
     });
   };
+
+  const handleDownloadQrCode = () => {
+    if (!qrRef.current) return;
+    const svg = qrRef.current.querySelector('svg');
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    const img = document.createElement('img');
+    img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        const pngFile = canvas.toDataURL('image/png');
+        
+        const downloadLink = document.createElement('a');
+        downloadLink.download = `qr-code-${patient.name.replace(/\s+/g, '-')}.png`;
+        downloadLink.href = pngFile;
+        downloadLink.click();
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+  }
 
   const shareActions = [
     {
@@ -123,10 +149,11 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 pt-4">
-          <div className="flex items-center justify-center rounded-lg bg-white p-4">
+          <div ref={qrRef} className="flex items-center justify-center rounded-lg bg-white p-4">
             {dashboardLink ? <QRCode value={dashboardLink} size={160} /> : <div className="h-[160px] w-[160px] bg-gray-200 animate-pulse" />}
           </div>
 
+          <div className="flex items-center gap-2">
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button className="w-full">
@@ -143,6 +170,11 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
                 ))}
             </DropdownMenuContent>
            </DropdownMenu>
+            <Button variant="outline" onClick={handleDownloadQrCode} className="w-full">
+                <Download className="mr-2 h-4 w-4" />
+                Download QR
+            </Button>
+          </div>
 
             <Separator />
 
