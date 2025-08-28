@@ -131,16 +131,18 @@ export default function PatientDashboard() {
                  <ProfileCard />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="md:col-span-2 lg:col-span-1">
-                 <ReminderCard />
-              </div>
-              <div className="md:col-span-2">
+            <div className="grid grid-cols-1 gap-6">
                 <InsightsCard />
-              </div>
             </div>
             
-            {renderDashboard()}
+            <div className="grid auto-rows-fr grid-cols-1 lg:grid-cols-3 gap-6">
+               <div className="lg:col-span-2">
+                {renderDashboard()}
+              </div>
+              <div className="lg:col-span-1">
+                 <ReminderCard />
+              </div>
+            </div>
 
           </div>
         </main>
