@@ -69,12 +69,12 @@ export default function DoctorDashboardPage() {
                     description: `${updatedPatient.name}'s details have been updated.`,
                 });
             } else { // Adding new patient
-                await addPatient(patientData as Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number });
+                const newPatient = await addPatient(patientData as Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number });
                 toast({
                     title: 'Patient Added',
-                    description: `${patientData.name}'s details have been added.`,
+                    description: `${newPatient.name}'s details have been added.`,
                 });
-                await fetchPatients(); // Re-fetch the entire list to include the new patient
+                await fetchPatients();
             }
         } catch (error) {
              console.error("Failed to save patient:", error);

@@ -183,11 +183,9 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
         photoUrl: data.photoUrl || undefined,
     };
     
-    setTimeout(() => {
-        onSave(submissionData, patient?.id);
-        setIsSubmitting(false);
-        setOpen(false);
-    }, 1000);
+    onSave(submissionData, patient?.id);
+    setIsSubmitting(false);
+    setOpen(false);
   };
 
   const openDialog = () => setOpen(true);
@@ -208,162 +206,162 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
               {isEditMode ? "Update the patient's profile information." : "Enter the new patient's details to create their profile."}
             </DialogDescription>
           </DialogHeader>
-          <Form {...form}>
-            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="flex-1 min-h-0">
-                <ScrollArea className="h-full -mx-6">
-                    <div className="space-y-4 py-4 px-6">
-                        <div className="flex items-center gap-4">
-                            <Avatar className="h-20 w-20">
-                                <AvatarImage src={photoPreview || undefined} alt="Patient photo" />
-                                <AvatarFallback>
-                                    <User className="h-10 w-10 text-muted-foreground" />
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                                <FormLabel>Profile Photo</FormLabel>
-                                <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
-                                <Button type="button" variant="outline" size="sm" className="w-full mt-2" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
-                                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                                    {isUploading ? 'Uploading...' : 'Change Photo'}
-                                </Button>
-                            </div>
+          <div className="flex-1 min-h-0">
+            <ScrollArea className="h-full pr-6 -mr-6">
+                <Form {...form}>
+                <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+                    <div className="flex items-center gap-4">
+                        <Avatar className="h-20 w-20">
+                            <AvatarImage src={photoPreview || undefined} alt="Patient photo" />
+                            <AvatarFallback>
+                                <User className="h-10 w-10 text-muted-foreground" />
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                            <FormLabel>Profile Photo</FormLabel>
+                            <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
+                            <Button type="button" variant="outline" size="sm" className="w-full mt-2" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                                {isUploading ? 'Uploading...' : 'Change Photo'}
+                            </Button>
                         </div>
+                    </div>
 
+                    <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Patient Full Name</FormLabel>
+                            <FormControl>
+                            <Input placeholder="e.g., John Smith" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                        control={form.control}
+                        name="dob"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Date of Birth</FormLabel>
+                            <FormControl>
+                                <Input type="date" {...field} />
+                            </FormControl>
+                            {calculatedAge !== null && <FormDescription className='text-xs'>{calculatedAge} years old</FormDescription>}
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="gender"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Gender</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select gender" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                <SelectItem value="male">Male</SelectItem>
+                                <SelectItem value="female">Female</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Patient Full Name</FormLabel>
-                                <FormControl>
-                                <Input placeholder="e.g., John Smith" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                            control={form.control}
-                            name="dob"
+                            name="height"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Date of Birth</FormLabel>
-                                <FormControl>
-                                    <Input type="date" {...field} />
-                                </FormControl>
-                                {calculatedAge !== null && <FormDescription className='text-xs'>{calculatedAge} years old</FormDescription>}
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                            <FormField
-                            control={form.control}
-                            name="gender"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Gender</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormLabel>Height (cm)</FormLabel>
                                     <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select gender" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                    <SelectItem value="male">Male</SelectItem>
-                                    <SelectItem value="female">Female</SelectItem>
-                                    <SelectItem value="other">Other</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="height"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Height (cm)</FormLabel>
-                                        <FormControl>
-                                            <Input type="number" placeholder="e.g., 175" {...field} value={field.value ?? ''} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="weight"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Weight (kg)</FormLabel>
-                                        <FormControl>
-                                            <Input type="number" step="0.1" placeholder="e.g., 70" {...field} value={field.value ?? ''} />
-                                        </FormControl>
-                                        <FormDescription className='text-xs'>This will create a new weight record.</FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Email Address</FormLabel>
-                                <FormControl>
-                                <Input type="email" placeholder="e.g., john@example.com" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                            control={form.control}
-                            name="country"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Country</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select country" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                    {countries.map(c => (
-                                        <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
-                                    ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="phone"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Phone Number</FormLabel>
-                                    <FormControl>
-                                    <Input type="tel" placeholder="Select a country first" {...field} />
+                                        <Input type="number" placeholder="e.g., 175" {...field} value={field.value ?? ''} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
-                                )}
-                            />
-                        </div>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="weight"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Weight (kg)</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" step="0.1" placeholder="e.g., 70" {...field} value={field.value ?? ''} />
+                                    </FormControl>
+                                    <FormDescription className='text-xs'>This will create a new weight record.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
-                </ScrollArea>
-            </form>
-          </Form>
+
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Email Address</FormLabel>
+                            <FormControl>
+                            <Input type="email" placeholder="e.g., john@example.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                        control={form.control}
+                        name="country"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Country</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select country" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                {countries.map(c => (
+                                    <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                                ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="phone"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Phone Number</FormLabel>
+                                <FormControl>
+                                <Input type="tel" placeholder="Select a country first" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                    </div>
+                </form>
+                </Form>
+            </ScrollArea>
+          </div>
            <DialogFooter>
                 <Button type="submit" form={formId} disabled={isSubmitting || isUploading} size="sm">
                 {isSubmitting ? (
@@ -380,4 +378,3 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
       </Dialog>
   );
 }
-
