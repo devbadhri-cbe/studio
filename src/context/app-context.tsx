@@ -76,10 +76,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     setIsClient(true);
-    const storedTheme = localStorage.getItem('theme') as Theme | null;
-    if (storedTheme) {
-      setThemeState(storedTheme);
-    }
   }, []);
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
