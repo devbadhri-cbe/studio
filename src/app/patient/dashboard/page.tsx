@@ -127,12 +127,13 @@ export default function PatientDashboard() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 gap-6">
-                 <ProfileCard />
-            </div>
-
-            <div className="grid grid-cols-1 gap-6">
-                <InsightsCard />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1">
+                    <ProfileCard />
+                </div>
+                <div className="lg:col-span-2">
+                    <InsightsCard />
+                </div>
             </div>
             
             <div className="grid auto-rows-fr grid-cols-1 lg:grid-cols-3 gap-6">
