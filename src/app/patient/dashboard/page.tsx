@@ -29,6 +29,16 @@ import { HypertensionCard } from '@/components/hypertension-card';
 export default function PatientDashboard() {
   const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
   const router = useRouter();
+  
+  // Use a separate state to track doctor login status on the client
+  const [isDoctor, setIsDoctor] = React.useState(false);
+
+  React.useEffect(() => {
+    // This ensures we check the actual login status from context and local storage
+    const doctorStatus = isDoctorLoggedIn || localStorage.getItem('doctor_logged_in') === 'true';
+    setIsDoctor(doctorStatus);
+  }, [isDoctorLoggedIn]);
+
 
   if (!isClient) {
     return (
@@ -38,7 +48,7 @@ export default function PatientDashboard() {
     );
   }
   
-  const pageTitle = isDoctorLoggedIn 
+  const pageTitle = isDoctor 
     ? `${profile.name}'s Dashboard` 
     : `Welcome, ${profile.name || 'User'}!`;
 
@@ -73,11 +83,11 @@ export default function PatientDashboard() {
                     </div>
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
                         <ThemeToggle />
-                        {isDoctorLoggedIn && <Button onClick={() => router.push('/doctor/dashboard')}>Patient List</Button>}
+                        {isDoctor && <Button onClick={() => router.push('/doctor/dashboard')}>Patient List</Button>}
                     </div>
                 </div>
 
-                {isDoctorLoggedIn && (
+                {isDoctor && (
                     <div className="text-center text-sm text-muted-foreground">
                         <p className="font-semibold text-foreground">{doctorName}</p>
                         <div className="flex items-center justify-center gap-4">
