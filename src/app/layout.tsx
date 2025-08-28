@@ -3,7 +3,6 @@ import './globals.css';
 import { AppProvider } from '@/context/app-context';
 import { Toaster } from '@/components/ui/toaster';
 import { Logo } from '@/components/logo';
-import { ThemeToggle } from '@/components/theme-toggle';
 
 export const metadata: Metadata = {
   title: 'Health Guardian',
@@ -25,9 +24,6 @@ export default function RootLayout({
       <body>
         <AppProvider>
           <div className="flex flex-col min-h-screen">
-            <div className="absolute top-4 right-4 z-50">
-              <ThemeToggle />
-            </div>
             {children}
           </div>
           <Toaster />

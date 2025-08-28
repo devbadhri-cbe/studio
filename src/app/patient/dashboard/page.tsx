@@ -25,6 +25,7 @@ import { ReportCard } from '@/components/report-card';
 import { ThyroidCard } from '@/components/thyroid-card';
 import { HypertensionCard } from '@/components/hypertension-card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function PatientDashboard() {
   const { profile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
@@ -81,6 +82,22 @@ export default function PatientDashboard() {
                         <Logo className="h-8 w-8 text-primary" />
                         <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
                     </div>
+                    <div className="flex items-center gap-2">
+                         {isDoctor && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="outline" className="h-9 w-9">
+                                    <ClipboardList className="h-4 w-4" />
+                                    <span className="sr-only">Patient List</span>
+                                </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                <p>Patient List</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
+                        <ThemeToggle />
+                    </div>
                 </div>
 
                 {isDoctor && (
@@ -93,19 +110,6 @@ export default function PatientDashboard() {
                                   drbadhri@gmail.com
                               </a>
                           </div>
-                        </div>
-                        <div className="absolute right-0 bottom-0">
-                           <Tooltip>
-                            <TooltipTrigger asChild>
-                               <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="outline">
-                                  <ClipboardList className="h-4 w-4" />
-                                  <span className="sr-only">Patient List</span>
-                               </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Patient List</p>
-                            </TooltipContent>
-                          </Tooltip>
                         </div>
                     </div>
                 )}
