@@ -76,7 +76,7 @@ export function AddVitaminDRecordDialog() {
       toast({
         variant: 'destructive',
         title: 'Medication Required',
-        description: 'Please enter the current medication in the profile before adding a new record.',
+        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
       });
     }
   };

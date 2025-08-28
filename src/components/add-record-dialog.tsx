@@ -79,7 +79,7 @@ export function AddRecordDialog() {
       toast({
         variant: 'destructive',
         title: 'Medication Required',
-        description: 'Please enter at least one medication in the profile before adding a new record.',
+        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
       });
     }
   };
