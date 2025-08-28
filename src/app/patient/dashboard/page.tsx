@@ -69,7 +69,6 @@ export default function PatientDashboard() {
         const snapshot = await uploadBytes(fileRef, file);
         const downloadUrl = await getDownloadURL(snapshot.ref);
         
-        await updatePatient(profile.id, { photoUrl: downloadUrl });
         setProfile({ ...profile, photoUrl: downloadUrl });
         
         toast({

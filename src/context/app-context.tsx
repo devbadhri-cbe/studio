@@ -166,10 +166,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setProfile = (newProfile: UserProfile) => {
       setProfileState(newProfile);
-      // We only update the local state for photo changes, firestore is updated in the component
-      if (!newProfile.photoUrl) {
-        updatePatientData(newProfile.id, { ...newProfile });
-      }
+      updatePatientData(newProfile.id, { ...newProfile });
   }
   
   const addMedicalCondition = (condition: Omit<MedicalCondition, 'id'>) => {
