@@ -24,6 +24,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import type { UserProfile } from '@/lib/types';
+import { Separator } from './ui/separator';
 
 const FormSchema = z.object({
   name: z.string(), // Keep name for structure, but will be disabled
@@ -33,6 +34,7 @@ const FormSchema = z.object({
   country: z.string().min(1, { message: "Country is required." }),
   phone: z.string().min(5, { message: "Phone number is too short." }),
   height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional().or(z.literal('')),
+  weight: z.coerce.number().min(2, 'Weight must be at least 2kg.').optional().or(z.literal('')),
 });
 
 interface EditProfileDialogProps {
@@ -42,7 +44,7 @@ interface EditProfileDialogProps {
 export function EditProfileDialog({ children }: EditProfileDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { profile, setProfile } = useApp();
+  const { profile, setProfile, addWeightRecord } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -55,6 +57,7 @@ export function EditProfileDialog({ children }: EditProfileDialogProps) {
       country: '',
       phone: '',
       height: '',
+      weight: '',
     },
   });
   
@@ -72,8 +75,7 @@ export function EditProfileDialog({ children }: EditProfileDialogProps) {
   
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
-    const updatedProfile: UserProfile = {
-        ...profile,
+    const updatedProfile: Partial<UserProfile> = {
         dob: data.dob,
         gender: data.gender,
         email: data.email,
@@ -82,7 +84,10 @@ export function EditProfileDialog({ children }: EditProfileDialogProps) {
         height: data.height || undefined,
     };
     try {
-        setProfile(updatedProfile);
+        setProfile({ ...profile, ...updatedProfile });
+        if (data.weight) {
+          addWeightRecord({ value: data.weight, date: new Date().toISOString() });
+        }
         toast({
             title: 'Profile Updated',
             description: 'Your details have been successfully saved.',
@@ -109,6 +114,7 @@ export function EditProfileDialog({ children }: EditProfileDialogProps) {
             country: profile?.country || '',
             phone: profile?.phone || '',
             height: profile?.height || '',
+            weight: '',
           });
       }
   }, [open, profile, form]);
@@ -136,6 +142,9 @@ export function EditProfileDialog({ children }: EditProfileDialogProps) {
                                 <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled /></FormControl><FormMessage /></FormItem> )} />
                                 <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
                                 <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
+                                
+                                <Separator />
+                                
                                 <FormField
                                     control={form.control}
                                     name="country"
@@ -158,7 +167,13 @@ export function EditProfileDialog({ children }: EditProfileDialogProps) {
                                     />
                                 <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
                                 <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
+
+                                <Separator />
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                  <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Current Weight (kg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 70" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                </div>
                             </div>
                              <div className="flex justify-end gap-2 pt-4">
                                 <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
