@@ -282,33 +282,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addBatchRecords = (batch: BatchRecords) => {
     const newMedication = getMedicationForRecord(profile.medication);
     const updates: Partial<Patient> = {};
+    const date = batch.hba1c?.date || batch.lipid?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date;
 
-    if (batch.hba1c) {
+    if (!date) return; // Cannot add records without a date
+
+    if (batch.hba1c && batch.hba1c.value) {
       const newRecord: Hba1cRecord = { ...batch.hba1c, id: `hba1c-${Date.now()}`, medication: newMedication };
       const newHba1cRecords = [...records, newRecord];
       setRecordsState(newHba1cRecords);
       updates.records = newHba1cRecords;
     }
-    if (batch.lipid) {
-      const newRecord: LipidRecord = { ldl: 0, hdl: 0, triglycerides: 0, total: 0, ...batch.lipid, id: `lipid-${Date.now()}`, medication: newMedication };
+    if (batch.lipid && batch.lipid.ldl && batch.lipid.hdl && batch.lipid.triglycerides && batch.lipid.total) {
+      const newRecord: LipidRecord = { ...batch.lipid, id: `lipid-${Date.now()}`, medication: newMedication };
       const newLipidRecords = [...lipidRecords, newRecord];
       setLipidRecordsState(newLipidRecords);
       updates.lipidRecords = newLipidRecords;
     }
-    if (batch.vitaminD) {
+    if (batch.vitaminD && batch.vitaminD.value) {
       const newRecord: VitaminDRecord = { ...batch.vitaminD, id: `vitd-${Date.now()}`, medication: newMedication };
       const newVitaminDRecords = [...vitaminDRecords, newRecord];
       setVitaminDRecordsState(newVitaminDRecords);
       updates.vitaminDRecords = newVitaminDRecords;
     }
-    if (batch.thyroid) {
-      const newRecord: ThyroidRecord = { tsh: 0, t3: 0, t4: 0, ...batch.thyroid, id: `thyroid-${Date.now()}`, medication: newMedication };
+    if (batch.thyroid && batch.thyroid.tsh && batch.thyroid.t3 && batch.thyroid.t4) {
+      const newRecord: ThyroidRecord = { ...batch.thyroid, id: `thyroid-${Date.now()}`, medication: newMedication };
       const newThyroidRecords = [...thyroidRecords, newRecord];
       setThyroidRecordsState(newThyroidRecords);
       updates.thyroidRecords = newThyroidRecords;
     }
-    if (batch.bloodPressure) {
-      const newRecord: BloodPressureRecord = { systolic: 0, diastolic: 0, ...batch.bloodPressure, id: `bp-${Date.now()}`, medication: newMedication };
+    if (batch.bloodPressure && batch.bloodPressure.systolic && batch.bloodPressure.diastolic) {
+      const newRecord: BloodPressureRecord = { ...batch.bloodPressure, id: `bp-${Date.now()}`, medication: newMedication };
       const newBloodPressureRecords = [...bloodPressureRecords, newRecord];
       setBloodPressureRecordsState(newBloodPressureRecords);
       updates.bloodPressureRecords = newBloodPressureRecords;
@@ -364,7 +367,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isClient,
     dashboardView,
     setDashboardView,
-    isDoctorLoggedIn,
+isDoctorLoggedIn,
     setIsDoctorLoggedIn,
     doctorName: DOCTOR_NAME,
     setPatientData,
