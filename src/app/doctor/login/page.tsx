@@ -14,14 +14,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 const FormSchema = z.object({
+  email: z.string().email({ message: 'Please enter a valid email.' }),
   password: z.string().min(1, { message: 'Password is required.' }),
 });
 
-// This is a hardcoded password for demonstration purposes.
-// In a real application, this should be handled by a secure authentication system.
-const DOCTOR_PASSWORD = 'password123';
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
 export default function DoctorLoginPage() {
@@ -32,31 +32,29 @@ export default function DoctorLoginPage() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
+      email: 'drbadhri@gmail.com',
       password: '',
     },
   });
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
-    // Simulate an API call
-    setTimeout(() => {
-      if (data.password === DOCTOR_PASSWORD) {
-        // Set a flag in localStorage to indicate doctor is logged in
-        localStorage.setItem('doctor_logged_in', 'true');
-        toast({
-          title: 'Login Successful',
-          description: `Welcome, ${DOCTOR_NAME}! Redirecting to your dashboard...`,
-        });
-        router.push('/doctor/dashboard');
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Login Failed',
-          description: 'The password you entered is incorrect. Please try again.',
-        });
-        setIsSubmitting(false);
-      }
-    }, 1000);
+    try {
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      toast({
+        title: 'Login Successful',
+        description: `Welcome, ${DOCTOR_NAME}! Redirecting to your dashboard...`,
+      });
+      router.push('/doctor/dashboard');
+    } catch (error) {
+      console.error("Firebase Auth Error:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: 'The email or password you entered is incorrect. Please try again.',
+      });
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -68,11 +66,24 @@ export default function DoctorLoginPage() {
               <span className="text-2xl font-bold font-headline">Health Guardian</span>
             </div>
           <CardTitle className="text-2xl">{DOCTOR_NAME}'s Portal</CardTitle>
-          <CardDescription>Please enter your password to access the dashboard.</CardDescription>
+          <CardDescription>Please enter your credentials to access the dashboard.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+               <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="doctor@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="password"
