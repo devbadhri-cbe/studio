@@ -406,22 +406,21 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
                            {condFields.length === 0 && <p className="text-sm text-center text-muted-foreground py-2">No medical conditions added.</p>}
                         </div>
                     </div>
-
                 </form>
                 </Form>
             </div>
         </ScrollArea>
         
-        <DialogFooter className="p-6 pt-4 border-t shrink-0">
-            <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" form="patient-form" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {patient ? 'Save Changes' : 'Add Patient'}
-            </Button>
+        <DialogFooter className="p-6 pt-4 border-t shrink-0 bg-background">
+            <div className="w-full flex flex-col gap-2">
+                <Button type="submit" form="patient-form" disabled={isSubmitting} className="w-full">
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {patient ? 'Save Changes' : 'Add Patient'}
+                </Button>
+                <Button variant="ghost" onClick={() => setOpen(false)} className="w-full">Cancel</Button>
+            </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-
-    
