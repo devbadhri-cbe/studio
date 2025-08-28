@@ -41,6 +41,8 @@ export default function PatientDashboard() {
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
+  const [pulsateDashboardIcon, setPulsateDashboardIcon] = React.useState(true);
+
 
   React.useEffect(() => {
     const doctorStatus = isDoctorLoggedIn || localStorage.getItem('doctor_logged_in') === 'true';
@@ -113,6 +115,13 @@ export default function PatientDashboard() {
     thyroid: 'Thyroid Dashboard',
     hypertension: 'Hypertension Dashboard',
     report: 'Comprehensive Report',
+  }
+  
+  const handleDashboardOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) {
+        setPulsateDashboardIcon(false);
+    }
   }
 
   return (
@@ -192,9 +201,9 @@ export default function PatientDashboard() {
                 </div>
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
-                   <DropdownMenu open={open} onOpenChange={setOpen}>
+                   <DropdownMenu open={open} onOpenChange={handleDashboardOpenChange}>
                         <DropdownMenuTrigger asChild onMouseOver={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-                            <Button size="icon" variant="outline" className="w-9 h-9 p-0">
+                            <Button size="icon" variant="outline" className={`w-9 h-9 p-0 ${pulsateDashboardIcon ? 'animate-pulse-once bg-primary/20' : ''}`}>
                                 <GaugeCircle className="w-4 h-4" />
                             </Button>
                         </DropdownMenuTrigger>
