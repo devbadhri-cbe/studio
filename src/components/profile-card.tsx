@@ -188,7 +188,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: z.infer<typ
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
         <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Condition Name" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-        <FormField control={form.control} name="date" render={({ field }) => ( <FormItem><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+        <FormField control={form.control} name="date" render={({ field }) => ( <FormItem><FormControl><Input type="date" placeholder="YYYY-MM-DD" {...field} /></FormControl><FormMessage /></FormItem> )}/>
         <div className="flex justify-end gap-2">
           <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
           <Button type="submit" size="sm" disabled={isSubmitting}>
@@ -216,7 +216,7 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
             <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
                 <div className="grid grid-cols-2 gap-2">
                     <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><Input type="date" placeholder="YYYY-MM-DD" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
                 <div className="flex justify-end gap-2">
                     <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
@@ -292,11 +292,11 @@ function CountryForm({ currentCountry, onSave, onCancel }: { currentCountry?: st
 
 const DobSchema = z.object({ dob: z.string().refine((val) => isValid(new Date(val)), { message: "A valid date is required." }) });
 function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave: (dob: string) => void; onCancel: () => void }) {
-    const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob ? new Date(currentDob).toISOString().split('T')[0] : '' } });
+    const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob ? format(new Date(currentDob), 'yyyy-MM-dd') : '' } });
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit((d) => onSave(d.dob))} className="flex items-center gap-2 flex-1">
-                <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="date" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="date" placeholder="YYYY-MM-DD" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
                 <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
                 <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
             </form>
@@ -401,7 +401,7 @@ export function ProfileCard() {
                 ) : (
                    <div className="flex items-center gap-2 flex-1">
                         <p>
-                            {profile.dob ? format(new Date(profile.dob), 'dd MMM, yyyy') : 'N/A'}
+                            {profile.dob ? formatDate(profile.dob) : 'N/A'}
                             {calculatedAge !== null && ` (Age: ${calculatedAge})`}
                         </p>
                         <Tooltip>

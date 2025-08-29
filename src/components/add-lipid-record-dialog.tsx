@@ -47,7 +47,7 @@ export function AddLipidRecordDialog() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      date: format(new Date(), 'yyyy-MM-dd'),
+      date: '',
       ldl: '' as any,
       hdl: '' as any,
       triglycerides: '' as any,
@@ -58,8 +58,15 @@ export function AddLipidRecordDialog() {
   React.useEffect(() => {
     if (open) {
       setInputUnit(biomarkerUnit);
+      form.reset({
+        date: format(new Date(), 'yyyy-MM-dd'),
+        ldl: '' as any,
+        hdl: '' as any,
+        triglycerides: '' as any,
+        total: '' as any,
+      });
     }
-  }, [open, biomarkerUnit]);
+  }, [open, biomarkerUnit, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     const newDate = new Date(data.date + 'T00:00:00');
@@ -94,13 +101,6 @@ export function AddLipidRecordDialog() {
       description: 'Your new lipid record has been added.',
     });
     setOpen(false);
-    form.reset({
-      date: format(new Date(), 'yyyy-MM-dd'),
-      ldl: '' as any,
-      hdl: '' as any,
-      triglycerides: '' as any,
-      total: '' as any,
-    });
   };
   
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -146,7 +146,7 @@ export function AddLipidRecordDialog() {
                   <FormItem>
                     <FormLabel>Test Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" placeholder="YYYY-MM-DD" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

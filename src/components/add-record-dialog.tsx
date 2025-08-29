@@ -37,9 +37,18 @@ export function AddRecordDialog() {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       value: '' as any,
-      date: format(new Date(), 'yyyy-MM-dd'),
+      date: '',
     },
   });
+  
+  React.useEffect(() => {
+    if (open) {
+      form.reset({
+        value: '' as any,
+        date: format(new Date(), 'yyyy-MM-dd'),
+      });
+    }
+  }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     // Parse the date string from the form. The 'T00:00:00' ensures it's parsed as local midnight.
@@ -70,10 +79,6 @@ export function AddRecordDialog() {
       description: 'Your new HbA1c record has been added.',
     });
     setOpen(false);
-    form.reset({
-      value: '' as any,
-      date: format(new Date(), 'yyyy-MM-dd'),
-    });
   };
 
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -110,7 +115,7 @@ export function AddRecordDialog() {
                   <FormItem>
                     <FormLabel>Test Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" placeholder="YYYY-MM-DD" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -15,6 +15,7 @@ import { countries } from '@/lib/countries';
 import { Loader2 } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
+import { format } from 'date-fns';
 
 const FormSchema = z.object({
   name: z.string().min(2, { message: "Name is required." }),
@@ -163,7 +164,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
 
     form.reset({
         name: patient?.name || '',
-        dob: patient?.dob ? new Date(patient.dob).toISOString().split('T')[0] : '',
+        dob: patient?.dob ? format(new Date(patient.dob), 'yyyy-MM-dd') : '',
         gender: patient?.gender || undefined,
         email: patient?.email || '',
         country: patient?.country || '',
@@ -194,7 +195,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
                         <div className="space-y-4">
                             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                               <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                               <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" placeholder="YYYY-MM-DD" {...field} /></FormControl><FormMessage /></FormItem> )} />
                                <FormField
                                 control={form.control}
                                 name="gender"

@@ -38,12 +38,23 @@ export function AddBloodPressureRecordDialog() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      date: format(new Date(), 'yyyy-MM-dd'),
+      date: '',
       systolic: '' as any,
       diastolic: '' as any,
       heartRate: '' as any,
     },
   });
+  
+  React.useEffect(() => {
+    if (open) {
+      form.reset({
+        date: format(new Date(), 'yyyy-MM-dd'),
+        systolic: '' as any,
+        diastolic: '' as any,
+        heartRate: '' as any,
+      });
+    }
+  }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     const newDate = new Date(data.date + 'T00:00:00');
@@ -73,12 +84,6 @@ export function AddBloodPressureRecordDialog() {
       description: 'Your new blood pressure record has been added.',
     });
     setOpen(false);
-    form.reset({
-      date: format(new Date(), 'yyyy-MM-dd'),
-      systolic: '' as any,
-      diastolic: '' as any,
-      heartRate: '' as any,
-    });
   };
   
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -115,7 +120,7 @@ export function AddBloodPressureRecordDialog() {
                   <FormItem>
                     <FormLabel>Test Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" placeholder="YYYY-MM-DD" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
