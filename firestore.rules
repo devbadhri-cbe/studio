@@ -3,26 +3,16 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper functions
-    function isAuthOwner() {
-      return request.auth != null;
-    }
-    
-    // Anyone can read a patient document if they know the ID.
-    // This is used for patient login to verify the ID exists.
-    function isPatientTryingToReadOwnDoc() {
-        return request.method == 'get';
-    }
-
+    // Rules for the patients collection
     match /patients/{patientId} {
-        // - Allow read access if the user is authenticated (a doctor).
-        // - Allow read access for unauthenticated users if they are just fetching the document (for patient login).
-        allow read: if isAuthOwner() || isPatientTryingToReadOwnDoc();
+      // Allow read/write for authenticated users (doctors)
+      allow read, write: if request.auth != null;
 
-        // - Allow write access (create, update, delete) if the user is authenticated (a doctor).
-        // - Allow patients to update their own document.
-        allow write: if isAuthOwner() || request.resource.id == patientId;
+      // Rules for the chat subcollection
+      match /chat/{messageId} {
+        // Allow anyone (doctor or patient with the link) to read/write to a specific chat
+        allow read, write: if true;
+      }
     }
   }
 }
