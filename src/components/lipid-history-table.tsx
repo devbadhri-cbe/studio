@@ -28,9 +28,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 const RECORDS_PER_PAGE = 5;
 
 export function LipidHistoryTable() {
-  const { lipidRecords, removeLipidRecord } = useApp();
+  const { lipidRecords, removeLipidRecord, getDisplayLipidValue, biomarkerUnit } = useApp();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [selectedRecord, setSelectedRecord] = React.useState<LipidRecord | null>(null);
+  
+  const lipidUnit = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
 
   const sortedRecords = React.useMemo(() => {
@@ -66,10 +68,10 @@ export function LipidHistoryTable() {
           <TableHeader>
             <TableRow>
               <TableHead className="px-2 md:px-4">Date</TableHead>
-              <TableHead className="px-2 md:px-4">Total</TableHead>
-              <TableHead className="px-2 md:px-4">LDL</TableHead>
-              <TableHead className="px-2 md:px-4">HDL</TableHead>
-              <TableHead className="px-2 md:px-4">Trig.</TableHead>
+              <TableHead className="px-2 md:px-4">Total ({lipidUnit})</TableHead>
+              <TableHead className="px-2 md:px-4">LDL ({lipidUnit})</TableHead>
+              <TableHead className="px-2 md:px-4">HDL ({lipidUnit})</TableHead>
+              <TableHead className="px-2 md:px-4">Trig. ({lipidUnit})</TableHead>
               <TableHead className="text-right px-2 md:px-4">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -81,10 +83,10 @@ export function LipidHistoryTable() {
                         <TableCell className="font-medium px-2 md:px-4">
                             {format(new Date(record.date), 'dd-MM-yyyy')}
                         </TableCell>
-                        <TableCell className="px-2 md:px-4">{record.total}</TableCell>
-                        <TableCell className="px-2 md:px-4">{record.ldl}</TableCell>
-                        <TableCell className="px-2 md:px-4">{record.hdl}</TableCell>
-                        <TableCell className="px-2 md:px-4">{record.triglycerides}</TableCell>
+                        <TableCell className="px-2 md:px-4">{getDisplayLipidValue(record.total, 'total')}</TableCell>
+                        <TableCell className="px-2 md:px-4">{getDisplayLipidValue(record.ldl, 'ldl')}</TableCell>
+                        <TableCell className="px-2 md:px-4">{getDisplayLipidValue(record.hdl, 'hdl')}</TableCell>
+                        <TableCell className="px-2 md:px-4">{getDisplayLipidValue(record.triglycerides, 'triglycerides')}</TableCell>
                         <TableCell className="text-right px-2 md:px-4">
                           <DropdownMenu>
                             <Tooltip>

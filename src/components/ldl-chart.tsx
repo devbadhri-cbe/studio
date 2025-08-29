@@ -1,3 +1,4 @@
+
 'use client';
 
 import { format } from 'date-fns';
@@ -6,19 +7,27 @@ import type { ChartConfig } from '@/components/ui/chart';
 import { useApp } from '@/context/app-context';
 
 export function LdlChart() {
-  const { lipidRecords } = useApp();
+  const { lipidRecords, getDisplayLipidValue, biomarkerUnit } = useApp();
 
   const sortedRecords = [...lipidRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const latestRecords = sortedRecords.slice(0, 5).reverse();
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
-    ldl: r.ldl,
+    ldl: getDisplayLipidValue(r.ldl, 'ldl'),
   }));
 
   const maxValue = chartData.reduce((max, r) => r.ldl > max ? r.ldl : max, 0);
-  const yAxisMax = Math.ceil(maxValue / 50) * 50 + 50;
-  const yAxisTicks = Array.from({ length: Math.floor(yAxisMax / 50) }, (_, i) => (i + 1) * 50);
+  
+  // Dynamic Y-axis based on unit
+  const yAxisMax = biomarkerUnit === 'si' ? Math.ceil(maxValue) + 2 : Math.ceil(maxValue / 50) * 50 + 50;
+  const yAxisTickInterval = biomarkerUnit === 'si' ? 1 : 50;
+  const yAxisTicks = Array.from({ length: Math.floor(yAxisMax / yAxisTickInterval) }, (_, i) => (i + 1) * yAxisTickInterval);
+  const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
+  
+  // Reference lines in correct units
+  const nearOptimal = biomarkerUnit === 'si' ? getDisplayLipidValue(100, 'ldl') : 100;
+  const idealTarget = biomarkerUnit === 'si' ? getDisplayLipidValue(70, 'ldl') : 70;
 
   return (
     <div className="h-[300px] w-full">
@@ -40,10 +49,10 @@ export function LdlChart() {
             <YAxis
               domain={[0, yAxisMax]}
               ticks={yAxisTicks}
-              allowDecimals={false}
+              allowDecimals={biomarkerUnit === 'si'}
               tickLine={true}
               axisLine={true}
-              label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}
+              label={{ value: unitLabel, angle: -90, position: 'insideLeft' }}
             />
             <Tooltip
               cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
@@ -59,7 +68,7 @@ export function LdlChart() {
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">LDL</span>
                           <span className="font-bold" style={{ color: 'hsl(var(--primary))' }}>
-                            {payload[0].value} mg/dL
+                            {payload[0].value} {unitLabel}
                           </span>
                         </div>
                       </div>
@@ -69,19 +78,19 @@ export function LdlChart() {
                 return null;
               }}
             />
-            <ReferenceArea y1={0} y2={100} stroke="hsl(var(--accent))" strokeOpacity={0.3} fill="transparent" fillOpacity={0}>
+            <ReferenceArea y1={0} y2={nearOptimal} stroke="hsl(var(--accent))" strokeOpacity={0.3} fill="transparent" fillOpacity={0}>
               <Legend
                 content={() => (
                   <div className="text-xs text-center text-accent-foreground/70" style={{color: 'hsl(var(--accent))'}}>
-                    Near Optimal Range (&lt;100 mg/dL)
+                    Near Optimal Range (&lt;{nearOptimal} {unitLabel})
                   </div>
                 )}
                 verticalAlign="top"
                 align="center"
               />
             </ReferenceArea>
-            <ReferenceLine y={70} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
-              <Label value="Ideal Target (<70 mg/dL)" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
+            <ReferenceLine y={idealTarget} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
+              <Label value={`Ideal Target (<${idealTarget} ${unitLabel})`} position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
             </ReferenceLine>
             <Line type="monotone" dataKey="ldl" name="LDL" stroke="hsl(var(--primary))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--primary))" />} activeDot={{ r: 6 }} />
           </LineChart>

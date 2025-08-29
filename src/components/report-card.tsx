@@ -14,7 +14,7 @@ import { BloodPressureChart } from './blood-pressure-chart';
 
 
 export function ReportCard() {
-  const { records, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords } = useApp();
+  const { records, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, getDisplayLipidValue, getDisplayVitaminDValue, biomarkerUnit } = useApp();
 
   const latestHba1c = [...records].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestLipid = [...lipidRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
@@ -22,6 +22,8 @@ export function ReportCard() {
   const latestThyroid = [...(thyroidRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestBloodPressure = [...(bloodPressureRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
+  const lipidUnit = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
+  const vitDUnit = biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL';
 
   return (
     <Card className="h-full">
@@ -58,7 +60,7 @@ export function ReportCard() {
               <CardContent>
                  {latestLipid ? (
                     <>
-                     <div className="text-2xl font-bold">{latestLipid.ldl} <span className="text-base font-normal text-muted-foreground">mg/dL</span></div>
+                     <div className="text-2xl font-bold">{getDisplayLipidValue(latestLipid.ldl, 'ldl')} <span className="text-base font-normal text-muted-foreground">{lipidUnit}</span></div>
                      <p className="text-xs text-muted-foreground">on {format(new Date(latestLipid.date), 'dd MMM yyyy')}</p>
                     </>
                 ) : <p className="text-sm text-muted-foreground">No data</p>}
@@ -72,7 +74,7 @@ export function ReportCard() {
               <CardContent>
                  {latestVitaminD ? (
                     <>
-                     <div className="text-2xl font-bold">{latestVitaminD.value} <span className="text-base font-normal text-muted-foreground">ng/mL</span></div>
+                     <div className="text-2xl font-bold">{getDisplayVitaminDValue(latestVitaminD.value)} <span className="text-base font-normal text-muted-foreground">{vitDUnit}</span></div>
                      <p className="text-xs text-muted-foreground">on {format(new Date(latestVitaminD.date), 'dd MMM yyyy')}</p>
                     </>
                 ) : <p className="text-sm text-muted-foreground">No data</p>}

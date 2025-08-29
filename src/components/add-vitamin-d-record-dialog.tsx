@@ -30,8 +30,10 @@ const FormSchema = z.object({
 
 export function AddVitaminDRecordDialog() {
   const [open, setOpen] = React.useState(false);
-  const { addVitaminDRecord, profile, vitaminDRecords } = useApp();
+  const { addVitaminDRecord, profile, vitaminDRecords, biomarkerUnit, getDbVitaminDValue } = useApp();
   const { toast } = useToast();
+  
+  const unit = biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL';
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -57,10 +59,12 @@ export function AddVitaminDRecordDialog() {
       });
       return;
     }
+    
+    const dbValue = getDbVitaminDValue(data.value);
 
     addVitaminDRecord({
       date: newDate.toISOString(),
-      value: data.value,
+      value: dbValue,
     });
     toast({
       title: 'Success!',
@@ -118,9 +122,9 @@ export function AddVitaminDRecordDialog() {
                 name="value"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Vitamin D (ng/mL)</FormLabel>
+                    <FormLabel>Vitamin D ({unit})</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="e.g., 30" {...field} />
+                      <Input type="number" step="any" placeholder={unit === 'si' ? "e.g., 75" : "e.g., 30"} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

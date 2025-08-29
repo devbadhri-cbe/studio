@@ -8,6 +8,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO } from 'date-fns';
+import { countries } from '@/lib/countries';
+import { toMgDl, toMmolL, toNgDl, toNmolL } from '@/lib/unit-conversions';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', presentMedicalConditions: [], medication: [] };
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
@@ -21,6 +23,8 @@ interface BatchRecords {
     thyroid?: Omit<ThyroidRecord, 'id' | 'medication'>;
     bloodPressure?: Omit<BloodPressureRecord, 'id' | 'medication'>;
 }
+
+type BiomarkerUnitSystem = 'conventional' | 'si';
 
 interface AppContextType {
   profile: UserProfile;
@@ -60,6 +64,11 @@ interface AppContextType {
   setPatientData: (patient: Patient) => void;
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  biomarkerUnit: BiomarkerUnitSystem;
+  getDisplayLipidValue: (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides') => number;
+  getDisplayVitaminDValue: (value: number) => number;
+  getDbLipidValue: (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides') => number;
+  getDbVitaminDValue: (value: number) => number;
 }
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -78,11 +87,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
 
+  const biomarkerUnit = React.useMemo(() => {
+    return countries.find(c => c.code === profile.country)?.biomarkerUnit || 'conventional';
+  }, [profile.country]);
+
+  // All lipid values are stored in mg/dL in the database.
+  const getDisplayLipidValue = (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides'): number => {
+    if (biomarkerUnit === 'si') {
+      return parseFloat(toMmolL(value, type).toFixed(2));
+    }
+    return Math.round(value);
+  }
+  
+  // All Vitamin D values are stored in ng/mL in the database.
+  const getDisplayVitaminDValue = (value: number): number => {
+      if (biomarkerUnit === 'si') {
+          return parseFloat(toNmolL(value).toFixed(2));
+      }
+      return Math.round(value);
+  }
+
+  // Convert displayed SI value back to conventional for DB storage
+  const getDbLipidValue = (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides'): number => {
+    if (biomarkerUnit === 'si') {
+        return toMgDl(value, type);
+    }
+    return value;
+  }
+
+  const getDbVitaminDValue = (value: number): number => {
+    if (biomarkerUnit === 'si') {
+        return toNgDl(value);
+    }
+    return value;
+  }
 
   React.useEffect(() => {
     setIsClient(true);
     
-    // Check for doctor's auth state once when the app loads
     const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
             setIsDoctorLoggedInState(true);
@@ -93,7 +135,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
     });
 
-    // Check for saved theme
     const savedTheme = localStorage.getItem('theme') as Theme | null;
     if (savedTheme) {
         setThemeState(savedTheme);
@@ -294,7 +335,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return;
     };
     
-    // The date from AI comes as YYYY-MM-DD, so we add T00:00:00 to ensure it's parsed as local midnight.
     const newRecordDate = new Date(date + 'T00:00:00');
 
     let duplicatesFound = false;
@@ -398,12 +438,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isClient,
     dashboardView,
     setDashboardView,
-isDoctorLoggedIn,
+    isDoctorLoggedIn,
     setIsDoctorLoggedIn,
     doctorName: DOCTOR_NAME,
     setPatientData,
     theme,
     setTheme,
+    biomarkerUnit,
+    getDisplayLipidValue,
+    getDisplayVitaminDValue,
+    getDbLipidValue,
+    getDbVitaminDValue,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -416,5 +461,3 @@ export function useApp() {
   }
   return context;
 }
-
-    

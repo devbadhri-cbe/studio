@@ -29,9 +29,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 const RECORDS_PER_PAGE = 5;
 
 export function VitaminDHistoryTable() {
-  const { vitaminDRecords, removeVitaminDRecord } = useApp();
+  const { vitaminDRecords, removeVitaminDRecord, getDisplayVitaminDValue, biomarkerUnit } = useApp();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [selectedRecord, setSelectedRecord] = React.useState<VitaminDRecord | null>(null);
+  
+  const unit = biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL';
+  const deficientValue = biomarkerUnit === 'si' ? 50 : 20;
+  const insufficientValue = biomarkerUnit === 'si' ? 75 : 30;
 
   const sortedRecords = React.useMemo(() => {
     return [...(vitaminDRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -45,8 +49,9 @@ export function VitaminDHistoryTable() {
   );
 
   const getStatus = (value: number) => {
-    if (value < 20) return { text: 'Deficient', variant: 'destructive' as const };
-    if (value < 30) return { text: 'Insufficient', variant: 'secondary' as const };
+    const displayValue = getDisplayVitaminDValue(value);
+    if (displayValue < deficientValue) return { text: 'Deficient', variant: 'destructive' as const };
+    if (displayValue < insufficientValue) return { text: 'Insufficient', variant: 'secondary' as const };
     return { text: 'Sufficient', variant: 'outline' as const };
   }
 
@@ -68,7 +73,7 @@ export function VitaminDHistoryTable() {
           <TableHeader>
             <TableRow>
               <TableHead className="px-2 md:px-4">Date</TableHead>
-              <TableHead className="px-2 md:px-4">Result (ng/mL)</TableHead>
+              <TableHead className="px-2 md:px-4">Result ({unit})</TableHead>
               <TableHead className="px-2 md:px-4">Status</TableHead>
               <TableHead className="text-right px-2 md:px-4">Actions</TableHead>
             </TableRow>
@@ -82,7 +87,7 @@ export function VitaminDHistoryTable() {
                       <TableCell className="font-medium px-2 md:px-4">
                         {format(new Date(record.date), 'dd-MM-yyyy')}
                       </TableCell>
-                      <TableCell className="px-2 md:px-4">{record.value.toFixed(1)}</TableCell>
+                      <TableCell className="px-2 md:px-4">{getDisplayVitaminDValue(record.value)}</TableCell>
                       <TableCell className="px-2 md:px-4">
                         <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>
                       </TableCell>

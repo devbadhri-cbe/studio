@@ -25,16 +25,18 @@ import { useToast } from '@/hooks/use-toast';
 
 const FormSchema = z.object({
   date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
-  ldl: z.coerce.number().min(1, 'Value is required.'),
-  hdl: z.coerce.number().min(1, 'Value is required.'),
-  triglycerides: z.coerce.number().min(1, 'Value is required.'),
-  total: z.coerce.number().min(1, 'Value is required.'),
+  ldl: z.coerce.number().min(0.1, 'Value is required.'),
+  hdl: z.coerce.number().min(0.1, 'Value is required.'),
+  triglycerides: z.coerce.number().min(0.1, 'Value is required.'),
+  total: z.coerce.number().min(0.1, 'Value is required.'),
 });
 
 export function AddLipidRecordDialog() {
   const [open, setOpen] = React.useState(false);
-  const { addLipidRecord, profile, lipidRecords } = useApp();
+  const { addLipidRecord, profile, lipidRecords, biomarkerUnit, getDbLipidValue } = useApp();
   const { toast } = useToast();
+  
+  const lipidUnit = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -64,13 +66,17 @@ export function AddLipidRecordDialog() {
       return;
     }
     
-    addLipidRecord({
-      date: newDate.toISOString(),
-      ldl: data.ldl,
-      hdl: data.hdl,
-      triglycerides: data.triglycerides,
-      total: data.total,
-    });
+    // Convert values to mg/dL for storage if necessary
+    const dbRecord = {
+        date: newDate.toISOString(),
+        ldl: getDbLipidValue(data.ldl, 'ldl'),
+        hdl: getDbLipidValue(data.hdl, 'hdl'),
+        triglycerides: getDbLipidValue(data.triglycerides, 'triglycerides'),
+        total: getDbLipidValue(data.total, 'total'),
+    }
+
+    addLipidRecord(dbRecord);
+
     toast({
       title: 'Success!',
       description: 'Your new lipid record has been added.',
@@ -131,9 +137,9 @@ export function AddLipidRecordDialog() {
                   name="ldl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>LDL (mg/dL)</FormLabel>
+                      <FormLabel>LDL ({lipidUnit})</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 100" {...field} />
+                        <Input type="number" step="any" placeholder={lipidUnit === 'si' ? "e.g., 2.6" : "e.g., 100"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -144,9 +150,9 @@ export function AddLipidRecordDialog() {
                   name="hdl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>HDL (mg/dL)</FormLabel>
+                      <FormLabel>HDL ({lipidUnit})</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 50" {...field} />
+                        <Input type="number" step="any" placeholder={lipidUnit === 'si' ? "e.g., 1.3" : "e.g., 50"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -157,9 +163,9 @@ export function AddLipidRecordDialog() {
                   name="triglycerides"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Triglycerides (mg/dL)</FormLabel>
+                      <FormLabel>Triglycerides ({lipidUnit})</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 150" {...field} />
+                        <Input type="number" step="any" placeholder={lipidUnit === 'si' ? "e.g., 1.7" : "e.g., 150"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -170,9 +176,9 @@ export function AddLipidRecordDialog() {
                   name="total"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Total (mg/dL)</FormLabel>
+                      <FormLabel>Total ({lipidUnit})</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 200" {...field} />
+                        <Input type="number" step="any" placeholder={lipidUnit === 'si' ? "e.g., 5.2" : "e.g., 200"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

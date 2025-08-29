@@ -6,19 +6,26 @@ import { Line, LineChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea
 import { useApp } from '@/context/app-context';
 
 export function VitaminDChart() {
-  const { vitaminDRecords } = useApp();
+  const { vitaminDRecords, getDisplayVitaminDValue, biomarkerUnit } = useApp();
 
   const sortedRecords = [...(vitaminDRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const latestRecords = sortedRecords.slice(0, 5).reverse();
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
-    value: r.value,
+    value: getDisplayVitaminDValue(r.value),
   }));
 
   const maxValue = chartData.reduce((max, r) => r.value > max ? r.value : max, 0);
-  const yAxisMax = Math.max(100, Math.ceil(maxValue / 20) * 20 + 20);
-  const yAxisTicks = Array.from({ length: Math.floor(yAxisMax / 20) }, (_, i) => (i + 1) * 20);
+
+  const yAxisMax = biomarkerUnit === 'si' ? Math.ceil(maxValue / 50) * 50 + 50 : Math.max(100, Math.ceil(maxValue / 20) * 20 + 20);
+  const yAxisTickInterval = biomarkerUnit === 'si' ? 50 : 20;
+  const yAxisTicks = Array.from({ length: Math.floor(yAxisMax / yAxisTickInterval) }, (_, i) => (i + 1) * yAxisTickInterval);
+  const unitLabel = biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL';
+
+  // Reference lines in correct units
+  const sufficient = biomarkerUnit === 'si' ? getDisplayVitaminDValue(30) : 30;
+  const insufficient = biomarkerUnit === 'si' ? getDisplayVitaminDValue(20) : 20;
 
   return (
     <div className="h-[300px] w-full">
@@ -40,10 +47,10 @@ export function VitaminDChart() {
             <YAxis
               domain={[0, yAxisMax]}
               ticks={yAxisTicks}
-              allowDecimals={false}
+              allowDecimals={biomarkerUnit === 'si'}
               tickLine={true}
               axisLine={true}
-              label={{ value: 'ng/mL', angle: -90, position: 'insideLeft' }}
+              label={{ value: unitLabel, angle: -90, position: 'insideLeft' }}
             />
             <Tooltip
               cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
@@ -59,7 +66,7 @@ export function VitaminDChart() {
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">Vitamin D</span>
                           <span className="font-bold" style={{ color: 'hsl(var(--chart-2))' }}>
-                            {payload[0].value} ng/mL
+                            {payload[0].value} {unitLabel}
                           </span>
                         </div>
                       </div>
@@ -69,21 +76,21 @@ export function VitaminDChart() {
                 return null;
               }}
             />
-            <ReferenceArea y1={30} y2={100} stroke="hsl(var(--accent))" strokeOpacity={0.3} fill="transparent" fillOpacity={0}>
+            <ReferenceArea y1={sufficient} y2={yAxisMax} stroke="hsl(var(--accent))" strokeOpacity={0.3} fill="transparent" fillOpacity={0}>
               <Legend
                 content={() => (
                   <div className="text-xs text-center text-accent-foreground/70" style={{color: 'hsl(var(--accent))'}}>
-                    Sufficient Range (30-100 ng/mL)
+                    Sufficient Range ({'>'}{sufficient} {unitLabel})
                   </div>
                 )}
                 verticalAlign="top"
                 align="center"
               />
             </ReferenceArea>
-             <ReferenceArea y1={20} y2={29} stroke="hsl(var(--chart-3))" strokeOpacity={0.3} fill="hsl(var(--chart-3))" fillOpacity={0.1}>
+             <ReferenceArea y1={insufficient} y2={sufficient-0.1} stroke="hsl(var(--chart-3))" strokeOpacity={0.3} fill="hsl(var(--chart-3))" fillOpacity={0.1}>
                  <Label value="Insufficient" position="insideTopLeft" fill="hsl(var(--chart-3))" fontSize={10} />
             </ReferenceArea>
-             <ReferenceArea y1={0} y2={19} stroke="hsl(var(--destructive))" strokeOpacity={0.3} fill="hsl(var(--destructive))" fillOpacity={0.1}>
+             <ReferenceArea y1={0} y2={insufficient-0.1} stroke="hsl(var(--destructive))" strokeOpacity={0.3} fill="hsl(var(--destructive))" fillOpacity={0.1}>
                  <Label value="Deficient" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
             </ReferenceArea>
             <Line type="monotone" dataKey="value" name="Vitamin D" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--chart-2))" />} activeDot={{ r: 6 }} />
