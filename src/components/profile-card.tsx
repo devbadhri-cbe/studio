@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings } from 'lucide-react';
@@ -23,6 +24,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 
 const MedicationSchema = z.object({
@@ -293,20 +300,6 @@ function CountryForm({ currentCountry, onSave, onCancel }: { currentCountry?: st
     );
 }
 
-const DateFormatSchema = z.object({ dateFormat: z.string().min(1, "A format is required.") });
-function DateFormatForm({ currentFormat, onSave, onCancel }: { currentFormat?: string; onSave: (format: string) => void; onCancel: () => void }) {
-    const form = useForm<z.infer<typeof DateFormatSchema>>({ resolver: zodResolver(DateFormatSchema), defaultValues: { dateFormat: currentFormat || '' } });
-    return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit((d) => onSave(d.dateFormat))} className="flex items-center gap-2 flex-1">
-                <FormField control={form.control} name="dateFormat" render={({ field }) => ( <FormItem className="flex-1"><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="h-8"><SelectValue placeholder="Select..." /></SelectTrigger></FormControl><SelectContent>{dateFormats.map(f => <SelectItem key={f.format} value={f.format}>{f.label}</SelectItem>)}</SelectContent></Select><FormMessage className="text-xs" /></FormItem> )}/>
-                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
-                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
-            </form>
-        </Form>
-    );
-}
-
 const DobSchema = z.object({ dob: z.date({ required_error: "A valid date is required." }) });
 function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave: (dob: string) => void; onCancel: () => void }) {
     const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob ? parseISO(currentDob) : undefined } });
@@ -332,7 +325,6 @@ export function ProfileCard() {
   const [isEditingPhone, setIsEditingPhone] = React.useState(false);
   const [isEditingCountry, setIsEditingCountry] = React.useState(false);
   const [isEditingDob, setIsEditingDob] = React.useState(false);
-  const [isEditingDateFormat, setIsEditingDateFormat] = React.useState(false);
   const [medicationChanged, setMedicationChanged] = React.useState(false);
   const formatDate = useDateFormatter();
 
@@ -393,7 +385,6 @@ export function ProfileCard() {
   
   const handleSaveDateFormat = (newFormat: string) => {
     setProfile({ ...profile, dateFormat: newFormat });
-    setIsEditingDateFormat(false);
   }
 
   const handleSaveDob = (newDob: string) => {
@@ -437,20 +428,32 @@ export function ProfileCard() {
                                 <p>Edit Date of Birth</p>
                             </TooltipContent>
                         </Tooltip>
-                        {isEditingDateFormat ? (
-                            <DateFormatForm currentFormat={profile.dateFormat} onSave={handleSaveDateFormat} onCancel={() => setIsEditingDateFormat(false)} />
-                        ) : (
-                             <Tooltip>
+                        
+                        <DropdownMenu>
+                            <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingDateFormat(true)}>
-                                        <Settings className="h-3 w-3 text-border" strokeWidth={1.5} />
-                                    </Button>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button size="icon" variant="ghost" className="h-6 w-6">
+                                            <Settings className="h-3 w-3 text-border" strokeWidth={1.5} />
+                                        </Button>
+                                    </DropdownMenuTrigger>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p>Edit Date Format ({profile.dateFormat})</p>
+                                    <p>Change Date Format ({profile.dateFormat})</p>
                                 </TooltipContent>
                             </Tooltip>
-                        )}
+                            <DropdownMenuContent>
+                                {dateFormats.map(f => (
+                                    <DropdownMenuItem 
+                                        key={f.format} 
+                                        onSelect={() => handleSaveDateFormat(f.format)}
+                                        className={profile.dateFormat === f.format ? 'bg-accent' : ''}
+                                    >
+                                        {f.label}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 )}
             </div>
@@ -715,4 +718,3 @@ export function ProfileCard() {
   );
 }
 
-    
