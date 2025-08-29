@@ -19,12 +19,12 @@ import { useToast } from '@/hooks/use-toast';
 import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 import { DrugInteractionDialog } from './drug-interaction-dialog';
 import { Separator } from './ui/separator';
-import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
-import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from './ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
+import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 
 
 const MedicationSchema = z.object({
@@ -34,13 +34,15 @@ const MedicationSchema = z.object({
 });
 
 function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
+  const [isChecking, setIsChecking] = React.useState(false);
+  const [suggestion, setSuggestion] = React.useState<{ originalData: z.infer<typeof MedicationSchema>, correctedName: string } | null>(null);
 
   const form = useForm<z.infer<typeof MedicationSchema>>({
     resolver: zodResolver(MedicationSchema),
     defaultValues: { medicationName: '', dosage: '', frequency: '' },
   });
 
-  const handleSave = (data: z.infer<typeof MedicationSchema>) => {
+  const handleFinalSave = (data: z.infer<typeof MedicationSchema>) => {
     onSave({
       name: data.medicationName,
       dosage: data.dosage,
@@ -48,42 +50,86 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
     });
     form.reset();
   };
+  
+  const handleInitialSubmit = async (data: z.infer<typeof MedicationSchema>) => {
+    setIsChecking(true);
+    try {
+        const result = await checkMedicationSpelling({ medicationName: data.medicationName });
+        if (result.correctedName) {
+            setSuggestion({ originalData: data, correctedName: result.correctedName });
+        } else {
+            handleFinalSave(data);
+        }
+    } catch (error) {
+        console.error("Spell check failed, saving as is.", error);
+        handleFinalSave(data);
+    } finally {
+        setIsChecking(false);
+    }
+  };
+
+  const onConfirmSuggestion = () => {
+    if (suggestion) {
+        handleFinalSave({ ...suggestion.originalData, medicationName: suggestion.correctedName });
+    }
+    setSuggestion(null);
+  };
+
+  const onIgnoreSuggestion = () => {
+    if (suggestion) {
+        handleFinalSave(suggestion.originalData);
+    }
+    setSuggestion(null);
+  }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-        <FormField
-          control={form.control}
-          name="medicationName"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  placeholder="Medication Name"
-                  {...field}
-                  autoComplete="off"
-                  spellCheck={false}
-                  onChange={(e) => {
-                    const { value } = e.target;
-                    const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
-                    field.onChange(formattedValue);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="grid grid-cols-2 gap-2">
-          <FormField control={form.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
-          <FormField control={form.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
-        </div>
-        <div className="flex justify-end gap-2">
-          <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
-          <Button type="submit" size="sm">Save</Button>
-        </div>
-      </form>
-    </Form>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleInitialSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
+           <FormField
+            control={form.control}
+            name="medicationName"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    placeholder="Medication Name"
+                    {...field}
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <FormField control={form.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
+            <FormField control={form.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+            <Button type="submit" size="sm" disabled={isChecking}>
+              {isChecking ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+            </Button>
+          </div>
+        </form>
+      </Form>
+      <AlertDialog open={!!suggestion} onOpenChange={(isOpen) => !isOpen && setSuggestion(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Spelling Suggestion</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Did you mean <strong className="text-foreground">{suggestion?.correctedName}</strong> instead of <span className="line-through">{suggestion?.originalData.medicationName}</span>?
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={onIgnoreSuggestion}>Save as is</AlertDialogCancel>
+                <AlertDialogAction onClick={onConfirmSuggestion}>Use Suggestion</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
@@ -617,5 +663,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    
