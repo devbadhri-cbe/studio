@@ -2,6 +2,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { differenceInYears } from "date-fns"
+import { countries } from "./countries";
  
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -43,3 +44,38 @@ export const cmToFtIn = (cm: number) => {
     return { feet, inches };
 };
 
+export const formatDisplayPhoneNumber = (phone?: string, countryCode?: string): string => {
+    if (!phone || !countryCode) return phone || 'N/A';
+    const country = countries.find(c => c.code === countryCode);
+    if (!country) return phone;
+    
+    const phoneDigits = phone.replace(/\D/g, '');
+    const countryPhoneCodeDigits = country.phoneCode.replace(/\D/g, '');
+    
+    const nationalNumber = phoneDigits.startsWith(countryPhoneCodeDigits)
+        ? phoneDigits.substring(countryPhoneCodeDigits.length)
+        : phoneDigits;
+
+    switch (countryCode) {
+        case 'US':
+        case 'CA':
+            if (nationalNumber.length === 10) {
+                return `${country.phoneCode} (${nationalNumber.substring(0, 3)}) ${nationalNumber.substring(3, 6)}-${nationalNumber.substring(6)}`;
+            }
+            break;
+        case 'IN':
+             if (nationalNumber.length === 10) {
+                return `${country.phoneCode} ${nationalNumber.substring(0, 5)} ${nationalNumber.substring(5)}`;
+            }
+            break;
+        case 'GB':
+             if (nationalNumber.length === 10) {
+                return `${country.phoneCode} ${nationalNumber.substring(0, 4)} ${nationalNumber.substring(4)}`;
+            }
+            break;
+        default:
+            return `${country.phoneCode} ${nationalNumber}`;
+    }
+    
+    return `${country.phoneCode} ${nationalNumber}`;
+}

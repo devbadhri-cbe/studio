@@ -11,7 +11,7 @@ import { format, isValid, parseISO } from 'date-fns';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
-import { calculateAge, calculateBmi, cmToFtIn, ftInToCm, kgToLbs, lbsToKg } from '@/lib/utils';
+import { calculateAge, calculateBmi, cmToFtIn, ftInToCm, kgToLbs, lbsToKg, formatDisplayPhoneNumber } from '@/lib/utils';
 import { countries, Country, dateFormats } from '@/lib/countries';
 import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
@@ -410,21 +410,7 @@ export function ProfileCard() {
       : `${profile.height} cm`
     : 'N/A';
     
-  const formattedPhone = (phone?: string, countryCode?: string) => {
-    if (!phone || !countryCode) return 'N/A';
-    const country = countries.find(c => c.code === countryCode);
-    if (!country) return phone;
-    
-    const phoneDigits = phone.replace(/\D/g, '');
-    const countryPhoneCodeDigits = country.phoneCode.replace(/\D/g, '');
-
-    if (phoneDigits.startsWith(countryPhoneCodeDigits)) {
-      const nationalNumber = phoneDigits.substring(countryPhoneCodeDigits.length);
-      return `${country.phoneCode} ${nationalNumber}`;
-    }
-    
-    return `${country.phoneCode} ${phoneDigits}`;
-  }
+  const formattedPhone = formatDisplayPhoneNumber(profile.phone, profile.country);
 
 
   const bmi = calculateBmi(latestWeight?.value, profile.height || 0);
@@ -647,7 +633,7 @@ export function ProfileCard() {
                     <PhoneForm currentPhone={profile.phone} onSave={handleSavePhone} onCancel={() => setIsEditingPhone(false)} />
                 ) : (
                     <div className="flex items-center gap-2 flex-1">
-                        <p>{formattedPhone(profile.phone, profile.country)}</p>
+                        <p>{formattedPhone}</p>
                         <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingPhone(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Phone</p></TooltipContent></Tooltip>
                     </div>
                 )}
@@ -850,5 +836,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    

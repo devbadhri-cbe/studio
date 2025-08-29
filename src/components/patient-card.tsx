@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2, MessageSquare } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { calculateAge } from '@/lib/utils';
+import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { countries } from '@/lib/countries';
 import * as React from 'react';
@@ -33,21 +33,6 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-const formatPhoneNumber = (phone: string, countryCode: string): string => {
-    const country = countries.find(c => c.code === countryCode);
-    if (!phone || !country) return phone || 'N/A';
-
-    const phoneDigits = phone.replace(/\D/g, '');
-    const countryPhoneCodeDigits = country.phoneCode.replace(/\D/g, '');
-
-    if (phoneDigits.startsWith(countryPhoneCodeDigits)) {
-      const nationalNumber = phoneDigits.substring(countryPhoneCodeDigits.length);
-      return `${country.phoneCode} ${nationalNumber}`;
-    }
-    
-    return `${country.phoneCode} ${phoneDigits}`;
-}
-
 const getStatusVariant = (status: Patient['status']) => {
     switch (status) {
         case 'Urgent':
@@ -69,7 +54,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const age = calculateAge(patient.dob);
   const country = countries.find(c => c.code === patient.country);
   const countryName = country?.name || patient.country;
-  const formattedPhone = formatPhoneNumber(patient.phone, patient.country);
+  const formattedPhone = formatDisplayPhoneNumber(patient.phone, patient.country);
   
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest('button, [role="menuitem"], [role="dialog"]')) {
@@ -227,5 +212,3 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     </Card>
   );
 }
-
-    

@@ -20,7 +20,7 @@ import { format } from 'date-fns';
 import { DatePicker } from './ui/date-picker';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { cmToFtIn, ftInToCm, kgToLbs, lbsToKg } from '@/lib/utils';
+import { cmToFtIn, ftInToCm, kgToLbs, lbsToKg, formatDisplayPhoneNumber } from '@/lib/utils';
 import type { UnitSystem } from '@/lib/types';
 
 const FormSchema = z.object({
@@ -43,36 +43,6 @@ interface PatientFormProps {
     patient?: Patient;
     onSave: (patient: Partial<Patient> & { weight?: number | string }, patientId?: string) => Promise<void>;
     onCancel: () => void;
-}
-
-const formatPhoneNumber = (phone: string, countryCode: string): string => {
-    const country = countries.find(c => c.code === countryCode);
-    if (!phone || !country) return phone;
-
-    const phoneDigits = phone.replace(/\D/g, '');
-    const countryPhoneCodeDigits = country.phoneCode.replace(/\D/g, '');
-    
-    const phoneWithoutCountryCode = phoneDigits.startsWith(countryPhoneCodeDigits)
-        ? phoneDigits.substring(countryPhoneCodeDigits.length)
-        : phoneDigits;
-
-    switch (countryCode) {
-        case 'US':
-        case 'CA':
-            if (phoneWithoutCountryCode.length === 10) {
-                return `(${phoneWithoutCountryCode.substring(0, 3)}) ${phoneWithoutCountryCode.substring(3, 6)}-${phoneWithoutCountryCode.substring(6)}`;
-            }
-            break;
-        case 'IN':
-             if (phoneWithoutCountryCode.length === 10) {
-                return `+91 ${phoneWithoutCountryCode.substring(0, 5)} ${phoneWithoutCountryCode.substring(5)}`;
-            }
-            break;
-        default:
-            return `${country.phoneCode} ${phoneWithoutCountryCode}`;
-    }
-    
-    return phone;
 }
 
 export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
@@ -174,7 +144,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
     const currentPhone = form.getValues('phone');
     const currentCountry = form.getValues('country');
     if(currentPhone && currentCountry) {
-        const formatted = formatPhoneNumber(currentPhone, currentCountry);
+        const formatted = formatDisplayPhoneNumber(currentPhone, currentCountry);
         form.setValue('phone', formatted, { shouldValidate: true });
     }
   }
