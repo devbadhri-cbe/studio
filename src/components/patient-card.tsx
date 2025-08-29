@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2 } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2, MessageSquare } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge } from '@/lib/utils';
@@ -15,6 +15,7 @@ import * as React from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { SharePatientAccessDialog } from './share-patient-access-dialog';
+import { useRouter } from 'next/navigation';
 
 
 interface PatientCardProps {
@@ -70,6 +71,7 @@ const getStatusVariant = (status: Patient['status']) => {
 
 
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
+  const router = useRouter();
   const { toast } = useToast();
   const statusVariant = getStatusVariant(patient.status);
   const age = calculateAge(patient.dob);
@@ -107,39 +109,44 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </p>
              </div>
           </div>
-           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={handleActionClick}>
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" onClick={handleActionClick}>
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={() => onView(patient)}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={onEdit}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit Details
-                </DropdownMenuItem>
-                 <SharePatientAccessDialog patient={patient}>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                       <Share2 className="mr-2 h-4 w-4" />
-                        Share Patient Access
+          <div className="flex items-center" onClick={handleActionClick}>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => router.push(`/chat/${patient.id}`)}>
+                  <MessageSquare className="h-4 w-4" />
+              </Button>
+               <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuItem onSelect={() => onView(patient)}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Dashboard
                     </DropdownMenuItem>
-                </SharePatientAccessDialog>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                    onSelect={() => onDelete(patient)}
-                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Patient
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+                    <DropdownMenuItem onSelect={onEdit}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit Details
+                    </DropdownMenuItem>
+                     <SharePatientAccessDialog patient={patient}>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                           <Share2 className="mr-2 h-4 w-4" />
+                            Share Patient Access
+                        </DropdownMenuItem>
+                    </SharePatientAccessDialog>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                        onSelect={() => onDelete(patient)}
+                        className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                    >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete Patient
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </CardHeader>
       

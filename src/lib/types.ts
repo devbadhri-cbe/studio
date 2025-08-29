@@ -79,6 +79,13 @@ export interface BloodPressureRecord {
   medication?: string;
 }
 
+export interface Message {
+  id: string;
+  text: string;
+  senderId: 'doctor' | string; // 'doctor' or patient's ID
+  timestamp: any; // Firestore Timestamp for ordering
+}
+
 
 export interface Patient {
   id: string;
@@ -124,5 +131,3 @@ export interface Patient {
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
 }
-
-    
