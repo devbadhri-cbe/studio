@@ -22,6 +22,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
+import { toMgDl } from '@/lib/unit-conversions';
 
 const FormSchema = z.object({
   date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
@@ -31,12 +34,15 @@ const FormSchema = z.object({
   total: z.coerce.number().min(0.1, 'Value is required.'),
 });
 
+type LipidUnit = 'conventional' | 'si';
+
 export function AddLipidRecordDialog() {
   const [open, setOpen] = React.useState(false);
-  const { addLipidRecord, profile, lipidRecords, biomarkerUnit, getDbLipidValue } = useApp();
+  const { addLipidRecord, profile, lipidRecords, biomarkerUnit } = useApp();
   const { toast } = useToast();
-  
-  const lipidUnit = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
+  const [inputUnit, setInputUnit] = React.useState<LipidUnit>(biomarkerUnit);
+
+  const getUnitLabel = (unit: LipidUnit) => (unit === 'si' ? 'mmol/L' : 'mg/dL');
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -48,6 +54,12 @@ export function AddLipidRecordDialog() {
       total: '' as any,
     },
   });
+
+  React.useEffect(() => {
+    if (open) {
+      setInputUnit(biomarkerUnit);
+    }
+  }, [open, biomarkerUnit]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     const newDate = new Date(data.date + 'T00:00:00');
@@ -66,13 +78,13 @@ export function AddLipidRecordDialog() {
       return;
     }
     
-    // Convert values to mg/dL for storage if necessary
+    // Convert values to mg/dL for storage if input was in SI units
     const dbRecord = {
         date: newDate.toISOString(),
-        ldl: getDbLipidValue(data.ldl, 'ldl'),
-        hdl: getDbLipidValue(data.hdl, 'hdl'),
-        triglycerides: getDbLipidValue(data.triglycerides, 'triglycerides'),
-        total: getDbLipidValue(data.total, 'total'),
+        ldl: inputUnit === 'si' ? toMgDl(data.ldl, 'ldl') : data.ldl,
+        hdl: inputUnit === 'si' ? toMgDl(data.hdl, 'hdl') : data.hdl,
+        triglycerides: inputUnit === 'si' ? toMgDl(data.triglycerides, 'triglycerides') : data.triglycerides,
+        total: inputUnit === 'si' ? toMgDl(data.total, 'total') : data.total,
     }
 
     addLipidRecord(dbRecord);
@@ -118,6 +130,15 @@ export function AddLipidRecordDialog() {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="unit-switch">mg/dL</Label>
+                <Switch
+                    id="unit-switch"
+                    checked={inputUnit === 'si'}
+                    onCheckedChange={(checked) => setInputUnit(checked ? 'si' : 'conventional')}
+                />
+                <Label htmlFor="unit-switch">mmol/L</Label>
+              </div>
               <FormField
                 control={form.control}
                 name="date"
@@ -137,9 +158,9 @@ export function AddLipidRecordDialog() {
                   name="ldl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>LDL ({lipidUnit})</FormLabel>
+                      <FormLabel>LDL ({getUnitLabel(inputUnit)})</FormLabel>
                       <FormControl>
-                        <Input type="number" step="any" placeholder={lipidUnit === 'si' ? "e.g., 2.6" : "e.g., 100"} {...field} />
+                        <Input type="number" step="any" placeholder={inputUnit === 'si' ? "e.g., 2.6" : "e.g., 100"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -150,9 +171,9 @@ export function AddLipidRecordDialog() {
                   name="hdl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>HDL ({lipidUnit})</FormLabel>
+                      <FormLabel>HDL ({getUnitLabel(inputUnit)})</FormLabel>
                       <FormControl>
-                        <Input type="number" step="any" placeholder={lipidUnit === 'si' ? "e.g., 1.3" : "e.g., 50"} {...field} />
+                        <Input type="number" step="any" placeholder={inputUnit === 'si' ? "e.g., 1.3" : "e.g., 50"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -163,9 +184,9 @@ export function AddLipidRecordDialog() {
                   name="triglycerides"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Triglycerides ({lipidUnit})</FormLabel>
+                      <FormLabel>Triglycerides ({getUnitLabel(inputUnit)})</FormLabel>
                       <FormControl>
-                        <Input type="number" step="any" placeholder={lipidUnit === 'si' ? "e.g., 1.7" : "e.g., 150"} {...field} />
+                        <Input type="number" step="any" placeholder={inputUnit === 'si' ? "e.g., 1.7" : "e.g., 150"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -176,9 +197,9 @@ export function AddLipidRecordDialog() {
                   name="total"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Total ({lipidUnit})</FormLabel>
+                      <FormLabel>Total ({getUnitLabel(inputUnit)})</FormLabel>
                       <FormControl>
-                        <Input type="number" step="any" placeholder={lipidUnit === 'si' ? "e.g., 5.2" : "e.g., 200"} {...field} />
+                        <Input type="number" step="any" placeholder={inputUnit === 'si' ? "e.g., 5.2" : "e.g., 200"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

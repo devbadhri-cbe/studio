@@ -22,18 +22,24 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
+import { toNgDl } from '@/lib/unit-conversions';
+import { Label } from './ui/label';
+import { Switch } from './ui/switch';
 
 const FormSchema = z.object({
   date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
   value: z.coerce.number().min(1, 'Value is required.'),
 });
 
+type VitaminDUnit = 'conventional' | 'si';
+
 export function AddVitaminDRecordDialog() {
   const [open, setOpen] = React.useState(false);
-  const { addVitaminDRecord, profile, vitaminDRecords, biomarkerUnit, getDbVitaminDValue } = useApp();
+  const { addVitaminDRecord, profile, vitaminDRecords, biomarkerUnit } = useApp();
   const { toast } = useToast();
-  
-  const unit = biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL';
+  const [inputUnit, setInputUnit] = React.useState<VitaminDUnit>(biomarkerUnit);
+
+  const getUnitLabel = (unit: VitaminDUnit) => (unit === 'si' ? 'nmol/L' : 'ng/mL');
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -42,6 +48,12 @@ export function AddVitaminDRecordDialog() {
       value: '' as any,
     },
   });
+
+  React.useEffect(() => {
+    if (open) {
+      setInputUnit(biomarkerUnit);
+    }
+  }, [open, biomarkerUnit]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     const newDate = new Date(data.date + 'T00:00:00');
@@ -60,7 +72,7 @@ export function AddVitaminDRecordDialog() {
       return;
     }
     
-    const dbValue = getDbVitaminDValue(data.value);
+    const dbValue = inputUnit === 'si' ? toNgDl(data.value) : data.value;
 
     addVitaminDRecord({
       date: newDate.toISOString(),
@@ -104,6 +116,15 @@ export function AddVitaminDRecordDialog() {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+               <div className="flex items-center space-x-2">
+                <Label htmlFor="unit-switch">ng/mL</Label>
+                <Switch
+                    id="unit-switch"
+                    checked={inputUnit === 'si'}
+                    onCheckedChange={(checked) => setInputUnit(checked ? 'si' : 'conventional')}
+                />
+                <Label htmlFor="unit-switch">nmol/L</Label>
+              </div>
               <FormField
                 control={form.control}
                 name="date"
@@ -122,9 +143,9 @@ export function AddVitaminDRecordDialog() {
                 name="value"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Vitamin D ({unit})</FormLabel>
+                    <FormLabel>Vitamin D ({getUnitLabel(inputUnit)})</FormLabel>
                     <FormControl>
-                      <Input type="number" step="any" placeholder={unit === 'si' ? "e.g., 75" : "e.g., 30"} {...field} />
+                      <Input type="number" step="any" placeholder={inputUnit === 'si' ? "e.g., 75" : "e.g., 30"} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
