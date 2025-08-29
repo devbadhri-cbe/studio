@@ -11,7 +11,7 @@ import { format, isValid, parseISO } from 'date-fns';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
-import { calculateAge, calculateBmi } from '@/lib/utils';
+import { calculateAge, calculateBmi, cmToFtIn, ftInToCm, kgToLbs, lbsToKg } from '@/lib/utils';
 import { countries, Country, dateFormats } from '@/lib/countries';
 import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
@@ -30,6 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import type { UnitSystem } from '@/lib/types';
 
 
 const MedicationSchema = z.object({
@@ -349,6 +350,21 @@ export function ProfileCard() {
   const countryName = countries.find(c => c.code === profile.country)?.name || profile.country;
   const sortedWeights = React.useMemo(() => [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [weightRecords]);
   const latestWeight = sortedWeights[0];
+
+  const { unitSystem } = profile;
+  
+  const displayWeight = latestWeight?.value
+    ? unitSystem === 'imperial'
+      ? `${Math.round(kgToLbs(latestWeight.value))} lbs`
+      : `${latestWeight.value.toFixed(1)} kg`
+    : 'N/A';
+
+  const displayHeight = profile.height
+    ? unitSystem === 'imperial'
+      ? `${cmToFtIn(profile.height).feet}' ${cmToFtIn(profile.height).inches}"`
+      : `${profile.height} cm`
+    : 'N/A';
+
   const bmi = calculateBmi(latestWeight?.value, profile.height || 0);
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
@@ -396,12 +412,16 @@ export function ProfileCard() {
 
   const handleSaveCountry = (newCountry: string) => {
     const newCountryData = countries.find(c => c.code === newCountry);
-    setProfile({ ...profile, country: newCountry, dateFormat: newCountryData?.dateFormat || 'MM-dd-yyyy' });
+    setProfile({ ...profile, country: newCountry, dateFormat: newCountryData?.dateFormat || 'MM-dd-yyyy', unitSystem: newCountryData?.unitSystem || 'metric' });
     setIsEditingCountry(false);
   };
   
   const handleSaveDateFormat = (newFormat: string) => {
     setProfile({ ...profile, dateFormat: newFormat });
+  }
+
+  const handleSaveUnitSystem = (newSystem: UnitSystem) => {
+    setProfile({ ...profile, unitSystem: newSystem });
   }
 
   const handleSaveDob = (newDob: string) => {
@@ -486,7 +506,7 @@ export function ProfileCard() {
                     <HeightForm currentHeight={profile.height} onSave={handleSaveHeight} onCancel={() => setIsEditingHeight(false)} />
                 ) : (
                     <div className="flex items-center gap-2 flex-1">
-                        <p>{profile.height ? `${profile.height} cm` : 'N/A'}</p>
+                        <p>{displayHeight}</p>
                          <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingHeight(true)}>
@@ -503,9 +523,37 @@ export function ProfileCard() {
             <div className="flex items-center gap-3 text-muted-foreground">
                 <TrendingUp className="h-5 w-5 shrink-0" />
                  <p>
-                    {latestWeight ? `${latestWeight.value} kg` : 'N/A'}
+                    {displayWeight}
                     {bmi && <span className="ml-2 font-semibold text-foreground">(BMI: {bmi})</span>}
                 </p>
+                 <DropdownMenu>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <DropdownMenuTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-6 w-6">
+                                    <Settings className="h-3 w-3 text-border" strokeWidth={1.5} />
+                                </Button>
+                            </DropdownMenuTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Change Units ({profile.unitSystem})</p>
+                        </TooltipContent>
+                    </Tooltip>
+                    <DropdownMenuContent className="font-sans">
+                        <DropdownMenuItem 
+                            onSelect={() => handleSaveUnitSystem('metric')}
+                            className={profile.unitSystem === 'metric' ? 'bg-accent' : ''}
+                        >
+                            Metric (kg, cm)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                            onSelect={() => handleSaveUnitSystem('imperial')}
+                            className={profile.unitSystem === 'imperial' ? 'bg-accent' : ''}
+                        >
+                            Imperial (lbs, ft, in)
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
             <Separator className="my-2" />

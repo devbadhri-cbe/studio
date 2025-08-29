@@ -83,6 +83,7 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
     let newPatientObject: Omit<Patient, 'id'> = {
         ...restOfPatientData,
         dateFormat: countryInfo?.dateFormat || 'MM-dd-yyyy',
+        unitSystem: countryInfo?.unitSystem || 'metric',
         lastHba1c: null,
         lastLipid: null,
         lastVitaminD: null,

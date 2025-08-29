@@ -19,6 +19,8 @@ import { format } from 'date-fns';
 import { DatePicker } from './ui/date-picker';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
+import { cmToFtIn, ftInToCm, kgToLbs, lbsToKg } from '@/lib/utils';
+import type { UnitSystem } from '@/lib/types';
 
 const FormSchema = z.object({
   name: z.string().min(2, { message: "Name is required." }),
@@ -72,20 +74,9 @@ const formatPhoneNumber = (phone: string, countryCode: string): string => {
     return phone;
 }
 
-const lbsToKg = (lbs: number) => lbs * 0.453592;
-const kgToLbs = (kg: number) => kg / 0.453592;
-const ftInToCm = (ft: number, inches: number) => (ft * 12 + inches) * 2.54;
-const cmToFtIn = (cm: number) => {
-    const totalInches = cm / 2.54;
-    const feet = Math.floor(totalInches / 12);
-    const inches = Math.round(totalInches % 12);
-    return { feet, inches };
-};
-
-
 export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [unitSystem, setUnitSystem] = React.useState<'metric' | 'imperial'>('metric');
+  const [unitSystem, setUnitSystem] = React.useState<UnitSystem>('metric');
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -113,9 +104,9 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
         if (countryData && (!currentPhone || !countries.some(c => currentPhone.startsWith(c.phoneCode)))) {
              form.setValue('phone', countryData.phoneCode, { shouldValidate: false });
         }
-        setUnitSystem(countryData?.unitSystem || 'metric');
+        setUnitSystem(patient?.unitSystem || countryData?.unitSystem || 'metric');
     }
-  }, [watchCountry, form]);
+  }, [watchCountry, form, patient?.unitSystem]);
   
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
@@ -137,6 +128,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
         country: data.country,
         phone: data.phone,
         height: heightInCm,
+        unitSystem: unitSystem,
         weight: weightInKg,
     };
     await onSave(patientDataToSave, patient?.id);
@@ -144,8 +136,8 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
   };
   
   React.useEffect(() => {
-    const countryData = countries.find(c => c.code === patient?.country);
-    setUnitSystem(countryData?.unitSystem || 'metric');
+    const selectedUnitSystem = patient?.unitSystem || countries.find(c => c.code === patient?.country)?.unitSystem || 'metric';
+    setUnitSystem(selectedUnitSystem);
     
     let height_cm = patient?.height || '';
     let weight_kg = patient?.weightRecords?.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]?.value || '';
@@ -153,14 +145,11 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
     let height_in = '';
     let weight_lbs = '';
 
-    if (countryData?.unitSystem === 'imperial') {
+    if (selectedUnitSystem === 'imperial') {
         if (patient?.height) {
             const { feet, inches } = cmToFtIn(patient.height);
             height_ft = feet.toString();
             height_in = inches.toString();
-        }
-        if (weight_kg) {
-            weight_lbs = Math.round(kgToLbs(Number(weight_kg))).toString();
         }
     }
 

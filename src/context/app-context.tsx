@@ -1,7 +1,7 @@
 
 'use client';
 
-import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type Theme, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord } from '@/lib/types';
+import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type Theme, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -11,7 +11,7 @@ import { startOfDay, parseISO } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMgDl, toMmolL, toNgDl, toNmolL } from '@/lib/unit-conversions';
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', presentMedicalConditions: [], medication: [] };
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [] };
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
 type DashboardView = 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'hypertension' | 'report';
@@ -176,6 +176,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       height: patient.height,
       photoUrl: patient.photoUrl,
       dateFormat: patient.dateFormat || 'MM-dd-yyyy',
+      unitSystem: patient.unitSystem || countries.find(c => c.code === patient.country)?.unitSystem || 'metric',
       medication: Array.isArray(patient.medication) ? patient.medication : [],
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
     };

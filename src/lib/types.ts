@@ -2,6 +2,7 @@
 import { Timestamp } from "firebase/firestore";
 
 export type Theme = 'light' | 'dark' | 'system';
+export type UnitSystem = 'metric' | 'imperial';
 
 export interface MedicalCondition {
   id: string;
@@ -35,6 +36,7 @@ export interface UserProfile {
   height?: number; // in cm
   photoUrl?: string;
   dateFormat: string; // e.g., 'dd-MM-yyyy'
+  unitSystem: UnitSystem;
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
 }
@@ -92,6 +94,7 @@ export interface Patient {
   height?: number; // in cm
   photoUrl?: string;
   dateFormat: string;
+  unitSystem: UnitSystem;
   bmi?: number;
   lastHba1c: {
     value: number;

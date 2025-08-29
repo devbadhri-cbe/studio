@@ -1,3 +1,4 @@
+
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { differenceInYears } from "date-fns"
@@ -31,3 +32,13 @@ export function calculateBmi(weight: number | undefined, height: number | undefi
     return null;
   }
 }
+
+export const lbsToKg = (lbs: number) => lbs * 0.453592;
+export const kgToLbs = (kg: number) => kg / 0.453592;
+export const ftInToCm = (ft: number, inches: number) => (ft * 12 + inches) * 2.54;
+export const cmToFtIn = (cm: number) => {
+    const totalInches = cm / 2.54;
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { feet, inches };
+};
