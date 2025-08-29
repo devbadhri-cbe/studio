@@ -37,28 +37,12 @@ const formatPhoneNumber = (phone: string, countryCode: string): string => {
     const country = countries.find(c => c.code === countryCode);
     if (!phone || !country) return phone || 'N/A';
 
-    let phoneDigits = phone.replace(country.phoneCode, '').replace(/\D/g, '');
-    
-    if (phone.startsWith(country.phoneCode)) {
-      phoneDigits = phone.substring(country.phoneCode.length).replace(/\D/g, '');
-    } else {
-      phoneDigits = phone.replace(/\D/g, '');
-    }
+    const phoneDigits = phone.replace(/\D/g, '');
+    const countryPhoneCodeDigits = country.phoneCode.replace(/\D/g, '');
 
-
-    switch (countryCode) {
-        case 'US':
-            if (phoneDigits.length === 10) {
-                return `(${phoneDigits.substring(0, 3)}) ${phoneDigits.substring(3, 6)}-${phoneDigits.substring(6)}`;
-            }
-            break;
-        case 'IN':
-             if (phoneDigits.length === 10) {
-                return `+91 ${phoneDigits.substring(0, 5)} ${phoneDigits.substring(5)}`;
-            }
-            break;
-        default:
-            return `${country.phoneCode} ${phoneDigits}`;
+    if (phoneDigits.startsWith(countryPhoneCodeDigits)) {
+      const nationalNumber = phoneDigits.substring(countryPhoneCodeDigits.length);
+      return `${country.phoneCode} ${nationalNumber}`;
     }
     
     return `${country.phoneCode} ${phoneDigits}`;
@@ -243,3 +227,5 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     </Card>
   );
 }
+
+    

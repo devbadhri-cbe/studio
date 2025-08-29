@@ -391,7 +391,8 @@ export function ProfileCard() {
   const formatDate = useDateFormatter();
 
   const calculatedAge = calculateAge(profile.dob);
-  const countryName = countries.find(c => c.code === profile.country)?.name || profile.country;
+  const country = countries.find(c => c.code === profile.country);
+  const countryName = country?.name || profile.country;
   const sortedWeights = React.useMemo(() => [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [weightRecords]);
   const latestWeight = sortedWeights[0];
 
@@ -408,6 +409,23 @@ export function ProfileCard() {
       ? `${cmToFtIn(profile.height).feet}' ${cmToFtIn(profile.height).inches}"`
       : `${profile.height} cm`
     : 'N/A';
+    
+  const formattedPhone = (phone?: string, countryCode?: string) => {
+    if (!phone || !countryCode) return 'N/A';
+    const country = countries.find(c => c.code === countryCode);
+    if (!country) return phone;
+    
+    const phoneDigits = phone.replace(/\D/g, '');
+    const countryPhoneCodeDigits = country.phoneCode.replace(/\D/g, '');
+
+    if (phoneDigits.startsWith(countryPhoneCodeDigits)) {
+      const nationalNumber = phoneDigits.substring(countryPhoneCodeDigits.length);
+      return `${country.phoneCode} ${nationalNumber}`;
+    }
+    
+    return `${country.phoneCode} ${phoneDigits}`;
+  }
+
 
   const bmi = calculateBmi(latestWeight?.value, profile.height || 0);
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
@@ -629,7 +647,7 @@ export function ProfileCard() {
                     <PhoneForm currentPhone={profile.phone} onSave={handleSavePhone} onCancel={() => setIsEditingPhone(false)} />
                 ) : (
                     <div className="flex items-center gap-2 flex-1">
-                        <p>{profile.phone || 'N/A'}</p>
+                        <p>{formattedPhone(profile.phone, profile.country)}</p>
                         <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingPhone(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Phone</p></TooltipContent></Tooltip>
                     </div>
                 )}
@@ -833,4 +851,4 @@ export function ProfileCard() {
   );
 }
 
-
+    
