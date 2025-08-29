@@ -201,22 +201,22 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
         <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Condition Name" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-        <FormField 
-            control={form.control} 
-            name="date" 
-            render={({ field }) => ( 
-                <FormItem>
-                    <FormControl>
-                        <DatePicker 
-                            value={field.value} 
-                            onChange={field.onChange}
-                            fromYear={new Date().getFullYear() - 50}
-                            toYear={new Date().getFullYear()}
-                        />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem> 
-            )}
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <DatePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  fromYear={new Date().getFullYear() - 50}
+                  toYear={new Date().getFullYear()}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
         <div className="flex justify-end gap-2">
           <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
@@ -768,21 +768,23 @@ export function ProfileCard() {
                             }
                         }}
                     >
-                         <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button 
-                                    size="icon" 
-                                    variant="outline" 
-                                    className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-blue-500/20' : ''}`}
-                                    disabled={profile.medication.length < 2 || isMedicationNil}
-                                >
-                                    <ShieldAlert className="h-4 w-4" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Check Drug Interactions</p>
-                            </TooltipContent>
-                        </Tooltip>
+                         <DialogTrigger asChild>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button 
+                                        size="icon" 
+                                        variant="outline" 
+                                        className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-blue-500/20' : ''}`}
+                                        disabled={profile.medication.length < 2 || isMedicationNil}
+                                    >
+                                        <ShieldAlert className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Check Drug Interactions</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </DialogTrigger>
                     </DrugInteractionDialog>
                      {profile.medication.length === 0 && !isAddingMedication && (
                         <Tooltip>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { checkDrugInteractions } from '@/ai/flows/drug-interaction-check';
@@ -73,9 +74,7 @@ export function DrugInteractionDialog({ medications, disabled, children, onOpenC
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild disabled={disabled}>
-        {children}
-      </DialogTrigger>
+      {children}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Drug Interaction Analysis</DialogTitle>
@@ -106,5 +105,3 @@ export function DrugInteractionDialog({ medications, disabled, children, onOpenC
     </Dialog>
   );
 }
-
-    
