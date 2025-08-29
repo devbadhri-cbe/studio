@@ -35,7 +35,6 @@ const medicationSpellCheckFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      // Use the correct 'spellingsuggestions' endpoint as shown in the user's example.
       const response = await fetch(`https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json?name=${encodeURIComponent(input.medicationName)}`);
       
       if (!response.ok) {
@@ -45,8 +44,7 @@ const medicationSpellCheckFlow = ai.defineFlow(
       
       const data = await response.json();
       
-      // Correctly parse the response structure for spelling suggestions.
-      const suggestions = data.suggestionGroup.suggestionList?.suggestion;
+      const suggestions = data.suggestionGroup?.suggestionList?.suggestion;
 
       if (suggestions && suggestions.length > 0) {
         const bestSuggestion = suggestions[0];
