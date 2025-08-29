@@ -31,7 +31,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { UnitSystem } from '@/lib/types';
-import { Dialog, DialogTrigger } from './ui/dialog';
 
 
 const MedicationSchema = z.object({
@@ -406,7 +405,6 @@ export function ProfileCard() {
   const [isEditingCountry, setIsEditingCountry] = React.useState(false);
   const [isEditingDob, setIsEditingDob] = React.useState(false);
   const [medicationChanged, setMedicationChanged] = React.useState(false);
-  const [isDrugInteractionOpen, setIsDrugInteractionOpen] = React.useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const formatDate = useDateFormatter();
 
@@ -771,28 +769,25 @@ export function ProfileCard() {
                 </div>
                 <div className="flex items-center gap-1">
                     {profile.medication.length > 1 && !isMedicationNil && (
-                         <Dialog open={isDrugInteractionOpen} onOpenChange={setIsDrugInteractionOpen}>
-                            <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+                        <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
+                             <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
                                 <TooltipTrigger asChild>
-                                     <DialogTrigger asChild>
-                                        <Button 
-                                            size="icon" 
-                                            variant="outline" 
-                                            className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-blue-500/20' : ''}`}
-                                            onClick={() => {
-                                                setMedicationChanged(false);
-                                            }}
-                                        >
-                                            <ShieldAlert className="h-4 w-4" />
-                                        </Button>
-                                    </DialogTrigger>
+                                    <Button 
+                                        size="icon" 
+                                        variant="outline" 
+                                        className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-primary/20' : ''}`}
+                                        onClick={() => {
+                                            setMedicationChanged(false);
+                                        }}
+                                    >
+                                        <ShieldAlert className="h-4 w-4" />
+                                    </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <p>Check Drug Interactions</p>
                                 </TooltipContent>
                             </Tooltip>
-                            <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)} />
-                        </Dialog>
+                        </DrugInteractionDialog>
                     )}
                      {profile.medication.length === 0 && !isAddingMedication && (
                         <Tooltip>
