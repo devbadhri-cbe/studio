@@ -1,12 +1,12 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Edit, Check, X, Pencil } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Edit, Check, X, Pencil, Cake } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
@@ -290,6 +290,20 @@ function CountryForm({ currentCountry, onSave, onCancel }: { currentCountry?: st
     );
 }
 
+const DobSchema = z.object({ dob: z.string().refine((val) => isValid(new Date(val)), { message: "A valid date is required." }) });
+function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave: (dob: string) => void; onCancel: () => void }) {
+    const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob || '' } });
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit((d) => onSave(d.dob))} className="flex items-center gap-2 flex-1">
+                <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="date" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
+                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
+            </form>
+        </Form>
+    );
+}
+
 
 export function ProfileCard() {
   const { profile, setProfile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
@@ -300,6 +314,7 @@ export function ProfileCard() {
   const [isEditingEmail, setIsEditingEmail] = React.useState(false);
   const [isEditingPhone, setIsEditingPhone] = React.useState(false);
   const [isEditingCountry, setIsEditingCountry] = React.useState(false);
+  const [isEditingDob, setIsEditingDob] = React.useState(false);
   const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
   const [medicationChanged, setMedicationChanged] = React.useState(false);
 
@@ -357,6 +372,11 @@ export function ProfileCard() {
     setIsEditingCountry(false);
   };
 
+  const handleSaveDob = (newDob: string) => {
+    setProfile({ ...profile, dob: newDob });
+    setIsEditingDob(false);
+  };
+
 
   return (
     <Card className="h-full">
@@ -386,9 +406,32 @@ export function ProfileCard() {
       <CardContent className="space-y-4 text-sm">
         <div className="space-y-2 rounded-lg border bg-card p-4">
             <div className="flex items-center gap-3 text-muted-foreground">
+                <Cake className="h-5 w-5 shrink-0" />
+                {isEditingDob ? (
+                    <DobForm currentDob={profile.dob} onSave={handleSaveDob} onCancel={() => setIsEditingDob(false)} />
+                ) : (
+                   <div className="flex items-center gap-2 flex-1">
+                        <p>
+                            {profile.dob ? format(new Date(profile.dob), 'dd MMM, yyyy') : 'N/A'}
+                            {calculatedAge !== null && ` (Age: ${calculatedAge})`}
+                        </p>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingDob(true)}>
+                                    <Pencil className="h-3 w-3 text-border" strokeWidth={1.5} />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Edit Date of Birth</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </div>
+                )}
+            </div>
+             <div className="flex items-center gap-3 text-muted-foreground">
                 <VenetianMask className="h-5 w-5 shrink-0" />
                 <p>
-                    {calculatedAge !== null ? `${calculatedAge} years` : 'N/A'}, <span className="capitalize">{profile.gender || 'N/A'}</span>
+                    <span className="capitalize">{profile.gender || 'N/A'}</span>
                 </p>
             </div>
             <div className="flex items-center gap-3 text-muted-foreground">
@@ -646,3 +689,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
