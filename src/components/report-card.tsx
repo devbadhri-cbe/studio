@@ -8,7 +8,7 @@ import { VitaminDChart } from './vitamin-d-chart';
 import { Separator } from './ui/separator';
 import { useApp } from '@/context/app-context';
 import { format } from 'date-fns';
-import { Droplet, Heart, Sun, Activity, Zap } from 'lucide-react';
+import { Droplet, Heart, Sun, Activity, Zap, Pulse } from 'lucide-react';
 import { ThyroidChart } from './thyroid-chart';
 import { BloodPressureChart } from './blood-pressure-chart';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
@@ -105,6 +105,20 @@ export function ReportCard() {
                  {latestBloodPressure ? (
                     <>
                      <div className="text-2xl font-bold">{latestBloodPressure.systolic}/{latestBloodPressure.diastolic} <span className="text-base font-normal text-muted-foreground">mmHg</span></div>
+                     <p className="text-xs text-muted-foreground">on {formatDate(latestBloodPressure.date)}</p>
+                    </>
+                ) : <p className="text-sm text-muted-foreground">No data</p>}
+              </CardContent>
+            </Card>
+             <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Heart Rate</CardTitle>
+                <Pulse className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                 {latestBloodPressure?.heartRate ? (
+                    <>
+                     <div className="text-2xl font-bold">{latestBloodPressure.heartRate} <span className="text-base font-normal text-muted-foreground">bpm</span></div>
                      <p className="text-xs text-muted-foreground">on {formatDate(latestBloodPressure.date)}</p>
                     </>
                 ) : <p className="text-sm text-muted-foreground">No data</p>}

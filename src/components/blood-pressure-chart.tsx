@@ -26,6 +26,7 @@ export function BloodPressureChart() {
     date: r.date,
     systolic: r.systolic,
     diastolic: r.diastolic,
+    heartRate: r.heartRate,
   }));
 
   const yAxisMax = 200;
@@ -49,6 +50,7 @@ export function BloodPressureChart() {
               tick={{ fontSize: 12 }}
             />
             <YAxis
+              yAxisId="left"
               dataKey="systolic"
               domain={[40, yAxisMax]}
               ticks={yAxisTicks}
@@ -57,26 +59,42 @@ export function BloodPressureChart() {
               axisLine={true}
               label={{ value: 'mmHg', angle: -90, position: 'insideLeft' }}
             />
+            <YAxis 
+                yAxisId="right" 
+                dataKey="heartRate" 
+                orientation="right" 
+                domain={[40, 120]} 
+                tickLine={true} 
+                axisLine={true} 
+                label={{ value: 'bpm', angle: 90, position: 'insideRight' }}
+            />
             <Tooltip
               cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
               content={({ active, payload, label }) => {
                 if (active && payload && payload.length) {
                   const systolicValue = payload.find(p => p.dataKey === 'systolic')?.value;
                   const diastolicValue = payload.find(p => p.dataKey === 'diastolic')?.value;
+                  const heartRateValue = payload.find(p => p.dataKey === 'heartRate')?.value;
+
                   return (
                     <div className="rounded-lg border bg-background p-2 shadow-sm">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">Date</span>
-                          <span className="font-bold text-foreground">{formatDate(label)}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">BP</span>
-                           <span className="font-bold">
-                            <span style={{ color: 'hsl(var(--primary))' }}>{systolicValue}</span>
-                            <span className="text-muted-foreground"> / </span>
-                            <span style={{ color: 'hsl(var(--accent))' }}>{diastolicValue}</span>
-                          </span>
+                      <div className="grid grid-cols-1 gap-1 text-center">
+                        <div className="font-bold text-foreground">{formatDate(label)}</div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="flex flex-col">
+                            <span className="text-[0.70rem] uppercase text-muted-foreground">BP</span>
+                            <span className="font-bold">
+                                <span style={{ color: 'hsl(var(--primary))' }}>{systolicValue}</span>
+                                <span className="text-muted-foreground"> / </span>
+                                <span style={{ color: 'hsl(var(--accent))' }}>{diastolicValue}</span>
+                            </span>
+                            </div>
+                             <div className="flex flex-col">
+                                <span className="text-[0.70rem] uppercase text-muted-foreground">HR</span>
+                                <span className="font-bold" style={{ color: 'hsl(var(--chart-3))' }}>
+                                    {heartRateValue || 'N/A'}
+                                </span>
+                            </div>
                         </div>
                       </div>
                     </div>
@@ -85,14 +103,16 @@ export function BloodPressureChart() {
                 return null;
               }}
             />
-             <ReferenceArea y1={80} y2={130} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
+             <ReferenceArea yAxisId="left" y1={80} y2={130} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
             </ReferenceArea>
 
-            <ReferenceLine y={80} stroke="hsl(var(--accent))" strokeDasharray="3 3" />
-            <ReferenceLine y={130} stroke="hsl(var(--primary))" strokeDasharray="3 3" />
+            <ReferenceLine yAxisId="left" y={80} stroke="hsl(var(--accent))" strokeDasharray="3 3" />
+            <ReferenceLine yAxisId="left" y={130} stroke="hsl(var(--primary))" strokeDasharray="3 3" />
             
-            <Line type="monotone" dataKey='systolic' stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} activeDot={{ r: 6 }} name="Systolic"/>
-            <Line type="monotone" dataKey='diastolic' stroke="hsl(var(--accent))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--accent))' }} activeDot={{ r: 6 }} name="Diastolic"/>
+            <Line yAxisId="left" type="monotone" dataKey='systolic' stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} activeDot={{ r: 6 }} name="Systolic"/>
+            <Line yAxisId="left" type="monotone" dataKey='diastolic' stroke="hsl(var(--accent))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--accent))' }} activeDot={{ r: 6 }} name="Diastolic"/>
+            <Line yAxisId="right" type="monotone" dataKey='heartRate' stroke="hsl(var(--chart-3))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--chart-3))' }} activeDot={{ r: 6 }} name="Heart Rate"/>
+
           </ComposedChart>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">

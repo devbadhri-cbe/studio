@@ -27,6 +27,7 @@ const FormSchema = z.object({
   date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
   systolic: z.coerce.number().min(50, 'Value seems too low.').max(300, 'Value seems too high.'),
   diastolic: z.coerce.number().min(30, 'Value seems too low.').max(200, 'Value seems too high.'),
+  heartRate: z.coerce.number().min(30, 'Value seems too low.').max(250, 'Value seems too high.').optional(),
 });
 
 export function AddBloodPressureRecordDialog() {
@@ -40,6 +41,7 @@ export function AddBloodPressureRecordDialog() {
       date: format(new Date(), 'yyyy-MM-dd'),
       systolic: '' as any,
       diastolic: '' as any,
+      heartRate: '' as any,
     },
   });
 
@@ -64,6 +66,7 @@ export function AddBloodPressureRecordDialog() {
       date: newDate.toISOString(),
       systolic: data.systolic,
       diastolic: data.diastolic,
+      heartRate: data.heartRate,
     });
     toast({
       title: 'Success!',
@@ -74,6 +77,7 @@ export function AddBloodPressureRecordDialog() {
       date: format(new Date(), 'yyyy-MM-dd'),
       systolic: '' as any,
       diastolic: '' as any,
+      heartRate: '' as any,
     });
   };
   
@@ -100,7 +104,7 @@ export function AddBloodPressureRecordDialog() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add New Blood Pressure Record</DialogTitle>
-            <DialogDescription>Enter your systolic and diastolic blood pressure readings.</DialogDescription>
+            <DialogDescription>Enter your systolic, diastolic, and heart rate readings.</DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -145,6 +149,19 @@ export function AddBloodPressureRecordDialog() {
                   )}
                 />
               </div>
+              <FormField
+                  control={form.control}
+                  name="heartRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Heart Rate (bpm)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g., 70" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               <DialogFooter>
                 <Button type="submit">Save Record</Button>
               </DialogFooter>

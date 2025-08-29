@@ -73,6 +73,7 @@ export function BloodPressureHistoryTable() {
               <TableHead className="px-2 md:px-4">Date</TableHead>
               <TableHead className="px-2 md:px-4">Systolic (mmHg)</TableHead>
               <TableHead className="px-2 md:px-4">Diastolic (mmHg)</TableHead>
+              <TableHead className="px-2 md:px-4">Heart Rate (bpm)</TableHead>
               <TableHead className="px-2 md:px-4">Status</TableHead>
               <TableHead className="text-right px-2 md:px-4">Actions</TableHead>
             </TableRow>
@@ -88,6 +89,7 @@ export function BloodPressureHistoryTable() {
                       </TableCell>
                       <TableCell className="px-2 md:px-4">{record.systolic}</TableCell>
                       <TableCell className="px-2 md:px-4">{record.diastolic}</TableCell>
+                      <TableCell className="px-2 md:px-4">{record.heartRate || 'N/A'}</TableCell>
                       <TableCell className="px-2 md:px-4">
                         <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>
                       </TableCell>
@@ -119,7 +121,7 @@ export function BloodPressureHistoryTable() {
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     No records found.
                   </TableCell>
                 </TableRow>

@@ -31,7 +31,7 @@ const recalculatePatientStatus = (patient: Patient): Patient => {
     updatedPatient.lastLipid = sortedLipids[0] ? { ldl: sortedLipids[0].ldl, date: new Date(sortedLipids[0].date).toISOString() } : null;
     updatedPatient.lastVitaminD = sortedVitaminD[0] ? { value: sortedVitaminD[0].value, date: new Date(sortedVitaminD[0].date).toISOString() } : null;
     updatedPatient.lastThyroid = sortedThyroid[0] ? { tsh: sortedThyroid[0].tsh, date: new Date(sortedThyroid[0].date).toISOString() } : null;
-    updatedPatient.lastBloodPressure = sortedBloodPressure[0] ? { systolic: sortedBloodPressure[0].systolic, diastolic: sortedBloodPressure[0].diastolic, date: new Date(sortedBloodPressure[0].date).toISOString() } : null;
+    updatedPatient.lastBloodPressure = sortedBloodPressure[0] ? { systolic: sortedBloodPressure[0].systolic, diastolic: sortedBloodPressure[0].diastolic, heartRate: sortedBloodPressure[0].heartRate, date: new Date(sortedBloodPressure[0].date).toISOString() } : null;
     
     if (updatedPatient.height && sortedWeight.length > 0) {
         updatedPatient.bmi = calculateBmi(sortedWeight[0].value, updatedPatient.height);

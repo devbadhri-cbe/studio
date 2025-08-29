@@ -75,6 +75,7 @@ export interface BloodPressureRecord {
   date: Date | string;
   systolic: number;
   diastolic: number;
+  heartRate?: number;
   medication?: string;
 }
 
@@ -109,6 +110,7 @@ export interface Patient {
   lastBloodPressure?: {
     systolic: number;
     diastolic: number;
+    heartRate?: number;
     date: string;
   } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
