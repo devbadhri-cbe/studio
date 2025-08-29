@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { UnitSystem } from '@/lib/types';
+import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 
 
 const MedicationSchema = z.object({
