@@ -1,7 +1,7 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Edit, Check, X } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Edit, Check, X, Pencil } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -370,7 +370,9 @@ export function ProfileCard() {
                                     <Pencil className="h-3.5 w-3.5" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent>Edit Height</TooltipContent>
+                            <TooltipContent>
+                                <p>Edit Height</p>
+                            </TooltipContent>
                         </Tooltip>
                     </div>
                 )}
