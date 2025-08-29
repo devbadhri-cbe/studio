@@ -117,8 +117,8 @@ export default function PatientDashboard() {
     report: 'Comprehensive Report',
   }
   
-  const handleDropdownOpen = (isOpen: boolean) => {
-    if (isOpen) {
+  const handleDropdownOpenChange = (open: boolean) => {
+    if (open) {
       setIsTooltipOpen(false);
     }
   };
@@ -201,7 +201,7 @@ export default function PatientDashboard() {
                 </div>
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
-                   <DropdownMenu onOpenChange={handleDropdownOpen}>
+                   <DropdownMenu onOpenChange={handleDropdownOpenChange}>
                     <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
                         <TooltipTrigger asChild>
                             <DropdownMenuTrigger asChild>
