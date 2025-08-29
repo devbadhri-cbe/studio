@@ -2,7 +2,7 @@
 'use client';
 
 import { useApp } from '@/context/app-context';
-import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears } from 'date-fns';
+import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears, differenceInDays } from 'date-fns';
 import { Bell, CheckCircle2, Heart, Droplet, Sun, Activity, Zap } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { calculateAge } from '@/lib/utils';
@@ -185,30 +185,56 @@ export function ReminderCard() {
           color: 'bg-yellow-500/10',
       };
   } else {
-      const lastTestDate = new Date(lastBloodPressureRecord.date);
-      let retestYears = 1; // General recommendation is yearly, more often if high
-      if (lastBloodPressureRecord.systolic > 130 || lastBloodPressureRecord.diastolic > 80) {
-        retestYears = 0; // Effectively recommending more frequent checks
+    const { systolic, diastolic, date } = lastBloodPressureRecord;
+    const lastTestDate = new Date(date);
+    const daysSinceLastTest = differenceInDays(new Date(), lastTestDate);
+
+    if (systolic >= 130 || diastolic >= 80) {
+      bloodPressureContent = {
+        icon: <Zap className="h-5 w-5 text-destructive" />,
+        title: 'Follow Up on Blood Pressure',
+        description: 'Your last reading was elevated. Please consult your doctor for a management plan.',
+        color: 'bg-destructive/10',
+      };
+    } else if (systolic >= 120) {
+      const retestMonths = 3;
+      const monthsSinceLastTest = differenceInMonths(new Date(), lastTestDate);
+      const nextTestDate = addMonths(lastTestDate, retestMonths);
+      if (monthsSinceLastTest >= retestMonths) {
+        bloodPressureContent = {
+          icon: <Zap className="h-5 w-5 text-yellow-500" />,
+          title: 'BP Check Recommended',
+          description: `Last check was ${formatDistanceToNow(lastTestDate)} ago. Consider rechecking soon.`,
+          color: 'bg-yellow-500/10',
+        };
+      } else {
+        bloodPressureContent = {
+          icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+          title: 'Blood Pressure On Track',
+          description: `Last reading was normal. Next check is around ${format(addMonths(lastTestDate, 6), 'MMM yyyy')}.`,
+          color: 'bg-green-500/10',
+        };
       }
-      
+    } else { // Normal BP
+      const retestYears = 1;
       const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
       const nextTestDate = addYears(lastTestDate, retestYears);
-
       if (yearsSinceLastTest >= retestYears) {
           bloodPressureContent = {
-              icon: <Zap className="h-5 w-5 text-destructive" />,
-              title: 'Blood Pressure Check Due',
-              description: `Last check was ${formatDistanceToNow(lastTestDate)} ago. Retesting is recommended.`,
-              color: 'bg-destructive/10',
+              icon: <Zap className="h-5 w-5 text-yellow-500" />,
+              title: 'Annual BP Check Due',
+              description: `Last check was over a year ago. Time for your annual check-up.`,
+              color: 'bg-yellow-500/10',
           };
       } else {
           bloodPressureContent = {
               icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
               title: 'Blood Pressure On Track',
-              description: `Next check is around ${format(nextTestDate, 'MMM yyyy')}.`,
+              description: `Your next annual check is around ${format(nextTestDate, 'MMM yyyy')}.`,
               color: 'bg-green-500/10',
           };
       }
+    }
   }
 
 
