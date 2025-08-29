@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
 import { addPatient, deletePatient, getPatients, updatePatient } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PatientForm } from '@/components/patient-form';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
@@ -33,6 +34,7 @@ export default function DoctorDashboardPage() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
     const [searchQuery, setSearchQuery] = React.useState('');
+    const [isAddingPatient, setIsAddingPatient] = React.useState(false);
 
     const fetchPatients = React.useCallback(async () => {
         setIsLoading(true);
@@ -59,7 +61,7 @@ export default function DoctorDashboardPage() {
         router.push(`/patient/${patient.id}`);
     }
 
-    const handleSavePatient = async (patientData: Partial<Patient> & { weight?: number }, patientId?: string) => {
+    const handleSavePatient = async (patientData: Partial<Patient> & { weight?: number | string }, patientId?: string) => {
         try {
             if (patientId) { // Editing existing patient
                 const updatedPatient = await updatePatient(patientId, patientData);
@@ -74,6 +76,7 @@ export default function DoctorDashboardPage() {
                     title: 'Patient Added',
                     description: `${newPatient.name}'s details have been added.`,
                 });
+                setIsAddingPatient(false);
                 await fetchPatients();
             }
         } catch (error) {
@@ -145,6 +148,19 @@ export default function DoctorDashboardPage() {
                 </div>
             </div>
 
+            {isAddingPatient && (
+                <Card className="mb-6">
+                    <CardHeader>
+                        <CardTitle>Add New Patient</CardTitle>
+                        <CardDescription>Fill out the form below to add a new patient to your list.</CardDescription>
+                    </CardHeader>
+                    <PatientForm
+                        onSave={handleSavePatient}
+                        onCancel={() => setIsAddingPatient(false)}
+                    />
+                </Card>
+            )}
+
             <Card>
                 <CardHeader className="flex flex-col md:flex-row md:items-center gap-4">
                     <div className="grid gap-2 flex-1">
@@ -162,12 +178,10 @@ export default function DoctorDashboardPage() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <PatientFormDialog onSave={handleSavePatient}>
-                            <Button size="sm" className="gap-1 w-full sm:w-auto">
-                                <UserPlus className="h-3.5 w-3.5" />
-                                <span className="whitespace-nowrap">Add Patient</span>
-                            </Button>
-                        </PatientFormDialog>
+                        <Button size="sm" className="gap-1 w-full sm:w-auto" onClick={() => setIsAddingPatient(true)} disabled={isAddingPatient}>
+                            <UserPlus className="h-3.5 w-3.5" />
+                            <span className="whitespace-nowrap">Add Patient</span>
+                        </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
