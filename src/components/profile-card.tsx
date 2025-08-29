@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { UnitSystem } from '@/lib/types';
+import { DialogTrigger } from './ui/dialog';
 
 
 const MedicationSchema = z.object({
@@ -194,6 +195,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
       await onSave(data);
     } finally {
       setIsSubmitting(false);
+      onCancel();
     }
   }
 
@@ -855,3 +857,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
