@@ -451,19 +451,16 @@ export function ProfileCard() {
   const handleSaveMedication = (data: { name: string; dosage: string; frequency: string; }) => {
     addMedication(data);
     setIsAddingMedication(false);
-    setMedicationChanged(true);
     triggerTooltip();
   }
 
   const handleRemoveMedication = (id: string) => {
     removeMedication(id);
-    setMedicationChanged(true);
     triggerTooltip();
   }
   
   const handleSetMedicationNil = () => {
       setMedicationNil();
-      setMedicationChanged(true);
   }
 
   const handleSaveWeight = (data: z.infer<typeof WeightSchema>) => {
@@ -771,34 +768,49 @@ export function ProfileCard() {
                 </div>
                 <div className="flex items-center gap-1">
                     {profile.medication.length > 1 && !isMedicationNil && (
-                        <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
-                             <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+                        <Dialog>
+                            <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
                                 <TooltipTrigger asChild>
-                                    <Button
-                                        size="icon"
-                                        variant="outline"
-                                        className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-primary/20' : ''}`}
-                                        onClick={() => {
-                                            setMedicationChanged(false);
-                                        }}
-                                    >
-                                        <ShieldAlert className="h-4 w-4" />
-                                    </Button>
+                                    <DialogTrigger asChild>
+                                        <Button
+                                            size="icon"
+                                            variant="outline"
+                                            className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-primary/20' : ''}`}
+                                            onClick={() => {
+                                                if (medicationChanged) {
+                                                    setMedicationChanged(false);
+                                                }
+                                            }}
+                                        >
+                                            <ShieldAlert className="h-4 w-4" />
+                                        </Button>
+                                    </DialogTrigger>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <p>Check Drug Interactions</p>
                                 </TooltipContent>
                             </Tooltip>
-                        </DrugInteractionDialog>
+                            <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)} />
+                        </Dialog>
+                    )}
+                     {(profile.medication.length === 0 || isMedicationNil) && !isAddingMedication && (
+                        <Tooltip>
+                           <TooltipTrigger asChild>
+                               <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => removeMedication('nil')}>
+                                   <PlusCircle className="h-4 w-4" />
+                               </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>Add Medication</TooltipContent>
+                        </Tooltip>
                     )}
                      {profile.medication.length === 0 && !isAddingMedication && (
                         <Tooltip>
                            <TooltipTrigger asChild>
-                               <Button size="icon" variant="outline" className="h-7 w-7" onClick={handleSetMedicationNil}>
-                                   Nil
+                               <Button size="sm" variant="outline" className="h-7" onClick={handleSetMedicationNil}>
+                                   Set to Nil
                                </Button>
                            </TooltipTrigger>
-                           <TooltipContent>Set medication to Nil</TooltipContent>
+                           <TooltipContent>If no medication is being taken.</TooltipContent>
                         </Tooltip>
                     )}
                      {!isAddingMedication && !isMedicationNil && (
@@ -823,14 +835,6 @@ export function ProfileCard() {
                              {med.name.toLowerCase() === 'nil' ? (
                                 <div className="flex-1 flex justify-between items-center">
                                     <span className="font-semibold text-foreground">Nil - No medication</span>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => handleRemoveMedication(med.id)}>
-                                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>Delete entry</TooltipContent>
-                                    </Tooltip>
                                 </div>
                              ) : (
                                 <>
@@ -860,3 +864,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
