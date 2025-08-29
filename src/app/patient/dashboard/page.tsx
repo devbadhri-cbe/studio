@@ -44,17 +44,11 @@ export default function PatientDashboard() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [isDoctor, setIsDoctor] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(true);
   const doctorPhoneNumber = '+919791377716';
 
-
-  React.useEffect(() => {
-    const doctorStatus = isDoctorLoggedIn || localStorage.getItem('doctor_logged_in') === 'true';
-    setIsDoctor(doctorStatus);
-  }, [isDoctorLoggedIn]);
 
   if (!isClient) {
     return (
@@ -64,7 +58,7 @@ export default function PatientDashboard() {
     );
   }
 
-  const pageTitle = isDoctor
+  const pageTitle = isDoctorLoggedIn
     ? `${profile.name}'s Dashboard`
     : `Welcome, ${profile.name || 'User'}!`;
 
@@ -145,7 +139,7 @@ export default function PatientDashboard() {
                 </div>
               </div>
 
-             {isDoctor && (
+             {isDoctorLoggedIn && (
                 <div className="w-full flex items-center justify-between text-sm text-muted-foreground pb-4">
                     <div>
                         <p className="font-semibold text-foreground">{doctorName}</p>
@@ -210,7 +204,7 @@ export default function PatientDashboard() {
                 </div>
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
-                  {!isDoctor && (
+                  {!isDoctorLoggedIn && (
                      <DropdownMenu>
                         <Tooltip>
                             <TooltipTrigger asChild>
