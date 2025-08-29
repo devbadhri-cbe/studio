@@ -34,43 +34,11 @@ const MedicationSchema = z.object({
 });
 
 function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
-  const [suggestion, setSuggestion] = React.useState<string | null>(null);
 
   const form = useForm<z.infer<typeof MedicationSchema>>({
     resolver: zodResolver(MedicationSchema),
     defaultValues: { medicationName: '', dosage: '', frequency: '' },
   });
-
-  const medicationNameValue = form.watch('medicationName');
-
-  React.useEffect(() => {
-    const handler = setTimeout(async () => {
-      if (medicationNameValue && medicationNameValue.length > 3) {
-        setSuggestion(null);
-        try {
-          const result = await checkMedicationSpelling({ medicationName: medicationNameValue });
-          if (result.correctedName) {
-            setSuggestion(result.correctedName);
-          }
-        } catch (error) {
-          console.error("Medication spell check failed", error);
-        }
-      } else {
-        setSuggestion(null);
-      }
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [medicationNameValue]);
-  
-  const handleSuggestionAccept = () => {
-    if (suggestion) {
-      form.setValue('medicationName', suggestion, { shouldValidate: true });
-      setSuggestion(null);
-    }
-  }
 
   const handleSave = (data: z.infer<typeof MedicationSchema>) => {
     onSave({
@@ -84,41 +52,28 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-         <Popover open={!!suggestion} onOpenChange={(isOpen) => !isOpen && setSuggestion(null)}>
-            <PopoverAnchor asChild>
-                <FormField
-                  control={form.control}
-                  name="medicationName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          placeholder="Medication Name"
-                          {...field}
-                          autoComplete="new-password"
-                          spellCheck={false}
-                          onChange={(e) => {
-                            const { value } = e.target;
-                            const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
-                            field.onChange(formattedValue);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+        <FormField
+          control={form.control}
+          name="medicationName"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  placeholder="Medication Name"
+                  {...field}
+                  autoComplete="off"
+                  spellCheck={false}
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
+                    field.onChange(formattedValue);
+                  }}
                 />
-            </PopoverAnchor>
-            {suggestion && (
-                 <PopoverContent className="w-[var(--radix-popover-anchor-width)] p-2">
-                    <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm">Did you mean: <span className="font-semibold">{suggestion}</span>?</p>
-                        <Button size="sm" onClick={handleSuggestionAccept}>Yes</Button>
-                    </div>
-                </PopoverContent>
-            )}
-        </Popover>
-
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <div className="grid grid-cols-2 gap-2">
           <FormField control={form.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
           <FormField control={form.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
