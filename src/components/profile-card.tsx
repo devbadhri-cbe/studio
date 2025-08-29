@@ -191,7 +191,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
         title: 'An error occurred',
         description: 'Could not get ICD code suggestion. The condition will be added without it.',
       });
-      await onSave(data);
+      await onSave(data, undefined);
     } finally {
       setIsSubmitting(false);
     }
@@ -407,8 +407,8 @@ export function ProfileCard() {
 
   const displayHeight = profile.height
     ? unitSystem === 'imperial'
-      ? `${cmToFtIn(profile.height).feet}' ${cmToFtIn(profile.height).inches}"`
-      : `${profile.height} cm`
+      ? `${cmToFtIn(profile.height).feet}' ${cmToFtIn(profile.height).inches.toFixed(2)}"`
+      : `${profile.height.toFixed(2)} cm`
     : 'N/A';
     
   const formattedPhone = formatDisplayPhoneNumber(profile.phone, profile.country);
@@ -837,3 +837,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
