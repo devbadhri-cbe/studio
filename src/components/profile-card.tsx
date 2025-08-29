@@ -770,16 +770,18 @@ export function ProfileCard() {
                             }
                         }}
                     >
-                        <Tooltip>
+                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button 
-                                    size="icon" 
-                                    variant="outline" 
-                                    className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-blue-500/20' : ''}`}
-                                    disabled={profile.medication.length < 2 || isMedicationNil}
-                                >
-                                    <ShieldAlert className="h-4 w-4" />
-                                </Button>
+                                <DialogTrigger asChild>
+                                    <Button 
+                                        size="icon" 
+                                        variant="outline" 
+                                        className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-blue-500/20' : ''}`}
+                                        disabled={profile.medication.length < 2 || isMedicationNil}
+                                    >
+                                        <ShieldAlert className="h-4 w-4" />
+                                    </Button>
+                                </DialogTrigger>
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>Check Drug Interactions</p>
