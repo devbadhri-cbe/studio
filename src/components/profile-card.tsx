@@ -23,7 +23,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
-import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 
 
@@ -34,8 +33,9 @@ const MedicationSchema = z.object({
 });
 
 function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
-  const [isChecking, setIsChecking] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [suggestion, setSuggestion] = React.useState<{ originalData: z.infer<typeof MedicationSchema>, correctedName: string } | null>(null);
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof MedicationSchema>>({
     resolver: zodResolver(MedicationSchema),
@@ -52,19 +52,28 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
   };
   
   const handleInitialSubmit = async (data: z.infer<typeof MedicationSchema>) => {
-    setIsChecking(true);
+    setIsSubmitting(true);
     try {
-        const result = await checkMedicationSpelling({ medicationName: data.medicationName });
-        if (result.correctedName) {
-            setSuggestion({ originalData: data, correctedName: result.correctedName });
+        const response = await fetch(`https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json?name=${encodeURIComponent(data.medicationName)}`);
+        if (!response.ok) throw new Error('API request failed');
+        const apiData = await response.json();
+        const suggestions = apiData.suggestionGroup?.suggestionList?.suggestion;
+
+        if (suggestions && suggestions.length > 0 && suggestions[0].toLowerCase() !== data.medicationName.toLowerCase()) {
+            setSuggestion({ originalData: data, correctedName: suggestions[0] });
         } else {
             handleFinalSave(data);
         }
     } catch (error) {
         console.error("Spell check failed, saving as is.", error);
+        toast({
+            variant: 'destructive',
+            title: 'Spell Check Failed',
+            description: 'Could not reach the spelling suggestion service. Saving medication as entered.'
+        });
         handleFinalSave(data);
     } finally {
-        setIsChecking(false);
+        setIsSubmitting(false);
     }
   };
 
@@ -109,8 +118,8 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
-            <Button type="submit" size="sm" disabled={isChecking}>
-              {isChecking ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+            <Button type="submit" size="sm" disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
             </Button>
           </div>
         </form>
