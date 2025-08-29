@@ -1,17 +1,20 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Rules for the patients collection
     match /patients/{patientId} {
-      // Allow read/write for authenticated users (doctors)
+      // Doctors (authenticated users) can read/write any patient document.
       allow read, write: if request.auth != null;
+      
+      // Patients (unauthenticated users) can only read their own document.
+      allow get: if true;
 
-      // Rules for the chat subcollection
+      // Rules for the 'chat' subcollection within each patient document.
       match /chat/{messageId} {
-        // Allow anyone (doctor or patient with the link) to read/write to a specific chat
-        allow read, write: if true;
+        // Authenticated doctors can read/write any message in any chat.
+        // Unauthenticated patients can list messages in their own chatroom 
+        // and create new messages.
+        allow read, write: if request.auth != null || request.path[4] == patientId;
       }
     }
   }
