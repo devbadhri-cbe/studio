@@ -13,6 +13,7 @@ import { Separator } from './ui/separator';
 import { format } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { ScrollArea } from './ui/scroll-area';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
 
 
 export function UploadRecordDialog() {
@@ -21,6 +22,7 @@ export function UploadRecordDialog() {
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   const { addBatchRecords, profile } = useApp();
   const { toast } = useToast();
+  const formatDate = useDateFormatter();
 
   React.useEffect(() => {
     // Reset state when dialog is closed
@@ -154,7 +156,7 @@ export function UploadRecordDialog() {
                          <div>
                             <p className="font-semibold">Report Date</p>
                             <p className="text-sm text-muted-foreground">
-                                {format(new Date(extractedData.date), 'MMMM d, yyyy')}
+                                {formatDate(extractedData.date)}
                             </p>
                         </div>
                      </div>

@@ -23,6 +23,7 @@ import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
 import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from './ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
 
 
 const MedicationSchema = z.object({
@@ -316,6 +317,7 @@ export function ProfileCard() {
   const [isEditingDob, setIsEditingDob] = React.useState(false);
   const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
   const [medicationChanged, setMedicationChanged] = React.useState(false);
+  const formatDate = useDateFormatter();
 
   const calculatedAge = calculateAge(profile.dob);
   const countryName = countries.find(c => c.code === profile.country)?.name || profile.country;
@@ -512,7 +514,7 @@ export function ProfileCard() {
                         <li key={weight.id} className="group flex items-start gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                            <div className="flex-1">
                                 <span className="font-semibold text-foreground">{weight.value} kg</span>
-                                <span className="block text-xs">on {format(new Date(weight.date), 'dd-MMM-yyyy')}</span>
+                                <span className="block text-xs">on {formatDate(weight.date)}</span>
                            </div>
                            <Tooltip>
                             <TooltipTrigger asChild>
@@ -557,7 +559,7 @@ export function ProfileCard() {
                             <div className="flex-1">
                                 <span className="font-semibold text-foreground">{condition.condition}</span>
                                 {condition.icdCode && <span className='block text-xs'>ICD-10: {condition.icdCode}</span>}
-                                <span className="block text-xs">Diagnosed: {format(new Date(condition.date), 'dd-MMM-yyyy')}</span>
+                                <span className="block text-xs">Diagnosed: {formatDate(condition.date)}</span>
                             </div>
                             <Tooltip>
                               <TooltipTrigger asChild>

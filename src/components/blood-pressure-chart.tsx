@@ -4,9 +4,11 @@
 import { format, subYears } from 'date-fns';
 import { ComposedChart, Area, Line, CartesianGrid, Label, Rectangle, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine } from 'recharts';
 import { useApp } from '@/context/app-context';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
 
 export function BloodPressureChart() {
   const { bloodPressureRecords } = useApp();
+  const formatDate = useDateFormatter();
 
   const sortedRecords = [...(bloodPressureRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
@@ -37,7 +39,7 @@ export function BloodPressureChart() {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick) => format(new Date(tick), 'dd-MM-yyyy')}
+              tickFormatter={(tick) => formatDate(tick)}
               tickLine={true}
               axisLine={true}
               padding={{ left: 20, right: 20 }}
@@ -66,7 +68,7 @@ export function BloodPressureChart() {
                       <div className="grid grid-cols-2 gap-2">
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">Date</span>
-                          <span className="font-bold text-foreground">{format(new Date(label), 'dd-MM-yyyy')}</span>
+                          <span className="font-bold text-foreground">{formatDate(label)}</span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">BP</span>

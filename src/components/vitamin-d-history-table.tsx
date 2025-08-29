@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dialog';
 import type { VitaminDRecord } from '@/lib/types';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
 
 const RECORDS_PER_PAGE = 5;
 
@@ -32,6 +33,7 @@ export function VitaminDHistoryTable() {
   const { vitaminDRecords, removeVitaminDRecord, getDisplayVitaminDValue, biomarkerUnit } = useApp();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [selectedRecord, setSelectedRecord] = React.useState<VitaminDRecord | null>(null);
+  const formatDate = useDateFormatter();
   
   const unit = biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL';
   const deficientValue = biomarkerUnit === 'si' ? 50 : 20;
@@ -85,7 +87,7 @@ export function VitaminDHistoryTable() {
                   return (
                     <TableRow key={record.id}>
                       <TableCell className="font-medium px-2 md:px-4">
-                        {format(new Date(record.date), 'dd-MM-yyyy')}
+                        {formatDate(record.date)}
                       </TableCell>
                       <TableCell className="px-2 md:px-4">{getDisplayVitaminDValue(record.value)}</TableCell>
                       <TableCell className="px-2 md:px-4">

@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
 
 const RECORDS_PER_PAGE = 5;
 
@@ -31,6 +32,7 @@ export function LipidHistoryTable() {
   const { lipidRecords, removeLipidRecord, getDisplayLipidValue, biomarkerUnit } = useApp();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [selectedRecord, setSelectedRecord] = React.useState<LipidRecord | null>(null);
+  const formatDate = useDateFormatter();
   
   const lipidUnit = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
@@ -81,7 +83,7 @@ export function LipidHistoryTable() {
                   return (
                     <TableRow key={record.id}>
                         <TableCell className="font-medium px-2 md:px-4">
-                            {format(new Date(record.date), 'dd-MM-yyyy')}
+                            {formatDate(record.date)}
                         </TableCell>
                         <TableCell className="px-2 md:px-4">{getDisplayLipidValue(record.total, 'total')}</TableCell>
                         <TableCell className="px-2 md:px-4">{getDisplayLipidValue(record.ldl, 'ldl')}</TableCell>

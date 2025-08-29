@@ -11,10 +11,12 @@ import { format } from 'date-fns';
 import { Droplet, Heart, Sun, Activity, Zap } from 'lucide-react';
 import { ThyroidChart } from './thyroid-chart';
 import { BloodPressureChart } from './blood-pressure-chart';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
 
 
 export function ReportCard() {
   const { records, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, getDisplayLipidValue, getDisplayVitaminDValue, biomarkerUnit } = useApp();
+  const formatDate = useDateFormatter();
 
   const latestHba1c = [...records].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestLipid = [...lipidRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
@@ -47,7 +49,7 @@ export function ReportCard() {
                 {latestHba1c ? (
                     <>
                      <div className="text-2xl font-bold">{latestHba1c.value}%</div>
-                     <p className="text-xs text-muted-foreground">on {format(new Date(latestHba1c.date), 'dd MMM yyyy')}</p>
+                     <p className="text-xs text-muted-foreground">on {formatDate(latestHba1c.date)}</p>
                     </>
                 ) : <p className="text-sm text-muted-foreground">No data</p>}
               </CardContent>
@@ -61,7 +63,7 @@ export function ReportCard() {
                  {latestLipid ? (
                     <>
                      <div className="text-2xl font-bold">{getDisplayLipidValue(latestLipid.ldl, 'ldl')} <span className="text-base font-normal text-muted-foreground">{lipidUnit}</span></div>
-                     <p className="text-xs text-muted-foreground">on {format(new Date(latestLipid.date), 'dd MMM yyyy')}</p>
+                     <p className="text-xs text-muted-foreground">on {formatDate(latestLipid.date)}</p>
                     </>
                 ) : <p className="text-sm text-muted-foreground">No data</p>}
               </CardContent>
@@ -75,7 +77,7 @@ export function ReportCard() {
                  {latestVitaminD ? (
                     <>
                      <div className="text-2xl font-bold">{getDisplayVitaminDValue(latestVitaminD.value)} <span className="text-base font-normal text-muted-foreground">{vitDUnit}</span></div>
-                     <p className="text-xs text-muted-foreground">on {format(new Date(latestVitaminD.date), 'dd MMM yyyy')}</p>
+                     <p className="text-xs text-muted-foreground">on {formatDate(latestVitaminD.date)}</p>
                     </>
                 ) : <p className="text-sm text-muted-foreground">No data</p>}
               </CardContent>
@@ -89,7 +91,7 @@ export function ReportCard() {
                  {latestThyroid ? (
                     <>
                      <div className="text-2xl font-bold">{latestThyroid.tsh.toFixed(2)} <span className="text-base font-normal text-muted-foreground">μIU/mL</span></div>
-                     <p className="text-xs text-muted-foreground">on {format(new Date(latestThyroid.date), 'dd MMM yyyy')}</p>
+                     <p className="text-xs text-muted-foreground">on {formatDate(latestThyroid.date)}</p>
                     </>
                 ) : <p className="text-sm text-muted-foreground">No data</p>}
               </CardContent>
@@ -103,7 +105,7 @@ export function ReportCard() {
                  {latestBloodPressure ? (
                     <>
                      <div className="text-2xl font-bold">{latestBloodPressure.systolic}/{latestBloodPressure.diastolic} <span className="text-base font-normal text-muted-foreground">mmHg</span></div>
-                     <p className="text-xs text-muted-foreground">on {format(new Date(latestBloodPressure.date), 'dd MMM yyyy')}</p>
+                     <p className="text-xs text-muted-foreground">on {formatDate(latestBloodPressure.date)}</p>
                     </>
                 ) : <p className="text-sm text-muted-foreground">No data</p>}
               </CardContent>

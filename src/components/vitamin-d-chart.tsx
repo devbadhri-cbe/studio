@@ -4,9 +4,11 @@
 import { format } from 'date-fns';
 import { Line, LineChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot } from 'recharts';
 import { useApp } from '@/context/app-context';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
 
 export function VitaminDChart() {
   const { vitaminDRecords, getDisplayVitaminDValue, biomarkerUnit } = useApp();
+  const formatDate = useDateFormatter();
 
   const sortedRecords = [...(vitaminDRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const latestRecords = sortedRecords.slice(0, 5).reverse();
@@ -35,7 +37,7 @@ export function VitaminDChart() {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick) => format(new Date(tick), 'dd-MM-yyyy')}
+              tickFormatter={(tick) => formatDate(tick)}
               tickLine={true}
               axisLine={true}
               padding={{ left: 20, right: 20 }}
@@ -61,7 +63,7 @@ export function VitaminDChart() {
                       <div className="grid grid-cols-2 gap-2">
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">Date</span>
-                          <span className="font-bold text-foreground">{format(new Date(label), 'dd-MM-yyyy')}</span>
+                          <span className="font-bold text-foreground">{formatDate(label)}</span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">Vitamin D</span>

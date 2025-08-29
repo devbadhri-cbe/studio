@@ -5,9 +5,11 @@ import { format } from 'date-fns';
 import { Line, LineChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot } from 'recharts';
 import type { ChartConfig } from '@/components/ui/chart';
 import { useApp } from '@/context/app-context';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
 
 export function LdlChart() {
   const { lipidRecords, getDisplayLipidValue, biomarkerUnit } = useApp();
+  const formatDate = useDateFormatter();
 
   const sortedRecords = [...lipidRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const latestRecords = sortedRecords.slice(0, 5).reverse();
@@ -37,7 +39,7 @@ export function LdlChart() {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick) => format(new Date(tick), 'dd-MM-yyyy')}
+              tickFormatter={(tick) => formatDate(tick)}
               tickLine={true}
               axisLine={true}
               padding={{ left: 20, right: 20 }}
@@ -63,7 +65,7 @@ export function LdlChart() {
                       <div className="grid grid-cols-2 gap-2">
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">Date</span>
-                          <span className="font-bold text-foreground">{format(new Date(label), 'dd-MM-yyyy')}</span>
+                          <span className="font-bold text-foreground">{formatDate(label)}</span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">LDL</span>

@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dialog';
 import type { Hba1cRecord } from '@/lib/types';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
 
 const RECORDS_PER_PAGE = 5;
 
@@ -32,6 +33,7 @@ export function HistoryTable() {
   const { records, removeRecord } = useApp();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [selectedRecord, setSelectedRecord] = React.useState<Hba1cRecord | null>(null);
+  const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
     return [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -87,7 +89,7 @@ export function HistoryTable() {
                   return (
                     <TableRow key={record.id}>
                       <TableCell className="font-medium px-2 md:px-4">
-                        {format(new Date(record.date), 'dd-MM-yyyy')}
+                        {formatDate(record.date)}
                       </TableCell>
                       <TableCell className="px-2 md:px-4">{record.value.toFixed(1)}</TableCell>
                       <TableCell className="px-2 md:px-4">
