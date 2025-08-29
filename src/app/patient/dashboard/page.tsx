@@ -71,6 +71,7 @@ export default function PatientDashboard() {
         const snapshot = await uploadBytes(fileRef, file);
         const downloadUrl = await getDownloadURL(snapshot.ref);
         
+        await updatePatient(profile.id, { photoUrl: downloadUrl });
         setProfile({ ...profile, photoUrl: downloadUrl });
         
         toast({
@@ -202,7 +203,7 @@ export default function PatientDashboard() {
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
                    <DropdownMenu open={open} onOpenChange={handleDashboardOpenChange}>
-                        <DropdownMenuTrigger asChild onMouseOver={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+                        <DropdownMenuTrigger asChild>
                             <Button size="icon" variant="outline" className={`w-9 h-9 p-0 ${pulsateDashboardIcon ? 'animate-pulse-once bg-primary/20' : ''}`}>
                                 <GaugeCircle className="w-4 h-4" />
                             </Button>
