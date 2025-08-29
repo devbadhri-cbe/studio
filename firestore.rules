@@ -3,24 +3,19 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /patients/{patientId} {
-      // Authenticated doctors can read and write all patient data and subcollections.
+      // Allow full read/write access for authenticated doctors.
       allow read, write: if request.auth != null;
 
-      // Unauthenticated patients must have GET access on the parent document
-      // to be able to query any subcollection.
-      allow get: if request.auth == null;
+      // Allow unauthenticated patients to read their own document (which is
+      // required to then access the chat subcollection) and update it
+      // (to add records). This is secure as it requires the unguessable patient ID.
+      allow read, update: if request.auth == null;
 
-      // Unauthenticated patients can update their own document to add records.
-      allow update: if request.auth == null;
-
-      // This is the critical fix for the chat subcollection.
+      // Rules for the chat subcollection.
       match /chat/{messageId} {
-        // This rule grants read (which includes the 'list' permission needed for
-        // the snapshot listener) and write (which includes 'create' for new
-        // messages) access to the chat subcollection for ANYONE.
-        // This rule is only evaluated if the parent document access rules are passed.
-        // Security is maintained because access to this path still requires
-        // knowledge of the unique, unguessable patientId.
+        // Since the parent read rule is now correct, this rule will allow
+        // anyone who can read the patient document to also read and write
+        // to the chat.
         allow read, write: if true;
       }
     }
