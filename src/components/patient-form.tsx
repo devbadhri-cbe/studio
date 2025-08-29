@@ -187,15 +187,14 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
 
   return (
     <div className="flex-1 min-h-0">
-        <ScrollArea className="h-full">
-            <div className="p-4 sm:p-6">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="h-full flex flex-col">
+                <ScrollArea className="flex-1">
+                    <div className="space-y-6 p-4 sm:p-6">
                         <div className="space-y-4">
                             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                               <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} className="w-full h-10" /></FormControl><FormMessage /></FormItem> )} />
+                               <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
                                <FormField
                                 control={form.control}
                                 name="gender"
@@ -267,18 +266,17 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
                                 <FormField control={form.control} name="weight_lbs" render={({ field }) => ( <FormItem><FormLabel>Current Weight (lbs)</FormLabel><FormControl><Input type="number" placeholder="e.g., 154" {...field} /></FormControl><FormMessage /></FormItem> )} />
                             </div>
                         )}
-
-                         <div className="flex justify-end gap-2 pt-4 border-t">
-                            <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
-                            <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {patient ? 'Save Changes' : 'Add Patient'}
-                            </Button>
-                        </div>
-                    </form>
-                </Form>
-            </div>
-        </ScrollArea>
+                    </div>
+                </ScrollArea>
+                 <div className="flex justify-end gap-2 p-4 border-t">
+                    <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {patient ? 'Save Changes' : 'Add Patient'}
+                    </Button>
+                </div>
+            </form>
+        </Form>
     </div>
   );
 }
