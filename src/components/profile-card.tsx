@@ -24,9 +24,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import {
-  Dialog,
-  DialogTrigger,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -406,7 +405,6 @@ export function ProfileCard() {
   const [isEditingPhone, setIsEditingPhone] = React.useState(false);
   const [isEditingCountry, setIsEditingCountry] = React.useState(false);
   const [isEditingDob, setIsEditingDob] = React.useState(false);
-  const [medicationChanged, setMedicationChanged] = React.useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const formatDate = useDateFormatter();
 
@@ -436,28 +434,28 @@ export function ProfileCard() {
   const bmi = calculateBmi(latestWeight?.value, profile.height || 0);
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
-  const triggerTooltip = () => {
+  const triggerTooltip = React.useCallback(() => {
     setIsTooltipOpen(true);
     setTimeout(() => {
         setIsTooltipOpen(false);
     }, 3000); // Hide tooltip after 3 seconds
-  };
+  }, []);
 
   const handleSaveCondition = async (data: { condition: string, date: Date }, icdCode?: string) => {
     addMedicalCondition({ ...data, date: data.date.toISOString(), icdCode });
     setIsAddingCondition(false);
   };
   
-  const handleSaveMedication = (data: { name: string; dosage: string; frequency: string; }) => {
+  const handleSaveMedication = React.useCallback((data: { name: string; dosage: string; frequency: string; }) => {
     addMedication(data);
     setIsAddingMedication(false);
     triggerTooltip();
-  }
+  }, [addMedication, triggerTooltip]);
 
-  const handleRemoveMedication = (id: string) => {
+  const handleRemoveMedication = React.useCallback((id: string) => {
     removeMedication(id);
     triggerTooltip();
-  }
+  }, [removeMedication, triggerTooltip]);
   
   const handleSetMedicationNil = () => {
       setMedicationNil();
@@ -775,12 +773,7 @@ export function ProfileCard() {
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-primary/20' : ''}`}
-                                            onClick={() => {
-                                                if (medicationChanged) {
-                                                    setMedicationChanged(false);
-                                                }
-                                            }}
+                                            className={`h-7 w-7 ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}
                                         >
                                             <ShieldAlert className="h-4 w-4" />
                                         </Button>
@@ -864,5 +857,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    
