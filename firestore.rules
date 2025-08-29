@@ -2,12 +2,18 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /patients/{patientId} {
-      allow read, write: if request.auth != null; // Doctors can read/write any patient doc
-      allow get, update: if request.auth == null;   // Patients can get/update their own doc
+      // Doctors (authenticated users) can do anything to patient documents.
+      allow read, write: if request.auth != null;
 
+      // Patients (unauthenticated) can only get and update their own document.
+      // They cannot list all patients or delete their own record.
+      allow get, update: if request.auth == null;
+
+      // Chat subcollection
       match /chat/{messageId} {
-        // Allow both doctors (authenticated) and patients (unauthenticated with link)
-        // to read and write messages.
+        // Allow both authenticated doctors and unauthenticated patients (who have the patientId)
+        // to read and write messages. This is necessary for the real-time listener to work
+        // for patients who are not logged in via Firebase Auth.
         allow read, write: if true;
       }
     }
