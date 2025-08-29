@@ -186,11 +186,11 @@ export default function DoctorDashboardPage() {
                 </CardHeader>
                 <CardContent>
                     {isLoading ? (
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-[300px] w-full" />)}
                         </div>
                     ) : (
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {filteredPatients.map((patient) => (
                                  <PatientFormDialog key={patient.id} patient={patient} onSave={handleSavePatient}>
                                     {({ openDialog }) => (
