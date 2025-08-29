@@ -17,6 +17,8 @@ import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
 import { format } from 'date-fns';
 import { DatePicker } from './ui/date-picker';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
 
 const FormSchema = z.object({
   name: z.string().min(2, { message: "Name is required." }),
@@ -118,7 +120,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
     let heightInCm = data.height_cm;
-    if (unitSystem === 'imperial' && data.height_ft) {
+    if (unitSystem === 'imperial' && (data.height_ft || data.height_in)) {
         heightInCm = ftInToCm(Number(data.height_ft) || 0, Number(data.height_in) || 0);
     }
 
@@ -250,24 +252,35 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
                         </div>
 
                         <Separator />
-                        
-                        {unitSystem === 'metric' ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <FormField control={form.control} name="height_cm" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                <FormField control={form.control} name="weight_kg" render={({ field }) => ( <FormItem><FormLabel>Current Weight (kg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 70" {...field} /></FormControl><FormMessage /></FormItem> )} />
+
+                        <div>
+                            <div className="flex items-center space-x-2 mb-4">
+                                <Label htmlFor="unit-switch" className={unitSystem === 'imperial' ? 'text-muted-foreground' : ''}>Metric (cm, kg)</Label>
+                                <Switch
+                                    id="unit-switch"
+                                    checked={unitSystem === 'imperial'}
+                                    onCheckedChange={(checked) => setUnitSystem(checked ? 'imperial' : 'metric')}
+                                />
+                                <Label htmlFor="unit-switch" className={unitSystem === 'metric' ? 'text-muted-foreground' : ''}>Imperial (ft, in, lbs)</Label>
                             </div>
-                        ) : (
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <FormLabel>Height (ft, in)</FormLabel>
-                                    <div className="flex gap-2 mt-2">
-                                        <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="ft" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                        <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="in" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                    </div>
+                            {unitSystem === 'metric' ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <FormField control={form.control} name="height_cm" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                    <FormField control={form.control} name="weight_kg" render={({ field }) => ( <FormItem><FormLabel>Current Weight (kg)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 70" {...field} /></FormControl><FormMessage /></FormItem> )} />
                                 </div>
-                                <FormField control={form.control} name="weight_lbs" render={({ field }) => ( <FormItem><FormLabel>Current Weight (lbs)</FormLabel><FormControl><Input type="number" placeholder="e.g., 154" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                            </div>
-                        )}
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <FormLabel>Height (ft, in)</FormLabel>
+                                        <div className="flex gap-2 mt-2">
+                                            <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="ft" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                            <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="in" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                        </div>
+                                    </div>
+                                    <FormField control={form.control} name="weight_lbs" render={({ field }) => ( <FormItem><FormLabel>Current Weight (lbs)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 154" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </ScrollArea>
                  <div className="flex justify-end gap-2 p-4 border-t">
