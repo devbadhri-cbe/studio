@@ -90,7 +90,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
          <Popover open={!!suggestion} onOpenChange={(isOpen) => !isOpen && setSuggestion(null)}>
-            <PopoverTrigger asChild>
+            <PopoverAnchor asChild>
                 <FormField
                   control={form.control}
                   name="medicationName"
@@ -101,6 +101,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
                           placeholder="Medication Name"
                           {...field}
                           autoComplete="off"
+                          spellCheck="false"
                           onChange={(e) => {
                             const { value } = e.target;
                             const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
@@ -112,9 +113,9 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
                     </FormItem>
                   )}
                 />
-            </PopoverTrigger>
+            </PopoverAnchor>
             {suggestion && (
-                 <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-2">
+                 <PopoverContent className="w-[var(--radix-popover-anchor-width)] p-2">
                     <div className="flex items-center justify-between gap-2">
                         <p className="text-sm">Did you mean: <span className="font-semibold">{suggestion}</span>?</p>
                         <Button size="sm" onClick={handleSuggestionAccept}>Yes</Button>
