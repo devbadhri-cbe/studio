@@ -1,3 +1,4 @@
+
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings } from 'lucide-react';
@@ -406,6 +407,7 @@ export function ProfileCard() {
   const [isEditingDob, setIsEditingDob] = React.useState(false);
   const [medicationChanged, setMedicationChanged] = React.useState(false);
   const [isDrugInteractionOpen, setIsDrugInteractionOpen] = React.useState(false);
+  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const formatDate = useDateFormatter();
 
   const calculatedAge = calculateAge(profile.dob);
@@ -434,6 +436,12 @@ export function ProfileCard() {
   const bmi = calculateBmi(latestWeight?.value, profile.height || 0);
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
+  const triggerTooltip = () => {
+    setIsTooltipOpen(true);
+    setTimeout(() => {
+        setIsTooltipOpen(false);
+    }, 3000); // Hide tooltip after 3 seconds
+  };
 
   const handleSaveCondition = async (data: { condition: string, date: Date }, icdCode?: string) => {
     addMedicalCondition({ ...data, date: data.date.toISOString(), icdCode });
@@ -444,11 +452,13 @@ export function ProfileCard() {
     addMedication(data);
     setIsAddingMedication(false);
     setMedicationChanged(true);
+    triggerTooltip();
   }
 
   const handleRemoveMedication = (id: string) => {
     removeMedication(id);
     setMedicationChanged(true);
+    triggerTooltip();
   }
   
   const handleSetMedicationNil = () => {
@@ -761,28 +771,27 @@ export function ProfileCard() {
                 </div>
                 <div className="flex items-center gap-1">
                     {profile.medication.length > 1 && !isMedicationNil && (
-                        <Dialog open={isDrugInteractionOpen} onOpenChange={setIsDrugInteractionOpen}>
-                            <DialogTrigger asChild>
-                                 <Tooltip>
-                                    <TooltipTrigger asChild>
+                         <Dialog open={isDrugInteractionOpen} onOpenChange={setIsDrugInteractionOpen}>
+                            <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+                                <TooltipTrigger asChild>
+                                     <DialogTrigger asChild>
                                         <Button 
                                             size="icon" 
                                             variant="outline" 
                                             className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-blue-500/20' : ''}`}
                                             onClick={() => {
-                                                setIsDrugInteractionOpen(true);
                                                 setMedicationChanged(false);
                                             }}
                                         >
                                             <ShieldAlert className="h-4 w-4" />
                                         </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Check Drug Interactions</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </DialogTrigger>
-                           <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)} />
+                                    </DialogTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Check Drug Interactions</p>
+                                </TooltipContent>
+                            </Tooltip>
+                            <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)} />
                         </Dialog>
                     )}
                      {profile.medication.length === 0 && !isAddingMedication && (
