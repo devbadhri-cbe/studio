@@ -1,4 +1,5 @@
 
+import { Timestamp } from "firebase/firestore";
 
 export type Theme = 'light' | 'dark' | 'system';
 
@@ -83,7 +84,7 @@ export interface Message {
   id: string;
   text: string;
   senderId: 'doctor' | string; // 'doctor' or patient's ID
-  timestamp: any; // Firestore Timestamp for ordering
+  timestamp: Timestamp; // Firestore Timestamp for ordering
 }
 
 
