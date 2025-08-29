@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format, isValid, parseISO } from 'date-fns';
+import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
@@ -31,7 +32,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { UnitSystem } from '@/lib/types';
-import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 
 
 const MedicationSchema = z.object({
@@ -182,7 +182,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
       await onSave(data, `${icdCode}: ${description}`);
        toast({
         title: 'Condition Added',
-        description: `Suggested ICD-10 code: ${icdCode}`,
+        description: `Suggested ICD-11 code: ${icdCode}`,
       });
     } catch (error) {
        console.error('Failed to get ICD code suggestion', error);
@@ -589,7 +589,7 @@ export function ProfileCard() {
                 <TrendingUp className="h-5 w-5 shrink-0" />
                  <p>
                     {displayWeight}
-                    {bmi && <span className="ml-2 font-semibold text-foreground">(BMI: {bmi})</span>}
+                    {bmi && <span className="ml-2 font-semibold text-foreground">(BMI: {bmi.toFixed(2)})</span>}
                 </p>
                  <DropdownMenu>
                     <Tooltip>
@@ -732,9 +732,9 @@ export function ProfileCard() {
                     {profile.presentMedicalConditions.map((condition) => (
                         <li key={condition.id} className="group flex items-start gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                             <div className="flex-1">
-                                <span className="font-semibold text-foreground">{condition.condition}</span>
-                                {condition.icdCode && <span className='block text-xs'>ICD-10: {condition.icdCode}</span>}
-                                <span className="block text-xs">Diagnosed: {formatDate(condition.date)}</span>
+                                <p className="font-semibold text-foreground">{condition.condition}</p>
+                                {condition.icdCode && <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>}
+                                <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
                             </div>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -853,5 +853,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    
