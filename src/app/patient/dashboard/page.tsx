@@ -40,8 +40,8 @@ export default function PatientDashboard() {
   const [isDoctor, setIsDoctor] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [open, setOpen] = React.useState(false);
-  const [pulsateDashboardIcon, setPulsateDashboardIcon] = React.useState(true);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isTooltipOpen, setIsTooltipOpen] = React.useState(true);
 
 
   React.useEffect(() => {
@@ -119,9 +119,9 @@ export default function PatientDashboard() {
   }
   
   const handleDashboardOpenChange = (isOpen: boolean) => {
-    setOpen(isOpen);
+    setIsMenuOpen(isOpen);
     if (isOpen) {
-        setPulsateDashboardIcon(false);
+        setIsTooltipOpen(false);
     }
   }
 
@@ -202,24 +202,31 @@ export default function PatientDashboard() {
                 </div>
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
-                   <DropdownMenu open={open} onOpenChange={handleDashboardOpenChange}>
-                        <DropdownMenuTrigger asChild>
-                            <Button size="icon" variant="outline" className={`w-9 h-9 p-0 ${pulsateDashboardIcon ? 'animate-pulse-once bg-primary/20' : ''}`}>
-                                <GaugeCircle className="w-4 h-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                      <DropdownMenuContent onMouseOver={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-                        {Object.entries(dashboardOptions).map(([key, value]) => (
-                            <DropdownMenuItem 
-                                key={key}
-                                onSelect={() => setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}
-                                className={dashboardView === key ? 'bg-accent' : ''}
-                            >
-                                {value}
-                            </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+                    <TooltipTrigger asChild>
+                       <DropdownMenu open={isMenuOpen} onOpenChange={handleDashboardOpenChange}>
+                            <DropdownMenuTrigger asChild>
+                                <Button size="icon" variant="outline" className={`w-9 h-9 p-0 ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
+                                    <GaugeCircle className="w-4 h-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                          <DropdownMenuContent onMouseOver={() => setIsMenuOpen(true)} onMouseLeave={() => setIsMenuOpen(false)}>
+                            {Object.entries(dashboardOptions).map(([key, value]) => (
+                                <DropdownMenuItem 
+                                    key={key}
+                                    onSelect={() => setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}
+                                    className={dashboardView === key ? 'bg-accent' : ''}
+                                >
+                                    {value}
+                                </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" align="end">
+                      <p>Select a dashboard to view</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </div>
