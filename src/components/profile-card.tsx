@@ -1,4 +1,3 @@
-
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings } from 'lucide-react';
@@ -95,7 +94,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
 
   const onConfirmSuggestion = () => {
     if (suggestion) {
-        handleFinalSave({ ...suggestion.originalData, medicationName: suggestion.correctedName });
+        handleFinalSave({ ...suggestion.originalData, medicationName: capitalizeFirstLetter(suggestion.correctedName) });
     }
     setPopoverOpen(false);
     setSuggestion(null);
@@ -168,7 +167,7 @@ const ConditionSchema = z.object({
 
 function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition: string, date: Date}, icdCode?: string) => Promise<void>, onCancel: () => void }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useToast();
+  const { toast } = useApp();
 
   const form = useForm<z.infer<typeof ConditionSchema>>({
     resolver: zodResolver(ConditionSchema),
@@ -308,11 +307,11 @@ function HeightForm({
         <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="flex items-start gap-2 flex-1">
                 {unitSystem === 'metric' ? (
-                    <FormField control={form.control} name="height_cm" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="cm" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                    <FormField control={form.control} name="height_cm" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="cm" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )} />
                 ) : (
                     <div className="flex flex-1 gap-2">
-                        <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="ft" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
-                        <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="in" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                        <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="ft" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )} />
+                        <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="in" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )} />
                     </div>
                 )}
                 <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
@@ -764,13 +763,16 @@ export function ProfileCard() {
                     {profile.medication.length > 1 && !isMedicationNil && (
                         <Dialog open={isDrugInteractionOpen} onOpenChange={setIsDrugInteractionOpen}>
                             <DialogTrigger asChild>
-                                <Tooltip>
+                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <Button 
                                             size="icon" 
                                             variant="outline" 
                                             className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-blue-500/20' : ''}`}
-                                            onClick={() => setMedicationChanged(false)}
+                                            onClick={() => {
+                                                setIsDrugInteractionOpen(true);
+                                                setMedicationChanged(false);
+                                            }}
                                         >
                                             <ShieldAlert className="h-4 w-4" />
                                         </Button>
@@ -780,9 +782,7 @@ export function ProfileCard() {
                                     </TooltipContent>
                                 </Tooltip>
                             </DialogTrigger>
-                            <DrugInteractionDialog
-                                medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                            />
+                           <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)} />
                         </Dialog>
                     )}
                      {profile.medication.length === 0 && !isAddingMedication && (
