@@ -1,19 +1,29 @@
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+    // By default, deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
     match /patients/{patientId} {
-      // Doctors (authenticated users) can do anything to patient documents.
-      allow read, write: if request.auth != null;
+      // Doctors (authenticated users) can manage patients
+      allow list, create: if request.auth != null;
+      allow get, update, delete: if request.auth != null;
 
-      // Patients (unauthenticated) can only get and update their own document.
-      // They cannot list all patients or delete their own record.
-      allow get, update: if request.auth == null;
+      // Patients (unauthenticated) can get/update their own document if they have the ID
+      allow get: if true;
+      allow update: if true;
 
-      // Chat subcollection
+      // Rules for the chat subcollection
       match /chat/{messageId} {
-        // Allow both authenticated doctors and unauthenticated patients (who have the patientId)
-        // to read and write messages. This is necessary for the real-time listener to work
-        // for patients who are not logged in via Firebase Auth.
+        // This is the key fix: Allow anyone to query (list) the chat messages.
+        // This is required for the onSnapshot listener to work for patients.
+        allow list: if true;
+
+        // Allow anyone to read and write individual chat messages.
         allow read, write: if true;
       }
     }
