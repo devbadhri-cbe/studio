@@ -437,6 +437,20 @@ export function ProfileCard() {
                                 <p>Edit Date of Birth</p>
                             </TooltipContent>
                         </Tooltip>
+                        {isEditingDateFormat ? (
+                            <DateFormatForm currentFormat={profile.dateFormat} onSave={handleSaveDateFormat} onCancel={() => setIsEditingDateFormat(false)} />
+                        ) : (
+                             <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingDateFormat(true)}>
+                                        <Settings className="h-3 w-3 text-border" strokeWidth={1.5} />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Edit Date Format ({profile.dateFormat})</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
                     </div>
                 )}
             </div>
@@ -474,22 +488,7 @@ export function ProfileCard() {
                 </p>
             </div>
 
-             <Separator className="my-2" />
-            
-             <div className="flex items-center gap-3 text-muted-foreground">
-                <Settings className="h-5 w-5 shrink-0" />
-                {isEditingDateFormat ? (
-                    <DateFormatForm currentFormat={profile.dateFormat} onSave={handleSaveDateFormat} onCancel={() => setIsEditingDateFormat(false)} />
-                ) : (
-                    <div className="flex items-center gap-2 flex-1">
-                        <p>Date Format: <span className="font-semibold text-foreground">{profile.dateFormat}</span></p>
-                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingDateFormat(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Date Format</p></TooltipContent></Tooltip>
-                    </div>
-                )}
-            </div>
-
-             <Separator className="my-2" />
-
+            <Separator className="my-2" />
              <div className="flex items-center gap-3 text-muted-foreground">
                 <Globe className="h-5 w-5 shrink-0" />
                 {isEditingCountry ? (
@@ -715,3 +714,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
