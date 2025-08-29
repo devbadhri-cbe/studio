@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { checkDrugInteractions } from '@/ai/flows/drug-interaction-check';
@@ -20,18 +19,16 @@ import { ScrollArea } from './ui/scroll-area';
 
 interface DrugInteractionDialogProps {
   medications: string[];
-  disabled?: boolean;
-  children: React.ReactNode;
   onOpenChange?: (open: boolean) => void;
+  open: boolean;
 }
 
-export function DrugInteractionDialog({ medications, disabled, children, onOpenChange }: DrugInteractionDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function DrugInteractionDialog({ medications, onOpenChange, open }: DrugInteractionDialogProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleInteractionCheck = async () => {
+  const handleInteractionCheck = React.useCallback(async () => {
     if (medications.length < 2) {
       toast({
         variant: 'destructive',
@@ -55,53 +52,45 @@ export function DrugInteractionDialog({ medications, disabled, children, onOpenC
     } finally {
       setIsLoading(false);
     }
-  };
-  
-  const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
-    if(onOpenChange) {
-        onOpenChange(newOpen);
-    }
-    
-    if (newOpen) {
+  }, [medications, toast]);
+
+  React.useEffect(() => {
+    if (open) {
       handleInteractionCheck();
     } else {
-        // Reset on close
-        setResult(null);
-        setIsLoading(false);
+      setResult(null);
+      setIsLoading(false);
     }
-  }
+  }, [open, handleInteractionCheck]);
+
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Drug Interaction Analysis</DialogTitle>
-          <DialogDescription>
-            AI-powered analysis of potential interactions for the current medication list.
-          </DialogDescription>
-        </DialogHeader>
-        <ScrollArea className="max-h-[60vh] -mx-6 px-6">
-            <div className="py-4 space-y-4">
-            {isLoading && (
-                <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p>Analyzing interactions...</p>
-                </div>
-            )}
-            {result && (
-                <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
-                    <ShieldAlert className="h-4 w-4 !text-destructive" />
-                    <AlertTitle className="text-destructive">Interaction Summary</AlertTitle>
-                    <AlertDescription className="text-destructive/90 whitespace-pre-wrap">
-                        {result}
-                    </AlertDescription>
-                </Alert>
-            )}
-            </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Drug Interaction Analysis</DialogTitle>
+        <DialogDescription>
+          AI-powered analysis of potential interactions for the current medication list.
+        </DialogDescription>
+      </DialogHeader>
+      <ScrollArea className="max-h-[60vh] -mx-6 px-6">
+          <div className="py-4 space-y-4">
+          {isLoading && (
+              <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p>Analyzing interactions...</p>
+              </div>
+          )}
+          {result && (
+              <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
+                  <ShieldAlert className="h-4 w-4 !text-destructive" />
+                  <AlertTitle className="text-destructive">Interaction Summary</AlertTitle>
+                  <AlertDescription className="text-destructive/90 whitespace-pre-wrap">
+                      {result}
+                  </AlertDescription>
+              </Alert>
+          )}
+          </div>
+      </ScrollArea>
+    </DialogContent>
   );
 }

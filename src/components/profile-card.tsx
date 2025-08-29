@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings } from 'lucide-react';
@@ -32,7 +31,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { UnitSystem } from '@/lib/types';
-import { DialogTrigger } from './ui/dialog';
+import { Dialog, DialogTrigger } from './ui/dialog';
 
 
 const MedicationSchema = z.object({
@@ -407,6 +406,7 @@ export function ProfileCard() {
   const [isEditingCountry, setIsEditingCountry] = React.useState(false);
   const [isEditingDob, setIsEditingDob] = React.useState(false);
   const [medicationChanged, setMedicationChanged] = React.useState(false);
+  const [isDrugInteractionOpen, setIsDrugInteractionOpen] = React.useState(false);
   const formatDate = useDateFormatter();
 
   const calculatedAge = calculateAge(profile.dob);
@@ -570,7 +570,7 @@ export function ProfileCard() {
             <div className="flex items-center gap-3 text-muted-foreground">
                 <Ruler className="h-5 w-5 shrink-0" />
                  {isEditingHeight ? (
-                    <HeightForm unitSystem={unitSystem} currentHeight={profile.height} onSave={handleSaveHeight} onCancel={() => setIsEditingHeight(false)} />
+                    <HeightForm unitSystem={unitSystem} currentHeight={profile.height} onSave={handleSaveHeight} onCancel={()={() => setIsEditingHeight(false)} />
                 ) : (
                     <div className="flex items-center gap-2 flex-1">
                         <p>{displayHeight}</p>
@@ -740,7 +740,7 @@ export function ProfileCard() {
                             </div>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedicalCondition(condition.id)}>
+                                <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={()={() => removeMedicalCondition(condition.id)}>
                                   <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                 </Button>
                               </TooltipTrigger>
@@ -762,31 +762,29 @@ export function ProfileCard() {
                 </div>
                 <div className="flex items-center gap-1">
                     {profile.medication.length > 1 && !isMedicationNil && (
-                         <DialogTrigger asChild>
+                        <Dialog open={isDrugInteractionOpen} onOpenChange={setIsDrugInteractionOpen}>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <DrugInteractionDialog
-                                        medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                                        onOpenChange={(open) => {
-                                            if (open) {
-                                                setMedicationChanged(false);
-                                            }
-                                        }}
-                                    >
+                                    <DialogTrigger asChild>
                                         <Button 
                                             size="icon" 
                                             variant="outline" 
                                             className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-blue-500/20' : ''}`}
+                                            onClick={() => setMedicationChanged(false)}
                                         >
                                             <ShieldAlert className="h-4 w-4" />
                                         </Button>
-                                    </DrugInteractionDialog>
+                                    </DialogTrigger>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <p>Check Drug Interactions</p>
                                 </TooltipContent>
                             </Tooltip>
-                         </DialogTrigger>
+                            <DrugInteractionDialog
+                                open={isDrugInteractionOpen}
+                                medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
+                            />
+                        </Dialog>
                     )}
                      {profile.medication.length === 0 && !isAddingMedication && (
                         <Tooltip>
@@ -812,7 +810,7 @@ export function ProfileCard() {
                     )}
                 </div>
             </div>
-             {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} />}
+             {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={()={() => setIsAddingMedication(false)} />}
             {profile.medication.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
@@ -857,4 +855,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
