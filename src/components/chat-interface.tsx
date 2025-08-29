@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/context/app-context';
-import { getChatMessages, sendMessage } from '@/lib/firestore';
+import { getChatMessages, sendMessage } from '@/lib/chat';
 import type { Message } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
