@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { Patient } from '@/lib/types';
@@ -141,7 +142,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 <CardTitle className="text-lg truncate">{patient.name}</CardTitle>
                 <p className="text-xs text-muted-foreground truncate">
                     {age ? `${age} years` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
-                    {patient.bmi && <span className="font-semibold"> (BMI: {patient.bmi.toFixed(1)})</span>}
+                    {patient.bmi && <span className="font-semibold"> (BMI: {patient.bmi.toFixed(2)})</span>}
                 </p>
              </div>
           </div>

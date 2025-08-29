@@ -399,8 +399,8 @@ export function ProfileCard() {
   
   const displayWeight = latestWeight?.value
     ? unitSystem === 'imperial'
-      ? `${Math.round(kgToLbs(latestWeight.value))} lbs`
-      : `${latestWeight.value.toFixed(1)} kg`
+      ? `${kgToLbs(latestWeight.value).toFixed(2)} lbs`
+      : `${latestWeight.value.toFixed(2)} kg`
     : 'N/A';
 
   const displayHeight = profile.height
@@ -661,7 +661,7 @@ export function ProfileCard() {
                     {sortedWeights.slice(0, 3).map((weight) => (
                         <li key={weight.id} className="group flex items-start gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                            <div className="flex-1">
-                                <span className="font-semibold text-foreground">{weight.value} kg</span>
+                                <span className="font-semibold text-foreground">{weight.value.toFixed(2)} kg</span>
                                 <span className="block text-xs">on {formatDate(weight.date)}</span>
                            </div>
                            <Tooltip>
@@ -826,3 +826,4 @@ export function ProfileCard() {
     </Card>
   );
 }
+

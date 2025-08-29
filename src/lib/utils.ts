@@ -26,7 +26,7 @@ export function calculateBmi(weight: number | undefined, height: number | undefi
   try {
     const heightInMeters = height / 100;
     const bmi = weight / (heightInMeters * heightInMeters);
-    return parseFloat(bmi.toFixed(1));
+    return parseFloat(bmi.toFixed(2));
   } catch (e) {
     console.error("Could not calculate BMI", e);
     return null;
@@ -39,6 +39,7 @@ export const ftInToCm = (ft: number, inches: number) => (ft * 12 + inches) * 2.5
 export const cmToFtIn = (cm: number) => {
     const totalInches = cm / 2.54;
     const feet = Math.floor(totalInches / 12);
-    const inches = Math.round(totalInches % 12);
+    const inches = parseFloat((totalInches % 12).toFixed(2));
     return { feet, inches };
 };
+

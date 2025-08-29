@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -127,9 +128,9 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
         email: data.email,
         country: data.country,
         phone: data.phone,
-        height: heightInCm,
+        height: heightInCm ? parseFloat(Number(heightInCm).toFixed(2)) : undefined,
         unitSystem: unitSystem,
-        weight: weightInKg,
+        weight: weightInKg ? parseFloat(Number(weightInKg).toFixed(2)) : undefined,
     };
     await onSave(patientDataToSave, patient?.id);
     setIsSubmitting(false);
@@ -254,8 +255,8 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
                             </div>
                             {unitSystem === 'metric' ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <FormField control={form.control} name="height_cm" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                    <FormField control={form.control} name="weight_kg" render={({ field }) => ( <FormItem><FormLabel>Current Weight (kg)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 70" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                    <FormField control={form.control} name="height_cm" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 175.00" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                    <FormField control={form.control} name="weight_kg" render={({ field }) => ( <FormItem><FormLabel>Current Weight (kg)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 70.00" {...field} /></FormControl><FormMessage /></FormItem> )} />
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -263,10 +264,10 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
                                         <FormLabel>Height (ft, in)</FormLabel>
                                         <div className="flex gap-2 mt-2">
                                             <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="ft" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                            <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="in" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                            <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" step="0.01" placeholder="in" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                         </div>
                                     </div>
-                                    <FormField control={form.control} name="weight_lbs" render={({ field }) => ( <FormItem><FormLabel>Current Weight (lbs)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 154" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                    <FormField control={form.control} name="weight_lbs" render={({ field }) => ( <FormItem><FormLabel>Current Weight (lbs)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 154.00" {...field} /></FormControl><FormMessage /></FormItem> )} />
                                 </div>
                             )}
                         </div>

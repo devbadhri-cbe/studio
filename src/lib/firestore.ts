@@ -104,7 +104,7 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
         (newPatientObject.weightRecords as WeightRecord[]).push({
             id: `weight-${Date.now()}`,
             date: new Date().toISOString(),
-            value: weight,
+            value: Number(weight.toFixed(2)),
         });
     }
     
@@ -131,7 +131,7 @@ export const updatePatient = async (patientId: string, patientData: Partial<Pati
         const newWeightRecord = {
             id: `weight-${Date.now()}`,
             date: new Date().toISOString(),
-            value: newWeight,
+            value: Number(Number(newWeight).toFixed(2)),
         };
         updatedData.weightRecords = [...(updatedData.weightRecords || []), newWeightRecord];
         delete (updatedData as any).weight;
