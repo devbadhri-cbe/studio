@@ -16,10 +16,11 @@ import { Loader2 } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
 import { format } from 'date-fns';
+import { DatePicker } from './ui/date-picker';
 
 const FormSchema = z.object({
   name: z.string().min(2, { message: "Name is required." }),
-  dob: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "A valid date is required." }),
+  dob: z.date({ required_error: "A valid date is required." }),
   gender: z.enum(['male', 'female', 'other'], { required_error: "Gender is required." }),
   email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')),
   country: z.string().min(1, { message: "Country is required." }),
@@ -88,7 +89,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: '',
-      dob: '',
+      dob: undefined,
       gender: undefined,
       email: '',
       country: '',
@@ -128,7 +129,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
 
     const patientDataToSave = {
         name: data.name,
-        dob: data.dob,
+        dob: format(data.dob, 'yyyy-MM-dd'),
         gender: data.gender,
         email: data.email,
         country: data.country,
@@ -164,7 +165,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
 
     form.reset({
         name: patient?.name || '',
-        dob: patient?.dob ? format(new Date(patient.dob), 'yyyy-MM-dd') : '',
+        dob: patient?.dob ? new Date(patient.dob) : undefined,
         gender: patient?.gender || undefined,
         email: patient?.email || '',
         country: patient?.country || '',
@@ -195,7 +196,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
                         <div className="space-y-4">
                             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                               <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" placeholder="YYYY-MM-DD" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                               <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem> )} />
                                <FormField
                                 control={form.control}
                                 name="gender"

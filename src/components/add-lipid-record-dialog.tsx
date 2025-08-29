@@ -25,9 +25,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { toMgDl } from '@/lib/unit-conversions';
+import { DatePicker } from './ui/date-picker';
 
 const FormSchema = z.object({
-  date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
+  date: z.date({ required_error: 'A valid date is required.' }),
   ldl: z.coerce.number().min(0.1, 'Value is required.'),
   hdl: z.coerce.number().min(0.1, 'Value is required.'),
   triglycerides: z.coerce.number().min(0.1, 'Value is required.'),
@@ -47,7 +48,7 @@ export function AddLipidRecordDialog() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      date: '',
+      date: new Date(),
       ldl: '' as any,
       hdl: '' as any,
       triglycerides: '' as any,
@@ -59,7 +60,7 @@ export function AddLipidRecordDialog() {
     if (open) {
       setInputUnit(biomarkerUnit);
       form.reset({
-        date: format(new Date(), 'yyyy-MM-dd'),
+        date: new Date(),
         ldl: '' as any,
         hdl: '' as any,
         triglycerides: '' as any,
@@ -69,7 +70,7 @@ export function AddLipidRecordDialog() {
   }, [open, biomarkerUnit, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    const newDate = new Date(data.date + 'T00:00:00');
+    const newDate = startOfDay(data.date);
 
     const dateExists = lipidRecords.some((record) => {
         const storedDate = startOfDay(parseISO(record.date as string));
@@ -146,7 +147,7 @@ export function AddLipidRecordDialog() {
                   <FormItem>
                     <FormLabel>Test Date</FormLabel>
                     <FormControl>
-                      <Input type="date" placeholder="YYYY-MM-DD" {...field} />
+                      <DatePicker value={field.value} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

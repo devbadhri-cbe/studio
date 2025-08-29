@@ -22,9 +22,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
+import { DatePicker } from './ui/date-picker';
 
 const FormSchema = z.object({
-  date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
+  date: z.date({ required_error: 'A valid date is required.' }),
   value: z.coerce.number().min(1, 'Value is required.').max(25, 'Value seems too high.'),
 });
 
@@ -37,7 +38,7 @@ export function AddRecordDialog() {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       value: '' as any,
-      date: '',
+      date: new Date(),
     },
   });
   
@@ -45,19 +46,16 @@ export function AddRecordDialog() {
     if (open) {
       form.reset({
         value: '' as any,
-        date: format(new Date(), 'yyyy-MM-dd'),
+        date: new Date(),
       });
     }
   }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    // Parse the date string from the form. The 'T00:00:00' ensures it's parsed as local midnight.
-    const newDate = new Date(data.date + 'T00:00:00'); 
+    const newDate = startOfDay(data.date);
     
     const dateExists = records.some((record) => {
-        // Parse the stored ISO string and get the start of that day in UTC.
         const storedDate = startOfDay(parseISO(record.date as string));
-        // Compare the start of the day for both dates.
         return storedDate.getTime() === newDate.getTime();
     });
 
@@ -115,7 +113,7 @@ export function AddRecordDialog() {
                   <FormItem>
                     <FormLabel>Test Date</FormLabel>
                     <FormControl>
-                      <Input type="date" placeholder="YYYY-MM-DD" {...field} />
+                      <DatePicker value={field.value} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

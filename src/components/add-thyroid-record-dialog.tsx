@@ -22,9 +22,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
+import { DatePicker } from './ui/date-picker';
 
 const FormSchema = z.object({
-  date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
+  date: z.date({ required_error: 'A valid date is required.' }),
   tsh: z.coerce.number().min(0, 'Value is required.'),
   t3: z.coerce.number().min(0, 'Value is required.'),
   t4: z.coerce.number().min(0, 'Value is required.'),
@@ -38,7 +39,7 @@ export function AddThyroidRecordDialog() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      date: '',
+      date: new Date(),
       tsh: '' as any,
       t3: '' as any,
       t4: '' as any,
@@ -48,7 +49,7 @@ export function AddThyroidRecordDialog() {
   React.useEffect(() => {
     if (open) {
       form.reset({
-        date: format(new Date(), 'yyyy-MM-dd'),
+        date: new Date(),
         tsh: '' as any,
         t3: '' as any,
         t4: '' as any,
@@ -57,7 +58,7 @@ export function AddThyroidRecordDialog() {
   }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    const newDate = new Date(data.date + 'T00:00:00');
+    const newDate = startOfDay(data.date);
 
     const dateExists = thyroidRecords.some((record) => {
         const storedDate = startOfDay(parseISO(record.date as string));
@@ -120,7 +121,7 @@ export function AddThyroidRecordDialog() {
                   <FormItem>
                     <FormLabel>Test Date</FormLabel>
                     <FormControl>
-                      <Input type="date" placeholder="YYYY-MM-DD" {...field} />
+                      <DatePicker value={field.value} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -24,6 +24,7 @@ import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from './ui/pop
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { DatePicker } from './ui/date-picker';
 
 
 const MedicationSchema = z.object({
@@ -150,16 +151,16 @@ function MedicationForm({ onSave, onCancel, isCheckingSpelling, setIsCheckingSpe
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
-  date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
+  date: z.date({ required_error: 'A valid date is required.' }),
 });
 
-function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof ConditionSchema>, icdCode?: string) => Promise<void>, onCancel: () => void }) {
+function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition: string, date: Date}, icdCode?: string) => Promise<void>, onCancel: () => void }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof ConditionSchema>>({
     resolver: zodResolver(ConditionSchema),
-    defaultValues: { condition: '', date: format(new Date(), 'yyyy-MM-dd') },
+    defaultValues: { condition: '', date: new Date() },
   });
   
   const handleSubmit = async (data: z.infer<typeof ConditionSchema>) => {
@@ -188,7 +189,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: z.infer<typ
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
         <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Condition Name" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-        <FormField control={form.control} name="date" render={({ field }) => ( <FormItem><FormControl><Input type="date" placeholder="YYYY-MM-DD" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+        <FormField control={form.control} name="date" render={({ field }) => ( <FormItem><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem> )}/>
         <div className="flex justify-end gap-2">
           <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
           <Button type="submit" size="sm" disabled={isSubmitting}>
@@ -202,13 +203,13 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: z.infer<typ
 
 const WeightSchema = z.object({
     value: z.coerce.number().min(2, 'Weight must be at least 2kg.'),
-    date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
+    date: z.date({ required_error: 'A valid date is required.' }),
 });
 
 function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof WeightSchema>) => void, onCancel: () => void }) {
     const form = useForm<z.infer<typeof WeightSchema>>({
         resolver: zodResolver(WeightSchema),
-        defaultValues: { value: '' as any, date: format(new Date(), 'yyyy-MM-dd') },
+        defaultValues: { value: '' as any, date: new Date() },
     });
 
     return (
@@ -216,7 +217,7 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
             <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
                 <div className="grid grid-cols-2 gap-2">
                     <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><Input type="date" placeholder="YYYY-MM-DD" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
                 <div className="flex justify-end gap-2">
                     <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
@@ -290,13 +291,13 @@ function CountryForm({ currentCountry, onSave, onCancel }: { currentCountry?: st
     );
 }
 
-const DobSchema = z.object({ dob: z.string().refine((val) => isValid(new Date(val)), { message: "A valid date is required." }) });
+const DobSchema = z.object({ dob: z.date({ required_error: "A valid date is required." }) });
 function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave: (dob: string) => void; onCancel: () => void }) {
-    const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob ? format(new Date(currentDob), 'yyyy-MM-dd') : '' } });
+    const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob ? new Date(currentDob) : undefined } });
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit((d) => onSave(d.dob))} className="flex items-center gap-2 flex-1">
-                <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="date" placeholder="YYYY-MM-DD" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+            <form onSubmit={form.handleSubmit((d) => onSave(format(d.dob, 'yyyy-MM-dd')))} className="flex items-center gap-2 flex-1">
+                <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem className="flex-1"><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
                 <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
                 <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
             </form>
@@ -327,8 +328,8 @@ export function ProfileCard() {
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
 
-  const handleSaveCondition = async (data: z.infer<typeof ConditionSchema>, icdCode?: string) => {
-    addMedicalCondition({ ...data, date: new Date(data.date).toISOString(), icdCode });
+  const handleSaveCondition = async (data: { condition: string, date: Date }, icdCode?: string) => {
+    addMedicalCondition({ ...data, date: data.date.toISOString(), icdCode });
     setIsAddingCondition(false);
   };
   
@@ -349,7 +350,7 @@ export function ProfileCard() {
   }
 
   const handleSaveWeight = (data: z.infer<typeof WeightSchema>) => {
-      addWeightRecord(data);
+      addWeightRecord({ ...data, date: data.date.toISOString() });
       setIsAddingWeight(false);
   }
 

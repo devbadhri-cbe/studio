@@ -22,9 +22,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
+import { DatePicker } from './ui/date-picker';
 
 const FormSchema = z.object({
-  date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'A valid date is required.' }),
+  date: z.date({ required_error: 'A valid date is required.' }),
   systolic: z.coerce.number().min(50, 'Value seems too low.').max(300, 'Value seems too high.'),
   diastolic: z.coerce.number().min(30, 'Value seems too low.').max(200, 'Value seems too high.'),
   heartRate: z.coerce.number().min(30, 'Value seems too low.').max(250, 'Value seems too high.').optional(),
@@ -38,7 +39,7 @@ export function AddBloodPressureRecordDialog() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      date: '',
+      date: new Date(),
       systolic: '' as any,
       diastolic: '' as any,
       heartRate: '' as any,
@@ -48,7 +49,7 @@ export function AddBloodPressureRecordDialog() {
   React.useEffect(() => {
     if (open) {
       form.reset({
-        date: format(new Date(), 'yyyy-MM-dd'),
+        date: new Date(),
         systolic: '' as any,
         diastolic: '' as any,
         heartRate: '' as any,
@@ -57,7 +58,7 @@ export function AddBloodPressureRecordDialog() {
   }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    const newDate = new Date(data.date + 'T00:00:00');
+    const newDate = startOfDay(data.date);
 
     const dateExists = bloodPressureRecords.some((record) => {
         const storedDate = startOfDay(parseISO(record.date as string));
@@ -120,7 +121,7 @@ export function AddBloodPressureRecordDialog() {
                   <FormItem>
                     <FormLabel>Test Date</FormLabel>
                     <FormControl>
-                      <Input type="date" placeholder="YYYY-MM-DD" {...field} />
+                      <DatePicker value={field.value} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
