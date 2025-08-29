@@ -117,11 +117,10 @@ export default function PatientDashboard() {
     report: 'Comprehensive Report',
   }
   
-  const handleDropdownOpenChange = (open: boolean) => {
-    if (open) {
-      setIsTooltipOpen(false);
-    }
-  };
+  const handleDashboardSelect = (key: string) => {
+    setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension');
+    setIsTooltipOpen(false);
+  }
 
 
   return (
@@ -201,7 +200,7 @@ export default function PatientDashboard() {
                 </div>
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
-                   <DropdownMenu onOpenChange={handleDropdownOpenChange}>
+                   <DropdownMenu>
                     <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
                         <TooltipTrigger asChild>
                             <DropdownMenuTrigger asChild>
@@ -218,7 +217,7 @@ export default function PatientDashboard() {
                         {Object.entries(dashboardOptions).map(([key, value]) => (
                             <DropdownMenuItem 
                                 key={key}
-                                onSelect={() => setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension')}
+                                onSelect={() => handleDashboardSelect(key)}
                                 className={dashboardView === key ? 'bg-accent' : ''}
                             >
                                 {value}
