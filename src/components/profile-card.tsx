@@ -292,7 +292,7 @@ function CountryForm({ currentCountry, onSave, onCancel }: { currentCountry?: st
 
 const DobSchema = z.object({ dob: z.string().refine((val) => isValid(new Date(val)), { message: "A valid date is required." }) });
 function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave: (dob: string) => void; onCancel: () => void }) {
-    const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob || '' } });
+    const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob ? new Date(currentDob).toISOString().split('T')[0] : '' } });
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit((d) => onSave(d.dob))} className="flex items-center gap-2 flex-1">
@@ -465,6 +465,17 @@ export function ProfileCard() {
              <Separator className="my-2" />
 
              <div className="flex items-center gap-3 text-muted-foreground">
+                <Globe className="h-5 w-5 shrink-0" />
+                {isEditingCountry ? (
+                    <CountryForm currentCountry={profile.country} onSave={handleSaveCountry} onCancel={() => setIsEditingCountry(false)} />
+                ) : (
+                    <div className="flex items-center gap-2 flex-1">
+                        <p>{countryName}</p>
+                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingCountry(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Country</p></TooltipContent></Tooltip>
+                    </div>
+                )}
+            </div>
+             <div className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="h-5 w-5 shrink-0" />
                 {isEditingEmail ? (
                     <EmailForm currentEmail={profile.email} onSave={handleSaveEmail} onCancel={() => setIsEditingEmail(false)} />
@@ -483,17 +494,6 @@ export function ProfileCard() {
                     <div className="flex items-center gap-2 flex-1">
                         <p>{profile.phone || 'N/A'}</p>
                         <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingPhone(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Phone</p></TooltipContent></Tooltip>
-                    </div>
-                )}
-            </div>
-             <div className="flex items-center gap-3 text-muted-foreground">
-                <Globe className="h-5 w-5 shrink-0" />
-                {isEditingCountry ? (
-                    <CountryForm currentCountry={profile.country} onSave={handleSaveCountry} onCancel={() => setIsEditingCountry(false)} />
-                ) : (
-                    <div className="flex items-center gap-2 flex-1">
-                        <p>{countryName}</p>
-                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingCountry(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Country</p></TooltipContent></Tooltip>
                     </div>
                 )}
             </div>
@@ -689,5 +689,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    
