@@ -1,23 +1,16 @@
 
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
     match /patients/{patientId} {
       // Allow full read/write access for authenticated doctors.
       allow read, write: if request.auth != null;
-
+      
       // Allow unauthenticated patients to read their own document (which is
-      // required to then access the chat subcollection) and update it
+      // required to then access any subcollections) and update it
       // (to add records). This is secure as it requires the unguessable patient ID.
       allow read, update: if request.auth == null;
-
-      // Rules for the chat subcollection.
-      match /chat/{messageId} {
-        // Since the parent read rule is now correct, this rule will allow
-        // anyone who can read the patient document to also read and write
-        // to the chat.
-        allow read, write: if true;
-      }
     }
   }
 }

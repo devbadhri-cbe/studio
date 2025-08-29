@@ -8,7 +8,7 @@ import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
-import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid, UploadCloud, GaugeCircle, MessageSquare } from 'lucide-react';
+import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid, UploadCloud, GaugeCircle } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import {
   DropdownMenu,
@@ -200,16 +200,6 @@ export default function PatientDashboard() {
                 </div>
                 <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="icon" variant="outline" onClick={() => router.push(`/chat/${profile.id}`)}>
-                          <MessageSquare className="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" align="end">
-                      <p>Chat with your Doctor</p>
-                    </TooltipContent>
-                  </Tooltip>
                    <DropdownMenu>
                     <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
                         <TooltipTrigger asChild>
