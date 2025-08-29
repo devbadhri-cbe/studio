@@ -1,7 +1,7 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Edit } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Edit, Check, X } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -226,11 +226,62 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
     );
 }
 
+const HeightSchema = z.object({
+    height: z.coerce.number().min(50, 'Height must be at least 50cm.').max(250, 'Height seems too high.'),
+});
+
+function HeightForm({ currentHeight, onSave, onCancel }: { currentHeight?: number; onSave: (height: number) => void; onCancel: () => void }) {
+    const form = useForm<z.infer<typeof HeightSchema>>({
+        resolver: zodResolver(HeightSchema),
+        defaultValues: { height: currentHeight || ('' as any) },
+    });
+
+    const handleSubmit = (data: z.infer<typeof HeightSchema>) => {
+        onSave(data.height);
+    };
+
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="flex items-center gap-2 flex-1">
+                <FormField
+                    control={form.control}
+                    name="height"
+                    render={({ field }) => (
+                        <FormItem className="flex-1">
+                            <FormControl>
+                                <Input type="number" placeholder="cm" {...field} className="h-8" />
+                            </FormControl>
+                             <FormMessage className="text-xs" />
+                        </FormItem>
+                    )}
+                />
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600">
+                            <Check className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Save</TooltipContent>
+                 </Tooltip>
+                 <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Cancel</TooltipContent>
+                 </Tooltip>
+            </form>
+        </Form>
+    );
+}
+
 export function ProfileCard() {
-  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
+  const { profile, setProfile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [isAddingWeight, setIsAddingWeight] = React.useState(false);
+  const [isEditingHeight, setIsEditingHeight] = React.useState(false);
   const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
   const [medicationChanged, setMedicationChanged] = React.useState(false);
 
@@ -268,6 +319,11 @@ export function ProfileCard() {
       setIsAddingWeight(false);
   }
 
+  const handleSaveHeight = (newHeight: number) => {
+    setProfile({ ...profile, height: newHeight });
+    setIsEditingHeight(false);
+  };
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -303,7 +359,21 @@ export function ProfileCard() {
             </div>
             <div className="flex items-center gap-3 text-muted-foreground">
                 <Ruler className="h-5 w-5 shrink-0" />
-                <p>{profile.height ? `${profile.height} cm` : 'N/A'}</p>
+                 {isEditingHeight ? (
+                    <HeightForm currentHeight={profile.height} onSave={handleSaveHeight} onCancel={() => setIsEditingHeight(false)} />
+                ) : (
+                    <div className="flex items-center gap-2 flex-1">
+                        <p>{profile.height ? `${profile.height} cm` : 'N/A'}</p>
+                         <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingHeight(true)}>
+                                    <Pencil className="h-3.5 w-3.5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Edit Height</TooltipContent>
+                        </Tooltip>
+                    </div>
+                )}
             </div>
             <div className="flex items-center gap-3 text-muted-foreground">
                 <TrendingUp className="h-5 w-5 shrink-0" />
@@ -519,5 +589,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    
