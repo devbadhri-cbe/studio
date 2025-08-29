@@ -1,3 +1,4 @@
+
 import { Timestamp } from "firebase/firestore";
 
 export type Theme = 'light' | 'dark' | 'system';
@@ -78,14 +79,6 @@ export interface BloodPressureRecord {
   heartRate?: number;
   medication?: string;
 }
-
-export interface Message {
-  id: string;
-  text: string;
-  senderId: 'doctor' | string; // 'doctor' or patient's ID
-  timestamp: Timestamp; // Firestore Timestamp for ordering
-}
-
 
 export interface Patient {
   id: string;

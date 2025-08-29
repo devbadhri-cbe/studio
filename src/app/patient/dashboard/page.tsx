@@ -8,7 +8,7 @@ import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
-import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid, UploadCloud, GaugeCircle, MessageSquare } from 'lucide-react';
+import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid, UploadCloud, GaugeCircle } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import {
   DropdownMenu,
@@ -31,7 +31,6 @@ import { useToast } from '@/hooks/use-toast';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import { updatePatient } from '@/lib/firestore';
-import { ChatCard } from '@/components/chat-card';
 
 export default function PatientDashboard() {
   const { profile, setProfile, isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
@@ -104,8 +103,6 @@ export default function PatientDashboard() {
         return <HypertensionCard />;
       case 'report':
         return <ReportCard />;
-      case 'messages':
-        return <ChatCard />;
       default:
         return <Hba1cCard />;
     }
@@ -118,11 +115,10 @@ export default function PatientDashboard() {
     thyroid: { name: 'Thyroid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     hypertension: { name: 'Hypertension Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     report: { name: 'Comprehensive Report', icon: <LayoutGrid className="w-4 h-4" /> },
-    messages: { name: 'Messages', icon: <MessageSquare className="w-4 h-4" /> },
   }
   
   const handleDashboardSelect = (key: string) => {
-    setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension' | 'messages');
+    setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension');
     setIsTooltipOpen(false);
   }
   

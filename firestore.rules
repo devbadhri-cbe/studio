@@ -1,28 +1,15 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Function to check if the user is authenticated (is a doctor)
-    function isDoctor() {
-      return request.auth != null;
-    }
-    
     match /patients/{patientId} {
-      // Doctors can perform any action on patient data.
-      allow read, write: if isDoctor();
-      
-      // Unauthenticated patients can get their own document (to view the dashboard)
-      // and update it (to add records). This is secure as it requires the unguessable ID.
-      allow get, update: if request.auth == null;
+      // Doctors can read and write all patient data.
+      allow read, write: if request.auth != null;
 
-      // This is the critical rule for the chat subcollection.
-      match /chat/{messageId} {
-        // Allow reading (which includes 'list' for the listener) and creating messages
-        // ONLY IF the requestor has permission to 'get' the parent patient document.
-        // This securely links subcollection access to parent document access and is the
-        // standard way to implement this security model.
-        allow read, create: if get(/databases/$(database)/documents/patients/$(patientId)) != null;
-      }
+      // Patients (unauthenticated) can get their own document to view the dashboard
+      // and update it to add new records. This is secure because they must know
+      // the unique and unguessable patientId.
+      allow get, update: if request.auth == null;
     }
   }
 }
