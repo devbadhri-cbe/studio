@@ -89,7 +89,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
         const countryData = countries.find(c => c.code === watchCountry);
         const currentPhone = form.getValues('phone');
         if (countryData && (!currentPhone || !countries.some(c => currentPhone.startsWith(c.phoneCode)))) {
-             form.setValue('phone', countryData.phoneCode, { shouldValidate: true });
+             form.setValue('phone', countryData.phoneCode, { shouldValidate: false });
         }
     }
   }, [watchCountry, form]);
