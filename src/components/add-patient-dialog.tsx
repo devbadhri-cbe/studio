@@ -9,9 +9,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { PatientForm } from './patient-form';
+import { Card } from './ui/card';
 
 interface PatientFormDialogProps {
     patient?: Patient;
@@ -38,7 +38,7 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
           {children}
         </DialogTrigger>
       )}
-      <DialogContent className="w-full max-w-lg max-h-[90vh] flex flex-col p-0 sm:p-0">
+      <DialogContent className="w-full max-w-lg max-h-[90vh] flex flex-col p-0">
         <DialogHeader className="p-4 sm:p-6 pb-4 border-b">
           <DialogTitle>{patient ? 'Edit Patient Details' : 'Add New Patient'}</DialogTitle>
           <DialogDescription>
@@ -54,5 +54,3 @@ export function PatientFormDialog({ patient, onSave, children }: PatientFormDial
     </Dialog>
   );
 }
-
-    

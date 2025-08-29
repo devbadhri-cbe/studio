@@ -149,16 +149,18 @@ export default function DoctorDashboardPage() {
             </div>
 
             {isAddingPatient && (
-                <Card className="mb-6">
-                    <CardHeader>
-                        <CardTitle>Add New Patient</CardTitle>
-                        <CardDescription>Fill out the form below to add a new patient to your list.</CardDescription>
-                    </CardHeader>
-                    <PatientForm
-                        onSave={handleSavePatient}
-                        onCancel={() => setIsAddingPatient(false)}
-                    />
-                </Card>
+                <div className="max-w-lg mx-auto mb-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Add New Patient</CardTitle>
+                            <CardDescription>Fill out the form below to add a new patient to your list.</CardDescription>
+                        </CardHeader>
+                        <PatientForm
+                            onSave={handleSavePatient}
+                            onCancel={() => setIsAddingPatient(false)}
+                        />
+                    </Card>
+                </div>
             )}
 
             <Card>
