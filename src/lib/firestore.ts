@@ -135,6 +135,13 @@ export const updatePatient = async (patientId: string, patientData: Partial<Pati
     
     updatedData = recalculatePatientStatus(updatedData);
 
+    // Sanitize data to remove undefined values before sending to Firestore
+    Object.keys(updatedData).forEach(key => {
+        if ((updatedData as any)[key] === undefined) {
+            delete (updatedData as any)[key];
+        }
+    });
+
     await setDoc(patientDocRef, updatedData, { merge: true });
     return updatedData;
 };
