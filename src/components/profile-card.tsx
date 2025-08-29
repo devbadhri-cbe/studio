@@ -240,19 +240,63 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
 }
 
 const HeightSchema = z.object({
-    height: z.coerce.number().min(50, 'Height must be at least 50cm.').max(250, 'Height seems too high.'),
+    height_cm: z.coerce.number().optional(),
+    height_ft: z.coerce.number().optional(),
+    height_in: z.coerce.number().optional(),
+}).refine(data => {
+    if (data.height_cm) return data.height_cm >= 50 && data.height_cm <= 250;
+    if (data.height_ft || data.height_in) return (data.height_ft || 0) > 0 || (data.height_in || 0) > 0;
+    return false;
+}, {
+    message: "A valid height is required.",
+    path: ["height_cm"], // show error on first field
 });
 
-function HeightForm({ currentHeight, onSave, onCancel }: { currentHeight?: number; onSave: (height: number) => void; onCancel: () => void }) {
+function HeightForm({
+    currentHeight,
+    unitSystem,
+    onSave,
+    onCancel,
+}: {
+    currentHeight?: number;
+    unitSystem: UnitSystem;
+    onSave: (height: number) => void;
+    onCancel: () => void;
+}) {
+    const defaultValues = React.useMemo(() => {
+        if (unitSystem === 'imperial' && currentHeight) {
+            const { feet, inches } = cmToFtIn(currentHeight);
+            return { height_ft: feet, height_in: inches };
+        }
+        return { height_cm: currentHeight };
+    }, [currentHeight, unitSystem]);
+
     const form = useForm<z.infer<typeof HeightSchema>>({
         resolver: zodResolver(HeightSchema),
-        defaultValues: { height: currentHeight || ('' as any) },
+        defaultValues,
     });
+    
+    const handleSubmit = (data: z.infer<typeof HeightSchema>) => {
+        let heightInCm: number;
+        if (unitSystem === 'imperial') {
+            heightInCm = ftInToCm(data.height_ft || 0, data.height_in || 0);
+        } else {
+            heightInCm = data.height_cm || 0;
+        }
+        onSave(heightInCm);
+    };
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit((d) => onSave(d.height))} className="flex items-center gap-2 flex-1">
-                <FormField control={form.control} name="height" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="cm" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="flex items-start gap-2 flex-1">
+                {unitSystem === 'metric' ? (
+                    <FormField control={form.control} name="height_cm" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="cm" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                ) : (
+                    <div className="flex flex-1 gap-2">
+                        <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="ft" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                        <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="in" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                    </div>
+                )}
                 <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
                 <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
             </form>
@@ -503,7 +547,7 @@ export function ProfileCard() {
             <div className="flex items-center gap-3 text-muted-foreground">
                 <Ruler className="h-5 w-5 shrink-0" />
                  {isEditingHeight ? (
-                    <HeightForm currentHeight={profile.height} onSave={handleSaveHeight} onCancel={() => setIsEditingHeight(false)} />
+                    <HeightForm unitSystem={unitSystem} currentHeight={profile.height} onSave={handleSaveHeight} onCancel={() => setIsEditingHeight(false)} />
                 ) : (
                     <div className="flex items-center gap-2 flex-1">
                         <p>{displayHeight}</p>
