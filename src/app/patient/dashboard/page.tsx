@@ -204,13 +204,13 @@ export default function PatientDashboard() {
                   <UploadRecordDialog />
                   <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
                     <TooltipTrigger asChild>
-                       <DropdownMenu open={isMenuOpen} onOpenChange={handleDashboardOpenChange}>
+                       <DropdownMenu onOpenChange={handleDashboardOpenChange}>
                             <DropdownMenuTrigger asChild>
                                 <Button size="icon" variant="outline" className={`w-9 h-9 p-0 ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
                                     <GaugeCircle className="w-4 h-4" />
                                 </Button>
                             </DropdownMenuTrigger>
-                          <DropdownMenuContent onMouseOver={() => setIsMenuOpen(true)} onMouseLeave={() => setIsMenuOpen(false)}>
+                          <DropdownMenuContent>
                             {Object.entries(dashboardOptions).map(([key, value]) => (
                                 <DropdownMenuItem 
                                     key={key}
