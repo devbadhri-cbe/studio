@@ -158,7 +158,24 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
                         <div className="space-y-4">
                             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                               <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem> )} />
+                               <FormField
+                                  control={form.control}
+                                  name="dob"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Date of Birth</FormLabel>
+                                      <FormControl>
+                                        <DatePicker
+                                          value={field.value}
+                                          onChange={field.onChange}
+                                          fromYear={new Date().getFullYear() - 100}
+                                          toYear={new Date().getFullYear()}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
                                <FormField
                                 control={form.control}
                                 name="gender"
