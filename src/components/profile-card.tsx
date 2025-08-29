@@ -34,7 +34,6 @@ const MedicationSchema = z.object({
 });
 
 function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
-  const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
   const [suggestion, setSuggestion] = React.useState<string | null>(null);
 
   const form = useForm<z.infer<typeof MedicationSchema>>({
@@ -46,27 +45,23 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
 
   React.useEffect(() => {
     const handler = setTimeout(async () => {
-      if (medicationNameValue && medicationNameValue.length > 2) {
-        setIsCheckingSpelling(true);
+      if (medicationNameValue && medicationNameValue.length > 3) {
         setSuggestion(null);
         try {
           const result = await checkMedicationSpelling({ medicationName: medicationNameValue });
-          if (result.correctedName && result.correctedName.toLowerCase() !== medicationNameValue.toLowerCase()) {
+          if (result.correctedName) {
             setSuggestion(result.correctedName);
           }
         } catch (error) {
           console.error("Medication spell check failed", error);
-        } finally {
-          setIsCheckingSpelling(false);
         }
       } else {
         setSuggestion(null);
       }
-    }, 500); // 500ms debounce
+    }, 500);
 
     return () => {
       clearTimeout(handler);
-      setIsCheckingSpelling(false);
     };
   }, [medicationNameValue]);
   
@@ -667,5 +662,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    
