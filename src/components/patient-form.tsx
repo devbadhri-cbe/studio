@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import type { Patient } from '@/lib/types';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from './ui/button';
@@ -23,8 +23,13 @@ const FormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')),
   country: z.string().min(1, { message: "Country is required." }),
   phone: z.string().min(5, { message: "Phone number is too short." }),
-  height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional().or(z.literal('')),
-  weight: z.coerce.number().min(2, 'Weight must be at least 2kg.').optional().or(z.literal('')),
+  // Imperial units
+  height_ft: z.coerce.number().optional().or(z.literal('')),
+  height_in: z.coerce.number().optional().or(z.literal('')),
+  weight_lbs: z.coerce.number().optional().or(z.literal('')),
+  // Metric units
+  height_cm: z.coerce.number().optional().or(z.literal('')),
+  weight_kg: z.coerce.number().optional().or(z.literal('')),
 });
 
 interface PatientFormProps {
@@ -40,7 +45,6 @@ const formatPhoneNumber = (phone: string, countryCode: string): string => {
     const phoneDigits = phone.replace(/\D/g, '');
     const countryPhoneCodeDigits = country.phoneCode.replace(/\D/g, '');
     
-    // Remove country code if it's already there
     const phoneWithoutCountryCode = phoneDigits.startsWith(countryPhoneCodeDigits)
         ? phoneDigits.substring(countryPhoneCodeDigits.length)
         : phoneDigits;
@@ -61,12 +65,23 @@ const formatPhoneNumber = (phone: string, countryCode: string): string => {
             return `${country.phoneCode} ${phoneWithoutCountryCode}`;
     }
     
-    return phone; // Return original if not formatted
+    return phone;
 }
+
+const lbsToKg = (lbs: number) => lbs * 0.453592;
+const kgToLbs = (kg: number) => kg / 0.453592;
+const ftInToCm = (ft: number, inches: number) => (ft * 12 + inches) * 2.54;
+const cmToFtIn = (cm: number) => {
+    const totalInches = cm / 2.54;
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { feet, inches };
+};
 
 
 export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [unitSystem, setUnitSystem] = React.useState<'metric' | 'imperial'>('metric');
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -77,8 +92,11 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
       email: '',
       country: '',
       phone: '',
-      height: '',
-      weight: '',
+      height_cm: '',
+      weight_kg: '',
+      height_ft: '',
+      height_in: '',
+      weight_lbs: '',
     },
   });
   
@@ -91,11 +109,22 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
         if (countryData && (!currentPhone || !countries.some(c => currentPhone.startsWith(c.phoneCode)))) {
              form.setValue('phone', countryData.phoneCode, { shouldValidate: false });
         }
+        setUnitSystem(countryData?.unitSystem || 'metric');
     }
   }, [watchCountry, form]);
   
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
+    let heightInCm = data.height_cm;
+    if (unitSystem === 'imperial' && data.height_ft) {
+        heightInCm = ftInToCm(Number(data.height_ft) || 0, Number(data.height_in) || 0);
+    }
+
+    let weightInKg = data.weight_kg;
+    if (unitSystem === 'imperial' && data.weight_lbs) {
+        weightInKg = lbsToKg(Number(data.weight_lbs) || 0);
+    }
+
     const patientDataToSave = {
         name: data.name,
         dob: data.dob,
@@ -103,14 +132,35 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
         email: data.email,
         country: data.country,
         phone: data.phone,
-        height: data.height,
-        weight: data.weight,
+        height: heightInCm,
+        weight: weightInKg,
     };
     await onSave(patientDataToSave, patient?.id);
     setIsSubmitting(false);
   };
   
   React.useEffect(() => {
+    const countryData = countries.find(c => c.code === patient?.country);
+    setUnitSystem(countryData?.unitSystem || 'metric');
+    
+    let height_cm = patient?.height || '';
+    let weight_kg = patient?.weightRecords?.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]?.value || '';
+    let height_ft = '';
+    let height_in = '';
+    let weight_lbs = '';
+
+    if (countryData?.unitSystem === 'imperial') {
+        if (patient?.height) {
+            const { feet, inches } = cmToFtIn(patient.height);
+            height_ft = feet.toString();
+            height_in = inches.toString();
+        }
+        if (weight_kg) {
+            weight_lbs = Math.round(kgToLbs(Number(weight_kg))).toString();
+        }
+    }
+
+
     form.reset({
         name: patient?.name || '',
         dob: patient?.dob ? new Date(patient.dob).toISOString().split('T')[0] : '',
@@ -118,8 +168,11 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
         email: patient?.email || '',
         country: patient?.country || '',
         phone: patient?.phone || '',
-        height: patient?.height || '',
-        weight: '',
+        height_cm: height_cm.toString(),
+        weight_kg: '', // Always clear weight field for new entry
+        height_ft: height_ft,
+        height_in: height_in,
+        weight_lbs: '', // Always clear weight field for new entry
     });
   }, [patient, form]);
 
@@ -173,11 +226,23 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
 
                         <Separator />
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                            <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Current Weight (kg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 70" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                        </div>
-
+                        {unitSystem === 'metric' ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <FormField control={form.control} name="height_cm" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                <FormField control={form.control} name="weight_kg" render={({ field }) => ( <FormItem><FormLabel>Current Weight (kg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 70" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            </div>
+                        ) : (
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <FormLabel>Height (ft, in)</FormLabel>
+                                    <div className="flex gap-2 mt-2">
+                                        <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="ft" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                        <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="in" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                    </div>
+                                </div>
+                                <FormField control={form.control} name="weight_lbs" render={({ field }) => ( <FormItem><FormLabel>Current Weight (lbs)</FormLabel><FormControl><Input type="number" placeholder="e.g., 154" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            </div>
+                        )}
 
                          <div className="flex justify-end gap-2 pt-4">
                             <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
@@ -193,5 +258,3 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
     </div>
   );
 }
-
-    
