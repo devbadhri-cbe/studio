@@ -16,14 +16,13 @@ import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 import { DrugInteractionDialog } from './drug-interaction-dialog';
 import { Separator } from './ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 
 const MedicationSchema = z.object({
@@ -35,6 +34,7 @@ const MedicationSchema = z.object({
 function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [suggestion, setSuggestion] = React.useState<{ originalData: z.infer<typeof MedicationSchema>, correctedName: string } | null>(null);
+  const [popoverOpen, setPopoverOpen] = React.useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof MedicationSchema>>({
@@ -53,6 +53,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
   
   const handleInitialSubmit = async (data: z.infer<typeof MedicationSchema>) => {
     setIsSubmitting(true);
+    setPopoverOpen(false);
     try {
         const response = await fetch(`https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json?name=${encodeURIComponent(data.medicationName)}`);
         if (!response.ok) throw new Error('API request failed');
@@ -61,6 +62,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
 
         if (suggestions && suggestions.length > 0 && suggestions[0].toLowerCase() !== data.medicationName.toLowerCase()) {
             setSuggestion({ originalData: data, correctedName: suggestions[0] });
+            setPopoverOpen(true);
         } else {
             handleFinalSave(data);
         }
@@ -81,6 +83,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
     if (suggestion) {
         handleFinalSave({ ...suggestion.originalData, medicationName: suggestion.correctedName });
     }
+    setPopoverOpen(false);
     setSuggestion(null);
   };
 
@@ -88,11 +91,11 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
     if (suggestion) {
         handleFinalSave(suggestion.originalData);
     }
+    setPopoverOpen(false);
     setSuggestion(null);
   }
 
   return (
-    <>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleInitialSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
            <FormField
@@ -104,7 +107,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
                   <Input
                     placeholder="Medication Name"
                     {...field}
-                    autoComplete="off"
+                    autoComplete="new-password"
                     spellCheck={false}
                   />
                 </FormControl>
@@ -118,27 +121,27 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
-            <Button type="submit" size="sm" disabled={isSubmitting}>
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
-            </Button>
+            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button type="submit" size="sm" disabled={isSubmitting}>
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-3">
+                 <div className="space-y-2">
+                    <p className="text-sm">
+                      Did you mean <strong className="text-foreground">{suggestion?.correctedName}</strong>?
+                    </p>
+                    <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline" onClick={onIgnoreSuggestion}>Save as is</Button>
+                        <Button size="sm" onClick={onConfirmSuggestion}>Use Suggestion</Button>
+                    </div>
+                 </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </form>
       </Form>
-      <AlertDialog open={!!suggestion} onOpenChange={(isOpen) => !isOpen && setSuggestion(null)}>
-        <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>Spelling Suggestion</AlertDialogTitle>
-                <AlertDialogDescription>
-                    Did you mean <strong className="text-foreground">{suggestion?.correctedName}</strong> instead of <span className="line-through">{suggestion?.originalData.medicationName}</span>?
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel onClick={onIgnoreSuggestion}>Save as is</AlertDialogCancel>
-                <AlertDialogAction onClick={onConfirmSuggestion}>Use Suggestion</AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
   );
 }
 
