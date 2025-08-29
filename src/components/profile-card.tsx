@@ -389,18 +389,6 @@ export function ProfileCard() {
                 <CardDescription>Your personal and medical information.</CardDescription>
               </div>
             </div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <EditProfileDialog>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </EditProfileDialog>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Edit Profile</p>
-              </TooltipContent>
-            </Tooltip>
         </div>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
