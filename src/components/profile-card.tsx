@@ -51,6 +51,11 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
     defaultValues: { medicationName: '', dosage: '', frequency: '' },
   });
 
+  const capitalizeFirstLetter = (string: string) => {
+    if (!string) return "";
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
   const handleFinalSave = (data: z.infer<typeof MedicationSchema>) => {
     onSave({
       name: data.medicationName,
@@ -102,11 +107,6 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
     }
     setPopoverOpen(false);
     setSuggestion(null);
-  }
-
-  const capitalizeFirstLetter = (string: string) => {
-    if (!string) return "";
-    return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
   return (
@@ -365,7 +365,7 @@ function CountryForm({ currentCountry, onSave, onCancel }: { currentCountry?: st
 }
 
 const DobSchema = z.object({ dob: z.date({ required_error: "A valid date is required." }) });
-function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave: (dob: string) => void; onCancel: () => void }) {
+function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave: (dob: string) => void; onCancel: () => void; }) {
     const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob ? parseISO(currentDob) : undefined } });
     return (
         <Form {...form}>
@@ -570,7 +570,7 @@ export function ProfileCard() {
             <div className="flex items-center gap-3 text-muted-foreground">
                 <Ruler className="h-5 w-5 shrink-0" />
                  {isEditingHeight ? (
-                    <HeightForm unitSystem={unitSystem} currentHeight={profile.height} onSave={handleSaveHeight} onCancel={()={() => setIsEditingHeight(false)} />
+                    <HeightForm unitSystem={unitSystem} currentHeight={profile.height} onSave={handleSaveHeight} onCancel={() => setIsEditingHeight(false)} />
                 ) : (
                     <div className="flex items-center gap-2 flex-1">
                         <p>{displayHeight}</p>
@@ -740,7 +740,7 @@ export function ProfileCard() {
                             </div>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={()={() => removeMedicalCondition(condition.id)}>
+                                <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedicalCondition(condition.id)}>
                                   <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                 </Button>
                               </TooltipTrigger>
@@ -763,9 +763,9 @@ export function ProfileCard() {
                 <div className="flex items-center gap-1">
                     {profile.medication.length > 1 && !isMedicationNil && (
                         <Dialog open={isDrugInteractionOpen} onOpenChange={setIsDrugInteractionOpen}>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <DialogTrigger asChild>
+                            <DialogTrigger asChild>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
                                         <Button 
                                             size="icon" 
                                             variant="outline" 
@@ -774,14 +774,13 @@ export function ProfileCard() {
                                         >
                                             <ShieldAlert className="h-4 w-4" />
                                         </Button>
-                                    </DialogTrigger>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Check Drug Interactions</p>
-                                </TooltipContent>
-                            </Tooltip>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Check Drug Interactions</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </DialogTrigger>
                             <DrugInteractionDialog
-                                open={isDrugInteractionOpen}
                                 medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
                             />
                         </Dialog>
@@ -810,7 +809,7 @@ export function ProfileCard() {
                     )}
                 </div>
             </div>
-             {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={()={() => setIsAddingMedication(false)} />}
+             {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} />}
             {profile.medication.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
