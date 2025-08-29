@@ -102,7 +102,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
              <div className="flex-1 min-w-0">
                 <CardTitle className="text-lg truncate">{patient.name}</CardTitle>
                 <p className="text-xs text-muted-foreground truncate">
-                    {age ? `${age} years old` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
+                    {age ? `${age} Y` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
                     {patient.bmi && <span className="font-semibold"> (BMI: {patient.bmi.toFixed(1)})</span>}
                 </p>
              </div>
