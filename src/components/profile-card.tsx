@@ -1,17 +1,17 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format, isValid } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { calculateAge, calculateBmi } from '@/lib/utils';
-import { countries, Country } from '@/lib/countries';
+import { countries, Country, dateFormats } from '@/lib/countries';
 import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
@@ -293,9 +293,23 @@ function CountryForm({ currentCountry, onSave, onCancel }: { currentCountry?: st
     );
 }
 
+const DateFormatSchema = z.object({ dateFormat: z.string().min(1, "A format is required.") });
+function DateFormatForm({ currentFormat, onSave, onCancel }: { currentFormat?: string; onSave: (format: string) => void; onCancel: () => void }) {
+    const form = useForm<z.infer<typeof DateFormatSchema>>({ resolver: zodResolver(DateFormatSchema), defaultValues: { dateFormat: currentFormat || '' } });
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit((d) => onSave(d.dateFormat))} className="flex items-center gap-2 flex-1">
+                <FormField control={form.control} name="dateFormat" render={({ field }) => ( <FormItem className="flex-1"><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="h-8"><SelectValue placeholder="Select..." /></SelectTrigger></FormControl><SelectContent>{dateFormats.map(f => <SelectItem key={f.format} value={f.format}>{f.label}</SelectItem>)}</SelectContent></Select><FormMessage className="text-xs" /></FormItem> )}/>
+                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
+                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
+            </form>
+        </Form>
+    );
+}
+
 const DobSchema = z.object({ dob: z.date({ required_error: "A valid date is required." }) });
 function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave: (dob: string) => void; onCancel: () => void }) {
-    const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob ? new Date(currentDob) : undefined } });
+    const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob ? parseISO(currentDob) : undefined } });
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit((d) => onSave(format(d.dob, 'yyyy-MM-dd')))} className="flex items-center gap-2 flex-1">
@@ -318,6 +332,7 @@ export function ProfileCard() {
   const [isEditingPhone, setIsEditingPhone] = React.useState(false);
   const [isEditingCountry, setIsEditingCountry] = React.useState(false);
   const [isEditingDob, setIsEditingDob] = React.useState(false);
+  const [isEditingDateFormat, setIsEditingDateFormat] = React.useState(false);
   const [medicationChanged, setMedicationChanged] = React.useState(false);
   const formatDate = useDateFormatter();
 
@@ -371,9 +386,15 @@ export function ProfileCard() {
   };
 
   const handleSaveCountry = (newCountry: string) => {
-    setProfile({ ...profile, country: newCountry });
+    const newCountryData = countries.find(c => c.code === newCountry);
+    setProfile({ ...profile, country: newCountry, dateFormat: newCountryData?.dateFormat || 'MM-dd-yyyy' });
     setIsEditingCountry(false);
   };
+  
+  const handleSaveDateFormat = (newFormat: string) => {
+    setProfile({ ...profile, dateFormat: newFormat });
+    setIsEditingDateFormat(false);
+  }
 
   const handleSaveDob = (newDob: string) => {
     setProfile({ ...profile, dob: newDob });
@@ -451,6 +472,20 @@ export function ProfileCard() {
                     {latestWeight ? `${latestWeight.value} kg` : 'N/A'}
                     {bmi && <span className="ml-2 font-semibold text-foreground">(BMI: {bmi})</span>}
                 </p>
+            </div>
+
+             <Separator className="my-2" />
+            
+             <div className="flex items-center gap-3 text-muted-foreground">
+                <Settings className="h-5 w-5 shrink-0" />
+                {isEditingDateFormat ? (
+                    <DateFormatForm currentFormat={profile.dateFormat} onSave={handleSaveDateFormat} onCancel={() => setIsEditingDateFormat(false)} />
+                ) : (
+                    <div className="flex items-center gap-2 flex-1">
+                        <p>Date Format: <span className="font-semibold text-foreground">{profile.dateFormat}</span></p>
+                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingDateFormat(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Date Format</p></TooltipContent></Tooltip>
+                    </div>
+                )}
             </div>
 
              <Separator className="my-2" />

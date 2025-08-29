@@ -2,7 +2,6 @@
 'use client';
 
 import * as React from 'react';
-import { format } from 'date-fns';
 import { ChevronLeft, ChevronRight, MoreHorizontal, Eye } from 'lucide-react';
 
 import { useApp } from '@/context/app-context';
@@ -157,7 +156,7 @@ export function ThyroidHistoryTable() {
           <DialogHeader>
             <DialogTitle>Medication Details</DialogTitle>
             <DialogDescription>
-              Medication taken at the time of the test on {selectedRecord ? format(new Date(selectedRecord.date), 'MMMM d, yyyy') : ''}.
+              Medication taken at the time of the test on {selectedRecord ? formatDate(selectedRecord.date) : ''}.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">

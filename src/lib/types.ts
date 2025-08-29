@@ -34,6 +34,7 @@ export interface UserProfile {
   phone?: string;
   height?: number; // in cm
   photoUrl?: string;
+  dateFormat: string; // e.g., 'dd-MM-yyyy'
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
 }
@@ -90,6 +91,7 @@ export interface Patient {
   phone: string;
   height?: number; // in cm
   photoUrl?: string;
+  dateFormat: string;
   bmi?: number;
   lastHba1c: {
     value: number;

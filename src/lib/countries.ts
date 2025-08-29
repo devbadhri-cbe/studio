@@ -8,6 +8,16 @@ export interface Country {
     dateFormat: string;
 }
 
+export const dateFormats = [
+    { format: 'MM-dd-yyyy', label: 'MM-DD-YYYY' },
+    { format: 'dd-MM-yyyy', label: 'DD-MM-YYYY' },
+    { format: 'yyyy-MM-dd', label: 'YYYY-MM-DD' },
+    { format: 'dd.MM.yyyy', label: 'DD.MM.YYYY' },
+    { format: 'dd/MM/yyyy', label: 'DD/MM/YYYY' },
+    { format: 'yyyy/MM/dd', label: 'YYYY/MM/DD' },
+    { format: 'PPP', label: 'Month D, YYYY' },
+]
+
 export const countries: Country[] = [
     { code: 'US', name: 'United States', phoneCode: '+1', unitSystem: 'imperial', biomarkerUnit: 'conventional', dateFormat: 'MM-dd-yyyy' },
     { code: 'IN', name: 'India', phoneCode: '+91', unitSystem: 'metric', biomarkerUnit: 'si', dateFormat: 'dd-MM-yyyy' },

@@ -1,7 +1,6 @@
 
 'use client';
 
-import { format } from 'date-fns';
 import { Line, LineChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot } from 'recharts';
 import type { ChartConfig } from '@/components/ui/chart';
 import { useApp } from '@/context/app-context';

@@ -2,7 +2,6 @@
 'use client';
 
 import * as React from 'react';
-import { format } from 'date-fns';
 import { ChevronLeft, ChevronRight, MoreHorizontal, Eye } from 'lucide-react';
 
 import { useApp } from '@/context/app-context';
@@ -26,6 +25,7 @@ import {
 import type { Hba1cRecord } from '@/lib/types';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { format } from 'date-fns';
 
 const RECORDS_PER_PAGE = 5;
 
@@ -160,7 +160,7 @@ export function HistoryTable() {
           <DialogHeader>
             <DialogTitle>Medication Details</DialogTitle>
             <DialogDescription>
-              Medication taken at the time of the test on {selectedRecord ? format(new Date(selectedRecord.date), 'MMMM d, yyyy') : ''}.
+              Medication taken at the time of the test on {selectedRecord ? formatDate(selectedRecord.date) : ''}.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">

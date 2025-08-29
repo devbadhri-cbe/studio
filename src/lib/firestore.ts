@@ -14,6 +14,7 @@ import { WeightRecord } from './types';
 import { BloodPressureRecord } from './types';
 import { MedicalCondition } from './types';
 import { Medication } from './types';
+import { countries } from './countries';
 
 const PATIENTS_COLLECTION = 'patients';
 
@@ -77,9 +78,11 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
 // Add a new patient
 export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number }): Promise<Patient> => {
     const { weight, ...restOfPatientData } = patientData;
+    const countryInfo = countries.find(c => c.code === patientData.country);
 
     let newPatientObject: Omit<Patient, 'id'> = {
         ...restOfPatientData,
+        dateFormat: countryInfo?.dateFormat || 'MM-dd-yyyy',
         lastHba1c: null,
         lastLipid: null,
         lastVitaminD: null,
