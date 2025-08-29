@@ -8,7 +8,7 @@ import { VitaminDChart } from './vitamin-d-chart';
 import { Separator } from './ui/separator';
 import { useApp } from '@/context/app-context';
 import { format } from 'date-fns';
-import { Droplet, Heart, Sun, Activity, Zap, Pulse } from 'lucide-react';
+import { Droplet, Heart, Sun, Activity, Zap, HeartPulse } from 'lucide-react';
 import { ThyroidChart } from './thyroid-chart';
 import { BloodPressureChart } from './blood-pressure-chart';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
@@ -113,7 +113,7 @@ export function ReportCard() {
              <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Heart Rate</CardTitle>
-                <Pulse className="h-4 w-4 text-muted-foreground" />
+                <HeartPulse className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                  {latestBloodPressure?.heartRate ? (
