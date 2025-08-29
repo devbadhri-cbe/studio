@@ -74,7 +74,7 @@ export function DrugInteractionDialog({ medications, disabled, children, onOpenC
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      {children}
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Drug Interaction Analysis</DialogTitle>
