@@ -36,46 +36,45 @@ const MedicationSchema = z.object({
 function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
   const { toast } = useToast();
   const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
+  const [suggestion, setSuggestion] = React.useState<string | null>(null);
 
   const form = useForm<z.infer<typeof MedicationSchema>>({
     resolver: zodResolver(MedicationSchema),
     defaultValues: { medicationName: '', dosage: '', frequency: '' },
   });
-  
-  const handleSpellCheck = async () => {
-    const medicationName = form.getValues('medicationName');
-    if (medicationName.length < 3) {
-      toast({
-          variant: 'destructive',
-          title: 'Enter a medication name',
-          description: 'Please type a medication name before checking its spelling.',
-      });
-      return;
-    }
-    setIsCheckingSpelling(true);
-    try {
-      const result = await checkMedicationSpelling({ medicationName });
-      if (result.correctedName && result.correctedName.toLowerCase() !== medicationName.toLowerCase()) {
-        form.setValue('medicationName', result.correctedName);
-        toast({
-          title: 'Spelling Corrected',
-          description: `Changed "${medicationName}" to "${result.correctedName}".`,
-        });
+
+  const medicationNameValue = form.watch('medicationName');
+
+  React.useEffect(() => {
+    const handler = setTimeout(async () => {
+      if (medicationNameValue && medicationNameValue.length > 2) {
+        setIsCheckingSpelling(true);
+        setSuggestion(null);
+        try {
+          const result = await checkMedicationSpelling({ medicationName: medicationNameValue });
+          if (result.correctedName && result.correctedName.toLowerCase() !== medicationNameValue.toLowerCase()) {
+            setSuggestion(result.correctedName);
+          }
+        } catch (error) {
+          console.error("Medication spell check failed", error);
+        } finally {
+          setIsCheckingSpelling(false);
+        }
       } else {
-         toast({
-          title: 'Spelling seems correct!',
-          description: `No corrections found for "${medicationName}".`,
-        });
+        setSuggestion(null);
       }
-    } catch (error) {
-      console.error("Medication spell check failed", error);
-      toast({
-          variant: 'destructive',
-          title: 'Spell Check Failed',
-          description: 'Could not check spelling at this time.',
-      });
-    } finally {
+    }, 500); // 500ms debounce
+
+    return () => {
+      clearTimeout(handler);
       setIsCheckingSpelling(false);
+    };
+  }, [medicationNameValue]);
+  
+  const handleSuggestionAccept = () => {
+    if (suggestion) {
+      form.setValue('medicationName', suggestion, { shouldValidate: true });
+      setSuggestion(null);
     }
   }
 
@@ -91,32 +90,33 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-start">
-           <FormField 
-            control={form.control} 
-            name="medicationName" 
-            render={({ field }) => ( 
-                <FormItem>
-                    <FormControl>
-                        <Input 
-                            placeholder="Medication Name" 
-                            {...field}
-                            autoComplete="off"
-                        />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem> 
-            )} 
-          />
-           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button type="button" variant="outline" size="icon" onClick={handleSpellCheck} disabled={isCheckingSpelling} className="w-full sm:w-10">
-                {isCheckingSpelling ? <Loader2 className="h-4 w-4 animate-spin" /> : <SpellCheck className="h-4 w-4" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Check Spelling</TooltipContent>
-           </Tooltip>
-        </div>
+         <Popover open={!!suggestion} onOpenChange={(isOpen) => !isOpen && setSuggestion(null)}>
+            <PopoverAnchor asChild>
+                 <FormField 
+                    control={form.control} 
+                    name="medicationName" 
+                    render={({ field }) => ( 
+                        <FormItem>
+                            <FormControl>
+                                <Input 
+                                    placeholder="Medication Name" 
+                                    {...field}
+                                    autoComplete="off"
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem> 
+                    )} 
+                />
+            </PopoverAnchor>
+             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-2">
+                <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm">Did you mean: <span className="font-semibold">{suggestion}</span>?</p>
+                    <Button size="sm" onClick={handleSuggestionAccept}>Yes</Button>
+                </div>
+            </PopoverContent>
+        </Popover>
+
         <div className="grid grid-cols-2 gap-2">
           <FormField control={form.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
           <FormField control={form.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
