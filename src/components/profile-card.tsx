@@ -401,7 +401,7 @@ export function ProfileCard() {
                          <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingHeight(true)}>
-                                    <Pencil className="h-3 w-3" />
+                                    <Pencil className="h-3 w-3 text-border" strokeWidth={1.5} />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -428,7 +428,7 @@ export function ProfileCard() {
                 ) : (
                     <div className="flex items-center gap-2 flex-1">
                         <p>{profile.email || 'N/A'}</p>
-                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingEmail(true)}><Pencil className="h-3 w-3" /></Button></TooltipTrigger><TooltipContent><p>Edit Email</p></TooltipContent></Tooltip>
+                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingEmail(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Email</p></TooltipContent></Tooltip>
                     </div>
                 )}
             </div>
@@ -439,7 +439,7 @@ export function ProfileCard() {
                 ) : (
                     <div className="flex items-center gap-2 flex-1">
                         <p>{profile.phone || 'N/A'}</p>
-                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingPhone(true)}><Pencil className="h-3 w-3" /></Button></TooltipTrigger><TooltipContent><p>Edit Phone</p></TooltipContent></Tooltip>
+                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingPhone(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Phone</p></TooltipContent></Tooltip>
                     </div>
                 )}
             </div>
@@ -450,7 +450,7 @@ export function ProfileCard() {
                 ) : (
                     <div className="flex items-center gap-2 flex-1">
                         <p>{countryName}</p>
-                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingCountry(true)}><Pencil className="h-3 w-3" /></Button></TooltipTrigger><TooltipContent><p>Edit Country</p></TooltipContent></Tooltip>
+                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingCountry(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Country</p></TooltipContent></Tooltip>
                     </div>
                 )}
             </div>
@@ -646,5 +646,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    
