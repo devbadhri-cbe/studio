@@ -1,32 +1,27 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Default to secure: deny all reads and writes
-    match /{document=**} {
-      allow read, write: if false;
+
+    // Helper function to check if a user is the authenticated doctor.
+    function isDoctor() {
+      return request.auth != null;
     }
 
+    // Secure the patients collection
     match /patients/{patientId} {
-      // Doctors (authenticated) can list all patients for their dashboard
-      allow list: if request.auth != null;
+      // Doctors can do anything.
+      allow read, write: if isDoctor();
       
-      // Doctors can read any patient document.
-      // Patients (unauthenticated) can read their own document using their unique ID.
-      allow get: if request.auth != null || true;
+      // Patients (unauthenticated) can get their own document to view the dashboard
+      // and update it to add records or change their profile.
+      // This is secure because they must know the unguessable patient ID.
+      allow get, update: if !isDoctor();
       
-      // Doctors can create, update, and delete patients.
-      // Patients can update their own records.
-      allow write: if request.auth != null || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['records', 'lipidRecords', 'vitaminDRecords', 'thyroidRecords', 'bloodPressureRecords', 'weightRecords', 'medication', 'presentMedicalConditions', 'photoUrl', 'dob', 'gender', 'email', 'country', 'phone', 'height']));
-
-      // Chat subcollection rules
+      // Rules for the chat subcollection
       match /chat/{messageId} {
-        // Allow both doctors (auth) and patients (no auth) to read and create messages.
-        // This is safe because access requires knowing the unguessable patientId.
-        // 'list' is required for the onSnapshot listener to work.
-        allow list, create: if true;
-        allow get, update, delete: if request.auth != null; // Only doctors can manage individual messages
+        // Anyone (doctor or patient with the link) can read and write chat messages.
+        // This is necessary for the real-time chat to function for unauthenticated patients.
+        allow read, write: if true;
       }
     }
   }
