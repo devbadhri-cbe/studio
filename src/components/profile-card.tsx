@@ -95,8 +95,8 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
                         <Input
                           placeholder="Medication Name"
                           {...field}
-                          autoComplete="off"
-                          spellCheck="false"
+                          autoComplete="new-password"
+                          spellCheck={false}
                           onChange={(e) => {
                             const { value } = e.target;
                             const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
@@ -662,3 +662,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
