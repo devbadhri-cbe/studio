@@ -1,7 +1,7 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, SpellCheck } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,44 +33,47 @@ const MedicationSchema = z.object({
   frequency: z.string().min(1, 'Frequency is required.'),
 });
 
-function MedicationForm({ onSave, onCancel, isCheckingSpelling, setIsCheckingSpelling }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void, isCheckingSpelling: boolean, setIsCheckingSpelling: (isChecking: boolean) => void }) {
-  const [suggestion, setSuggestion] = React.useState<string | null>(null);
-  const [isSuggestionOpen, setIsSuggestionOpen] = React.useState(false);
-  const [ignoredSuggestions, setIgnoredSuggestions] = React.useState<string[]>([]);
-
+function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
+  const { toast } = useToast();
+  const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
 
   const form = useForm<z.infer<typeof MedicationSchema>>({
     resolver: zodResolver(MedicationSchema),
     defaultValues: { medicationName: '', dosage: '', frequency: '' },
   });
   
-  const handleUpdateMedicationName = (name: string) => {
-    form.setValue('medicationName', name);
-    setIsSuggestionOpen(false);
-  }
-
   const handleSpellCheck = async () => {
     const medicationName = form.getValues('medicationName');
-    if (medicationName.length < 3 || ignoredSuggestions.includes(medicationName.toLowerCase())) {
-        setSuggestion(null);
-        setIsSuggestionOpen(false);
-        return;
-    };
-
+    if (medicationName.length < 3) {
+      toast({
+          variant: 'destructive',
+          title: 'Enter a medication name',
+          description: 'Please type a medication name before checking its spelling.',
+      });
+      return;
+    }
     setIsCheckingSpelling(true);
     try {
       const result = await checkMedicationSpelling({ medicationName });
       if (result.correctedName && result.correctedName.toLowerCase() !== medicationName.toLowerCase()) {
-        setSuggestion(result.correctedName);
-        setIsSuggestionOpen(true);
+        form.setValue('medicationName', result.correctedName);
+        toast({
+          title: 'Spelling Corrected',
+          description: `Changed "${medicationName}" to "${result.correctedName}".`,
+        });
       } else {
-        setSuggestion(null);
-        setIsSuggestionOpen(false);
+         toast({
+          title: 'Spelling seems correct!',
+          description: `No corrections found for "${medicationName}".`,
+        });
       }
     } catch (error) {
       console.error("Medication spell check failed", error);
-      setSuggestion(null);
-      setIsSuggestionOpen(false);
+      toast({
+          variant: 'destructive',
+          title: 'Spell Check Failed',
+          description: 'Could not check spelling at this time.',
+      });
     } finally {
       setIsCheckingSpelling(false);
     }
@@ -83,64 +86,43 @@ function MedicationForm({ onSave, onCancel, isCheckingSpelling, setIsCheckingSpe
       frequency: data.frequency,
     });
     form.reset();
-    setIgnoredSuggestions([]);
   };
-
-  const handlePopoverOpenChange = (open: boolean) => {
-    if (!open) {
-        const medicationName = form.getValues('medicationName');
-        if (medicationName && !ignoredSuggestions.includes(medicationName.toLowerCase())) {
-            setIgnoredSuggestions([...ignoredSuggestions, medicationName.toLowerCase()]);
-        }
-    }
-    setIsSuggestionOpen(open);
-  }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-start">
            <FormField 
             control={form.control} 
             name="medicationName" 
             render={({ field }) => ( 
                 <FormItem>
                     <FormControl>
-                        <Popover open={isSuggestionOpen} onOpenChange={handlePopoverOpenChange}>
-                            <PopoverAnchor asChild>
-                                <div className="relative">
-                                    <Input 
-                                        placeholder="Name" 
-                                        {...field}
-                                        onBlur={handleSpellCheck}
-                                        autoComplete="off"
-                                    />
-                                </div>
-                            </PopoverAnchor>
-                            <PopoverContent className="w-auto p-2" onOpenAutoFocus={(e) => e.preventDefault()}>
-                                <div className="flex items-center gap-2 text-sm">
-                                    <span className="text-muted-foreground">Did you mean:</span>
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        onClick={() => handleUpdateMedicationName(suggestion!)}
-                                        className="p-0 h-auto font-semibold"
-                                    >
-                                        {suggestion}
-                                    </Button>
-                                </div>
-                            </PopoverContent>
-                        </Popover>
+                        <Input 
+                            placeholder="Medication Name" 
+                            {...field}
+                            autoComplete="off"
+                        />
                     </FormControl>
                     <FormMessage />
                 </FormItem> 
             )} 
           />
-          <FormField control={form.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage" {...field} /></FormControl><FormMessage /></FormItem> )} />
-          <FormField control={form.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency" {...field} /></FormControl><FormMessage /></FormItem> )} />
+           <Tooltip>
+            <TooltipTrigger asChild>
+              <Button type="button" variant="outline" size="icon" onClick={handleSpellCheck} disabled={isCheckingSpelling} className="w-full sm:w-10">
+                {isCheckingSpelling ? <Loader2 className="h-4 w-4 animate-spin" /> : <SpellCheck className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Check Spelling</TooltipContent>
+           </Tooltip>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <FormField control={form.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
+          <FormField control={form.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
         </div>
         <div className="flex justify-end gap-2">
-          <Button type="button" size="sm" variant="ghost" onClick={() => { onCancel(); setIgnoredSuggestions([]); }}>Cancel</Button>
+          <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
           <Button type="submit" size="sm">Save</Button>
         </div>
       </form>
@@ -316,7 +298,6 @@ export function ProfileCard() {
   const [isEditingPhone, setIsEditingPhone] = React.useState(false);
   const [isEditingCountry, setIsEditingCountry] = React.useState(false);
   const [isEditingDob, setIsEditingDob] = React.useState(false);
-  const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
   const [medicationChanged, setMedicationChanged] = React.useState(false);
   const formatDate = useDateFormatter();
 
@@ -587,7 +568,7 @@ export function ProfileCard() {
                 <div className="flex items-center gap-1">
                     <DrugInteractionDialog
                         medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                        disabled={isCheckingSpelling || profile.medication.length < 2 || isMedicationNil}
+                        disabled={profile.medication.length < 2 || isMedicationNil}
                         onOpenChange={(open) => {
                             if (open) {
                                 setMedicationChanged(false);
@@ -600,7 +581,7 @@ export function ProfileCard() {
                                     size="icon" 
                                     variant="outline" 
                                     className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-blue-500/20' : ''}`}
-                                    disabled={isCheckingSpelling || profile.medication.length < 2 || isMedicationNil}
+                                    disabled={profile.medication.length < 2 || isMedicationNil}
                                 >
                                     <ShieldAlert className="h-4 w-4" />
                                 </Button>
@@ -634,7 +615,7 @@ export function ProfileCard() {
                     )}
                 </div>
             </div>
-             {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} isCheckingSpelling={isCheckingSpelling} setIsCheckingSpelling={setIsCheckingSpelling} />}
+             {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} />}
             {profile.medication.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
