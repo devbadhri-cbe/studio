@@ -20,7 +20,7 @@ export const dateFormats = [
 
 export const countries: Country[] = [
     { code: 'US', name: 'United States', phoneCode: '+1', unitSystem: 'imperial', biomarkerUnit: 'conventional', dateFormat: 'MM-dd-yyyy' },
-    { code: 'IN', name: 'India', phoneCode: '+91', unitSystem: 'metric', biomarkerUnit: 'si', dateFormat: 'dd-MM-yyyy' },
+    { code: 'IN', name: 'India', phoneCode: '+91', unitSystem: 'metric', biomarkerUnit: 'conventional', dateFormat: 'dd-MM-yyyy' },
     { code: 'GB', name: 'United Kingdom', phoneCode: '+44', unitSystem: 'metric', biomarkerUnit: 'si', dateFormat: 'dd-MM-yyyy' },
     { code: 'AU', name: 'Australia', phoneCode: '+61', unitSystem: 'metric', biomarkerUnit: 'si', dateFormat: 'dd-MM-yyyy' },
     { code: 'CA', name: 'Canada', phoneCode: '+1', unitSystem: 'metric', biomarkerUnit: 'si', dateFormat: 'yyyy-MM-dd' },
