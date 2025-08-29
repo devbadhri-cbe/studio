@@ -1,7 +1,7 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, SpellCheck } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,7 +34,6 @@ const MedicationSchema = z.object({
 });
 
 function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
-  const { toast } = useToast();
   const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
   const [suggestion, setSuggestion] = React.useState<string | null>(null);
 
@@ -92,28 +91,30 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
       <form onSubmit={form.handleSubmit(handleSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
          <Popover open={!!suggestion} onOpenChange={(isOpen) => !isOpen && setSuggestion(null)}>
             <PopoverAnchor asChild>
-                 <FormField 
-                    control={form.control} 
-                    name="medicationName" 
-                    render={({ field }) => ( 
-                        <FormItem>
-                            <FormControl>
-                                <Input 
-                                    placeholder="Medication Name" 
-                                    {...field}
-                                    autoComplete="off"
-                                    onChange={(e) => {
-                                        const { value } = e.target;
-                                        field.onChange(value.charAt(0).toUpperCase() + value.slice(1));
-                                    }}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem> 
-                    )} 
+                <FormField
+                  control={form.control}
+                  name="medicationName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          placeholder="Medication Name"
+                          {...field}
+                          autoComplete="off"
+                          onChange={(e) => {
+                            const { value } = e.target;
+                            // Capitalize first letter, leave rest as is
+                            const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
+                            field.onChange(formattedValue);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
             </PopoverAnchor>
-             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-2">
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-2">
                 <div className="flex items-center justify-between gap-2">
                     <p className="text-sm">Did you mean: <span className="font-semibold">{suggestion}</span>?</p>
                     <Button size="sm" onClick={handleSuggestionAccept}>Yes</Button>
