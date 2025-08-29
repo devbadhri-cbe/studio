@@ -102,6 +102,10 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
                                     placeholder="Medication Name" 
                                     {...field}
                                     autoComplete="off"
+                                    onChange={(e) => {
+                                        const { value } = e.target;
+                                        field.onChange(value.charAt(0).toUpperCase() + value.slice(1));
+                                    }}
                                 />
                             </FormControl>
                             <FormMessage />
