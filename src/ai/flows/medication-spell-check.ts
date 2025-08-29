@@ -35,17 +35,25 @@ const medicationSpellCheckFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      const response = await fetch(`https://rxnav.nlm.nih.gov/REST/approximateTerm.json?term=${encodeURIComponent(input.medicationName)}&maxEntries=1`);
+      // Use the correct 'spellingsuggestions' endpoint as shown in the user's example.
+      const response = await fetch(`https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json?name=${encodeURIComponent(input.medicationName)}`);
+      
       if (!response.ok) {
         console.error('RxNorm API request failed:', response.statusText);
         return { correctedName: '' };
       }
+      
       const data = await response.json();
       
-      const candidate = data?.approximateGroup?.candidate?.[0];
+      // Correctly parse the response structure for spelling suggestions.
+      const suggestions = data.suggestionGroup.suggestionList?.suggestion;
 
-      if (candidate && candidate.name.toLowerCase() !== input.medicationName.toLowerCase()) {
-        return { correctedName: candidate.name };
+      if (suggestions && suggestions.length > 0) {
+        const bestSuggestion = suggestions[0];
+        // Only return a suggestion if it's different from what the user typed.
+        if (bestSuggestion.toLowerCase() !== input.medicationName.toLowerCase()) {
+            return { correctedName: bestSuggestion };
+        }
       }
 
       return { correctedName: '' };
