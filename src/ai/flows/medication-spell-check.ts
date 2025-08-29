@@ -47,7 +47,6 @@ const medicationSpellCheckFlow = ai.defineFlow(
       const suggestions = data.suggestionGroup?.suggestionList?.suggestion;
 
       if (suggestions && suggestions.length > 0) {
-        // The first suggestion is generally the best match.
         const bestSuggestion = suggestions[0];
         // Only return a suggestion if it's different from what the user typed (case-insensitive).
         if (bestSuggestion.toLowerCase() !== input.medicationName.toLowerCase()) {
