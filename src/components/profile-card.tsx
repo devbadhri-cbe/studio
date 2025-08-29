@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { calculateAge, calculateBmi } from '@/lib/utils';
-import { countries } from '@/lib/countries';
+import { countries, Country } from '@/lib/countries';
 import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
@@ -23,6 +23,7 @@ import { checkMedicationSpelling } from '@/ai/flows/medication-spell-check';
 import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from './ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { EditProfileDialog } from './edit-profile-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 
 const MedicationSchema = z.object({
@@ -236,45 +237,59 @@ function HeightForm({ currentHeight, onSave, onCancel }: { currentHeight?: numbe
         defaultValues: { height: currentHeight || ('' as any) },
     });
 
-    const handleSubmit = (data: z.infer<typeof HeightSchema>) => {
-        onSave(data.height);
-    };
-
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="flex items-center gap-2 flex-1">
-                <FormField
-                    control={form.control}
-                    name="height"
-                    render={({ field }) => (
-                        <FormItem className="flex-1">
-                            <FormControl>
-                                <Input type="number" placeholder="cm" {...field} className="h-8" />
-                            </FormControl>
-                             <FormMessage className="text-xs" />
-                        </FormItem>
-                    )}
-                />
-                 <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600">
-                            <Check className="h-4 w-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Save</TooltipContent>
-                 </Tooltip>
-                 <Tooltip>
-                     <TooltipTrigger asChild>
-                        <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}>
-                            <X className="h-4 w-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>Cancel</TooltipContent>
-                 </Tooltip>
+            <form onSubmit={form.handleSubmit((d) => onSave(d.height))} className="flex items-center gap-2 flex-1">
+                <FormField control={form.control} name="height" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="cm" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
+                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
             </form>
         </Form>
     );
 }
+
+const EmailSchema = z.object({ email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')) });
+function EmailForm({ currentEmail, onSave, onCancel }: { currentEmail?: string; onSave: (email: string) => void; onCancel: () => void }) {
+    const form = useForm<z.infer<typeof EmailSchema>>({ resolver: zodResolver(EmailSchema), defaultValues: { email: currentEmail || '' } });
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit((d) => onSave(d.email || ''))} className="flex items-center gap-2 flex-1">
+                <FormField control={form.control} name="email" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="email" placeholder="patient@example.com" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
+                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
+            </form>
+        </Form>
+    );
+}
+
+const PhoneSchema = z.object({ phone: z.string().min(5, { message: "Phone number is too short." }) });
+function PhoneForm({ currentPhone, onSave, onCancel }: { currentPhone?: string; onSave: (phone: string) => void; onCancel: () => void }) {
+    const form = useForm<z.infer<typeof PhoneSchema>>({ resolver: zodResolver(PhoneSchema), defaultValues: { phone: currentPhone || '' } });
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit((d) => onSave(d.phone))} className="flex items-center gap-2 flex-1">
+                <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="tel" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
+                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
+            </form>
+        </Form>
+    );
+}
+
+const CountrySchema = z.object({ country: z.string().min(1, { message: "Country is required." }) });
+function CountryForm({ currentCountry, onSave, onCancel }: { currentCountry?: string; onSave: (country: string) => void; onCancel: () => void }) {
+    const form = useForm<z.infer<typeof CountrySchema>>({ resolver: zodResolver(CountrySchema), defaultValues: { country: currentCountry || '' } });
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit((d) => onSave(d.country))} className="flex items-center gap-2 flex-1">
+                <FormField control={form.control} name="country" render={({ field }) => ( <FormItem className="flex-1"><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="h-8"><SelectValue placeholder="Select..." /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage className="text-xs" /></FormItem> )}/>
+                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
+                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
+            </form>
+        </Form>
+    );
+}
+
 
 export function ProfileCard() {
   const { profile, setProfile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
@@ -282,6 +297,9 @@ export function ProfileCard() {
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [isAddingWeight, setIsAddingWeight] = React.useState(false);
   const [isEditingHeight, setIsEditingHeight] = React.useState(false);
+  const [isEditingEmail, setIsEditingEmail] = React.useState(false);
+  const [isEditingPhone, setIsEditingPhone] = React.useState(false);
+  const [isEditingCountry, setIsEditingCountry] = React.useState(false);
   const [isCheckingSpelling, setIsCheckingSpelling] = React.useState(false);
   const [medicationChanged, setMedicationChanged] = React.useState(false);
 
@@ -323,6 +341,22 @@ export function ProfileCard() {
     setProfile({ ...profile, height: newHeight });
     setIsEditingHeight(false);
   };
+
+  const handleSaveEmail = (newEmail: string) => {
+    setProfile({ ...profile, email: newEmail });
+    setIsEditingEmail(false);
+  };
+
+  const handleSavePhone = (newPhone: string) => {
+    setProfile({ ...profile, phone: newPhone });
+    setIsEditingPhone(false);
+  };
+
+  const handleSaveCountry = (newCountry: string) => {
+    setProfile({ ...profile, country: newCountry });
+    setIsEditingCountry(false);
+  };
+
 
   return (
     <Card className="h-full">
@@ -389,15 +423,36 @@ export function ProfileCard() {
 
              <div className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="h-5 w-5 shrink-0" />
-                <p>{profile.email || 'N/A'}</p>
+                {isEditingEmail ? (
+                    <EmailForm currentEmail={profile.email} onSave={handleSaveEmail} onCancel={() => setIsEditingEmail(false)} />
+                ) : (
+                    <div className="flex items-center gap-2 flex-1">
+                        <p>{profile.email || 'N/A'}</p>
+                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingEmail(true)}><Pencil className="h-3 w-3" /></Button></TooltipTrigger><TooltipContent><p>Edit Email</p></TooltipContent></Tooltip>
+                    </div>
+                )}
             </div>
             <div className="flex items-center gap-3 text-muted-foreground">
                 <Phone className="h-5 w-5 shrink-0" />
-                <p>{profile.phone || 'N/A'}</p>
+                 {isEditingPhone ? (
+                    <PhoneForm currentPhone={profile.phone} onSave={handleSavePhone} onCancel={() => setIsEditingPhone(false)} />
+                ) : (
+                    <div className="flex items-center gap-2 flex-1">
+                        <p>{profile.phone || 'N/A'}</p>
+                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingPhone(true)}><Pencil className="h-3 w-3" /></Button></TooltipTrigger><TooltipContent><p>Edit Phone</p></TooltipContent></Tooltip>
+                    </div>
+                )}
             </div>
              <div className="flex items-center gap-3 text-muted-foreground">
                 <Globe className="h-5 w-5 shrink-0" />
-                <p>{countryName}</p>
+                {isEditingCountry ? (
+                    <CountryForm currentCountry={profile.country} onSave={handleSaveCountry} onCancel={() => setIsEditingCountry(false)} />
+                ) : (
+                    <div className="flex items-center gap-2 flex-1">
+                        <p>{countryName}</p>
+                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingCountry(true)}><Pencil className="h-3 w-3" /></Button></TooltipTrigger><TooltipContent><p>Edit Country</p></TooltipContent></Tooltip>
+                    </div>
+                )}
             </div>
         </div>
 
@@ -591,3 +646,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
