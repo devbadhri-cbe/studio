@@ -367,7 +367,7 @@ export function ProfileCard() {
                          <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingHeight(true)}>
-                                    <Pencil className="h-3.5 w-3.5" />
+                                    <Pencil className="h-3 w-3" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
