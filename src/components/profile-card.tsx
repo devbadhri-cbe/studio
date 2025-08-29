@@ -25,6 +25,8 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import {
+  Dialog,
+  DialogTrigger,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -770,11 +772,11 @@ export function ProfileCard() {
                 <div className="flex items-center gap-1">
                     {profile.medication.length > 1 && !isMedicationNil && (
                         <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
-                             <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+                            <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
                                 <TooltipTrigger asChild>
-                                    <Button 
-                                        size="icon" 
-                                        variant="outline" 
+                                    <Button
+                                        size="icon"
+                                        variant="outline"
                                         className={`h-7 w-7 ${medicationChanged ? 'animate-pulse-once bg-primary/20' : ''}`}
                                         onClick={() => {
                                             setMedicationChanged(false);

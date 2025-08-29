@@ -57,10 +57,6 @@ export function DrugInteractionDialog({ medications, children }: DrugInteraction
   React.useEffect(() => {
     if (open) {
       handleInteractionCheck();
-    } else {
-      // Reset state when dialog closes
-      setResult(null);
-      setIsLoading(false);
     }
   }, [open, handleInteractionCheck]);
 
