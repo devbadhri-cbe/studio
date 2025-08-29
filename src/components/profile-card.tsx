@@ -762,17 +762,17 @@ export function ProfileCard() {
                 </div>
                 <div className="flex items-center gap-1">
                     {profile.medication.length > 1 && !isMedicationNil && (
-                        <DrugInteractionDialog
-                            medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                            onOpenChange={(open) => {
-                                if (open) {
-                                    setMedicationChanged(false);
-                                }
-                            }}
-                        >
+                         <DialogTrigger asChild>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <DialogTrigger asChild>
+                                    <DrugInteractionDialog
+                                        medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
+                                        onOpenChange={(open) => {
+                                            if (open) {
+                                                setMedicationChanged(false);
+                                            }
+                                        }}
+                                    >
                                         <Button 
                                             size="icon" 
                                             variant="outline" 
@@ -780,13 +780,13 @@ export function ProfileCard() {
                                         >
                                             <ShieldAlert className="h-4 w-4" />
                                         </Button>
-                                    </DialogTrigger>
+                                    </DrugInteractionDialog>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <p>Check Drug Interactions</p>
                                 </TooltipContent>
                             </Tooltip>
-                        </DrugInteractionDialog>
+                         </DialogTrigger>
                     )}
                      {profile.medication.length === 0 && !isAddingMedication && (
                         <Tooltip>
