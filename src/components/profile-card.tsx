@@ -95,6 +95,10 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
     setSuggestion(null);
   }
 
+  const capitalizeFirstLetter = (string: string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
   return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleInitialSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
@@ -107,6 +111,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
                   <Input
                     placeholder="Medication Name"
                     {...field}
+                    onChange={(e) => field.onChange(capitalizeFirstLetter(e.target.value))}
                     autoComplete="new-password"
                     spellCheck={false}
                   />
