@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -18,9 +19,13 @@ interface DatePickerProps {
   onChange: (date?: Date) => void;
   className?: string;
   placeholder?: string;
+  fromYear?: number;
+  toYear?: number;
 }
 
-export function DatePicker({ value, onChange, className, placeholder }: DatePickerProps) {
+export function DatePicker({ value, onChange, className, placeholder, fromYear, toYear }: DatePickerProps) {
+  const captionLayout = fromYear && toYear ? "dropdown-buttons" : "buttons";
+  
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -43,6 +48,9 @@ export function DatePicker({ value, onChange, className, placeholder }: DatePick
           onSelect={onChange}
           initialFocus
           disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+          captionLayout={captionLayout}
+          fromYear={fromYear}
+          toYear={toYear}
         />
       </PopoverContent>
     </Popover>

@@ -103,6 +103,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
   }
 
   const capitalizeFirstLetter = (string: string) => {
+    if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
@@ -306,7 +307,23 @@ function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit((d) => onSave(format(d.dob, 'yyyy-MM-dd')))} className="flex items-center gap-2 flex-1">
-                <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem className="flex-1"><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                <FormField 
+                    control={form.control} 
+                    name="dob" 
+                    render={({ field }) => ( 
+                        <FormItem className="flex-1">
+                            <FormControl>
+                                <DatePicker 
+                                    value={field.value} 
+                                    onChange={field.onChange} 
+                                    fromYear={new Date().getFullYear() - 100}
+                                    toYear={new Date().getFullYear()}
+                                />
+                            </FormControl>
+                            <FormMessage className="text-xs" />
+                        </FormItem> 
+                    )}
+                />
                 <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
                 <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
             </form>
@@ -442,7 +459,7 @@ export function ProfileCard() {
                                     <p>Change Date Format ({profile.dateFormat})</p>
                                 </TooltipContent>
                             </Tooltip>
-                            <DropdownMenuContent>
+                            <DropdownMenuContent className="font-sans">
                                 {dateFormats.map(f => (
                                     <DropdownMenuItem 
                                         key={f.format} 
@@ -717,4 +734,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
