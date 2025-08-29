@@ -501,7 +501,7 @@ export function ProfileCard() {
                    <div className="flex items-center gap-2 flex-1">
                         <p>
                             {profile.dob ? formatDate(profile.dob) : 'N/A'}
-                            {calculatedAge !== null && ` (Age: ${calculatedAge})`}
+                            {calculatedAge !== null && ` (${calculatedAge} years)`}
                         </p>
                         <Tooltip>
                             <TooltipTrigger asChild>
