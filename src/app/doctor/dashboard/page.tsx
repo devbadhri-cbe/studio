@@ -56,6 +56,18 @@ export default function DoctorDashboardPage() {
     React.useEffect(() => {
         fetchPatients();
     }, [fetchPatients]);
+    
+    // Re-fetch data when the page is focused
+    React.useEffect(() => {
+        const handleFocus = () => {
+            fetchPatients();
+        };
+        window.addEventListener('focus', handleFocus);
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+        };
+    }, [fetchPatients]);
+
 
     const viewPatientDashboard = (patient: Patient) => {
         router.push(`/patient/${patient.id}`);
