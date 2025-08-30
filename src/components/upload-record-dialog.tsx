@@ -16,6 +16,8 @@ import { ScrollArea } from './ui/scroll-area';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
 import { parseISO, isValid } from 'date-fns';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 type UploadStep = 'initial' | 'extractingName' | 'confirmingName' | 'extractingData' | 'confirmingData';
 
@@ -235,10 +237,32 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
     const vitaminDUnitMismatch = extractedData.vitaminDUnits && extractedData.vitaminDUnits !== expectedVitaminDUnit;
 
     const canConfirm = hasAnyData && isDateValid && !lipidUnitMismatch && !vitaminDUnitMismatch;
+    
+    const handleManualEntry = (field: keyof LabResultUploadOutput, value: string | number | object) => {
+        if (!extractedData) return;
+        
+        const updatedData = { ...extractedData };
+        
+        if (typeof value === 'object') {
+            (updatedData as any)[field] = { ...(updatedData as any)[field], ...value };
+        } else {
+             (updatedData as any)[field] = value;
+        }
+
+        if (field === 'vitaminDValue' && !updatedData.vitaminDUnits) {
+            updatedData.vitaminDUnits = expectedVitaminDUnit;
+        }
+        if (field === 'lipidPanel' && !updatedData.lipidPanel?.units) {
+             if (updatedData.lipidPanel) updatedData.lipidPanel.units = expectedLipidUnit;
+        }
+
+        setExtractedData(updatedData);
+    };
 
     return (
-        <>
-            <div className="flex-1 space-y-4 overflow-y-auto p-6">
+      <div className="flex-1 flex flex-col min-h-0">
+        <ScrollArea className="flex-1">
+            <div className="space-y-4 p-6">
                  <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
                     <FileText className="h-5 w-5 text-primary" />
                      <div className="flex-1">
@@ -269,117 +293,126 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
                 <h4 className="font-medium text-center text-muted-foreground">Extracted Results</h4>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                    {extractedData.hba1cValue && (
-                         <div className="flex items-center gap-3 rounded-md border p-2">
-                            <Droplet className="h-5 w-5 text-primary/80" />
-                            <div>
-                                <p className="font-semibold">HbA1c</p>
+                    <div className="flex items-center gap-3 rounded-md border p-2">
+                        <Droplet className="h-5 w-5 text-primary/80" />
+                        <div className="flex-1">
+                            <Label htmlFor="hba1c-manual" className="font-semibold">HbA1c</Label>
+                            {extractedData.hba1cValue ? (
                                 <p>{extractedData.hba1cValue}%</p>
-                            </div>
-                        </div>
-                    )}
-                    {extractedData.vitaminDValue && (
-                        <div className="flex items-center gap-3 rounded-md border p-2">
-                           <Sun className="h-5 w-5 text-primary/80" />
-                           <div>
-                               <p className="font-semibold">Vitamin D</p>
-                               <p>{extractedData.vitaminDValue} {extractedData.vitaminDUnits}</p>
-                           </div>
-                            {vitaminDUnitMismatch && (
-                                 <Tooltip>
-                                    <TooltipTrigger>
-                                        <AlertCircle className="h-4 w-4 text-destructive" />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Unit mismatch. Expected {expectedVitaminDUnit}.</p>
-                                    </TooltipContent>
-                                 </Tooltip>
+                            ) : (
+                                 <Input id="hba1c-manual" type="number" step="0.1" placeholder="Enter HbA1c" className="h-8 mt-1" onChange={e => handleManualEntry('hba1cValue', parseFloat(e.target.value))}/>
                             )}
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 rounded-md border p-2">
+                       <Sun className="h-5 w-5 text-primary/80" />
+                       <div className="flex-1">
+                           <Label htmlFor="vitd-manual" className="font-semibold">Vitamin D</Label>
+                           {extractedData.vitaminDValue ? (
+                                <p>{extractedData.vitaminDValue} {extractedData.vitaminDUnits}</p>
+                           ): (
+                                <Input id="vitd-manual" type="number" placeholder={`Enter Vit D (${expectedVitaminDUnit})`} className="h-8 mt-1" onChange={e => handleManualEntry('vitaminDValue', parseFloat(e.target.value))}/>
+                           )}
                        </div>
-                    )}
-                     {extractedData.bloodPressure && (
-                        <div className="flex items-center gap-3 rounded-md border p-2">
-                           <Zap className="h-5 w-5 text-primary/80" />
-                           <div>
-                               <p className="font-semibold">Blood Pressure</p>
+                        {vitaminDUnitMismatch && (
+                             <Tooltip>
+                                <TooltipTrigger>
+                                    <AlertCircle className="h-4 w-4 text-destructive" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Unit mismatch. Expected {expectedVitaminDUnit}.</p>
+                                </TooltipContent>
+                             </Tooltip>
+                        )}
+                   </div>
+                   
+                   <div className="flex items-center gap-3 rounded-md border p-2">
+                       <Zap className="h-5 w-5 text-primary/80" />
+                       <div className="flex-1">
+                           <p className="font-semibold">Blood Pressure</p>
+                           {extractedData.bloodPressure ? (
                                <p>{extractedData.bloodPressure.systolic}/{extractedData.bloodPressure.diastolic} mmHg</p>
-                           </div>
+                           ) : (
+                                <div className="flex gap-2 mt-1">
+                                    <Input type="number" placeholder="Systolic" className="h-8" onChange={e => handleManualEntry('bloodPressure', { systolic: parseFloat(e.target.value) })}/>
+                                    <Input type="number" placeholder="Diastolic" className="h-8" onChange={e => handleManualEntry('bloodPressure', { diastolic: parseFloat(e.target.value) })}/>
+                                </div>
+                           )}
                        </div>
-                    )}
+                   </div>
                 </div>
 
-                {extractedData.lipidPanel && (
-                     <div className="rounded-md border p-2 space-y-2">
-                        <div className="flex items-center gap-3">
-                             <FlaskConical className="h-5 w-5 text-primary/80" />
-                             <p className="font-semibold">Lipid Panel ({extractedData.lipidPanel.units || 'N/A'})</p>
-                              {lipidUnitMismatch && (
-                                 <Tooltip>
-                                    <TooltipTrigger>
-                                        <AlertCircle className="h-4 w-4 text-destructive" />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Unit mismatch. Expected {expectedLipidUnit}.</p>
-                                    </TooltipContent>
-                                 </Tooltip>
-                            )}
+                <div className="rounded-md border p-2 space-y-2">
+                    <div className="flex items-center gap-3">
+                         <FlaskConical className="h-5 w-5 text-primary/80" />
+                         <p className="font-semibold">Lipid Panel ({extractedData.lipidPanel?.units || expectedLipidUnit})</p>
+                          {lipidUnitMismatch && (
+                             <Tooltip>
+                                <TooltipTrigger>
+                                    <AlertCircle className="h-4 w-4 text-destructive" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Unit mismatch. Expected {expectedLipidUnit}.</p>
+                                </TooltipContent>
+                             </Tooltip>
+                        )}
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs">
+                         <div className="rounded-md bg-muted/50 p-2">
+                            <Label htmlFor="total-manual" className="font-semibold">Total</Label>
+                             {extractedData.lipidPanel?.total ? (<p>{extractedData.lipidPanel.total}</p>) : (<Input id="total-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('lipidPanel', { total: parseFloat(e.target.value) })}/>) }
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs">
-                             <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">Total</p>
-                                <p>{extractedData.lipidPanel.total || 'N/A'}</p>
-                            </div>
-                            <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">LDL</p>
-                                <p>{extractedData.lipidPanel.ldl || 'N/A'}</p>
-                            </div>
-                            <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">HDL</p>
-                                <p>{extractedData.lipidPanel.hdl || 'N/A'}</p>
-                            </div>
-                             <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">Trig.</p>
-                                <p>{extractedData.lipidPanel.triglycerides || 'N/A'}</p>
-                            </div>
+                        <div className="rounded-md bg-muted/50 p-2">
+                            <Label htmlFor="ldl-manual" className="font-semibold">LDL</Label>
+                            {extractedData.lipidPanel?.ldl ? (<p>{extractedData.lipidPanel.ldl}</p>) : (<Input id="ldl-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('lipidPanel', { ldl: parseFloat(e.target.value) })}/>) }
+                        </div>
+                        <div className="rounded-md bg-muted/50 p-2">
+                            <Label htmlFor="hdl-manual" className="font-semibold">HDL</Label>
+                            {extractedData.lipidPanel?.hdl ? (<p>{extractedData.lipidPanel.hdl}</p>) : (<Input id="hdl-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('lipidPanel', { hdl: parseFloat(e.target.value) })}/>) }
+                        </div>
+                         <div className="rounded-md bg-muted/50 p-2">
+                            <Label htmlFor="trig-manual" className="font-semibold">Trig.</Label>
+                            {extractedData.lipidPanel?.triglycerides ? (<p>{extractedData.lipidPanel.triglycerides}</p>) : (<Input id="trig-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('lipidPanel', { triglycerides: parseFloat(e.target.value) })}/>) }
                         </div>
                     </div>
-                )}
-                 {extractedData.thyroidPanel && (
-                     <div className="rounded-md border p-2 space-y-2">
-                        <div className="flex items-center gap-3">
-                             <Activity className="h-5 w-5 text-primary/80" />
-                             <p className="font-semibold">Thyroid Panel</p>
+                </div>
+
+                 <div className="rounded-md border p-2 space-y-2">
+                    <div className="flex items-center gap-3">
+                         <Activity className="h-5 w-5 text-primary/80" />
+                         <p className="font-semibold">Thyroid Panel</p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                         <div className="rounded-md bg-muted/50 p-2">
+                            <Label htmlFor="tsh-manual" className="font-semibold">TSH (μIU/mL)</Label>
+                            {extractedData.thyroidPanel?.tsh ? (<p>{extractedData.thyroidPanel.tsh}</p>) : (<Input id="tsh-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('thyroidPanel', { tsh: parseFloat(e.target.value) })}/>) }
                         </div>
-                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                             <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">TSH (μIU/mL)</p>
-                                <p>{extractedData.thyroidPanel.tsh || 'N/A'}</p>
-                            </div>
-                            <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">T3 (ng/dL)</p>
-                                <p>{extractedData.thyroidPanel.t3 || 'N/A'}</p>
-                            </div>
-                            <div className="rounded-md bg-muted/50 p-2">
-                                <p className="font-semibold">T4 (μg/dL)</p>
-                                <p>{extractedData.thyroidPanel.t4 || 'N/A'}</p>
-                            </div>
+                        <div className="rounded-md bg-muted/50 p-2">
+                            <Label htmlFor="t3-manual" className="font-semibold">T3 (ng/dL)</Label>
+                            {extractedData.thyroidPanel?.t3 ? (<p>{extractedData.thyroidPanel.t3}</p>) : (<Input id="t3-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('thyroidPanel', { t3: parseFloat(e.target.value) })}/>) }
+                        </div>
+                        <div className="rounded-md bg-muted/50 p-2">
+                            <Label htmlFor="t4-manual" className="font-semibold">T4 (μg/dL)</Label>
+                            {extractedData.thyroidPanel?.t4 ? (<p>{extractedData.thyroidPanel.t4}</p>) : (<Input id="t4-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('thyroidPanel', { t4: parseFloat(e.target.value) })}/>) }
                         </div>
                     </div>
-                )}
+                </div>
                 
                 {!hasAnyData && (
-                    <p className="text-center text-muted-foreground text-sm py-4">No specific biomarker data could be extracted. Please check the document or enter manually.</p>
+                    <p className="text-center text-muted-foreground text-sm py-4">No biomarker data could be extracted. Please enter results manually.</p>
                 )}
             </div>
-            <DialogFooter className="p-6 pt-0">
-                <DialogClose asChild>
-                    <Button variant="ghost">Cancel</Button>
-                </DialogClose>
-                <Button onClick={handleDataConfirmation} disabled={!canConfirm}>
-                    Confirm & Add Records
-                </Button>
-            </DialogFooter>
-        </>
+        </ScrollArea>
+        <DialogFooter className="p-6 pt-4 border-t">
+            <DialogClose asChild>
+                <Button variant="ghost">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleDataConfirmation} disabled={!canConfirm}>
+                Confirm & Add Records
+            </Button>
+        </DialogFooter>
+      </div>
     );
   }
 
