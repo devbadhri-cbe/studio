@@ -58,7 +58,7 @@ const prompt = ai.definePrompt({
   output: {schema: LabResultUploadOutputSchema},
   prompt: `You are an expert medical assistant specializing in extracting information from lab results.
 
-Your first task is to verify the patient's name. The user's name is "{{{name}}}". You must search the entire document for this name. The matching should be case-insensitive, and it should be considered a match even if there are minor variations or if the name is part of a larger text block. Set the 'nameVerified' field to true if a plausible match is found, otherwise set it to false.
+Your first task is to verify the patient's name. The user's name is "{{{name}}}". You must search the entire document for this name. The matching should be case-insensitive. Set 'nameVerified' to true ONLY if the name on the document is an exact or very close match to the user's name. If there are significant discrepancies, set it to false.
 
 Next, extract the test date. It MUST be formatted as YYYY-MM-DD. If you cannot find a date, leave the field empty.
 
@@ -85,3 +85,4 @@ const labResultUploadFlow = ai.defineFlow(
     return output!;
   }
 );
+
