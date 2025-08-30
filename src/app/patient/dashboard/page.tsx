@@ -139,7 +139,7 @@ export default function PatientDashboard() {
                     <div className="absolute top-4 left-4">
                         <Tooltip>
                             <TooltipTrigger asChild>
-                            <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="outline">
+                            <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="ghost">
                                 <ArrowLeft className="h-4 w-4" />
                                 <span className="sr-only">Back to Patient List</span>
                             </Button>
