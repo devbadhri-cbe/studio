@@ -108,7 +108,7 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
     }
   };
 
-  const handleDataConfirmation = () => {
+  const handleDataConfirmation = async () => {
     if (!extractedData) return;
 
     const { hba1cValue, lipidPanel, vitaminDValue, thyroidPanel, bloodPressure, date } = extractedData;
@@ -122,7 +122,7 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
         return;
     }
     
-    addBatchRecords({
+    const { added, duplicates } = await addBatchRecords({
       hba1c: hba1cValue ? { value: hba1cValue, date } : undefined,
       lipid: lipidPanel ? { ...lipidPanel, date } : undefined,
       vitaminD: vitaminDValue ? { value: vitaminDValue, date } : undefined,
@@ -130,10 +130,30 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
       bloodPressure: bloodPressure ? { ...bloodPressure, date } : undefined,
     });
     
-    toast({
-      title: 'Records Added!',
-      description: 'Your health records have been updated successfully.',
-    });
+    if (added.length > 0 && duplicates.length === 0) {
+      toast({
+        title: 'Records Added!',
+        description: `${added.join(', ')} records have been updated successfully.`,
+      });
+    } else if (added.length > 0 && duplicates.length > 0) {
+       toast({
+        title: 'Some Records Added',
+        description: `${added.join(', ')} were added. Duplicates for ${duplicates.join(', ')} were skipped.`,
+      });
+    } else if (added.length === 0 && duplicates.length > 0) {
+        toast({
+            variant: 'destructive',
+            title: 'No New Records Added',
+            description: `All extracted records for this date already exist: ${duplicates.join(', ')}.`,
+        });
+    } else {
+         toast({
+            variant: 'destructive',
+            title: 'No Data to Add',
+            description: 'No new information was found to add to your records.',
+        });
+    }
+
     setOpen(false);
   };
 

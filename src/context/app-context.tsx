@@ -26,6 +26,11 @@ interface BatchRecords {
 
 type BiomarkerUnitSystem = 'conventional' | 'si';
 
+interface AddBatchRecordsResult {
+    added: string[];
+    duplicates: string[];
+}
+
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
@@ -52,7 +57,7 @@ interface AppContextType {
   bloodPressureRecords: BloodPressureRecord[];
   addBloodPressureRecord: (record: Omit<BloodPressureRecord, 'id' | 'medication'>) => void;
   removeBloodPressureRecord: (id: string) => void;
-  addBatchRecords: (records: BatchRecords) => void;
+  addBatchRecords: (records: BatchRecords) => Promise<AddBatchRecordsResult>;
   tips: string[];
   setTips: (tips: string[]) => void;
   isClient: boolean;
@@ -324,10 +329,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { bloodPressureRecords: updatedRecords });
   };
 
-  const addBatchRecords = (batch: BatchRecords) => {
+  const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
     const updates: Partial<Patient> = {};
     const date = batch.hba1c?.date || batch.lipid?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date;
+
+    const result: AddBatchRecordsResult = { added: [], duplicates: [] };
 
     if (!date) {
       toast({
@@ -335,11 +342,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         title: "Missing Date",
         description: "The uploaded document must contain a valid test date."
       })
-      return;
+      return result;
     };
     
     const newRecordDate = startOfDay(new Date(date));
-    const duplicates: string[] = [];
 
     if (batch.hba1c && batch.hba1c.value) {
       const dateExists = records.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
@@ -347,7 +353,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newRecord: Hba1cRecord = { ...batch.hba1c, id: `hba1c-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.records = [...records, newRecord];
         setRecordsState(updates.records);
-      } else { duplicates.push('HbA1c'); }
+        result.added.push('HbA1c');
+      } else { result.duplicates.push('HbA1c'); }
     }
     if (batch.lipid && batch.lipid.ldl && batch.lipid.hdl && batch.lipid.triglycerides && batch.lipid.total) {
       const dateExists = lipidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
@@ -355,7 +362,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newRecord: LipidRecord = { ...batch.lipid, id: `lipid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.lipidRecords = [...lipidRecords, newRecord];
         setLipidRecordsState(updates.lipidRecords);
-      } else { duplicates.push('Lipid Panel'); }
+        result.added.push('Lipid Panel');
+      } else { result.duplicates.push('Lipid Panel'); }
     }
     if (batch.vitaminD && batch.vitaminD.value) {
       const dateExists = vitaminDRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
@@ -363,7 +371,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newRecord: VitaminDRecord = { ...batch.vitaminD, id: `vitd-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.vitaminDRecords = [...vitaminDRecords, newRecord];
         setVitaminDRecordsState(updates.vitaminDRecords);
-      } else { duplicates.push('Vitamin D'); }
+        result.added.push('Vitamin D');
+      } else { result.duplicates.push('Vitamin D'); }
     }
     if (batch.thyroid && batch.thyroid.tsh && batch.thyroid.t3 && batch.thyroid.t4) {
       const dateExists = thyroidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
@@ -371,7 +380,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newRecord: ThyroidRecord = { ...batch.thyroid, id: `thyroid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.thyroidRecords = [...thyroidRecords, newRecord];
         setThyroidRecordsState(updates.thyroidRecords);
-      } else { duplicates.push('Thyroid Panel'); }
+        result.added.push('Thyroid Panel');
+      } else { result.duplicates.push('Thyroid Panel'); }
     }
     if (batch.bloodPressure && batch.bloodPressure.systolic && batch.bloodPressure.diastolic) {
        const dateExists = bloodPressureRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
@@ -379,20 +389,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newRecord: BloodPressureRecord = { ...batch.bloodPressure, id: `bp-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.bloodPressureRecords = [...bloodPressureRecords, newRecord];
         setBloodPressureRecordsState(updates.bloodPressureRecords);
-      } else { duplicates.push('Blood Pressure'); }
+        result.added.push('Blood Pressure');
+      } else { result.duplicates.push('Blood Pressure'); }
     }
     
     if (Object.keys(updates).length > 0) {
-        updatePatientData(profile.id, updates);
+        await updatePatientData(profile.id, updates);
     }
     
-    if (duplicates.length > 0) {
-      toast({
-        variant: "destructive",
-        title: "Duplicate Records Found",
-        description: `Records for ${duplicates.join(', ')} on this date already exist and were not added.`
-      })
-    }
+    return result;
   };
 
   const setTips = (newTips: string[]) => {
