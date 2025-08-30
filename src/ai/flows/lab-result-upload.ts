@@ -2,8 +2,7 @@
 'use server';
 
 /**
- * @fileOverview This flow extracts HbA1c, Lipid Panel, Vitamin D, and Thyroid data from a lab result screenshot, verifies the user's name,
- * and returns the extracted information.
+ * @fileOverview This flow extracts HbA1c, Lipid Panel, Vitamin D, and Thyroid data from a lab result screenshot.
  *
  * - labResultUpload - A function that handles the lab result upload process.
  * - LabResultUploadInput - The input type for the labResultUpload function.
@@ -19,13 +18,11 @@ const LabResultUploadInputSchema = z.object({
     .describe(
       'A photo of the lab result as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.' 
     ),
-  name: z.string().describe('The name of the user to verify against the lab result.'),
 });
 export type LabResultUploadInput = z.infer<typeof LabResultUploadInputSchema>;
 
 const LabResultUploadOutputSchema = z.object({
   date: z.string().describe('The date the lab result was taken (YYYY-MM-DD format).'),
-  nameVerified: z.boolean().describe('Whether the name on the lab result matches the user provided name.'),
   hba1cValue: z.number().optional().describe('The HbA1c result extracted from the lab result (as a number).'),
   lipidPanel: z.object({
     ldl: z.number().optional().describe('LDL cholesterol level.'),
@@ -58,9 +55,7 @@ const prompt = ai.definePrompt({
   output: {schema: LabResultUploadOutputSchema},
   prompt: `You are an expert medical assistant specializing in extracting information from lab results.
 
-Your first task is to verify the patient's name. The user's name is "{{{name}}}". You must search the entire document for this name. The matching should be case-insensitive. Set 'nameVerified' to true ONLY if the name on the document is an exact or very close match to the user's name. If there are significant discrepancies, set it to false.
-
-Next, extract the test date. It MUST be formatted as YYYY-MM-DD. If you cannot find a date, leave the field empty.
+First, extract the test date. It MUST be formatted as YYYY-MM-DD. If you cannot find a date, leave the field empty.
 
 Then, scan the document for the following biomarkers. If a biomarker is present, extract its value. If it's not present, leave the field empty.
 - HbA1c (as a percentage value)
@@ -85,4 +80,3 @@ const labResultUploadFlow = ai.defineFlow(
     return output!;
   }
 );
-

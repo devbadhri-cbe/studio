@@ -2,9 +2,10 @@
 'use client';
 
 import { labResultUpload, type LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
+import { extractPatientName } from '@/ai/flows/extract-patient-name';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, CheckCircle, XCircle, FileText, FlaskConical, Sun, Droplet, Activity, Zap, AlertTriangle } from 'lucide-react';
+import { Loader2, UploadCloud, CheckCircle, XCircle, FileText, FlaskConical, Sun, Droplet, Activity, Zap, AlertTriangle, UserCheck, UserX } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from './ui/dialog';
@@ -16,6 +17,7 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
 import { parseISO, isValid } from 'date-fns';
 
+type UploadStep = 'initial' | 'extractingName' | 'confirmingName' | 'extractingData' | 'confirmingData';
 
 interface UploadRecordDialogProps {
   children?: React.ReactNode;
@@ -23,7 +25,9 @@ interface UploadRecordDialogProps {
 
 export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const [isUploading, setIsUploading] = React.useState(false);
+  const [uploadStep, setUploadStep] = React.useState<UploadStep>('initial');
+  const [extractedName, setExtractedName] = React.useState<string | null>(null);
+  const [photoDataUri, setPhotoDataUri] = React.useState<string | null>(null);
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   const { addBatchRecords, profile } = useApp();
   const { toast } = useToast();
@@ -32,7 +36,9 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
   React.useEffect(() => {
     // Reset state when dialog is closed
     if (!open) {
-      setIsUploading(false);
+      setUploadStep('initial');
+      setExtractedName(null);
+      setPhotoDataUri(null);
       setExtractedData(null);
     }
   }, [open]);
@@ -45,32 +51,32 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
       toast({
         variant: 'destructive',
         title: 'Profile Name Required',
-        description: 'Please set your name in the profile before uploading a lab result for verification.',
+        description: 'Please set your name in the profile before uploading a lab result.',
       });
       setOpen(false);
       return;
     }
 
-    setIsUploading(true);
-    setExtractedData(null);
+    setUploadStep('extractingName');
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = async () => {
-      const photoDataUri = reader.result as string;
+      const dataUri = reader.result as string;
+      setPhotoDataUri(dataUri);
       try {
-        const result = await labResultUpload({ photoDataUri, name: profile.name });
-        setExtractedData(result);
+        const result = await extractPatientName({ photoDataUri: dataUri });
+        setExtractedName(result.patientName);
+        setUploadStep('confirmingName');
 
       } catch (error) {
-        console.error('Error processing lab result:', error);
+        console.error('Error extracting patient name:', error);
         toast({
           variant: 'destructive',
-          title: 'Upload Failed',
-          description: 'Could not extract information from the lab result. Please try again or enter it manually.',
+          title: 'Extraction Failed',
+          description: 'Could not extract a name from the document. Please try again.',
         });
-      } finally {
-        setIsUploading(false);
+        setUploadStep('initial');
       }
     };
     reader.onerror = (error) => {
@@ -80,11 +86,29 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
         title: 'File Read Error',
         description: 'There was an issue reading your file.',
       });
-      setIsUploading(false);
+      setUploadStep('initial');
     };
   };
 
-  const handleConfirm = () => {
+  const handleNameConfirmation = async () => {
+    if (!photoDataUri) return;
+    setUploadStep('extractingData');
+    try {
+        const result = await labResultUpload({ photoDataUri });
+        setExtractedData(result);
+        setUploadStep('confirmingData');
+    } catch (error) {
+        console.error('Error processing lab result:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Upload Failed',
+          description: 'Could not extract information from the lab result. Please try again or enter it manually.',
+        });
+        setUploadStep('confirmingName');
+    }
+  };
+
+  const handleDataConfirmation = () => {
     if (!extractedData) return;
 
     const { hba1cValue, lipidPanel, vitaminDValue, thyroidPanel, bloodPressure, date } = extractedData;
@@ -133,15 +157,53 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
     </div>
   );
 
-  const renderUploadingView = () => (
+  const renderLoadingView = (message: string) => (
      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground h-40">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p>Analyzing your document...</p>
+        <p>{message}</p>
         <p className="text-xs">This may take a moment.</p>
     </div>
   );
+  
+  const renderNameConfirmationView = () => {
+    if (!extractedName) return null;
+    return (
+        <>
+           <div className="flex-1 space-y-4">
+                <Alert>
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Confirm Patient Name</AlertTitle>
+                    <AlertDescription>
+                        Please verify that the name extracted from the document matches the patient's profile before proceeding.
+                    </AlertDescription>
+                </Alert>
 
-  const renderConfirmationView = () => {
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
+                        <UserCheck className="h-5 w-5 text-green-500" />
+                        <div>
+                            <p className="font-semibold">Profile Name</p>
+                            <p className="text-sm text-muted-foreground">{profile.name}</p>
+                        </div>
+                    </div>
+                     <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
+                        <UserX className="h-5 w-5 text-primary" />
+                        <div>
+                            <p className="font-semibold">Extracted Name</p>
+                            <p className="text-sm text-muted-foreground">{extractedName}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <DialogFooter className="pt-6">
+                <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
+                <Button onClick={handleNameConfirmation}>Yes, this is correct. Proceed.</Button>
+            </DialogFooter>
+        </>
+    );
+  }
+
+  const renderDataConfirmationView = () => {
     if (!extractedData) return null;
     const hasAnyData = extractedData.hba1cValue || extractedData.lipidPanel || extractedData.vitaminDValue || extractedData.thyroidPanel || extractedData.bloodPressure;
     const isDateValid = extractedData.date && isValid(parseISO(extractedData.date));
@@ -150,32 +212,6 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
         <>
             <ScrollArea className="flex-1 -mx-6">
                 <div className="px-6 py-4 space-y-4">
-                    {!extractedData.nameVerified && (
-                       <Alert variant="destructive">
-                            <AlertTriangle className="h-4 w-4" />
-                            <AlertTitle>Name Mismatch Warning</AlertTitle>
-                            <AlertDescription>
-                                The name on the document could not be matched to "{profile.name}". Please ensure this is the correct report before proceeding.
-                            </AlertDescription>
-                        </Alert>
-                    )}
-
-                     <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
-                        {extractedData.nameVerified ? (
-                            <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : (
-                            <XCircle className="h-5 w-5 text-yellow-500" />
-                        )}
-                        <div>
-                            <p className="font-semibold">Name Verification</p>
-                            <p className="text-sm text-muted-foreground">
-                                {extractedData.nameVerified
-                                    ? `Name "${profile.name}" successfully matched.`
-                                    : `Name mismatch detected.`
-                                }
-                            </p>
-                        </div>
-                    </div>
                      <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
                         <FileText className="h-5 w-5 text-primary" />
                          <div className="flex-1">
@@ -293,12 +329,42 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
                 <DialogClose asChild>
                     <Button variant="ghost">Cancel</Button>
                 </DialogClose>
-                <Button onClick={handleConfirm} disabled={!hasAnyData || !isDateValid}>
+                <Button onClick={handleDataConfirmation} disabled={!hasAnyData || !isDateValid}>
                     Confirm & Add Records
                 </Button>
             </DialogFooter>
         </>
     );
+  }
+
+  const renderContent = () => {
+    switch (uploadStep) {
+        case 'initial':
+            return renderInitialView();
+        case 'extractingName':
+            return renderLoadingView('Extracting name...');
+        case 'confirmingName':
+            return renderNameConfirmationView();
+        case 'extractingData':
+            return renderLoadingView('Analyzing your document...');
+        case 'confirmingData':
+            return renderDataConfirmationView();
+        default:
+            return null;
+    }
+  }
+
+  const getDialogDescription = () => {
+      switch (uploadStep) {
+          case 'initial':
+              return 'Let AI read your lab result. It will extract HbA1c, Lipids, Vitamin D, and Thyroid values.';
+          case 'confirmingName':
+              return 'Please confirm the patient name before proceeding.';
+          case 'confirmingData':
+              return 'Please review the extracted information below and confirm to add it to your records.';
+          default:
+              return '';
+      }
   }
 
   const defaultTrigger = (
@@ -326,13 +392,10 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
         <DialogHeader>
           <DialogTitle>Upload Lab Result</DialogTitle>
           <DialogDescription>
-             {extractedData 
-                ? 'Please review the extracted information below and confirm to add it to your records.'
-                : 'Let AI read your lab result. It will extract HbA1c, Lipids, Vitamin D, and Thyroid values.'
-             }
+             {getDialogDescription()}
           </DialogDescription>
         </DialogHeader>
-        {isUploading ? renderUploadingView() : extractedData ? renderConfirmationView() : renderInitialView()}
+        {renderContent()}
       </DialogContent>
     </Dialog>
   );
