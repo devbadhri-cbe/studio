@@ -114,7 +114,7 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
                 <div className="flex items-center gap-2">
                     <Select value={targetLanguage} onValueChange={setTargetLanguage}>
                         <SelectTrigger className="flex-1">
-                            <SelectValue placeholder="Select Language to Translate" />
+                            <SelectValue placeholder="Translate..." />
                         </SelectTrigger>
                         <SelectContent>
                             {LANGUAGES.map((lang) => (

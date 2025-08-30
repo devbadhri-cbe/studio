@@ -308,79 +308,71 @@ export function ProfileCard() {
                             {calculatedAge !== null && ` (${calculatedAge} yrs)`}
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button variant="outline" size="icon" className="h-8 w-8">
-                                            <Settings className="h-4 w-4" />
-                                            <span className="sr-only">Settings</span>
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Display Settings</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-64" align="end">
-                                <div className="grid gap-4">
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium leading-none">Settings</h4>
-                                        <p className="text-sm text-muted-foreground">
-                                            Customize your display preferences.
-                                        </p>
-                                    </div>
-                                    <div className="grid gap-2">
-                                        <div className="grid grid-cols-3 items-center gap-4">
-                                            <Label htmlFor="date-format">Date Format</Label>
-                                            <Select
-                                                value={profile.dateFormat}
-                                                onValueChange={(value) => setProfile({...profile, dateFormat: value})}
-                                            >
-                                                <SelectTrigger className="col-span-2 h-8">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {dateFormats.map(df => (
-                                                        <SelectItem key={df.format} value={df.format}>{df.label}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="grid grid-cols-3 items-center gap-4">
-                                            <Label htmlFor="unit-system">Units</Label>
-                                             <Select
-                                                value={profile.unitSystem}
-                                                onValueChange={(value) => setProfile({...profile, unitSystem: value as UnitSystem})}
-                                            >
-                                                <SelectTrigger className="col-span-2 h-8">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="metric">Metric (cm, kg)</SelectItem>
-                                                    <SelectItem value="imperial">Imperial (ft/in, lbs)</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </PopoverContent>
-                        </Popover>
-                        <EditProfileDialog>
-                             <Tooltip>
+                     <Popover>
+                        <PopoverTrigger asChild>
+                            <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button variant="outline" size="icon" className="h-8 w-8">
-                                        <Edit className="h-4 w-4" />
-                                        <span className="sr-only">Edit Profile</span>
+                                        <Settings className="h-4 w-4" />
+                                        <span className="sr-only">Settings</span>
                                     </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p>Edit Profile</p>
+                                    <p>Display Settings</p>
                                 </TooltipContent>
                             </Tooltip>
-                        </EditProfileDialog>
-                    </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-64" align="end">
+                            <div className="grid gap-4">
+                                <div className="space-y-2">
+                                    <h4 className="font-medium leading-none">Profile Settings</h4>
+                                    <p className="text-sm text-muted-foreground">
+                                        Customize your display preferences and details.
+                                    </p>
+                                </div>
+                                <div className="grid gap-2">
+                                    <div className="grid grid-cols-3 items-center gap-4">
+                                        <Label htmlFor="date-format">Date Format</Label>
+                                        <Select
+                                            value={profile.dateFormat}
+                                            onValueChange={(value) => setProfile({...profile, dateFormat: value})}
+                                        >
+                                            <SelectTrigger className="col-span-2 h-8">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {dateFormats.map(df => (
+                                                    <SelectItem key={df.format} value={df.format}>{df.label}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="grid grid-cols-3 items-center gap-4">
+                                        <Label htmlFor="unit-system">Units</Label>
+                                         <Select
+                                            value={profile.unitSystem}
+                                            onValueChange={(value) => setProfile({...profile, unitSystem: value as UnitSystem})}
+                                        >
+                                            <SelectTrigger className="col-span-2 h-8">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="metric">Metric (cm, kg)</SelectItem>
+                                                <SelectItem value="imperial">Imperial (ft/in, lbs)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <Separator />
+                                     <EditProfileDialog>
+                                        <Button variant="outline" size="sm" className="w-full">
+                                            <Pencil className="mr-2 h-4 w-4" />
+                                            Edit Profile Details
+                                        </Button>
+                                    </EditProfileDialog>
+                                </div>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
                     <VenetianMask className="h-5 w-5 shrink-0" />
