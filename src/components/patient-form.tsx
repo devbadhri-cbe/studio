@@ -32,7 +32,7 @@ const FormSchema = z.object({
   phone: z.string().min(5, { message: "Phone number is too short." }),
   // Imperial units
   height_ft: z.coerce.number().optional().or(z.literal('')),
-  height_in: z.coerce.number().int().optional().or(z.literal('')),
+  height_in: z.coerce.number().optional().or(z.literal('')),
   weight_lbs: z.coerce.number().optional().or(z.literal('')),
   // Metric units
   height_cm: z.coerce.number().optional().or(z.literal('')),
