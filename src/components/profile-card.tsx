@@ -75,7 +75,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
         const suggestions = apiData.suggestionGroup?.suggestionList?.suggestion;
 
         if (suggestions && suggestions.length > 0 && suggestions[0].toLowerCase() !== data.medicationName.toLowerCase()) {
-            setSuggestion({ originalData: data, correctedName: suggestions[0] });
+            setSuggestion({ originalData: data, correctedName: capitalizeFirstLetter(suggestions[0]) });
             setPopoverOpen(true);
         } else {
             handleFinalSave(data);
@@ -95,7 +95,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
 
   const onConfirmSuggestion = () => {
     if (suggestion) {
-        handleFinalSave({ ...suggestion.originalData, medicationName: capitalizeFirstLetter(suggestion.correctedName) });
+        handleFinalSave({ ...suggestion.originalData, medicationName: suggestion.correctedName });
     }
     setPopoverOpen(false);
     setSuggestion(null);
@@ -406,6 +406,7 @@ export function ProfileCard() {
   const [isEditingCountry, setIsEditingCountry] = React.useState(false);
   const [isEditingDob, setIsEditingDob] = React.useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
+  const [animateShield, setAnimateShield] = React.useState(false);
   const formatDate = useDateFormatter();
 
   const calculatedAge = calculateAge(profile.dob);
@@ -450,9 +451,13 @@ export function ProfileCard() {
     addMedication(data);
     setIsAddingMedication(false);
     triggerTooltip();
-  }, [addMedication, triggerTooltip]);
+     if (profile.medication.length >= 1) { 
+      setAnimateShield(true);
+      setTimeout(() => setAnimateShield(false), 2000); 
+    }
+  }, [addMedication, triggerTooltip, profile.medication.length]);
 
-  const handleRemoveMedication = React.useCallback((id: string) => {
+  const handleRemoveMedication = React. useCallback((id: string) => {
     removeMedication(id);
     triggerTooltip();
   }, [removeMedication, triggerTooltip]);
@@ -799,7 +804,7 @@ export function ProfileCard() {
                     )}
                 </div>
             </div>
-             {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} />}
+            {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} />}
             {profile.medication.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
@@ -831,14 +836,22 @@ export function ProfileCard() {
                  !isAddingMedication && <p className="text-xs text-muted-foreground pl-8">No medication recorded.</p>
             )}
              {profile.medication.length > 1 && !isMedicationNil && (
-                <DrugInteractionDialog
-                    medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                >
-                    <Button variant="outline" size="sm" className="w-full mt-2">
-                        <ShieldAlert className="mr-2 h-4 w-4" />
-                        Check Drug Interactions
-                    </Button>
-                </DrugInteractionDialog>
+                <Dialog>
+                  <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+                      <TooltipTrigger asChild>
+                          <DialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="w-full mt-2">
+                                <ShieldAlert className={`mr-2 h-4 w-4 ${animateShield ? 'animate-spin' : ''}`} />
+                                  Check Drug Interactions
+                              </Button>
+                          </DialogTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                          <p>Check for interactions between medications.</p>
+                      </TooltipContent>
+                  </Tooltip>
+                  <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)} />
+              </Dialog>
             )}
         </div>
 
