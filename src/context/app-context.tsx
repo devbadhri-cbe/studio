@@ -339,7 +339,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     
     const newRecordDate = startOfDay(new Date(date));
-    let duplicatesFound = false;
+    const duplicates: string[] = [];
 
     if (batch.hba1c && batch.hba1c.value) {
       const dateExists = records.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
@@ -347,7 +347,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newRecord: Hba1cRecord = { ...batch.hba1c, id: `hba1c-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.records = [...records, newRecord];
         setRecordsState(updates.records);
-      } else { duplicatesFound = true; }
+      } else { duplicates.push('HbA1c'); }
     }
     if (batch.lipid && batch.lipid.ldl && batch.lipid.hdl && batch.lipid.triglycerides && batch.lipid.total) {
       const dateExists = lipidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
@@ -355,7 +355,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newRecord: LipidRecord = { ...batch.lipid, id: `lipid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.lipidRecords = [...lipidRecords, newRecord];
         setLipidRecordsState(updates.lipidRecords);
-      } else { duplicatesFound = true; }
+      } else { duplicates.push('Lipid Panel'); }
     }
     if (batch.vitaminD && batch.vitaminD.value) {
       const dateExists = vitaminDRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
@@ -363,7 +363,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newRecord: VitaminDRecord = { ...batch.vitaminD, id: `vitd-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.vitaminDRecords = [...vitaminDRecords, newRecord];
         setVitaminDRecordsState(updates.vitaminDRecords);
-      } else { duplicatesFound = true; }
+      } else { duplicates.push('Vitamin D'); }
     }
     if (batch.thyroid && batch.thyroid.tsh && batch.thyroid.t3 && batch.thyroid.t4) {
       const dateExists = thyroidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
@@ -371,7 +371,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newRecord: ThyroidRecord = { ...batch.thyroid, id: `thyroid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.thyroidRecords = [...thyroidRecords, newRecord];
         setThyroidRecordsState(updates.thyroidRecords);
-      } else { duplicatesFound = true; }
+      } else { duplicates.push('Thyroid Panel'); }
     }
     if (batch.bloodPressure && batch.bloodPressure.systolic && batch.bloodPressure.diastolic) {
        const dateExists = bloodPressureRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
@@ -379,18 +379,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newRecord: BloodPressureRecord = { ...batch.bloodPressure, id: `bp-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.bloodPressureRecords = [...bloodPressureRecords, newRecord];
         setBloodPressureRecordsState(updates.bloodPressureRecords);
-      } else { duplicatesFound = true; }
+      } else { duplicates.push('Blood Pressure'); }
     }
     
     if (Object.keys(updates).length > 0) {
         updatePatientData(profile.id, updates);
     }
     
-    if (duplicatesFound) {
+    if (duplicates.length > 0) {
       toast({
         variant: "destructive",
-        title: "Duplicate Record Found",
-        description: "Some records were not added because an entry for that date already exists."
+        title: "Duplicate Records Found",
+        description: `Records for ${duplicates.join(', ')} on this date already exist and were not added.`
       })
     }
   };
