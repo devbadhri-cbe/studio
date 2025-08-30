@@ -2,7 +2,7 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings, Info, XCircle } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings, Info, XCircle, Edit } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,7 +20,7 @@ import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { DrugInteractionViewer } from './drug-interaction-dialog';
+import { DrugInteractionViewer } from './drug-interaction-viewer';
 import { Separator } from './ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -37,6 +37,7 @@ import type { UnitSystem } from '@/lib/types';
 import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { EditProfileDialog } from './edit-profile-dialog';
 
 
 const MedicationSchema = z.object({
@@ -154,166 +155,6 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
     );
 }
 
-const HeightSchema = z.object({
-    height_cm: z.coerce.number().optional(),
-    height_ft: z.coerce.number().optional(),
-    height_in: z.coerce.number().optional(),
-}).refine(data => {
-    if (data.height_cm) return data.height_cm >= 50 && data.height_cm <= 250;
-    if (data.height_ft || data.height_in) return (data.height_ft || 0) > 0 || (data.height_in || 0) > 0;
-    return false;
-}, {
-    message: "A valid height is required.",
-    path: ["height_cm"], // show error on first field
-});
-
-function HeightForm({
-    currentHeight,
-    unitSystem,
-    onSave,
-    onCancel,
-}: {
-    currentHeight?: number;
-    unitSystem: UnitSystem;
-    onSave: (height: number) => void;
-    onCancel: () => void;
-}) {
-    const inputRef = React.useRef<HTMLInputElement>(null);
-    const defaultValues = React.useMemo(() => {
-        if (unitSystem === 'imperial' && currentHeight) {
-            const { feet, inches } = cmToFtIn(currentHeight);
-            return { height_ft: feet, height_in: inches };
-        }
-        return { height_cm: currentHeight };
-    }, [currentHeight, unitSystem]);
-
-    const form = useForm<z.infer<typeof HeightSchema>>({
-        resolver: zodResolver(HeightSchema),
-        defaultValues,
-    });
-    
-     React.useEffect(() => {
-        setTimeout(() => {
-            inputRef.current?.focus();
-        }, 100);
-    }, []);
-
-    const handleSubmit = (data: z.infer<typeof HeightSchema>) => {
-        let heightInCm: number;
-        if (unitSystem === 'imperial') {
-            heightInCm = ftInToCm(data.height_ft || 0, data.height_in || 0);
-        } else {
-            heightInCm = data.height_cm || 0;
-        }
-        onSave(heightInCm);
-    };
-
-    return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="flex items-start gap-2 flex-1">
-                {unitSystem === 'metric' ? (
-                    <FormField control={form.control} name="height_cm" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input ref={inputRef} type="number" placeholder="cm" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )} />
-                ) : (
-                    <div className="flex flex-1 gap-2">
-                        <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input ref={inputRef} type="number" placeholder="ft" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
-                        <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="in" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
-                    </div>
-                )}
-                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
-                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
-            </form>
-        </Form>
-    );
-}
-
-const EmailSchema = z.object({ email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')) });
-function EmailForm({ currentEmail, onSave, onCancel }: { currentEmail?: string; onSave: (email: string) => void; onCancel: () => void }) {
-    const inputRef = React.useRef<HTMLInputElement>(null);
-    const form = useForm<z.infer<typeof EmailSchema>>({ resolver: zodResolver(EmailSchema), defaultValues: { email: currentEmail || '' } });
-    
-     React.useEffect(() => {
-        setTimeout(() => {
-            inputRef.current?.focus();
-        }, 100);
-    }, []);
-
-    return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit((d) => onSave(d.email || ''))} className="flex items-center gap-2 flex-1">
-                <FormField control={form.control} name="email" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input ref={inputRef} type="email" placeholder="patient@example.com" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
-                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
-                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
-            </form>
-        </Form>
-    );
-}
-
-const PhoneSchema = z.object({ phone: z.string().min(5, { message: "Phone number is too short." }) });
-function PhoneForm({ currentPhone, onSave, onCancel }: { currentPhone?: string; onSave: (phone: string) => void; onCancel: () => void }) {
-    const inputRef = React.useRef<HTMLInputElement>(null);
-    const form = useForm<z.infer<typeof PhoneSchema>>({ resolver: zodResolver(PhoneSchema), defaultValues: { phone: currentPhone || '' } });
-
-     React.useEffect(() => {
-        setTimeout(() => {
-            inputRef.current?.focus();
-        }, 100);
-    }, []);
-
-    return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit((d) => onSave(d.phone))} className="flex items-center gap-2 flex-1">
-                <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input ref={inputRef} type="tel" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
-                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
-                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
-            </form>
-        </Form>
-    );
-}
-
-const CountrySchema = z.object({ country: z.string().min(1, { message: "Country is required." }) });
-function CountryForm({ currentCountry, onSave, onCancel }: { currentCountry?: string; onSave: (country: string) => void; onCancel: () => void }) {
-    const form = useForm<z.infer<typeof CountrySchema>>({ resolver: zodResolver(CountrySchema), defaultValues: { country: currentCountry || '' } });
-    return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit((d) => onSave(d.country))} className="flex items-center gap-2 flex-1">
-                <FormField control={form.control} name="country" render={({ field }) => ( <FormItem className="flex-1"><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="h-8"><SelectValue placeholder="Select..." /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage className="text-xs" /></FormItem> )}/>
-                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
-                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
-            </form>
-        </Form>
-    );
-}
-
-const DobSchema = z.object({ dob: z.date({ required_error: "A valid date is required." }) });
-function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave: (dob: string) => void; onCancel: () => void; }) {
-    const form = useForm<z.infer<typeof DobSchema>>({ resolver: zodResolver(DobSchema), defaultValues: { dob: currentDob ? parseISO(currentDob) : undefined } });
-    return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit((d) => onSave(format(d.dob, 'yyyy-MM-dd')))} className="flex items-center gap-2 flex-1">
-                <FormField 
-                    control={form.control} 
-                    name="dob" 
-                    render={({ field }) => ( 
-                        <FormItem className="flex-1">
-                            <FormControl>
-                                <DatePicker 
-                                    value={field.value} 
-                                    onChange={field.onChange} 
-                                    fromYear={new Date().getFullYear() - 100}
-                                    toYear={new Date().getFullYear()}
-                                />
-                            </FormControl>
-                            <FormMessage className="text-xs" />
-                        </FormItem> 
-                    )}
-                />
-                <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
-                <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
-            </form>
-        </Form>
-    );
-}
-
 type ActiveSynopsis = {
     type: 'medication' | 'condition';
     id: string;
@@ -330,12 +171,6 @@ export function ProfileCard() {
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
 
-  const [isEditingHeight, setIsEditingHeight] = React.useState(false);
-  const [isEditingEmail, setIsEditingEmail] = React.useState(false);
-  const [isEditingPhone, setIsEditingPhone] = React.useState(false);
-  const [isEditingCountry, setIsEditingCountry] = React.useState(false);
-  const [isEditingDob, setIsEditingDob] = React.useState(false);
-  
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [animateShield, setAnimateShield] = React.useState(false);
 
@@ -428,40 +263,6 @@ export function ProfileCard() {
       setIsAddingWeight(false);
   }
 
-  const handleSaveHeight = (newHeight: number) => {
-    setProfile({ ...profile, height: newHeight });
-    setIsEditingHeight(false);
-  };
-
-  const handleSaveEmail = (newEmail: string) => {
-    setProfile({ ...profile, email: newEmail });
-    setIsEditingEmail(false);
-  };
-
-  const handleSavePhone = (newPhone: string) => {
-    setProfile({ ...profile, phone: newPhone });
-    setIsEditingPhone(false);
-  };
-
-  const handleSaveCountry = (newCountry: string) => {
-    const newCountryData = countries.find(c => c.code === newCountry);
-    setProfile({ ...profile, country: newCountry, dateFormat: newCountryData?.dateFormat || 'MM-dd-yyyy', unitSystem: newCountryData?.unitSystem || 'metric' });
-    setIsEditingCountry(false);
-  };
-  
-  const handleSaveDateFormat = (newFormat: string) => {
-    setProfile({ ...profile, dateFormat: newFormat });
-  }
-
-  const handleSaveUnitSystem = (newSystem: UnitSystem) => {
-    setProfile({ ...profile, unitSystem: newSystem });
-  }
-
-  const handleSaveDob = (newDob: string) => {
-    setProfile({ ...profile, dob: newDob });
-    setIsEditingDob(false);
-  };
-
   const handleSaveCondition = async (data: { condition: string, date: Date }, icdCode?: string) => {
     addMedicalCondition({ ...data, date: data.date.toISOString(), icdCode });
     setIsAddingCondition(false);
@@ -494,154 +295,55 @@ export function ProfileCard() {
                 <CardDescription>Your personal and medical information.</CardDescription>
               </div>
             </div>
+            <EditProfileDialog>
+                <Button variant="outline" size="sm">
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                </Button>
+            </EditProfileDialog>
         </div>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
-        <div className="space-y-2 rounded-lg border bg-card p-4">
-            <div className="flex items-center gap-3 text-muted-foreground">
-                <Cake className="h-5 w-5 shrink-0" />
-                {isEditingDob ? (
-                    <DobForm currentDob={profile.dob} onSave={handleSaveDob} onCancel={() => setIsEditingDob(false)} />
-                ) : (
-                   <div className="flex items-center gap-2 flex-1">
-                        <p>
-                            {profile.dob ? formatDate(profile.dob) : 'N/A'}
-                            {calculatedAge !== null && ` (${calculatedAge} years)`}
-                        </p>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingDob(true)}>
-                                    <Pencil className="h-3 w-3 text-border" strokeWidth={1.5} />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Edit Date of Birth</p>
-                            </TooltipContent>
-                        </Tooltip>
-                        
-                        <DropdownMenu>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="h-6 w-6">
-                                            <Settings className="h-3 w-3 text-border" strokeWidth={1.5} />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Change Date Format ({profile.dateFormat})</p>
-                                </TooltipContent>
-                            </Tooltip>
-                            <DropdownMenuContent className="font-sans">
-                                {dateFormats.map(f => (
-                                    <DropdownMenuItem 
-                                        key={f.format} 
-                                        onSelect={() => handleSaveDateFormat(f.format)}
-                                        className={profile.dateFormat === f.format ? 'bg-accent' : ''}
-                                    >
-                                        {f.label}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                )}
-            </div>
-             <div className="flex items-center gap-3 text-muted-foreground">
-                <VenetianMask className="h-5 w-5 shrink-0" />
-                <p>
-                    <span className="capitalize">{profile.gender || 'N/A'}</span>
-                </p>
-            </div>
-            <div className="flex items-center gap-3 text-muted-foreground">
-                <Ruler className="h-5 w-5 shrink-0" />
-                 {isEditingHeight ? (
-                    <HeightForm unitSystem={unitSystem} currentHeight={profile.height} onSave={handleSaveHeight} onCancel={() => setIsEditingHeight(false)} />
-                ) : (
-                    <div className="flex items-center gap-2 flex-1">
-                        <p>{displayHeight}</p>
-                         <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingHeight(true)}>
-                                    <Pencil className="h-3 w-3 text-border" strokeWidth={1.5} />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Edit Height</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </div>
-                )}
-            </div>
-            <div className="flex items-center gap-3 text-muted-foreground">
-                <TrendingUp className="h-5 w-5 shrink-0" />
-                 <p>
-                    {displayWeight}
-                    {bmi && <span className="ml-2 font-semibold text-foreground">(BMI: {bmi.toFixed(2)})</span>}
-                </p>
-                 <DropdownMenu>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <DropdownMenuTrigger asChild>
-                                <Button size="icon" variant="ghost" className="h-6 w-6">
-                                    <Settings className="h-3 w-3 text-border" strokeWidth={1.5} />
-                                </Button>
-                            </DropdownMenuTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Change Units ({profile.unitSystem})</p>
-                        </TooltipContent>
-                    </Tooltip>
-                    <DropdownMenuContent className="font-sans">
-                        <DropdownMenuItem 
-                            onSelect={() => handleSaveUnitSystem('metric')}
-                            className={profile.unitSystem === 'metric' ? 'bg-accent' : ''}
-                        >
-                            Metric (kg, cm)
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                            onSelect={() => handleSaveUnitSystem('imperial')}
-                            className={profile.unitSystem === 'imperial' ? 'bg-accent' : ''}
-                        >
-                            Imperial (lbs, ft, in)
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+        <div className="space-y-3 rounded-lg border bg-card p-4">
+            <div className="grid grid-cols-2 gap-4">
+                 <div className="flex items-center gap-3 text-muted-foreground">
+                    <Cake className="h-5 w-5 shrink-0" />
+                    <p>
+                        {profile.dob ? formatDate(profile.dob) : 'N/A'}
+                        {calculatedAge !== null && ` (${calculatedAge} yrs)`}
+                    </p>
+                </div>
+                <div className="flex items-center gap-3 text-muted-foreground">
+                    <VenetianMask className="h-5 w-5 shrink-0" />
+                    <p>
+                        <span className="capitalize">{profile.gender || 'N/A'}</span>
+                    </p>
+                </div>
+                 <div className="flex items-center gap-3 text-muted-foreground">
+                    <Ruler className="h-5 w-5 shrink-0" />
+                     <p>{displayHeight}</p>
+                </div>
+                 <div className="flex items-center gap-3 text-muted-foreground">
+                    <TrendingUp className="h-5 w-5 shrink-0" />
+                     <p>
+                        {displayWeight}
+                        {bmi && <span className="ml-2 font-semibold text-foreground">(BMI: {bmi.toFixed(2)})</span>}
+                    </p>
+                </div>
             </div>
 
             <Separator className="my-2" />
              <div className="flex items-center gap-3 text-muted-foreground">
                 <Globe className="h-5 w-5 shrink-0" />
-                {isEditingCountry ? (
-                    <CountryForm currentCountry={profile.country} onSave={handleSaveCountry} onCancel={() => setIsEditingCountry(false)} />
-                ) : (
-                    <div className="flex items-center gap-2 flex-1">
-                        <p>{countryName}</p>
-                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingCountry(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Country</p></TooltipContent></Tooltip>
-                    </div>
-                )}
+                <p>{countryName}</p>
             </div>
              <div className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="h-5 w-5 shrink-0" />
-                {isEditingEmail ? (
-                    <EmailForm currentEmail={profile.email} onSave={handleSaveEmail} onCancel={() => setIsEditingEmail(false)} />
-                ) : (
-                    <div className="flex items-center gap-2 flex-1">
-                        <p>{profile.email || 'N/A'}</p>
-                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingEmail(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Email</p></TooltipContent></Tooltip>
-                    </div>
-                )}
+                <p>{profile.email || 'N/A'}</p>
             </div>
             <div className="flex items-center gap-3 text-muted-foreground">
                 <Phone className="h-5 w-5 shrink-0" />
-                 {isEditingPhone ? (
-                    <PhoneForm currentPhone={profile.phone} onSave={handleSavePhone} onCancel={() => setIsEditingPhone(false)} />
-                ) : (
-                    <div className="flex items-center gap-2 flex-1">
-                        <p>{formattedPhone}</p>
-                        <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingPhone(true)}><Pencil className="h-3 w-3 text-border" strokeWidth={1.5} /></Button></TooltipTrigger><TooltipContent><p>Edit Phone</p></TooltipContent></Tooltip>
-                    </div>
-                )}
+                 <p>{formattedPhone}</p>
             </div>
         </div>
 
