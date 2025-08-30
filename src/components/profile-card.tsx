@@ -142,14 +142,12 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-                <div className="flex flex-col sm:flex-row gap-2">
-                    <FormField control={form.control} name="value" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input ref={inputRef} type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="date" render={({ field }) => (<FormItem className="flex-1"><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
-                </div>
+            <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-2">
+                <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input ref={inputRef} type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <div className="flex justify-end gap-2">
-                    <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
-                    <Button type="submit" size="sm">Save</Button>
+                    <Button type="button" size="sm" variant="ghost" className="flex-1" onClick={onCancel}>Cancel</Button>
+                    <Button type="submit" size="sm" className="flex-1">Save</Button>
                 </div>
             </form>
         </Form>
