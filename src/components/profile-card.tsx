@@ -12,7 +12,7 @@ import { standardizeMedication } from '@/ai/flows/standardize-medication';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
-import { calculateAge, calculateBmi, cmToFtIn, ftInToCm, kgToLbs, lbsToKg, formatDisplayPhoneNumber } from '@/lib/utils';
+import { calculateAge, calculateBmi, cmToFtIn, ftInToCm, kgToLbs, lbsToKg, formatDisplayPhoneNumber, cn } from '@/lib/utils';
 import { countries, Country, dateFormats } from '@/lib/countries';
 import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
@@ -376,6 +376,7 @@ export function ProfileCard() {
         setIsAddingMedication(false);
         if (profile.medication.length >= 1) { 
             setAnimateShield(true);
+            setTimeout(() => setAnimateShield(false), 2000);
         }
         toast({
             title: 'Medication Added',
@@ -802,13 +803,13 @@ export function ProfileCard() {
              {profile.medication.length > 1 && !isMedicationNil && (
                 <div className="pt-2">
                     <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
+                        <Button
+                            variant="outline"
+                            size="sm"
                             className="w-full"
                             onClick={() => setAnimateShield(false)}
                         >
-                            <ShieldAlert className={cn(`mr-2 h-4 w-4`, animateShield && 'animate-rotate-y')} />
+                            <ShieldAlert className={cn(`mr-2 h-4 w-4`, animateShield && 'animate-rotate')} />
                             Check Drug Interactions
                         </Button>
                     </DrugInteractionDialog>
