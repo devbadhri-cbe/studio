@@ -3,19 +3,10 @@
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { getMedicationSynopsis } from '@/ai/flows/medication-synopsis';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, BookOpen, Languages, Undo2 } from 'lucide-react';
-import { ScrollArea } from './ui/scroll-area';
+import { Loader2, BookOpen, Languages, Undo2, XCircle } from 'lucide-react';
 import { translateText } from '@/ai/flows/translate-text';
 import {
   Select,
@@ -24,11 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Card, CardContent } from './ui/card';
 
-
-interface MedicationSynopsisDialogProps {
+interface MedicationSynopsisProps {
   medicationName: string;
-  children: React.ReactNode;
+  onClose: () => void;
 }
 
 const LANGUAGES = [
@@ -42,8 +33,7 @@ const LANGUAGES = [
     { value: 'Japanese', label: 'Japanese' },
 ];
 
-export function MedicationSynopsisDialog({ medicationName, children }: MedicationSynopsisDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function MedicationSynopsisDialog({ medicationName, onClose }: MedicationSynopsisProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<string | null>(null);
   const [originalText, setOriginalText] = React.useState<string | null>(null);
@@ -69,17 +59,15 @@ export function MedicationSynopsisDialog({ medicationName, children }: Medicatio
         title: 'An error occurred',
         description: 'Could not fetch medication information.',
       });
-      setOpen(false);
+      onClose();
     } finally {
       setIsLoading(false);
     }
-  }, [medicationName, toast]);
+  }, [medicationName, toast, onClose]);
   
   React.useEffect(() => {
-    if(open) {
-        handleFetchSynopsis();
-    }
-  }, [open, handleFetchSynopsis]);
+    handleFetchSynopsis();
+  }, [handleFetchSynopsis]);
 
   const handleTranslate = async () => {
     if (!result || !targetLanguage) return;
@@ -105,58 +93,50 @@ export function MedicationSynopsisDialog({ medicationName, children }: Medicatio
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-4">
-          <DialogTitle>Synopsis for {medicationName}</DialogTitle>
-          <DialogDescription>
-            AI-generated summary. Always consult a healthcare professional.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex-1 min-h-0">
-            <ScrollArea className="h-full">
-                <div className="px-6 pb-6 space-y-4">
-                    {isLoading ? (
-                        <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            <p>Loading synopsis...</p>
-                        </div>
-                    ) : result && (
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2">
-                                <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                                    <SelectTrigger className="flex-1">
-                                        <SelectValue placeholder="Select Language to Translate" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {LANGUAGES.map((lang) => (
-                                            <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <Button onClick={handleTranslate} disabled={isTranslating || !targetLanguage} size="icon" variant="outline">
-                                    {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
-                                </Button>
-                                {result !== originalText && (
-                                    <Button onClick={handleRevert} size="icon" variant="outline">
-                                        <Undo2 className="h-4 w-4" />
-                                    </Button>
-                                )}
-                            </div>
-                            <Alert>
-                            <BookOpen className="h-4 w-4" />
-                            <AlertTitle className="font-semibold">Medication Information</AlertTitle>
-                            <AlertDescription className="whitespace-pre-wrap leading-relaxed">
-                                {result}
-                            </AlertDescription>
-                            </Alert>
-                        </div>
-                    )}
+    <Card className="mt-2 bg-muted/30">
+        <CardContent className="p-4 space-y-4">
+             {isLoading && (
+                <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p>Loading synopsis...</p>
                 </div>
-            </ScrollArea>
-        </div>
-      </DialogContent>
-    </Dialog>
+            )}
+             {result && (
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                        <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+                            <SelectTrigger className="flex-1">
+                                <SelectValue placeholder="Translate..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {LANGUAGES.map((lang) => (
+                                    <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Button onClick={handleTranslate} disabled={isTranslating || !targetLanguage} size="icon" variant="outline">
+                            {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
+                        </Button>
+                        {result !== originalText && (
+                            <Button onClick={handleRevert} size="icon" variant="outline">
+                                <Undo2 className="h-4 w-4" />
+                            </Button>
+                        )}
+                    </div>
+                    <Alert>
+                    <BookOpen className="h-4 w-4" />
+                    <AlertTitle className="font-semibold">Medication Information</AlertTitle>
+                    <AlertDescription className="whitespace-pre-wrap leading-relaxed text-xs">
+                        {result}
+                    </AlertDescription>
+                    </Alert>
+                </div>
+            )}
+            <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={onClose}>
+                <XCircle className="mr-2 h-4 w-4" />
+                Close
+            </Button>
+        </CardContent>
+    </Card>
   );
 }

@@ -2,7 +2,7 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings, Info } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings, Info, XCircle } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,7 +27,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -315,6 +314,10 @@ function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave
     );
 }
 
+type ActiveSynopsis = {
+    type: 'medication' | 'condition';
+    id: string;
+} | null;
 
 export function ProfileCard() {
   const { profile, setProfile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
@@ -325,6 +328,7 @@ export function ProfileCard() {
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [isAddingWeight, setIsAddingWeight] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
+  const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
 
   const [isEditingHeight, setIsEditingHeight] = React.useState(false);
   const [isEditingEmail, setIsEditingEmail] = React.useState(false);
@@ -410,6 +414,9 @@ export function ProfileCard() {
 
   const handleRemoveMedication = (id: string) => {
     removeMedication(id);
+    if(activeSynopsis?.type === 'medication' && activeSynopsis.id === id) {
+        setActiveSynopsis(null);
+    }
   };
   
   const handleSetMedicationNil = () => {
@@ -459,6 +466,21 @@ export function ProfileCard() {
     addMedicalCondition({ ...data, date: data.date.toISOString(), icdCode });
     setIsAddingCondition(false);
   };
+
+  const handleSynopsisToggle = (type: 'medication' | 'condition', id: string) => {
+    if (activeSynopsis?.id === id) {
+      setActiveSynopsis(null);
+    } else {
+      setActiveSynopsis({ type, id });
+    }
+  };
+  
+  const handleRemoveCondition = (id: string) => {
+      removeMedicalCondition(id);
+      if (activeSynopsis?.type === 'condition' && activeSynopsis.id === id) {
+          setActiveSynopsis(null);
+      }
+  }
 
 
   return (
@@ -702,30 +724,31 @@ export function ProfileCard() {
             {profile.presentMedicalConditions.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.presentMedicalConditions.map((condition) => (
-                         <li key={condition.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                           <ConditionSynopsisDialog conditionName={condition.condition}>
-                               <div className={cn("flex-1", !isMobile && "cursor-pointer")}>
+                        <React.Fragment key={condition.id}>
+                             <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md cursor-pointer" onClick={() => handleSynopsisToggle('condition', condition.id)}>
+                               <div className="flex-1">
                                    <p className="font-semibold text-foreground">{condition.condition}</p>
                                    {condition.icdCode && <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>}
                                    <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
                                </div>
-                           </ConditionSynopsisDialog>
-                            <div className="flex items-center shrink-0">
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); removeMedicalCondition(condition.id); }}>
-                                            <Trash2 className="h-4 w-4 text-destructive" />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>Delete condition</TooltipContent>
-                                </Tooltip>
-                                <ConditionSynopsisDialog conditionName={condition.condition}>
-                                     <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100">
+                                <div className="flex items-center shrink-0">
+                                     <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveCondition(condition.id); }}>
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                    </Button>
+                                    <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100">
                                         <Info className="h-4 w-4 text-blue-500" />
                                     </Button>
-                                </ConditionSynopsisDialog>
-                            </div>
-                        </li>
+                                </div>
+                            </li>
+                            {activeSynopsis?.type === 'condition' && activeSynopsis.id === condition.id && (
+                                <li className="pl-5 pb-2">
+                                    <ConditionSynopsisDialog
+                                        conditionName={condition.condition}
+                                        onClose={() => setActiveSynopsis(null)}
+                                    />
+                                </li>
+                            )}
+                        </React.Fragment>
                     ))}
                 </ul>
             ) : (
@@ -794,9 +817,9 @@ export function ProfileCard() {
             {profile.medication.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
-                         <li key={med.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                           <MedicationSynopsisDialog medicationName={med.name}>
-                               <div className={cn("flex-1", !isMobile && "cursor-pointer")}>
+                        <React.Fragment key={med.id}>
+                            <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md cursor-pointer" onClick={() => med.name.toLowerCase() !== 'nil' && handleSynopsisToggle('medication', med.id)}>
+                               <div className="flex-1">
                                {med.name.toLowerCase() === 'nil' ? (
                                        <span className="font-semibold text-foreground">Nil - No medication</span>
                                ) : (
@@ -806,27 +829,32 @@ export function ProfileCard() {
                                    </>
                                )}
                                </div>
-                           </MedicationSynopsisDialog>
-                            <div className="flex items-center shrink-0">
-                                {med.name.toLowerCase() !== 'nil' && (
-                                    <>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
-                                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>Delete medication</TooltipContent>
-                                        </Tooltip>
-                                        <MedicationSynopsisDialog medicationName={med.name}>
+                                <div className="flex items-center shrink-0">
+                                    {med.name.toLowerCase() !== 'nil' ? (
+                                        <>
+                                            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
+                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                            </Button>
                                             <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100">
                                                 <Info className="h-4 w-4 text-blue-500" />
                                             </Button>
-                                        </MedicationSynopsisDialog>
-                                    </>
-                                )}
-                            </div>
-                        </li>
+                                        </>
+                                    ) : (
+                                         <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
+                                            <XCircle className="h-4 w-4 text-muted-foreground" />
+                                        </Button>
+                                    )}
+                                </div>
+                            </li>
+                             {activeSynopsis?.type === 'medication' && activeSynopsis.id === med.id && (
+                                <li className="pl-5 pb-2">
+                                    <MedicationSynopsisDialog
+                                        medicationName={med.name}
+                                        onClose={() => setActiveSynopsis(null)}
+                                    />
+                                </li>
+                            )}
+                        </React.Fragment>
                     ))}
                 </ul>
             ) : (
