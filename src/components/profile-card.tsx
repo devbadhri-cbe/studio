@@ -148,7 +148,7 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-2">
                 <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><DatePicker placeholder="Date of Weight" value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input ref={inputRef} type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input ref={inputRef} type="number" step="0.01" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <div className="flex justify-end gap-2">
                     <Button type="button" size="sm" variant="ghost" className="flex-1" onClick={onCancel}>Cancel</Button>
                     <Button type="submit" size="sm" className="flex-1">Save</Button>
@@ -242,8 +242,8 @@ export function ProfileCard() {
   
   const displayWeight = latestWeight?.value
     ? unitSystem === 'imperial'
-      ? `${kgToLbs(latestWeight.value).toFixed(1)} lbs`
-      : `${latestWeight.value.toFixed(1)} kg`
+      ? `${kgToLbs(latestWeight.value).toFixed(2)} lbs`
+      : `${latestWeight.value.toFixed(2)} kg`
     : 'N/A';
 
   const displayHeight = profile.height
@@ -385,7 +385,7 @@ export function ProfileCard() {
                     />
                     <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
                     <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-                    <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" step="0.1" placeholder="e.g., 70" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 70" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
                     <Separator />
                      <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
                      <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
@@ -468,8 +468,8 @@ export function ProfileCard() {
                  <ul className="space-y-1 mt-2">
                     {sortedWeights.slice(0, 3).map((weight) => {
                         const displayRecordWeight = unitSystem === 'imperial'
-                            ? `${kgToLbs(weight.value).toFixed(1)} lbs`
-                            : `${weight.value.toFixed(1)} kg`;
+                            ? `${kgToLbs(weight.value).toFixed(2)} lbs`
+                            : `${weight.value.toFixed(2)} kg`;
 
                         return (
                             <li key={weight.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
@@ -682,3 +682,4 @@ export function ProfileCard() {
     </Card>
   );
 }
+
