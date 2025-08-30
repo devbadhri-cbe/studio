@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings } from 'lucide-react';
@@ -40,135 +39,6 @@ const MedicationSchema = z.object({
   dosage: z.string().min(1, 'Dosage is required.'),
   frequency: z.string().min(1, 'Frequency is required.'),
 });
-
-function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; dosage: string; frequency: string; }) => void, onCancel: () => void }) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [suggestion, setSuggestion] = React.useState<{ originalData: z.infer<typeof MedicationSchema>, correctedName: string } | null>(null);
-  const [popoverOpen, setPopoverOpen] = React.useState(false);
-  const { toast } = useToast();
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  
-  React.useEffect(() => {
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 100);
-  }, []);
-
-  const form = useForm<z.infer<typeof MedicationSchema>>({
-    resolver: zodResolver(MedicationSchema),
-    defaultValues: { medicationName: '', dosage: '', frequency: '' },
-  });
-
-  const capitalizeFirstLetter = (string: string) => {
-    if (!string) return "";
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  }
-
-  const handleFinalSave = (data: z.infer<typeof MedicationSchema>) => {
-    onSave({
-      name: capitalizeFirstLetter(data.medicationName),
-      dosage: data.dosage,
-      frequency: data.frequency,
-    });
-    form.reset();
-  };
-  
-  const handleInitialSubmit = async (data: z.infer<typeof MedicationSchema>) => {
-    setIsSubmitting(true);
-    setPopoverOpen(false);
-    try {
-        const response = await fetch(`https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json?name=${encodeURIComponent(data.medicationName)}`);
-        if (!response.ok) throw new Error('API request failed');
-        const apiData = await response.json();
-        const suggestions = apiData.suggestionGroup?.suggestionList?.suggestion;
-
-        if (suggestions && suggestions.length > 0 && suggestions[0].toLowerCase() !== data.medicationName.toLowerCase()) {
-            setSuggestion({ originalData: data, correctedName: capitalizeFirstLetter(suggestions[0]) });
-            setPopoverOpen(true);
-        } else {
-            handleFinalSave(data);
-        }
-    } catch (error) {
-        console.error("Spell check failed, saving as is.", error);
-        toast({
-            variant: 'destructive',
-            title: 'Spell Check Failed',
-            description: 'Could not reach the spelling suggestion service. Saving medication as entered.'
-        });
-        handleFinalSave(data);
-    } finally {
-        setIsSubmitting(false);
-    }
-  };
-
-  const onConfirmSuggestion = () => {
-    if (suggestion) {
-        handleFinalSave({ ...suggestion.originalData, medicationName: suggestion.correctedName });
-    }
-    setPopoverOpen(false);
-    setSuggestion(null);
-  };
-
-  const onIgnoreSuggestion = () => {
-    if (suggestion) {
-        handleFinalSave(suggestion.originalData);
-    }
-    setPopoverOpen(false);
-    setSuggestion(null);
-  }
-
-  return (
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleInitialSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-           <FormField
-            control={form.control}
-            name="medicationName"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    ref={inputRef}
-                    placeholder="Medication Name"
-                    {...field}
-                    onChange={(e) => field.onChange(capitalizeFirstLetter(e.target.value))}
-                    autoComplete="new-password"
-                    spellCheck={false}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="grid grid-cols-2 gap-2">
-            <FormField control={form.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
-            <FormField control={form.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
-            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button type="submit" size="sm" disabled={isSubmitting}>
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-3">
-                 <div className="space-y-2">
-                    <p className="text-sm">
-                      Did you mean <strong className="text-foreground">{suggestion?.correctedName}</strong>?
-                    </p>
-                    <div className="flex justify-end gap-2">
-                        <Button size="sm" variant="outline" onClick={onIgnoreSuggestion}>Save as is</Button>
-                        <Button size="sm" onClick={onConfirmSuggestion}>Use Suggestion</Button>
-                    </div>
-                 </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-        </form>
-      </Form>
-  );
-}
-
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
@@ -443,17 +313,30 @@ function DobForm({ currentDob, onSave, onCancel }: { currentDob?: string; onSave
 
 export function ProfileCard() {
   const { profile, setProfile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
+  const { toast } = useToast();
+
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [isAddingWeight, setIsAddingWeight] = React.useState(false);
+
   const [isEditingHeight, setIsEditingHeight] = React.useState(false);
   const [isEditingEmail, setIsEditingEmail] = React.useState(false);
   const [isEditingPhone, setIsEditingPhone] = React.useState(false);
   const [isEditingCountry, setIsEditingCountry] = React.useState(false);
   const [isEditingDob, setIsEditingDob] = React.useState(false);
-  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
+  
+  const [isSubmittingMedication, setIsSubmittingMedication] = React.useState(false);
+  const [medicationSuggestion, setMedicationSuggestion] = React.useState<{ originalData: z.infer<typeof MedicationSchema>, correctedName: string } | null>(null);
+  const [popoverOpen, setPopoverOpen] = React.useState(false);
+
   const [animateShield, setAnimateShield] = React.useState(false);
   const formatDate = useDateFormatter();
+  const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
+
+  const medicationForm = useForm<z.infer<typeof MedicationSchema>>({
+    resolver: zodResolver(MedicationSchema),
+    defaultValues: { medicationName: '', dosage: '', frequency: '' },
+  });
 
   const calculatedAge = calculateAge(profile.dob);
   const country = countries.find(c => c.code === profile.country);
@@ -480,15 +363,76 @@ export function ProfileCard() {
 
   const bmi = calculateBmi(latestWeight?.value, profile.height || 0);
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
+  
+  const capitalizeFirstLetter = (string: string) => {
+    if (!string) return "";
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
 
-  const handleSaveMedication = React.useCallback((data: { name: string; dosage: string; frequency: string; }) => {
-    addMedication(data);
+  const handleFinalSaveMedication = (data: z.infer<typeof MedicationSchema>) => {
+    addMedication({
+      name: capitalizeFirstLetter(data.medicationName),
+      dosage: data.dosage,
+      frequency: data.frequency,
+    });
+    medicationForm.reset();
     setIsAddingMedication(false);
-     if (profile.medication.length >= 1) { 
+    if (profile.medication.length >= 1) { 
         setAnimateShield(true);
-        setTimeout(() => setAnimateShield(false), 2000);
     }
-  }, [addMedication, profile.medication.length]);
+  };
+
+  const onInitialMedicationSubmit = async (data: z.infer<typeof MedicationSchema>) => {
+    setIsSubmittingMedication(true);
+    setPopoverOpen(false);
+    try {
+        const response = await fetch(`https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json?name=${encodeURIComponent(data.medicationName)}`);
+        if (!response.ok) throw new Error('API request failed');
+        const apiData = await response.json();
+        const suggestions = apiData.suggestionGroup?.suggestionList?.suggestion;
+
+        if (suggestions && suggestions.length > 0 && suggestions[0].toLowerCase() !== data.medicationName.toLowerCase()) {
+            setMedicationSuggestion({ originalData: data, correctedName: capitalizeFirstLetter(suggestions[0]) });
+            setPopoverOpen(true);
+        } else {
+            handleFinalSaveMedication(data);
+        }
+    } catch (error) {
+        console.error("Spell check failed, saving as is.", error);
+        toast({
+            variant: 'destructive',
+            title: 'Spell Check Failed',
+            description: 'Could not reach the spelling suggestion service. Saving medication as entered.'
+        });
+        handleFinalSaveMedication(data);
+    } finally {
+        setIsSubmittingMedication(false);
+    }
+  };
+
+  const onConfirmSuggestion = () => {
+    if (medicationSuggestion) {
+        handleFinalSaveMedication({ ...medicationSuggestion.originalData, medicationName: medicationSuggestion.correctedName });
+    }
+    setPopoverOpen(false);
+    setMedicationSuggestion(null);
+  };
+
+  const onIgnoreSuggestion = () => {
+    if (medicationSuggestion) {
+        handleFinalSaveMedication(medicationSuggestion.originalData);
+    }
+    setPopoverOpen(false);
+    setMedicationSuggestion(null);
+  }
+
+  React.useEffect(() => {
+    if (isAddingMedication) {
+        setTimeout(() => {
+            medicationNameInputRef.current?.focus();
+        }, 100);
+    }
+  }, [isAddingMedication]);
 
   const handleRemoveMedication = React. useCallback((id: string) => {
     removeMedication(id);
@@ -841,7 +785,56 @@ export function ProfileCard() {
                     )}
                 </div>
             </div>
-            {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} />}
+            {isAddingMedication && (
+                 <Form {...medicationForm}>
+                    <form onSubmit={medicationForm.handleSubmit(onInitialMedicationSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
+                    <FormField
+                        control={medicationForm.control}
+                        name="medicationName"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormControl>
+                            <Input
+                                ref={medicationNameInputRef}
+                                placeholder="Medication Name"
+                                {...field}
+                                onChange={(e) => field.onChange(capitalizeFirstLetter(e.target.value))}
+                                autoComplete="new-password"
+                                spellCheck={false}
+                            />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                        <FormField control={medicationForm.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={medicationForm.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                        <Button type="button" size="sm" variant="ghost" onClick={() => setIsAddingMedication(false)}>Cancel</Button>
+                        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                        <PopoverTrigger asChild>
+                            <Button type="submit" size="sm" disabled={isSubmittingMedication}>
+                            {isSubmittingMedication ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-3">
+                            <div className="space-y-2">
+                                <p className="text-sm">
+                                Did you mean <strong className="text-foreground">{medicationSuggestion?.correctedName}</strong>?
+                                </p>
+                                <div className="flex justify-end gap-2">
+                                    <Button size="sm" variant="outline" onClick={onIgnoreSuggestion}>Save as is</Button>
+                                    <Button size="sm" onClick={onConfirmSuggestion}>Use Suggestion</Button>
+                                </div>
+                            </div>
+                        </PopoverContent>
+                        </Popover>
+                    </div>
+                    </form>
+                </Form>
+            )}
             {profile.medication.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
@@ -876,12 +869,12 @@ export function ProfileCard() {
                 <div className="pt-2">
                     <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
                         <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => setAnimateShield(false)}
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full"
+                            onClick={() => setAnimateShield(false)}
                         >
-                        <ShieldAlert className={`mr-2 h-4 w-4 ${animateShield ? 'animate-spin' : ''}`} />
+                            <ShieldAlert className={`mr-2 h-4 w-4 ${animateShield ? 'animate-spin' : ''}`} />
                             Check Drug Interactions
                         </Button>
                     </DrugInteractionDialog>
@@ -893,3 +886,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
