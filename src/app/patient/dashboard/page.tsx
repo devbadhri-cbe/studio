@@ -168,7 +168,7 @@ export default function PatientDashboard() {
       </header>
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
-            <div className="flex items-center border-b pb-4 gap-4">
+            <div className="flex flex-col sm:flex-row items-center border-b pb-4 gap-4">
               <Tooltip>
                 <TooltipTrigger asChild>
                     <button 
@@ -195,14 +195,14 @@ export default function PatientDashboard() {
               </Tooltip>
               <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 flex-1">
-                <div>
+              <div className="flex flex-col items-center sm:items-start flex-1 gap-4 w-full">
+                <div className="text-center sm:text-left">
                   <h1 className="text-2xl md:text-3xl font-semibold font-headline">
                     {pageTitle}
                   </h1>
                   <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
                 </div>
-                <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
+                <div className="flex w-full sm:w-auto items-center justify-center sm:justify-end gap-2 shrink-0">
                   <UploadRecordDialog />
                   {!isDoctorLoggedIn && (
                      <DropdownMenu>
