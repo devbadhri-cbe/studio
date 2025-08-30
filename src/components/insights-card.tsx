@@ -5,16 +5,38 @@ import { getPersonalizedInsights } from '@/ai/flows/personalized-insights';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { calculateAge, calculateBmi } from '@/lib/utils';
-import { Lightbulb, Loader2 } from 'lucide-react';
+import { Lightbulb, Loader2, Languages, Undo2 } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { format } from 'date-fns';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { translateText } from '@/ai/flows/translate-text';
+
+const LANGUAGES = [
+    { value: 'Spanish', label: 'Spanish' },
+    { value: 'French', label: 'French' },
+    { value: 'German', label: 'German' },
+    { value: 'Mandarin', label: 'Mandarin' },
+    { value: 'Hindi', label: 'Hindi' },
+    { value: 'Arabic', label: 'Arabic' },
+    { value: 'Tamil', label: 'Tamil' },
+    { value: 'Japanese', label: 'Japanese' },
+];
 
 export function InsightsCard() {
   const { profile, records, lipidRecords, bloodPressureRecords, tips, setTips, weightRecords } = useApp();
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
+  const [originalTips, setOriginalTips] = React.useState<string[]>([]);
+  const [isTranslating, setIsTranslating] = React.useState(false);
+  const [targetLanguage, setTargetLanguage] = React.useState('');
 
   const handleGetInsights = async () => {
     if (!profile.name || !profile.dob) {
@@ -60,6 +82,7 @@ export function InsightsCard() {
       });
       if (result.tips) {
         setTips(result.tips);
+        setOriginalTips(result.tips);
         toast({
           title: 'New Insights Generated!',
           description: 'We have new personalized tips for you.',
@@ -76,6 +99,34 @@ export function InsightsCard() {
       setIsLoading(false);
     }
   };
+  
+   const handleTranslate = async () => {
+    if (!tips.length || !targetLanguage) return;
+
+    setIsTranslating(true);
+    try {
+        const translatedTips = await Promise.all(tips.map(async (tip) => {
+            const response = await translateText({ text: tip, targetLanguage });
+            return response.translatedText;
+        }));
+        setTips(translatedTips);
+    } catch (error) {
+         console.error('Error translating text:', error);
+         toast({
+            variant: 'destructive',
+            title: 'Translation Failed',
+            description: `Could not translate the insights to ${targetLanguage}.`,
+         });
+    } finally {
+        setIsTranslating(false);
+    }
+  }
+
+  const handleRevert = () => {
+      setTips(originalTips);
+  }
+  
+  const areTipsTranslated = JSON.stringify(tips) !== JSON.stringify(originalTips);
 
   return (
     <Card className="h-full">
@@ -93,6 +144,29 @@ export function InsightsCard() {
         </div>
       </CardHeader>
       <CardContent>
+        {tips.length > 0 && (
+            <div className="flex items-center gap-2 mb-4">
+                <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+                    <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Select Language to Translate" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {LANGUAGES.map((lang) => (
+                            <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Button onClick={handleTranslate} disabled={isTranslating || !targetLanguage} size="icon" variant="outline">
+                    {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
+                </Button>
+                 {areTipsTranslated && (
+                    <Button onClick={handleRevert} size="icon" variant="outline">
+                        <Undo2 className="h-4 w-4" />
+                    </Button>
+                )}
+            </div>
+        )}
+
         {tips.length > 0 ? (
           <ul className="space-y-3">
             {tips.map((tip, index) => (
