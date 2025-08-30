@@ -32,7 +32,7 @@ const FormSchema = z.object({
   phone: z.string().min(5, { message: "Phone number is too short." }),
   // Imperial units
   height_ft: z.coerce.number().optional().or(z.literal('')),
-  height_in: z.coerce.number().optional().or(z.literal('')),
+  height_in: z.coerce.number().int().optional().or(z.literal('')),
   weight_lbs: z.coerce.number().optional().or(z.literal('')),
   // Metric units
   height_cm: z.coerce.number().optional().or(z.literal('')),
@@ -130,7 +130,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
         if (patient?.height) {
             const { feet, inches } = cmToFtIn(patient.height);
             height_ft = feet.toString();
-            height_in = inches.toString();
+            height_in = Math.round(inches).toString();
         }
     }
 
@@ -261,7 +261,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
                                         <FormLabel>Height (ft, in)</FormLabel>
                                         <div className="flex gap-2 mt-2">
                                             <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="ft" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                            <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" step="0.01" placeholder="in" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                            <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="in" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                         </div>
                                     </div>
                                     <FormField control={form.control} name="weight_lbs" render={({ field }) => ( <FormItem><FormLabel>Current Weight (lbs)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 154.00" {...field} /></FormControl><FormMessage /></FormItem> )} />

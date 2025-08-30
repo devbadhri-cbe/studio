@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings, Info, XCircle, Edit } from 'lucide-react';
@@ -198,7 +199,7 @@ export function ProfileCard() {
 
   const displayHeight = profile.height
     ? unitSystem === 'imperial'
-      ? `${cmToFtIn(profile.height).feet}' ${cmToFtIn(profile.height).inches.toFixed(2)}"`
+      ? `${cmToFtIn(profile.height).feet}' ${Math.round(cmToFtIn(profile.height).inches)}"`
       : `${profile.height.toFixed(2)} cm`
     : 'N/A';
     
