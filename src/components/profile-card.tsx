@@ -307,7 +307,7 @@ export function ProfileCard() {
                             {calculatedAge !== null && ` (${calculatedAge} yrs)`}
                         </p>
                     </div>
-                    <EditProfileDialog>
+                     <EditProfileDialog>
                          <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button variant="outline" size="icon" className="h-8 w-8">
@@ -367,7 +367,7 @@ export function ProfileCard() {
                     {!isAddingWeight && (
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setIsAddingWeight(true)}>
+                                <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setIsAddingWeight(true)}>
                                     <PlusCircle className="h-4 w-4" />
                                 </Button>
                             </TooltipTrigger>
@@ -421,7 +421,7 @@ export function ProfileCard() {
                     {!isAddingCondition && (
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setIsAddingCondition(true)}>
+                                <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setIsAddingCondition(true)}>
                                     <PlusCircle className="h-4 w-4" />
                                 </Button>
                             </TooltipTrigger>
@@ -480,7 +480,7 @@ export function ProfileCard() {
                             {profile.medication.length === 0 ? (
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button size="sm" variant="outline" className="h-7" onClick={handleSetMedicationNil}>
+                                        <Button size="sm" variant="outline" className="h-8" onClick={handleSetMedicationNil}>
                                             Set to Nil
                                         </Button>
                                     </TooltipTrigger>
@@ -494,7 +494,7 @@ export function ProfileCard() {
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className="h-7 w-7"
+                                            className="h-8 w-8"
                                             onClick={() => {
                                                 setIsAddingMedication(true);
                                             }}
