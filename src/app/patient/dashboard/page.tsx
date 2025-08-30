@@ -202,7 +202,7 @@ export default function PatientDashboard() {
                   </h1>
                   <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
                 </div>
-                <div className="grid w-full grid-cols-1 sm:flex sm:w-auto sm:justify-end gap-2 shrink-0">
+                <div className="grid w-full grid-cols-1 sm:flex sm:w-auto sm:justify-center gap-2 shrink-0">
                   <UploadRecordDialog>
                     <Button variant="outline" className="w-full sm:w-auto">
                         <UploadCloud className="mr-2 h-4 w-4" />
@@ -235,8 +235,7 @@ export default function PatientDashboard() {
                         <DropdownMenuTrigger asChild>
                              <Button variant="outline" className={`w-full sm:w-auto ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
                                 {ActiveDashboardIcon}
-                                <span className="sm:hidden ml-2">Select Dashboard</span>
-                                <span className="hidden sm:inline-block ml-2">{dashboardOptions[dashboardView].name}</span>
+                                <span className="ml-2">{dashboardOptions[dashboardView].name}</span>
                                 <Menu className="ml-auto h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
