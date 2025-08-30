@@ -206,7 +206,8 @@ export default function PatientDashboard() {
                   <UploadRecordDialog>
                     <Button variant="outline" className="w-full sm:w-auto">
                         <UploadCloud className="mr-2 h-4 w-4" />
-                        Upload Result
+                        <span className="sm:hidden">Upload Result</span>
+                        <span className="hidden sm:inline-block">Upload Result</span>
                     </Button>
                   </UploadRecordDialog>
                   {!isDoctorLoggedIn && (
@@ -214,7 +215,8 @@ export default function PatientDashboard() {
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="w-full sm:w-auto">
                                 <MessageSquareText className="mr-2 h-4 w-4" />
-                                Contact Doctor
+                                <span className="sm:hidden">Contact Doctor</span>
+                                <span className="hidden sm:inline-block">Contact Doctor</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
@@ -233,8 +235,8 @@ export default function PatientDashboard() {
                         <DropdownMenuTrigger asChild>
                              <Button variant="outline" className={`w-full sm:w-auto ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
                                 {ActiveDashboardIcon}
-                                <span className="sm:hidden ml-2">{dashboardOptions[dashboardView].name}</span>
-                                <span className="hidden sm:inline-block ml-2">Select Dashboard</span>
+                                <span className="sm:hidden ml-2">Select Dashboard</span>
+                                <span className="hidden sm:inline-block ml-2">{dashboardOptions[dashboardView].name}</span>
                                 <Menu className="ml-auto h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
