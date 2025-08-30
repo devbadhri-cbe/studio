@@ -42,6 +42,7 @@ export function AddLipidRecordDialog() {
   const { addLipidRecord, profile, lipidRecords, biomarkerUnit } = useApp();
   const { toast } = useToast();
   const [inputUnit, setInputUnit] = React.useState<LipidUnit>(biomarkerUnit);
+  const dateInputRef = React.useRef<HTMLButtonElement>(null);
 
   const getUnitLabel = (unit: LipidUnit) => (unit === 'si' ? 'mmol/L' : 'mg/dL');
 
@@ -66,6 +67,9 @@ export function AddLipidRecordDialog() {
         triglycerides: '' as any,
         total: '' as any,
       });
+      setTimeout(() => {
+        dateInputRef.current?.focus();
+      }, 100);
     }
   }, [open, biomarkerUnit, form]);
 
@@ -147,7 +151,11 @@ export function AddLipidRecordDialog() {
                   <FormItem>
                     <FormLabel>Test Date</FormLabel>
                     <FormControl>
-                      <DatePicker value={field.value} onChange={field.onChange} />
+                      <DatePicker
+                        ref={dateInputRef}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

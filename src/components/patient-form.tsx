@@ -48,6 +48,7 @@ interface PatientFormProps {
 export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [unitSystem, setUnitSystem] = React.useState<UnitSystem>('metric');
+  const nameInputRef = React.useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -78,6 +79,15 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
         setUnitSystem(patient?.unitSystem || countryData?.unitSystem || 'metric');
     }
   }, [watchCountry, form, patient?.unitSystem]);
+
+  React.useEffect(() => {
+      // Focus the name input when the component mounts for a new patient
+      if (!patient) {
+          setTimeout(() => {
+            nameInputRef.current?.focus();
+          }, 100);
+      }
+  }, [patient]);
   
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
@@ -156,7 +166,7 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
                 <ScrollArea className="flex-1">
                     <div className="space-y-6 p-4 sm:p-6">
                         <div className="space-y-4">
-                            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input ref={nameInputRef} placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                <FormField
                                   control={form.control}

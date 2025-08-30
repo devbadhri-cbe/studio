@@ -33,6 +33,7 @@ export function AddRecordDialog() {
   const [open, setOpen] = React.useState(false);
   const { addRecord, records, profile } = useApp();
   const { toast } = useToast();
+  const dateInputRef = React.useRef<HTMLButtonElement>(null);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -48,6 +49,9 @@ export function AddRecordDialog() {
         value: '' as any,
         date: new Date(),
       });
+      setTimeout(() => {
+        dateInputRef.current?.focus();
+      }, 100);
     }
   }, [open, form]);
 
@@ -113,7 +117,11 @@ export function AddRecordDialog() {
                   <FormItem>
                     <FormLabel>Test Date</FormLabel>
                     <FormControl>
-                      <DatePicker value={field.value} onChange={field.onChange} />
+                      <DatePicker
+                        ref={dateInputRef}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

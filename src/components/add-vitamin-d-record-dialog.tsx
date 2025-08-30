@@ -39,6 +39,7 @@ export function AddVitaminDRecordDialog() {
   const { addVitaminDRecord, profile, vitaminDRecords, biomarkerUnit } = useApp();
   const { toast } = useToast();
   const [inputUnit, setInputUnit] = React.useState<VitaminDUnit>(biomarkerUnit);
+  const dateInputRef = React.useRef<HTMLButtonElement>(null);
 
   const getUnitLabel = (unit: VitaminDUnit) => (unit === 'si' ? 'nmol/L' : 'ng/mL');
 
@@ -57,6 +58,9 @@ export function AddVitaminDRecordDialog() {
         date: new Date(),
         value: '' as any,
       });
+      setTimeout(() => {
+        dateInputRef.current?.focus();
+      }, 100);
     }
   }, [open, biomarkerUnit, form]);
 
@@ -133,7 +137,11 @@ export function AddVitaminDRecordDialog() {
                   <FormItem>
                     <FormLabel>Test Date</FormLabel>
                     <FormControl>
-                      <DatePicker value={field.value} onChange={field.onChange} />
+                      <DatePicker
+                        ref={dateInputRef}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

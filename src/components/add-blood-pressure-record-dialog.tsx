@@ -35,6 +35,7 @@ export function AddBloodPressureRecordDialog() {
   const [open, setOpen] = React.useState(false);
   const { addBloodPressureRecord, profile, bloodPressureRecords } = useApp();
   const { toast } = useToast();
+  const dateInputRef = React.useRef<HTMLButtonElement>(null);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -54,6 +55,9 @@ export function AddBloodPressureRecordDialog() {
         diastolic: '' as any,
         heartRate: '' as any,
       });
+      setTimeout(() => {
+        dateInputRef.current?.focus();
+      }, 100);
     }
   }, [open, form]);
 
@@ -121,7 +125,11 @@ export function AddBloodPressureRecordDialog() {
                   <FormItem>
                     <FormLabel>Test Date</FormLabel>
                     <FormControl>
-                      <DatePicker value={field.value} onChange={field.onChange} />
+                      <DatePicker
+                        ref={dateInputRef}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

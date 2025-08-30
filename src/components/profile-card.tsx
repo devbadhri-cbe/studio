@@ -46,6 +46,13 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
   const [suggestion, setSuggestion] = React.useState<{ originalData: z.infer<typeof MedicationSchema>, correctedName: string } | null>(null);
   const [popoverOpen, setPopoverOpen] = React.useState(false);
   const { toast } = useToast();
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  
+  React.useEffect(() => {
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  }, []);
 
   const form = useForm<z.infer<typeof MedicationSchema>>({
     resolver: zodResolver(MedicationSchema),
@@ -120,6 +127,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
               <FormItem>
                 <FormControl>
                   <Input
+                    ref={inputRef}
                     placeholder="Medication Name"
                     {...field}
                     onChange={(e) => field.onChange(capitalizeFirstLetter(e.target.value))}
@@ -170,6 +178,13 @@ const ConditionSchema = z.object({
 function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition: string, date: Date}, icdCode?: string) => Promise<void>, onCancel: () => void }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useApp();
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  
+  React.useEffect(() => {
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  }, []);
 
   const form = useForm<z.infer<typeof ConditionSchema>>({
     resolver: zodResolver(ConditionSchema),
@@ -202,7 +217,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-        <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Condition Name" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+        <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormControl><Input ref={inputRef} placeholder="Condition Name" {...field} /></FormControl><FormMessage /></FormItem> )}/>
         <FormField
           control={form.control}
           name="date"
@@ -237,16 +252,23 @@ const WeightSchema = z.object({
 });
 
 function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof WeightSchema>) => void, onCancel: () => void }) {
+    const inputRef = React.useRef<HTMLInputElement>(null);
     const form = useForm<z.infer<typeof WeightSchema>>({
         resolver: zodResolver(WeightSchema),
         defaultValues: { value: '' as any, date: new Date() },
     });
+    
+    React.useEffect(() => {
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 100)
+    }, []);
 
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
                 <div className="grid grid-cols-2 gap-2">
-                    <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input ref={inputRef} type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
                 <div className="flex justify-end gap-2">
@@ -282,6 +304,7 @@ function HeightForm({
     onSave: (height: number) => void;
     onCancel: () => void;
 }) {
+    const inputRef = React.useRef<HTMLInputElement>(null);
     const defaultValues = React.useMemo(() => {
         if (unitSystem === 'imperial' && currentHeight) {
             const { feet, inches } = cmToFtIn(currentHeight);
@@ -295,6 +318,12 @@ function HeightForm({
         defaultValues,
     });
     
+     React.useEffect(() => {
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 100);
+    }, []);
+
     const handleSubmit = (data: z.infer<typeof HeightSchema>) => {
         let heightInCm: number;
         if (unitSystem === 'imperial') {
@@ -309,11 +338,11 @@ function HeightForm({
         <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="flex items-start gap-2 flex-1">
                 {unitSystem === 'metric' ? (
-                    <FormField control={form.control} name="height_cm" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="cm" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )} />
+                    <FormField control={form.control} name="height_cm" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input ref={inputRef} type="number" placeholder="cm" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )} />
                 ) : (
                     <div className="flex flex-1 gap-2">
-                        <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="ft" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )} />
-                        <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="in" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )} />
+                        <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input ref={inputRef} type="number" placeholder="ft" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                        <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="number" placeholder="in" {...field} value={field.value ?? ''} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
                     </div>
                 )}
                 <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
@@ -325,11 +354,19 @@ function HeightForm({
 
 const EmailSchema = z.object({ email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')) });
 function EmailForm({ currentEmail, onSave, onCancel }: { currentEmail?: string; onSave: (email: string) => void; onCancel: () => void }) {
+    const inputRef = React.useRef<HTMLInputElement>(null);
     const form = useForm<z.infer<typeof EmailSchema>>({ resolver: zodResolver(EmailSchema), defaultValues: { email: currentEmail || '' } });
+    
+     React.useEffect(() => {
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 100);
+    }, []);
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit((d) => onSave(d.email || ''))} className="flex items-center gap-2 flex-1">
-                <FormField control={form.control} name="email" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="email" placeholder="patient@example.com" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                <FormField control={form.control} name="email" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input ref={inputRef} type="email" placeholder="patient@example.com" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
                 <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
                 <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
             </form>
@@ -339,11 +376,19 @@ function EmailForm({ currentEmail, onSave, onCancel }: { currentEmail?: string; 
 
 const PhoneSchema = z.object({ phone: z.string().min(5, { message: "Phone number is too short." }) });
 function PhoneForm({ currentPhone, onSave, onCancel }: { currentPhone?: string; onSave: (phone: string) => void; onCancel: () => void }) {
+    const inputRef = React.useRef<HTMLInputElement>(null);
     const form = useForm<z.infer<typeof PhoneSchema>>({ resolver: zodResolver(PhoneSchema), defaultValues: { phone: currentPhone || '' } });
+
+     React.useEffect(() => {
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 100);
+    }, []);
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit((d) => onSave(d.phone))} className="flex items-center gap-2 flex-1">
-                <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input type="tel" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
+                <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem className="flex-1"><FormControl><Input ref={inputRef} type="tel" {...field} className="h-8" /></FormControl><FormMessage className="text-xs" /></FormItem> )}/>
                 <Tooltip><TooltipTrigger asChild><Button type="submit" size="icon" variant="ghost" className="h-7 w-7 text-green-600"><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Save</TooltipContent></Tooltip>
                 <Tooltip><TooltipTrigger asChild><Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onCancel}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancel</TooltipContent></Tooltip>
             </form>
@@ -440,7 +485,8 @@ export function ProfileCard() {
     addMedication(data);
     setIsAddingMedication(false);
      if (profile.medication.length >= 1) { 
-      setAnimateShield(true);
+        setAnimateShield(true);
+        setTimeout(() => setAnimateShield(false), 2000);
     }
   }, [addMedication, profile.medication.length]);
 
@@ -827,17 +873,19 @@ export function ProfileCard() {
                  !isAddingMedication && <p className="text-xs text-muted-foreground pl-8">No medication recorded.</p>
             )}
              {profile.medication.length > 1 && !isMedicationNil && (
-                 <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full mt-2"
-                      onClick={() => setAnimateShield(false)}
-                    >
-                      <ShieldAlert className={`mr-2 h-4 w-4 ${animateShield ? 'animate-spin' : ''}`} />
-                        Check Drug Interactions
-                    </Button>
-                </DrugInteractionDialog>
+                <div className="pt-2">
+                    <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
+                        <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => setAnimateShield(false)}
+                        >
+                        <ShieldAlert className={`mr-2 h-4 w-4 ${animateShield ? 'animate-spin' : ''}`} />
+                            Check Drug Interactions
+                        </Button>
+                    </DrugInteractionDialog>
+                </div>
             )}
         </div>
 
