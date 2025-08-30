@@ -92,7 +92,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-2">
         <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormControl><Input ref={inputRef} placeholder="Condition Name" {...field} /></FormControl><FormMessage /></FormItem> )}/>
         <FormField
           control={form.control}
@@ -112,8 +112,8 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
           )}
         />
         <div className="flex justify-end gap-2">
-          <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
-          <Button type="submit" size="sm" disabled={isSubmitting}>
+          <Button type="button" size="sm" variant="ghost" className="flex-1" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
+          <Button type="submit" size="sm" className="flex-1" disabled={isSubmitting}>
              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
           </Button>
         </div>
