@@ -338,8 +338,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return;
     };
     
-    const newRecordDate = new Date(date + 'T00:00:00');
-
+    const newRecordDate = startOfDay(new Date(date));
     let duplicatesFound = false;
 
     if (batch.hba1c && batch.hba1c.value) {
