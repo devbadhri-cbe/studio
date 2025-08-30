@@ -22,7 +22,7 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
             fillOpacity="0.1" 
         />
         <polyline
-            className="animate-pulse-trace"
+            className="animate-pulse-trace text-destructive"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
