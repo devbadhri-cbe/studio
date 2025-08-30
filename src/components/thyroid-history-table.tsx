@@ -69,9 +69,9 @@ export function ThyroidHistoryTable() {
           <TableHeader>
             <TableRow>
               <TableHead className="px-2 md:px-4">Date</TableHead>
-              <TableHead className="px-2 md:px-4">TSH</TableHead>
-              <TableHead className="px-2 md:px-4">T3</TableHead>
-              <TableHead className="px-2 md:px-4">T4</TableHead>
+              <TableHead className="px-2 md:px-4">TSH (μIU/mL)</TableHead>
+              <TableHead className="px-2 md:px-4">T3 (ng/dL)</TableHead>
+              <TableHead className="px-2 md:px-4">T4 (μg/dL)</TableHead>
               <TableHead className="px-2 md:px-4">TSH Status</TableHead>
               <TableHead className="text-right px-2 md:px-4">Actions</TableHead>
             </TableRow>
