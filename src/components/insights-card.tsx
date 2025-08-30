@@ -147,45 +147,43 @@ export function InsightsCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         {tips.length > 0 && (
-          <div className="space-y-4">
-             <div className="flex items-center gap-2">
-                <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                    <SelectTrigger className="flex-1">
-                        <SelectValue placeholder="Translate..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {LANGUAGES.map((lang) => (
-                            <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Button onClick={handleTranslate} disabled={isTranslating || !targetLanguage} size="icon" variant="outline">
-                    {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
-                </Button>
-                 {areTipsTranslated && (
-                    <Button onClick={handleRevert} size="icon" variant="outline">
-                        <Undo2 className="h-4 w-4" />
-                    </Button>
-                )}
-            </div>
-            <Alert className="bg-muted/50">
-              <AlertDescription>
-                <ul className="space-y-3">
-                  {tips.map((tip, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                      <p className="text-sm text-muted-foreground">{tip}</p>
-                    </li>
-                  ))}
-                </ul>
-              </AlertDescription>
-            </Alert>
-          </div>
+          <Alert className="bg-muted/50">
+            <AlertDescription className="space-y-4">
+               <div className="flex items-center gap-2">
+                  <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+                      <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Translate..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                          {LANGUAGES.map((lang) => (
+                              <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                          ))}
+                      </SelectContent>
+                  </Select>
+                  <Button onClick={handleTranslate} disabled={isTranslating || !targetLanguage} size="icon" variant="outline">
+                      {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
+                  </Button>
+                   {areTipsTranslated && (
+                      <Button onClick={handleRevert} size="icon" variant="outline">
+                          <Undo2 className="h-4 w-4" />
+                      </Button>
+                  )}
+              </div>
+              <ul className="space-y-3">
+                {tips.map((tip, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                    <p className="text-sm text-muted-foreground">{tip}</p>
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
         )}
         
         {!isLoading && tips.length === 0 && (
             <div className="text-center text-sm text-muted-foreground py-4">
-                <p>No insights yet. Generate insights based on your records.</p>
+                <p>Click the button to generate personalized health tips.</p>
             </div>
         )}
 
