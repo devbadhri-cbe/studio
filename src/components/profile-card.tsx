@@ -151,7 +151,7 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
 
     const handleSave = (data: z.infer<typeof WeightSchema>) => {
         const dbValue = isImperial ? lbsToKg(data.value) : data.value;
-        onSave({ ...data, value: dbValue });
+        onSave({ ...data, value: parseFloat(dbValue.toFixed(2)) });
     }
 
     return (
@@ -190,6 +190,15 @@ export function ProfileCard() {
   const formatDate = useDateFormatter();
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
 
+  const medicationForm = useForm<z.infer<typeof MedicationSchema>>({
+    resolver: zodResolver(MedicationSchema),
+    defaultValues: {
+      medicationName: '',
+      dosage: '',
+      frequency: '',
+    },
+  });
+
   const form = useForm<z.infer<typeof ProfileSchema>>({
     resolver: zodResolver(ProfileSchema),
   });
@@ -208,7 +217,7 @@ export function ProfileCard() {
         if(profile.height && isImperial) {
             const { feet, inches } = cmToFtIn(profile.height);
             height_ft = feet.toString();
-            height_in = inches.toString();
+            height_in = Math.round(inches).toString();
         }
 
         form.reset({
@@ -220,7 +229,7 @@ export function ProfileCard() {
             height: !isImperial ? profile?.height || '' : '',
             height_ft: isImperial ? height_ft : '',
             height_in: isImperial ? height_in : '',
-            weight: latestWeight?.value ? (isImperial ? kgToLbs(latestWeight.value) : latestWeight.value) : '',
+            weight: latestWeight?.value ? (isImperial ? parseFloat(kgToLbs(latestWeight.value).toFixed(2)) : parseFloat(latestWeight.value.toFixed(2))) : '',
         });
     }
   }, [isEditing, profile, latestWeight, form, isImperial]);
@@ -253,7 +262,7 @@ export function ProfileCard() {
         const latestDate = latestWeight ? new Date(latestWeight.date).getTime() : 0;
         const oneDay = 24 * 60 * 60 * 1000;
         if (new Date().getTime() - latestDate > oneDay || dbWeight !== latestWeight?.value) {
-            addWeightRecord({ value: dbWeight, date: new Date().toISOString() });
+            addWeightRecord({ value: parseFloat(dbWeight.toFixed(2)), date: new Date().toISOString() });
         }
     }
     toast({
@@ -277,7 +286,7 @@ export function ProfileCard() {
   const displayHeight = profile.height
     ? isImperial
       ? `${cmToFtIn(profile.height).feet}' ${Math.round(cmToFtIn(profile.height).inches)}"`
-      : `${profile.height.toFixed(0)} cm`
+      : `${Math.round(profile.height)} cm`
     : 'N/A';
     
   const formattedPhone = formatDisplayPhoneNumber(profile.phone, profile.country);
@@ -420,7 +429,7 @@ export function ProfileCard() {
                     ) : (
                         <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
                     )}
-                    <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Weight ({isImperial ? 'lbs' : 'kg'})</FormLabel><FormControl><Input type="number" step="0.01" placeholder={isImperial ? 'e.g., 154.32' : 'e.g., 70'} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Weight ({isImperial ? 'lbs' : 'kg'})</FormLabel><FormControl><Input type="number" step="0.01" placeholder={isImperial ? 'e.g., 154.32' : 'e.g., 70.00'} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
                     <Separator />
                      <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
                      <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
@@ -717,5 +726,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    

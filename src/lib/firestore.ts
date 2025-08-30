@@ -104,7 +104,7 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
         (newPatientObject.weightRecords as WeightRecord[]).push({
             id: `weight-${Date.now()}`,
             date: new Date().toISOString(),
-            value: Number(weight.toFixed(2)),
+            value: parseFloat(weight.toFixed(2)),
         });
     }
     
