@@ -93,7 +93,6 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-2">
-        <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormControl><Input ref={inputRef} placeholder="Condition Name" {...field} /></FormControl><FormMessage /></FormItem> )}/>
         <FormField
           control={form.control}
           name="date"
@@ -101,6 +100,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
             <FormItem>
               <FormControl>
                 <DatePicker
+                  placeholder='Date of Diagnosis'
                   value={field.value}
                   onChange={field.onChange}
                   fromYear={new Date().getFullYear() - 50}
@@ -111,6 +111,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
             </FormItem>
           )}
         />
+        <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormControl><Input ref={inputRef} placeholder="Condition Name" {...field} /></FormControl><FormMessage /></FormItem> )}/>
         <div className="flex justify-end gap-2">
           <Button type="button" size="sm" variant="ghost" className="flex-1" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
           <Button type="submit" size="sm" className="flex-1" disabled={isSubmitting}>
@@ -143,7 +144,7 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-2">
-                <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><DatePicker placeholder="Date of Weight" value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input ref={inputRef} type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <div className="flex justify-end gap-2">
                     <Button type="button" size="sm" variant="ghost" className="flex-1" onClick={onCancel}>Cancel</Button>
