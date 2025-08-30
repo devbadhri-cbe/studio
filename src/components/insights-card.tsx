@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { translateText } from '@/ai/flows/translate-text';
+import { Alert, AlertDescription } from './ui/alert';
 
 const LANGUAGES = [
     { value: 'Spanish', label: 'Spanish' },
@@ -49,6 +50,7 @@ export function InsightsCard() {
     }
 
     setIsLoading(true);
+    setTargetLanguage('');
     try {
       const age = calculateAge(profile.dob);
       if (age === null) throw new Error('Could not calculate age.');
@@ -101,11 +103,11 @@ export function InsightsCard() {
   };
   
    const handleTranslate = async () => {
-    if (!tips.length || !targetLanguage) return;
+    if (!tips.length || !targetLanguage || !originalTips.length) return;
 
     setIsTranslating(true);
     try {
-        const translatedTips = await Promise.all(tips.map(async (tip) => {
+        const translatedTips = await Promise.all(originalTips.map(async (tip) => {
             const response = await translateText({ text: tip, targetLanguage });
             return response.translatedText;
         }));
@@ -143,12 +145,13 @@ export function InsightsCard() {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        {tips.length > 0 && (
-            <div className="flex items-center gap-2 mb-4">
+      <CardContent className="space-y-4">
+        {tips.length > 0 ? (
+          <div className="space-y-4">
+             <div className="flex items-center gap-2">
                 <Select value={targetLanguage} onValueChange={setTargetLanguage}>
                     <SelectTrigger className="flex-1">
-                        <SelectValue placeholder="Select Language to Translate" />
+                        <SelectValue placeholder="Translate..." />
                     </SelectTrigger>
                     <SelectContent>
                         {LANGUAGES.map((lang) => (
@@ -165,23 +168,25 @@ export function InsightsCard() {
                     </Button>
                 )}
             </div>
-        )}
-
-        {tips.length > 0 ? (
-          <ul className="space-y-3">
-            {tips.map((tip, index) => (
-              <li key={index} className="flex items-start gap-3">
-                <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                <p className="text-sm text-muted-foreground">{tip}</p>
-              </li>
-            ))}
-          </ul>
+            <Alert className="bg-muted/50">
+              <AlertDescription>
+                <ul className="space-y-3">
+                  {tips.map((tip, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                      <p className="text-sm text-muted-foreground">{tip}</p>
+                    </li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          </div>
         ) : (
-          <div className="text-center text-sm text-muted-foreground">
+          <div className="text-center text-sm text-muted-foreground py-4">
             <p>No insights yet. Generate insights based on your records.</p>
           </div>
         )}
-        <Button onClick={handleGetInsights} disabled={isLoading} className="mt-6 w-full" size="sm">
+        <Button onClick={handleGetInsights} disabled={isLoading} className="w-full" size="sm">
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
