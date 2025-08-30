@@ -30,7 +30,7 @@ import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ProfileSettingsDialog } from './profile-settings-dialog';
+import { ProfileSettingsPopover } from './profile-settings-popover';
 
 
 const ProfileSchema = z.object({
@@ -357,7 +357,7 @@ export function ProfileCard() {
                         <p>{isEditing ? 'Cancel' : 'Edit Profile'}</p>
                     </TooltipContent>
                 </Tooltip>
-                 <ProfileSettingsDialog>
+                 <ProfileSettingsPopover>
                      <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="outline" size="icon" className="h-8 w-8">
@@ -369,7 +369,7 @@ export function ProfileCard() {
                             <p>Display Settings</p>
                         </TooltipContent>
                     </Tooltip>
-                </ProfileSettingsDialog>
+                </ProfileSettingsPopover>
             </div>
         </div>
       </CardHeader>
