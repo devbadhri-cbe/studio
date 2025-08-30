@@ -45,13 +45,21 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
     
     if (isMobile) {
         return (
-            <Input
-                type="date"
-                value={dateString}
-                onChange={handleNativeChange}
-                className={cn("w-full justify-start text-left font-normal h-10 border-0 bg-transparent", !value && "text-muted-foreground", className)}
-                max={format(new Date(), 'yyyy-MM-dd')}
-            />
+            <div className={cn("relative flex items-center w-full h-10", className)}>
+                <div className="flex items-center absolute inset-0 pointer-events-none">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <span className={cn("text-sm", !value && "text-muted-foreground")}>
+                        {value ? format(value, "PPP") : (placeholder || 'Pick a date')}
+                    </span>
+                </div>
+                <Input
+                    type="date"
+                    value={dateString}
+                    onChange={handleNativeChange}
+                    className="w-full h-full opacity-0"
+                    max={format(new Date(), 'yyyy-MM-dd')}
+                />
+            </div>
         )
     }
   
