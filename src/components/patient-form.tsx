@@ -137,7 +137,19 @@ export function PatientForm({ patient, onSave, onCancel }: PatientFormProps) {
         if (latestWeightKg) {
             weight_lbs = kgToLbs(latestWeightKg).toFixed(2);
             weight_kg = ''; // clear metric weight if we are using imperial
+        } else {
+             weight_lbs = '';
         }
+        height_cm = '';
+    } else { // metric
+        if (latestWeightKg) {
+            weight_kg = latestWeightKg.toString();
+        } else {
+            weight_kg = '';
+        }
+        weight_lbs = '';
+        height_ft = '';
+        height_in = '';
     }
 
 
