@@ -46,7 +46,7 @@ export default function PatientDashboard() {
 
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [isTooltipOpen, setIsTooltipOpen] = React.useState(true);
+  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const doctorPhoneNumber = '+919791377716';
 
 
@@ -106,7 +106,7 @@ export default function PatientDashboard() {
       case 'report':
         return <ReportCard />;
       default:
-        return <Hba1cCard />;
+        return null;
     }
   }
   
@@ -120,11 +120,12 @@ export default function PatientDashboard() {
   }
   
   const handleDashboardSelect = (key: string) => {
-    setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension');
+    setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension' | 'none');
     setIsTooltipOpen(false);
   }
   
-  const ActiveDashboardIcon = dashboardOptions[dashboardView]?.icon || <GaugeCircle className="w-4 h-4" />;
+  const ActiveDashboardIcon = dashboardView !== 'none' ? dashboardOptions[dashboardView]?.icon : <GaugeCircle className="w-4 h-4" />;
+  const dashboardButtonLabel = dashboardView !== 'none' ? dashboardOptions[dashboardView].name : "Select a Dashboard";
 
 
   return (
@@ -233,10 +234,10 @@ export default function PatientDashboard() {
                   )}
                    <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                             <Button variant="outline" className={`w-full sm:w-auto ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
+                             <Button variant="outline" className={`w-full sm:w-auto justify-center ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
                                 {ActiveDashboardIcon}
-                                <span className="ml-2">{dashboardOptions[dashboardView].name}</span>
-                                <Menu className="h-4 w-4" />
+                                <span className="ml-2">{dashboardButtonLabel}</span>
+                                <Menu className="ml-2 h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
                     <DropdownMenuContent>
@@ -265,14 +266,24 @@ export default function PatientDashboard() {
                 </div>
             </div>
             
-            <div className="grid auto-rows-fr grid-cols-1 lg:grid-cols-3 gap-6">
-               <div className="lg:col-span-2">
-                {renderDashboard()}
-              </div>
-              <div className="lg:col-span-1">
-                 <ReminderCard />
-              </div>
-            </div>
+            {dashboardView !== 'none' ? (
+                <div className="grid auto-rows-fr grid-cols-1 lg:grid-cols-3 gap-6">
+                   <div className="lg:col-span-2">
+                        {renderDashboard()}
+                   </div>
+                   <div className="lg:col-span-1">
+                        <ReminderCard />
+                   </div>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 gap-6">
+                    <div className="lg:col-span-3 flex justify-center">
+                        <div className="w-full max-w-2xl">
+                           <ReminderCard />
+                        </div>
+                    </div>
+                </div>
+            )}
 
           </div>
         </main>
@@ -280,3 +291,4 @@ export default function PatientDashboard() {
     </TooltipProvider>
   );
 }
+

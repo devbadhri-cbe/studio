@@ -14,7 +14,7 @@ import { toMgDl, toMmolL, toNgDl, toNmolL } from '@/lib/unit-conversions';
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [] };
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
-type DashboardView = 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'hypertension' | 'report';
+type DashboardView = 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'hypertension' | 'report' | 'none';
 
 interface BatchRecords {
     hba1c?: Omit<Hba1cRecord, 'id' | 'medication'>;
@@ -82,7 +82,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [weightRecords, setWeightRecordsState] = React.useState<WeightRecord[]>([]);
   const [bloodPressureRecords, setBloodPressureRecordsState] = React.useState<BloodPressureRecord[]>([]);
   const [tips, setTipsState] = React.useState<string[]>([]);
-  const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('hba1c');
+  const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('none');
   const [isClient, setIsClient] = React.useState(false);
   const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
@@ -188,6 +188,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
     setTips([]); // Clear tips for new patient
+    setDashboardViewState('none'); // Reset to default view
   }, []);
   
   const updatePatientData = async (patientId: string, updates: Partial<Patient>) => {
