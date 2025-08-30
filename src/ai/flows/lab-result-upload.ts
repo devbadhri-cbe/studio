@@ -58,19 +58,20 @@ const prompt = ai.definePrompt({
   output: {schema: LabResultUploadOutputSchema},
   prompt: `You are an expert medical assistant specializing in extracting information from lab results.
 
-You will extract the test date and verify that the name on the lab result matches the user provided name.
+Your first task is to verify the patient's name. The user's name is "{{{name}}}". You must search the entire document for this name. The matching should be case-insensitive, and it should be considered a match even if there are minor variations or if the name is part of a larger text block. Set the 'nameVerified' field to true if a plausible match is found, otherwise set it to false.
 
-Then, you will scan the document for the following biomarkers. If a biomarker is present, extract its value. If it's not present, leave the field empty.
+Next, extract the test date. It must be formatted as YYYY-MM-DD.
+
+Then, scan the document for the following biomarkers. If a biomarker is present, extract its value. If it's not present, leave the field empty.
 - HbA1c (as a percentage value)
 - Lipid Panel (LDL, HDL, Triglycerides, Total Cholesterol)
 - Vitamin D (as a numerical value)
 - Thyroid Panel (TSH, T3, T4)
 - Blood Pressure (Systolic, Diastolic) and Heart Rate (Pulse)
 
-Return the extracted information in the specified format. The date should be in YYYY-MM-DD format.
+Return the extracted information in the specified format.
 
-Lab Result Image: {{media url=photoDataUri}}
-User Name: {{{name}}}`,
+Lab Result Image: {{media url=photoDataUri}}`,
 });
 
 const labResultUploadFlow = ai.defineFlow(
