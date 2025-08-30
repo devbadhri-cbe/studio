@@ -132,19 +132,18 @@ export default function PatientDashboard() {
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
          <header className="border-b px-4 md:px-6">
-            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2">
-              <div className="w-full flex justify-center py-6">
-                <div className="flex items-center gap-2">
-                    <Logo className="h-8 w-8 text-primary" />
-                    <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
-                </div>
+            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 py-6">
+              <div className="flex items-center gap-2">
+                  <Logo className="h-8 w-8 text-primary" />
+                  <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
               </div>
 
              {isDoctorLoggedIn && (
-                <div className="w-full flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground pb-4 gap-2">
-                    <div className='text-center md:text-left'>
+                <div className="w-full flex flex-col items-center justify-between text-sm text-muted-foreground gap-2">
+                    <div className='text-center'>
+                        <p className="text-xs">by</p>
                         <p className="font-semibold text-foreground">{doctorName}</p>
-                        <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-center md:justify-start gap-1.5 hover:text-primary">
+                        <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-center gap-1.5 hover:text-primary">
                             <Mail className="h-3 w-3" />
                             drbadhri@gmail.com
                         </a>
