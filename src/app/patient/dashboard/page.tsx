@@ -210,21 +210,19 @@ export default function PatientDashboard() {
                   </h1>
                   <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
                 </div>
-                <div className="grid w-full grid-cols-1 sm:flex sm:w-auto sm:justify-center gap-2 shrink-0">
+                <div className="grid w-full grid-cols-2 gap-2 shrink-0">
                   <UploadRecordDialog>
-                    <Button variant="outline" className="w-full sm:w-auto">
+                    <Button variant="outline" className="w-full">
                         <UploadCloud className="mr-2 h-4 w-4" />
-                        <span className="sm:hidden">Upload Result</span>
-                        <span className="hidden sm:inline-block">Upload Result</span>
+                        Upload Result
                     </Button>
                   </UploadRecordDialog>
                   {!isDoctorLoggedIn && (
                      <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full sm:w-auto">
+                            <Button variant="outline" className="w-full">
                                 <MessageSquareText className="mr-2 h-4 w-4" />
-                                <span className="sm:hidden">Contact Doctor</span>
-                                <span className="hidden sm:inline-block">Contact Doctor</span>
+                                Contact Doctor
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
@@ -241,10 +239,10 @@ export default function PatientDashboard() {
                   )}
                    <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                             <Button variant="outline" className={`w-full sm:w-auto justify-center ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
+                             <Button variant="outline" className={`w-full col-span-2 justify-center ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
                                 {ActiveDashboardIcon}
                                 <span className="ml-2">{dashboardButtonLabel}</span>
-                                <Menu className="h-4 w-4" />
+                                <Menu className="h-4 w-4 ml-2" />
                             </Button>
                         </DropdownMenuTrigger>
                     <DropdownMenuContent>
