@@ -9,10 +9,11 @@ import * as z from 'zod';
 import { format, isValid, parseISO } from 'date-fns';
 import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 import { standardizeMedication } from '@/ai/flows/standardize-medication';
+import { cn } from '@/lib/utils';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
-import { calculateAge, calculateBmi, cmToFtIn, ftInToCm, kgToLbs, lbsToKg, formatDisplayPhoneNumber, cn } from '@/lib/utils';
+import { calculateAge, calculateBmi, cmToFtIn, ftInToCm, kgToLbs, lbsToKg, formatDisplayPhoneNumber } from '@/lib/utils';
 import { countries, Country, dateFormats } from '@/lib/countries';
 import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
@@ -376,7 +377,6 @@ export function ProfileCard() {
         setIsAddingMedication(false);
         if (profile.medication.length >= 1) { 
             setAnimateShield(true);
-            setTimeout(() => setAnimateShield(false), 2000);
         }
         toast({
             title: 'Medication Added',
@@ -719,37 +719,38 @@ export function ProfileCard() {
                     <h3 className="font-medium">Current Medication</h3>
                 </div>
                 <div className="flex items-center gap-1">
-                     {(profile.medication.length === 0 || isMedicationNil) && !isAddingMedication && (
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                               <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => removeMedication('nil')}>
-                                   <PlusCircle className="h-4 w-4" />
-                               </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>Add Medication</TooltipContent>
-                        </Tooltip>
-                    )}
-                     {profile.medication.length === 0 && !isAddingMedication && (
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                               <Button size="sm" variant="outline" className="h-7" onClick={handleSetMedicationNil}>
-                                   Set to Nil
-                               </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>If no medication is being taken.</TooltipContent>
-                        </Tooltip>
-                    )}
-                     {!isAddingMedication && !isMedicationNil && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setIsAddingMedication(true)}>
-                                    <PlusCircle className="h-4 w-4" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Add Medication</p>
-                            </TooltipContent>
-                        </Tooltip>
+                    {!isAddingMedication && (
+                        <>
+                            {profile.medication.length === 0 ? (
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button size="sm" variant="outline" className="h-7" onClick={handleSetMedicationNil}>
+                                            Set to Nil
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>If no medication is being taken.</TooltipContent>
+                                </Tooltip>
+                            ) : null}
+
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        size="icon"
+                                        variant="outline"
+                                        className="h-7 w-7"
+                                        onClick={() => {
+                                            if (isMedicationNil) {
+                                                removeMedication('nil');
+                                            }
+                                            setIsAddingMedication(true);
+                                        }}
+                                    >
+                                        <PlusCircle className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Add Medication</TooltipContent>
+                            </Tooltip>
+                        </>
                     )}
                 </div>
             </div>
@@ -809,7 +810,7 @@ export function ProfileCard() {
                             className="w-full"
                             onClick={() => setAnimateShield(false)}
                         >
-                            <ShieldAlert className={cn(`mr-2 h-4 w-4`, animateShield && 'animate-rotate')} />
+                            <ShieldAlert className={cn(`mr-2 h-4 w-4`, animateShield && 'animate-spin')} />
                             Check Drug Interactions
                         </Button>
                     </DrugInteractionDialog>
@@ -821,3 +822,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
