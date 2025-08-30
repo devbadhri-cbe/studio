@@ -7,6 +7,7 @@ import { Logo } from '@/components/logo';
 export const metadata: Metadata = {
   title: 'Health Guardian',
   description: 'Track and manage your health metrics with AI-powered insights.',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -20,6 +21,15 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        
+        {/* PWA Meta Tags */}
+        <meta name="application-name" content="Health Guardian" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Health Guardian" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#A1C9F7" />
       </head>
       <body>
         <AppProvider>

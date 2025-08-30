@@ -1,0 +1,22 @@
+{
+  "name": "Health Guardian",
+  "short_name": "Health Guardian",
+  "description": "Track and manage your health metrics with AI-powered insights.",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#A1C9F7",
+  "background_color": "#F8FAFD",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
+}
