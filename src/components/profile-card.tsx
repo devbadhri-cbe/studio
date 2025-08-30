@@ -40,6 +40,8 @@ const ProfileSchema = z.object({
   country: z.string().min(1, { message: "Country is required." }),
   phone: z.string().min(5, { message: "Phone number is too short." }).optional().or(z.literal('')),
   height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional().or(z.literal('')),
+  height_ft: z.coerce.number().optional().or(z.literal('')),
+  height_in: z.coerce.number().optional().or(z.literal('')),
   weight: z.coerce.number().min(2, 'Weight must be at least 2kg.').optional().or(z.literal('')),
 });
 
@@ -133,6 +135,9 @@ const WeightSchema = z.object({
 
 function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof WeightSchema>) => void, onCancel: () => void }) {
     const inputRef = React.useRef<HTMLInputElement>(null);
+    const { profile } = useApp();
+    const isImperial = profile.unitSystem === 'imperial';
+
     const form = useForm<z.infer<typeof WeightSchema>>({
         resolver: zodResolver(WeightSchema),
         defaultValues: { value: '' as any, date: new Date() },
@@ -144,11 +149,16 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
         }, 100)
     }, []);
 
+    const handleSave = (data: z.infer<typeof WeightSchema>) => {
+        const dbValue = isImperial ? lbsToKg(data.value) : data.value;
+        onSave({ ...data, value: dbValue });
+    }
+
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-2">
+            <form onSubmit={form.handleSubmit(handleSave)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-2">
                 <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><DatePicker placeholder="Date of Weight" value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input ref={inputRef} type="number" step="0.01" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input ref={inputRef} type="number" step="0.01" placeholder={`Weight (${isImperial ? 'lbs' : 'kg'})`} {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <div className="flex justify-end gap-2">
                     <Button type="button" size="sm" variant="ghost" className="flex-1" onClick={onCancel}>Cancel</Button>
                     <Button type="submit" size="sm" className="flex-1">Save</Button>
@@ -184,10 +194,7 @@ export function ProfileCard() {
     resolver: zodResolver(ProfileSchema),
   });
 
-  const medicationForm = useForm<z.infer<typeof MedicationSchema>>({
-    resolver: zodResolver(MedicationSchema),
-    defaultValues: { medicationName: '', dosage: '', frequency: '' },
-  });
+  const isImperial = profile.unitSystem === 'imperial';
   
   const sortedWeights = React.useMemo(() => [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [weightRecords]);
   const latestWeight = sortedWeights[0];
@@ -195,20 +202,41 @@ export function ProfileCard() {
   React.useEffect(() => {
     if (isEditing) {
         const countryData = countries.find(c => c.code === profile.country);
+        
+        let height_ft = '';
+        let height_in = '';
+        if(profile.height && isImperial) {
+            const { feet, inches } = cmToFtIn(profile.height);
+            height_ft = feet.toString();
+            height_in = inches.toString();
+        }
+
         form.reset({
             dob: profile?.dob ? parseISO(profile.dob) : new Date(),
             gender: profile?.gender,
             email: profile?.email || '',
             country: profile?.country || '',
             phone: profile?.phone || countryData?.phoneCode || '',
-            height: profile?.height || '',
-            weight: latestWeight?.value || '',
+            height: !isImperial ? profile?.height || '' : '',
+            height_ft: isImperial ? height_ft : '',
+            height_in: isImperial ? height_in : '',
+            weight: latestWeight?.value ? (isImperial ? kgToLbs(latestWeight.value) : latestWeight.value) : '',
         });
     }
-  }, [isEditing, profile, latestWeight, form]);
+  }, [isEditing, profile, latestWeight, form, isImperial]);
 
   const onProfileSubmit = (data: z.infer<typeof ProfileSchema>) => {
     setIsSubmitting(true);
+
+    let heightInCm: number | undefined;
+    if (isImperial) {
+        const ft = data.height_ft ? Number(data.height_ft) : 0;
+        const inches = data.height_in ? Number(data.height_in) : 0;
+        heightInCm = ft > 0 || inches > 0 ? ftInToCm(ft, inches) : undefined;
+    } else {
+        heightInCm = data.height ? Number(data.height) : undefined;
+    }
+
      const updatedProfile = {
         ...profile,
         dob: data.dob.toISOString(),
@@ -216,14 +244,16 @@ export function ProfileCard() {
         email: data.email,
         country: data.country,
         phone: data.phone || '',
-        height: data.height || undefined,
+        height: heightInCm,
     };
     setProfile(updatedProfile);
+
     if (data.weight) {
+        const dbWeight = isImperial ? lbsToKg(data.weight) : data.weight;
         const latestDate = latestWeight ? new Date(latestWeight.date).getTime() : 0;
         const oneDay = 24 * 60 * 60 * 1000;
-        if (new Date().getTime() - latestDate > oneDay || data.weight !== latestWeight?.value) {
-            addWeightRecord({ value: data.weight, date: new Date().toISOString() });
+        if (new Date().getTime() - latestDate > oneDay || dbWeight !== latestWeight?.value) {
+            addWeightRecord({ value: dbWeight, date: new Date().toISOString() });
         }
     }
     toast({
@@ -237,17 +267,15 @@ export function ProfileCard() {
   const calculatedAge = calculateAge(profile.dob);
   const country = countries.find(c => c.code === profile.country);
   const countryName = country?.name || profile.country;
-
-  const { unitSystem } = profile;
   
   const displayWeight = latestWeight?.value
-    ? unitSystem === 'imperial'
+    ? isImperial
       ? `${kgToLbs(latestWeight.value).toFixed(2)} lbs`
       : `${latestWeight.value.toFixed(2)} kg`
     : 'N/A';
 
   const displayHeight = profile.height
-    ? unitSystem === 'imperial'
+    ? isImperial
       ? `${cmToFtIn(profile.height).feet}' ${Math.round(cmToFtIn(profile.height).inches)}"`
       : `${profile.height.toFixed(0)} cm`
     : 'N/A';
@@ -309,7 +337,7 @@ export function ProfileCard() {
   }
 
   const handleSaveWeight = (data: z.infer<typeof WeightSchema>) => {
-      addWeightRecord({ ...data, date: data.date.toISOString() });
+      addWeightRecord({ ...data, value: data.value });
       setIsAddingWeight(false);
   }
 
@@ -346,7 +374,7 @@ export function ProfileCard() {
               </div>
             </div>
              <div className="flex items-center gap-1">
-                 <Tooltip>
+                <Tooltip>
                     <TooltipTrigger asChild>
                          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setIsEditing(p => !p)}>
                             {isEditing ? <X className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
@@ -384,8 +412,15 @@ export function ProfileCard() {
                       )}
                     />
                     <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
-                    <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-                    <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 70" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                    {isImperial ? (
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem><FormLabel>Height (ft)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem><FormLabel>Height (in)</FormLabel><FormControl><Input type="number" placeholder="e.g., 9" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                        </div>
+                    ) : (
+                        <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                    )}
+                    <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Weight ({isImperial ? 'lbs' : 'kg'})</FormLabel><FormControl><Input type="number" step="0.01" placeholder={isImperial ? 'e.g., 154.32' : 'e.g., 70'} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
                     <Separator />
                      <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
                      <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
@@ -467,7 +502,7 @@ export function ProfileCard() {
             {sortedWeights.length > 0 ? (
                  <ul className="space-y-1 mt-2">
                     {sortedWeights.slice(0, 3).map((weight) => {
-                        const displayRecordWeight = unitSystem === 'imperial'
+                        const displayRecordWeight = isImperial
                             ? `${kgToLbs(weight.value).toFixed(2)} lbs`
                             : `${weight.value.toFixed(2)} kg`;
 
@@ -683,3 +718,4 @@ export function ProfileCard() {
   );
 }
 
+    
