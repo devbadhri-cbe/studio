@@ -143,9 +143,9 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-                <div className="grid grid-cols-2 gap-2">
-                    <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input ref={inputRef} type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
+                <div className="flex flex-wrap sm:flex-nowrap gap-2">
+                    <FormField control={form.control} name="value" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input ref={inputRef} type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="date" render={({ field }) => (<FormItem className="flex-1"><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
                 <div className="flex justify-end gap-2">
                     <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
@@ -408,9 +408,9 @@ export function ProfileCard() {
     }
   }, [isAddingMedication]);
 
-  const handleRemoveMedication = React.useCallback((id: string) => {
+  const handleRemoveMedication = (id: string) => {
     removeMedication(id);
-  }, [removeMedication]);
+  };
   
   const handleSetMedicationNil = () => {
       setMedicationNil();
@@ -704,17 +704,17 @@ export function ProfileCard() {
                                    <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
                                </div>
                            </ConditionSynopsisDialog>
-                           <div className="flex items-center shrink-0">
+                            <div className="flex items-center shrink-0">
                                 <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); removeMedicalCondition(condition.id); }}>
-                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Delete condition</TooltipContent>
+                                    <TooltipTrigger asChild>
+                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); removeMedicalCondition(condition.id); }}>
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Delete condition</TooltipContent>
                                 </Tooltip>
                                 <ConditionSynopsisDialog conditionName={condition.condition}>
-                                    <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100">
+                                     <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100">
                                         <Info className="h-4 w-4 text-blue-500" />
                                     </Button>
                                 </ConditionSynopsisDialog>
@@ -804,19 +804,19 @@ export function ProfileCard() {
                             <div className="flex items-center shrink-0">
                                 {med.name.toLowerCase() !== 'nil' && (
                                     <>
-                                    <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
-                                            <Trash2 className="h-4 w-4 text-destructive" />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>Delete medication</TooltipContent>
-                                    </Tooltip>
-                                    <MedicationSynopsisDialog medicationName={med.name}>
-                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100">
-                                            <Info className="h-4 w-4 text-blue-500" />
-                                        </Button>
-                                    </MedicationSynopsisDialog>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Delete medication</TooltipContent>
+                                        </Tooltip>
+                                        <MedicationSynopsisDialog medicationName={med.name}>
+                                            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100">
+                                                <Info className="h-4 w-4 text-blue-500" />
+                                            </Button>
+                                        </MedicationSynopsisDialog>
                                     </>
                                 )}
                             </div>
@@ -847,4 +847,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
