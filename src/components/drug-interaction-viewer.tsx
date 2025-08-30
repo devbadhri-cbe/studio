@@ -147,5 +147,3 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
     </Card>
   );
 }
-
-    
