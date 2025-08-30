@@ -41,7 +41,7 @@ interface EditProfileDialogProps {
     children: React.ReactNode;
 }
 
-export function EditProfileDialog({ children }: EditProfileDialogProps) {
+export function ProfileSettingsDialog({ children }: EditProfileDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { profile, setProfile, addWeightRecord } = useApp();
