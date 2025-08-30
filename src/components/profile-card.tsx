@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { UnitSystem } from '@/lib/types';
 import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
+import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 
 
 const MedicationSchema = z.object({
@@ -692,21 +693,23 @@ export function ProfileCard() {
             {profile.presentMedicalConditions.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.presentMedicalConditions.map((condition) => (
-                        <li key={condition.id} className="group flex items-start gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                            <div className="flex-1">
-                                <p className="font-semibold text-foreground">{condition.condition}</p>
-                                {condition.icdCode && <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>}
-                                <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
-                            </div>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeMedicalCondition(condition.id)}>
-                                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Delete condition</TooltipContent>
-                            </Tooltip>
-                        </li>
+                        <ConditionSynopsisDialog key={condition.id} conditionName={condition.condition}>
+                            <li className="group flex items-start gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md cursor-pointer">
+                                <div className="flex-1">
+                                    <p className="font-semibold text-foreground">{condition.condition}</p>
+                                    {condition.icdCode && <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>}
+                                    <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
+                                </div>
+                                <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); removeMedicalCondition(condition.id); }}>
+                                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Delete condition</TooltipContent>
+                                </Tooltip>
+                            </li>
+                        </ConditionSynopsisDialog>
                     ))}
                 </ul>
             ) : (
@@ -816,7 +819,7 @@ export function ProfileCard() {
                             className="w-full"
                             onClick={() => setAnimateShield(false)}
                         >
-                            <ShieldAlert className={cn(`mr-2 h-4 w-4`, animateShield && 'animate-spin')} />
+                            <ShieldAlert className={cn('mr-2 h-4 w-4', animateShield && 'animate-spin')} />
                             Check Drug Interactions
                         </Button>
                     </DrugInteractionDialog>
