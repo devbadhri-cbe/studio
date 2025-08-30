@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { getConditionSynopsis } from '@/ai/flows/condition-synopsis';
 import { useToast } from '@/hooks/use-toast';
