@@ -49,7 +49,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
                 type="date"
                 value={dateString}
                 onChange={handleNativeChange}
-                className={cn("w-full justify-start text-left font-normal h-10", !value && "text-muted-foreground", className)}
+                className={cn("w-full justify-start text-left font-normal h-10 border-0", !value && "text-muted-foreground", className)}
                 max={format(new Date(), 'yyyy-MM-dd')}
             />
         )
