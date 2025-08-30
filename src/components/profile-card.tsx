@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings, Info } from 'lucide-react';
@@ -703,14 +704,7 @@ export function ProfileCard() {
                                     <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
                                 </div>
                             </ConditionSynopsisDialog>
-                            <div className="flex items-center gap-1 ml-auto shrink-0">
-                                {isMobile && (
-                                    <ConditionSynopsisDialog conditionName={condition.condition}>
-                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0">
-                                            <Info className="h-4 w-4 text-blue-500" />
-                                        </Button>
-                                    </ConditionSynopsisDialog>
-                                )}
+                            <div className="ml-auto flex items-center shrink-0">
                                 <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); removeMedicalCondition(condition.id); }}>
@@ -719,6 +713,11 @@ export function ProfileCard() {
                                 </TooltipTrigger>
                                 <TooltipContent>Delete condition</TooltipContent>
                                 </Tooltip>
+                                <ConditionSynopsisDialog conditionName={condition.condition}>
+                                    <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0">
+                                        <Info className="h-4 w-4 text-blue-500" />
+                                    </Button>
+                                </ConditionSynopsisDialog>
                             </div>
                         </li>
                     ))}
@@ -802,15 +801,9 @@ export function ProfileCard() {
                                 )}
                                 </div>
                             </MedicationSynopsisDialog>
-                            <div className="flex items-center gap-1 ml-auto shrink-0">
-                                {isMobile && med.name.toLowerCase() !== 'nil' && (
-                                    <MedicationSynopsisDialog medicationName={med.name}>
-                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0">
-                                            <Info className="h-4 w-4 text-blue-500" />
-                                        </Button>
-                                    </MedicationSynopsisDialog>
-                                )}
+                            <div className="ml-auto flex items-center shrink-0">
                                 {med.name.toLowerCase() !== 'nil' && (
+                                    <>
                                     <Tooltip>
                                     <TooltipTrigger asChild>
                                         <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
@@ -819,6 +812,12 @@ export function ProfileCard() {
                                     </TooltipTrigger>
                                     <TooltipContent>Delete medication</TooltipContent>
                                     </Tooltip>
+                                    <MedicationSynopsisDialog medicationName={med.name}>
+                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0">
+                                            <Info className="h-4 w-4 text-blue-500" />
+                                        </Button>
+                                    </MedicationSynopsisDialog>
+                                    </>
                                 )}
                             </div>
                         </li>
