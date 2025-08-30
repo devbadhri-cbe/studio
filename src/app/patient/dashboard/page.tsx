@@ -141,10 +141,10 @@ export default function PatientDashboard() {
               </div>
 
              {isDoctorLoggedIn && (
-                <div className="w-full flex items-center justify-between text-sm text-muted-foreground pb-4">
-                    <div>
+                <div className="w-full flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground pb-4 gap-2">
+                    <div className='text-center md:text-left'>
                         <p className="font-semibold text-foreground">{doctorName}</p>
-                        <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
+                        <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-center md:justify-start gap-1.5 hover:text-primary">
                             <Mail className="h-3 w-3" />
                             drbadhri@gmail.com
                         </a>
@@ -237,7 +237,7 @@ export default function PatientDashboard() {
                              <Button variant="outline" className={`w-full sm:w-auto justify-center ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
                                 {ActiveDashboardIcon}
                                 <span className="ml-2">{dashboardButtonLabel}</span>
-                                <Menu className="ml-2 h-4 w-4" />
+                                <Menu className="ml-auto h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
                     <DropdownMenuContent>
@@ -292,3 +292,6 @@ export default function PatientDashboard() {
   );
 }
 
+
+
+    
