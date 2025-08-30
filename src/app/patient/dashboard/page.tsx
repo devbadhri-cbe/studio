@@ -8,7 +8,7 @@ import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
-import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid, UploadCloud, GaugeCircle, MessageSquareText, Menu } from 'lucide-react';
+import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid, UploadCloud, GaugeCircle, MessageSquareText, Menu, ArrowLeft } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import {
   DropdownMenu,
@@ -131,8 +131,30 @@ export default function PatientDashboard() {
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
-         <header className="border-b px-4 md:px-6">
+         <header className="relative border-b px-4 md:px-6">
             <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 py-6">
+
+             {isDoctorLoggedIn && (
+                 <>
+                    <div className="absolute top-4 left-4">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                            <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="outline">
+                                <ArrowLeft className="h-4 w-4" />
+                                <span className="sr-only">Back to Patient List</span>
+                            </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                            <p>Patient List</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </div>
+                     <div className="absolute top-4 right-4">
+                        <ThemeToggle />
+                    </div>
+                </>
+            )}
+
               <div className="flex items-center gap-2">
                   <Logo className="h-8 w-8 text-primary" />
                   <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
@@ -147,20 +169,6 @@ export default function PatientDashboard() {
                             <Mail className="h-3 w-3" />
                             drbadhri@gmail.com
                         </a>
-                    </div>
-                     <div className="flex items-center gap-2">
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="outline">
-                                <ClipboardList className="h-4 w-4" />
-                                <span className="sr-only">Patient List</span>
-                            </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                            <p>Patient List</p>
-                            </TooltipContent>
-                        </Tooltip>
-                        <ThemeToggle />
                     </div>
                 </div>
             )}
