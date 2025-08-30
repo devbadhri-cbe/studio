@@ -18,8 +18,8 @@ type DashboardView = 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'hypertension
 
 interface BatchRecords {
     hba1c?: Omit<Hba1cRecord, 'id' | 'medication'>;
-    lipid?: Omit<LipidRecord, 'id' | 'medication'>;
-    vitaminD?: Omit<VitaminDRecord, 'id' | 'medication'>;
+    lipid?: Omit<LipidRecord, 'id' | 'medication'> & { units?: 'mg/dL' | 'mmol/L' };
+    vitaminD?: Omit<VitaminDRecord, 'id' | 'medication'> & { units?: 'ng/mL' | 'nmol/L' };
     thyroid?: Omit<ThyroidRecord, 'id' | 'medication'>;
     bloodPressure?: Omit<BloodPressureRecord, 'id' | 'medication'>;
 }
@@ -358,21 +358,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     if (batch.lipid && batch.lipid.ldl && batch.lipid.hdl && batch.lipid.triglycerides && batch.lipid.total) {
       const dateExists = lipidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
-      if (!dateExists) {
+      const expectedUnit = biomarkerUnit === 'conventional' ? 'mg/dL' : 'mmol/L';
+      if (!dateExists && batch.lipid.units === expectedUnit) {
         const newRecord: LipidRecord = { ...batch.lipid, id: `lipid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.lipidRecords = [...lipidRecords, newRecord];
         setLipidRecordsState(updates.lipidRecords);
         result.added.push('Lipid Panel');
-      } else { result.duplicates.push('Lipid Panel'); }
+      } else if (dateExists) { result.duplicates.push('Lipid Panel'); }
     }
     if (batch.vitaminD && batch.vitaminD.value) {
       const dateExists = vitaminDRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
-      if (!dateExists) {
-        const newRecord: VitaminDRecord = { ...batch.vitaminD, id: `vitd-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+      const expectedUnit = biomarkerUnit === 'conventional' ? 'ng/mL' : 'nmol/L';
+      if (!dateExists && batch.vitaminD.units === expectedUnit) {
+        const newRecord: VitaminDRecord = { ...batch.vitaminD, value: batch.vitaminD.value, id: `vitd-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.vitaminDRecords = [...vitaminDRecords, newRecord];
         setVitaminDRecordsState(updates.vitaminDRecords);
         result.added.push('Vitamin D');
-      } else { result.duplicates.push('Vitamin D'); }
+      } else if(dateExists) { result.duplicates.push('Vitamin D'); }
     }
     if (batch.thyroid && batch.thyroid.tsh && batch.thyroid.t3 && batch.thyroid.t4) {
       const dateExists = thyroidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());

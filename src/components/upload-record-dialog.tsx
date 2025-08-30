@@ -5,7 +5,7 @@ import { labResultUpload, type LabResultUploadOutput } from '@/ai/flows/lab-resu
 import { extractPatientName } from '@/ai/flows/extract-patient-name';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, CheckCircle, XCircle, FileText, FlaskConical, Sun, Droplet, Activity, Zap, AlertTriangle, UserCheck, UserX } from 'lucide-react';
+import { Loader2, UploadCloud, CheckCircle, XCircle, FileText, FlaskConical, Sun, Droplet, Activity, Zap, AlertTriangle, UserCheck, UserX, AlertCircle } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from './ui/dialog';
@@ -29,7 +29,7 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
   const [extractedName, setExtractedName] = React.useState<string | null>(null);
   const [photoDataUri, setPhotoDataUri] = React.useState<string | null>(null);
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
-  const { addBatchRecords, profile } = useApp();
+  const { addBatchRecords, profile, biomarkerUnit } = useApp();
   const { toast } = useToast();
   const formatDate = useDateFormatter();
 
@@ -111,7 +111,7 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
   const handleDataConfirmation = async () => {
     if (!extractedData) return;
 
-    const { hba1cValue, lipidPanel, vitaminDValue, thyroidPanel, bloodPressure, date } = extractedData;
+    const { hba1cValue, lipidPanel, vitaminDValue, vitaminDUnits, thyroidPanel, bloodPressure, date } = extractedData;
     
     if (!date || !isValid(parseISO(date))) {
         toast({
@@ -124,8 +124,8 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
     
     const { added, duplicates } = await addBatchRecords({
       hba1c: hba1cValue ? { value: hba1cValue, date } : undefined,
-      lipid: lipidPanel ? { ...lipidPanel, date } : undefined,
-      vitaminD: vitaminDValue ? { value: vitaminDValue, date } : undefined,
+      lipid: lipidPanel ? { ...lipidPanel, date, units: lipidPanel.units } : undefined,
+      vitaminD: (vitaminDValue && vitaminDUnits) ? { value: vitaminDValue, date, units: vitaminDUnits } : undefined,
       thyroid: thyroidPanel ? { ...thyroidPanel, date } : undefined,
       bloodPressure: bloodPressure ? { ...bloodPressure, date } : undefined,
     });
@@ -227,7 +227,15 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
     if (!extractedData) return null;
     const hasAnyData = extractedData.hba1cValue || extractedData.lipidPanel || extractedData.vitaminDValue || extractedData.thyroidPanel || extractedData.bloodPressure;
     const isDateValid = extractedData.date && isValid(parseISO(extractedData.date));
+
+    const expectedLipidUnit = biomarkerUnit === 'conventional' ? 'mg/dL' : 'mmol/L';
+    const lipidUnitMismatch = extractedData.lipidPanel?.units && extractedData.lipidPanel.units !== expectedLipidUnit;
     
+    const expectedVitaminDUnit = biomarkerUnit === 'conventional' ? 'ng/mL' : 'nmol/L';
+    const vitaminDUnitMismatch = extractedData.vitaminDUnits && extractedData.vitaminDUnits !== expectedVitaminDUnit;
+
+    const canConfirm = hasAnyData && isDateValid && !lipidUnitMismatch && !vitaminDUnitMismatch;
+
     return (
         <>
             <ScrollArea className="flex-1 -mx-6">
@@ -238,7 +246,7 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
                             <p className="font-semibold">Report Date</p>
                             {isDateValid ? (
                                 <p className="text-sm text-muted-foreground">
-                                    {formatDate(extractedData.date)}
+                                    {formatDate(extractedData.date!)}
                                 </p>
                             ) : (
                                  <div className="space-y-2">
@@ -276,8 +284,18 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
                                <Sun className="h-5 w-5 text-primary/80" />
                                <div>
                                    <p className="font-semibold">Vitamin D</p>
-                                   <p>{extractedData.vitaminDValue} ng/mL</p>
+                                   <p>{extractedData.vitaminDValue} {extractedData.vitaminDUnits}</p>
                                </div>
+                                {vitaminDUnitMismatch && (
+                                     <Tooltip>
+                                        <TooltipTrigger>
+                                            <AlertCircle className="h-4 w-4 text-destructive" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Unit mismatch. Expected {expectedVitaminDUnit}.</p>
+                                        </TooltipContent>
+                                     </Tooltip>
+                                )}
                            </div>
                         )}
                          {extractedData.bloodPressure && (
@@ -295,7 +313,17 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
                          <div className="rounded-md border p-2 space-y-2">
                             <div className="flex items-center gap-3">
                                  <FlaskConical className="h-5 w-5 text-primary/80" />
-                                 <p className="font-semibold">Lipid Panel (mg/dL)</p>
+                                 <p className="font-semibold">Lipid Panel ({extractedData.lipidPanel.units || 'N/A'})</p>
+                                  {lipidUnitMismatch && (
+                                     <Tooltip>
+                                        <TooltipTrigger>
+                                            <AlertCircle className="h-4 w-4 text-destructive" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Unit mismatch. Expected {expectedLipidUnit}.</p>
+                                        </TooltipContent>
+                                     </Tooltip>
+                                )}
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs">
                                  <div className="rounded-md bg-muted/50 p-2">
@@ -349,7 +377,7 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
                 <DialogClose asChild>
                     <Button variant="ghost">Cancel</Button>
                 </DialogClose>
-                <Button onClick={handleDataConfirmation} disabled={!hasAnyData || !isDateValid}>
+                <Button onClick={handleDataConfirmation} disabled={!canConfirm}>
                     Confirm & Add Records
                 </Button>
             </DialogFooter>

@@ -29,8 +29,10 @@ const LabResultUploadOutputSchema = z.object({
     hdl: z.number().optional().describe('HDL cholesterol level.'),
     triglycerides: z.number().optional().describe('Triglycerides level.'),
     total: z.number().optional().describe('Total cholesterol level.'),
+    units: z.enum(['mg/dL', 'mmol/L']).optional().describe('The units for the lipid panel results (mg/dL or mmol/L).'),
   }).optional().describe('The lipid panel results extracted.'),
   vitaminDValue: z.number().optional().describe('The Vitamin D result extracted from the lab result (as a number).'),
+  vitaminDUnits: z.enum(['ng/mL', 'nmol/L']).optional().describe('The units for the Vitamin D result (ng/mL or nmol/L).'),
   thyroidPanel: z.object({
       tsh: z.number().optional().describe('TSH level.'),
       t3: z.number().optional().describe('T3 level.'),
@@ -57,12 +59,12 @@ const prompt = ai.definePrompt({
 
 First, extract the test date. It MUST be formatted as YYYY-MM-DD. If you cannot find a date, leave the field empty.
 
-Then, scan the document for the following biomarkers. If a biomarker is present, extract its value. If it's not present, leave the field empty.
-- HbA1c (as a percentage value)
-- Lipid Panel (LDL, HDL, Triglycerides, Total Cholesterol)
-- Vitamin D (as a numerical value)
-- Thyroid Panel (TSH, T3, T4)
-- Blood Pressure (Systolic, Diastolic) and Heart Rate (Pulse)
+Then, scan the document for the following biomarkers. For each biomarker, extract its value AND the units of measurement if available.
+- HbA1c (as a percentage value, units are always '%')
+- Lipid Panel (LDL, HDL, Triglycerides, Total Cholesterol). Common units are mg/dL or mmol/L.
+- Vitamin D (as a numerical value). Common units are ng/mL or nmol/L.
+- Thyroid Panel (TSH, T3, T4). Units for TSH are typically μIU/mL, T3 as ng/dL, and T4 as μg/dL. Ignore these units for extraction.
+- Blood Pressure (Systolic, Diastolic) and Heart Rate (Pulse). Units are typically mmHg and bpm. Ignore these units for extraction.
 
 Return the extracted information in the specified format.
 
