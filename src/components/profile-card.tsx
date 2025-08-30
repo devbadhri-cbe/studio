@@ -24,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
