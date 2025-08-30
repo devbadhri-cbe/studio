@@ -57,6 +57,7 @@ export function DrugInteractionDialog({ medications, children }: DrugInteraction
         title: 'Not enough medications',
         description: 'Please add at least two medications to check for interactions.',
       });
+      setOpen(false); // Close dialog if check can't be performed
       return;
     }
     setIsLoading(true);
@@ -74,6 +75,7 @@ export function DrugInteractionDialog({ medications, children }: DrugInteraction
         title: 'An error occurred',
         description: 'Could not perform the drug interaction check.',
       });
+      setOpen(false); // Close dialog on error
     } finally {
       setIsLoading(false);
     }
