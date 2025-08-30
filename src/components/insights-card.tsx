@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/select';
 import { translateText } from '@/ai/flows/translate-text';
 import { Alert, AlertDescription } from './ui/alert';
+import { cn } from '@/lib/utils';
+
 
 const LANGUAGES = [
     { value: 'Spanish', label: 'Spanish' },
@@ -145,7 +147,7 @@ export function InsightsCard() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className={cn("space-y-4", (isLoading || tips.length === 0) && "pt-0")}>
         {tips.length > 0 && (
           <Alert className="bg-muted/50">
             <AlertDescription className="space-y-4">
@@ -182,7 +184,7 @@ export function InsightsCard() {
         )}
         
         {!isLoading && tips.length === 0 && (
-            <div className="text-center text-sm text-muted-foreground py-4">
+            <div className="text-center text-sm text-muted-foreground">
                 <p>Click the button to generate personalized health tips.</p>
             </div>
         )}
