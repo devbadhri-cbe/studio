@@ -210,9 +210,9 @@ export default function PatientDashboard() {
                   </h1>
                   <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
                 </div>
-                <div className="grid w-full grid-cols-2 gap-2 shrink-0">
+                <div className="flex w-full flex-wrap justify-center gap-2">
                   <UploadRecordDialog>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline">
                         <UploadCloud className="mr-2 h-4 w-4" />
                         Upload Result
                     </Button>
@@ -220,7 +220,7 @@ export default function PatientDashboard() {
                   {!isDoctorLoggedIn && (
                      <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full">
+                            <Button variant="outline">
                                 <MessageSquareText className="mr-2 h-4 w-4" />
                                 Contact Doctor
                             </Button>
@@ -239,10 +239,10 @@ export default function PatientDashboard() {
                   )}
                    <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                             <Button variant="outline" className="w-full col-span-2 justify-center ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}">
+                             <Button variant="outline" className="justify-center ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}">
                                 {ActiveDashboardIcon}
                                 <span className="ml-2">{dashboardButtonLabel}</span>
-                                <Menu className="h-4 w-4 ml-2" />
+                                <Menu className="ml-2 h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
                     <DropdownMenuContent>
@@ -302,4 +302,5 @@ export default function PatientDashboard() {
     
 
     
+
 
