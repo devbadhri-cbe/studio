@@ -407,7 +407,7 @@ export function ProfileCard() {
     }
   }, [isAddingMedication]);
 
-  const handleRemoveMedication = React. useCallback((id: string) => {
+  const handleRemoveMedication = React.useCallback((id: string) => {
     removeMedication(id);
   }, [removeMedication]);
   
@@ -695,7 +695,7 @@ export function ProfileCard() {
             {profile.presentMedicalConditions.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.presentMedicalConditions.map((condition) => (
-                        <li key={condition.id} className="group flex items-start gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                        <li key={condition.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                             <ConditionSynopsisDialog conditionName={condition.condition}>
                                 <div className={cn("flex-1", !isMobile && "cursor-pointer")}>
                                     <p className="font-semibold text-foreground">{condition.condition}</p>
@@ -703,18 +703,18 @@ export function ProfileCard() {
                                     <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
                                 </div>
                             </ConditionSynopsisDialog>
-                            <div className="flex items-center">
+                            <div className="flex items-center gap-1 ml-auto shrink-0">
                                 {isMobile && (
                                     <ConditionSynopsisDialog conditionName={condition.condition}>
-                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0">
-                                            <Info className="h-3.5 w-3.5 text-blue-500" />
+                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0">
+                                            <Info className="h-4 w-4 text-blue-500" />
                                         </Button>
                                     </ConditionSynopsisDialog>
                                 )}
                                 <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); removeMedicalCondition(condition.id); }}>
-                                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                    <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); removeMedicalCondition(condition.id); }}>
+                                    <Trash2 className="h-4 w-4 text-destructive" />
                                     </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>Delete condition</TooltipContent>
@@ -802,19 +802,19 @@ export function ProfileCard() {
                                 )}
                                 </div>
                             </MedicationSynopsisDialog>
-                            <div className="flex items-center">
+                            <div className="flex items-center gap-1 ml-auto shrink-0">
                                 {isMobile && med.name.toLowerCase() !== 'nil' && (
                                     <MedicationSynopsisDialog medicationName={med.name}>
-                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0">
-                                            <Info className="h-3.5 w-3.5 text-blue-500" />
+                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0">
+                                            <Info className="h-4 w-4 text-blue-500" />
                                         </Button>
                                     </MedicationSynopsisDialog>
                                 )}
                                 {med.name.toLowerCase() !== 'nil' && (
                                     <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
-                                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
+                                            <Trash2 className="h-4 w-4 text-destructive" />
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>Delete medication</TooltipContent>
