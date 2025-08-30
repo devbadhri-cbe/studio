@@ -8,7 +8,7 @@ import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { Logo } from '@/components/logo';
-import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid, UploadCloud, GaugeCircle, MessageSquareText } from 'lucide-react';
+import { ClipboardList, Mail, Upload, User, Loader2, LayoutGrid, UploadCloud, GaugeCircle, MessageSquareText, Menu } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import {
   DropdownMenu,
@@ -168,7 +168,7 @@ export default function PatientDashboard() {
       </header>
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
-            <div className="flex flex-col sm:flex-row items-center border-b pb-4 gap-4">
+            <div className="flex flex-col items-center border-b pb-4 gap-4">
               <Tooltip>
                 <TooltipTrigger asChild>
                     <button 
@@ -195,29 +195,28 @@ export default function PatientDashboard() {
               </Tooltip>
               <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
 
-              <div className="flex flex-col items-center sm:items-start flex-1 gap-4 w-full">
-                <div className="text-center sm:text-left">
+              <div className="flex flex-col items-center flex-1 gap-4 w-full">
+                <div className="text-center">
                   <h1 className="text-2xl md:text-3xl font-semibold font-headline">
                     {pageTitle}
                   </h1>
                   <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
                 </div>
-                <div className="flex w-full sm:w-auto items-center justify-center sm:justify-end gap-2 shrink-0">
-                  <UploadRecordDialog />
+                <div className="grid w-full grid-cols-1 sm:flex sm:w-auto sm:justify-end gap-2 shrink-0">
+                  <UploadRecordDialog>
+                    <Button variant="outline" className="w-full sm:w-auto">
+                        <UploadCloud className="mr-2 h-4 w-4" />
+                        Upload Result
+                    </Button>
+                  </UploadRecordDialog>
                   {!isDoctorLoggedIn && (
                      <DropdownMenu>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <DropdownMenuTrigger asChild>
-                                    <Button size="icon" variant="outline">
-                                        <MessageSquareText className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Contact Doctor</p>
-                            </TooltipContent>
-                        </Tooltip>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full sm:w-auto">
+                                <MessageSquareText className="mr-2 h-4 w-4" />
+                                Contact Doctor
+                            </Button>
+                        </DropdownMenuTrigger>
                         <DropdownMenuContent>
                             <DropdownMenuItem onSelect={() => window.open(`https://wa.me/${doctorPhoneNumber.replace(/\D/g, '')}`, '_blank')}>
                                 <WhatsAppIcon className="w-4 h-4 mr-2" />
@@ -231,18 +230,14 @@ export default function PatientDashboard() {
                     </DropdownMenu>
                   )}
                    <DropdownMenu>
-                    <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
-                        <TooltipTrigger asChild>
-                            <DropdownMenuTrigger asChild>
-                                <Button size="icon" variant="outline" className={`w-9 h-9 p-0 ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
-                                   {ActiveDashboardIcon}
-                                </Button>
-                            </DropdownMenuTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" align="end">
-                            <p>Select a dashboard to view</p>
-                        </TooltipContent>
-                    </Tooltip>
+                        <DropdownMenuTrigger asChild>
+                             <Button variant="outline" className={`w-full sm:w-auto ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
+                                {ActiveDashboardIcon}
+                                <span className="sm:hidden ml-2">{dashboardOptions[dashboardView].name}</span>
+                                <span className="hidden sm:inline-block ml-2">Select Dashboard</span>
+                                <Menu className="ml-auto h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         {Object.entries(dashboardOptions).map(([key, value]) => (
                             <DropdownMenuItem 

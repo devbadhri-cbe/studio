@@ -15,7 +15,11 @@ import { ScrollArea } from './ui/scroll-area';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 
 
-export function UploadRecordDialog() {
+interface UploadRecordDialogProps {
+  children?: React.ReactNode;
+}
+
+export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
@@ -260,21 +264,27 @@ export function UploadRecordDialog() {
     );
   }
 
+  const defaultTrigger = (
+    <Tooltip>
+        <TooltipTrigger asChild>
+            <DialogTrigger asChild>
+                <Button size="icon" variant="outline">
+                    <UploadCloud className="h-4 w-4" />
+                    <span className="sr-only">Upload Result</span>
+                </Button>
+            </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+            <p>Upload Result</p>
+        </TooltipContent>
+  </Tooltip>
+  );
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <DialogTrigger asChild>
-                    <Button size="icon" variant="outline">
-                        <UploadCloud className="h-4 w-4" />
-                        <span className="sr-only">Upload Result</span>
-                    </Button>
-                </DialogTrigger>
-            </TooltipTrigger>
-            <TooltipContent>
-                <p>Upload Result</p>
-            </TooltipContent>
-      </Tooltip>
+        <DialogTrigger asChild>
+          {children || defaultTrigger}
+        </DialogTrigger>
       <DialogContent className="max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Upload Lab Result</DialogTitle>
