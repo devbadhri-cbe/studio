@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings, Info, XCircle, Edit } from 'lucide-react';
@@ -587,3 +586,5 @@ export function ProfileCard() {
     </Card>
   );
 }
+
+    
