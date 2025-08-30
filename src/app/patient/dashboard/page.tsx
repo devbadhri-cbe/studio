@@ -103,8 +103,6 @@ export default function PatientDashboard() {
         return <ThyroidCard />;
       case 'hypertension':
         return <HypertensionCard />;
-      case 'report':
-        return <ReportCard />;
       default:
         return null;
     }
@@ -261,20 +259,30 @@ export default function PatientDashboard() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
                 <div className="lg:col-span-1">
                     <ProfileCard />
                 </div>
-                <div className="lg:col-span-2 space-y-6">
-                    <InsightsCard />
-                    <ReminderCard />
+                 <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                     {dashboardView !== 'none' && dashboardView !== 'report' ? (
+                        <div className="md:col-span-1">
+                            {renderDashboard()}
+                        </div>
+                    ) : (
+                        <div className="md:col-span-1">
+                            <ReminderCard />
+                        </div>
+                    )}
+                    <div className="md:col-span-1">
+                        <InsightsCard />
+                    </div>
                 </div>
             </div>
             
             {dashboardView !== 'none' && (
                 <div className="grid auto-rows-fr grid-cols-1 gap-6">
                    <div className="lg:col-span-3">
-                        {renderDashboard()}
+                        <ReportCard />
                    </div>
                 </div>
             )}
@@ -285,14 +293,3 @@ export default function PatientDashboard() {
     </TooltipProvider>
   );
 }
-
-
-
-    
-
-    
-
-
-
-
-
