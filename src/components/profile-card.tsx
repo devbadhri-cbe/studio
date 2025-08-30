@@ -19,7 +19,7 @@ import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { DrugInteractionViewer } from './drug-interaction-viewer';
+import { DrugInteractionViewer } from './drug-interaction-dialog';
 import { Separator } from './ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -304,7 +304,7 @@ export function ProfileCard() {
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         <div className="space-y-3 rounded-lg border bg-card p-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-3">
                  <div className="flex items-center gap-3 text-muted-foreground">
                     <Cake className="h-5 w-5 shrink-0" />
                     <p>
