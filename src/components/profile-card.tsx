@@ -199,7 +199,7 @@ export function ProfileCard() {
             dob: profile?.dob ? parseISO(profile.dob) : new Date(),
             gender: profile?.gender,
             email: profile?.email || '',
-            country: profile?.country,
+            country: profile?.country || '',
             phone: profile?.phone || countryData?.phoneCode || '',
             height: profile?.height || '',
             weight: latestWeight?.value || '',
@@ -400,8 +400,8 @@ export function ProfileCard() {
                     <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" step="0.1" placeholder="e.g., 70" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
                     <Separator />
                      <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
-                     <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                     <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                     <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                     <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
 
                      <Button type="submit" disabled={isSubmitting} className="w-full">
                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
