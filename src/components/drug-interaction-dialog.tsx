@@ -6,14 +6,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ShieldAlert, Languages, Undo2 } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { ScrollArea } from './ui/scroll-area';
 import { translateText } from '@/ai/flows/translate-text';
@@ -24,10 +16,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Card, CardContent } from './ui/card';
 
-interface DrugInteractionDialogProps {
+interface DrugInteractionViewerProps {
   medications: string[];
-  children: React.ReactNode;
+  onClose: () => void;
 }
 
 const LANGUAGES = [
@@ -41,8 +34,7 @@ const LANGUAGES = [
     { value: 'Japanese', label: 'Japanese' },
 ];
 
-export function DrugInteractionDialog({ medications, children }: DrugInteractionDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function DrugInteractionViewer({ medications, onClose }: DrugInteractionViewerProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<string | null>(null);
   const [originalText, setOriginalText] = React.useState<string | null>(null);
@@ -57,7 +49,7 @@ export function DrugInteractionDialog({ medications, children }: DrugInteraction
         title: 'Not enough medications',
         description: 'Please add at least two medications to check for interactions.',
       });
-      setOpen(false); // Close dialog if check can't be performed
+      onClose();
       return;
     }
     setIsLoading(true);
@@ -75,17 +67,15 @@ export function DrugInteractionDialog({ medications, children }: DrugInteraction
         title: 'An error occurred',
         description: 'Could not perform the drug interaction check.',
       });
-      setOpen(false); // Close dialog on error
+      onClose();
     } finally {
       setIsLoading(false);
     }
-  }, [medications, toast]);
+  }, [medications, toast, onClose]);
 
   React.useEffect(() => {
-    if (open) {
-      handleInteractionCheck();
-    }
-  }, [open, handleInteractionCheck]);
+    handleInteractionCheck();
+  }, [handleInteractionCheck]);
 
   const handleTranslate = async () => {
     if (!result || !targetLanguage) return;
@@ -111,59 +101,49 @@ export function DrugInteractionDialog({ medications, children }: DrugInteraction
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-4">
-          <DialogTitle>Drug Interaction Analysis</DialogTitle>
-          <DialogDescription>
-            AI-powered analysis of potential interactions for the current medication list.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex-1 min-h-0">
-          <ScrollArea className="h-full">
-            <div className="px-6 pb-6 space-y-4">
-              {isLoading && (
-                <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p>Analyzing interactions...</p>
+    <Card className="mt-2">
+      <CardContent className="p-4 space-y-4">
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p>Analyzing interactions...</p>
+          </div>
+        )}
+        {result && (
+            <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                    <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+                        <SelectTrigger className="flex-1">
+                            <SelectValue placeholder="Select Language to Translate" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {LANGUAGES.map((lang) => (
+                                <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Button onClick={handleTranslate} disabled={isTranslating || !targetLanguage} size="icon" variant="outline">
+                        {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
+                    </Button>
+                    {result !== originalText && (
+                        <Button onClick={handleRevert} size="icon" variant="outline">
+                            <Undo2 className="h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
-              )}
-              {result && (
-                  <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                          <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                              <SelectTrigger className="flex-1">
-                                  <SelectValue placeholder="Select Language to Translate" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                  {LANGUAGES.map((lang) => (
-                                      <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
-                                  ))}
-                              </SelectContent>
-                          </Select>
-                          <Button onClick={handleTranslate} disabled={isTranslating || !targetLanguage} size="icon" variant="outline">
-                              {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
-                          </Button>
-                          {result !== originalText && (
-                              <Button onClick={handleRevert} size="icon" variant="outline">
-                                  <Undo2 className="h-4 w-4" />
-                              </Button>
-                          )}
-                      </div>
-                        <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
-                          <ShieldAlert className="h-4 w-4 !text-destructive" />
-                          <AlertTitle className="text-destructive">Interaction Summary</AlertTitle>
-                          <AlertDescription className="text-destructive/90 whitespace-pre-wrap">
-                            {result}
-                          </AlertDescription>
-                        </Alert>
-                  </div>
-              )}
+                  <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
+                    <ShieldAlert className="h-4 w-4 !text-destructive" />
+                    <AlertTitle className="text-destructive">Interaction Summary</AlertTitle>
+                    <AlertDescription className="text-destructive/90 whitespace-pre-wrap">
+                      {result}
+                    </AlertDescription>
+                  </Alert>
             </div>
-          </ScrollArea>
-        </div>
-      </DialogContent>
-    </Dialog>
+        )}
+         <Button variant="ghost" size="sm" className="w-full" onClick={onClose}>
+          Close
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

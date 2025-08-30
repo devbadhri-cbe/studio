@@ -20,7 +20,7 @@ import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { DrugInteractionDialog } from './drug-interaction-dialog';
+import { DrugInteractionViewer } from './drug-interaction-dialog';
 import { Separator } from './ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -324,6 +324,7 @@ export function ProfileCard() {
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [isAddingWeight, setIsAddingWeight] = React.useState(false);
+  const [showInteraction, setShowInteraction] = React.useState(false);
 
   const [isEditingHeight, setIsEditingHeight] = React.useState(false);
   const [isEditingEmail, setIsEditingEmail] = React.useState(false);
@@ -833,17 +834,21 @@ export function ProfileCard() {
             )}
              {profile.medication.length > 1 && !isMedicationNil && (
                 <div className="pt-2">
-                    <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full"
-                            onClick={() => setAnimateShield(false)}
-                        >
-                            <ShieldAlert className={cn('mr-2 h-4 w-4', animateShield && 'animate-spin')} />
-                            Check Drug Interactions
-                        </Button>
-                    </DrugInteractionDialog>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => setShowInteraction(s => !s)}
+                    >
+                        <ShieldAlert className={cn('mr-2 h-4 w-4', animateShield && 'animate-spin')} />
+                        {showInteraction ? 'Hide Interactions' : 'Check Drug Interactions'}
+                    </Button>
+                    {showInteraction && (
+                        <DrugInteractionViewer
+                            medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
+                            onClose={() => setShowInteraction(false)}
+                        />
+                    )}
                 </div>
             )}
         </div>
