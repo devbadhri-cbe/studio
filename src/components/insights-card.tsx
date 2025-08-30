@@ -146,7 +146,7 @@ export function InsightsCard() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {tips.length > 0 ? (
+        {tips.length > 0 && (
           <div className="space-y-4">
              <div className="flex items-center gap-2">
                 <Select value={targetLanguage} onValueChange={setTargetLanguage}>
@@ -181,11 +181,14 @@ export function InsightsCard() {
               </AlertDescription>
             </Alert>
           </div>
-        ) : (
-          <div className="text-center text-sm text-muted-foreground py-4">
-            <p>No insights yet. Generate insights based on your records.</p>
-          </div>
         )}
+        
+        {!isLoading && tips.length === 0 && (
+            <div className="text-center text-sm text-muted-foreground py-4">
+                <p>No insights yet. Generate insights based on your records.</p>
+            </div>
+        )}
+
         <Button onClick={handleGetInsights} disabled={isLoading} className="w-full" size="sm">
           {isLoading ? (
             <>
