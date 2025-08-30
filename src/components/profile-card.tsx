@@ -143,7 +143,7 @@ function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof Weight
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-                <div className="flex flex-wrap sm:flex-nowrap gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                     <FormField control={form.control} name="value" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input ref={inputRef} type="number" step="0.1" placeholder="Weight (kg)" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="date" render={({ field }) => (<FormItem className="flex-1"><FormControl><DatePicker value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
@@ -464,7 +464,7 @@ export function ProfileCard() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <div className="flex items-start justify-between">
+        <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <UserCircle className="h-10 w-10 shrink-0 text-muted-foreground" />
               <div>
@@ -629,18 +629,20 @@ export function ProfileCard() {
                     <TrendingUp className="h-5 w-5 shrink-0 text-muted-foreground" />
                     <h3 className="font-medium">Weight Records</h3>
                 </div>
-                {!isAddingWeight && (
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setIsAddingWeight(true)}>
-                                <PlusCircle className="h-4 w-4" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Add Weight Record</p>
-                        </TooltipContent>
-                    </Tooltip>
-                )}
+                 <div className="flex items-center gap-1 shrink-0">
+                    {!isAddingWeight && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setIsAddingWeight(true)}>
+                                    <PlusCircle className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Add Weight Record</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
+                </div>
             </div>
             {isAddingWeight && <WeightForm onSave={handleSaveWeight} onCancel={() => setIsAddingWeight(false)} />}
             {sortedWeights.length > 0 ? (
@@ -656,14 +658,16 @@ export function ProfileCard() {
                                     <span className="font-semibold text-foreground">{displayRecordWeight}</span>
                                     <span className="block text-xs">on {formatDate(weight.date)}</span>
                                </div>
-                               <Tooltip>
-                                <TooltipTrigger asChild>
-                                   <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeWeightRecord(weight.id)}>
-                                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                   </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Delete record</TooltipContent>
-                               </Tooltip>
+                               <div className="flex items-center shrink-0">
+                                   <Tooltip>
+                                    <TooltipTrigger asChild>
+                                       <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeWeightRecord(weight.id)}>
+                                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                       </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Delete record</TooltipContent>
+                                   </Tooltip>
+                                </div>
                             </li>
                         );
                     })}
@@ -679,18 +683,20 @@ export function ProfileCard() {
                     <Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />
                     <h3 className="font-medium">Present Medical Conditions</h3>
                 </div>
-                 {!isAddingCondition && (
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setIsAddingCondition(true)}>
-                                <PlusCircle className="h-4 w-4" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Add Condition</p>
-                        </TooltipContent>
-                    </Tooltip>
-                )}
+                 <div className="flex items-center gap-1 shrink-0">
+                    {!isAddingCondition && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setIsAddingCondition(true)}>
+                                    <PlusCircle className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Add Condition</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
+                 </div>
             </div>
              {isAddingCondition && <MedicalConditionForm onSave={handleSaveCondition} onCancel={() => setIsAddingCondition(false)} />}
             {profile.presentMedicalConditions.length > 0 ? (
@@ -733,7 +739,7 @@ export function ProfileCard() {
                     <Pill className="h-5 w-5 shrink-0 text-muted-foreground" />
                     <h3 className="font-medium">Current Medication</h3>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 shrink-0">
                     {!isAddingMedication && (
                         <>
                             {profile.medication.length === 0 ? (
