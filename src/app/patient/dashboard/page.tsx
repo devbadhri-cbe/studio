@@ -260,22 +260,13 @@ export default function PatientDashboard() {
             </div>
             
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
-                <div className="lg:col-span-1">
+                <div className="lg:col-span-1 flex flex-col gap-6">
                     <ProfileCard />
+                    <ReminderCard />
                 </div>
-                 <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                     {dashboardView !== 'none' && dashboardView !== 'report' ? (
-                        <div className="md:col-span-1">
-                            {renderDashboard()}
-                        </div>
-                    ) : (
-                        <div className="md:col-span-1">
-                            <ReminderCard />
-                        </div>
-                    )}
-                    <div className="md:col-span-1">
-                        <InsightsCard />
-                    </div>
+                <div className="lg:col-span-2 flex flex-col gap-6">
+                    <InsightsCard />
+                    {dashboardView !== 'none' && dashboardView !== 'report' && renderDashboard()}
                 </div>
             </div>
             
