@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Stethoscope, Pill, PlusCircle, Trash2, Loader2, ShieldAlert, TrendingUp, Ruler, Check, X, Pencil, Cake, Settings } from 'lucide-react';
@@ -795,14 +796,6 @@ export function ProfileCard() {
                     )}
                 </div>
             </div>
-             {profile.medication.length > 1 && !isMedicationNil && (
-                 <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
-                    <Button variant="outline" size="sm" className="w-full mb-2">
-                      <ShieldAlert className={`mr-2 h-4 w-4 ${animateShield ? 'animate-spin' : ''}`} />
-                        Check Drug Interactions
-                    </Button>
-                </DrugInteractionDialog>
-            )}
             {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} />}
             {profile.medication.length > 0 ? (
                 <ul className="space-y-1 mt-2">
@@ -833,6 +826,14 @@ export function ProfileCard() {
                 </ul>
             ) : (
                  !isAddingMedication && <p className="text-xs text-muted-foreground pl-8">No medication recorded.</p>
+            )}
+             {profile.medication.length > 1 && !isMedicationNil && (
+                 <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
+                    <Button variant="outline" size="sm" className="w-full mt-2">
+                      <ShieldAlert className={`mr-2 h-4 w-4 ${animateShield ? 'animate-spin' : ''}`} />
+                        Check Drug Interactions
+                    </Button>
+                </DrugInteractionDialog>
             )}
         </div>
 
