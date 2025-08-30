@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format, isValid, parseISO } from 'date-fns';
 import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
+import { standardizeMedication } from '@/ai/flows/standardize-medication';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
@@ -325,11 +326,9 @@ export function ProfileCard() {
   const [isEditingCountry, setIsEditingCountry] = React.useState(false);
   const [isEditingDob, setIsEditingDob] = React.useState(false);
   
-  const [isSubmittingMedication, setIsSubmittingMedication] = React.useState(false);
-  const [medicationSuggestion, setMedicationSuggestion] = React.useState<{ originalData: z.infer<typeof MedicationSchema>, correctedName: string } | null>(null);
-  const [popoverOpen, setPopoverOpen] = React.useState(false);
-
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [animateShield, setAnimateShield] = React.useState(false);
+
   const formatDate = useDateFormatter();
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -363,69 +362,37 @@ export function ProfileCard() {
 
   const bmi = calculateBmi(latestWeight?.value, profile.height || 0);
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
-  
-  const capitalizeFirstLetter = (string: string) => {
-    if (!string) return "";
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  }
 
-  const handleFinalSaveMedication = (data: z.infer<typeof MedicationSchema>) => {
-    addMedication({
-      name: capitalizeFirstLetter(data.medicationName),
-      dosage: data.dosage,
-      frequency: data.frequency,
-    });
-    medicationForm.reset();
-    setIsAddingMedication(false);
-    if (profile.medication.length >= 1) { 
-        setAnimateShield(true);
-    }
-  };
-
-  const onInitialMedicationSubmit = async (data: z.infer<typeof MedicationSchema>) => {
-    setIsSubmittingMedication(true);
-    setPopoverOpen(false);
+  const onMedicationSubmit = async (data: z.infer<typeof MedicationSchema>) => {
+    setIsSubmitting(true);
     try {
-        const response = await fetch(`https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json?name=${encodeURIComponent(data.medicationName)}`);
-        if (!response.ok) throw new Error('API request failed');
-        const apiData = await response.json();
-        const suggestions = apiData.suggestionGroup?.suggestionList?.suggestion;
-
-        if (suggestions && suggestions.length > 0 && suggestions[0].toLowerCase() !== data.medicationName.toLowerCase()) {
-            setMedicationSuggestion({ originalData: data, correctedName: capitalizeFirstLetter(suggestions[0]) });
-            setPopoverOpen(true);
-        } else {
-            handleFinalSaveMedication(data);
+        const standardized = await standardizeMedication(data);
+        addMedication({
+            name: standardized.name,
+            dosage: standardized.dosage,
+            frequency: standardized.frequency,
+        });
+        medicationForm.reset();
+        setIsAddingMedication(false);
+        if (profile.medication.length >= 1) { 
+            setAnimateShield(true);
         }
+        toast({
+            title: 'Medication Added',
+            description: `${standardized.name} has been added to your list.`,
+        });
     } catch (error) {
-        console.error("Spell check failed, saving as is.", error);
+        console.error("Failed to standardize or add medication", error);
         toast({
             variant: 'destructive',
-            title: 'Spell Check Failed',
-            description: 'Could not reach the spelling suggestion service. Saving medication as entered.'
+            title: 'An error occurred',
+            description: 'Could not add the medication. Please try again.',
         });
-        handleFinalSaveMedication(data);
     } finally {
-        setIsSubmittingMedication(false);
+        setIsSubmitting(false);
     }
   };
-
-  const onConfirmSuggestion = () => {
-    if (medicationSuggestion) {
-        handleFinalSaveMedication({ ...medicationSuggestion.originalData, medicationName: medicationSuggestion.correctedName });
-    }
-    setPopoverOpen(false);
-    setMedicationSuggestion(null);
-  };
-
-  const onIgnoreSuggestion = () => {
-    if (medicationSuggestion) {
-        handleFinalSaveMedication(medicationSuggestion.originalData);
-    }
-    setPopoverOpen(false);
-    setMedicationSuggestion(null);
-  }
-
+  
   React.useEffect(() => {
     if (isAddingMedication) {
         setTimeout(() => {
@@ -786,52 +753,19 @@ export function ProfileCard() {
                 </div>
             </div>
             {isAddingMedication && (
-                 <Form {...medicationForm}>
-                    <form onSubmit={medicationForm.handleSubmit(onInitialMedicationSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-                    <FormField
-                        control={medicationForm.control}
-                        name="medicationName"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormControl>
-                            <Input
-                                ref={medicationNameInputRef}
-                                placeholder="Medication Name"
-                                {...field}
-                                onChange={(e) => field.onChange(capitalizeFirstLetter(e.target.value))}
-                                autoComplete="new-password"
-                                spellCheck={false}
-                            />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <div className="grid grid-cols-2 gap-2">
-                        <FormField control={medicationForm.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                        <FormField control={medicationForm.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                    </div>
-                    <div className="flex justify-end gap-2">
-                        <Button type="button" size="sm" variant="ghost" onClick={() => setIsAddingMedication(false)}>Cancel</Button>
-                        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                        <PopoverTrigger asChild>
-                            <Button type="submit" size="sm" disabled={isSubmittingMedication}>
-                            {isSubmittingMedication ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+                <Form {...medicationForm}>
+                    <form onSubmit={medicationForm.handleSubmit(onMedicationSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
+                        <FormField control={medicationForm.control} name="medicationName" render={({ field }) => (<FormItem><FormControl><Input ref={medicationNameInputRef} placeholder="Medication Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <div className="grid grid-cols-2 gap-2">
+                            <FormField control={medicationForm.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={medicationForm.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <Button type="button" size="sm" variant="ghost" onClick={() => setIsAddingMedication(false)}>Cancel</Button>
+                            <Button type="submit" size="sm" disabled={isSubmitting}>
+                                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
                             </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-3">
-                            <div className="space-y-2">
-                                <p className="text-sm">
-                                Did you mean <strong className="text-foreground">{medicationSuggestion?.correctedName}</strong>?
-                                </p>
-                                <div className="flex justify-end gap-2">
-                                    <Button size="sm" variant="outline" onClick={onIgnoreSuggestion}>Save as is</Button>
-                                    <Button size="sm" onClick={onConfirmSuggestion}>Use Suggestion</Button>
-                                </div>
-                            </div>
-                        </PopoverContent>
-                        </Popover>
-                    </div>
+                        </div>
                     </form>
                 </Form>
             )}
@@ -874,7 +808,7 @@ export function ProfileCard() {
                             className="w-full"
                             onClick={() => setAnimateShield(false)}
                         >
-                            <ShieldAlert className={`mr-2 h-4 w-4 ${animateShield ? 'animate-spin' : ''}`} />
+                            <ShieldAlert className={cn(`mr-2 h-4 w-4`, animateShield && 'animate-rotate-y')} />
                             Check Drug Interactions
                         </Button>
                     </DrugInteractionDialog>
@@ -886,5 +820,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    
