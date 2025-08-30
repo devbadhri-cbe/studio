@@ -24,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,7 +58,7 @@ function MedicationForm({ onSave, onCancel }: { onSave: (data: { name: string; d
 
   const handleFinalSave = (data: z.infer<typeof MedicationSchema>) => {
     onSave({
-      name: data.medicationName,
+      name: capitalizeFirstLetter(data.medicationName),
       dosage: data.dosage,
       frequency: data.frequency,
     });
@@ -765,27 +765,6 @@ export function ProfileCard() {
                     <h3 className="font-medium">Current Medication</h3>
                 </div>
                 <div className="flex items-center gap-1">
-                    {profile.medication.length > 1 && !isMedicationNil && (
-                        <Dialog>
-                            <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
-                                <TooltipTrigger asChild>
-                                    <DialogTrigger asChild>
-                                        <Button
-                                            size="icon"
-                                            variant="outline"
-                                            className={`h-7 w-7 ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}
-                                        >
-                                            <ShieldAlert className="h-4 w-4" />
-                                        </Button>
-                                    </DialogTrigger>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Check Drug Interactions</p>
-                                </TooltipContent>
-                            </Tooltip>
-                            <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)} />
-                        </Dialog>
-                    )}
                      {(profile.medication.length === 0 || isMedicationNil) && !isAddingMedication && (
                         <Tooltip>
                            <TooltipTrigger asChild>
@@ -850,6 +829,16 @@ export function ProfileCard() {
                 </ul>
             ) : (
                  !isAddingMedication && <p className="text-xs text-muted-foreground pl-8">No medication recorded.</p>
+            )}
+             {profile.medication.length > 1 && !isMedicationNil && (
+                <DrugInteractionDialog
+                    medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
+                >
+                    <Button variant="outline" size="sm" className="w-full mt-2">
+                        <ShieldAlert className="mr-2 h-4 w-4" />
+                        Check Drug Interactions
+                    </Button>
+                </DrugInteractionDialog>
             )}
         </div>
 
