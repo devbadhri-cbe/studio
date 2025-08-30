@@ -158,7 +158,7 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
   };
 
   const renderInitialView = () => (
-    <div className="flex-1">
+    <div className="flex-1 p-6">
       <Alert>
         <AlertTitle>Important!</AlertTitle>
         <AlertDescription>
@@ -178,7 +178,7 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
   );
 
   const renderLoadingView = (message: string) => (
-     <div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground h-40">
+     <div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground h-40 p-6">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p>{message}</p>
         <p className="text-xs">This may take a moment.</p>
@@ -189,7 +189,7 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
     if (!extractedName) return null;
     return (
         <>
-           <div className="flex-1 space-y-4">
+           <div className="flex-1 space-y-4 p-6">
                 <Alert>
                     <AlertTriangle className="h-4 w-4" />
                     <AlertTitle>Confirm Patient Name</AlertTitle>
@@ -215,7 +215,7 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
                     </div>
                 </div>
             </div>
-            <DialogFooter className="pt-6">
+            <DialogFooter className="p-6 pt-0">
                 <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
                 <Button onClick={handleNameConfirmation}>Yes, this is correct. Proceed.</Button>
             </DialogFooter>
@@ -238,142 +238,140 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
 
     return (
         <>
-            <ScrollArea className="flex-1 -mx-6">
-                <div className="px-6 py-4 space-y-4">
-                     <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
-                        <FileText className="h-5 w-5 text-primary" />
-                         <div className="flex-1">
-                            <p className="font-semibold">Report Date</p>
-                            {isDateValid ? (
-                                <p className="text-sm text-muted-foreground">
-                                    {formatDate(extractedData.date!)}
-                                </p>
-                            ) : (
-                                 <div className="space-y-2">
-                                    <p className="text-sm text-destructive">Date not found. Please select one.</p>
-                                    <DatePicker 
-                                        placeholder='Select a date'
-                                        value={extractedData.date ? parseISO(extractedData.date) : undefined}
-                                        onChange={(newDate) => {
-                                            if (newDate) {
-                                                setExtractedData({ ...extractedData, date: newDate.toISOString().split('T')[0] })
-                                            }
-                                        }}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                     </div>
-
-                    <Separator />
-
-                    <h4 className="font-medium text-center text-muted-foreground">Extracted Results</h4>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        {extractedData.hba1cValue && (
-                             <div className="flex items-center gap-3 rounded-md border p-2">
-                                <Droplet className="h-5 w-5 text-primary/80" />
-                                <div>
-                                    <p className="font-semibold">HbA1c</p>
-                                    <p>{extractedData.hba1cValue}%</p>
-                                </div>
+            <div className="flex-1 space-y-4 overflow-y-auto p-6">
+                 <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
+                    <FileText className="h-5 w-5 text-primary" />
+                     <div className="flex-1">
+                        <p className="font-semibold">Report Date</p>
+                        {isDateValid ? (
+                            <p className="text-sm text-muted-foreground">
+                                {formatDate(extractedData.date!)}
+                            </p>
+                        ) : (
+                             <div className="space-y-2">
+                                <p className="text-sm text-destructive">Date not found. Please select one.</p>
+                                <DatePicker 
+                                    placeholder='Select a date'
+                                    value={extractedData.date ? parseISO(extractedData.date) : undefined}
+                                    onChange={(newDate) => {
+                                        if (newDate) {
+                                            setExtractedData({ ...extractedData, date: newDate.toISOString().split('T')[0] })
+                                        }
+                                    }}
+                                />
                             </div>
-                        )}
-                        {extractedData.vitaminDValue && (
-                            <div className="flex items-center gap-3 rounded-md border p-2">
-                               <Sun className="h-5 w-5 text-primary/80" />
-                               <div>
-                                   <p className="font-semibold">Vitamin D</p>
-                                   <p>{extractedData.vitaminDValue} {extractedData.vitaminDUnits}</p>
-                               </div>
-                                {vitaminDUnitMismatch && (
-                                     <Tooltip>
-                                        <TooltipTrigger>
-                                            <AlertCircle className="h-4 w-4 text-destructive" />
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Unit mismatch. Expected {expectedVitaminDUnit}.</p>
-                                        </TooltipContent>
-                                     </Tooltip>
-                                )}
-                           </div>
-                        )}
-                         {extractedData.bloodPressure && (
-                            <div className="flex items-center gap-3 rounded-md border p-2">
-                               <Zap className="h-5 w-5 text-primary/80" />
-                               <div>
-                                   <p className="font-semibold">Blood Pressure</p>
-                                   <p>{extractedData.bloodPressure.systolic}/{extractedData.bloodPressure.diastolic} mmHg</p>
-                               </div>
-                           </div>
                         )}
                     </div>
+                 </div>
 
-                    {extractedData.lipidPanel && (
-                         <div className="rounded-md border p-2 space-y-2">
-                            <div className="flex items-center gap-3">
-                                 <FlaskConical className="h-5 w-5 text-primary/80" />
-                                 <p className="font-semibold">Lipid Panel ({extractedData.lipidPanel.units || 'N/A'})</p>
-                                  {lipidUnitMismatch && (
-                                     <Tooltip>
-                                        <TooltipTrigger>
-                                            <AlertCircle className="h-4 w-4 text-destructive" />
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Unit mismatch. Expected {expectedLipidUnit}.</p>
-                                        </TooltipContent>
-                                     </Tooltip>
-                                )}
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs">
-                                 <div className="rounded-md bg-muted/50 p-2">
-                                    <p className="font-semibold">Total</p>
-                                    <p>{extractedData.lipidPanel.total || 'N/A'}</p>
-                                </div>
-                                <div className="rounded-md bg-muted/50 p-2">
-                                    <p className="font-semibold">LDL</p>
-                                    <p>{extractedData.lipidPanel.ldl || 'N/A'}</p>
-                                </div>
-                                <div className="rounded-md bg-muted/50 p-2">
-                                    <p className="font-semibold">HDL</p>
-                                    <p>{extractedData.lipidPanel.hdl || 'N/A'}</p>
-                                </div>
-                                 <div className="rounded-md bg-muted/50 p-2">
-                                    <p className="font-semibold">Trig.</p>
-                                    <p>{extractedData.lipidPanel.triglycerides || 'N/A'}</p>
-                                </div>
+                <Separator />
+
+                <h4 className="font-medium text-center text-muted-foreground">Extracted Results</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    {extractedData.hba1cValue && (
+                         <div className="flex items-center gap-3 rounded-md border p-2">
+                            <Droplet className="h-5 w-5 text-primary/80" />
+                            <div>
+                                <p className="font-semibold">HbA1c</p>
+                                <p>{extractedData.hba1cValue}%</p>
                             </div>
                         </div>
                     )}
-                     {extractedData.thyroidPanel && (
-                         <div className="rounded-md border p-2 space-y-2">
-                            <div className="flex items-center gap-3">
-                                 <Activity className="h-5 w-5 text-primary/80" />
-                                 <p className="font-semibold">Thyroid Panel</p>
-                            </div>
-                            <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                                 <div className="rounded-md bg-muted/50 p-2">
-                                    <p className="font-semibold">TSH (μIU/mL)</p>
-                                    <p>{extractedData.thyroidPanel.tsh || 'N/A'}</p>
-                                </div>
-                                <div className="rounded-md bg-muted/50 p-2">
-                                    <p className="font-semibold">T3 (ng/dL)</p>
-                                    <p>{extractedData.thyroidPanel.t3 || 'N/A'}</p>
-                                </div>
-                                <div className="rounded-md bg-muted/50 p-2">
-                                    <p className="font-semibold">T4 (μg/dL)</p>
-                                    <p>{extractedData.thyroidPanel.t4 || 'N/A'}</p>
-                                </div>
-                            </div>
-                        </div>
+                    {extractedData.vitaminDValue && (
+                        <div className="flex items-center gap-3 rounded-md border p-2">
+                           <Sun className="h-5 w-5 text-primary/80" />
+                           <div>
+                               <p className="font-semibold">Vitamin D</p>
+                               <p>{extractedData.vitaminDValue} {extractedData.vitaminDUnits}</p>
+                           </div>
+                            {vitaminDUnitMismatch && (
+                                 <Tooltip>
+                                    <TooltipTrigger>
+                                        <AlertCircle className="h-4 w-4 text-destructive" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Unit mismatch. Expected {expectedVitaminDUnit}.</p>
+                                    </TooltipContent>
+                                 </Tooltip>
+                            )}
+                       </div>
                     )}
-                    
-                    {!hasAnyData && (
-                        <p className="text-center text-muted-foreground text-sm py-4">No specific biomarker data could be extracted. Please check the document or enter manually.</p>
+                     {extractedData.bloodPressure && (
+                        <div className="flex items-center gap-3 rounded-md border p-2">
+                           <Zap className="h-5 w-5 text-primary/80" />
+                           <div>
+                               <p className="font-semibold">Blood Pressure</p>
+                               <p>{extractedData.bloodPressure.systolic}/{extractedData.bloodPressure.diastolic} mmHg</p>
+                           </div>
+                       </div>
                     )}
                 </div>
-            </ScrollArea>
-            <DialogFooter className="pt-6">
+
+                {extractedData.lipidPanel && (
+                     <div className="rounded-md border p-2 space-y-2">
+                        <div className="flex items-center gap-3">
+                             <FlaskConical className="h-5 w-5 text-primary/80" />
+                             <p className="font-semibold">Lipid Panel ({extractedData.lipidPanel.units || 'N/A'})</p>
+                              {lipidUnitMismatch && (
+                                 <Tooltip>
+                                    <TooltipTrigger>
+                                        <AlertCircle className="h-4 w-4 text-destructive" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Unit mismatch. Expected {expectedLipidUnit}.</p>
+                                    </TooltipContent>
+                                 </Tooltip>
+                            )}
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs">
+                             <div className="rounded-md bg-muted/50 p-2">
+                                <p className="font-semibold">Total</p>
+                                <p>{extractedData.lipidPanel.total || 'N/A'}</p>
+                            </div>
+                            <div className="rounded-md bg-muted/50 p-2">
+                                <p className="font-semibold">LDL</p>
+                                <p>{extractedData.lipidPanel.ldl || 'N/A'}</p>
+                            </div>
+                            <div className="rounded-md bg-muted/50 p-2">
+                                <p className="font-semibold">HDL</p>
+                                <p>{extractedData.lipidPanel.hdl || 'N/A'}</p>
+                            </div>
+                             <div className="rounded-md bg-muted/50 p-2">
+                                <p className="font-semibold">Trig.</p>
+                                <p>{extractedData.lipidPanel.triglycerides || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                 {extractedData.thyroidPanel && (
+                     <div className="rounded-md border p-2 space-y-2">
+                        <div className="flex items-center gap-3">
+                             <Activity className="h-5 w-5 text-primary/80" />
+                             <p className="font-semibold">Thyroid Panel</p>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                             <div className="rounded-md bg-muted/50 p-2">
+                                <p className="font-semibold">TSH (μIU/mL)</p>
+                                <p>{extractedData.thyroidPanel.tsh || 'N/A'}</p>
+                            </div>
+                            <div className="rounded-md bg-muted/50 p-2">
+                                <p className="font-semibold">T3 (ng/dL)</p>
+                                <p>{extractedData.thyroidPanel.t3 || 'N/A'}</p>
+                            </div>
+                            <div className="rounded-md bg-muted/50 p-2">
+                                <p className="font-semibold">T4 (μg/dL)</p>
+                                <p>{extractedData.thyroidPanel.t4 || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
+                {!hasAnyData && (
+                    <p className="text-center text-muted-foreground text-sm py-4">No specific biomarker data could be extracted. Please check the document or enter manually.</p>
+                )}
+            </div>
+            <DialogFooter className="p-6 pt-0">
                 <DialogClose asChild>
                     <Button variant="ghost">Cancel</Button>
                 </DialogClose>
@@ -436,8 +434,8 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
         <DialogTrigger asChild>
           {children || defaultTrigger}
         </DialogTrigger>
-      <DialogContent className="max-h-[90vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="p-6 pb-4 border-b">
           <DialogTitle>Upload Lab Result</DialogTitle>
           <DialogDescription>
              {getDialogDescription()}
