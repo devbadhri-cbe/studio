@@ -236,7 +236,7 @@ export default function PatientDashboard() {
                              <Button variant="outline" className={`w-full sm:w-auto justify-center ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
                                 {ActiveDashboardIcon}
                                 <span className="ml-2">{dashboardButtonLabel}</span>
-                                <Menu className="ml-auto h-4 w-4" />
+                                <Menu className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
                     <DropdownMenuContent>
@@ -292,5 +292,7 @@ export default function PatientDashboard() {
 }
 
 
+
+    
 
     
