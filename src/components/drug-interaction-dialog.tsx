@@ -62,6 +62,7 @@ export function DrugInteractionDialog({ medications, children }: DrugInteraction
     setIsLoading(true);
     setResult(null);
     setOriginalText(null);
+    setTargetLanguage('');
     try {
       const response = await checkDrugInteractions({ medications });
       setResult(response.interactionSummary);
@@ -89,7 +90,7 @@ export function DrugInteractionDialog({ medications, children }: DrugInteraction
 
     setIsTranslating(true);
     try {
-        const response = await translateText({ text: result, targetLanguage });
+        const response = await translateText({ text: originalText!, targetLanguage });
         setResult(response.translatedText);
     } catch (error) {
          console.error('Error translating text:', error);
@@ -110,53 +111,55 @@ export function DrugInteractionDialog({ medications, children }: DrugInteraction
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="p-6 pb-4">
           <DialogTitle>Drug Interaction Analysis</DialogTitle>
           <DialogDescription>
             AI-powered analysis of potential interactions for the current medication list.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4 space-y-4">
-            {isLoading && (
-              <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p>Analyzing interactions...</p>
-              </div>
-            )}
-            {result && (
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                        <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                            <SelectTrigger className="flex-1">
-                                <SelectValue placeholder="Select Language to Translate" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {LANGUAGES.map((lang) => (
-                                    <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Button onClick={handleTranslate} disabled={isTranslating || !targetLanguage} size="icon" variant="outline">
-                            {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
-                        </Button>
-                         {result !== originalText && (
-                            <Button onClick={handleRevert} size="icon" variant="outline">
-                                <Undo2 className="h-4 w-4" />
-                            </Button>
-                        )}
-                    </div>
-                    <ScrollArea className="max-h-[50vh] -mx-6 px-6">
-                      <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
-                        <ShieldAlert className="h-4 w-4 !text-destructive" />
-                        <AlertTitle className="text-destructive">Interaction Summary</AlertTitle>
-                        <AlertDescription className="text-destructive/90 whitespace-pre-wrap">
-                          {result}
-                        </AlertDescription>
-                      </Alert>
-                    </ScrollArea>
+        <div className="flex-1 min-h-0">
+          <ScrollArea className="h-full">
+            <div className="px-6 pb-6 space-y-4">
+              {isLoading && (
+                <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p>Analyzing interactions...</p>
                 </div>
-            )}
+              )}
+              {result && (
+                  <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                          <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+                              <SelectTrigger className="flex-1">
+                                  <SelectValue placeholder="Select Language to Translate" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                  {LANGUAGES.map((lang) => (
+                                      <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                                  ))}
+                              </SelectContent>
+                          </Select>
+                          <Button onClick={handleTranslate} disabled={isTranslating || !targetLanguage} size="icon" variant="outline">
+                              {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
+                          </Button>
+                          {result !== originalText && (
+                              <Button onClick={handleRevert} size="icon" variant="outline">
+                                  <Undo2 className="h-4 w-4" />
+                              </Button>
+                          )}
+                      </div>
+                        <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
+                          <ShieldAlert className="h-4 w-4 !text-destructive" />
+                          <AlertTitle className="text-destructive">Interaction Summary</AlertTitle>
+                          <AlertDescription className="text-destructive/90 whitespace-pre-wrap">
+                            {result}
+                          </AlertDescription>
+                        </Alert>
+                  </div>
+              )}
+            </div>
+          </ScrollArea>
         </div>
       </DialogContent>
     </Dialog>

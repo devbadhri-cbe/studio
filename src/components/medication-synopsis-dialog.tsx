@@ -57,6 +57,7 @@ export function MedicationSynopsisDialog({ medicationName, children }: Medicatio
     setIsLoading(true);
     setResult(null);
     setOriginalText(null);
+    setTargetLanguage('');
     try {
       const response = await getMedicationSynopsis({ medicationName });
       setResult(response.synopsis);
@@ -85,7 +86,7 @@ export function MedicationSynopsisDialog({ medicationName, children }: Medicatio
 
     setIsTranslating(true);
     try {
-        const response = await translateText({ text: result, targetLanguage });
+        const response = await translateText({ text: originalText!, targetLanguage });
         setResult(response.translatedText);
     } catch (error) {
          console.error('Error translating text:', error);
@@ -106,52 +107,54 @@ export function MedicationSynopsisDialog({ medicationName, children }: Medicatio
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="p-6 pb-4">
           <DialogTitle>Synopsis for {medicationName}</DialogTitle>
           <DialogDescription>
             AI-generated summary. Always consult a healthcare professional.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4 space-y-4">
-            {isLoading ? (
-                <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p>Loading synopsis...</p>
+        <div className="flex-1 min-h-0">
+            <ScrollArea className="h-full">
+                <div className="px-6 pb-6 space-y-4">
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            <p>Loading synopsis...</p>
+                        </div>
+                    ) : result && (
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                                <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+                                    <SelectTrigger className="flex-1">
+                                        <SelectValue placeholder="Select Language to Translate" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {LANGUAGES.map((lang) => (
+                                            <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Button onClick={handleTranslate} disabled={isTranslating || !targetLanguage} size="icon" variant="outline">
+                                    {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
+                                </Button>
+                                {result !== originalText && (
+                                    <Button onClick={handleRevert} size="icon" variant="outline">
+                                        <Undo2 className="h-4 w-4" />
+                                    </Button>
+                                )}
+                            </div>
+                            <Alert>
+                            <BookOpen className="h-4 w-4" />
+                            <AlertTitle className="font-semibold">Medication Information</AlertTitle>
+                            <AlertDescription className="whitespace-pre-wrap leading-relaxed">
+                                {result}
+                            </AlertDescription>
+                            </Alert>
+                        </div>
+                    )}
                 </div>
-            ) : result && (
-                 <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                        <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                            <SelectTrigger className="flex-1">
-                                <SelectValue placeholder="Select Language to Translate" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {LANGUAGES.map((lang) => (
-                                    <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Button onClick={handleTranslate} disabled={isTranslating || !targetLanguage} size="icon" variant="outline">
-                            {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
-                        </Button>
-                         {result !== originalText && (
-                            <Button onClick={handleRevert} size="icon" variant="outline">
-                                <Undo2 className="h-4 w-4" />
-                            </Button>
-                        )}
-                    </div>
-                    <ScrollArea className="max-h-[50vh] -mx-6 px-6">
-                        <Alert>
-                        <BookOpen className="h-4 w-4" />
-                        <AlertTitle className="font-semibold">Medication Information</AlertTitle>
-                        <AlertDescription className="whitespace-pre-wrap leading-relaxed">
-                            {result}
-                        </AlertDescription>
-                        </Alert>
-                    </ScrollArea>
-                </div>
-            )}
+            </ScrollArea>
         </div>
       </DialogContent>
     </Dialog>
