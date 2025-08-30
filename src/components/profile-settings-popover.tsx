@@ -13,20 +13,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { dateFormats } from '@/lib/countries';
 import { useApp } from '@/context/app-context';
 import type { UnitSystem } from '@/lib/types';
+import { Settings } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
-
-interface ProfileSettingsPopoverProps {
-    children: React.ReactNode;
-}
-
-export function ProfileSettingsPopover({ children }: ProfileSettingsPopoverProps) {
+export function ProfileSettingsPopover() {
   const { profile, setProfile } = useApp();
 
   return (
     <Popover>
-        <PopoverTrigger asChild>
-          {children}
-        </PopoverTrigger>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <PopoverTrigger asChild>
+                    <Button variant="outline" size="icon" className="h-8 w-8">
+                        <Settings className="h-4 w-4" />
+                        <span className="sr-only">Settings</span>
+                    </Button>
+                </PopoverTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>Display Settings</p>
+            </TooltipContent>
+        </Tooltip>
         <PopoverContent className="w-64" align="end">
             <div className="grid gap-4">
                 <div className="space-y-2">

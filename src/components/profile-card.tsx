@@ -38,7 +38,7 @@ const ProfileSchema = z.object({
   gender: z.enum(['male', 'female', 'other'], { required_error: "Gender is required." }),
   email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')),
   country: z.string().min(1, { message: "Country is required." }),
-  phone: z.string().min(5, { message: "Phone number is too short." }),
+  phone: z.string().min(5, { message: "Phone number is too short." }).optional().or(z.literal('')),
   height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional().or(z.literal('')),
   weight: z.coerce.number().min(2, 'Weight must be at least 2kg.').optional().or(z.literal('')),
 });
@@ -215,7 +215,7 @@ export function ProfileCard() {
         gender: data.gender,
         email: data.email,
         country: data.country,
-        phone: data.phone,
+        phone: data.phone || '',
         height: data.height || undefined,
     };
     setProfile(updatedProfile);
@@ -357,19 +357,7 @@ export function ProfileCard() {
                         <p>{isEditing ? 'Cancel' : 'Edit Profile'}</p>
                     </TooltipContent>
                 </Tooltip>
-                 <ProfileSettingsPopover>
-                     <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                                <Settings className="h-4 w-4" />
-                                <span className="sr-only">Settings</span>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Display Settings</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </ProfileSettingsPopover>
+                 <ProfileSettingsPopover />
             </div>
         </div>
       </CardHeader>
