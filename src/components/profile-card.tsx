@@ -294,23 +294,25 @@ export function ProfileCard() {
                 <CardDescription>Your personal and medical information.</CardDescription>
               </div>
             </div>
-            <EditProfileDialog>
-                <Button variant="outline" size="sm">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                </Button>
-            </EditProfileDialog>
         </div>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         <div className="space-y-3 rounded-lg border bg-card p-4">
             <div className="flex flex-col gap-3">
-                 <div className="flex items-center gap-3 text-muted-foreground">
-                    <Cake className="h-5 w-5 shrink-0" />
-                    <p>
-                        {profile.dob ? formatDate(profile.dob) : 'N/A'}
-                        {calculatedAge !== null && ` (${calculatedAge} yrs)`}
-                    </p>
+                <div className="flex items-center justify-between text-muted-foreground">
+                    <div className="flex items-center gap-3">
+                        <Cake className="h-5 w-5 shrink-0" />
+                        <p>
+                            {profile.dob ? formatDate(profile.dob) : 'N/A'}
+                            {calculatedAge !== null && ` (${calculatedAge} yrs)`}
+                        </p>
+                    </div>
+                    <EditProfileDialog>
+                        <Button variant="outline" size="sm" className="h-8">
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                        </Button>
+                    </EditProfileDialog>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
                     <VenetianMask className="h-5 w-5 shrink-0" />
