@@ -168,7 +168,7 @@ export default function PatientDashboard() {
       </header>
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
-            <div className="flex items-stretch border-b pb-4 gap-4">
+            <div className="flex items-center border-b pb-4 gap-4">
               <Tooltip>
                 <TooltipTrigger asChild>
                     <button 
@@ -176,7 +176,7 @@ export default function PatientDashboard() {
                         disabled={isUploading}
                         className="relative rounded-full group shrink-0"
                     >
-                        <Avatar className="h-24 w-24 cursor-pointer">
+                        <Avatar className="h-20 w-20 md:h-24 md:w-24 cursor-pointer">
                             <AvatarImage src={profile.photoUrl} />
                             <AvatarFallback>
                                 {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : 
