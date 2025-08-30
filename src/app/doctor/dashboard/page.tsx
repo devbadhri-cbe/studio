@@ -120,22 +120,20 @@ export default function DoctorDashboardPage() {
   return (
     <>
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <header className="border-b px-4 py-4 md:px-6 flex flex-col items-center gap-2">
-          <div className="w-full flex justify-start md:justify-center">
-            <div className="flex items-center gap-2">
-              <Logo className="h-8 w-8 text-primary" />
-              <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
+       <header className="border-b px-4 py-4 md:px-6">
+            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 md:flex-row md:justify-between">
+              <div className="flex items-center gap-2">
+                  <Logo className="h-8 w-8 text-primary" />
+                  <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
+              </div>
+              <div className="text-center md:text-right text-sm text-muted-foreground">
+                  <p className="font-semibold text-lg text-foreground">{doctorName}</p>
+                  <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-center md:justify-end gap-1.5 hover:text-primary">
+                      <Mail className="h-3 w-3" />
+                      drbadhri@gmail.com
+                  </a>
+              </div>
             </div>
-          </div>
-          <div className="w-full text-left md:text-center text-sm text-muted-foreground">
-            <p className="font-semibold text-lg text-foreground">{doctorName}</p>
-            <div className="flex items-center justify-start md:justify-center gap-4">
-              <a href="mailto:drbadhri@gmail.com" className="flex items-center gap-1.5 hover:text-primary">
-                <Mail className="h-3 w-3" />
-                drbadhri@gmail.com
-              </a>
-            </div>
-          </div>
         </header>
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
@@ -235,5 +233,3 @@ export default function DoctorDashboardPage() {
     </>
   );
 }
-
-    
