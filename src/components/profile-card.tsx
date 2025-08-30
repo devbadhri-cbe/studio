@@ -435,32 +435,18 @@ export function ProfileCard() {
   const bmi = calculateBmi(latestWeight?.value, profile.height || 0);
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
-  const triggerTooltip = React.useCallback(() => {
-    setIsTooltipOpen(true);
-    setTimeout(() => {
-        setIsTooltipOpen(false);
-    }, 3000); // Hide tooltip after 3 seconds
-  }, []);
-
-  const handleSaveCondition = async (data: { condition: string, date: Date }, icdCode?: string) => {
-    addMedicalCondition({ ...data, date: data.date.toISOString(), icdCode });
-    setIsAddingCondition(false);
-  };
-  
   const handleSaveMedication = React.useCallback((data: { name: string; dosage: string; frequency: string; }) => {
     addMedication(data);
     setIsAddingMedication(false);
-    triggerTooltip();
      if (profile.medication.length >= 1) { 
       setAnimateShield(true);
       setTimeout(() => setAnimateShield(false), 2000); 
     }
-  }, [addMedication, triggerTooltip, profile.medication.length]);
+  }, [addMedication, profile.medication.length]);
 
   const handleRemoveMedication = React. useCallback((id: string) => {
     removeMedication(id);
-    triggerTooltip();
-  }, [removeMedication, triggerTooltip]);
+  }, [removeMedication]);
   
   const handleSetMedicationNil = () => {
       setMedicationNil();
@@ -503,6 +489,11 @@ export function ProfileCard() {
   const handleSaveDob = (newDob: string) => {
     setProfile({ ...profile, dob: newDob });
     setIsEditingDob(false);
+  };
+
+  const handleSaveCondition = async (data: { condition: string, date: Date }, icdCode?: string) => {
+    addMedicalCondition({ ...data, date: data.date.toISOString(), icdCode });
+    setIsAddingCondition(false);
   };
 
 
@@ -804,6 +795,14 @@ export function ProfileCard() {
                     )}
                 </div>
             </div>
+             {profile.medication.length > 1 && !isMedicationNil && (
+                 <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
+                    <Button variant="outline" size="sm" className="w-full mb-2">
+                      <ShieldAlert className={`mr-2 h-4 w-4 ${animateShield ? 'animate-spin' : ''}`} />
+                        Check Drug Interactions
+                    </Button>
+                </DrugInteractionDialog>
+            )}
             {isAddingMedication && <MedicationForm onSave={handleSaveMedication} onCancel={() => setIsAddingMedication(false)} />}
             {profile.medication.length > 0 ? (
                 <ul className="space-y-1 mt-2">
@@ -834,24 +833,6 @@ export function ProfileCard() {
                 </ul>
             ) : (
                  !isAddingMedication && <p className="text-xs text-muted-foreground pl-8">No medication recorded.</p>
-            )}
-             {profile.medication.length > 1 && !isMedicationNil && (
-                <Dialog>
-                  <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
-                      <TooltipTrigger asChild>
-                          <DialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="w-full mt-2">
-                                <ShieldAlert className={`mr-2 h-4 w-4 ${animateShield ? 'animate-spin' : ''}`} />
-                                  Check Drug Interactions
-                              </Button>
-                          </DialogTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                          <p>Check for interactions between medications.</p>
-                      </TooltipContent>
-                  </Tooltip>
-                  <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)} />
-              </Dialog>
             )}
         </div>
 
