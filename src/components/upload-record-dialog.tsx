@@ -4,7 +4,7 @@
 import { labResultUpload, type LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, CheckCircle, XCircle, FileText, FlaskConical, Sun, Droplet, Activity, Zap } from 'lucide-react';
+import { Loader2, UploadCloud, CheckCircle, XCircle, FileText, FlaskConical, Sun, Droplet, Activity, Zap, AlertTriangle } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from './ui/dialog';
@@ -13,6 +13,8 @@ import { Separator } from './ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { ScrollArea } from './ui/scroll-area';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { DatePicker } from './ui/date-picker';
+import { parseISO, isValid } from 'date-fns';
 
 
 interface UploadRecordDialogProps {
@@ -87,6 +89,15 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
 
     const { hba1cValue, lipidPanel, vitaminDValue, thyroidPanel, bloodPressure, date } = extractedData;
     
+    if (!date || !isValid(parseISO(date))) {
+        toast({
+            variant: 'destructive',
+            title: 'Valid Date Required',
+            description: 'Please select a valid date for the report before saving.',
+        });
+        return;
+    }
+    
     addBatchRecords({
       hba1c: hba1cValue ? { value: hba1cValue, date } : undefined,
       lipid: lipidPanel ? { ...lipidPanel, date } : undefined,
@@ -133,34 +144,60 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
   const renderConfirmationView = () => {
     if (!extractedData) return null;
     const hasAnyData = extractedData.hba1cValue || extractedData.lipidPanel || extractedData.vitaminDValue || extractedData.thyroidPanel || extractedData.bloodPressure;
+    const isDateValid = extractedData.date && isValid(parseISO(extractedData.date));
     
     return (
         <>
             <ScrollArea className="flex-1 -mx-6">
                 <div className="px-6 py-4 space-y-4">
-                    <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
+                    {!extractedData.nameVerified && (
+                       <Alert variant="destructive">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertTitle>Name Mismatch Warning</AlertTitle>
+                            <AlertDescription>
+                                The name on the document could not be matched to "{profile.name}". Please ensure this is the correct report before proceeding.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
+                     <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
                         {extractedData.nameVerified ? (
                             <CheckCircle className="h-5 w-5 text-green-500" />
                         ) : (
-                            <XCircle className="h-5 w-5 text-destructive" />
+                            <XCircle className="h-5 w-5 text-yellow-500" />
                         )}
                         <div>
                             <p className="font-semibold">Name Verification</p>
                             <p className="text-sm text-muted-foreground">
                                 {extractedData.nameVerified
                                     ? `Name "${profile.name}" successfully matched.`
-                                    : `Name on document does not match "${profile.name}".`
+                                    : `Name mismatch detected.`
                                 }
                             </p>
                         </div>
                     </div>
                      <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3">
                         <FileText className="h-5 w-5 text-primary" />
-                         <div>
+                         <div className="flex-1">
                             <p className="font-semibold">Report Date</p>
-                            <p className="text-sm text-muted-foreground">
-                                {formatDate(extractedData.date)}
-                            </p>
+                            {isDateValid ? (
+                                <p className="text-sm text-muted-foreground">
+                                    {formatDate(extractedData.date)}
+                                </p>
+                            ) : (
+                                 <div className="space-y-2">
+                                    <p className="text-sm text-destructive">Date not found. Please select one.</p>
+                                    <DatePicker 
+                                        placeholder='Select a date'
+                                        value={extractedData.date ? parseISO(extractedData.date) : undefined}
+                                        onChange={(newDate) => {
+                                            if (newDate) {
+                                                setExtractedData({ ...extractedData, date: newDate.toISOString().split('T')[0] })
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            )}
                         </div>
                      </div>
 
@@ -256,7 +293,7 @@ export function UploadRecordDialog({ children }: UploadRecordDialogProps) {
                 <DialogClose asChild>
                     <Button variant="ghost">Cancel</Button>
                 </DialogClose>
-                <Button onClick={handleConfirm} disabled={!extractedData.nameVerified || !hasAnyData}>
+                <Button onClick={handleConfirm} disabled={!hasAnyData || !isDateValid}>
                     Confirm & Add Records
                 </Button>
             </DialogFooter>
