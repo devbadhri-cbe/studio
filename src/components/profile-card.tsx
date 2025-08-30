@@ -332,17 +332,19 @@ export function ProfileCard() {
             </div>
 
             <Separator className="my-2" />
-             <div className="flex items-center gap-3 text-muted-foreground">
-                <Globe className="h-5 w-5 shrink-0" />
-                <p>{countryName}</p>
-            </div>
-             <div className="flex items-center gap-3 text-muted-foreground">
-                <Mail className="h-5 w-5 shrink-0" />
-                <p>{profile.email || 'N/A'}</p>
-            </div>
-            <div className="flex items-center gap-3 text-muted-foreground">
-                <Phone className="h-5 w-5 shrink-0" />
-                 <p>{formattedPhone}</p>
+             <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3 text-muted-foreground">
+                    <Globe className="h-5 w-5 shrink-0" />
+                    <p>{countryName}</p>
+                </div>
+                <div className="flex items-center gap-3 text-muted-foreground">
+                    <Mail className="h-5 w-5 shrink-0" />
+                    <p>{profile.email || 'N/A'}</p>
+                </div>
+                <div className="flex items-center gap-3 text-muted-foreground">
+                    <Phone className="h-5 w-5 shrink-0" />
+                    <p>{formattedPhone}</p>
+                </div>
             </div>
         </div>
 
@@ -587,4 +589,4 @@ export function ProfileCard() {
   );
 }
 
-    
+  
