@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { format } from "date-fns"
+import { format, parse, isValid } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -13,8 +13,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { Input } from "./input"
 
-interface DatePickerProps extends React.ComponentPropsWithoutRef<typeof Button> {
+interface DatePickerProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'onChange' | 'value'> {
   value?: Date;
   onChange: (date?: Date) => void;
   placeholder?: string;
@@ -24,6 +26,35 @@ interface DatePickerProps extends React.ComponentPropsWithoutRef<typeof Button> 
 
 export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
   ({ value, onChange, className, placeholder, fromYear, toYear, ...props }, ref) => {
+    const isMobile = useIsMobile();
+    const [dateString, setDateString] = React.useState<string>(value ? format(value, 'yyyy-MM-dd') : '');
+
+    React.useEffect(() => {
+        setDateString(value ? format(value, 'yyyy-MM-dd') : '');
+    }, [value]);
+
+    const handleNativeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const dateValue = e.target.value;
+        setDateString(dateValue);
+        // Date from native picker is yyyy-MM-dd. We need to parse it considering the local timezone.
+        const parsedDate = dateValue ? parse(dateValue, 'yyyy-MM-dd', new Date()) : undefined;
+        if (isValid(parsedDate) || !dateValue) {
+             onChange(parsedDate);
+        }
+    }
+    
+    if (isMobile) {
+        return (
+            <Input
+                type="date"
+                value={dateString}
+                onChange={handleNativeChange}
+                className={cn("w-full justify-start text-left font-normal h-10", !value && "text-muted-foreground", className)}
+                max={format(new Date(), 'yyyy-MM-dd')}
+            />
+        )
+    }
+  
     const captionLayout = fromYear && toYear ? "dropdown-buttons" : "buttons";
   
     return (
