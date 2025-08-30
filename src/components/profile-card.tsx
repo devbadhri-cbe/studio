@@ -624,12 +624,12 @@ export function ProfileCard() {
         </div>
 
         <div>
-             <div className="flex items-center justify-between gap-3 mb-2">
-                <div className='flex items-center gap-3'>
+            <div className="flex items-center justify-between gap-3 mb-2">
+                <div className="flex items-center gap-3">
                     <TrendingUp className="h-5 w-5 shrink-0 text-muted-foreground" />
                     <h3 className="font-medium">Weight Records</h3>
                 </div>
-                 {!isAddingWeight && (
+                {!isAddingWeight && (
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setIsAddingWeight(true)}>
@@ -651,7 +651,7 @@ export function ProfileCard() {
                             : `${weight.value.toFixed(2)} kg`;
 
                         return (
-                            <li key={weight.id} className="group flex items-start gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                            <li key={weight.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                                <div className="flex-1">
                                     <span className="font-semibold text-foreground">{displayRecordWeight}</span>
                                     <span className="block text-xs">on {formatDate(weight.date)}</span>
@@ -675,7 +675,7 @@ export function ProfileCard() {
         
         <div>
             <div className="flex items-center justify-between gap-3 mb-2">
-                <div className='flex items-center gap-3'>
+                <div className='flex items-center gap-3 flex-1'>
                     <Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />
                     <h3 className="font-medium">Present Medical Conditions</h3>
                 </div>
@@ -697,14 +697,16 @@ export function ProfileCard() {
                 <ul className="space-y-1 mt-2">
                     {profile.presentMedicalConditions.map((condition) => (
                         <li key={condition.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                            <ConditionSynopsisDialog conditionName={condition.condition}>
-                                <div className={cn("flex-1", !isMobile && "cursor-pointer")}>
-                                    <p className="font-semibold text-foreground">{condition.condition}</p>
-                                    {condition.icdCode && <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>}
-                                    <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
-                                </div>
-                            </ConditionSynopsisDialog>
-                            <div className="ml-auto flex items-center shrink-0">
+                           <div className='flex-1'>
+                                <ConditionSynopsisDialog conditionName={condition.condition}>
+                                    <div className={cn("flex-1", !isMobile && "cursor-pointer")}>
+                                        <p className="font-semibold text-foreground">{condition.condition}</p>
+                                        {condition.icdCode && <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>}
+                                        <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
+                                    </div>
+                                </ConditionSynopsisDialog>
+                           </div>
+                           <div className="flex items-center shrink-0">
                                 <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); removeMedicalCondition(condition.id); }}>
@@ -729,7 +731,7 @@ export function ProfileCard() {
 
         <div>
             <div className="flex items-center justify-between gap-3 mb-2">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-1">
                     <Pill className="h-5 w-5 shrink-0 text-muted-foreground" />
                     <h3 className="font-medium">Current Medication</h3>
                 </div>
@@ -789,19 +791,21 @@ export function ProfileCard() {
                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
                          <li key={med.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                            <MedicationSynopsisDialog medicationName={med.name}>
-                                <div className={cn("flex-1", !isMobile && "cursor-pointer")}>
-                                {med.name.toLowerCase() === 'nil' ? (
-                                        <span className="font-semibold text-foreground">Nil - No medication</span>
-                                ) : (
-                                    <>
-                                        <span className="font-semibold text-foreground">{med.name}</span>
-                                        <span className='block'>({med.dosage}, {med.frequency})</span>
-                                    </>
-                                )}
-                                </div>
-                            </MedicationSynopsisDialog>
-                            <div className="ml-auto flex items-center shrink-0">
+                           <div className="flex-1">
+                                <MedicationSynopsisDialog medicationName={med.name}>
+                                    <div className={cn("flex-1", !isMobile && "cursor-pointer")}>
+                                    {med.name.toLowerCase() === 'nil' ? (
+                                            <span className="font-semibold text-foreground">Nil - No medication</span>
+                                    ) : (
+                                        <>
+                                            <span className="font-semibold text-foreground">{med.name}</span>
+                                            <span className='block'>({med.dosage}, {med.frequency})</span>
+                                        </>
+                                    )}
+                                    </div>
+                                </MedicationSynopsisDialog>
+                            </div>
+                            <div className="flex items-center shrink-0">
                                 {med.name.toLowerCase() !== 'nil' && (
                                     <>
                                     <Tooltip>
@@ -847,3 +851,4 @@ export function ProfileCard() {
     </Card>
   );
 }
+
