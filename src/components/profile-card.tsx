@@ -34,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { UnitSystem } from '@/lib/types';
+import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
 
 
 const MedicationSchema = z.object({
@@ -364,7 +365,7 @@ export function ProfileCard() {
   const bmi = calculateBmi(latestWeight?.value, profile.height || 0);
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
-  const onMedicationSubmit = async (data: z.infer<typeof MedicationSchema>) => {
+  const handleSaveMedication = async (data: z.infer<typeof MedicationSchema>) => {
     setIsSubmitting(true);
     try {
         const standardized = await standardizeMedication(data);
@@ -377,6 +378,7 @@ export function ProfileCard() {
         setIsAddingMedication(false);
         if (profile.medication.length >= 1) { 
             setAnimateShield(true);
+            setTimeout(() => setAnimateShield(false), 2000);
         }
         toast({
             title: 'Medication Added',
@@ -732,6 +734,7 @@ export function ProfileCard() {
                                 </Tooltip>
                             ) : null}
 
+                            {!isMedicationNil &&
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button
@@ -750,13 +753,14 @@ export function ProfileCard() {
                                 </TooltipTrigger>
                                 <TooltipContent>Add Medication</TooltipContent>
                             </Tooltip>
+                            }
                         </>
                     )}
                 </div>
             </div>
             {isAddingMedication && (
                 <Form {...medicationForm}>
-                    <form onSubmit={medicationForm.handleSubmit(onMedicationSubmit)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
+                    <form onSubmit={medicationForm.handleSubmit(handleSaveMedication)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
                         <FormField control={medicationForm.control} name="medicationName" render={({ field }) => (<FormItem><FormControl><Input ref={medicationNameInputRef} placeholder="Medication Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
                         <div className="grid grid-cols-2 gap-2">
                             <FormField control={medicationForm.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
@@ -774,28 +778,30 @@ export function ProfileCard() {
             {profile.medication.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
-                         <li key={med.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                             {med.name.toLowerCase() === 'nil' ? (
-                                <div className="flex-1 flex justify-between items-center">
-                                    <span className="font-semibold text-foreground">Nil - No medication</span>
-                                </div>
-                             ) : (
-                                <>
-                                    <div className='flex-1'>
-                                        <span className="font-semibold text-foreground">{med.name}</span>
-                                        <span className='block'>({med.dosage}, {med.frequency})</span>
+                        <MedicationSynopsisDialog key={med.id} medicationName={med.name}>
+                            <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md cursor-pointer">
+                                {med.name.toLowerCase() === 'nil' ? (
+                                    <div className="flex-1 flex justify-between items-center">
+                                        <span className="font-semibold text-foreground">Nil - No medication</span>
                                     </div>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => handleRemoveMedication(med.id)}>
-                                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>Delete medication</TooltipContent>
-                                    </Tooltip>
-                                </>
-                             )}
-                        </li>
+                                ) : (
+                                    <>
+                                        <div className='flex-1'>
+                                            <span className="font-semibold text-foreground">{med.name}</span>
+                                            <span className='block'>({med.dosage}, {med.frequency})</span>
+                                        </div>
+                                        <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
+                                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Delete medication</TooltipContent>
+                                        </Tooltip>
+                                    </>
+                                )}
+                            </li>
+                        </MedicationSynopsisDialog>
                     ))}
                 </ul>
             ) : (
@@ -822,5 +828,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-    
