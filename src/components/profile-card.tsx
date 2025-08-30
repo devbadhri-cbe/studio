@@ -588,5 +588,3 @@ export function ProfileCard() {
     </Card>
   );
 }
-
-  
