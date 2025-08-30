@@ -308,10 +308,17 @@ export function ProfileCard() {
                         </p>
                     </div>
                     <EditProfileDialog>
-                        <Button variant="outline" size="sm" className="h-8">
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                        </Button>
+                         <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-8 w-8">
+                                    <Edit className="h-4 w-4" />
+                                    <span className="sr-only">Edit Profile</span>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Edit Profile</p>
+                            </TooltipContent>
+                        </Tooltip>
                     </EditProfileDialog>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
