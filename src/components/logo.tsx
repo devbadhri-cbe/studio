@@ -1,5 +1,6 @@
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 export function Logo(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -20,12 +21,14 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
             fill="currentColor" 
             fillOpacity="0.1" 
         />
-        <path 
-            d="M8 16H12L14 10L18 22L20 16H24"
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
+        <polyline
+            className="animate-pulse-trace"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
             strokeLinejoin="round"
+            points="8,16 12,16 14,10 18,22 20,16 24,16"
         />
     </svg>
   );

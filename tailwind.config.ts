@@ -87,15 +87,25 @@ export default {
             height: '0',
           },
         },
-        'rotate-y': {
-            '0%': { transform: 'rotateY(0deg)' },
-            '100%': { transform: 'rotateY(360deg)' },
-        }
+        'pulse-trace': {
+          '0%': {
+            'stroke-dasharray': '0 100',
+            'stroke-dashoffset': '0',
+          },
+          '50%': {
+            'stroke-dasharray': '100 100',
+            'stroke-dashoffset': '0',
+          },
+          '100%': {
+            'stroke-dasharray': '100 100',
+            'stroke-dashoffset': '-100',
+          }
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'rotate-y': 'rotate-y 1s infinite',
+        'pulse-trace': 'pulse-trace 2s ease-in-out infinite',
       },
     },
   },
