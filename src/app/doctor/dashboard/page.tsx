@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation';
 import { Mail, Search, UserPlus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Patient } from '@/lib/types';
-import { PatientFormDialog } from '@/components/add-patient-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,9 +21,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
-import { addPatient, deletePatient, getPatients, updatePatient } from '@/lib/firestore';
+import { deletePatient, getPatients } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PatientForm } from '@/components/patient-form';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
@@ -34,7 +32,6 @@ export default function DoctorDashboardPage() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
     const [searchQuery, setSearchQuery] = React.useState('');
-    const [isAddingPatient, setIsAddingPatient] = React.useState(false);
 
     const fetchPatients = React.useCallback(async () => {
         setIsLoading(true);
@@ -72,34 +69,6 @@ export default function DoctorDashboardPage() {
     const viewPatientDashboard = (patient: Patient) => {
         router.push(`/patient/${patient.id}`);
     }
-
-    const handleSavePatient = async (patientData: Partial<Patient> & { weight?: number | string }, patientId?: string) => {
-        try {
-            if (patientId) { // Editing existing patient
-                const updatedPatient = await updatePatient(patientId, patientData);
-                setPatients(patients.map(p => p.id === patientId ? updatedPatient : p));
-                 toast({
-                    title: 'Patient Updated',
-                    description: `${updatedPatient.name}'s details have been updated.`,
-                });
-            } else { // Adding new patient
-                const newPatient = await addPatient(patientData as Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number });
-                toast({
-                    title: 'Patient Added',
-                    description: `${newPatient.name}'s details have been added.`,
-                });
-                setIsAddingPatient(false);
-                await fetchPatients();
-            }
-        } catch (error) {
-             console.error("Failed to save patient:", error);
-             toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Could not save patient details. Please try again.',
-             });
-        }
-    };
     
     const removePatient = async (patientId: string) => {
         try {
@@ -158,21 +127,6 @@ export default function DoctorDashboardPage() {
                 </div>
             </div>
 
-            {isAddingPatient && (
-                <div className="max-w-lg mx-auto mb-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Add New Patient</CardTitle>
-                            <CardDescription>Fill out the form below to add a new patient to your list.</CardDescription>
-                        </CardHeader>
-                        <PatientForm
-                            onSave={handleSavePatient}
-                            onCancel={() => setIsAddingPatient(false)}
-                        />
-                    </Card>
-                </div>
-            )}
-
             <Card>
                 <CardHeader className="flex flex-col md:flex-row md:items-center gap-4">
                     <div className="grid gap-2 flex-1">
@@ -190,10 +144,6 @@ export default function DoctorDashboardPage() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <Button size="sm" className="gap-1 w-full sm:w-auto" onClick={() => setIsAddingPatient(true)} disabled={isAddingPatient}>
-                            <UserPlus className="h-3.5 w-3.5" />
-                            <span className="whitespace-nowrap">Add Patient</span>
-                        </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -204,16 +154,12 @@ export default function DoctorDashboardPage() {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {filteredPatients.map((patient) => (
-                                 <PatientFormDialog key={patient.id} patient={patient} onSave={handleSavePatient}>
-                                    {({ openDialog }) => (
-                                        <PatientCard
-                                            patient={patient}
-                                            onView={viewPatientDashboard}
-                                            onEdit={openDialog}
-                                            onDelete={setPatientToDelete}
-                                        />
-                                    )}
-                                 </PatientFormDialog>
+                                <PatientCard
+                                    key={patient.id}
+                                    patient={patient}
+                                    onView={viewPatientDashboard}
+                                    onDelete={setPatientToDelete}
+                                />
                             ))}
                         </div>
                     )}

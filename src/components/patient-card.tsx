@@ -22,7 +22,6 @@ import { useRouter } from 'next/navigation';
 interface PatientCardProps {
   patient: Patient;
   onView: (patient: Patient) => void;
-  onEdit: () => void;
   onDelete: (patient: Patient) => void;
 }
 
@@ -47,7 +46,7 @@ const getStatusVariant = (status: Patient['status']) => {
 }
 
 
-export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
+export function PatientCard({ patient, onView, onDelete }: PatientCardProps) {
   const router = useRouter();
   const { toast } = useToast();
   const statusVariant = getStatusVariant(patient.status);
@@ -128,10 +127,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                     <DropdownMenuItem onSelect={() => onView(patient)}>
                         <Eye className="mr-2 h-4 w-4" />
                         View Dashboard
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={onEdit}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Edit Details
                     </DropdownMenuItem>
                      <SharePatientAccessDialog patient={patient}>
                         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
