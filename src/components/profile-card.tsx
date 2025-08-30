@@ -441,7 +441,6 @@ export function ProfileCard() {
     setIsAddingMedication(false);
      if (profile.medication.length >= 1) { 
       setAnimateShield(true);
-      setTimeout(() => setAnimateShield(false), 2000); 
     }
   }, [addMedication, profile.medication.length]);
 
@@ -829,7 +828,12 @@ export function ProfileCard() {
             )}
              {profile.medication.length > 1 && !isMedicationNil && (
                  <DrugInteractionDialog medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}>
-                    <Button variant="outline" size="sm" className="w-full mt-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full mt-2"
+                      onClick={() => setAnimateShield(false)}
+                    >
                       <ShieldAlert className={`mr-2 h-4 w-4 ${animateShield ? 'animate-spin' : ''}`} />
                         Check Drug Interactions
                     </Button>
