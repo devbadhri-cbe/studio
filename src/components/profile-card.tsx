@@ -624,7 +624,7 @@ export function ProfileCard() {
         </div>
 
         <div>
-             <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2">
                 <div className='flex items-center gap-3 flex-1'>
                     <TrendingUp className="h-5 w-5 shrink-0 text-muted-foreground" />
                     <h3 className="font-medium">Weight Records</h3>
@@ -714,7 +714,7 @@ export function ProfileCard() {
                                 <TooltipContent>Delete condition</TooltipContent>
                                 </Tooltip>
                                 <ConditionSynopsisDialog conditionName={condition.condition}>
-                                    <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0">
+                                    <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100">
                                         <Info className="h-4 w-4 text-blue-500" />
                                     </Button>
                                 </ConditionSynopsisDialog>
@@ -813,7 +813,7 @@ export function ProfileCard() {
                                     <TooltipContent>Delete medication</TooltipContent>
                                     </Tooltip>
                                     <MedicationSynopsisDialog medicationName={med.name}>
-                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0">
+                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100">
                                             <Info className="h-4 w-4 text-blue-500" />
                                         </Button>
                                     </MedicationSynopsisDialog>
@@ -847,3 +847,4 @@ export function ProfileCard() {
     </Card>
   );
 }
+
