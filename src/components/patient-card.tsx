@@ -6,7 +6,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format, formatDistanceToNow } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2, MessageSquare, Clock } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2, MessageSquare, Clock, Info } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { SharePatientAccessDialog } from './share-patient-access-dialog';
 import { useRouter } from 'next/navigation';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 
 interface PatientCardProps {
@@ -209,10 +210,22 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         </div>
       </CardContent>
 
-      <div className="p-4 pt-0 mt-auto">
-        <Badge variant={statusVariant} className={`w-full justify-center ${statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
-            {patient.status}
-        </Badge>
+      <div className="p-4 pt-0 mt-auto" onClick={(e) => e.stopPropagation()}>
+         <Tooltip>
+            <TooltipTrigger asChild>
+                <Badge variant={statusVariant} className={`w-full justify-center cursor-help ${statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
+                    {patient.status}
+                </Badge>
+            </TooltipTrigger>
+            <TooltipContent align="center" side="bottom" className="max-w-[250px] text-xs">
+                <div className="font-bold text-base mb-2">{patient.status}</div>
+                <div className="text-left space-y-1">
+                    <p><strong className="text-destructive">Urgent:</strong> HbA1c ≥ 7.0%, or BP ≥ 140/90.</p>
+                    <p><strong className="text-amber-600 dark:text-amber-500">Needs Review:</strong> HbA1c ≥ 5.7%, LDL ≥ 130, abnormal TSH, or BP ≥ 130/80.</p>
+                    <p><strong className="text-green-600 dark:text-green-500">On Track:</strong> All key biomarkers are within their target ranges.</p>
+                </div>
+            </TooltipContent>
+        </Tooltip>
       </div>
     </Card>
   );
