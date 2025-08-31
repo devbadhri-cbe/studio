@@ -147,6 +147,7 @@ export default function DoctorDashboardPage() {
                   <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
               </div>
               <div className="text-center text-sm text-muted-foreground">
+                  <p className="text-xs">by</p>
                   <p className="font-semibold text-lg text-foreground">{doctorName}</p>
                   <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-center gap-1.5 hover:text-primary">
                       <Mail className="h-3 w-3" />
