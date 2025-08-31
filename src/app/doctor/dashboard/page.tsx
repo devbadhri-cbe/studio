@@ -161,11 +161,11 @@ export default function DoctorDashboardPage() {
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
             <div className="flex items-center justify-between border-b pb-4 mb-6">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-semibold font-headline">
+                <div className="flex-1">
+                    <h1 className={`text-2xl md:text-3xl font-semibold font-headline ${isAddingPatient ? 'text-center' : ''}`}>
                         {isAddingPatient ? 'Add New Patient' : 'Patient Overview'}
                     </h1>
-                    <p className="text-muted-foreground">
+                    <p className={`text-muted-foreground ${isAddingPatient ? 'text-center' : ''}`}>
                         {isAddingPatient ? "Enter the patient's details below." : "Manage and review your patients' health data."}
                     </p>
                 </div>
