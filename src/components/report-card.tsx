@@ -148,50 +148,67 @@ export function ReportCard() {
           </div>
         </section>
 
-        <Separator />
+        {records && records.length > 0 && (
+          <>
+            <Separator />
+            <section>
+              <CardTitle className="text-lg mb-4">HbA1c Trend</CardTitle>
+              <Hba1cChart />
+            </section>
+          </>
+        )}
+
+        {weightRecords && weightRecords.length > 0 && (
+          <>
+            <Separator />
+            <section>
+              <CardTitle className="text-lg mb-4">Weight Trend</CardTitle>
+              <div className="h-[300px] w-full">
+                <WeightChart />
+              </div>
+            </section>
+          </>
+        )}
+
+        {bloodPressureRecords && bloodPressureRecords.length > 0 && (
+          <>
+            <Separator />
+            <section>
+              <CardTitle className="text-lg mb-4">Blood Pressure Trend</CardTitle>
+              <BloodPressureChart />
+            </section>
+          </>
+        )}
         
-        <section>
-          <CardTitle className="text-lg mb-4">HbA1c Trend</CardTitle>
-          <Hba1cChart />
-        </section>
+        {lipidRecords && lipidRecords.length > 0 && (
+          <>
+            <Separator />
+            <section>
+              <CardTitle className="text-lg mb-4">LDL Cholesterol Trend</CardTitle>
+              <LdlChart />
+            </section>
+          </>
+        )}
 
-        <Separator />
-
-        <section>
-          <CardTitle className="text-lg mb-4">Weight Trend</CardTitle>
-          <div className="h-[300px] w-full">
-            <WeightChart />
-          </div>
-        </section>
-
-        <Separator />
-
-        <section>
-          <CardTitle className="text-lg mb-4">Blood Pressure Trend</CardTitle>
-          <BloodPressureChart />
-        </section>
+        {vitaminDRecords && vitaminDRecords.length > 0 && (
+          <>
+            <Separator />
+            <section>
+              <CardTitle className="text-lg mb-4">Vitamin D Trend</CardTitle>
+              <VitaminDChart />
+            </section>
+          </>
+        )}
         
-        <Separator />
-
-        <section>
-          <CardTitle className="text-lg mb-4">LDL Cholesterol Trend</CardTitle>
-          <LdlChart />
-        </section>
-
-        <Separator />
-
-        <section>
-          <CardTitle className="text-lg mb-4">Vitamin D Trend</CardTitle>
-          <VitaminDChart />
-        </section>
-        
-        <Separator />
-
-        <section>
-          <CardTitle className="text-lg mb-4">TSH Trend</CardTitle>
-          <ThyroidChart />
-        </section>
-
+        {thyroidRecords && thyroidRecords.length > 0 && (
+          <>
+            <Separator />
+            <section>
+              <CardTitle className="text-lg mb-4">TSH Trend</CardTitle>
+              <ThyroidChart />
+            </section>
+          </>
+        )}
       </CardContent>
     </Card>
   );
