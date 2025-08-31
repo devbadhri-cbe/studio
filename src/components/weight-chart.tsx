@@ -96,11 +96,6 @@ export function WeightChart() {
           )}
         </ResponsiveContainer>
       </div>
-      {idealWeight && (
-        <div className="text-center text-xs text-muted-foreground mt-2">
-          Ideal Weight (BMI 25): <span className="font-bold text-foreground">{idealWeight} {unitLabel}</span>
-        </div>
-      )}
     </div>
   );
 }
