@@ -105,7 +105,10 @@ export default function PatientDashboard() {
           <div className="mx-auto grid w-full max-w-7xl gap-6">
             <div className="space-y-6">
               <PatientHeader />
-              <ProfileCard />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <ProfileCard />
+                <WeightRecordCard />
+              </div>
             </div>
             
             <Separator />
@@ -141,7 +144,6 @@ export default function PatientDashboard() {
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
                 <div className="lg:col-span-1 flex flex-col gap-6">
-                    <WeightRecordCard />
                     <MedicalHistoryCard />
                 </div>
                 <div className="lg:col-span-2 flex flex-col gap-6">
