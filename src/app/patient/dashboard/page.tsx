@@ -104,10 +104,10 @@ export default function PatientDashboard() {
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                <div className="lg:col-span-2 order-2 lg:order-1">
+                <div className="lg:col-span-2 order-1 lg:order-1">
                     <PatientHeader />
                 </div>
-                <div className="lg:col-span-1 row-start-1 lg:row-start-auto order-1 lg:order-2">
+                <div className="lg:col-span-1 row-start-2 lg:row-start-auto order-2 lg:order-2">
                     <ProfileCard />
                 </div>
             </div>
