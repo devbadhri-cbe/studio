@@ -34,6 +34,7 @@ import { ProfileSettingsPopover } from './profile-settings-popover';
 
 
 const ProfileSchema = z.object({
+  name: z.string().min(2, "Name is required."),
   dob: z.date({ required_error: "A valid date is required." }),
   gender: z.enum(['male', 'female', 'other'], { required_error: "Gender is required." }),
   email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')),
@@ -221,11 +222,12 @@ export function ProfileCard() {
         }
 
         form.reset({
+            name: profile?.name || '',
             dob: profile?.dob ? parseISO(profile.dob) : new Date(),
             gender: profile?.gender,
             email: profile?.email || '',
             country: profile?.country || '',
-            phone: profile?.phone || countryData?.phoneCode || '',
+            phone: profile?.phone || '',
             height: !isImperial ? profile?.height || '' : '',
             height_ft: isImperial ? height_ft : '',
             height_in: isImperial ? height_in : '',
@@ -248,6 +250,7 @@ export function ProfileCard() {
 
      const updatedProfile = {
         ...profile,
+        name: data.name,
         dob: data.dob.toISOString(),
         gender: data.gender,
         email: data.email,
@@ -402,6 +405,7 @@ export function ProfileCard() {
         {isEditing ? (
              <Form {...form}>
                 <form onSubmit={form.handleSubmit(onProfileSubmit)} className="space-y-4">
+                    <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
                     <FormField
                       control={form.control}
                       name="dob"
