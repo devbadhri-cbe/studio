@@ -21,51 +21,58 @@ export function CameraCaptureDialog({ open, onOpenChange, onCapture, isUploading
   const [hasCameraPermission, setHasCameraPermission] = React.useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = React.useState<string | null>(null);
   const { toast } = useToast();
+  const streamRef = React.useRef<MediaStream | null>(null);
 
   const cleanupCamera = React.useCallback(() => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
   }, []);
+  
+  const resetState = React.useCallback(() => {
+    cleanupCamera();
+    setCapturedImage(null);
+    setHasCameraPermission(null);
+  }, [cleanupCamera]);
+
 
   React.useEffect(() => {
-    const getCameraPermission = async () => {
-      if (!open || hasCameraPermission) {
-        if (!open) {
-          cleanupCamera();
+    if (open) {
+      const getCameraPermission = async () => {
+        try {
+          // Request rear camera first, which is better for document scanning
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          streamRef.current = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+          setHasCameraPermission(true);
+        } catch (error) {
+          console.error('Error accessing camera:', error);
+          setHasCameraPermission(false);
+          toast({
+            variant: 'destructive',
+            title: 'Camera Access Denied',
+            description: 'Please enable camera permissions in your browser settings to use this feature.',
+          });
+          onOpenChange(false); // Close dialog if permission is denied
         }
-        return;
-      }
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-        setHasCameraPermission(true);
-      } catch (error) {
-        console.error('Error accessing camera:', error);
-        setHasCameraPermission(false);
-        toast({
-          variant: 'destructive',
-          title: 'Camera Access Denied',
-          description: 'Please enable camera permissions in your browser settings to use this feature.',
-        });
-        onOpenChange(false);
-      }
-    };
-
-    getCameraPermission();
-
-    return () => {
-      cleanupCamera();
-    };
-  }, [open, hasCameraPermission, onOpenChange, toast, cleanupCamera]);
+      };
+      getCameraPermission();
+    } else {
+      resetState();
+    }
+    
+    return cleanupCamera;
+  }, [open, onOpenChange, toast, resetState, cleanupCamera]);
+  
 
   const handleCapture = () => {
-    if (videoRef.current && canvasRef.current) {
+    if (videoRef.current && canvasRef.current && videoRef.current.readyState >= 2) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
@@ -75,8 +82,14 @@ export function CameraCaptureDialog({ open, onOpenChange, onCapture, isUploading
         context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
         const dataUrl = canvas.toDataURL('image/jpeg');
         setCapturedImage(dataUrl);
-        cleanupCamera();
+        cleanupCamera(); // Turn off camera after capture
       }
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'Capture Failed',
+            description: 'Could not capture image. The camera may not be ready.',
+        })
     }
   };
 
@@ -85,27 +98,32 @@ export function CameraCaptureDialog({ open, onOpenChange, onCapture, isUploading
       canvasRef.current.toBlob((blob) => {
         if (blob) {
           onCapture(blob);
+        } else {
+             toast({
+                variant: 'destructive',
+                title: 'Upload Failed',
+                description: 'Could not process the captured image.',
+            })
         }
-      }, 'image/jpeg');
+      }, 'image/jpeg', 0.9); // Use high quality JPEG
     }
   };
 
   const handleRetake = () => {
+    // Reset state and re-request camera
     setCapturedImage(null);
-    setHasCameraPermission(null); // Force re-request
+    setHasCameraPermission(null);
   };
   
-  const handleClose = () => {
-      onOpenChange(false);
-      // Give animations time to finish before resetting state
-      setTimeout(() => {
-          setCapturedImage(null);
-          setHasCameraPermission(null);
-      }, 300);
+  const handleDialogClose = (isOpen: boolean) => {
+      if (!isOpen) {
+          resetState();
+      }
+      onOpenChange(isOpen);
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Take a Profile Photo</DialogTitle>
@@ -117,17 +135,19 @@ export function CameraCaptureDialog({ open, onOpenChange, onCapture, isUploading
           {capturedImage ? (
             <img src={capturedImage} alt="Captured" className="h-full w-full object-cover" />
           ) : (
-            <video ref={videoRef} className="h-full w-full object-cover" autoPlay muted playsInline />
-          )}
-          {hasCameraPermission === false && (
-             <div className="absolute inset-0 flex items-center justify-center p-4">
-                <Alert variant="destructive">
-                  <AlertTitle>Camera Access Required</AlertTitle>
-                  <AlertDescription>
-                    Please allow camera access to use this feature.
-                  </AlertDescription>
-                </Alert>
-             </div>
+            <>
+                <video ref={videoRef} className="h-full w-full object-cover" autoPlay muted playsInline />
+                {hasCameraPermission === false && (
+                    <div className="absolute inset-0 flex items-center justify-center p-4">
+                        <Alert variant="destructive">
+                        <AlertTitle>Camera Access Required</AlertTitle>
+                        <AlertDescription>
+                            Please allow camera access to use this feature.
+                        </AlertDescription>
+                        </Alert>
+                    </div>
+                )}
+            </>
           )}
         </div>
         <canvas ref={canvasRef} style={{ display: 'none' }} />
