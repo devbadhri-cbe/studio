@@ -31,6 +31,8 @@ import {
 import { UploadRecordDialog } from '@/components/upload-record-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import type { LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
+import { UploadConfirmationForm } from '@/components/upload-confirmation-form';
 
 
 export default function PatientDashboard() {
@@ -38,6 +40,7 @@ export default function PatientDashboard() {
   const router = useRouter();
   const isMobile = useIsMobile();
   const [shouldAnimate, setShouldAnimate] = React.useState(false);
+  const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   
   React.useEffect(() => {
     if (isMobile && dashboardView === 'none') {
@@ -64,6 +67,15 @@ export default function PatientDashboard() {
       </div>
     );
   }
+  
+  const handleExtractionComplete = (data: LabResultUploadOutput) => {
+    setExtractedData(data);
+  };
+
+  const handleConfirmationCancel = () => {
+    setExtractedData(null);
+  };
+
 
   const renderDashboard = () => {
     switch (dashboardView) {
@@ -133,7 +145,7 @@ export default function PatientDashboard() {
             <Separator />
 
              <div className="flex w-full flex-wrap justify-center gap-2">
-              <UploadRecordDialog>
+              <UploadRecordDialog onExtractionComplete={handleExtractionComplete}>
                 <Button variant="outline">
                     <UploadCloud className="mr-2 h-4 w-4" />
                     Upload Result
@@ -161,6 +173,14 @@ export default function PatientDashboard() {
               </DropdownMenu>
             </div>
             
+             {extractedData && (
+              <UploadConfirmationForm 
+                extractedData={extractedData}
+                onCancel={handleConfirmationCancel}
+                onSuccess={() => setExtractedData(null)}
+              />
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
                 <div className="lg:col-span-1 flex flex-col gap-6">
                     <ReminderCard />
