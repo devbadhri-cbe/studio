@@ -2,10 +2,9 @@
 'use client';
 
 import * as React from 'react';
-import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Mail, Search, UserPlus, X } from 'lucide-react';
+import { Search, UserPlus, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Patient } from '@/lib/types';
 import {
@@ -24,11 +23,13 @@ import { PatientCard } from '@/components/patient-card';
 import { addPatient, deletePatient, getPatients } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
+import { TitleBar } from '@/components/title-bar';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
     const doctorName = 'Dr. Badhrinathan N';
+    const doctorEmail = 'drbadhri@gmail.com';
     const [patients, setPatients] = React.useState<Patient[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
@@ -140,22 +141,7 @@ export default function DoctorDashboardPage() {
   return (
     <>
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <header className="border-b px-4 py-6 md:px-6">
-            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2">
-              <div className="flex items-center gap-2">
-                  <Logo className="h-8 w-8 text-primary" />
-                  <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
-              </div>
-              <div className="text-center text-sm text-muted-foreground">
-                  <p className="text-xs">by</p>
-                  <p className="font-semibold text-lg text-foreground">{doctorName}</p>
-                  <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-center gap-1.5 hover:text-primary">
-                      <Mail className="h-3 w-3" />
-                      drbadhri@gmail.com
-                  </a>
-              </div>
-            </div>
-        </header>
+       <TitleBar doctorName={doctorName} doctorEmail={doctorEmail} />
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
             <div className="flex items-center justify-between border-b pb-4 mb-6">

@@ -31,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import { updatePatient } from '@/lib/firestore';
+import { TitleBar } from '@/components/title-bar';
 
 // A simple SVG for WhatsApp icon
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -48,6 +49,7 @@ export default function PatientDashboard() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const doctorPhoneNumber = '+919791377716';
+  const doctorEmail = 'drbadhri@gmail.com';
 
 
   if (!isClient) {
@@ -129,10 +131,8 @@ export default function PatientDashboard() {
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
-         <header className="border-b px-4 md:px-6">
-            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 py-6 relative">
-
-             {isDoctorLoggedIn && (
+         <TitleBar doctorName={doctorName} doctorEmail={doctorEmail}>
+            {isDoctorLoggedIn && (
                  <>
                     <div className="absolute top-1/2 -translate-y-1/2 left-0">
                         <Tooltip>
@@ -152,24 +152,7 @@ export default function PatientDashboard() {
                     </div>
                 </>
             )}
-
-              <div className="flex items-center gap-2">
-                  <Logo className="h-8 w-8 text-primary" />
-                  <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
-              </div>
-
-             {isDoctorLoggedIn && (
-                <div className="w-full text-center text-sm text-muted-foreground gap-2">
-                    <p className="text-xs">by</p>
-                    <p className="font-semibold text-foreground">{doctorName}</p>
-                    <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-center gap-1.5 hover:text-primary">
-                        <Mail className="h-3 w-3" />
-                        drbadhri@gmail.com
-                    </a>
-                </div>
-            )}
-            </div>
-      </header>
+         </TitleBar>
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
             <div className="flex flex-col items-center border-b pb-4 gap-4">
