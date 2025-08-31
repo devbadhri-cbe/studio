@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Mail, Search, UserPlus } from 'lucide-react';
+import { Mail, Search, UserPlus, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Patient } from '@/lib/types';
 import {
@@ -21,9 +21,9 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
-import { deletePatient, getPatients } from '@/lib/firestore';
+import { addPatient, deletePatient, getPatients } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AddPatientDialog } from '@/components/add-patient-dialog';
+import { PatientForm, type PatientFormData } from '@/components/patient-form';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
@@ -33,6 +33,9 @@ export default function DoctorDashboardPage() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
     const [searchQuery, setSearchQuery] = React.useState('');
+    const [isAddingPatient, setIsAddingPatient] = React.useState(false);
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
+
 
     const fetchPatients = React.useCallback(async () => {
         setIsLoading(true);
@@ -58,13 +61,15 @@ export default function DoctorDashboardPage() {
     // Re-fetch data when the page is focused
     React.useEffect(() => {
         const handleFocus = () => {
-            fetchPatients();
+            if (!isAddingPatient) {
+                fetchPatients();
+            }
         };
         window.addEventListener('focus', handleFocus);
         return () => {
             window.removeEventListener('focus', handleFocus);
         };
-    }, [fetchPatients]);
+    }, [fetchPatients, isAddingPatient]);
 
 
     const viewPatientDashboard = (patient: Patient) => {
@@ -89,6 +94,39 @@ export default function DoctorDashboardPage() {
              });
         }
     }
+
+    const handleAddPatientSubmit = async (data: PatientFormData) => {
+        setIsSubmitting(true);
+        const patientData = {
+            name: data.name,
+            dob: data.dob.toISOString(),
+            gender: data.gender,
+            email: data.email || '',
+            country: data.country,
+            phone: data.phone || '',
+            height: data.height ? Number(data.height) : undefined,
+            weight: data.weight ? Number(data.weight) : undefined,
+        }
+
+        try {
+            const newPatient = await addPatient(patientData);
+            toast({
+                title: 'Patient Added',
+                description: `${newPatient.name} has been successfully added.`,
+            });
+            await fetchPatients(); // Refetch all patients
+            setIsAddingPatient(false);
+        } catch (error) {
+            console.error("Failed to add patient", error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not add the patient. Please try again.',
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
     
     const filteredPatients = patients.filter(patient => {
         const query = searchQuery.toLowerCase();
@@ -122,56 +160,75 @@ export default function DoctorDashboardPage() {
             <div className="flex items-center justify-between border-b pb-4 mb-6">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                        Patient Overview
+                        {isAddingPatient ? 'Add New Patient' : 'Patient Overview'}
                     </h1>
-                    <p className="text-muted-foreground">Manage and review your patients' health data.</p>
+                    <p className="text-muted-foreground">
+                        {isAddingPatient ? "Enter the patient's details below." : "Manage and review your patients' health data."}
+                    </p>
                 </div>
-                 <AddPatientDialog onPatientAdded={fetchPatients}>
-                    <Button>
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Add Patient
-                    </Button>
-                </AddPatientDialog>
+                 <Button onClick={() => setIsAddingPatient(p => !p)}>
+                    {isAddingPatient ? <X className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
+                    {isAddingPatient ? 'Cancel' : 'Add Patient'}
+                </Button>
             </div>
 
-            <Card>
-                <CardHeader className="flex flex-col md:flex-row md:items-center gap-4">
-                    <div className="grid gap-2 flex-1">
-                        <CardTitle>Patient List</CardTitle>
-                        <CardDescription>A list of all patients currently under your care.</CardDescription>
-                    </div>
-                    <div className="flex flex-col sm:flex-row items-center gap-2">
-                         <div className="relative w-full sm:w-auto">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                type="search"
-                                placeholder="Search by name, email, or phone..."
-                                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
+            {isAddingPatient ? (
+                <Card>
+                    <CardContent className="p-6">
+                         <PatientForm 
+                            onSubmit={handleAddPatientSubmit} 
+                            isSubmitting={isSubmitting}
+                            onCancel={() => setIsAddingPatient(false)}
+                        />
+                    </CardContent>
+                </Card>
+            ) : (
+                <Card>
+                    <CardHeader className="flex flex-col md:flex-row md:items-center gap-4">
+                        <div className="grid gap-2 flex-1">
+                            <CardTitle>Patient List</CardTitle>
+                            <CardDescription>A list of all patients currently under your care.</CardDescription>
                         </div>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    {isLoading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-[300px] w-full" />)}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {filteredPatients.map((patient) => (
-                                <PatientCard
-                                    key={patient.id}
-                                    patient={patient}
-                                    onView={viewPatientDashboard}
-                                    onDelete={setPatientToDelete}
+                        <div className="flex flex-col sm:flex-row items-center gap-2">
+                             <div className="relative w-full sm:w-auto">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    type="search"
+                                    placeholder="Search by name, email, or phone..."
+                                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
                                 />
-                            ))}
+                            </div>
                         </div>
-                    )}
-                </CardContent>
-            </Card>
+                    </CardHeader>
+                    <CardContent>
+                        {isLoading ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-[300px] w-full" />)}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {filteredPatients.map((patient) => (
+                                    <PatientCard
+                                        key={patient.id}
+                                        patient={patient}
+                                        onView={viewPatientDashboard}
+                                        onDelete={setPatientToDelete}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                         {(!isLoading && filteredPatients.length === 0) && (
+                            <div className="text-center text-muted-foreground py-12">
+                                <p>No patients found.</p>
+                                {searchQuery && <p className="text-sm">Try adjusting your search query.</p>}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
+
         </div>
       </main>
     </div>
