@@ -3,8 +3,7 @@
 
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format, parseISO, startOfDay } from 'date-fns';
-import { PlusCircle } from 'lucide-react';
+import { startOfDay, parseISO } from 'date-fns';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -23,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { DatePicker } from './ui/date-picker';
+import { AddRecordButton } from './add-record-button';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -98,10 +98,7 @@ export function AddRecordDialog() {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" className="h-9 gap-1" onClick={handleTriggerClick}>
-            <PlusCircle className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Record</span>
-          </Button>
+          <AddRecordButton tooltipContent="Add HbA1c Record" onClick={handleTriggerClick} />
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
