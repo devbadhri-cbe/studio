@@ -92,6 +92,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             mode="single"
             selected={value}
             onSelect={onChange}
+            defaultMonth={value}
             initialFocus
             disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
             captionLayout={captionLayout}
