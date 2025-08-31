@@ -96,11 +96,11 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             <TooltipTrigger asChild>
                 <Button onClick={onCancel} variant="ghost" size="icon">
                     <X className="h-5 w-5" />
-                    <span className="sr-only">Cancel</span>
+                    <span className="sr-only">Close</span>
                 </Button>
             </TooltipTrigger>
             <TooltipContent>
-                <p>Cancel</p>
+                <p>Close</p>
             </TooltipContent>
         </Tooltip>
     </div>
