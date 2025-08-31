@@ -34,7 +34,6 @@ export interface UserProfile {
   country: string;
   phone?: string;
   height?: number; // in cm
-  photoUrl?: string;
   dateFormat: string; // e.g., 'dd-MM-yyyy'
   unitSystem: UnitSystem;
   presentMedicalConditions: MedicalCondition[];
@@ -93,7 +92,6 @@ export interface Patient {
   country: string;
   phone: string;
   height?: number; // in cm
-  photoUrl?: string;
   dateFormat: string;
   unitSystem: UnitSystem;
   lastLogin?: string; // ISO string

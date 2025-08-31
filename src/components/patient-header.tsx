@@ -3,22 +3,15 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
+import { Button } from '@/components/ui/button';
+import { MessageSquareText } from 'lucide-react';
+import { Card, CardContent } from './ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
-import { updatePatient } from '@/lib/firestore';
-import { MessageSquareText, Loader2, User, Camera, Upload } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
-import { CameraCaptureDialog } from './camera-capture-dialog';
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -27,82 +20,16 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export function PatientHeader() {
-  const { profile, setProfile, isDoctorLoggedIn } = useApp();
-  const { toast } = useToast();
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const [isUploading, setIsUploading] = React.useState(false);
-  const [showCameraDialog, setShowCameraDialog] = React.useState(false);
+  const { profile, isDoctorLoggedIn } = useApp();
   const doctorPhoneNumber = '+919791377716';
 
   const pageTitle = isDoctorLoggedIn
     ? `${profile.name}'s Dashboard`
     : `Welcome, ${profile.name || 'User'}!`;
     
-  const uploadPhoto = async (file: File | Blob) => {
-    if (!profile.id) return;
-    setIsUploading(true);
-
-    try {
-        const fileRef = ref(storage, `profile_photos/${profile.id}/${Date.now()}_photo.jpg`);
-        const snapshot = await uploadBytes(fileRef, file);
-        const downloadUrl = await getDownloadURL(snapshot.ref);
-        
-        const updatedPatient = await updatePatient(profile.id, { photoUrl: downloadUrl });
-        setProfile(updatedPatient);
-        
-        toast({
-            title: 'Photo Uploaded',
-            description: 'Your profile picture has been updated.',
-        });
-    } catch (error) {
-        console.error("Photo upload failed:", error);
-        toast({
-            variant: 'destructive',
-            title: 'Upload Failed',
-            description: 'Could not upload photo. Please try again.',
-        });
-    } finally {
-        setIsUploading(false);
-        setShowCameraDialog(false);
-        if(fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
-    }
-  }
-
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      await uploadPhoto(file);
-    }
-  };
-  
-  const handleGalleryUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
   return (
-    <>
     <Card>
       <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
-        <Avatar className="h-20 w-20 md:h-24 md:w-24">
-            <AvatarImage src={profile.photoUrl} />
-            <AvatarFallback>
-                {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : 
-                    <User className="h-10 w-10 text-muted-foreground" />
-                }
-            </AvatarFallback>
-        </Avatar>
-        <Input 
-            ref={fileInputRef}
-            type="file" 
-            className="hidden" 
-            onChange={handleFileSelect} 
-            accept="image/*" 
-            disabled={isUploading}
-        />
-
         <div className="flex flex-col items-center md:items-start flex-1 gap-4 w-full">
             <div className="text-center md:text-left">
                 <h1 className="text-2xl md:text-3xl font-semibold font-headline">
@@ -111,25 +38,6 @@ export function PatientHeader() {
                 <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
             </div>
             <div className="flex w-full flex-wrap justify-center md:justify-start gap-2">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button size="sm" variant="outline" disabled={isUploading}>
-                             <Camera className="mr-2 h-4 w-4" />
-                            {isUploading ? 'Uploading...' : 'Change Photo'}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuItem onSelect={() => setShowCameraDialog(true)}>
-                           <Camera className="mr-2 h-4 w-4" />
-                           Use Camera
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={handleGalleryUploadClick}>
-                           <Upload className="mr-2 h-4 w-4" />
-                           Upload from Gallery
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
                 {!isDoctorLoggedIn && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -154,13 +62,5 @@ export function PatientHeader() {
         </div>
       </CardContent>
     </Card>
-    <CameraCaptureDialog
-        open={showCameraDialog}
-        onOpenChange={setShowCameraDialog}
-        onCapture={uploadPhoto}
-        isUploading={isUploading}
-    />
-    </>
   );
 }
-

@@ -14,7 +14,7 @@ import { Separator } from './ui/separator';
 import { countries } from '@/lib/countries';
 import * as React from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Avatar, AvatarFallback } from './ui/avatar';
 import { SharePatientAccessDialog } from './share-patient-access-dialog';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
@@ -109,7 +109,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         <div className="flex items-start justify-between">
           <div className="flex-1 flex items-center gap-3 min-w-0">
              <Avatar>
-                <AvatarImage src={patient.photoUrl} />
                 <AvatarFallback>
                     <User className="h-5 w-5" />
                 </AvatarFallback>

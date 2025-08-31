@@ -188,7 +188,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       country: patient.country,
       phone: patient.phone,
       height: patient.height,
-      photoUrl: patient.photoUrl,
       dateFormat: patient.dateFormat || 'MM-dd-yyyy',
       unitSystem: patient.unitSystem || countries.find(c => c.code === patient.country)?.unitSystem || 'metric',
       medication: Array.isArray(patient.medication) ? patient.medication : [],

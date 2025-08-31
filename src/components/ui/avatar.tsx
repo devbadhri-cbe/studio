@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -47,4 +48,4 @@ const AvatarFallback = React.forwardRef<
 ))
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
 
-export { Avatar, AvatarImage, AvatarFallback }
+export { Avatar, AvatarFallback }
