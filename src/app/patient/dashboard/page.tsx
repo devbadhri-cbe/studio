@@ -242,8 +242,8 @@ export default function PatientDashboard() {
                     <InsightsCard />
                 </div>
                 <div className="lg:col-span-2 flex flex-col gap-6">
-                    <ReminderCard />
                     {dashboardView !== 'none' && dashboardView !== 'report' && renderDashboard()}
+                    <ReminderCard />
                 </div>
             </div>
             
