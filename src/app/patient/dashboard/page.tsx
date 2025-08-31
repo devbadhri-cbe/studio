@@ -129,12 +129,12 @@ export default function PatientDashboard() {
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
-         <header className="relative border-b px-4 md:px-6">
-            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 py-6">
+         <header className="border-b px-4 md:px-6">
+            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 py-6 relative">
 
              {isDoctorLoggedIn && (
                  <>
-                    <div className="absolute top-4 left-4">
+                    <div className="absolute top-1/2 -translate-y-1/2 left-0">
                         <Tooltip>
                             <TooltipTrigger asChild>
                             <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="ghost">
@@ -147,7 +147,7 @@ export default function PatientDashboard() {
                             </TooltipContent>
                         </Tooltip>
                     </div>
-                     <div className="absolute top-4 right-4">
+                     <div className="absolute top-1/2 -translate-y-1/2 right-0">
                         <ThemeToggle />
                     </div>
                 </>
@@ -284,5 +284,3 @@ export default function PatientDashboard() {
     </TooltipProvider>
   );
 }
-
-  
