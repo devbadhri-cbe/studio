@@ -11,10 +11,11 @@ import { LipidRecord } from './types';
 import { VitaminDRecord } from './types';
 import { ThyroidRecord } from './types';
 import { WeightRecord } from './types';
-import { BloodPressureRecord } from './types';
 import { MedicalCondition } from './types';
 import { Medication } from './types';
 import { countries } from './countries';
+
+const PATIENTS_COLLECTION = 'patients';
 
 const recalculatePatientStatus = (patient: Patient): Patient => {
     const updatedPatient = { ...patient };
