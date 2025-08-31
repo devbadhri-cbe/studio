@@ -106,56 +106,15 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
   );
 }
 
-const WeightSchema = z.object({
-    value: z.coerce.number().min(2, 'Weight must be at least 2kg.'),
-    date: z.date({ required_error: 'A valid date is required.' }),
-});
-
-function WeightForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof WeightSchema>) => void, onCancel: () => void }) {
-    const inputRef = React.useRef<HTMLInputElement>(null);
-    const { profile } = useApp();
-    const isImperial = profile.unitSystem === 'imperial';
-
-    const form = useForm<z.infer<typeof WeightSchema>>({
-        resolver: zodResolver(WeightSchema),
-        defaultValues: { value: '' as any, date: new Date() },
-    });
-    
-    React.useEffect(() => {
-        setTimeout(() => {
-            inputRef.current?.focus();
-        }, 100)
-    }, []);
-
-    const handleSave = (data: z.infer<typeof WeightSchema>) => {
-        const dbValue = isImperial ? lbsToKg(data.value) : data.value;
-        onSave({ ...data, value: parseFloat(dbValue.toFixed(2)) });
-    }
-
-    return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSave)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-2">
-                <FormField control={form.control} name="date" render={({ field }) => (<FormItem><FormControl><DatePicker placeholder="Date of Weight" value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="value" render={({ field }) => (<FormItem><FormControl><Input ref={inputRef} type="number" step="0.01" placeholder={`Weight (${isImperial ? 'lbs' : 'kg'})`} {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <div className="flex justify-end gap-2">
-                    <Button type="button" size="sm" variant="ghost" className="flex-1" onClick={onCancel}>Cancel</Button>
-                    <Button type="submit" size="sm" className="flex-1">Save</Button>
-                </div>
-            </form>
-        </Form>
-    );
-}
-
 type ActiveSynopsis = {
     type: 'medication' | 'condition';
     id: string;
 } | null;
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, weightRecords, addWeightRecord, removeWeightRecord, setMedicationNil } = useApp();
+  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, setMedicationNil } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
-  const [isAddingWeight, setIsAddingWeight] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -173,10 +132,6 @@ export function MedicalHistoryCard() {
     },
   });
 
-  const isImperial = profile.unitSystem === 'imperial';
-  
-  const sortedWeights = React.useMemo(() => [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [weightRecords]);
-  
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
   const handleSaveMedication = async (data: z.infer<typeof MedicationSchema>) => {
@@ -220,11 +175,6 @@ export function MedicalHistoryCard() {
       setMedicationNil();
   }
 
-  const handleSaveWeight = (data: z.infer<typeof WeightSchema>) => {
-      addWeightRecord({ ...data, value: data.value });
-      setIsAddingWeight(false);
-  }
-
   const handleSaveCondition = async (data: { condition: string, date: Date }, icdCode?: string) => {
     addMedicalCondition({ ...data, date: data.date.toISOString(), icdCode });
     setIsAddingCondition(false);
@@ -249,60 +199,6 @@ export function MedicalHistoryCard() {
   return (
     <Card>
         <CardContent className="space-y-4 text-sm p-4">
-             <div>
-                <div className="flex items-center justify-between mb-2">
-                    <div className='flex items-center gap-3 flex-1'>
-                        <TrendingUp className="h-5 w-5 shrink-0 text-muted-foreground" />
-                        <h3 className="font-medium">Weight Records</h3>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                        {!isAddingWeight && (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setIsAddingWeight(true)}>
-                                        <PlusCircle className="h-4 w-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Add Weight Record</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        )}
-                    </div>
-                </div>
-                {isAddingWeight && <WeightForm onSave={handleSaveWeight} onCancel={() => setIsAddingWeight(false)} />}
-                {sortedWeights.length > 0 ? (
-                    <ul className="space-y-1 mt-2">
-                        {sortedWeights.slice(0, 3).map((weight) => {
-                            const displayRecordWeight = isImperial
-                                ? `${kgToLbs(weight.value).toFixed(2)} lbs`
-                                : `${weight.value.toFixed(2)} kg`;
-
-                            return (
-                                <li key={weight.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                                <div className="flex-1">
-                                        <span className="font-semibold text-foreground">{displayRecordWeight}</span>
-                                        <span className="block text-xs">on {formatDate(weight.date)}</span>
-                                </div>
-                                <div className="flex items-center shrink-0">
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeWeightRecord(weight.id)}>
-                                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                        </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>Delete record</TooltipContent>
-                                    </Tooltip>
-                                </div>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                ) : (
-                    !isAddingWeight && <p className="text-xs text-muted-foreground pl-8">No weight recorded.</p>
-                )}
-            </div>
-            
             <div>
                 <div className="flex items-center justify-between mb-2">
                     <div className='flex items-center gap-3 flex-1'>

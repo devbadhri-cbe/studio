@@ -32,6 +32,7 @@ import { storage } from '@/lib/firebase';
 import { updatePatient } from '@/lib/firestore';
 import { TitleBar } from '@/components/title-bar';
 import { MedicalHistoryCard } from '@/components/medical-history-card';
+import { WeightRecordCard } from '@/components/weight-record-card';
 
 // A simple SVG for WhatsApp icon
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -240,6 +241,7 @@ export default function PatientDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
                 <div className="lg:col-span-1 flex flex-col gap-6">
                     <ProfileCard />
+                    <WeightRecordCard />
                     <MedicalHistoryCard />
                 </div>
                 <div className="lg:col-span-2 flex flex-col gap-6">
