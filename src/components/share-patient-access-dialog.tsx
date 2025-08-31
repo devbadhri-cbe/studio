@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
-import { Clipboard, Mail, MessageSquare, ExternalLink, Share2, Copy, Download, Image as ImageIcon } from 'lucide-react';
+import { Clipboard, Mail, MessageSquare, ExternalLink, Share2, Copy, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -85,18 +85,6 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
         };
         img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
       });
-  }
-
-  const handleDownloadQrCode = async () => {
-    const blob = await getQrCodeAsBlob();
-    if (blob) {
-        const url = URL.createObjectURL(blob);
-        const downloadLink = document.createElement('a');
-        downloadLink.download = `qr-code-${patient.name.replace(/\s+/g, '-')}.png`;
-        downloadLink.href = url;
-        downloadLink.click();
-        URL.revokeObjectURL(url);
-    }
   }
   
   const handleCopyQrCode = async () => {
@@ -210,10 +198,6 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
                 ))}
             </DropdownMenuContent>
            </DropdownMenu>
-            <Button variant="outline" onClick={handleDownloadQrCode} className="w-full">
-                <Download className="mr-2 h-4 w-4" />
-                Download QR
-            </Button>
           </div>
 
             <Separator />
@@ -245,5 +229,7 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
     </Dialog>
   );
 }
+
+    
 
     
