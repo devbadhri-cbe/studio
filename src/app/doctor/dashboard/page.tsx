@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Search, UserPlus, X } from 'lucide-react';
+import { Search, UserPlus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Patient } from '@/lib/types';
 import {
@@ -25,6 +25,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { TitleBar } from '@/components/title-bar';
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
@@ -142,38 +143,13 @@ export default function DoctorDashboardPage() {
   return (
     <TooltipProvider>
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <TitleBar doctorName={doctorName} doctorEmail={doctorEmail} />
+       <TitleBar doctorName={doctorName} doctorEmail={doctorEmail}>
+         <div className="absolute top-1/2 -translate-y-1/2 right-0">
+            <ThemeToggle />
+        </div>
+       </TitleBar>
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
-            <div className="flex items-center justify-between border-b pb-4 mb-6">
-                <div className={`flex-1 ${isAddingPatient ? 'text-center' : ''}`}>
-                    <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                        {isAddingPatient ? 'Add New Patient' : 'Patient Overview'}
-                    </h1>
-                    <p className="text-muted-foreground">
-                        {isAddingPatient ? "Enter the patient's details below." : "Manage and review your patients' health data."}
-                    </p>
-                </div>
-                 {isAddingPatient ? (
-                     <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button onClick={() => setIsAddingPatient(false)} variant="ghost" size="icon">
-                                <X className="h-5 w-5" />
-                                <span className="sr-only">Cancel</span>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Cancel</p>
-                        </TooltipContent>
-                     </Tooltip>
-                 ) : (
-                    <Button onClick={() => setIsAddingPatient(true)}>
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Add Patient
-                    </Button>
-                 )}
-            </div>
-
             {isAddingPatient ? (
                 <Card className="max-w-[800px] mx-auto">
                     <CardContent className="p-6">
@@ -185,6 +161,21 @@ export default function DoctorDashboardPage() {
                     </CardContent>
                 </Card>
             ) : (
+                <>
+                <div className="flex items-center justify-between border-b pb-4 mb-6">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-semibold font-headline">
+                            Patient Overview
+                        </h1>
+                        <p className="text-muted-foreground">
+                            Manage and review your patients' health data.
+                        </p>
+                    </div>
+                    <Button onClick={() => setIsAddingPatient(true)}>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Add Patient
+                    </Button>
+                </div>
                 <Card>
                     <CardHeader className="flex flex-col md:flex-row md:items-center gap-4">
                         <div className="grid gap-2 flex-1">
@@ -229,6 +220,7 @@ export default function DoctorDashboardPage() {
                         )}
                     </CardContent>
                 </Card>
+                </>
             )}
 
         </div>

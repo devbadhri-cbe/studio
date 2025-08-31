@@ -11,11 +11,12 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { countries } from '@/lib/countries';
-import { Loader2 } from 'lucide-react';
+import { Loader2, UserPlus, X } from 'lucide-react';
 import { Separator } from './ui/separator';
 import type { Patient } from '@/lib/types';
 import { DatePicker } from './ui/date-picker';
 import { parseISO } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 const FormSchema = z.object({
   name: z.string().min(2, "Name is required."),
@@ -81,6 +82,28 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
   }, [watchCountry, form]);
   
   return (
+    <>
+    <div className="flex items-start justify-between border-b pb-4 mb-6">
+        <div className="space-y-1">
+            <h1 className="text-2xl md:text-3xl font-semibold font-headline">
+                Add New Patient
+            </h1>
+            <p className="text-muted-foreground">
+                Enter the patient's details below.
+            </p>
+        </div>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <Button onClick={onCancel} variant="ghost" size="icon">
+                    <X className="h-5 w-5" />
+                    <span className="sr-only">Cancel</span>
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>Cancel</p>
+            </TooltipContent>
+        </Tooltip>
+    </div>
     <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
@@ -130,5 +153,6 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             </div>
         </form>
     </Form>
+    </>
   );
 }
