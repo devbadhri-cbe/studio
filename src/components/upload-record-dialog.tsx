@@ -27,6 +27,8 @@ export function UploadRecordDialog({ children, onExtractionComplete }: UploadRec
   const [photoDataUri, setPhotoDataUri] = React.useState<string | null>(null);
   const { profile } = useApp();
   const { toast } = useToast();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
 
   React.useEffect(() => {
     // Reset state when dialog is closed
@@ -112,12 +114,17 @@ export function UploadRecordDialog({ children, onExtractionComplete }: UploadRec
         </AlertDescription>
       </Alert>
       <div className="mt-4 flex items-center justify-center">
-        <Button asChild variant="default" size="sm">
-          <label htmlFor="file-upload">
+        <input
+            id="file-upload"
+            ref={fileInputRef}
+            type="file"
+            className="sr-only"
+            accept="image/*,application/pdf"
+            onChange={handleFileChange}
+        />
+        <Button variant="default" size="sm" onClick={() => fileInputRef.current?.click()}>
             <UploadCloud className="mr-2 h-4 w-4" />
             Choose File
-            <input id="file-upload" type="file" className="sr-only" accept="image/*,application/pdf" onChange={handleFileChange} />
-          </label>
         </Button>
       </div>
     </div>
