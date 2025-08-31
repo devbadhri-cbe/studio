@@ -22,6 +22,7 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
 import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
+import type { MedicalCondition } from '@/lib/types';
 
 const MedicationSchema = z.object({
   medicationName: z.string().min(2, 'Medication name is required.'),
@@ -34,7 +35,7 @@ const ConditionSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
 });
 
-function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition: string, date: Date}, icdCode?: string) => Promise<void>, onCancel: () => void }) {
+function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave: (data: {condition: string, date: Date}, icdCode?: string) => Promise<void>, onCancel: () => void, existingConditions: MedicalCondition[] }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -54,11 +55,23 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
     setIsSubmitting(true);
     try {
       const { icdCode, description } = await suggestIcdCode({ condition: data.condition });
-      await onSave(data, `${icdCode}: ${description}`);
-       toast({
-        title: 'Condition Added',
-        description: `Suggested ICD-11 code: ${icdCode}`,
-      });
+      const fullIcdCode = `${icdCode}: ${description}`;
+
+      const isDuplicate = existingConditions.some(c => c.icdCode?.startsWith(icdCode));
+
+      if (isDuplicate) {
+        toast({
+            variant: 'destructive',
+            title: 'Duplicate Condition',
+            description: `This condition (or a similar one with ICD-11 code ${icdCode}) already exists.`,
+        });
+      } else {
+         await onSave(data, fullIcdCode);
+         toast({
+          title: 'Condition Added',
+          description: `Suggested ICD-11 code: ${icdCode}`,
+        });
+      }
     } catch (error) {
        console.error('Failed to get ICD code suggestion', error);
       toast({
@@ -220,7 +233,7 @@ export function MedicalHistoryCard() {
                         )}
                     </div>
                 </div>
-                {isAddingCondition && <MedicalConditionForm onSave={handleSaveCondition} onCancel={() => setIsAddingCondition(false)} />}
+                {isAddingCondition && <MedicalConditionForm onSave={handleSaveCondition} onCancel={() => setIsAddingCondition(false)} existingConditions={profile.presentMedicalConditions} />}
                 {profile.presentMedicalConditions.length > 0 ? (
                     <ul className="space-y-1 mt-2">
                         {profile.presentMedicalConditions.map((condition) => (
