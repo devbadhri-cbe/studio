@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -90,30 +91,34 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                     control={form.control}
                     name="dob"
                     render={({ field }) => (
-                        <FormItem className="flex flex-col">
+                        <FormItem>
                             <FormLabel>Date of Birth</FormLabel>
-                            <DatePicker
-                                value={field.value}
-                                onChange={field.onChange}
-                                fromYear={new Date().getFullYear() - 120}
-                                toYear={new Date().getFullYear()}
-                            />
+                            <FormControl>
+                                <DatePicker
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    fromYear={new Date().getFullYear() - 120}
+                                    toYear={new Date().getFullYear()}
+                                />
+                            </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
                  <FormItem>
                     <FormLabel>Age</FormLabel>
-                    <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
+                    <FormControl>
+                        <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
+                    </FormControl>
                 </FormItem>
                  <FormField
                     control={form.control}
                     name="gender"
                     render={({ field }) => (
-                        <FormItem className="flex flex-col justify-end">
-                             <FormLabel className="mb-2.5">Gender</FormLabel>
+                        <FormItem>
+                             <FormLabel>Gender</FormLabel>
                             <FormControl>
-                                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 h-10">
+                                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 h-10 pt-2">
                                     <FormItem className="flex items-center space-x-2 space-y-0">
                                         <FormControl>
                                             <RadioGroupItem value="male" />
@@ -166,7 +171,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
 
              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
+                <Button type="button" variant="ghost" onClick={onCancel}>Close</Button>
                 <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save Patient
