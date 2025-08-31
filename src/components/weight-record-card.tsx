@@ -13,6 +13,7 @@ import { kgToLbs, cmToFtIn, getBmiStatus } from '@/lib/utils';
 import { WeightChart } from './weight-chart';
 import { Separator } from './ui/separator';
 import { Badge } from './ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 export function WeightRecordCard() {
   const { weightRecords, removeWeightRecord, profile } = useApp();
@@ -103,13 +104,13 @@ export function WeightRecordCard() {
                     <div className="flex items-center gap-2">
                         <span>Current BMI: <span className="font-bold text-foreground">{profile.bmi.toFixed(1)}</span></span>
                          {bmiStatus && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                  <Badge variant={bmiStatus.variant} className={`cursor-help ${bmiStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                  <Badge variant={bmiStatus.variant} className={`cursor-pointer ${bmiStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
                                       {bmiStatus.text}
                                   </Badge>
-                              </TooltipTrigger>
-                              <TooltipContent>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-64 text-sm">
                                 <div className="space-y-1 text-left">
                                   <h4 className="font-bold">BMI Categories</h4>
                                   <p>&lt; 18.5: Underweight</p>
@@ -119,8 +120,8 @@ export function WeightRecordCard() {
                                   <p>35 - 39.9: Obese Class II</p>
                                   <p>&ge; 40: Morbidly Obese</p>
                                 </div>
-                              </TooltipContent>
-                            </Tooltip>
+                              </PopoverContent>
+                            </Popover>
                         )}
                     </div>
                 )}
