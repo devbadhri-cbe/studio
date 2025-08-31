@@ -40,7 +40,9 @@ export function getBmiStatus(bmi: number | null | undefined): { text: string; va
   if (bmi < 18.5) return { text: 'Underweight', variant: 'secondary' };
   if (bmi >= 18.5 && bmi < 25) return { text: 'Normal', variant: 'outline' };
   if (bmi >= 25 && bmi < 30) return { text: 'Overweight', variant: 'secondary' };
-  if (bmi >= 30) return { text: 'Obese', variant: 'destructive' };
+  if (bmi >= 30 && bmi < 35) return { text: 'Obese Class I', variant: 'destructive' };
+  if (bmi >= 35 && bmi < 40) return { text: 'Obese Class II', variant: 'destructive' };
+  if (bmi >= 40) return { text: 'Morbidly Obese', variant: 'destructive' };
   
   return null;
 }
