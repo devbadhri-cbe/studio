@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import { updatePatient } from '@/lib/firestore';
-import { MessageSquareText, Loader2, User, Upload } from 'lucide-react';
+import { MessageSquareText, Loader2, User, Upload, Camera } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -31,7 +31,6 @@ export function PatientHeader() {
   const { toast } = useToast();
 
   const [isUploading, setIsUploading] = React.useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const doctorPhoneNumber = '+919791377716';
 
   const pageTitle = isDoctorLoggedIn
@@ -70,27 +69,14 @@ export function PatientHeader() {
   return (
     <Card>
       <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
-         <Tooltip>
-            <TooltipTrigger asChild>
-                <label htmlFor="photo-upload" className="relative rounded-full group shrink-0 cursor-pointer">
-                    <Avatar className="h-20 w-20 md:h-24 md:w-24">
-                        <AvatarImage src={profile.photoUrl} />
-                        <AvatarFallback>
-                            {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : 
-                                <>
-                                    <User className="h-10 w-10 text-muted-foreground group-hover:hidden" />
-                                    <Upload className="h-10 w-10 text-muted-foreground hidden group-hover:block" />
-                                </>
-                            }
-                        </AvatarFallback>
-                    </Avatar>
-                </label>
-            </TooltipTrigger>
-            <TooltipContent>
-                <p>Upload Photo</p>
-            </TooltipContent>
-        </Tooltip>
-        <Input id="photo-upload" ref={fileInputRef} type="file" className="hidden" onChange={handlePhotoUpload} accept="image/*" capture="user" disabled={isUploading}/>
+        <Avatar className="h-20 w-20 md:h-24 md:w-24">
+            <AvatarImage src={profile.photoUrl} />
+            <AvatarFallback>
+                {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : 
+                    <User className="h-10 w-10 text-muted-foreground" />
+                }
+            </AvatarFallback>
+        </Avatar>
 
         <div className="flex flex-col items-center md:items-start flex-1 gap-4 w-full">
             <div className="text-center md:text-left">
@@ -99,11 +85,26 @@ export function PatientHeader() {
                 </h1>
                 <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
             </div>
-            {!isDoctorLoggedIn && (
-                <div className="flex w-full flex-wrap justify-center md:justify-start gap-2">
+            <div className="flex w-full flex-wrap justify-center md:justify-start gap-2">
+                <Button asChild size="sm" variant="outline" className="relative cursor-pointer">
+                    <div>
+                        <Camera className="mr-2 h-4 w-4" />
+                        Upload Photo
+                        <Input 
+                            id="photo-upload" 
+                            type="file" 
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                            onChange={handlePhotoUpload} 
+                            accept="image/*" 
+                            capture="user" 
+                            disabled={isUploading}
+                        />
+                    </div>
+                </Button>
+                {!isDoctorLoggedIn && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline">
+                            <Button variant="outline" size="sm">
                                 <MessageSquareText className="mr-2 h-4 w-4" />
                                 Contact Doctor
                             </Button>
@@ -119,8 +120,8 @@ export function PatientHeader() {
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                </div>
-            )}
+                )}
+            </div>
         </div>
       </CardContent>
     </Card>
