@@ -76,12 +76,11 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
 };
 
 // Add a new patient
-export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi'> & { weight?: number }): Promise<Patient> => {
-    const { weight, ...restOfPatientData } = patientData;
+export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi' | 'height'>): Promise<Patient> => {
     const countryInfo = countries.find(c => c.code === patientData.country);
 
     let newPatientObject: Omit<Patient, 'id'> = {
-        ...restOfPatientData,
+        ...patientData,
         dateFormat: countryInfo?.dateFormat || 'MM-dd-yyyy',
         unitSystem: countryInfo?.unitSystem || 'metric',
         lastHba1c: null,
@@ -99,14 +98,6 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
         medication: [] as Medication[],
         presentMedicalConditions: [] as MedicalCondition[],
     };
-
-    if (weight) {
-        (newPatientObject.weightRecords as WeightRecord[]).push({
-            id: `weight-${Date.now()}`,
-            date: new Date().toISOString(),
-            value: parseFloat(weight.toFixed(2)),
-        });
-    }
     
     let patientToSave = recalculatePatientStatus(newPatientObject as Patient);
     

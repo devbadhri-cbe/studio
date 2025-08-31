@@ -25,8 +25,6 @@ const FormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')),
   country: z.string().min(1, { message: "Country is required." }),
   phone: z.string().min(5, { message: "Phone number is too short." }).optional().or(z.literal('')),
-  height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional().or(z.literal('')),
-  weight: z.coerce.number().min(2, 'Weight must be at least 2kg.').optional().or(z.literal('')),
 });
 
 export type PatientFormData = z.infer<typeof FormSchema>;
@@ -49,8 +47,6 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
       email: '',
       country: '',
       phone: '',
-      height: '',
-      weight: '',
     },
   });
   
@@ -65,8 +61,6 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             email: patient.email || '',
             country: patient.country || '',
             phone: patient.phone || '',
-            height: patient.height || '',
-            weight: patient.weightRecords?.[patient.weightRecords.length - 1]?.value.toFixed(2) || '',
         });
     }
   }, [patient, form]);
@@ -136,13 +130,6 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 />
             <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
             <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
-
-            <Separator />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
-              <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Initial Weight (kg)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 70.00" {...field} /></FormControl><FormMessage /></FormItem> )} />
-            </div>
 
              <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>

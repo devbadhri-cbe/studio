@@ -107,8 +107,6 @@ export default function DoctorDashboardPage() {
             email: data.email || '',
             country: data.country,
             phone: data.phone || '',
-            height: data.height ? Number(data.height) : undefined,
-            weight: data.weight ? Number(data.weight) : undefined,
         }
 
         try {
@@ -143,11 +141,7 @@ export default function DoctorDashboardPage() {
   return (
     <TooltipProvider>
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <TitleBar doctorName={doctorName} doctorEmail={doctorEmail}>
-         <div className="absolute top-1/2 -translate-y-1/2 right-0">
-            <ThemeToggle />
-        </div>
-       </TitleBar>
+       <TitleBar doctorName={doctorName} doctorEmail={doctorEmail} />
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
             {isAddingPatient ? (
