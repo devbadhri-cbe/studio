@@ -27,27 +27,43 @@ interface DatePickerProps extends Omit<React.ComponentPropsWithoutRef<'button'>,
 export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
   ({ value, onChange, className, placeholder, fromYear, toYear, ...props }, ref) => {
     const isMobile = useIsMobile();
+    const nativeInputRef = React.useRef<HTMLInputElement>(null);
   
-    // For mobile, render the native date picker
+    // For mobile, render a button that triggers the native date picker
     if (isMobile) {
         const dateString = value ? format(value, 'yyyy-MM-dd') : '';
 
         const handleNativeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const dateValue = e.target.value;
-            // The value from a native date input is a "yyyy-MM-dd" string.
-            // We create a new Date object from it. It will be in the user's local timezone.
             const newDate = dateValue ? new Date(dateValue + 'T00:00:00') : undefined;
             onChange(newDate);
         };
-
+        
         return (
-             <Input
-                type="date"
-                value={dateString}
-                onChange={handleNativeChange}
-                className={cn("w-full h-10", className)}
-                max={format(new Date(), 'yyyy-MM-dd')}
-            />
+          <div className="relative w-full">
+              <Button
+                  ref={ref}
+                  variant="outline"
+                  className={cn(
+                      "w-full justify-start text-left font-normal h-10",
+                      !value && "text-muted-foreground",
+                      className
+                  )}
+                  onClick={() => nativeInputRef.current?.showPicker()}
+                  {...props}
+              >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {value ? format(value, "PPP") : <span>{placeholder || 'Pick a date'}</span>}
+              </Button>
+              <Input
+                  ref={nativeInputRef}
+                  type="date"
+                  value={dateString}
+                  onChange={handleNativeChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  max={format(new Date(), 'yyyy-MM-dd')}
+              />
+          </div>
         )
     }
   
