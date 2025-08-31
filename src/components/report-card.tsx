@@ -7,14 +7,16 @@ import { LdlChart } from './ldl-chart';
 import { VitaminDChart } from './vitamin-d-chart';
 import { Separator } from './ui/separator';
 import { useApp } from '@/context/app-context';
-import { Droplet, Heart, Sun, Activity, Zap, HeartPulse } from 'lucide-react';
+import { Droplet, Heart, Sun, Activity, Zap, HeartPulse, TrendingUp } from 'lucide-react';
 import { ThyroidChart } from './thyroid-chart';
 import { BloodPressureChart } from './blood-pressure-chart';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { WeightChart } from './weight-chart';
+import { kgToLbs } from '@/lib/utils';
 
 
 export function ReportCard() {
-  const { records, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, getDisplayLipidValue, getDisplayVitaminDValue, biomarkerUnit } = useApp();
+  const { records, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, weightRecords, getDisplayLipidValue, getDisplayVitaminDValue, biomarkerUnit, profile } = useApp();
   const formatDate = useDateFormatter();
 
   const latestHba1c = [...records].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
@@ -22,9 +24,12 @@ export function ReportCard() {
   const latestVitaminD = [...vitaminDRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestThyroid = [...(thyroidRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestBloodPressure = [...(bloodPressureRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  const latestWeight = [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
+  const isImperial = profile.unitSystem === 'imperial';
   const lipidUnit = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
   const vitDUnit = biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL';
+  const weightUnit = isImperial ? 'lbs' : 'kg';
 
   return (
     <Card className="h-full">
@@ -123,6 +128,23 @@ export function ReportCard() {
                 ) : <p className="text-sm text-muted-foreground">No data</p>}
               </CardContent>
             </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Weight</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                 {latestWeight ? (
+                    <>
+                     <div className="text-2xl font-bold">
+                        {isImperial ? kgToLbs(latestWeight.value).toFixed(1) : latestWeight.value.toFixed(1)}
+                        <span className="text-base font-normal text-muted-foreground"> {weightUnit}</span>
+                     </div>
+                     <p className="text-xs text-muted-foreground">on {formatDate(latestWeight.date)}</p>
+                    </>
+                ) : <p className="text-sm text-muted-foreground">No data</p>}
+              </CardContent>
+            </Card>
           </div>
         </section>
 
@@ -131,6 +153,15 @@ export function ReportCard() {
         <section>
           <CardTitle className="text-lg mb-4">HbA1c Trend</CardTitle>
           <Hba1cChart />
+        </section>
+
+        <Separator />
+
+        <section>
+          <CardTitle className="text-lg mb-4">Weight Trend</CardTitle>
+          <div className="h-[300px] w-full">
+            <WeightChart />
+          </div>
         </section>
 
         <Separator />

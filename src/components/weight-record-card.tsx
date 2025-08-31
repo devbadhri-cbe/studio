@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -10,6 +9,7 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { AddWeightRecordDialog } from './add-weight-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { kgToLbs } from '@/lib/utils';
+import { WeightChart } from './weight-chart';
 
 export function WeightRecordCard() {
   const { weightRecords, removeWeightRecord, profile } = useApp();
@@ -44,36 +44,43 @@ export function WeightRecordCard() {
               </AddWeightRecordDialog>
             </div>
           </div>
-          {sortedWeights.length > 0 ? (
-            <ul className="space-y-1 mt-2">
-              {sortedWeights.slice(0, 5).map((weight) => {
-                const displayWeight = isImperial
-                  ? `${kgToLbs(weight.value).toFixed(2)} lbs`
-                  : `${weight.value.toFixed(2)} kg`;
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              {sortedWeights.length > 0 ? (
+                <ul className="space-y-1 mt-2">
+                  {sortedWeights.slice(0, 5).map((weight) => {
+                    const displayWeight = isImperial
+                      ? `${kgToLbs(weight.value).toFixed(1)} lbs`
+                      : `${weight.value.toFixed(1)} kg`;
 
-                return (
-                  <li key={weight.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                    <div className="flex-1">
-                      <span className="font-semibold text-foreground">{displayWeight}</span>
-                      <span className="block text-xs">on {formatDate(weight.date)}</span>
-                    </div>
-                    <div className="flex items-center shrink-0">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeWeightRecord(weight.id)}>
-                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete record</TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-xs text-muted-foreground pl-8">No weight recorded.</p>
-          )}
+                    return (
+                      <li key={weight.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                        <div className="flex-1">
+                          <span className="font-semibold text-foreground">{displayWeight}</span>
+                          <span className="block text-xs">on {formatDate(weight.date)}</span>
+                        </div>
+                        <div className="flex items-center shrink-0">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeWeightRecord(weight.id)}>
+                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete record</TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="text-xs text-muted-foreground pl-8 h-full flex items-center justify-center">No weight recorded.</p>
+              )}
+            </div>
+            <div className="min-h-[150px]">
+              <WeightChart />
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
