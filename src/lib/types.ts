@@ -39,6 +39,7 @@ export interface UserProfile {
   unitSystem: UnitSystem;
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
+  bmi?: number;
 }
 
 export interface Hba1cRecord {

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem } from '@/lib/types';
@@ -191,6 +192,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       unitSystem: patient.unitSystem || countries.find(c => c.code === patient.country)?.unitSystem || 'metric',
       medication: Array.isArray(patient.medication) ? patient.medication : [],
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
+      bmi: patient.bmi,
     };
     setProfileState(patientProfile);
     setRecordsState(patient.records || []);

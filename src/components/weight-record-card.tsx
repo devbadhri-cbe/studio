@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -10,15 +11,25 @@ import { AddWeightRecordDialog } from './add-weight-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { kgToLbs } from '@/lib/utils';
 import { WeightChart } from './weight-chart';
+import { Separator } from './ui/separator';
 
 export function WeightRecordCard() {
   const { weightRecords, removeWeightRecord, profile } = useApp();
   const formatDate = useDateFormatter();
   const isImperial = profile.unitSystem === 'imperial';
+  const weightUnit = isImperial ? 'lbs' : 'kg';
 
   const sortedWeights = React.useMemo(() => {
     return [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   }, [weightRecords]);
+  
+  const idealWeight = React.useMemo(() => {
+      if (!profile.height) return null;
+      const heightInMeters = profile.height / 100;
+      const idealWeightInKg = 25 * (heightInMeters * heightInMeters);
+      const value = isImperial ? kgToLbs(idealWeightInKg) : idealWeightInKg;
+      return parseFloat(value.toFixed(1));
+  }, [profile.height, isImperial]);
 
   return (
     <Card>
@@ -81,6 +92,17 @@ export function WeightRecordCard() {
               <WeightChart />
             </div>
           </div>
+          {(idealWeight || profile.bmi) && (
+             <div className="text-center text-xs text-muted-foreground mt-2 flex items-center justify-center gap-4">
+                {profile.bmi && (
+                    <div>Current BMI: <span className="font-bold text-foreground">{profile.bmi.toFixed(1)}</span></div>
+                )}
+                {idealWeight && profile.bmi && <Separator orientation="vertical" className="h-4" />}
+                {idealWeight && (
+                    <div>Ideal Weight: <span className="font-bold text-foreground">{idealWeight} {weightUnit}</span></div>
+                )}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
