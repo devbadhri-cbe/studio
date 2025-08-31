@@ -11,6 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMgDl, toMmolL, toNgDl, toNmolL } from '@/lib/unit-conversions';
+import { calculateBmi } from '@/lib/utils';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [] };
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
@@ -316,13 +317,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     const updatedRecords = [...weightRecords, newRecord];
     setWeightRecordsState(updatedRecords);
-    updatePatientData(profile.id, { weightRecords: updatedRecords });
+
+    const newBmi = calculateBmi(newRecord.value, profile.height);
+    const updatedProfile = { ...profile, bmi: newBmi || profile.bmi };
+    setProfileState(updatedProfile);
+
+    updatePatientData(profile.id, { weightRecords: updatedRecords, bmi: updatedProfile.bmi });
   };
 
   const removeWeightRecord = (id: string) => {
     const updatedRecords = weightRecords.filter(r => r.id !== id);
     setWeightRecordsState(updatedRecords);
-    updatePatientData(profile.id, { weightRecords: updatedRecords });
+
+    const lastWeight = [...updatedRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+    const newBmi = calculateBmi(lastWeight?.value, profile.height);
+    const updatedProfile = { ...profile, bmi: newBmi };
+    setProfileState(updatedProfile);
+
+    updatePatientData(profile.id, { weightRecords: updatedRecords, bmi: updatedProfile.bmi });
   };
   
   const addBloodPressureRecord = (record: Omit<BloodPressureRecord, 'id' | 'medication'>) => {
