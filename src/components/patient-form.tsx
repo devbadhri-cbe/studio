@@ -18,6 +18,7 @@ import { DatePicker } from './ui/date-picker';
 import { parseISO } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { calculateAge } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const FormSchema = z.object({
   name: z.string().min(2, "Name is required."),
@@ -51,6 +52,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
     },
   });
   
+  const isMobile = useIsMobile();
   const watchCountry = form.watch('country');
   const watchDob = form.watch('dob');
   const age = React.useMemo(() => calculateAge(watchDob?.toISOString()), [watchDob]);
@@ -110,13 +112,18 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                     name="dob"
                     render={({ field }) => (
                         <FormItem className="flex flex-col">
-                            <FormLabel>Date of Birth {age !== null && <span className="text-muted-foreground font-normal">({age} yrs)</span>}</FormLabel>
-                            <DatePicker
-                                value={field.value}
-                                onChange={field.onChange}
-                                fromYear={new Date().getFullYear() - 120}
-                                toYear={new Date().getFullYear()}
-                            />
+                            <FormLabel>
+                              Date of Birth {!isMobile && age !== null && <span className="text-muted-foreground font-normal">({age} yrs)</span>}
+                            </FormLabel>
+                             <div className="flex items-center gap-2">
+                                <DatePicker
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    fromYear={new Date().getFullYear() - 120}
+                                    toYear={new Date().getFullYear()}
+                                />
+                                {isMobile && age !== null && <span className="text-muted-foreground font-normal text-sm whitespace-nowrap">({age} yrs)</span>}
+                            </div>
                             <FormMessage />
                         </FormItem>
                     )}
