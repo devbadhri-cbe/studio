@@ -20,7 +20,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
-import { addPatient, deletePatient, getPatients } from '@/lib/firestore';
+import { addPatient, deletePatient, getPatients, updatePatient } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { TitleBar } from '@/components/title-bar';
@@ -36,7 +36,8 @@ export default function DoctorDashboardPage() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
     const [searchQuery, setSearchQuery] = React.useState('');
-    const [isAddingPatient, setIsAddingPatient] = React.useState(false);
+    const [isFormOpen, setIsFormOpen] = React.useState(false);
+    const [editingPatient, setEditingPatient] = React.useState<Patient | null>(null);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
 
 
@@ -64,7 +65,7 @@ export default function DoctorDashboardPage() {
     // Re-fetch data when the page is focused
     React.useEffect(() => {
         const handleFocus = () => {
-            if (!isAddingPatient) {
+            if (!isFormOpen) {
                 fetchPatients();
             }
         };
@@ -72,7 +73,7 @@ export default function DoctorDashboardPage() {
         return () => {
             window.removeEventListener('focus', handleFocus);
         };
-    }, [fetchPatients, isAddingPatient]);
+    }, [fetchPatients, isFormOpen]);
 
 
     const viewPatientDashboard = (patient: Patient) => {
@@ -98,7 +99,7 @@ export default function DoctorDashboardPage() {
         }
     }
 
-    const handleAddPatientSubmit = async (data: PatientFormData) => {
+    const handleFormSubmit = async (data: PatientFormData) => {
         setIsSubmitting(true);
         const patientData = {
             name: data.name,
@@ -110,24 +111,47 @@ export default function DoctorDashboardPage() {
         }
 
         try {
-            const newPatient = await addPatient(patientData);
-            toast({
-                title: 'Patient Added',
-                description: `${newPatient.name} has been successfully added.`,
-            });
-            await fetchPatients(); // Refetch all patients
-            setIsAddingPatient(false);
+            if (editingPatient) {
+                const updatedPatient = await updatePatient(editingPatient.id, patientData);
+                toast({
+                    title: 'Patient Updated',
+                    description: `${updatedPatient.name}'s details have been updated.`,
+                });
+            } else {
+                 const newPatient = await addPatient(patientData);
+                toast({
+                    title: 'Patient Added',
+                    description: `${newPatient.name} has been successfully added.`,
+                });
+            }
+            await fetchPatients();
+            closeForm();
         } catch (error) {
-            console.error("Failed to add patient", error);
+            console.error("Failed to save patient", error);
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: 'Could not add the patient. Please try again.',
+                description: 'Could not save the patient. Please try again.',
             });
         } finally {
             setIsSubmitting(false);
         }
     };
+    
+    const openFormToAdd = () => {
+        setEditingPatient(null);
+        setIsFormOpen(true);
+    }
+    
+    const openFormToEdit = (patient: Patient) => {
+        setEditingPatient(patient);
+        setIsFormOpen(true);
+    }
+
+    const closeForm = () => {
+        setIsFormOpen(false);
+        setEditingPatient(null);
+    }
     
     const filteredPatients = patients.filter(patient => {
         const query = searchQuery.toLowerCase();
@@ -144,13 +168,14 @@ export default function DoctorDashboardPage() {
        <TitleBar doctorName={doctorName} doctorEmail={doctorEmail} />
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
-            {isAddingPatient ? (
+            {isFormOpen ? (
                 <Card className="max-w-[800px] mx-auto">
                     <CardContent className="p-6">
                          <PatientForm 
-                            onSubmit={handleAddPatientSubmit} 
+                            patient={editingPatient ?? undefined}
+                            onSubmit={handleFormSubmit} 
                             isSubmitting={isSubmitting}
-                            onCancel={() => setIsAddingPatient(false)}
+                            onCancel={closeForm}
                         />
                     </CardContent>
                 </Card>
@@ -165,7 +190,7 @@ export default function DoctorDashboardPage() {
                             Manage and review your patients' health data.
                         </p>
                     </div>
-                    <Button onClick={() => setIsAddingPatient(true)}>
+                    <Button onClick={openFormToAdd}>
                         <UserPlus className="mr-2 h-4 w-4" />
                         Add Patient
                     </Button>
@@ -202,6 +227,7 @@ export default function DoctorDashboardPage() {
                                         patient={patient}
                                         onView={viewPatientDashboard}
                                         onDelete={setPatientToDelete}
+                                        onEdit={openFormToEdit}
                                     />
                                 ))}
                             </div>
