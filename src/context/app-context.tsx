@@ -143,26 +143,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  React.useEffect(() => {
-    const storedTheme = localStorage.getItem("theme") as Theme | null;
-    setThemeState(storedTheme || 'system');
-  }, []);
-
   const setTheme = (newTheme: Theme) => {
     localStorage.setItem("theme", newTheme);
     setThemeState(newTheme);
   };
   
   React.useEffect(() => {
-    const root = window.document.documentElement
-    root.classList.remove("light", "dark")
-
+    const storedTheme = (localStorage.getItem("theme") as Theme) || "system";
+    setThemeState(storedTheme);
+  }, []);
+  
+  React.useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove("light", "dark");
+  
     let effectiveTheme = theme;
     if (theme === "system") {
-      effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+      effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     }
-
-    root.classList.add(effectiveTheme)
+  
+    root.classList.add(effectiveTheme);
+  
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => {
+      if (theme === "system") {
+        const newEffectiveTheme = mediaQuery.matches ? "dark" : "light";
+        root.classList.remove("light", "dark");
+        root.classList.add(newEffectiveTheme);
+      }
+    };
+  
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme]);
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
