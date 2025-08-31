@@ -173,7 +173,7 @@ export default function DoctorDashboardPage() {
             </div>
 
             {isAddingPatient ? (
-                <Card>
+                <Card className="max-w-[800px] mx-auto">
                     <CardContent className="p-6">
                          <PatientForm 
                             onSubmit={handleAddPatientSubmit} 
