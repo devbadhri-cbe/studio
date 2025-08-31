@@ -9,7 +9,7 @@ import { PlusCircle, Trash2, TrendingUp } from 'lucide-react';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { AddWeightRecordDialog } from './add-weight-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { kgToLbs } from '@/lib/utils';
+import { kgToLbs, cmToFtIn } from '@/lib/utils';
 import { WeightChart } from './weight-chart';
 import { Separator } from './ui/separator';
 
@@ -29,6 +29,15 @@ export function WeightRecordCard() {
       const idealWeightInKg = 25 * (heightInMeters * heightInMeters);
       const value = isImperial ? kgToLbs(idealWeightInKg) : idealWeightInKg;
       return parseFloat(value.toFixed(1));
+  }, [profile.height, isImperial]);
+
+  const displayHeight = React.useMemo(() => {
+    if (!profile.height) return null;
+    if (isImperial) {
+        const { feet, inches } = cmToFtIn(profile.height);
+        return `${feet}' ${inches}"`;
+    }
+    return `${profile.height} cm`;
   }, [profile.height, isImperial]);
 
   return (
@@ -92,8 +101,12 @@ export function WeightRecordCard() {
               <WeightChart />
             </div>
           </div>
-          {(idealWeight || profile.bmi) && (
+           {(displayHeight || profile.bmi || idealWeight) && (
              <div className="text-center text-xs text-muted-foreground mt-2 flex items-center justify-center gap-4">
+                {displayHeight && (
+                    <div>Height: <span className="font-bold text-foreground">{displayHeight}</span></div>
+                )}
+                {displayHeight && profile.bmi && <Separator orientation="vertical" className="h-4" />}
                 {profile.bmi && (
                     <div>Current BMI: <span className="font-bold text-foreground">{profile.bmi.toFixed(1)}</span></div>
                 )}
