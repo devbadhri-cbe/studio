@@ -77,15 +77,12 @@ export default function PatientDashboard() {
         return <ThyroidCard />;
       case 'hypertension':
         return <HypertensionCard />;
-      case 'report':
-        return <ReportCard />;
       default:
         return null;
     }
   }
   
    const dashboardOptions = {
-    report: { name: 'Comprehensive Report', icon: <LayoutGrid className="w-4 h-4" /> },
     hba1c: { name: 'HbA1c Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     lipids: { name: 'Lipid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     vitaminD: { name: 'Vitamin D Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
@@ -97,8 +94,8 @@ export default function PatientDashboard() {
     setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension' | 'none');
   }
   
-  const ActiveDashboardIcon = dashboardView !== 'none' ? dashboardOptions[dashboardView]?.icon : <GaugeCircle className="w-4 h-4" />;
-  const dashboardButtonLabel = dashboardView !== 'none' ? dashboardOptions[dashboardView].name : "Select a Dashboard";
+  const ActiveDashboardIcon = dashboardView !== 'none' && dashboardView !== 'report' ? dashboardOptions[dashboardView]?.icon : <GaugeCircle className="w-4 h-4" />;
+  const dashboardButtonLabel = dashboardView !== 'none' && dashboardView !== 'report' ? dashboardOptions[dashboardView].name : "Select a Dashboard";
 
 
   return (
@@ -169,10 +166,14 @@ export default function PatientDashboard() {
                     <ReminderCard />
                 </div>
                 <div className="lg:col-span-2 flex flex-col gap-6">
-                    <InsightsCard />
                     {dashboardView !== 'none' && renderDashboard()}
+                    <InsightsCard />
                 </div>
             </div>
+
+            <Separator />
+
+            <ReportCard />
             
           </div>
         </main>
