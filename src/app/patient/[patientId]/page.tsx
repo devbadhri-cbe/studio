@@ -5,7 +5,7 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { useParams, useRouter } from 'next/navigation';
 import PatientDashboard from '@/app/patient/dashboard/page';
-import { getPatient } from '@/lib/firestore';
+import { getPatient, updatePatient } from '@/lib/firestore';
 import { Button } from '@/components/ui/button';
 
 export default function PatientDashboardPage() {
@@ -48,6 +48,8 @@ export default function PatientDashboardPage() {
                 if (patient) {
                     localStorage.setItem('patient_id', patient.id);
                     setPatientData(patient);
+                    // Update last login timestamp, but don't wait for it
+                    updatePatient(patient.id, { lastLogin: new Date().toISOString() });
                 } else {
                     setError(`No patient found with ID ${patientId}. Please check the link.`);
                     localStorage.removeItem('patient_id');

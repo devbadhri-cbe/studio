@@ -1,4 +1,5 @@
 
+
 import { Timestamp } from "firebase/firestore";
 
 export type UnitSystem = 'metric' | 'imperial';
@@ -94,6 +95,7 @@ export interface Patient {
   photoUrl?: string;
   dateFormat: string;
   unitSystem: UnitSystem;
+  lastLogin?: string; // ISO string
   bmi?: number;
   lastHba1c: {
     value: number;

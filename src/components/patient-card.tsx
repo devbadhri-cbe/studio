@@ -5,8 +5,8 @@
 import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2, MessageSquare } from 'lucide-react';
+import { format, formatDistanceToNow } from 'date-fns';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2, MessageSquare, Clock } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
@@ -168,6 +168,12 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
       
       <CardContent className="p-4 pt-0 space-y-3 text-sm flex-1">
         <div className="space-y-1.5 text-muted-foreground text-xs">
+             <div className="flex items-center gap-2">
+                <Clock className="h-3 w-3 shrink-0" />
+                <span className="truncate">
+                    Last seen: {patient.lastLogin ? formatDistanceToNow(new Date(patient.lastLogin), { addSuffix: true }) : 'Never'}
+                </span>
+            </div>
             <div className="flex items-center gap-2">
                 <Phone className="h-3 w-3 shrink-0" />
                 <span className="truncate">{formattedPhone}</span>
