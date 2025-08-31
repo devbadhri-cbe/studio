@@ -28,7 +28,7 @@ type ActiveSynopsis = {
     id: string;
 } | null;
 
-export function MedicalHistoryCard() {
+export function MedicationCard() {
   const { profile, addMedication, removeMedication, setMedicationNil } = useApp();
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);

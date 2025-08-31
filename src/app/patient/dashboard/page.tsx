@@ -17,7 +17,8 @@ import { ThyroidCard } from '@/components/thyroid-card';
 import { HypertensionCard } from '@/components/hypertension-card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { TitleBar } from '@/components/title-bar';
-import { MedicalHistoryCard } from '@/components/medical-history-card';
+import { MedicalConditionsCard } from '@/components/medical-conditions-card';
+import { MedicationCard } from '@/components/medication-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
@@ -144,7 +145,8 @@ export default function PatientDashboard() {
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
                 <div className="lg:col-span-1 flex flex-col gap-6">
-                    <MedicalHistoryCard />
+                    <MedicalConditionsCard />
+                    <MedicationCard />
                     <ReminderCard />
                 </div>
                 <div className="lg:col-span-2 flex flex-col gap-6">
