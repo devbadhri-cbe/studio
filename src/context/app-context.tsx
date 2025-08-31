@@ -140,12 +140,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
     });
 
+    return () => unsubscribe();
+  }, []);
+
+  React.useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme | null;
     if (savedTheme) {
         setThemeState(savedTheme);
     }
-
-    return () => unsubscribe();
   }, []);
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
