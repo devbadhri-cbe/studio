@@ -70,63 +70,63 @@ export function PatientHeader() {
   
   return (
     <Card>
-      <CardContent className="p-4 flex flex-col items-center gap-4">
-      <Tooltip>
-        <TooltipTrigger asChild>
-            <button 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="relative rounded-full group shrink-0"
-            >
-                <Avatar className="h-20 w-20 md:h-24 md:w-24 cursor-pointer">
-                    <AvatarImage src={profile.photoUrl} />
-                    <AvatarFallback>
-                        {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : 
-                            <>
-                                <User className="h-10 w-10 text-muted-foreground group-hover:hidden" />
-                                <Upload className="h-10 w-10 text-muted-foreground hidden group-hover:block" />
-                            </>
-                        }
-                    </AvatarFallback>
-                </Avatar>
-            </button>
-        </TooltipTrigger>
-        <TooltipContent>
-            <p>Upload Photo</p>
-        </TooltipContent>
-      </Tooltip>
-      <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
+      <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="relative rounded-full group shrink-0"
+                >
+                    <Avatar className="h-20 w-20 md:h-24 md:w-24 cursor-pointer">
+                        <AvatarImage src={profile.photoUrl} />
+                        <AvatarFallback>
+                            {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : 
+                                <>
+                                    <User className="h-10 w-10 text-muted-foreground group-hover:hidden" />
+                                    <Upload className="h-10 w-10 text-muted-foreground hidden group-hover:block" />
+                                </>
+                            }
+                        </AvatarFallback>
+                    </Avatar>
+                </button>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>Upload Photo</p>
+            </TooltipContent>
+        </Tooltip>
+        <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
 
-      <div className="flex flex-col items-center flex-1 gap-4 w-full">
-        <div className="text-center">
-          <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-            {pageTitle}
-          </h1>
-          <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
+        <div className="flex flex-col items-center md:items-start flex-1 gap-4 w-full">
+            <div className="text-center md:text-left">
+                <h1 className="text-2xl md:text-3xl font-semibold font-headline">
+                    {pageTitle}
+                </h1>
+                <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
+            </div>
+            {!isDoctorLoggedIn && (
+                <div className="flex w-full flex-wrap justify-center md:justify-start gap-2">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline">
+                                <MessageSquareText className="mr-2 h-4 w-4" />
+                                Contact Doctor
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onSelect={() => window.open(`https://wa.me/${doctorPhoneNumber.replace(/\D/g, '')}`, '_blank')}>
+                                <WhatsAppIcon className="w-4 h-4 mr-2" />
+                                <span>WhatsApp</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => window.open(`sms:${doctorPhoneNumber.replace(/\D/g, '')}`)}>
+                                <MessageSquareText className="w-4 h-4 mr-2" />
+                                <span>SMS / iMessage</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            )}
         </div>
-        <div className="flex w-full flex-wrap justify-center gap-2">
-          {!isDoctorLoggedIn && (
-             <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
-                        <MessageSquareText className="mr-2 h-4 w-4" />
-                        Contact Doctor
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuItem onSelect={() => window.open(`https://wa.me/${doctorPhoneNumber.replace(/\D/g, '')}`, '_blank')}>
-                        <WhatsAppIcon className="w-4 h-4 mr-2" />
-                        <span>WhatsApp</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => window.open(`sms:${doctorPhoneNumber.replace(/\D/g, '')}`)}>
-                        <MessageSquareText className="w-4 h-4 mr-2" />
-                        <span>SMS / iMessage</span>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-      </div>
       </CardContent>
     </Card>
   );
