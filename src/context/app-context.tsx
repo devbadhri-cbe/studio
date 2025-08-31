@@ -160,7 +160,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
 
   React.useEffect(() => {
-    if (!isClient) return;
+    if (typeof window === 'undefined') return;
+    
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
 
@@ -169,7 +170,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     root.classList.add(currentTheme);
-  }, [theme, isClient]);
+  }, [theme]);
   
   const setPatientData = React.useCallback((patient: Patient) => {
     const patientProfile: UserProfile = {
