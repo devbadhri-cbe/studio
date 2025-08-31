@@ -47,7 +47,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
       dob: undefined,
       gender: undefined,
       email: '',
-      country: 'US', // Default to US
+      country: '',
       phone: '',
       height: '',
       weight: '',
@@ -63,7 +63,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             dob: patient.dob ? parseISO(patient.dob) : new Date(),
             gender: patient.gender || undefined,
             email: patient.email || '',
-            country: patient.country || 'US',
+            country: patient.country || '',
             phone: patient.phone || '',
             height: patient.height || '',
             weight: patient.weightRecords?.[patient.weightRecords.length - 1]?.value.toFixed(2) || '',
