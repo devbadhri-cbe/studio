@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Line, LineChart, CartesianGrid, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot } from 'recharts';
+import { Line, LineChart, CartesianGrid, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot, ReferenceLine, Label } from 'recharts';
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { kgToLbs } from '@/lib/utils';
@@ -14,7 +14,7 @@ export function WeightChart() {
   const isImperial = profile.unitSystem === 'imperial';
   const unitLabel = isImperial ? 'lbs' : 'kg';
 
-  const sortedRecords = [...(weightRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const sortedRecords = [...(weightRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(a.date).getTime());
   
   const oneYearAgo = subYears(new Date(), 1);
   
@@ -39,6 +39,14 @@ export function WeightChart() {
     const padding = (max - min) * 0.2;
     return [Math.max(0, Math.floor(min - padding)), Math.ceil(max + padding)];
   }, [chartData]);
+  
+  const idealWeight = React.useMemo(() => {
+      if (!profile.height) return null;
+      const heightInMeters = profile.height / 100;
+      const idealWeightInKg = 25 * (heightInMeters * heightInMeters);
+      const value = isImperial ? kgToLbs(idealWeightInKg) : idealWeightInKg;
+      return parseFloat(value.toFixed(1));
+  }, [profile.height, isImperial]);
 
 
   return (
@@ -87,6 +95,17 @@ export function WeightChart() {
                 return null;
               }}
             />
+             {idealWeight && (
+                <ReferenceLine y={idealWeight} stroke="hsl(var(--accent))" strokeDasharray="3 3">
+                    <Label 
+                        value={`Ideal (${idealWeight} ${unitLabel})`} 
+                        position="insideTopLeft"
+                        fill="hsl(var(--accent))"
+                        fontSize={10}
+                        dy={-5}
+                    />
+                </ReferenceLine>
+             )}
             <Line type="monotone" dataKey="value" name="Weight" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--chart-5))" />} activeDot={{ r: 6 }} />
           </LineChart>
         ) : (
