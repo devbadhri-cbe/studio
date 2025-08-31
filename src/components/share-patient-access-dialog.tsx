@@ -61,50 +61,33 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
     });
   };
   
-  const getQrCodeAsBlob = (): Promise<Blob | null> => {
-      return new Promise((resolve) => {
-        if (!qrRef.current) return resolve(null);
-        const svg = qrRef.current.querySelector('svg');
-        if (!svg) return resolve(null);
+  const downloadQrCode = () => {
+    if (!qrRef.current) return;
+    const svg = qrRef.current.querySelector('svg');
+    if (!svg) return;
 
-        const svgData = new XMLSerializer().serializeToString(svg);
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return resolve(null);
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    const img = document.createElement('img');
+    img.onload = () => {
+        canvas.width = 256;
+        canvas.height = 256;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         
-        const img = document.createElement('img');
-        img.onload = () => {
-            canvas.width = 256; // Upscale for better quality
-            canvas.height = 256;
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            canvas.toBlob((blob) => {
-                resolve(blob);
-            }, 'image/png');
-        };
-        img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
-      });
-  }
-  
-  const handleCopyQrCode = async () => {
-      const blob = await getQrCodeAsBlob();
-      if (blob && navigator.clipboard?.write) {
-          try {
-              await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-               toast({
-                title: 'QR Code Copied',
-                description: 'The QR code image has been copied to your clipboard.',
-               });
-          } catch (error) {
-              console.error('Failed to copy QR code:', error);
-               toast({
-                variant: 'destructive',
-                title: 'Copy Failed',
-                description: 'Could not copy the QR code image. You may need to grant clipboard permissions.',
-               });
-          }
-      }
+        const pngUrl = canvas.toDataURL('image/png');
+        const downloadLink = document.createElement('a');
+        downloadLink.href = pngUrl;
+        downloadLink.download = `health-guardian-qrcode-${patient.name.replace(/\s+/g, '-').toLowerCase()}.png`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
   }
 
   const shareActions = [
@@ -114,9 +97,9 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
         action: () => copyToClipboard(dashboardLink, 'Dashboard Link')
     },
     {
-        label: 'Copy QR Code Image',
+        label: 'Download QR Code Image',
         icon: <ImageIcon className="mr-2 h-4 w-4" />,
-        action: handleCopyQrCode,
+        action: downloadQrCode,
     },
     {
         label: 'Open in New Tab',
@@ -229,7 +212,3 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
     </Dialog>
   );
 }
-
-    
-
-    
