@@ -15,9 +15,9 @@ export const AddRecordButton = React.forwardRef<HTMLButtonElement, AddRecordButt
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button ref={ref} size="sm" className="h-9 gap-1" {...props}>
-            <PlusCircle className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Record</span>
+          <Button ref={ref} size="icon" variant="outline" className="h-8 w-8" {...props}>
+            <PlusCircle className="h-4 w-4" />
+            <span className="sr-only">{tooltipContent}</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
