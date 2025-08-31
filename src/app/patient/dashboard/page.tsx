@@ -7,7 +7,7 @@ import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, UploadCloud, LayoutGrid, GaugeCircle } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -21,10 +21,20 @@ import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { UploadRecordDialog } from '@/components/upload-record-dialog';
+
 
 export default function PatientDashboard() {
-  const { isClient, dashboardView, isDoctorLoggedIn, doctorName } = useApp();
+  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
   const router = useRouter();
+  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
+
 
   if (!isClient) {
     return (
@@ -52,6 +62,24 @@ export default function PatientDashboard() {
         return null;
     }
   }
+  
+   const dashboardOptions = {
+    report: { name: 'Comprehensive Report', icon: <LayoutGrid className="w-4 h-4" /> },
+    hba1c: { name: 'HbA1c Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
+    lipids: { name: 'Lipid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
+    vitaminD: { name: 'Vitamin D Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
+    thyroid: { name: 'Thyroid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
+    hypertension: { name: 'Hypertension Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
+  }
+  
+  const handleDashboardSelect = (key: string) => {
+    setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension' | 'none');
+    setIsTooltipOpen(false);
+  }
+  
+  const ActiveDashboardIcon = dashboardView !== 'none' ? dashboardOptions[dashboardView]?.icon : <GaugeCircle className="w-4 h-4" />;
+  const dashboardButtonLabel = dashboardView !== 'none' ? dashboardOptions[dashboardView].name : "Select a Dashboard";
+
 
   return (
     <TooltipProvider>
@@ -76,15 +104,44 @@ export default function PatientDashboard() {
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-2 order-2 lg:order-1">
                     <PatientHeader />
                 </div>
-                <div className="lg:col-span-1 row-start-1 lg:row-start-auto">
+                <div className="lg:col-span-1 row-start-1 lg:row-start-auto order-1 lg:order-2">
                     <ProfileCard />
                 </div>
             </div>
             
             <Separator />
+
+             <div className="flex w-full flex-wrap justify-center gap-2">
+              <UploadRecordDialog>
+                <Button variant="outline">
+                    <UploadCloud className="mr-2 h-4 w-4" />
+                    Upload Result
+                </Button>
+              </UploadRecordDialog>
+              <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className={`justify-center ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
+                            {ActiveDashboardIcon}
+                            <span className="ml-2">{dashboardButtonLabel}</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    {Object.entries(dashboardOptions).map(([key, value]) => (
+                        <DropdownMenuItem 
+                            key={key}
+                            onSelect={() => handleDashboardSelect(key)}
+                            className={dashboardView === key ? 'bg-accent' : ''}
+                        >
+                            {value.icon}
+                            <span className="ml-2">{value.name}</span>
+                        </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
                 <div className="lg:col-span-1 flex flex-col gap-6">

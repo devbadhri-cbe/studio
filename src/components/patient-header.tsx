@@ -28,12 +28,11 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export function PatientHeader() {
-  const { profile, setProfile, dashboardView, setDashboardView, isDoctorLoggedIn } = useApp();
+  const { profile, setProfile, isDoctorLoggedIn } = useApp();
   const { toast } = useToast();
 
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const doctorPhoneNumber = '+919791377716';
 
   const pageTitle = isDoctorLoggedIn
@@ -69,23 +68,6 @@ export function PatientHeader() {
     }
   };
   
-  const dashboardOptions = {
-    report: { name: 'Comprehensive Report', icon: <LayoutGrid className="w-4 h-4" /> },
-    hba1c: { name: 'HbA1c Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-    lipids: { name: 'Lipid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-    vitaminD: { name: 'Vitamin D Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-    thyroid: { name: 'Thyroid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-    hypertension: { name: 'Hypertension Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-  }
-  
-  const handleDashboardSelect = (key: string) => {
-    setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension' | 'none');
-    setIsTooltipOpen(false);
-  }
-  
-  const ActiveDashboardIcon = dashboardView !== 'none' ? dashboardOptions[dashboardView]?.icon : <GaugeCircle className="w-4 h-4" />;
-  const dashboardButtonLabel = dashboardView !== 'none' ? dashboardOptions[dashboardView].name : "Select a Dashboard";
-
   return (
     <Card>
       <CardContent className="p-4 flex flex-col items-center gap-4">
@@ -123,12 +105,6 @@ export function PatientHeader() {
           <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
         </div>
         <div className="flex w-full flex-wrap justify-center gap-2">
-          <UploadRecordDialog>
-            <Button variant="outline">
-                <UploadCloud className="mr-2 h-4 w-4" />
-                Upload Result
-            </Button>
-          </UploadRecordDialog>
           {!isDoctorLoggedIn && (
              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -149,26 +125,6 @@ export function PatientHeader() {
                 </DropdownMenuContent>
             </DropdownMenu>
           )}
-           <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                     <Button variant="outline" className={`justify-center ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
-                        {ActiveDashboardIcon}
-                        <span className="ml-2">{dashboardButtonLabel}</span>
-                    </Button>
-                </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                {Object.entries(dashboardOptions).map(([key, value]) => (
-                    <DropdownMenuItem 
-                        key={key}
-                        onSelect={() => handleDashboardSelect(key)}
-                        className={dashboardView === key ? 'bg-accent' : ''}
-                    >
-                        {value.icon}
-                        <span className="ml-2">{value.name}</span>
-                    </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
       </CardContent>
