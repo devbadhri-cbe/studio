@@ -34,6 +34,17 @@ export function calculateBmi(weight: number | undefined, height: number | undefi
   }
 }
 
+export function getBmiStatus(bmi: number | null | undefined): { text: string; variant: 'destructive' | 'secondary' | 'outline' | 'default' } | null {
+  if (!bmi) return null;
+
+  if (bmi < 18.5) return { text: 'Underweight', variant: 'secondary' };
+  if (bmi >= 18.5 && bmi < 25) return { text: 'Normal', variant: 'outline' };
+  if (bmi >= 25 && bmi < 30) return { text: 'Overweight', variant: 'secondary' };
+  if (bmi >= 30) return { text: 'Obese', variant: 'destructive' };
+  
+  return null;
+}
+
 export const lbsToKg = (lbs: number) => lbs * 0.453592;
 export const kgToLbs = (kg: number) => kg / 0.453592;
 export const ftInToCm = (ft: number, inches: number) => (ft * 12 + inches) * 2.54;

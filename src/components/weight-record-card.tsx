@@ -9,9 +9,10 @@ import { PlusCircle, Trash2, TrendingUp } from 'lucide-react';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { AddWeightRecordDialog } from './add-weight-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { kgToLbs, cmToFtIn } from '@/lib/utils';
+import { kgToLbs, cmToFtIn, getBmiStatus } from '@/lib/utils';
 import { WeightChart } from './weight-chart';
 import { Separator } from './ui/separator';
+import { Badge } from './ui/badge';
 
 export function WeightRecordCard() {
   const { weightRecords, removeWeightRecord, profile } = useApp();
@@ -39,6 +40,8 @@ export function WeightRecordCard() {
     }
     return `${profile.height} cm`;
   }, [profile.height, isImperial]);
+
+  const bmiStatus = getBmiStatus(profile.bmi);
 
   return (
     <Card>
@@ -102,13 +105,20 @@ export function WeightRecordCard() {
             </div>
           </div>
            {(displayHeight || profile.bmi || idealWeight) && (
-             <div className="text-center text-xs text-muted-foreground mt-2 flex items-center justify-center gap-4">
+             <div className="text-center text-xs text-muted-foreground mt-2 flex items-center justify-center flex-wrap gap-x-4 gap-y-2">
                 {displayHeight && (
                     <div>Height: <span className="font-bold text-foreground">{displayHeight}</span></div>
                 )}
                 {displayHeight && profile.bmi && <Separator orientation="vertical" className="h-4" />}
                 {profile.bmi && (
-                    <div>Current BMI: <span className="font-bold text-foreground">{profile.bmi.toFixed(1)}</span></div>
+                    <div className="flex items-center gap-2">
+                        <span>Current BMI: <span className="font-bold text-foreground">{profile.bmi.toFixed(1)}</span></span>
+                         {bmiStatus && (
+                            <Badge variant={bmiStatus.variant} className={bmiStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
+                                {bmiStatus.text}
+                            </Badge>
+                        )}
+                    </div>
                 )}
                 {idealWeight && profile.bmi && <Separator orientation="vertical" className="h-4" />}
                 {idealWeight && (
