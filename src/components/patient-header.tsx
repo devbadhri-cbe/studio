@@ -31,7 +31,6 @@ export function PatientHeader() {
   const { toast } = useToast();
 
   const [isUploading, setIsUploading] = React.useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const doctorPhoneNumber = '+919791377716';
 
   const pageTitle = isDoctorLoggedIn
@@ -93,7 +92,7 @@ export function PatientHeader() {
                 <p>Upload Photo</p>
             </TooltipContent>
         </Tooltip>
-        <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" disabled={isUploading}/>
+        <Input id="photo-upload" type="file" className="hidden" onChange={handlePhotoUpload} accept="image/*" disabled={isUploading}/>
 
         <div className="flex flex-col items-center md:items-start flex-1 gap-4 w-full">
             <div className="text-center md:text-left">
