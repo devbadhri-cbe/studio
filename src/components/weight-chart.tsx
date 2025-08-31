@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { Line, LineChart, CartesianGrid, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot } from 'recharts';
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
