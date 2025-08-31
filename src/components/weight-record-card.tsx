@@ -103,9 +103,24 @@ export function WeightRecordCard() {
                     <div className="flex items-center gap-2">
                         <span>Current BMI: <span className="font-bold text-foreground">{profile.bmi.toFixed(1)}</span></span>
                          {bmiStatus && (
-                            <Badge variant={bmiStatus.variant} className={bmiStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
-                                {bmiStatus.text}
-                            </Badge>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                  <Badge variant={bmiStatus.variant} className={`cursor-help ${bmiStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
+                                      {bmiStatus.text}
+                                  </Badge>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <div className="space-y-1 text-left">
+                                  <h4 className="font-bold">BMI Categories</h4>
+                                  <p>&lt; 18.5: Underweight</p>
+                                  <p>18.5 - 24.9: Normal weight</p>
+                                  <p>25 - 29.9: Overweight</p>
+                                  <p>30 - 34.9: Obese Class I</p>
+                                  <p>35 - 39.9: Obese Class II</p>
+                                  <p>&ge; 40: Morbidly Obese</p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
                         )}
                     </div>
                 )}
