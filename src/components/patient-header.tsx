@@ -10,14 +10,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import { updatePatient } from '@/lib/firestore';
-import { MessageSquareText, Loader2, User, Upload, Camera } from 'lucide-react';
+import { MessageSquareText, Loader2, User, Camera } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -29,6 +28,7 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export function PatientHeader() {
   const { profile, setProfile, isDoctorLoggedIn } = useApp();
   const { toast } = useToast();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [isUploading, setIsUploading] = React.useState(false);
   const doctorPhoneNumber = '+919791377716';
@@ -47,8 +47,8 @@ export function PatientHeader() {
         const snapshot = await uploadBytes(fileRef, file);
         const downloadUrl = await getDownloadURL(snapshot.ref);
         
-        await updatePatient(profile.id, { photoUrl: downloadUrl });
-        setProfile({ ...profile, photoUrl: downloadUrl });
+        const updatedPatient = await updatePatient(profile.id, { photoUrl: downloadUrl });
+        setProfile(updatedPatient);
         
         toast({
             title: 'Photo Uploaded',
@@ -63,9 +63,17 @@ export function PatientHeader() {
         });
     } finally {
         setIsUploading(false);
+        // Reset file input
+        if(fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
     }
   };
   
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <Card>
       <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
@@ -77,6 +85,15 @@ export function PatientHeader() {
                 }
             </AvatarFallback>
         </Avatar>
+        <Input 
+            ref={fileInputRef}
+            type="file" 
+            className="hidden" 
+            onChange={handlePhotoUpload} 
+            accept="image/*" 
+            capture="user" 
+            disabled={isUploading}
+        />
 
         <div className="flex flex-col items-center md:items-start flex-1 gap-4 w-full">
             <div className="text-center md:text-left">
@@ -86,20 +103,9 @@ export function PatientHeader() {
                 <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
             </div>
             <div className="flex w-full flex-wrap justify-center md:justify-start gap-2">
-                <Button asChild size="sm" variant="outline" className="relative cursor-pointer">
-                    <div>
-                        <Camera className="mr-2 h-4 w-4" />
-                        Upload Photo
-                        <Input 
-                            id="photo-upload" 
-                            type="file" 
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                            onChange={handlePhotoUpload} 
-                            accept="image/*" 
-                            capture="user" 
-                            disabled={isUploading}
-                        />
-                    </div>
+                <Button onClick={handleUploadClick} size="sm" variant="outline" disabled={isUploading}>
+                    <Camera className="mr-2 h-4 w-4" />
+                    {isUploading ? 'Uploading...' : 'Upload Photo'}
                 </Button>
                 {!isDoctorLoggedIn && (
                     <DropdownMenu>
