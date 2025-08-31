@@ -141,14 +141,17 @@ export default function DoctorDashboardPage() {
     <>
     <div className="flex min-h-screen w-full flex-col bg-background">
        <header className="border-b px-4 py-4 md:px-6">
-            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 md:flex-row md:justify-between">
-              <div className="flex items-center gap-2">
+            <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
+              <div className="w-1/3">
+                {/* Empty div for spacing */}
+              </div>
+              <div className="w-1/3 flex justify-center items-center gap-2">
                   <Logo className="h-8 w-8 text-primary" />
                   <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
               </div>
-              <div className="text-center md:text-right text-sm text-muted-foreground">
+              <div className="w-1/3 text-right text-sm text-muted-foreground">
                   <p className="font-semibold text-lg text-foreground">{doctorName}</p>
-                  <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-center md:justify-end gap-1.5 hover:text-primary">
+                  <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-end gap-1.5 hover:text-primary">
                       <Mail className="h-3 w-3" />
                       drbadhri@gmail.com
                   </a>
