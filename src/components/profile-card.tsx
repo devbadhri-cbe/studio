@@ -202,6 +202,17 @@ export function ProfileCard() {
 
   const form = useForm<z.infer<typeof ProfileSchema>>({
     resolver: zodResolver(ProfileSchema),
+    defaultValues: {
+      name: '',
+      gender: undefined,
+      email: '',
+      country: '',
+      phone: '',
+      height: '',
+      height_ft: '',
+      height_in: '',
+      weight: '',
+    },
   });
 
   const isImperial = profile.unitSystem === 'imperial';
