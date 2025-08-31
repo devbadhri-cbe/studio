@@ -1,7 +1,7 @@
 
 'use client';
 
-import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type Theme, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem } from '@/lib/types';
+import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -67,8 +67,6 @@ interface AppContextType {
   setIsDoctorLoggedIn: (isLoggedIn: boolean) => void;
   doctorName: string;
   setPatientData: (patient: Patient) => void;
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
   biomarkerUnit: BiomarkerUnitSystem;
   getDisplayLipidValue: (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides') => number;
   getDisplayVitaminDValue: (value: number) => number;
@@ -90,7 +88,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('none');
   const [isClient, setIsClient] = React.useState(false);
   const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
-  const [theme, setThemeState] = React.useState<Theme>('system');
 
   const biomarkerUnit = React.useMemo(() => {
     return countries.find(c => c.code === profile.country)?.biomarkerUnit || 'conventional';
@@ -142,38 +139,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     return () => unsubscribe();
   }, []);
-
-  const setTheme = (newTheme: Theme) => {
-    localStorage.setItem("theme", newTheme);
-    setThemeState(newTheme);
-  };
-  
-  React.useEffect(() => {
-    const storedTheme = (localStorage.getItem('theme') as Theme) || 'system';
-    setThemeState(storedTheme);
-    
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-
-    let effectiveTheme = storedTheme;
-    if (storedTheme === 'system') {
-      effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    root.classList.add(effectiveTheme);
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      const currentTheme = (localStorage.getItem('theme') as Theme) || 'system';
-      if (currentTheme === 'system') {
-        const newEffectiveTheme = mediaQuery.matches ? 'dark' : 'light';
-        root.classList.remove('light', 'dark');
-        root.classList.add(newEffectiveTheme);
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
       setIsDoctorLoggedInState(isLoggedIn);
@@ -461,8 +426,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsDoctorLoggedIn,
     doctorName: DOCTOR_NAME,
     setPatientData,
-    theme,
-    setTheme,
     biomarkerUnit,
     getDisplayLipidValue,
     getDisplayVitaminDValue,

@@ -24,7 +24,6 @@ import { ReportCard } from '@/components/report-card';
 import { ThyroidCard } from '@/components/thyroid-card';
 import { HypertensionCard } from '@/components/hypertension-card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -133,24 +132,19 @@ export default function PatientDashboard() {
       <div className="flex min-h-screen w-full flex-col bg-background">
          <TitleBar doctorName={doctorName} doctorEmail={doctorEmail}>
             {isDoctorLoggedIn && (
-                 <>
-                    <div className="absolute top-1/2 -translate-y-1/2 left-0">
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="ghost">
-                                <ArrowLeft className="h-4 w-4" />
-                                <span className="sr-only">Back to Patient List</span>
-                            </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                            <p>Patient List</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </div>
-                     <div className="absolute top-1/2 -translate-y-1/2 right-0">
-                        <ThemeToggle />
-                    </div>
-                </>
+                 <div className="absolute top-1/2 -translate-y-1/2 left-0">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                        <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="ghost">
+                            <ArrowLeft className="h-4 w-4" />
+                            <span className="sr-only">Back to Patient List</span>
+                        </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                        <p>Patient List</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
             )}
          </TitleBar>
         <main className="flex-1 p-4 md:p-6">

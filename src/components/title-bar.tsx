@@ -4,7 +4,6 @@
 import { Logo } from '@/components/logo';
 import { Mail } from 'lucide-react';
 import * as React from 'react';
-import { ThemeToggle } from './theme-toggle';
 
 interface TitleBarProps {
     doctorName: string;

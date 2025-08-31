@@ -1,7 +1,6 @@
 
 import { Timestamp } from "firebase/firestore";
 
-export type Theme = 'light' | 'dark' | 'system';
 export type UnitSystem = 'metric' | 'imperial';
 
 export interface MedicalCondition {

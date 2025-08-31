@@ -24,7 +24,6 @@ import { addPatient, deletePatient, getPatients } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { TitleBar } from '@/components/title-bar';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 export default function DoctorDashboardPage() {
@@ -143,11 +142,7 @@ export default function DoctorDashboardPage() {
   return (
     <TooltipProvider>
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <TitleBar doctorName={doctorName} doctorEmail={doctorEmail}>
-         <div className="absolute top-1/2 -translate-y-1/2 right-0">
-            <ThemeToggle />
-        </div>
-       </TitleBar>
+       <TitleBar doctorName={doctorName} doctorEmail={doctorEmail} />
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
             <div className="flex items-center justify-between border-b pb-4 mb-6">
@@ -224,9 +219,7 @@ export default function DoctorDashboardPage() {
 
         </div>
       </main>
-    </div>
-
-    <AlertDialog open={!!patientToDelete} onOpenChange={() => setPatientToDelete(null)}>
+      <AlertDialog open={!!patientToDelete} onOpenChange={() => setPatientToDelete(null)}>
         <AlertDialogContent>
             <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -245,6 +238,7 @@ export default function DoctorDashboardPage() {
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
+    </div>
     </TooltipProvider>
   );
 }
