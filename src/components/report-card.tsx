@@ -7,12 +7,13 @@ import { LdlChart } from './ldl-chart';
 import { VitaminDChart } from './vitamin-d-chart';
 import { Separator } from './ui/separator';
 import { useApp } from '@/context/app-context';
-import { Droplet, Heart, Sun, Activity, Zap, HeartPulse, TrendingUp } from 'lucide-react';
+import { Droplet, Heart, Sun, Activity, Zap, HeartPulse, TrendingUp, Printer } from 'lucide-react';
 import { ThyroidChart } from './thyroid-chart';
 import { BloodPressureChart } from './blood-pressure-chart';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { WeightChart } from './weight-chart';
 import { kgToLbs } from '@/lib/utils';
+import { Button } from './ui/button';
 
 
 export function ReportCard() {
@@ -33,10 +34,16 @@ export function ReportCard() {
 
   return (
     <Card className="h-full">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-start">
         <div className="grid gap-2">
           <CardTitle>Comprehensive Health Report</CardTitle>
           <CardDescription>An overview of your key health metrics and trends.</CardDescription>
+        </div>
+         <div className="ml-auto no-print">
+            <Button onClick={() => window.print()} variant="outline" size="sm">
+                <Printer className="mr-2 h-4 w-4" />
+                Print / Save PDF
+            </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-8 px-2 md:px-6">

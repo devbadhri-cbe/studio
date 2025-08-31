@@ -172,8 +172,10 @@ export default function PatientDashboard() {
             </div>
 
             <Separator />
-
-            <ReportCard />
+            
+            <div className="printable-area">
+                <ReportCard />
+            </div>
             
           </div>
         </main>
