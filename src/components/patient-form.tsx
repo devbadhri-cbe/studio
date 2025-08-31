@@ -17,6 +17,7 @@ import type { Patient } from '@/lib/types';
 import { DatePicker } from './ui/date-picker';
 import { parseISO } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { calculateAge } from '@/lib/utils';
 
 const FormSchema = z.object({
   name: z.string().min(2, "Name is required."),
@@ -51,6 +52,8 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
   });
   
   const watchCountry = form.watch('country');
+  const watchDob = form.watch('dob');
+  const age = React.useMemo(() => calculateAge(watchDob?.toISOString()), [watchDob]);
 
   React.useEffect(() => {
     if (patient) {
@@ -102,24 +105,23 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField
+                 <FormField
                     control={form.control}
                     name="dob"
                     render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Date of Birth</FormLabel>
-                        <FormControl>
+                        <FormItem className="flex flex-col">
+                            <FormLabel>Date of Birth {age !== null && <span className="text-muted-foreground font-normal">({age} yrs)</span>}</FormLabel>
                             <DatePicker
                                 value={field.value}
                                 onChange={field.onChange}
                                 fromYear={new Date().getFullYear() - 120}
                                 toYear={new Date().getFullYear()}
                             />
-                        </FormControl>
-                        <FormMessage />
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
+
                 <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
             </div>
 
