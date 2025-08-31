@@ -53,18 +53,7 @@ export function WeightRecordCard() {
               <h3 className="font-medium">Weight Records</h3>
             </div>
             <div className="flex items-center gap-1 shrink-0">
-              <AddWeightRecordDialog>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="icon" variant="outline" className="h-8 w-8">
-                        <PlusCircle className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Add Weight Record</p>
-                    </TooltipContent>
-                  </Tooltip>
-              </AddWeightRecordDialog>
+               <AddWeightRecordDialog />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

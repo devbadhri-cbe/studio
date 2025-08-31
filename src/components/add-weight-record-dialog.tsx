@@ -23,7 +23,8 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { DatePicker } from './ui/date-picker';
 import { lbsToKg } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PlusCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -31,7 +32,7 @@ const FormSchema = z.object({
 });
 
 interface AddWeightRecordDialogProps {
-    children: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 export function AddWeightRecordDialog({ children }: AddWeightRecordDialogProps) {
@@ -86,12 +87,25 @@ export function AddWeightRecordDialog({ children }: AddWeightRecordDialogProps) 
         setIsSubmitting(false);
     }
   };
+  
+   const triggerButton = children || (
+    <Tooltip>
+        <TooltipTrigger asChild>
+            <Button size="icon" variant="outline" className="h-8 w-8">
+                <PlusCircle className="h-4 w-4" />
+            </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+            <p>Add Weight Record</p>
+        </TooltipContent>
+    </Tooltip>
+   );
+
 
   return (
-    <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-            {children}
+            {triggerButton}
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -140,6 +154,5 @@ export function AddWeightRecordDialog({ children }: AddWeightRecordDialogProps) 
           </Form>
         </DialogContent>
       </Dialog>
-    </>
   );
 }
