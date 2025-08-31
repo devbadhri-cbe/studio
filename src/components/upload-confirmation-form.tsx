@@ -24,6 +24,20 @@ interface UploadConfirmationFormProps {
 
 export function UploadConfirmationForm({ extractedData: initialData, onCancel, onSuccess }: UploadConfirmationFormProps) {
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput>(initialData);
+  const [manualInputs, setManualInputs] = React.useState({
+    hba1c: '',
+    vitD: '',
+    systolic: '',
+    diastolic: '',
+    total: '',
+    ldl: '',
+    hdl: '',
+    triglycerides: '',
+    tsh: '',
+    t3: '',
+    t4: '',
+  });
+
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addBatchRecords, biomarkerUnit } = useApp();
   const { toast } = useToast();
@@ -92,23 +106,34 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
     onSuccess();
   };
   
-  const handleManualEntry = (field: keyof LabResultUploadOutput, value: string | number | object) => {
-      const updatedData = { ...extractedData };
-      
-      if (typeof value === 'object') {
-          (updatedData as any)[field] = { ...(updatedData as any)[field], ...value };
-      } else {
-           (updatedData as any)[field] = value;
-      }
+  const handleManualEntryChange = (field: keyof typeof manualInputs, value: string) => {
+    setManualInputs(prev => ({ ...prev, [field]: value }));
+  };
 
-      if (field === 'vitaminDValue' && !updatedData.vitaminDUnits) {
-          updatedData.vitaminDUnits = expectedVitaminDUnit;
-      }
-      if (field === 'lipidPanel' && !updatedData.lipidPanel?.units) {
-           if (updatedData.lipidPanel) updatedData.lipidPanel.units = expectedLipidUnit;
-      }
+  const handleManualEntryBlur = (field: keyof LabResultUploadOutput, subfield?: string) => {
+    const key = subfield ? `${field}_${subfield}` : field;
+    const manualValue = (manualInputs as any)[subfield ? subfield : field];
 
-      setExtractedData(updatedData);
+    if (manualValue) {
+      const numericValue = parseFloat(manualValue);
+      if (!isNaN(numericValue)) {
+        setExtractedData(prev => {
+          const updated = { ...prev };
+          if (subfield) {
+            (updated as any)[field] = { ...(updated as any)[field] || {}, [subfield]: numericValue };
+          } else {
+            (updated as any)[field] = numericValue;
+          }
+           if (field === 'vitaminDValue' && !updated.vitaminDUnits) {
+                updated.vitaminDUnits = expectedVitaminDUnit;
+            }
+            if (field === 'lipidPanel' && !updated.lipidPanel?.units) {
+                if (updated.lipidPanel) updated.lipidPanel.units = expectedLipidUnit;
+            }
+          return updated;
+        });
+      }
+    }
   };
   
   return (
@@ -157,7 +182,11 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
                     {extractedData.hba1cValue ? (
                         <p>{extractedData.hba1cValue}%</p>
                     ) : (
-                         <Input id="hba1c-manual" type="number" step="0.1" placeholder="Enter HbA1c" className="h-8 mt-1" onChange={e => handleManualEntry('hba1cValue', parseFloat(e.target.value))}/>
+                         <Input id="hba1c-manual" type="number" step="0.1" placeholder="Enter HbA1c" className="h-8 mt-1" 
+                           value={manualInputs.hba1c}
+                           onChange={e => handleManualEntryChange('hba1c', e.target.value)}
+                           onBlur={() => handleManualEntryBlur('hba1cValue')}
+                         />
                     )}
                 </div>
             </div>
@@ -169,7 +198,11 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
                    {extractedData.vitaminDValue ? (
                         <p>{extractedData.vitaminDValue} {extractedData.vitaminDUnits}</p>
                    ): (
-                        <Input id="vitd-manual" type="number" placeholder={`Enter Vit D (${expectedVitaminDUnit})`} className="h-8 mt-1" onChange={e => handleManualEntry('vitaminDValue', parseFloat(e.target.value))}/>
+                        <Input id="vitd-manual" type="number" placeholder={`Enter Vit D (${expectedVitaminDUnit})`} className="h-8 mt-1" 
+                          value={manualInputs.vitD}
+                          onChange={e => handleManualEntryChange('vitD', e.target.value)}
+                          onBlur={() => handleManualEntryBlur('vitaminDValue')}
+                        />
                    )}
                </div>
                 {vitaminDUnitMismatch && (
@@ -192,8 +225,16 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
                        <p>{extractedData.bloodPressure.systolic}/{extractedData.bloodPressure.diastolic} mmHg</p>
                    ) : (
                         <div className="flex gap-2 mt-1">
-                            <Input type="number" placeholder="Systolic" className="h-8" onChange={e => handleManualEntry('bloodPressure', { systolic: parseFloat(e.target.value) })}/>
-                            <Input type="number" placeholder="Diastolic" className="h-8" onChange={e => handleManualEntry('bloodPressure', { diastolic: parseFloat(e.target.value) })}/>
+                            <Input type="number" placeholder="Systolic" className="h-8" 
+                              value={manualInputs.systolic}
+                              onChange={e => handleManualEntryChange('systolic', e.target.value)}
+                              onBlur={() => handleManualEntryBlur('bloodPressure', 'systolic')}
+                            />
+                            <Input type="number" placeholder="Diastolic" className="h-8" 
+                              value={manualInputs.diastolic}
+                              onChange={e => handleManualEntryChange('diastolic', e.target.value)}
+                              onBlur={() => handleManualEntryBlur('bloodPressure', 'diastolic')}
+                            />
                         </div>
                    )}
                </div>
@@ -218,19 +259,23 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs">
                  <div className="rounded-md bg-muted/50 p-2">
                     <Label htmlFor="total-manual" className="font-semibold">Total</Label>
-                     {extractedData.lipidPanel?.total ? (<p>{extractedData.lipidPanel.total}</p>) : (<Input id="total-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('lipidPanel', { total: parseFloat(e.target.value) })}/>) }
+                     {extractedData.lipidPanel?.total ? (<p>{extractedData.lipidPanel.total}</p>) : (<Input id="total-manual" type="number" className="h-7 mt-1 text-center" 
+                        value={manualInputs.total} onChange={e => handleManualEntryChange('total', e.target.value)} onBlur={() => handleManualEntryBlur('lipidPanel', 'total')} />) }
                 </div>
                 <div className="rounded-md bg-muted/50 p-2">
                     <Label htmlFor="ldl-manual" className="font-semibold">LDL</Label>
-                    {extractedData.lipidPanel?.ldl ? (<p>{extractedData.lipidPanel.ldl}</p>) : (<Input id="ldl-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('lipidPanel', { ldl: parseFloat(e.target.value) })}/>) }
+                    {extractedData.lipidPanel?.ldl ? (<p>{extractedData.lipidPanel.ldl}</p>) : (<Input id="ldl-manual" type="number" className="h-7 mt-1 text-center" 
+                        value={manualInputs.ldl} onChange={e => handleManualEntryChange('ldl', e.target.value)} onBlur={() => handleManualEntryBlur('lipidPanel', 'ldl')} />) }
                 </div>
                 <div className="rounded-md bg-muted/50 p-2">
                     <Label htmlFor="hdl-manual" className="font-semibold">HDL</Label>
-                    {extractedData.lipidPanel?.hdl ? (<p>{extractedData.lipidPanel.hdl}</p>) : (<Input id="hdl-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('lipidPanel', { hdl: parseFloat(e.target.value) })}/>) }
+                    {extractedData.lipidPanel?.hdl ? (<p>{extractedData.lipidPanel.hdl}</p>) : (<Input id="hdl-manual" type="number" className="h-7 mt-1 text-center" 
+                        value={manualInputs.hdl} onChange={e => handleManualEntryChange('hdl', e.target.value)} onBlur={() => handleManualEntryBlur('lipidPanel', 'hdl')} />) }
                 </div>
                  <div className="rounded-md bg-muted/50 p-2">
                     <Label htmlFor="trig-manual" className="font-semibold">Trig.</Label>
-                    {extractedData.lipidPanel?.triglycerides ? (<p>{extractedData.lipidPanel.triglycerides}</p>) : (<Input id="trig-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('lipidPanel', { triglycerides: parseFloat(e.target.value) })}/>) }
+                    {extractedData.lipidPanel?.triglycerides ? (<p>{extractedData.lipidPanel.triglycerides}</p>) : (<Input id="trig-manual" type="number" className="h-7 mt-1 text-center" 
+                        value={manualInputs.triglycerides} onChange={e => handleManualEntryChange('triglycerides', e.target.value)} onBlur={() => handleManualEntryBlur('lipidPanel', 'triglycerides')} />) }
                 </div>
             </div>
         </div>
@@ -243,15 +288,18 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
             <div className="grid grid-cols-3 gap-2 text-center text-xs">
                  <div className="rounded-md bg-muted/50 p-2">
                     <Label htmlFor="tsh-manual" className="font-semibold">TSH (μIU/mL)</Label>
-                    {extractedData.thyroidPanel?.tsh ? (<p>{extractedData.thyroidPanel.tsh}</p>) : (<Input id="tsh-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('thyroidPanel', { tsh: parseFloat(e.target.value) })}/>) }
+                    {extractedData.thyroidPanel?.tsh ? (<p>{extractedData.thyroidPanel.tsh}</p>) : (<Input id="tsh-manual" type="number" className="h-7 mt-1 text-center" 
+                        value={manualInputs.tsh} onChange={e => handleManualEntryChange('tsh', e.target.value)} onBlur={() => handleManualEntryBlur('thyroidPanel', 'tsh')} />) }
                 </div>
                 <div className="rounded-md bg-muted/50 p-2">
                     <Label htmlFor="t3-manual" className="font-semibold">T3 (ng/dL)</Label>
-                    {extractedData.thyroidPanel?.t3 ? (<p>{extractedData.thyroidPanel.t3}</p>) : (<Input id="t3-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('thyroidPanel', { t3: parseFloat(e.target.value) })}/>) }
+                    {extractedData.thyroidPanel?.t3 ? (<p>{extractedData.thyroidPanel.t3}</p>) : (<Input id="t3-manual" type="number" className="h-7 mt-1 text-center" 
+                        value={manualInputs.t3} onChange={e => handleManualEntryChange('t3', e.target.value)} onBlur={() => handleManualEntryBlur('thyroidPanel', 't3')} />) }
                 </div>
                 <div className="rounded-md bg-muted/50 p-2">
                     <Label htmlFor="t4-manual" className="font-semibold">T4 (μg/dL)</Label>
-                    {extractedData.thyroidPanel?.t4 ? (<p>{extractedData.thyroidPanel.t4}</p>) : (<Input id="t4-manual" type="number" className="h-7 mt-1 text-center" onChange={e => handleManualEntry('thyroidPanel', { t4: parseFloat(e.target.value) })}/>) }
+                    {extractedData.thyroidPanel?.t4 ? (<p>{extractedData.thyroidPanel.t4}</p>) : (<Input id="t4-manual" type="number" className="h-7 mt-1 text-center" 
+                        value={manualInputs.t4} onChange={e => handleManualEntryChange('t4', e.target.value)} onBlur={() => handleManualEntryBlur('thyroidPanel', 't4')} />) }
                 </div>
             </div>
         </div>
