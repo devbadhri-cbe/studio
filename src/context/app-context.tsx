@@ -328,7 +328,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const updatedRecords = weightRecords.filter(r => r.id !== id);
     setWeightRecordsState(updatedRecords);
 
-    const lastWeight = [...updatedRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+    const lastWeight = [...updatedRecords].sort((a,b) => new Date(a.date as string).getTime() - new Date(a.date as string).getTime())[0];
     const newBmi = calculateBmi(lastWeight?.value, profile.height);
     const updatedProfile = { ...profile, bmi: newBmi };
     setProfileState(updatedProfile);
@@ -376,26 +376,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         result.added.push('HbA1c');
       } else { result.duplicates.push('HbA1c'); }
     }
+    
     if (batch.lipid && batch.lipid.ldl && batch.lipid.hdl && batch.lipid.triglycerides && batch.lipid.total) {
       const dateExists = lipidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
       const expectedUnit = biomarkerUnit === 'conventional' ? 'mg/dL' : 'mmol/L';
-      if (!dateExists && batch.lipid.units === expectedUnit) {
-        const newRecord: LipidRecord = { ...batch.lipid, id: `lipid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+      
+      let lipidRecordForDb = { ...batch.lipid };
+      if (batch.lipid.units && batch.lipid.units !== 'mg/dL') {
+        lipidRecordForDb.ldl = toMgDl(batch.lipid.ldl, 'ldl');
+        lipidRecordForDb.hdl = toMgDl(batch.lipid.hdl, 'hdl');
+        lipidRecordForDb.triglycerides = toMgDl(batch.lipid.triglycerides, 'triglycerides');
+        lipidRecordForDb.total = toMgDl(batch.lipid.total, 'total');
+      }
+
+      if (!dateExists) {
+        const newRecord: LipidRecord = { ...lipidRecordForDb, id: `lipid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.lipidRecords = [...lipidRecords, newRecord];
         setLipidRecordsState(updates.lipidRecords);
         result.added.push('Lipid Panel');
       } else if (dateExists) { result.duplicates.push('Lipid Panel'); }
     }
+    
     if (batch.vitaminD && batch.vitaminD.value) {
       const dateExists = vitaminDRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
-      const expectedUnit = biomarkerUnit === 'conventional' ? 'ng/mL' : 'nmol/L';
-      if (!dateExists && batch.vitaminD.units === expectedUnit) {
-        const newRecord: VitaminDRecord = { ...batch.vitaminD, value: batch.vitaminD.value, id: `vitd-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+      
+      let vitDRecordForDb = { ...batch.vitaminD };
+      if(batch.vitaminD.units && batch.vitaminD.units !== 'ng/mL') {
+        vitDRecordForDb.value = toNgDl(batch.vitaminD.value);
+      }
+
+      if (!dateExists) {
+        const newRecord: VitaminDRecord = { ...vitDRecordForDb, value: vitDRecordForDb.value, id: `vitd-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
         updates.vitaminDRecords = [...vitaminDRecords, newRecord];
         setVitaminDRecordsState(updates.vitaminDRecords);
         result.added.push('Vitamin D');
       } else if(dateExists) { result.duplicates.push('Vitamin D'); }
     }
+    
     if (batch.thyroid && batch.thyroid.tsh && batch.thyroid.t3 && batch.thyroid.t4) {
       const dateExists = thyroidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
       if (!dateExists) {
