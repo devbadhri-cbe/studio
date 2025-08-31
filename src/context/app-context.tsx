@@ -149,32 +149,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
   
   React.useEffect(() => {
-    const storedTheme = (localStorage.getItem("theme") as Theme) || "system";
+    const storedTheme = (localStorage.getItem('theme') as Theme) || 'system';
     setThemeState(storedTheme);
-  }, []);
-  
-  React.useEffect(() => {
+    
     const root = window.document.documentElement;
-    root.classList.remove("light", "dark");
-  
-    let effectiveTheme = theme;
-    if (theme === "system") {
-      effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    root.classList.remove('light', 'dark');
+
+    let effectiveTheme = storedTheme;
+    if (storedTheme === 'system') {
+      effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
-  
     root.classList.add(effectiveTheme);
-  
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
-      if (theme === "system") {
-        const newEffectiveTheme = mediaQuery.matches ? "dark" : "light";
-        root.classList.remove("light", "dark");
+      const currentTheme = (localStorage.getItem('theme') as Theme) || 'system';
+      if (currentTheme === 'system') {
+        const newEffectiveTheme = mediaQuery.matches ? 'dark' : 'light';
+        root.classList.remove('light', 'dark');
         root.classList.add(newEffectiveTheme);
       }
     };
-  
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme]);
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
