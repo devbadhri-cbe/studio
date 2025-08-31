@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { UploadRecordDialog } from '@/components/upload-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
@@ -18,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import { updatePatient } from '@/lib/firestore';
-import { LayoutGrid, MessageSquareText, GaugeCircle, UploadCloud, Loader2, User, Upload } from 'lucide-react';
+import { MessageSquareText, Loader2, User, Upload } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -73,12 +72,11 @@ export function PatientHeader() {
       <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
         <Tooltip>
             <TooltipTrigger asChild>
-                <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading}
-                    className="relative rounded-full group shrink-0"
+                <label 
+                    htmlFor="photo-upload"
+                    className="relative rounded-full group shrink-0 cursor-pointer"
                 >
-                    <Avatar className="h-20 w-20 md:h-24 md:w-24 cursor-pointer">
+                    <Avatar className="h-20 w-20 md:h-24 md:w-24">
                         <AvatarImage src={profile.photoUrl} />
                         <AvatarFallback>
                             {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : 
@@ -89,13 +87,13 @@ export function PatientHeader() {
                             }
                         </AvatarFallback>
                     </Avatar>
-                </button>
+                </label>
             </TooltipTrigger>
             <TooltipContent>
                 <p>Upload Photo</p>
             </TooltipContent>
         </Tooltip>
-        <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
+        <Input id="photo-upload" type="file" className="hidden" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" disabled={isUploading}/>
 
         <div className="flex flex-col items-center md:items-start flex-1 gap-4 w-full">
             <div className="text-center md:text-left">
