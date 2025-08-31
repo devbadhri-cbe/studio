@@ -69,12 +69,9 @@ export function PatientHeader() {
   return (
     <Card>
       <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
-        <Tooltip>
+         <Tooltip>
             <TooltipTrigger asChild>
-                <label 
-                    htmlFor="photo-upload"
-                    className="relative rounded-full group shrink-0 cursor-pointer"
-                >
+                <label htmlFor="photo-upload" className="relative rounded-full group shrink-0 cursor-pointer">
                     <Avatar className="h-20 w-20 md:h-24 md:w-24">
                         <AvatarImage src={profile.photoUrl} />
                         <AvatarFallback>
@@ -92,7 +89,7 @@ export function PatientHeader() {
                 <p>Upload Photo</p>
             </TooltipContent>
         </Tooltip>
-        <Input id="photo-upload" type="file" className="hidden" onChange={handlePhotoUpload} accept="image/*" disabled={isUploading}/>
+        <Input id="photo-upload" type="file" className="hidden" onChange={handlePhotoUpload} accept="image/*" capture="user" disabled={isUploading}/>
 
         <div className="flex flex-col items-center md:items-start flex-1 gap-4 w-full">
             <div className="text-center md:text-left">
