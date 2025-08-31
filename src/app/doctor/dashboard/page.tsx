@@ -140,18 +140,15 @@ export default function DoctorDashboardPage() {
   return (
     <>
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <header className="border-b px-4 py-4 md:px-6">
-            <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
-              <div className="w-1/3">
-                {/* Empty div for spacing */}
-              </div>
-              <div className="w-1/3 flex justify-center items-center gap-2">
+       <header className="border-b px-4 py-6 md:px-6">
+            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2">
+              <div className="flex items-center gap-2">
                   <Logo className="h-8 w-8 text-primary" />
                   <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
               </div>
-              <div className="w-1/3 text-right text-sm text-muted-foreground">
+              <div className="text-center text-sm text-muted-foreground">
                   <p className="font-semibold text-lg text-foreground">{doctorName}</p>
-                  <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-end gap-1.5 hover:text-primary">
+                  <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-center gap-1.5 hover:text-primary">
                       <Mail className="h-3 w-3" />
                       drbadhri@gmail.com
                   </a>
@@ -161,11 +158,11 @@ export default function DoctorDashboardPage() {
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
             <div className="flex items-center justify-between border-b pb-4 mb-6">
-                <div className="flex-1">
-                    <h1 className={`text-2xl md:text-3xl font-semibold font-headline ${isAddingPatient ? 'text-center' : ''}`}>
+                <div className={`flex-1 ${isAddingPatient ? 'text-center' : ''}`}>
+                    <h1 className="text-2xl md:text-3xl font-semibold font-headline">
                         {isAddingPatient ? 'Add New Patient' : 'Patient Overview'}
                     </h1>
-                    <p className={`text-muted-foreground ${isAddingPatient ? 'text-center' : ''}`}>
+                    <p className="text-muted-foreground">
                         {isAddingPatient ? "Enter the patient's details below." : "Manage and review your patients' health data."}
                     </p>
                 </div>

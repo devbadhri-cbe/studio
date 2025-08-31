@@ -159,15 +159,13 @@ export default function PatientDashboard() {
               </div>
 
              {isDoctorLoggedIn && (
-                <div className="w-full flex flex-col items-center justify-between text-sm text-muted-foreground gap-2">
-                    <div className='text-center'>
-                        <p className="text-xs">by</p>
-                        <p className="font-semibold text-foreground">{doctorName}</p>
-                        <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-center gap-1.5 hover:text-primary">
-                            <Mail className="h-3 w-3" />
-                            drbadhri@gmail.com
-                        </a>
-                    </div>
+                <div className="w-full text-center text-sm text-muted-foreground gap-2">
+                    <p className="text-xs">by</p>
+                    <p className="font-semibold text-foreground">{doctorName}</p>
+                    <a href="mailto:drbadhri@gmail.com" className="flex items-center justify-center gap-1.5 hover:text-primary">
+                        <Mail className="h-3 w-3" />
+                        drbadhri@gmail.com
+                    </a>
                 </div>
             )}
             </div>
