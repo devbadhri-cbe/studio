@@ -88,7 +88,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [weightRecords, setWeightRecordsState] = React.useState<WeightRecord[]>([]);
   const [bloodPressureRecords, setBloodPressureRecordsState] = React.useState<BloodPressureRecord[]>([]);
   const [tips, setTipsState] = React.useState<string[]>([]);
-  const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('none');
+  const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('report');
   const [isClient, setIsClient] = React.useState(false);
   const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
@@ -200,7 +200,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
     setTips([]); // Clear tips for new patient
-    setDashboardViewState('none'); // Reset to default view
+    setDashboardViewState('report'); // Reset to default view
   }, []);
   
   const updatePatientData = async (patientId: string, updates: Partial<Patient>) => {

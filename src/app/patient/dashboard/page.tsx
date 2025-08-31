@@ -104,18 +104,20 @@ export default function PatientDashboard() {
         return <ThyroidCard />;
       case 'hypertension':
         return <HypertensionCard />;
+      case 'report':
+        return <ReportCard />;
       default:
         return null;
     }
   }
   
   const dashboardOptions = {
+    report: { name: 'Comprehensive Report', icon: <LayoutGrid className="w-4 h-4" /> },
     hba1c: { name: 'HbA1c Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     lipids: { name: 'Lipid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     vitaminD: { name: 'Vitamin D Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     thyroid: { name: 'Thyroid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     hypertension: { name: 'Hypertension Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-    report: { name: 'Comprehensive Report', icon: <LayoutGrid className="w-4 h-4" /> },
   }
   
   const handleDashboardSelect = (key: string) => {
@@ -245,14 +247,11 @@ export default function PatientDashboard() {
                 </div>
             </div>
             
-            {dashboardView !== 'none' && (
-                <div className="grid auto-rows-fr grid-cols-1 gap-6">
-                   <div className="lg:col-span-3">
-                        <ReportCard />
-                   </div>
-                </div>
+            {dashboardView === 'report' && (
+              <div className="lg:col-span-3">
+                  <ReportCard />
+              </div>
             )}
-
           </div>
         </main>
       </div>
