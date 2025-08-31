@@ -14,17 +14,9 @@ export function WeightChart() {
   const isImperial = profile.unitSystem === 'imperial';
   const unitLabel = isImperial ? 'lbs' : 'kg';
 
-  const sortedRecords = [...(weightRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(a.date).getTime());
+  const sortedRecords = [...(weightRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
-  const oneYearAgo = subYears(new Date(), 1);
-  
-  let latestRecords = sortedRecords.filter(r => new Date(r.date) >= oneYearAgo);
-
-  if (latestRecords.length < 5 && sortedRecords.length >= 5) {
-      latestRecords = sortedRecords.slice(sortedRecords.length - 5);
-  } else if (sortedRecords.length < 5) {
-      latestRecords = sortedRecords;
-  }
+  const latestRecords = sortedRecords.slice(-10);
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
@@ -53,7 +45,7 @@ export function WeightChart() {
     <div className="h-full w-full">
       <ResponsiveContainer width="100%" height="100%">
         {weightRecords && weightRecords.length > 0 ? (
-          <LineChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+          <LineChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
@@ -99,10 +91,11 @@ export function WeightChart() {
                 <ReferenceLine y={idealWeight} stroke="hsl(var(--accent))" strokeDasharray="3 3">
                     <Label 
                         value={`Ideal (${idealWeight} ${unitLabel})`} 
-                        position="insideTopLeft"
+                        position="bottom"
                         fill="hsl(var(--accent))"
                         fontSize={10}
                         dy={-5}
+                        offset={10}
                     />
                 </ReferenceLine>
              )}
