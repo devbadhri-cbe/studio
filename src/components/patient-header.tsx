@@ -16,8 +16,9 @@ import { useToast } from '@/hooks/use-toast';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import { updatePatient } from '@/lib/firestore';
-import { MessageSquareText, Loader2, User, Camera } from 'lucide-react';
+import { MessageSquareText, Loader2, User, Camera, Upload } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
+import { CameraCaptureDialog } from './camera-capture-dialog';
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -31,19 +32,19 @@ export function PatientHeader() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [isUploading, setIsUploading] = React.useState(false);
+  const [showCameraDialog, setShowCameraDialog] = React.useState(false);
   const doctorPhoneNumber = '+919791377716';
 
   const pageTitle = isDoctorLoggedIn
     ? `${profile.name}'s Dashboard`
     : `Welcome, ${profile.name || 'User'}!`;
-
-  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !profile.id) return;
-
+    
+  const uploadPhoto = async (file: File | Blob) => {
+    if (!profile.id) return;
     setIsUploading(true);
+
     try {
-        const fileRef = ref(storage, `profile_photos/${profile.id}/${Date.now()}_${file.name}`);
+        const fileRef = ref(storage, `profile_photos/${profile.id}/${Date.now()}_photo.jpg`);
         const snapshot = await uploadBytes(fileRef, file);
         const downloadUrl = await getDownloadURL(snapshot.ref);
         
@@ -63,18 +64,26 @@ export function PatientHeader() {
         });
     } finally {
         setIsUploading(false);
-        // Reset file input
+        setShowCameraDialog(false);
         if(fileInputRef.current) {
             fileInputRef.current.value = "";
         }
     }
+  }
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      await uploadPhoto(file);
+    }
   };
   
-  const handleUploadClick = () => {
+  const handleGalleryUploadClick = () => {
     fileInputRef.current?.click();
   };
 
   return (
+    <>
     <Card>
       <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
         <Avatar className="h-20 w-20 md:h-24 md:w-24">
@@ -89,9 +98,8 @@ export function PatientHeader() {
             ref={fileInputRef}
             type="file" 
             className="hidden" 
-            onChange={handlePhotoUpload} 
+            onChange={handleFileSelect} 
             accept="image/*" 
-            capture="user" 
             disabled={isUploading}
         />
 
@@ -103,10 +111,25 @@ export function PatientHeader() {
                 <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
             </div>
             <div className="flex w-full flex-wrap justify-center md:justify-start gap-2">
-                <Button onClick={handleUploadClick} size="sm" variant="outline" disabled={isUploading}>
-                    <Camera className="mr-2 h-4 w-4" />
-                    {isUploading ? 'Uploading...' : 'Upload Photo'}
-                </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button size="sm" variant="outline" disabled={isUploading}>
+                             <Camera className="mr-2 h-4 w-4" />
+                            {isUploading ? 'Uploading...' : 'Change Photo'}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem onSelect={() => setShowCameraDialog(true)}>
+                           <Camera className="mr-2 h-4 w-4" />
+                           Use Camera
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={handleGalleryUploadClick}>
+                           <Upload className="mr-2 h-4 w-4" />
+                           Upload from Gallery
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
                 {!isDoctorLoggedIn && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -131,5 +154,13 @@ export function PatientHeader() {
         </div>
       </CardContent>
     </Card>
+    <CameraCaptureDialog
+        open={showCameraDialog}
+        onOpenChange={setShowCameraDialog}
+        onCapture={uploadPhoto}
+        isUploading={isUploading}
+    />
+    </>
   );
 }
+
