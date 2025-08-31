@@ -81,27 +81,6 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
   
   return (
     <>
-    <div className="flex items-start justify-between border-b pb-4 mb-6">
-        <div className="space-y-1">
-            <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                Add New Patient
-            </h1>
-            <p className="text-muted-foreground">
-                Enter the patient's details below.
-            </p>
-        </div>
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <Button onClick={onCancel} variant="ghost" size="icon">
-                    <X className="h-5 w-5" />
-                    <span className="sr-only">Close</span>
-                </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-                <p>Close</p>
-            </TooltipContent>
-        </Tooltip>
-    </div>
     <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
@@ -127,7 +106,38 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                     <FormLabel>Age</FormLabel>
                     <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
                 </FormItem>
-                 <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
+                 <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col justify-end">
+                             <FormLabel className="mb-2.5">Gender</FormLabel>
+                            <FormControl>
+                                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 h-10">
+                                    <FormItem className="flex items-center space-x-2 space-y-0">
+                                        <FormControl>
+                                            <RadioGroupItem value="male" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Male</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-2 space-y-0">
+                                        <FormControl>
+                                            <RadioGroupItem value="female" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Female</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-2 space-y-0">
+                                        <FormControl>
+                                            <RadioGroupItem value="other" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Other</FormLabel>
+                                    </FormItem>
+                                </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
             </div>
 
             <Separator />
