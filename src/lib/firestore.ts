@@ -16,8 +16,6 @@ import { MedicalCondition } from './types';
 import { Medication } from './types';
 import { countries } from './countries';
 
-const PATIENTS_COLLECTION = 'patients';
-
 const recalculatePatientStatus = (patient: Patient): Patient => {
     const updatedPatient = { ...patient };
     
@@ -101,6 +99,13 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
     
     let patientToSave = recalculatePatientStatus(newPatientObject as Patient);
     
+    // Sanitize data to remove undefined values before sending to Firestore
+    Object.keys(patientToSave).forEach(key => {
+        if ((patientToSave as any)[key] === undefined) {
+            delete (patientToSave as any)[key];
+        }
+    });
+
     const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), patientToSave);
     return { ...patientToSave, id: docRef.id };
 };
