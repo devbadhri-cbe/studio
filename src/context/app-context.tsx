@@ -15,6 +15,7 @@ const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'ot
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
 type DashboardView = 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'hypertension' | 'report' | 'none';
+type Theme = 'dark' | 'light' | 'system';
 
 interface BatchRecords {
     hba1c?: Omit<Hba1cRecord, 'id' | 'medication'>;
@@ -72,6 +73,8 @@ interface AppContextType {
   getDisplayVitaminDValue: (value: number) => number;
   getDbLipidValue: (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides') => number;
   getDbVitaminDValue: (value: number) => number;
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
 }
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -88,6 +91,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('none');
   const [isClient, setIsClient] = React.useState(false);
   const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
+  const [theme, setThemeState] = React.useState<Theme>('system');
+
+  React.useEffect(() => {
+    const storedTheme = localStorage.getItem('theme') as Theme | null;
+    if (storedTheme) {
+      setThemeState(storedTheme);
+    }
+    setIsClient(true);
+  }, []);
+
+  React.useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    let effectiveTheme = theme;
+    if (theme === 'system') {
+      effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+    }
+
+    root.classList.add(effectiveTheme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+  
 
   const biomarkerUnit = React.useMemo(() => {
     return countries.find(c => c.code === profile.country)?.biomarkerUnit || 'conventional';
@@ -125,7 +153,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
 
   React.useEffect(() => {
-    setIsClient(true);
     
     const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -431,6 +458,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     getDisplayVitaminDValue,
     getDbLipidValue,
     getDbVitaminDValue,
+    theme,
+    setTheme: setThemeState,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

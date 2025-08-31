@@ -4,6 +4,7 @@
 import { Logo } from '@/components/logo';
 import { Mail } from 'lucide-react';
 import * as React from 'react';
+import { ThemeToggle } from './theme-toggle';
 
 interface TitleBarProps {
     doctorName: string;
@@ -15,7 +16,10 @@ export function TitleBar({ doctorName, doctorEmail, children }: TitleBarProps) {
     return (
         <header className="border-b px-4 py-6 md:px-6">
             <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 relative">
-                {children}
+                 <div className="absolute top-1/2 -translate-y-1/2 right-0 flex items-center gap-2">
+                    <ThemeToggle />
+                    {children}
+                </div>
                 <div className="flex items-center gap-2">
                     <Logo className="h-8 w-8 text-primary" />
                     <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
