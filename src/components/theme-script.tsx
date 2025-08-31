@@ -21,5 +21,15 @@ const script = `
 `;
 
 export function ThemeScript() {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   return <script dangerouslySetInnerHTML={{ __html: script }} />;
 }
