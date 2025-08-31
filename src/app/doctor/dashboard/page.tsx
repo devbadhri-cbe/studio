@@ -25,6 +25,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { TitleBar } from '@/components/title-bar';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
@@ -140,7 +141,7 @@ export default function DoctorDashboardPage() {
     });
 
   return (
-    <>
+    <TooltipProvider>
     <div className="flex min-h-screen w-full flex-col bg-background">
        <TitleBar doctorName={doctorName} doctorEmail={doctorEmail}>
          <div className="absolute top-1/2 -translate-y-1/2 right-0">
@@ -244,6 +245,6 @@ export default function DoctorDashboardPage() {
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
-    </>
+    </TooltipProvider>
   );
 }
