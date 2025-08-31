@@ -88,6 +88,15 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
             
+            {patient?.id && (
+                <FormItem>
+                    <FormLabel>Patient ID</FormLabel>
+                    <FormControl>
+                        <Input readOnly value={patient.id} />
+                    </FormControl>
+                </FormItem>
+            )}
+
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                  <FormItem>
                      <FormLabel>Date of Birth</FormLabel>
