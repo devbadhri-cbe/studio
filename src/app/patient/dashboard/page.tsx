@@ -145,6 +145,7 @@ export default function PatientDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
                 <div className="lg:col-span-1 flex flex-col gap-6">
                     <MedicalHistoryCard />
+                    <ReminderCard />
                 </div>
                 <div className="lg:col-span-2 flex flex-col gap-6">
                     <InsightsCard />
@@ -152,7 +153,6 @@ export default function PatientDashboard() {
                 </div>
             </div>
             
-            <ReminderCard />
           </div>
         </main>
       </div>
