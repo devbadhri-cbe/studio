@@ -19,6 +19,8 @@ import { parseISO } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { calculateAge } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+
 
 const FormSchema = z.object({
   name: z.string().min(2, "Name is required."),
@@ -75,7 +77,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
         const countryData = countries.find(c => c.code === watchCountry);
         const currentPhone = form.getValues('phone');
         if (countryData && (!currentPhone || currentPhone.startsWith('+'))) {
-             form.setValue('phone', countryData.phoneCode, { shouldValidate: true });
+             form.setValue('phone', countryData.phoneCode, { shouldValidate: false });
         }
     }
   }, [watchCountry, form]);
@@ -87,12 +89,12 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
             
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                 <FormField
-                    control={form.control}
-                    name="dob"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Date of Birth</FormLabel>
+                 <FormItem>
+                     <FormLabel>Date of Birth</FormLabel>
+                     <FormField
+                        control={form.control}
+                        name="dob"
+                        render={({ field }) => (
                             <FormControl>
                                 <DatePicker
                                     value={field.value}
@@ -101,10 +103,10 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                                     toYear={new Date().getFullYear()}
                                 />
                             </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                        )}
+                    />
+                    <FormMessage className="pt-1" />
+                </FormItem>
                  <FormItem>
                     <FormLabel>Age</FormLabel>
                     <FormControl>
@@ -116,7 +118,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                     name="gender"
                     render={({ field }) => (
                         <FormItem>
-                             <FormLabel>Gender</FormLabel>
+                            <FormLabel>Gender</FormLabel>
                             <FormControl>
                                 <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 h-10 pt-2">
                                     <FormItem className="flex items-center space-x-2 space-y-0">
