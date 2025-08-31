@@ -1,20 +1,13 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     match /patients/{patientId} {
-      // Allow doctors (authenticated users) to create, update, and delete patient records.
-      allow write: if request.auth != null;
+      // Allow anyone to read a single patient's document (for patient portal access)
+      allow get: if true;
       
-      // Allow both doctors (authenticated users) and patients (public with ID) to read.
-      allow read: if true;
-    }
-    
-    match /patients/{patientId}/{subcollection}/{docId} {
-        // For any potential subcollections, inherit the same logic.
-        allow write: if request.auth != null;
-        allow read: if true;
+      // Allow authenticated users (doctors) to list and write to patient documents
+      allow list, write: if request.auth != null;
     }
   }
 }
