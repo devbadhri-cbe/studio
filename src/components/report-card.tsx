@@ -39,7 +39,7 @@ export function ReportCard() {
           <CardTitle>Comprehensive Health Report</CardTitle>
           <CardDescription>An overview of your key health metrics and trends.</CardDescription>
         </div>
-         <div className="ml-auto no-print">
+         <div className="ml-auto flex-shrink-0 no-print">
             <Button onClick={() => window.print()} variant="outline" size="sm">
                 <Printer className="mr-2 h-4 w-4" />
                 Print / Save PDF
