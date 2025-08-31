@@ -29,12 +29,32 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { UploadRecordDialog } from '@/components/upload-record-dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 
 export default function PatientDashboard() {
   const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
   const router = useRouter();
-  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
+  const isMobile = useIsMobile();
+  const [shouldAnimate, setShouldAnimate] = React.useState(false);
+  
+  React.useEffect(() => {
+    if (isMobile && dashboardView === 'none') {
+        const timer = setTimeout(() => {
+            setShouldAnimate(true);
+        }, 500); // Small delay to ensure page is settled
+        
+        const clearTimer = setTimeout(() => {
+            setShouldAnimate(false);
+        }, 2500); // Animation is 2s, give it a bit more time
+
+        return () => {
+            clearTimeout(timer);
+            clearTimeout(clearTimer);
+        }
+    }
+  }, [isMobile, dashboardView]);
 
 
   if (!isClient) {
@@ -75,7 +95,6 @@ export default function PatientDashboard() {
   
   const handleDashboardSelect = (key: string) => {
     setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension' | 'none');
-    setIsTooltipOpen(false);
   }
   
   const ActiveDashboardIcon = dashboardView !== 'none' ? dashboardOptions[dashboardView]?.icon : <GaugeCircle className="w-4 h-4" />;
@@ -125,7 +144,7 @@ export default function PatientDashboard() {
               </UploadRecordDialog>
               <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className={`justify-center ${isTooltipOpen ? 'animate-pulse-once bg-primary/20' : ''}`}>
+                        <Button variant="outline" className={cn("justify-center", shouldAnimate && 'animate-pulse-once bg-primary/20')}>
                             {ActiveDashboardIcon}
                             <span className="ml-2">{dashboardButtonLabel}</span>
                         </Button>
