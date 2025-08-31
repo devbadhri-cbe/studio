@@ -144,11 +144,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   React.useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme | null;
-    if (savedTheme) {
-        setThemeState(savedTheme);
-    }
+    const storedTheme = localStorage.getItem("theme") as Theme | null;
+    setThemeState(storedTheme || 'system');
   }, []);
+
+  const setTheme = (newTheme: Theme) => {
+    localStorage.setItem("theme", newTheme);
+    setThemeState(newTheme);
+  };
+  
+  React.useEffect(() => {
+    const root = window.document.documentElement
+    root.classList.remove("light", "dark")
+
+    let effectiveTheme = theme;
+    if (theme === "system") {
+      effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+    }
+
+    root.classList.add(effectiveTheme)
+  }, [theme]);
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
       setIsDoctorLoggedInState(isLoggedIn);
@@ -158,19 +173,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('doctor_logged_in');
       }
   }
-
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-
-    let currentTheme = theme;
-    if (theme === 'system') {
-      currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    root.classList.add(currentTheme);
-  }, [theme]);
   
   const setPatientData = React.useCallback((patient: Patient) => {
     const patientProfile: UserProfile = {
@@ -411,11 +413,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setDashboardView = (view: DashboardView) => {
     setDashboardViewState(view);
-  }
-
-  const setTheme = (theme: Theme) => {
-    localStorage.setItem('theme', theme);
-    setThemeState(theme);
   }
   
   const value: AppContextType = {
