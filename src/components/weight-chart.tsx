@@ -2,11 +2,10 @@
 'use client';
 
 import * as React from 'react';
-import { Line, LineChart, CartesianGrid, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot, ReferenceLine, Label } from 'recharts';
+import { Line, LineChart, CartesianGrid, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot } from 'recharts';
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { kgToLbs } from '@/lib/utils';
-import { subYears } from 'date-fns';
 
 export function WeightChart() {
   const { weightRecords, profile } = useApp();
@@ -42,71 +41,66 @@ export function WeightChart() {
 
 
   return (
-    <div className="h-full w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        {weightRecords && weightRecords.length > 0 ? (
-          <LineChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickFormatter={(tick) => formatDate(tick)}
-              tickLine={false}
-              axisLine={false}
-              tick={{ fontSize: 10 }}
-              dy={10}
-            />
-            <YAxis
-              domain={yAxisDomain}
-              allowDecimals={true}
-              tickLine={false}
-              axisLine={false}
-              tick={{ fontSize: 10 }}
-              dx={-5}
-            />
-            <Tooltip
-              cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
-              content={({ active, payload, label }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">Date</span>
-                          <span className="font-bold text-foreground">{formatDate(label)}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">Weight</span>
-                          <span className="font-bold" style={{ color: 'hsl(var(--chart-5))' }}>
-                            {payload[0].value} {unitLabel}
-                          </span>
+    <div className="h-full w-full flex flex-col">
+      <div className="flex-1">
+        <ResponsiveContainer width="100%" height="100%">
+          {weightRecords && weightRecords.length > 0 ? (
+            <LineChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickFormatter={(tick) => formatDate(tick)}
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 10 }}
+                dy={10}
+              />
+              <YAxis
+                domain={yAxisDomain}
+                allowDecimals={true}
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 10 }}
+                dx={-5}
+              />
+              <Tooltip
+                cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="rounded-lg border bg-background p-2 shadow-sm">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="flex flex-col">
+                            <span className="text-[0.70rem] uppercase text-muted-foreground">Date</span>
+                            <span className="font-bold text-foreground">{formatDate(label)}</span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[0.70rem] uppercase text-muted-foreground">Weight</span>
+                            <span className="font-bold" style={{ color: 'hsl(var(--chart-5))' }}>
+                              {payload[0].value} {unitLabel}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-             {idealWeight && (
-                <ReferenceLine y={idealWeight} stroke="hsl(var(--accent))" strokeDasharray="3 3">
-                    <Label 
-                        value={`Ideal (${idealWeight} ${unitLabel})`} 
-                        position="bottom"
-                        fill="hsl(var(--accent))"
-                        fontSize={10}
-                        dy={-5}
-                        offset={10}
-                    />
-                </ReferenceLine>
-             )}
-            <Line type="monotone" dataKey="value" name="Weight" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--chart-5))" />} activeDot={{ r: 6 }} />
-          </LineChart>
-        ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
-            <p className="text-center text-xs text-muted-foreground">Not enough data to display chart.</p>
-          </div>
-        )}
-      </ResponsiveContainer>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Line type="monotone" dataKey="value" name="Weight" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--chart-5))" />} activeDot={{ r: 6 }} />
+            </LineChart>
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
+              <p className="text-center text-xs text-muted-foreground">Not enough data to display chart.</p>
+            </div>
+          )}
+        </ResponsiveContainer>
+      </div>
+      {idealWeight && (
+        <div className="text-center text-xs text-muted-foreground mt-2">
+          Ideal Weight (BMI 25): <span className="font-bold text-foreground">{idealWeight} {unitLabel}</span>
+        </div>
+      )}
     </div>
   );
 }
