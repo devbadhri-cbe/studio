@@ -19,6 +19,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import { updatePatient } from '@/lib/firestore';
 import { LayoutGrid, MessageSquareText, GaugeCircle, UploadCloud, Loader2, User, Upload } from 'lucide-react';
+import { Card, CardContent } from './ui/card';
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -86,7 +87,8 @@ export function PatientHeader() {
   const dashboardButtonLabel = dashboardView !== 'none' ? dashboardOptions[dashboardView].name : "Select a Dashboard";
 
   return (
-    <div className="flex flex-col items-center border-b pb-4 gap-4">
+    <Card>
+      <CardContent className="p-4 flex flex-col items-center gap-4">
       <Tooltip>
         <TooltipTrigger asChild>
             <button 
@@ -169,6 +171,7 @@ export function PatientHeader() {
           </DropdownMenu>
         </div>
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
