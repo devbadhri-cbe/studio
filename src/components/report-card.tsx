@@ -34,7 +34,7 @@ export function ReportCard() {
 
   return (
     <Card className="h-full">
-      <CardHeader className="flex flex-row items-start">
+      <CardHeader className="flex flex-row items-start justify-between">
         <div className="grid gap-2">
           <CardTitle>Comprehensive Health Report</CardTitle>
           <CardDescription>An overview of your key health metrics and trends.</CardDescription>
@@ -51,98 +51,85 @@ export function ReportCard() {
         <section>
           <CardTitle className="text-lg mb-2">Latest Results</CardTitle>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">HbA1c</CardTitle>
-                <Droplet className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                {latestHba1c ? (
-                    <>
-                     <div className="text-2xl font-bold">{latestHba1c.value}%</div>
-                     <p className="text-xs text-muted-foreground">on {formatDate(latestHba1c.date)}</p>
-                    </>
-                ) : <p className="text-sm text-muted-foreground">No data</p>}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">LDL Cholesterol</CardTitle>
-                <Heart className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                 {latestLipid ? (
-                    <>
+            {records.length > 0 && (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">HbA1c</CardTitle>
+                    <Droplet className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{latestHba1c.value}%</div>
+                    <p className="text-xs text-muted-foreground">on {formatDate(latestHba1c.date)}</p>
+                  </CardContent>
+                </Card>
+            )}
+            {lipidRecords.length > 0 && (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">LDL Cholesterol</CardTitle>
+                    <Heart className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
                      <div className="text-2xl font-bold">{getDisplayLipidValue(latestLipid.ldl, 'ldl')} <span className="text-base font-normal text-muted-foreground">{lipidUnit}</span></div>
                      <p className="text-xs text-muted-foreground">on {formatDate(latestLipid.date)}</p>
-                    </>
-                ) : <p className="text-sm text-muted-foreground">No data</p>}
-              </CardContent>
-            </Card>
-             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Vitamin D</CardTitle>
-                <Sun className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                 {latestVitaminD ? (
-                    <>
+                  </CardContent>
+                </Card>
+            )}
+            {vitaminDRecords.length > 0 && (
+                 <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Vitamin D</CardTitle>
+                    <Sun className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
                      <div className="text-2xl font-bold">{getDisplayVitaminDValue(latestVitaminD.value)} <span className="text-base font-normal text-muted-foreground">{vitDUnit}</span></div>
                      <p className="text-xs text-muted-foreground">on {formatDate(latestVitaminD.date)}</p>
-                    </>
-                ) : <p className="text-sm text-muted-foreground">No data</p>}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">TSH</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                 {latestThyroid ? (
-                    <>
+                  </CardContent>
+                </Card>
+            )}
+            {thyroidRecords.length > 0 && (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">TSH</CardTitle>
+                    <Activity className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
                      <div className="text-2xl font-bold">{latestThyroid.tsh.toFixed(2)} <span className="text-base font-normal text-muted-foreground">μIU/mL</span></div>
                      <p className="text-xs text-muted-foreground">on {formatDate(latestThyroid.date)}</p>
-                    </>
-                ) : <p className="text-sm text-muted-foreground">No data</p>}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Blood Pressure</CardTitle>
-                <Zap className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                 {latestBloodPressure ? (
-                    <>
+                  </CardContent>
+                </Card>
+            )}
+            {bloodPressureRecords.length > 0 && (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Blood Pressure</CardTitle>
+                    <Zap className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
                      <div className="text-2xl font-bold">{latestBloodPressure.systolic}/{latestBloodPressure.diastolic} <span className="text-base font-normal text-muted-foreground">mmHg</span></div>
                      <p className="text-xs text-muted-foreground">on {formatDate(latestBloodPressure.date)}</p>
-                    </>
-                ) : <p className="text-sm text-muted-foreground">No data</p>}
-              </CardContent>
-            </Card>
-             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Heart Rate</CardTitle>
-                <HeartPulse className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                 {latestBloodPressure?.heartRate ? (
-                    <>
+                  </CardContent>
+                </Card>
+            )}
+            {bloodPressureRecords.length > 0 && latestBloodPressure.heartRate && (
+                 <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Heart Rate</CardTitle>
+                    <HeartPulse className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
                      <div className="text-2xl font-bold">{latestBloodPressure.heartRate} <span className="text-base font-normal text-muted-foreground">bpm</span></div>
                      <p className="text-xs text-muted-foreground">on {formatDate(latestBloodPressure.date)}</p>
-                    </>
-                ) : <p className="text-sm text-muted-foreground">No data</p>}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Weight & BMI</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                 {latestWeight ? (
-                    <>
+                  </CardContent>
+                </Card>
+            )}
+            {weightRecords.length > 0 && (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Weight & BMI</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
                      <div className="flex items-baseline gap-2">
                         <div className="text-2xl font-bold">
                             {isImperial ? kgToLbs(latestWeight.value).toFixed(1) : latestWeight.value.toFixed(1)}
@@ -155,10 +142,9 @@ export function ReportCard() {
                         )}
                      </div>
                      <p className="text-xs text-muted-foreground">on {formatDate(latestWeight.date)}</p>
-                    </>
-                ) : <p className="text-sm text-muted-foreground">No data</p>}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+            )}
           </div>
         </section>
 
