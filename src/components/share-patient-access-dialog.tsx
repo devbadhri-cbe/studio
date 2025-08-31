@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
-import { Clipboard, Mail, MessageSquare, ExternalLink, Share2, Copy, Download } from 'lucide-react';
+import { Clipboard, Mail, MessageSquare, ExternalLink, Share2, Copy, Download, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -46,7 +46,7 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
 
   React.useEffect(() => {
     if (open && typeof window !== 'undefined') {
-       const host = window.location.host.replace(/^6000-/, '9000-');
+       const host = window.location.host;
        const protocol = window.location.protocol;
        setDashboardLink(`${protocol}//${host}/patient/${patient.id}`);
        setLoginPageLink(`${protocol}//${host}/`);
@@ -60,30 +60,63 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
       description: `The ${subject.toLowerCase()} has been copied to your clipboard.`,
     });
   };
+  
+  const getQrCodeAsBlob = (): Promise<Blob | null> => {
+      return new Promise((resolve) => {
+        if (!qrRef.current) return resolve(null);
+        const svg = qrRef.current.querySelector('svg');
+        if (!svg) return resolve(null);
 
-  const handleDownloadQrCode = () => {
-    if (!qrRef.current) return;
-    const svg = qrRef.current.querySelector('svg');
-    if (!svg) return;
-
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const img = document.createElement('img');
-    img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        const pngFile = canvas.toDataURL('image/png');
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(null);
         
+        const img = document.createElement('img');
+        img.onload = () => {
+            canvas.width = 256; // Upscale for better quality
+            canvas.height = 256;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => {
+                resolve(blob);
+            }, 'image/png');
+        };
+        img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+      });
+  }
+
+  const handleDownloadQrCode = async () => {
+    const blob = await getQrCodeAsBlob();
+    if (blob) {
+        const url = URL.createObjectURL(blob);
         const downloadLink = document.createElement('a');
         downloadLink.download = `qr-code-${patient.name.replace(/\s+/g, '-')}.png`;
-        downloadLink.href = pngFile;
+        downloadLink.href = url;
         downloadLink.click();
-    };
-    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+        URL.revokeObjectURL(url);
+    }
+  }
+  
+  const handleCopyQrCode = async () => {
+      const blob = await getQrCodeAsBlob();
+      if (blob && navigator.clipboard?.write) {
+          try {
+              await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+               toast({
+                title: 'QR Code Copied',
+                description: 'The QR code image has been copied to your clipboard.',
+               });
+          } catch (error) {
+              console.error('Failed to copy QR code:', error);
+               toast({
+                variant: 'destructive',
+                title: 'Copy Failed',
+                description: 'Could not copy the QR code image. You may need to grant clipboard permissions.',
+               });
+          }
+      }
   }
 
   const shareActions = [
@@ -91,6 +124,11 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
         label: 'Copy Dashboard Link',
         icon: <Clipboard className="mr-2 h-4 w-4" />,
         action: () => copyToClipboard(dashboardLink, 'Dashboard Link')
+    },
+    {
+        label: 'Copy QR Code Image',
+        icon: <ImageIcon className="mr-2 h-4 w-4" />,
+        action: handleCopyQrCode,
     },
     {
         label: 'Open in New Tab',
@@ -106,7 +144,7 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
                 return;
             }
             const subject = `Your Health Guardian Dashboard Access`;
-            const body = `Hello ${patient.name},\n\nHere is the one-click access link to your Health Guardian dashboard:\n\n${dashboardLink}\n\nThis link is unique to you. Please do not share it with others.\n\nBest,\n${'Dr. Badhrinathan N'}`;
+            const body = `Hello ${patient.name},\n\nYou can access your Health Guardian dashboard via this link:\n\n${dashboardLink}\n\nAlternatively, you can scan the QR code (if attached) or use your Patient ID on the main login page.\n\nBest,\n${'Dr. Badhrinathan N'}`;
             window.location.href = `mailto:${patient.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         }
     },
@@ -149,8 +187,10 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 pt-4">
-          <div ref={qrRef} className="flex items-center justify-center rounded-lg bg-white p-4">
-            {dashboardLink ? <QRCode value={dashboardLink} size={160} /> : <div className="h-[160px] w-[160px] bg-gray-200 animate-pulse" />}
+          <div className="flex items-center justify-center rounded-lg bg-white p-4">
+            <div ref={qrRef}>
+                {dashboardLink ? <QRCode value={dashboardLink} size={160} /> : <div className="h-[160px] w-[160px] bg-gray-200 animate-pulse" />}
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -205,3 +245,5 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
     </Dialog>
   );
 }
+
+    
