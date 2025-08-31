@@ -60,7 +60,20 @@ export const getPatients = async (): Promise<Patient[]> => {
     const patientsCollection = collection(db, PATIENTS_COLLECTION);
     const patientsSnapshot = await getDocs(patientsCollection);
     const patientsList = patientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Patient));
-    return patientsList.map(recalculatePatientStatus).sort((a, b) => a.name.localeCompare(b.name));
+    
+    const processedPatients = patientsList.map(recalculatePatientStatus);
+
+    return processedPatients.sort((a, b) => {
+        const dateA = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
+        const dateB = b.lastLogin ? new Date(b.lastLogin).getTime() : 0;
+        
+        if (dateB !== dateA) {
+            return dateB - dateA;
+        }
+
+        // If dates are the same (or both are null), sort by name
+        return a.name.localeCompare(b.name);
+    });
 };
 
 // Fetch a single patient
