@@ -76,6 +76,10 @@ export default function PatientDashboard() {
     setExtractedData(null);
   };
 
+  const handleConfirmationSuccess = () => {
+    setExtractedData(null);
+  }
+
 
   const renderDashboard = () => {
     switch (dashboardView) {
@@ -177,7 +181,7 @@ export default function PatientDashboard() {
               <UploadConfirmationForm 
                 extractedData={extractedData}
                 onCancel={handleConfirmationCancel}
-                onSuccess={() => setExtractedData(null)}
+                onSuccess={handleConfirmationSuccess}
               />
             )}
 
@@ -186,7 +190,7 @@ export default function PatientDashboard() {
                     <ReminderCard />
                 </div>
                 <div className="lg:col-span-2 flex flex-col gap-6">
-                    {dashboardView !== 'none' && renderDashboard()}
+                    {dashboardView !== 'none' && dashboardView !== 'report' && renderDashboard()}
                     <InsightsCard />
                 </div>
             </div>
