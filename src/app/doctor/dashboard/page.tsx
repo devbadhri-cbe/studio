@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
 import { deletePatient, getPatients } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AddPatientDialog } from '@/components/add-patient-dialog';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
@@ -125,6 +126,12 @@ export default function DoctorDashboardPage() {
                     </h1>
                     <p className="text-muted-foreground">Manage and review your patients' health data.</p>
                 </div>
+                 <AddPatientDialog onPatientAdded={fetchPatients}>
+                    <Button>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Add Patient
+                    </Button>
+                </AddPatientDialog>
             </div>
 
             <Card>
