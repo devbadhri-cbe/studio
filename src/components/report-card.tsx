@@ -130,15 +130,22 @@ export function ReportCard() {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Weight</CardTitle>
+                <CardTitle className="text-sm font-medium">Weight & BMI</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                  {latestWeight ? (
                     <>
-                     <div className="text-2xl font-bold">
-                        {isImperial ? kgToLbs(latestWeight.value).toFixed(1) : latestWeight.value.toFixed(1)}
-                        <span className="text-base font-normal text-muted-foreground"> {weightUnit}</span>
+                     <div className="flex items-baseline gap-2">
+                        <div className="text-2xl font-bold">
+                            {isImperial ? kgToLbs(latestWeight.value).toFixed(1) : latestWeight.value.toFixed(1)}
+                            <span className="text-base font-normal text-muted-foreground"> {weightUnit}</span>
+                        </div>
+                        {profile.bmi && (
+                             <div className="text-lg font-bold text-muted-foreground">
+                                (<span className="text-base">BMI </span>{profile.bmi.toFixed(1)})
+                            </div>
+                        )}
                      </div>
                      <p className="text-xs text-muted-foreground">on {formatDate(latestWeight.date)}</p>
                     </>
