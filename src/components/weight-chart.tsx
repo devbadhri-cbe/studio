@@ -45,7 +45,7 @@ export function WeightChart() {
       <div className="flex-1">
         <ResponsiveContainer width="100%" height="100%">
           {weightRecords && weightRecords.length > 0 ? (
-            <LineChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
+            <LineChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="date"
