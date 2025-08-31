@@ -91,8 +91,11 @@ export function AddWeightRecordDialog({ children }: AddWeightRecordDialogProps) 
    const triggerButton = children || (
     <Tooltip>
         <TooltipTrigger asChild>
-            <Button size="icon" variant="outline" className="h-8 w-8">
-                <PlusCircle className="h-4 w-4" />
+            <Button size="sm" variant="outline" className="h-8 gap-1">
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Add
+                </span>
             </Button>
         </TooltipTrigger>
         <TooltipContent>
