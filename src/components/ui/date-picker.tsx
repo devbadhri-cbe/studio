@@ -46,7 +46,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
     if (isMobile) {
         return (
             <div className={cn("relative flex items-center w-full h-10", className)}>
-                <div className="flex items-center absolute inset-0 pointer-events-none">
+                <div className="flex items-center absolute inset-0 pointer-events-none px-3">
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     <span className={cn("text-sm", !value && "text-muted-foreground")}>
                         {value ? format(value, "PPP") : (placeholder || 'Pick a date')}
