@@ -34,17 +34,21 @@ export function calculateBmi(weight: number | undefined, height: number | undefi
   }
 }
 
-export function getBmiStatus(bmi: number | null | undefined): { text: string; variant: 'destructive' | 'secondary' | 'outline' | 'default' } | null {
-  if (!bmi) return null;
+export const BMI_CATEGORIES: { min: number, max: number, text: string, variant: 'destructive' | 'secondary' | 'outline' | 'default' }[] = [
+    { min: 0, max: 18.4, text: 'Underweight', variant: 'secondary' },
+    { min: 18.5, max: 24.9, text: 'Normal weight', variant: 'outline' },
+    { min: 25, max: 29.9, text: 'Overweight', variant: 'secondary' },
+    { min: 30, max: 34.9, text: 'Obese Class I', variant: 'destructive' },
+    { min: 35, max: 39.9, text: 'Obese Class II', variant: 'destructive' },
+    { min: 40, max: Infinity, text: 'Morbidly Obese', variant: 'destructive' },
+];
 
-  if (bmi < 18.5) return { text: 'Underweight', variant: 'secondary' };
-  if (bmi >= 18.5 && bmi < 25) return { text: 'Normal', variant: 'outline' };
-  if (bmi >= 25 && bmi < 30) return { text: 'Overweight', variant: 'secondary' };
-  if (bmi >= 30 && bmi < 35) return { text: 'Obese Class I', variant: 'destructive' };
-  if (bmi >= 35 && bmi < 40) return { text: 'Obese Class II', variant: 'destructive' };
-  if (bmi >= 40) return { text: 'Morbidly Obese', variant: 'destructive' };
-  
-  return null;
+export function getBmiStatus(bmi: number | null | undefined): { text: string; variant: 'destructive' | 'secondary' | 'outline' | 'default' } | null {
+  if (bmi === null || bmi === undefined) return null;
+
+  const category = BMI_CATEGORIES.find(c => bmi >= c.min && bmi <= c.max);
+
+  return category || null;
 }
 
 export const lbsToKg = (lbs: number) => lbs * 0.453592;

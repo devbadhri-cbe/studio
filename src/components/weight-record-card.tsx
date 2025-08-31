@@ -9,7 +9,7 @@ import { PlusCircle, Trash2, TrendingUp } from 'lucide-react';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { AddWeightRecordDialog } from './add-weight-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { kgToLbs, cmToFtIn, getBmiStatus } from '@/lib/utils';
+import { kgToLbs, cmToFtIn, getBmiStatus, BMI_CATEGORIES } from '@/lib/utils';
 import { WeightChart } from './weight-chart';
 import { Separator } from './ui/separator';
 import { Badge } from './ui/badge';
@@ -113,12 +113,11 @@ export function WeightRecordCard() {
                               <PopoverContent className="w-64 text-sm">
                                 <div className="space-y-1 text-left">
                                   <h4 className="font-bold">BMI Categories</h4>
-                                  <p>&lt; 18.5: Underweight</p>
-                                  <p>18.5 - 24.9: Normal weight</p>
-                                  <p>25 - 29.9: Overweight</p>
-                                  <p>30 - 34.9: Obese Class I</p>
-                                  <p>35 - 39.9: Obese Class II</p>
-                                  <p>&ge; 40: Morbidly Obese</p>
+                                   {BMI_CATEGORIES.map(category => (
+                                    <p key={category.text}>
+                                        {category.min === 40 ? '≥ 40' : (category.max === 18.4 ? `< 18.5` : `${category.min} - ${category.max}`)}: {category.text}
+                                    </p>
+                                  ))}
                                 </div>
                               </PopoverContent>
                             </Popover>
