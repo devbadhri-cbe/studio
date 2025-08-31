@@ -20,6 +20,7 @@ import { TitleBar } from '@/components/title-bar';
 import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { PatientHeader } from '@/components/patient-header';
+import { Separator } from '@/components/ui/separator';
 
 export default function PatientDashboard() {
   const { isClient, dashboardView, isDoctorLoggedIn, doctorName } = useApp();
@@ -74,11 +75,19 @@ export default function PatientDashboard() {
          </TitleBar>
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
-            <PatientHeader />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                <div className="lg:col-span-2">
+                    <PatientHeader />
+                </div>
+                <div className="lg:col-span-1 row-start-1 lg:row-start-auto">
+                    <ProfileCard />
+                </div>
+            </div>
+            
+            <Separator />
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
                 <div className="lg:col-span-1 flex flex-col gap-6">
-                    <ProfileCard />
                     <WeightRecordCard />
                     <MedicalHistoryCard />
                 </div>
