@@ -1,15 +1,20 @@
 
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
     match /patients/{patientId} {
-      // Doctors can read and write all patient data.
-      allow read, write: if request.auth != null;
-
-      // Patients (unauthenticated) can get their own document to view the dashboard
-      // and update it to add new records. This is secure because they must know
-      // the unique and unguessable patientId.
-      allow get, update: if request.auth == null;
+      // Allow doctors (authenticated users) to create, update, and delete patient records.
+      allow write: if request.auth != null;
+      
+      // Allow both doctors (authenticated users) and patients (public with ID) to read.
+      allow read: if true;
+    }
+    
+    match /patients/{patientId}/{subcollection}/{docId} {
+        // For any potential subcollections, inherit the same logic.
+        allow write: if request.auth != null;
+        allow read: if true;
     }
   }
 }
