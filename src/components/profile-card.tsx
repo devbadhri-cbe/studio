@@ -11,6 +11,7 @@ import { format, isValid, parseISO } from 'date-fns';
 import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 import { standardizeMedication } from '@/ai/flows/standardize-medication';
 import { cn } from '@/lib/utils';
+import { updatePatient } from '@/lib/firestore';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
@@ -247,7 +248,7 @@ export function ProfileCard() {
     }
   }, [isEditing, profile, latestWeight, form, isImperial]);
 
-  const onProfileSubmit = (data: z.infer<typeof ProfileSchema>) => {
+  const onProfileSubmit = async (data: z.infer<typeof ProfileSchema>) => {
     setIsSubmitting(true);
 
     let heightInCm: number | undefined;
@@ -259,8 +260,7 @@ export function ProfileCard() {
         heightInCm = data.height ? Number(data.height) : undefined;
     }
 
-     const updatedProfile = {
-        ...profile,
+     const updatedProfileData = {
         name: data.name,
         dob: data.dob.toISOString(),
         gender: data.gender,
@@ -268,23 +268,27 @@ export function ProfileCard() {
         country: data.country,
         phone: data.phone || '',
         height: heightInCm,
+        weight: data.weight, // Pass weight separately to be handled by updatePatient
     };
-    setProfile(updatedProfile);
 
-    if (data.weight) {
-        const dbWeight = isImperial ? lbsToKg(data.weight) : data.weight;
-        const latestDate = latestWeight ? new Date(latestWeight.date).getTime() : 0;
-        const oneDay = 24 * 60 * 60 * 1000;
-        if (new Date().getTime() - latestDate > oneDay || dbWeight !== latestWeight?.value) {
-            addWeightRecord({ value: parseFloat(dbWeight.toFixed(2)), date: new Date().toISOString() });
-        }
+    try {
+        const updatedPatient = await updatePatient(profile.id, updatedProfileData);
+        setProfile(updatedPatient);
+        toast({
+            title: 'Profile Updated',
+            description: 'Your details have been successfully saved.',
+        });
+        setIsEditing(false);
+    } catch (error) {
+        console.error("Failed to update profile", error);
+        toast({
+            variant: 'destructive',
+            title: 'Update Failed',
+            description: 'Could not update profile. Please try again.',
+        });
+    } finally {
+        setIsSubmitting(false);
     }
-    toast({
-        title: 'Profile Updated',
-        description: 'Your details have been successfully saved.',
-    });
-    setIsSubmitting(false);
-    setIsEditing(false);
   };
   
   const calculatedAge = calculateAge(profile.dob);
