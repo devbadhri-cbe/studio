@@ -16,7 +16,7 @@ export function TitleBar({ doctorName, doctorEmail, children }: TitleBarProps) {
     return (
         <header className="border-b px-4 py-6 md:px-6">
             <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 relative">
-                 <div className="absolute top-4 right-4 flex items-center gap-2">
+                 <div className="absolute top-0 right-0 flex items-center gap-2">
                     <ThemeToggle />
                 </div>
                  {children}
