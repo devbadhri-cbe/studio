@@ -47,6 +47,12 @@ const getStatusVariant = (status: Patient['status']) => {
     }
 }
 
+const statusDescriptions: Record<Patient['status'], string> = {
+    'Urgent': 'Set when HbA1c ≥ 7.0%, or BP ≥ 140/90.',
+    'Needs Review': 'Set when HbA1c ≥ 5.7%, LDL ≥ 130, abnormal TSH, or BP ≥ 130/80.',
+    'On Track': 'Set when all key biomarkers are within their target ranges.'
+};
+
 
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
   const router = useRouter();
@@ -218,11 +224,9 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </Badge>
             </TooltipTrigger>
             <TooltipContent align="center" side="bottom" className="max-w-[250px] text-xs">
-                <div className="font-bold text-base mb-2">{patient.status}</div>
-                <div className="text-left space-y-1">
-                    <p><strong className="text-destructive">Urgent:</strong> HbA1c ≥ 7.0%, or BP ≥ 140/90.</p>
-                    <p><strong className="text-amber-600 dark:text-amber-500">Needs Review:</strong> HbA1c ≥ 5.7%, LDL ≥ 130, abnormal TSH, or BP ≥ 130/80.</p>
-                    <p><strong className="text-green-600 dark:text-green-500">On Track:</strong> All key biomarkers are within their target ranges.</p>
+                <div className="font-bold text-base mb-1">{patient.status}</div>
+                <div className="text-left">
+                    <p>{statusDescriptions[patient.status]}</p>
                 </div>
             </TooltipContent>
         </Tooltip>
