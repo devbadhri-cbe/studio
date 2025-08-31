@@ -24,7 +24,7 @@ import { addPatient, deletePatient, getPatients } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { TitleBar } from '@/components/title-bar';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
@@ -154,10 +154,24 @@ export default function DoctorDashboardPage() {
                         {isAddingPatient ? "Enter the patient's details below." : "Manage and review your patients' health data."}
                     </p>
                 </div>
-                 <Button onClick={() => setIsAddingPatient(p => !p)}>
-                    {isAddingPatient ? <X className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
-                    {isAddingPatient ? 'Cancel' : 'Add Patient'}
-                </Button>
+                 {isAddingPatient ? (
+                     <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button onClick={() => setIsAddingPatient(false)} variant="ghost" size="icon">
+                                <X className="h-5 w-5" />
+                                <span className="sr-only">Cancel</span>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Cancel</p>
+                        </TooltipContent>
+                     </Tooltip>
+                 ) : (
+                    <Button onClick={() => setIsAddingPatient(true)}>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Add Patient
+                    </Button>
+                 )}
             </div>
 
             {isAddingPatient ? (
