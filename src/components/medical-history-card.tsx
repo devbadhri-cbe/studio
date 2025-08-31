@@ -36,7 +36,7 @@ const ConditionSchema = z.object({
 
 function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition: string, date: Date}, icdCode?: string) => Promise<void>, onCancel: () => void }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useApp();
+  const { toast } = useToast();
   const inputRef = React.useRef<HTMLInputElement>(null);
   
   React.useEffect(() => {
