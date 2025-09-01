@@ -1,25 +1,13 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Doctors can read and write their own document
-    match /doctors/{doctorId} {
-      allow read, write: if request.auth != null && request.auth.uid == doctorId;
-    }
-
-    // Patients collection rules
-    match /patients/{patientId} {
-      // Allow anyone to read patient data (security through obscurity of patientId)
-      allow get;
-      
-      // Allow anyone to update ONLY the lastLogin field.
-      // This is for unauthenticated patients to update their login status.
-      allow update: if request.auth == null && request.resource.data.keys().hasOnly(['lastLogin']);
-
-      // A logged-in doctor can create, delete, and perform full updates on their own patients.
-      // They can also update lastLogin if needed, which is covered by `write`.
-      allow create, delete, update: if request.auth != null && request.auth.uid == resource.data.doctorId;
+    // Allow public read access to all documents
+    // Allow write access only for authenticated users
+    match /{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
     }
   }
 }
