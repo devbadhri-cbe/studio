@@ -2,189 +2,202 @@
 
 'use client';
 
+import {
+  doc,
+  collection,
+  addDoc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  limit,
+  serverTimestamp,
+  Timestamp,
+} from 'firebase/firestore';
 import { db } from './firebase';
-import { collection, getDocs, doc, getDoc, addDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import type { Patient } from './types';
-import { calculateBmi } from './utils';
-import { Hba1cRecord } from './types';
-import { LipidRecord } from './types';
-import { VitaminDRecord } from './types';
-import { ThyroidRecord } from './types';
-import { WeightRecord } from './types';
-import { RenalRecord } from './types';
-import { MedicalCondition } from './types';
-import { Medication } from './types';
-import { countries } from './countries';
+import { calculateAge, calculateBmi, calculateEgfr } from './utils';
 
 const PATIENTS_COLLECTION = 'patients';
 
-const recalculatePatientStatus = (patient: Patient): Patient => {
-    const updatedPatient = { ...patient };
+
+const getPatientStatus = (patientData: Partial<Patient>): 'On Track' | 'Needs Review' | 'Urgent' => {
+  const lastHba1c = patientData.records && patientData.records.length > 0 
+    ? [...patientData.records].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0] 
+    : null;
     
-    const sortedHba1c = [...(updatedPatient.records || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const sortedLipids = [...(updatedPatient.lipidRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const sortedVitaminD = [...(updatedPatient.vitaminDRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const sortedThyroid = [...(updatedPatient.thyroidRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const sortedBloodPressure = [...(updatedPatient.bloodPressureRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const sortedWeight = [...(updatedPatient.weightRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const sortedRenal = [...(updatedPatient.renalRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    updatedPatient.lastHba1c = sortedHba1c[0] ? { value: sortedHba1c[0].value, date: new Date(sortedHba1c[0].date).toISOString() } : null;
-    updatedPatient.lastLipid = sortedLipids[0] ? { ldl: sortedLipids[0].ldl, date: new Date(sortedLipids[0].date).toISOString() } : null;
-    updatedPatient.lastVitaminD = sortedVitaminD[0] ? { value: sortedVitaminD[0].value, date: new Date(sortedVitaminD[0].date).toISOString() } : null;
-    updatedPatient.lastThyroid = sortedThyroid[0] ? { tsh: sortedThyroid[0].tsh, date: new Date(sortedThyroid[0].date).toISOString() } : null;
-    updatedPatient.lastBloodPressure = sortedBloodPressure[0] ? { systolic: sortedBloodPressure[0].systolic, diastolic: sortedBloodPressure[0].diastolic, heartRate: sortedBloodPressure[0].heartRate, date: new Date(sortedBloodPressure[0].date).toISOString() } : null;
-    updatedPatient.lastRenal = sortedRenal[0] ? { egfr: sortedRenal[0].egfr, uacr: sortedRenal[0].uacr, date: new Date(sortedRenal[0].date).toISOString() } : null;
+  const lastBP = patientData.bloodPressureRecords && patientData.bloodPressureRecords.length > 0 
+    ? [...patientData.bloodPressureRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0] 
+    : null;
     
-    if (updatedPatient.height && sortedWeight.length > 0) {
-        updatedPatient.bmi = calculateBmi(sortedWeight[0].value, updatedPatient.height);
-    } else {
-        updatedPatient.bmi = undefined;
-    }
+  const lastRenal = patientData.renalRecords && patientData.renalRecords.length > 0
+    ? [...patientData.renalRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0]
+    : null;
+    
+  const needsReview = patientData.presentMedicalConditions?.some(c => c.status === 'pending_review');
 
-    let status: Patient['status'] = 'On Track';
-    const hasPendingReview = updatedPatient.presentMedicalConditions?.some(c => c.status === 'pending_review') || updatedPatient.dashboardSuggestions?.some(s => s.status === 'pending');
-
-    if (hasPendingReview) {
-        status = 'Needs Review';
-    } else if (updatedPatient.lastHba1c && updatedPatient.lastHba1c.value >= 7.0) {
-        status = 'Urgent';
-    } else if (updatedPatient.lastBloodPressure && (updatedPatient.lastBloodPressure.systolic >= 140 || updatedPatient.lastBloodPressure.diastolic >= 90)) {
-        status = 'Urgent';
-    } else if (updatedPatient.lastRenal && updatedPatient.lastRenal.egfr < 60) {
-        status = 'Urgent';
-    } else if (
-        (updatedPatient.lastHba1c && updatedPatient.lastHba1c.value >= 5.7) ||
-        (updatedPatient.lastLipid && updatedPatient.lastLipid.ldl >= 130) ||
-        (updatedPatient.lastThyroid && (updatedPatient.lastThyroid.tsh < 0.4 || updatedPatient.lastThyroid.tsh > 4.0)) ||
-        (updatedPatient.lastBloodPressure && (updatedPatient.lastBloodPressure.systolic >= 130 || updatedPatient.lastBloodPressure.diastolic >= 80)) ||
-        (updatedPatient.lastRenal && updatedPatient.lastRenal.uacr > 30)
-    ) {
-        status = 'Needs Review';
-    }
-    updatedPatient.status = status;
-
-    return updatedPatient;
+  if (lastHba1c && lastHba1c.value >= 7.0) return 'Urgent';
+  if (lastBP && (lastBP.systolic >= 140 || lastBP.diastolic >= 90)) return 'Urgent';
+  if (lastRenal && (lastRenal.eGFR && lastRenal.eGFR < 30)) return 'Urgent';
+  if (needsReview) return 'Needs Review';
+  
+  return 'On Track';
 };
 
 
-// Fetch all patients
-export const getPatients = async (): Promise<Patient[]> => {
-    const patientsCollection = collection(db, PATIENTS_COLLECTION);
-    const patientsSnapshot = await getDocs(patientsCollection);
-    const patientsList = patientsSnapshot.docs.map(doc => {
-      const data = doc.data();
-      return { 
-        id: doc.id,
-        ...data,
-        // Ensure arrays are initialized
-        presentMedicalConditions: data.presentMedicalConditions || [],
-        dashboardSuggestions: data.dashboardSuggestions || [],
-      } as Patient;
-    });
-    
-    const processedPatients = patientsList.map(recalculatePatientStatus);
-
-    return processedPatients.sort((a, b) => {
-        const dateA = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
-        const dateB = b.lastLogin ? new Date(b.lastLogin).getTime() : 0;
-        
-        if (dateB !== dateA) {
-            return dateB - dateA;
+// Helper function to convert Firestore Timestamps to ISO strings
+const convertTimestampsToISO = (data: any): any => {
+    if (!data) return data;
+    for (const key in data) {
+        if (data[key] instanceof Timestamp) {
+            data[key] = data[key].toDate().toISOString();
+        } else if (typeof data[key] === 'object' && data[key] !== null) {
+            if (Array.isArray(data[key])) {
+                data[key] = data[key].map(item => convertTimestampsToISO(item));
+            } else {
+                convertTimestampsToISO(data[key]);
+            }
         }
+    }
+    return data;
+}
 
-        // If dates are the same (or both are null), sort by name
-        return a.name.localeCompare(b.name);
-    });
+const processPatientDoc = (doc: any): Patient => {
+  const data = doc.data();
+
+  // Ensure all date fields in records are ISO strings
+  const records = (data.records || []).map(convertTimestampsToISO);
+  const lipidRecords = (data.lipidRecords || []).map(convertTimestampsToISO);
+  const vitaminDRecords = (data.vitaminDRecords || []).map(convertTimestampsToISO);
+  const thyroidRecords = (data.thyroidRecords || []).map(convertTimestampsToISO);
+  const weightRecords = (data.weightRecords || []).map(convertTimestampsToISO);
+  const bloodPressureRecords = (data.bloodPressureRecords || []).map(convertTimestampsToISO);
+  const renalRecords = (data.renalRecords || []).map(convertTimestampsToISO);
+
+  // Recalculate eGFR for all renal records
+  const age = calculateAge(data.dob);
+  const processedRenalRecords = renalRecords.map((record: any) => {
+    if (record.serumCreatinine && age && data.gender) {
+        record.eGFR = calculateEgfr(record.serumCreatinine, record.serumCreatinineUnits, age, data.gender);
+    }
+    return record;
+  });
+
+  const lastHba1c = records.length > 0 ? [...records].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
+  const lastLipid = lipidRecords.length > 0 ? [...lipidRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
+  const lastVitaminD = vitaminDRecords.length > 0 ? [...vitaminDRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
+  const lastThyroid = thyroidRecords.length > 0 ? [...thyroidRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
+  const lastBloodPressure = bloodPressureRecords.length > 0 ? [...bloodPressureRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
+  const lastRenal = processedRenalRecords.length > 0 ? [...processedRenalRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
+
+  const latestWeight = weightRecords.length > 0 ? [...weightRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
+  const bmi = calculateBmi(latestWeight?.value, data.height);
+
+  const patientData: Partial<Patient> = {
+    ...data,
+    id: doc.id,
+    dob: data.dob ? convertTimestampsToISO({ date: data.dob }).date : new Date().toISOString(),
+    lastLogin: data.lastLogin ? convertTimestampsToISO({ date: data.lastLogin }).date : undefined,
+    records,
+    lipidRecords,
+    vitaminDRecords,
+    thyroidRecords,
+    renalRecords: processedRenalRecords,
+    weightRecords,
+    bloodPressureRecords,
+    bmi,
+  };
+
+  const status = getPatientStatus(patientData);
+  
+  return {
+    ...patientData,
+    status,
+    lastHba1c: lastHba1c ? { value: lastHba1c.value, date: lastHba1c.date } : null,
+    lastLipid: lastLipid ? { ldl: lastLipid.ldl, date: lastLipid.date } : null,
+    lastVitaminD: lastVitaminD ? { value: lastVitaminD.value, date: lastVitaminD.date } : null,
+    lastThyroid: lastThyroid ? { tsh: lastThyroid.tsh, date: lastThyroid.date } : null,
+    lastBloodPressure: lastBloodPressure ? { systolic: lastBloodPressure.systolic, diastolic: lastBloodPressure.diastolic, date: lastBloodPressure.date } : null,
+    lastRenal: lastRenal ? { eGFR: lastRenal.eGFR, uacr: lastRenal.uacr, date: lastRenal.date } : null,
+  } as Patient;
 };
 
 
-// Fetch a single patient
-export const getPatient = async (id: string): Promise<Patient | null> => {
-    const patientDocRef = doc(db, PATIENTS_COLLECTION, id);
-    const patientDoc = await getDoc(patientDocRef);
-    if (patientDoc.exists()) {
-        const patientData = { 
-          id: patientDoc.id, 
-          ...patientDoc.data(),
-          // Ensure arrays are initialized
-          presentMedicalConditions: patientDoc.data().presentMedicalConditions || [],
-          dashboardSuggestions: patientDoc.data().dashboardSuggestions || [],
-        } as Patient;
-        return recalculatePatientStatus(patientData);
-    }
+export async function getPatients(): Promise<Patient[]> {
+  const snapshot = await getDocs(query(collection(db, PATIENTS_COLLECTION), orderBy('name', 'asc')));
+  return snapshot.docs.map(processPatientDoc);
+}
+
+export async function getPatient(id: string): Promise<Patient | null> {
+  const docRef = doc(db, PATIENTS_COLLECTION, id);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    return processPatientDoc(docSnap);
+  } else {
     return null;
-};
+  }
+}
 
-// Add a new patient
-export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'renalRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'lastRenal' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi' | 'height' | 'lastLogin' | 'dashboardSuggestions' | 'enabledDashboards'>): Promise<Patient> => {
-    const countryInfo = countries.find(c => c.code === patientData.country);
-
-    let newPatientObject: Omit<Patient, 'id'> = {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastHba1c' | 'lastLipid'>): Promise<Patient> {
+    const docData = {
         ...patientData,
-        dateFormat: countryInfo?.dateFormat || 'MM-dd-yyyy',
-        unitSystem: countryInfo?.unitSystem || 'metric',
-        lastHba1c: null,
-        lastLipid: null,
-        lastVitaminD: null,
-        lastThyroid: null,
-        lastBloodPressure: null,
-        lastRenal: null,
-        status: 'On Track',
-        records: [] as Hba1cRecord[],
-        lipidRecords: [] as LipidRecord[],
-        vitaminDRecords: [] as VitaminDRecord[],
-        thyroidRecords: [] as ThyroidRecord[],
-        renalRecords: [] as RenalRecord[],
-        weightRecords: [] as WeightRecord[],
-        bloodPressureRecords: [] as BloodPressureRecord[],
-        medication: [] as Medication[],
-        presentMedicalConditions: [] as MedicalCondition[],
-        enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
+        dob: new Date(patientData.dob),
+        lastLogin: null,
+        records: [],
+        lipidRecords: [],
+        vitaminDRecords: [],
+        thyroidRecords: [],
+        renalRecords: [],
+        weightRecords: [],
+        bloodPressureRecords: [],
+        presentMedicalConditions: [],
+        medication: [],
         dashboardSuggestions: [],
-    };
-    
-    let patientToSave = recalculatePatientStatus(newPatientObject as Patient);
-    
-    // Sanitize data to remove undefined values before sending to Firestore
-    Object.keys(patientToSave).forEach(key => {
-        if ((patientToSave as any)[key] === undefined) {
-            delete (patientToSave as any)[key];
-        }
-    });
-
-    const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), patientToSave);
-    return { ...patientToSave, id: docRef.id };
-};
-
-// Update an existing patient
-export const updatePatient = async (patientId: string, patientData: Partial<Patient>): Promise<Patient> => {
-    const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
-    
-    const currentDocSnap = await getDoc(patientDocRef);
-    if (!currentDocSnap.exists()) {
-        throw new Error("Patient not found");
+        enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
+        createdAt: serverTimestamp(),
     }
-    const currentData = currentDocSnap.data() as Patient;
+  const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), docData);
+  const newPatient = await getPatient(docRef.id);
+  if (!newPatient) throw new Error("Failed to create and retrieve patient.");
+  return newPatient;
+}
 
-    let updatedData: Patient = { ...currentData, ...patientData };
+export async function updatePatient(id: string, updates: Partial<Patient>): Promise<Patient> {
+    const docRef = doc(db, PATIENTS_COLLECTION, id);
     
-    updatedData = recalculatePatientStatus(updatedData);
-
-    // Sanitize data to remove undefined values before sending to Firestore
-    Object.keys(updatedData).forEach(key => {
-        if ((updatedData as any)[key] === undefined) {
-            delete (updatedData as any)[key];
+    // Convert date strings back to Firestore Timestamps where necessary
+    const updateData: {[key: string]: any} = { ...updates };
+    if (updates.dob && typeof updates.dob === 'string') {
+        updateData.dob = new Date(updates.dob);
+    }
+    if (updates.lastLogin && typeof updates.lastLogin === 'string') {
+        updateData.lastLogin = new Date(updates.lastLogin);
+    }
+    // Handle dates within record arrays
+    ['records', 'lipidRecords', 'vitaminDRecords', 'thyroidRecords', 'renalRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions'].forEach(key => {
+        if (updateData[key] && Array.isArray(updateData[key])) {
+            updateData[key] = updateData[key].map((item: any) => ({
+                ...item,
+                date: item.date && typeof item.date === 'string' ? new Date(item.date) : item.date
+            }));
         }
     });
 
-    await setDoc(patientDocRef, updatedData, { merge: true });
-    return updatedData;
-};
+    await updateDoc(docRef, updateData);
+    const updatedPatient = await getPatient(id);
+    if (!updatedPatient) throw new Error("Failed to update and retrieve patient.");
+    return updatedPatient;
+}
 
+export async function deletePatient(id: string): Promise<void> {
+  await deleteDoc(doc(db, PATIENTS_COLLECTION, id));
+}
 
-// Delete a patient
-export const deletePatient = async (id: string): Promise<void> => {
-    const patientDocRef = doc(db, PATIENTS_COLLECTION, id);
-    await deleteDoc(patientDocRef);
-};
+// NOTE: Specific record management (add/remove individual records) will be handled
+// in the AppContext to manage local state first, then persist the entire patient object.
+// This is more efficient than writing to Firestore for every small change.
+// The updatePatient function is the primary method for persisting any changes.
+

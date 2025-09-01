@@ -96,9 +96,11 @@ export interface BloodPressureRecord {
 export interface RenalRecord {
   id: string;
   date: Date | string;
-  egfr: number; // estimated Glomerular Filtration Rate
+  serumCreatinine: number;
+  serumCreatinineUnits: 'mg/dL' | 'umol/L';
   uacr: number; // Urine Albumin-to-Creatinine Ratio
   medication?: string;
+  eGFR?: number; // Optional: to store the calculated value
 }
 
 
@@ -138,7 +140,7 @@ export interface Patient {
     date: string;
   } | null;
   lastRenal?: {
-    egfr: number;
+    eGFR: number;
     uacr: number;
     date: string;
   } | null;

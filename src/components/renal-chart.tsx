@@ -24,7 +24,7 @@ export function RenalChart() {
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
-    egfr: r.egfr,
+    egfr: r.eGFR,
     uacr: r.uacr,
   }));
 

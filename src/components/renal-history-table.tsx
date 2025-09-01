@@ -45,7 +45,8 @@ export function RenalHistoryTable() {
     currentPage * RECORDS_PER_PAGE
   );
 
-  const getStatus = (egfr: number, uacr: number) => {
+  const getStatus = (egfr?: number, uacr?: number) => {
+    if (egfr === undefined || uacr === undefined) return { text: 'N/A', variant: 'default' as const };
     if (egfr < 60 || uacr > 30) return { text: 'High Risk', variant: 'destructive' as const };
     if (egfr < 90) return { text: 'Needs Monitoring', variant: 'secondary' as const };
     return { text: 'Normal', variant: 'outline' as const };
@@ -78,13 +79,13 @@ export function RenalHistoryTable() {
             <TableBody>
               {paginatedRecords.length > 0 ? (
                 paginatedRecords.map((record) => {
-                  const status = getStatus(record.egfr, record.uacr);
+                  const status = getStatus(record.eGFR, record.uacr);
                   return (
                     <TableRow key={record.id}>
                       <TableCell className="font-medium px-2 md:px-4">
                         {formatDate(record.date)}
                       </TableCell>
-                      <TableCell className="px-2 md:px-4">{record.egfr}</TableCell>
+                      <TableCell className="px-2 md:px-4">{record.eGFR ?? 'N/A'}</TableCell>
                       <TableCell className="px-2 md:px-4">{record.uacr}</TableCell>
                       <TableCell className="px-2 md:px-4">
                         <Badge variant={status.variant} className={status.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>{status.text}</Badge>
