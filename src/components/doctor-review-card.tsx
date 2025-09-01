@@ -53,7 +53,7 @@ export function DoctorReviewCard() {
                         <p className="font-semibold">{condition.condition}</p>
                         {condition.icdCode && <p className="text-xs text-muted-foreground">Suggested ICD-11: {condition.icdCode}</p>}
                         <p className="text-sm text-muted-foreground">Patient added on {formatDate(condition.date)}</p>
-                         {suggestion && (
+                         {suggestion && suggestion.suggestedDashboard !== 'none' && (
                             <div className="flex items-center gap-2 mt-1 text-xs text-primary">
                                 <GitMerge className="h-3 w-3" />
                                 <span>Suggested Dashboard: {getDashboardName(suggestion.suggestedDashboard)}</span>
@@ -77,7 +77,7 @@ export function DoctorReviewCard() {
                                     Approve
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent>Verify condition {suggestion ? 'and enable dashboard' : ''}.</TooltipContent>
+                            <TooltipContent>Verify condition {suggestion && suggestion.suggestedDashboard !== 'none' ? 'and enable dashboard' : ''}.</TooltipContent>
                         </Tooltip>
                     </div>
                 </div>

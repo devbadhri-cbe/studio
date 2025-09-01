@@ -19,7 +19,7 @@ const DashboardRecommendationInputSchema = z.object({
 export type DashboardRecommendationInput = z.infer<typeof DashboardRecommendationInputSchema>;
 
 const DashboardRecommendationOutputSchema = z.object({
-  recommendedDashboard: z.enum(['hba1c', 'lipids', 'hypertension', 'thyroid', 'none']).describe('The key of the recommended dashboard (hba1c, lipids, hypertension, thyroid) or "none".'),
+  recommendedDashboard: z.enum(['hba1c', 'lipids', 'hypertension', 'thyroid', 'vitaminD', 'none']).describe('The key of the recommended dashboard (hba1c, lipids, hypertension, thyroid, vitaminD) or "none".'),
 });
 export type DashboardRecommendationOutput = z.infer<typeof DashboardRecommendationOutputSchema>;
 
@@ -36,12 +36,13 @@ const prompt = ai.definePrompt({
 Condition: {{{conditionName}}}
 ICD Code: {{{icdCode}}}
 
-Available dashboard keys are: 'hba1c', 'lipids', 'hypertension', 'thyroid'.
+Available dashboard keys are: 'hba1c', 'lipids', 'hypertension', 'thyroid', 'vitaminD'.
 
 - If the condition is related to diabetes or blood sugar (e.g., Type 2 Diabetes, Prediabetes, 5A10-5A14), recommend 'hba1c'.
 - If the condition is related to cholesterol or heart disease risk (e.g., Hypercholesterolemia, 5B50-5B5Z), recommend 'lipids'.
 - If the condition is related to blood pressure (e.g., Hypertension, BA00-BA0Z), recommend 'hypertension'.
 - If the condition is related to the thyroid (e.g., Hypothyroidism, 5A00-5A0Z), recommend 'thyroid'.
+- If the condition is related to Vitamin D (e.g., Vitamin D deficiency, 5B82), recommend 'vitaminD'.
 - For anything else, recommend 'none'.
 
 Return only the single best dashboard key.
