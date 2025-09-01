@@ -26,7 +26,6 @@ export default function PatientDashboardPage() {
                 const patient = await getPatient(patientId);
                 if (patient) {
                     setPatientData(patient);
-                    localStorage.setItem('patient_id', patient.id);
                 } else {
                     setError(`No patient found with ID ${patientId}. Please check the link.`);
                     localStorage.removeItem('patient_id');

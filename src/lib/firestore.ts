@@ -157,14 +157,13 @@ const processPatientDoc = (doc: any): Patient => {
 export async function getPatients(doctorId: string): Promise<Patient[]> {
   const q = query(
     collection(db, PATIENTS_COLLECTION),
-    where('doctorId', '==', doctorId),
-    orderBy('name', 'asc')
+    where('doctorId', '==', doctorId)
   );
   
   const snapshot = await getDocs(q);
   const allPatients = snapshot.docs.map(processPatientDoc);
   
-  return allPatients;
+  return allPatients.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getPatient(id: string): Promise<Patient | null> {
@@ -172,8 +171,13 @@ export async function getPatient(id: string): Promise<Patient | null> {
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
-    // Note: This does not enforce security rules. The rules themselves should do that.
-    return processPatientDoc(docSnap);
+    // This will update the lastLogin timestamp when a patient is viewed by anyone.
+    // We are keeping this simple and not distinguishing between doctor and patient views for this field.
+    // In a real-world scenario, you might have separate fields or more complex logic.
+    await updateDoc(docRef, { lastLogin: serverTimestamp() });
+    
+    const freshDoc = await getDoc(docRef);
+    return processPatientDoc(freshDoc);
   } else {
     return null;
   }
