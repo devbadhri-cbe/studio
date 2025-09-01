@@ -44,7 +44,8 @@ export default function PatientDashboard() {
   const [shouldAnimate, setShouldAnimate] = React.useState(false);
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   
-  const hasPendingSuggestions = profile.dashboardSuggestions?.some(s => s.status === 'pending');
+  const hasPendingItems = (profile.dashboardSuggestions?.some(s => s.status === 'pending')) || (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
+
 
   React.useEffect(() => {
     if (isMobile && dashboardView === 'none') {
@@ -142,7 +143,7 @@ export default function PatientDashboard() {
           <div className="mx-auto grid w-full max-w-7xl gap-6">
             <div className="space-y-6">
               <PatientHeader />
-              {isDoctorLoggedIn && hasPendingSuggestions && <DoctorReviewCard />}
+              {isDoctorLoggedIn && hasPendingItems && <DoctorReviewCard />}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ProfileCard />
                 <WeightRecordCard />
