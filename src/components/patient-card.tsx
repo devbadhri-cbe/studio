@@ -104,7 +104,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   }
 
   return (
-    <Card className="w-full flex flex-col cursor-pointer transition-colors group md:hover:border-primary/50" onClick={handleCardClick}>
+    <Card className="w-full flex flex-col cursor-pointer transition-all group md:hover:border-primary/50 shadow-md md:hover:shadow-lg active:shadow-xl active:scale-[0.98]" onClick={handleCardClick}>
       <CardHeader className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1 flex items-center gap-3 min-w-0">
