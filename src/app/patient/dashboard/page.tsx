@@ -114,7 +114,7 @@ export default function PatientDashboard() {
     vitaminD: { name: 'Vitamin D Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     thyroid: { name: 'Thyroid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     hypertension: { name: 'Hypertension Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-    renal: { name: 'Renal Dashboard', icon: <RefreshCw className="w-4 h-4" /> },
+    renal: { name: 'Renal Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
   }
   
   const handleDashboardSelect = (key: string) => {
