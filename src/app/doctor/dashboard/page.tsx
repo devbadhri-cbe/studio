@@ -157,14 +157,25 @@ export default function DoctorDashboardPage() {
         setEditingPatient(null);
     }
     
-    const filteredPatients = patients.filter(patient => {
-        const query = searchQuery.toLowerCase();
-        return (
-            patient.name.toLowerCase().includes(query) ||
-            (patient.email && patient.email.toLowerCase().includes(query)) ||
-            (patient.phone && patient.phone.toLowerCase().includes(query))
-        );
-    });
+    const filteredAndSortedPatients = React.useMemo(() => {
+        const filtered = patients.filter(patient => {
+            const query = searchQuery.toLowerCase();
+            return (
+                patient.name.toLowerCase().includes(query) ||
+                (patient.email && patient.email.toLowerCase().includes(query)) ||
+                (patient.phone && patient.phone.toLowerCase().includes(query))
+            );
+        });
+
+        return filtered.sort((a, b) => {
+            const aNeedsReview = a.presentMedicalConditions?.some(c => c.status === 'pending_review') || a.dashboardSuggestions?.some(s => s.status === 'pending');
+            const bNeedsReview = b.presentMedicalConditions?.some(c => c.status === 'pending_review') || b.dashboardSuggestions?.some(s => s.status === 'pending');
+            
+            if (aNeedsReview && !bNeedsReview) return -1;
+            if (!aNeedsReview && bNeedsReview) return 1;
+            return a.name.localeCompare(b.name);
+        });
+    }, [patients, searchQuery]);
 
   return (
     <TooltipProvider>
@@ -231,7 +242,7 @@ export default function DoctorDashboardPage() {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                    {filteredPatients.map((patient) => (
+                                    {filteredAndSortedPatients.map((patient) => (
                                         <PatientCard
                                             key={patient.id}
                                             patient={patient}
@@ -242,7 +253,7 @@ export default function DoctorDashboardPage() {
                                     ))}
                                 </div>
                             )}
-                            {(!isLoading && filteredPatients.length === 0) && (
+                            {(!isLoading && filteredAndSortedPatients.length === 0) && (
                                 <div className="text-center text-muted-foreground py-12">
                                     <p>No patients found.</p>
                                     {searchQuery && <p className="text-sm">Try adjusting your search query.</p>}
