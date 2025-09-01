@@ -635,6 +635,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
          result.added.push('Nutrition (Albumin)');
        } else { result.duplicates.push('Nutrition (Albumin)'); }
     }
+
+    if (batch.electrolytes) {
+        const dateExists = electrolyteRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+        if (!dateExists) {
+            const newRecord: ElectrolyteRecord = { ...batch.electrolytes, id: `electrolytes-${Date.now()}`, date: newRecordDate.toISOString(), medication: newMedication };
+            updates.electrolyteRecords = [...electrolyteRecords, newRecord];
+            setElectrolyteRecordsState(updates.electrolyteRecords);
+            result.added.push('Electrolytes');
+        } else {
+            result.duplicates.push('Electrolytes');
+        }
+    }
+    
+    if (batch.mineralBone) {
+        const dateExists = mineralBoneDiseaseRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+        if (!dateExists) {
+            const newRecord: MineralBoneDiseaseRecord = { ...batch.mineralBone, id: `mineralbone-${Date.now()}`, date: newRecordDate.toISOString(), medication: newMedication };
+            updates.mineralBoneDiseaseRecords = [...mineralBoneDiseaseRecords, newRecord];
+            setMineralBoneDiseaseRecordsState(updates.mineralBoneDiseaseRecords);
+            result.added.push('Mineral/Bone');
+        } else {
+            result.duplicates.push('Mineral/Bone');
+        }
+    }
     
     if (Object.keys(updates).length > 0) {
         await updatePatientData(profile.id, updates);
