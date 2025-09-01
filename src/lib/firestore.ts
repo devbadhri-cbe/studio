@@ -100,7 +100,7 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
 };
 
 // Add a new patient
-export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi' | 'height' | 'lastLogin'>): Promise<Patient> => {
+export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi' | 'height' | 'lastLogin' | 'dashboardSuggestions' | 'enabledDashboards'>): Promise<Patient> => {
     const countryInfo = countries.find(c => c.code === patientData.country);
 
     let newPatientObject: Omit<Patient, 'id'> = {
@@ -122,6 +122,7 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
         medication: [] as Medication[],
         presentMedicalConditions: [] as MedicalCondition[],
         dashboardSuggestions: [] as DashboardSuggestion[],
+        enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension'],
     };
     
     let patientToSave = recalculatePatientStatus(newPatientObject as Patient);

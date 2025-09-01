@@ -275,11 +275,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
   
   const acknowledgeSuggestion = (conditionId: string) => {
+    // This is for dismissing. It verifies the condition but enables no dashboard.
+    // It marks the suggestion as acknowledged to remove it from the doctor's review queue.
+    const updatedConditions = profile.presentMedicalConditions.map(c => 
+        c.id === conditionId ? { ...c, status: 'verified' as const } : c
+    );
     const updatedSuggestions = (profile.dashboardSuggestions || []).map(s => 
         s.conditionId === conditionId ? { ...s, status: 'acknowledged' as const } : s
     );
-     setProfileState(p => ({ ...p, dashboardSuggestions: updatedSuggestions }));
-     updatePatientData(profile.id, { dashboardSuggestions: updatedSuggestions });
+    setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions }));
+    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions });
   };
 
   const approveMedicalCondition = (conditionId: string, suggestion?: DashboardSuggestion) => {

@@ -9,7 +9,6 @@ import { Button } from './ui/button';
 import { AlertTriangle, Check, GitMerge, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
-import type { DashboardSuggestion } from '@/lib/types';
 
 
 export function DoctorReviewCard() {
@@ -19,7 +18,7 @@ export function DoctorReviewCard() {
   const pendingConditions = profile.presentMedicalConditions.filter(c => c.status === 'pending_review');
   const pendingSuggestions = profile.dashboardSuggestions?.filter(s => s.status === 'pending') || [];
   
-  if (pendingConditions.length === 0) {
+  if (pendingConditions.length === 0 && pendingSuggestions.length === 0) {
     return null;
   }
 
@@ -69,7 +68,7 @@ export function DoctorReviewCard() {
                                     Dismiss
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent>Dismiss this suggestion without taking action.</TooltipContent>
+                            <TooltipContent>Verifies condition but does not enable dashboard.</TooltipContent>
                         </Tooltip>
                         <Tooltip>
                             <TooltipTrigger asChild>
