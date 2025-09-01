@@ -74,4 +74,3 @@ const getDashboardRecommendationsFlow = ai.defineFlow(
     }
   }
 );
-
