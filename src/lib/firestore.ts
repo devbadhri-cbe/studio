@@ -61,7 +61,14 @@ export const getPatients = async (): Promise<Patient[]> => {
     const patientsSnapshot = await getDocs(patientsCollection);
     const patientsList = patientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Patient));
     
-    const processedPatients = patientsList.map(recalculatePatientStatus);
+    const processedPatients = patientsList.map(p => {
+        const patientWithDefaults = {
+            ...p,
+            presentMedicalConditions: p.presentMedicalConditions || [],
+            dashboardSuggestions: p.dashboardSuggestions || []
+        };
+        return recalculatePatientStatus(patientWithDefaults);
+    });
 
     return processedPatients.sort((a, b) => {
         const dateA = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
