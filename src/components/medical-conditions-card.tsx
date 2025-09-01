@@ -131,7 +131,7 @@ export function MedicalConditionsCard() {
   const formatDate = useDateFormatter();
   
   const handleSaveCondition = async (data: { condition: string, date: string }, icdCode?: string) => {
-    addMedicalCondition({ ...data, date: data.date }, !isDoctorLoggedIn);
+    addMedicalCondition({ ...data, icdCode }, !isDoctorLoggedIn);
     setIsAddingCondition(false);
   };
   

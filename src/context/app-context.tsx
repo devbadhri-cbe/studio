@@ -8,7 +8,7 @@ import { updatePatient } from '@/lib/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { toast } from '@/hooks/use-toast';
-import { startOfDay, parseISO } from 'date-fns';
+import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMgDl, toMmolL, toNgDl, toNmolL } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
@@ -256,6 +256,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   
   const addMedicalCondition = async (condition: Omit<MedicalCondition, 'id' | 'status'>, isPatientAdding: boolean) => {
+    if (!condition.date || !isValid(parseISO(condition.date))) {
+        console.error("Attempted to add medical condition with invalid date", condition);
+        return;
+    }
+
     const newCondition = { 
         ...condition, 
         id: Date.now().toString(), 
