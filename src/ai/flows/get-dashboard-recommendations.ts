@@ -49,14 +49,13 @@ const getDashboardRecommendationsFlow = ai.defineFlow(
         return { recommendedDashboard: 'none' };
     }
 
-    const requiredBiomarkers = biomarkers.map(b => b.toLowerCase().trim());
+    const requiredBiomarkersLower = biomarkers.map(b => b.toLowerCase().trim());
 
-    // Check if an existing dashboard covers all required biomarkers
+    // Check if an existing dashboard covers ALL required biomarkers
     for (const [dashboardKey, dashboardBiomarkers] of Object.entries(availableDashboardBiomarkers)) {
         const dashboardBiomarkersLower = dashboardBiomarkers.map(b => b.toLowerCase().trim());
         
-        // Correct Logic: Check if ALL required biomarkers are covered by the current dashboard
-        const allRequiredAreCovered = requiredBiomarkers.every(req => 
+        const allRequiredAreCovered = requiredBiomarkersLower.every(req => 
             dashboardBiomarkersLower.includes(req)
         );
 
@@ -72,4 +71,3 @@ const getDashboardRecommendationsFlow = ai.defineFlow(
     }
   }
 );
-
