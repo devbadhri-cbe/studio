@@ -2,7 +2,7 @@
 
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake, Settings, Edit, Save, X } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake, Edit, Save, X } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -168,20 +168,18 @@ export function ProfileCard() {
              <Form {...form}>
                 <form onSubmit={form.handleSubmit(onProfileSubmit)} className="space-y-4">
                     <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                    <FormField
+                     <FormField
                       control={form.control}
                       name="dob"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                           <FormLabel>Date of Birth</FormLabel>
-                          <FormControl>
-                            <DatePicker
-                                value={field.value}
-                                onChange={field.onChange}
-                                fromYear={new Date().getFullYear() - 100}
-                                toYear={new Date().getFullYear()}
-                            />
-                          </FormControl>
+                          <DatePicker
+                              value={field.value}
+                              onChange={field.onChange}
+                              fromYear={new Date().getFullYear() - 100}
+                              toYear={new Date().getFullYear()}
+                          />
                           <FormMessage />
                         </FormItem>
                       )}

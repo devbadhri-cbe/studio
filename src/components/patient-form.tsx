@@ -11,15 +11,12 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { countries } from '@/lib/countries';
-import { Loader2, UserPlus, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import type { Patient } from '@/lib/types';
 import { DatePicker } from './ui/date-picker';
 import { parseISO } from 'date-fns';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { calculateAge } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
 
 
 const FormSchema = z.object({
@@ -54,10 +51,9 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
     },
   });
   
-  const isMobile = useIsMobile();
   const watchCountry = form.watch('country');
   const watchDob = form.watch('dob');
-  const age = React.useMemo(() => calculateAge(watchDob?.toISOString()), [watchDob]);
+  const age = React.useMemo(() => watchDob ? calculateAge(watchDob.toISOString()) : null, [watchDob]);
 
   React.useEffect(() => {
     if (patient) {
@@ -98,24 +94,22 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             )}
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                 <FormItem>
-                     <FormLabel>Date of Birth</FormLabel>
-                     <FormField
-                        control={form.control}
-                        name="dob"
-                        render={({ field }) => (
-                            <FormControl>
-                                <DatePicker
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    fromYear={new Date().getFullYear() - 120}
-                                    toYear={new Date().getFullYear()}
-                                />
-                            </FormControl>
-                        )}
-                    />
-                    <FormMessage className="pt-1" />
-                </FormItem>
+                 <FormField
+                    control={form.control}
+                    name="dob"
+                    render={({ field }) => (
+                         <FormItem className="flex flex-col">
+                            <FormLabel>Date of Birth</FormLabel>
+                            <DatePicker
+                                value={field.value}
+                                onChange={field.onChange}
+                                fromYear={new Date().getFullYear() - 120}
+                                toYear={new Date().getFullYear()}
+                            />
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
                  <FormItem>
                     <FormLabel>Age</FormLabel>
                     <FormControl>
