@@ -21,8 +21,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { DatePicker } from './ui/date-picker';
 import { AddRecordButton } from './add-record-button';
+import { DateField } from './ui/date-field';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -35,7 +35,6 @@ export function AddThyroidRecordDialog() {
   const [open, setOpen] = React.useState(false);
   const { addThyroidRecord, profile, thyroidRecords } = useApp();
   const { toast } = useToast();
-  const dateInputRef = React.useRef<HTMLButtonElement>(null);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -55,9 +54,6 @@ export function AddThyroidRecordDialog() {
         t3: '' as any,
         t4: '' as any,
       });
-      setTimeout(() => {
-        dateInputRef.current?.focus();
-      }, 100);
     }
   }, [open, form]);
 
@@ -115,22 +111,10 @@ export function AddThyroidRecordDialog() {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-              <FormField
-                control={form.control}
+              <DateField
                 name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Test Date</FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        ref={dateInputRef}
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Test Date"
+                control={form.control}
               />
               <div className="grid grid-cols-3 gap-4">
                 <FormField

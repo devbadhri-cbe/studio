@@ -14,9 +14,9 @@ import { countries } from '@/lib/countries';
 import { Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import type { Patient } from '@/lib/types';
-import { DatePicker } from './ui/date-picker';
 import { parseISO } from 'date-fns';
 import { calculateAge } from '@/lib/utils';
+import { DateField } from './ui/date-field';
 
 
 const FormSchema = z.object({
@@ -94,22 +94,13 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             )}
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                 <FormField
-                    control={form.control}
+                 <DateField
                     name="dob"
-                    render={({ field }) => (
-                         <FormItem className="flex flex-col">
-                            <FormLabel>Date of Birth</FormLabel>
-                            <DatePicker
-                                value={field.value}
-                                onChange={field.onChange}
-                                fromYear={new Date().getFullYear() - 120}
-                                toYear={new Date().getFullYear()}
-                            />
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                    label="Date of Birth"
+                    control={form.control}
+                    fromYear={new Date().getFullYear() - 120}
+                    toYear={new Date().getFullYear()}
+                 />
                  <FormItem>
                     <FormLabel>Age</FormLabel>
                     <FormControl>

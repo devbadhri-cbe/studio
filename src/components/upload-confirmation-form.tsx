@@ -159,7 +159,7 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
               ) : (
                    <div className="space-y-2">
                       <p className="text-sm text-destructive">Date not found. Please select one.</p>
-                      <DatePicker 
+                      <DatePicker
                           placeholder='Select a date'
                           value={extractedData.date ? parseISO(extractedData.date) : undefined}
                           onChange={(newDate) => {

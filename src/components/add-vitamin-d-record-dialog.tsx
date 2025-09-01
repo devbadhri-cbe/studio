@@ -24,8 +24,8 @@ import { useToast } from '@/hooks/use-toast';
 import { toNgDl } from '@/lib/unit-conversions';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
-import { DatePicker } from './ui/date-picker';
 import { AddRecordButton } from './add-record-button';
+import { DateField } from './ui/date-field';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -39,7 +39,6 @@ export function AddVitaminDRecordDialog() {
   const { addVitaminDRecord, profile, vitaminDRecords, biomarkerUnit } = useApp();
   const { toast } = useToast();
   const [inputUnit, setInputUnit] = React.useState<VitaminDUnit>(biomarkerUnit);
-  const dateInputRef = React.useRef<HTMLButtonElement>(null);
 
   const getUnitLabel = (unit: VitaminDUnit) => (unit === 'si' ? 'nmol/L' : 'ng/mL');
 
@@ -58,9 +57,6 @@ export function AddVitaminDRecordDialog() {
         date: new Date(),
         value: '' as any,
       });
-      setTimeout(() => {
-        dateInputRef.current?.focus();
-      }, 100);
     }
   }, [open, biomarkerUnit, form]);
 
@@ -127,22 +123,10 @@ export function AddVitaminDRecordDialog() {
                 />
                 <Label htmlFor="unit-switch">nmol/L</Label>
               </div>
-              <FormField
-                control={form.control}
+              <DateField
                 name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Test Date</FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        ref={dateInputRef}
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Test Date"
+                control={form.control}
               />
               <FormField
                 control={form.control}

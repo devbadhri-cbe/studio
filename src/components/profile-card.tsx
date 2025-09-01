@@ -18,14 +18,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from './ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
-import { DatePicker } from './ui/date-picker';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { ProfileSettingsPopover } from './profile-settings-popover';
 import { Loader2 } from 'lucide-react';
 import { updatePatient } from '@/lib/firestore';
+import { DateField } from './ui/date-field';
 
 const ProfileSchema = z.object({
   name: z.string().min(2, "Name is required."),
@@ -168,21 +168,12 @@ export function ProfileCard() {
              <Form {...form}>
                 <form onSubmit={form.handleSubmit(onProfileSubmit)} className="space-y-4">
                     <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                     <FormField
-                      control={form.control}
-                      name="dob"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Date of Birth</FormLabel>
-                          <DatePicker
-                              value={field.value}
-                              onChange={field.onChange}
-                              fromYear={new Date().getFullYear() - 100}
-                              toYear={new Date().getFullYear()}
-                          />
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                     <DateField
+                        name="dob"
+                        label="Date of Birth"
+                        control={form.control}
+                        fromYear={new Date().getFullYear() - 100}
+                        toYear={new Date().getFullYear()}
                     />
                     <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
                     {isImperial ? (

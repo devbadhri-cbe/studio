@@ -21,8 +21,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { DatePicker } from './ui/date-picker';
 import { AddRecordButton } from './add-record-button';
+import { DateField } from './ui/date-field';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -33,7 +33,6 @@ export function AddRecordDialog() {
   const [open, setOpen] = React.useState(false);
   const { addRecord, records, profile } = useApp();
   const { toast } = useToast();
-  const dateInputRef = React.useRef<HTMLButtonElement>(null);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -49,9 +48,6 @@ export function AddRecordDialog() {
         value: '' as any,
         date: new Date(),
       });
-      setTimeout(() => {
-        dateInputRef.current?.focus();
-      }, 100);
     }
   }, [open, form]);
 
@@ -107,22 +103,10 @@ export function AddRecordDialog() {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-              <FormField
-                control={form.control}
+              <DateField
                 name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Test Date</FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        ref={dateInputRef}
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Test Date"
+                control={form.control}
               />
               <FormField
                 control={form.control}

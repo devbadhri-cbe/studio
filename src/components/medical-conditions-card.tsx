@@ -16,12 +16,12 @@ import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
-import { DatePicker } from './ui/date-picker';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 import type { MedicalCondition } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from './ui/alert';
 import { isValid, parseISO } from 'date-fns';
+import { DateField } from './ui/date-field';
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
@@ -88,23 +88,12 @@ function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-2">
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <DatePicker
-                  placeholder='Date of Diagnosis'
-                  value={field.value}
-                  onChange={field.onChange}
-                  fromYear={new Date().getFullYear() - 50}
-                  toYear={new Date().getFullYear()}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+        <DateField
+            name="date"
+            control={form.control}
+            placeholder="Date of Diagnosis"
+            fromYear={new Date().getFullYear() - 50}
+            toYear={new Date().getFullYear()}
         />
         <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormControl><Input ref={inputRef} placeholder="Condition Name" {...field} /></FormControl><FormMessage /></FormItem> )}/>
         <div className="flex justify-end gap-2">
