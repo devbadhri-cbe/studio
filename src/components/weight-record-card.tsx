@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { PlusCircle, Trash2, TrendingUp } from 'lucide-react';
+import { PlusCircle, Trash2, Weight } from 'lucide-react';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { AddWeightRecordDialog } from './add-weight-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
@@ -50,7 +50,7 @@ export function WeightRecordCard() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <div className='flex items-center gap-3 flex-1'>
-              <TrendingUp className="h-5 w-5 shrink-0 text-muted-foreground" />
+              <Weight className="h-5 w-5 shrink-0 text-muted-foreground" />
               <h3 className="font-medium">Weight Records</h3>
             </div>
             <div className="flex items-center gap-1 shrink-0">
