@@ -17,7 +17,6 @@ export interface DashboardSuggestion {
   conditionId: string;
   conditionName: string;
   suggestedDashboard: string;
-  requiredBiomarkers?: string[];
   status: 'pending' | 'acknowledged';
 }
 

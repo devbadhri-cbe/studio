@@ -2,7 +2,7 @@
 'use client';
 
 import { useApp } from '@/context/app-context';
-import { AlertTriangle, BadgeCheck, XCircle, Wrench } from 'lucide-react';
+import { AlertTriangle, BadgeCheck, XCircle } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -42,8 +42,6 @@ export function DoctorReviewCard() {
       <CardContent className="space-y-4">
         {pendingConditions.map((condition, index) => {
           const suggestion = (dashboardSuggestions || []).find(s => s.conditionId === condition.id && s.status === 'pending');
-          const isNewDashboardRequest = suggestion?.suggestedDashboard === 'new_dashboard_needed';
-
           return (
             <React.Fragment key={condition.id}>
               {index > 0 && <Separator />}
@@ -53,19 +51,8 @@ export function DoctorReviewCard() {
                   {condition.icdCode && (
                     <p className="text-sm text-muted-foreground">AI-suggested ICD-11: {condition.icdCode}</p>
                   )}
-                  {suggestion ? (
-                    isNewDashboardRequest ? (
-                       <div className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-                          <p className="font-semibold flex items-center gap-2">
-                            Suggested Dashboard: New Dashboard to be created
-                          </p>
-                          <p className="text-xs">This condition requires monitoring of: <span className="font-medium">{suggestion.requiredBiomarkers?.join(', ') || 'N/A'}</span>.</p>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Suggested Dashboard: <span className="font-medium text-primary">{getDashboardName(suggestion.suggestedDashboard)}</span></p>
-                    )
-                  ) : (
-                     <p className="text-sm text-muted-foreground">No dashboard suggestion available.</p>
+                  {suggestion && (
+                    <p className="text-sm text-muted-foreground">Suggested Dashboard: <span className="font-medium text-primary">{getDashboardName(suggestion.suggestedDashboard)}</span></p>
                   )}
                 </div>
                 <div className="flex gap-2 shrink-0">

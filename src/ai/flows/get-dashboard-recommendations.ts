@@ -9,7 +9,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { getBiomarkersForCondition, type BiomarkersForConditionOutput } from './get-biomarkers-for-condition';
 
 const DashboardRecommendationInputSchema = z.object({
   conditionName: z.string().describe('The name of the medical condition.'),
@@ -18,23 +17,34 @@ const DashboardRecommendationInputSchema = z.object({
 export type DashboardRecommendationInput = z.infer<typeof DashboardRecommendationInputSchema>;
 
 const DashboardRecommendationOutputSchema = z.object({
-  recommendedDashboard: z.enum(['hba1c', 'lipids', 'hypertension', 'thyroid', 'vitaminD', 'new_dashboard_needed', 'none']).describe('The key of the recommended dashboard or "new_dashboard_needed" or "none".'),
-  requiredBiomarkers: z.array(z.string()).optional().describe('List of required biomarkers if a new dashboard is needed.'),
+  recommendedDashboard: z.enum(['hba1c', 'lipids', 'hypertension', 'thyroid', 'vitaminD', 'none']).describe('The key of the recommended dashboard or "none".'),
 });
 export type DashboardRecommendationOutput = z.infer<typeof DashboardRecommendationOutputSchema>;
-
-const availableDashboardBiomarkers: Record<string, string[]> = {
-    hba1c: ['hba1c'],
-    lipids: ['ldl', 'hdl', 'triglycerides', 'total cholesterol'],
-    hypertension: ['blood pressure', 'systolic', 'diastolic'],
-    thyroid: ['tsh', 't3', 't4'],
-    vitaminD: ['vitamin d'],
-};
 
 
 export async function getDashboardRecommendations(input: DashboardRecommendationInput): Promise<DashboardRecommendationOutput> {
   return getDashboardRecommendationsFlow(input);
 }
+
+const prompt = ai.definePrompt({
+  name: 'dashboardRecommendationPrompt',
+  input: {schema: DashboardRecommendationInputSchema},
+  output: {schema: DashboardRecommendationOutputSchema},
+  prompt: `You are a medical expert system. Based on the provided medical condition, recommend the single most relevant monitoring dashboard from the available options.
+
+Condition: {{{conditionName}}}
+{{#if icdCode}}ICD Code: {{{icdCode}}}{{/if}}
+
+Available Dashboards and their primary biomarkers:
+- 'hba1c': Monitors HbA1c for diabetes.
+- 'lipids': Monitors LDL, HDL, Triglycerides for cholesterol management.
+- 'hypertension': Monitors blood pressure.
+- 'thyroid': Monitors TSH, T3, T4 for thyroid function.
+- 'vitaminD': Monitors Vitamin D levels.
+
+Analyze the condition and choose the most appropriate dashboard key. For example, for "Type 2 Diabetes", recommend "hba1c". For "Hypercholesterolemia", recommend "lipids". For "Hypothyroidism", recommend "thyroid". If no specific dashboard is a good fit, recommend "none".
+`,
+});
 
 const getDashboardRecommendationsFlow = ai.defineFlow(
   {
@@ -43,31 +53,7 @@ const getDashboardRecommendationsFlow = ai.defineFlow(
     outputSchema: DashboardRecommendationOutputSchema,
   },
   async (input) => {
-    const { biomarkers } = await getBiomarkersForCondition(input);
-
-    if (!biomarkers || biomarkers.length === 0) {
-        return { recommendedDashboard: 'none' };
-    }
-
-    const requiredBiomarkersLower = biomarkers.map(b => b.toLowerCase().trim());
-
-    // Check if an existing dashboard covers ALL required biomarkers
-    for (const [dashboardKey, dashboardBiomarkers] of Object.entries(availableDashboardBiomarkers)) {
-        const dashboardBiomarkersLower = dashboardBiomarkers.map(b => b.toLowerCase().trim());
-        
-        const allRequiredAreCovered = requiredBiomarkersLower.every(req => 
-            dashboardBiomarkersLower.includes(req)
-        );
-
-        if (allRequiredAreCovered) {
-            return { recommendedDashboard: dashboardKey as 'hba1c' | 'lipids' | 'hypertension' | 'thyroid' | 'vitaminD' };
-        }
-    }
-    
-    // If no existing dashboard is sufficient after checking all of them, recommend a new one
-    return {
-        recommendedDashboard: 'new_dashboard_needed',
-        requiredBiomarkers: biomarkers,
-    }
+    const {output} = await prompt(input);
+    return output!;
   }
 );

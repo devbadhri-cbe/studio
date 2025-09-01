@@ -249,14 +249,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     if (isPatientAdding) {
       try {
-        const result = await getDashboardRecommendations({ conditionName: newCondition.condition, icdCode: newCondition.icdCode });
-        if (result.recommendedDashboard !== 'none') {
+        const { recommendedDashboard } = await getDashboardRecommendations({ conditionName: newCondition.condition, icdCode: newCondition.icdCode });
+        if (recommendedDashboard !== 'none') {
           const newSuggestion: DashboardSuggestion = {
             id: `sugg-${Date.now()}`,
             conditionId: newCondition.id,
             conditionName: newCondition.condition,
-            suggestedDashboard: result.recommendedDashboard,
-            requiredBiomarkers: result.requiredBiomarkers,
+            suggestedDashboard: recommendedDashboard,
             status: 'pending',
           };
           const updatedSuggestions = [...dashboardSuggestions, newSuggestion];
@@ -285,19 +284,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     
     if (suggestionId) {
       const suggestion = dashboardSuggestions.find(s => s.id === suggestionId);
-      if (suggestion) {
-        updatedSuggestions = dashboardSuggestions.map(s => 
-          s.id === suggestionId ? { ...s, status: 'acknowledged' as const } : s
-        );
-        
-        const isNewDashboardRequest = suggestion.suggestedDashboard === 'new_dashboard_needed';
-
-        if (!isNewDashboardRequest && !updatedEnabledDashboards.includes(suggestion.suggestedDashboard)) {
-          updatedEnabledDashboards = [...updatedEnabledDashboards, suggestion.suggestedDashboard];
-        }
+      if (suggestion && !updatedEnabledDashboards.includes(suggestion.suggestedDashboard)) {
+        updatedEnabledDashboards = [...updatedEnabledDashboards, suggestion.suggestedDashboard];
       }
+      
+      updatedSuggestions = dashboardSuggestions.map(s => 
+        s.id === suggestionId ? { ...s, status: 'acknowledged' as const } : s
+      );
     }
-
+    
     setProfileState(p => ({...p, presentMedicalConditions: updatedConditions, enabledDashboards: updatedEnabledDashboards}));
     setDashboardSuggestions(updatedSuggestions);
     updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions, enabledDashboards: updatedEnabledDashboards });
