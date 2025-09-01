@@ -11,7 +11,7 @@ import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 import { Card, CardContent } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Form, FormControl, FormField, FormItem } from './ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from './ui/form';
 import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
