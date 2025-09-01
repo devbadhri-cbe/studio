@@ -1,9 +1,17 @@
-
 "use client"
 
 import * as React from "react"
-import { format, parse } from "date-fns"
-import { Input } from "./input";
+import { format } from "date-fns"
+import { Calendar as CalendarIcon } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 interface DatePickerProps {
   value?: Date;
@@ -17,46 +25,39 @@ export function DatePicker({
   value,
   onChange,
   placeholder,
+  fromYear,
+  toYear,
 }: DatePickerProps) {
-  const [dateString, setDateString] = React.useState('');
-
-  React.useEffect(() => {
-    if (value) {
-      try {
-        setDateString(format(value, 'yyyy-MM-dd'));
-      } catch (e) {
-        setDateString('');
-      }
-    } else {
-      setDateString('');
-    }
-  }, [value]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newString = e.target.value;
-    setDateString(newString);
-    try {
-      // The HTML input type="date" provides the date in 'yyyy-MM-dd' format.
-      // We parse it while accounting for the user's timezone to avoid off-by-one errors.
-      const parsedDate = parse(newString, 'yyyy-MM-dd', new Date());
-      if (!isNaN(parsedDate.getTime())) {
-          onChange(parsedDate);
-      } else {
-        // Handle cases where the input might be cleared or invalid
-        onChange(undefined);
-      }
-    } catch {
-       onChange(undefined);
-    }
-  };
+  const [open, setOpen] = React.useState(false)
 
   return (
-    <Input
-        type="date"
-        value={dateString}
-        onChange={handleInputChange}
-        placeholder={placeholder || "YYYY-MM-DD"}
-        className="w-full justify-start text-left font-normal h-10"
-    />
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant={"outline"}
+          className={cn(
+            "w-full justify-start text-left font-normal h-10",
+            !value && "text-muted-foreground"
+          )}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {value ? format(value, "PPP") : <span>{placeholder || "Pick a date"}</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0">
+        <Calendar
+          mode="single"
+          selected={value}
+          onSelect={(date) => {
+            onChange(date)
+            setOpen(false)
+          }}
+          initialFocus
+          captionLayout="dropdown-buttons"
+          fromYear={fromYear}
+          toYear={toYear}
+        />
+      </PopoverContent>
+    </Popover>
   )
 }
