@@ -163,6 +163,7 @@ export async function getPatients(doctorId: string): Promise<Patient[]> {
   const snapshot = await getDocs(q);
   const allPatients = snapshot.docs.map(processPatientDoc);
   
+  // Sorting on the client-side after fetching
   return allPatients.sort((a, b) => a.name.localeCompare(b.name));
 }
 

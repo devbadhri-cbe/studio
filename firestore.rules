@@ -3,37 +3,33 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    function isDoctorAuthenticated() {
-      return request.auth != null;
+    
+    // Doctors collection
+    match /doctors/{doctor} {
+      // Anyone can create a doctor account (sign-up)
+      allow create: if true;
+      // Only the authenticated doctor can read or update their own document
+      allow read, update: if request.auth.uid == doctor;
     }
     
-    function isOwner(resource) {
-      return request.auth.uid == resource.data.doctorId;
-    }
-
-    // Doctors collection
-    match /doctors/{doctorId} {
-      allow read: if isDoctorAuthenticated();
-      allow create: if isDoctorAuthenticated() && request.auth.uid == doctorId;
-    }
-
     // Patients collection
     match /patients/{patientId} {
-      // Allow any user (authenticated or not) to read a patient document.
-      // This is needed so patients can access their dashboard via a direct link without logging in.
-      // Security is maintained because the patientId is a long, unguessable string.
-      allow get: if true;
+      // Doctors can create patients
+      allow create: if request.auth != null;
       
-      // Allow an authenticated doctor to list patients, but only their own.
-      allow list: if isDoctorAuthenticated() && request.query.where.doctorId == request.auth.uid;
+      // Allow read access for the assigned doctor
+      // and for any user (for patient dashboard access via direct URL)
+      allow get: if request.auth.uid == resource.data.doctorId || request.auth == null;
+
+      // Allow a doctor to list the patients that belong to them.
+      allow list: if request.auth.uid == request.query.where.doctorId;
       
-      // Allow an authenticated doctor to create a patient.
-      // We check that the doctorId being set in the new document matches the creator's ID.
-      allow create: if isDoctorAuthenticated() && request.resource.data.doctorId == request.auth.uid;
+      // Allow updates only by the assigned doctor OR for anyone to update ONLY the lastLogin field
+      allow update: if request.auth.uid == resource.data.doctorId || 
+                      (request.auth == null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLogin']));
       
-      // Allow an authenticated doctor to update or delete a patient, but only if they are the owner.
-      allow update, delete: if isDoctorAuthenticated() && isOwner(resource);
+      // Allow deletes only by the assigned doctor
+      allow delete: if request.auth.uid == resource.data.doctorId;
     }
   }
 }

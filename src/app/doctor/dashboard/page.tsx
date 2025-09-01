@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -30,7 +31,7 @@ import { Loader2 } from 'lucide-react';
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
-    const { doctor, isDoctorLoggedIn, isClient, setPatientData } = useApp();
+    const { doctor, isClient, setPatientData } = useApp();
     const [patients, setPatients] = React.useState<Patient[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
@@ -40,17 +41,17 @@ export default function DoctorDashboardPage() {
     const [isSubmitting, setIsSubmitting] = React.useState(false);
 
 
-    const fetchPatients = React.useCallback(async () => {
+    const fetchPatients = React.useCallback(async (doctorId: string) => {
         setIsLoading(true);
         try {
-            const fetchedPatients = await getPatients();
+            const fetchedPatients = await getPatients(doctorId);
             setPatients(fetchedPatients);
         } catch (error) {
             console.error("Failed to fetch patients from Firestore", error);
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Failed to load patient data from the cloud."
+                description: "Failed to load patient data. Please check your connection and permissions."
             });
         } finally {
             setIsLoading(false);
@@ -58,23 +59,27 @@ export default function DoctorDashboardPage() {
     }, [toast]);
 
     React.useEffect(() => {
-        if (isClient) {
-            fetchPatients();
+        // Only fetch patients if we are on the client and the doctor object with a UID is available.
+        if (isClient && doctor?.uid) {
+            fetchPatients(doctor.uid);
+        } else if (isClient && !doctor?.uid) {
+            // Handle case where app is loaded but doctor auth isn't ready yet
+            setIsLoading(false);
         }
-    }, [fetchPatients, isClient]);
+    }, [fetchPatients, isClient, doctor]);
     
     // Re-fetch data when the page is focused
     React.useEffect(() => {
         const handleFocus = () => {
-            if (!isFormOpen) {
-                fetchPatients();
+            if (!isFormOpen && doctor?.uid) {
+                fetchPatients(doctor.uid);
             }
         };
         window.addEventListener('focus', handleFocus);
         return () => {
             window.removeEventListener('focus', handleFocus);
         };
-    }, [fetchPatients, isFormOpen]);
+    }, [fetchPatients, isFormOpen, doctor]);
 
 
     const viewPatientDashboard = (patient: Patient) => {
@@ -126,7 +131,9 @@ export default function DoctorDashboardPage() {
                     description: `${newPatient.name} has been successfully added.`,
                 });
             }
-            await fetchPatients();
+             if (doctor?.uid) {
+                await fetchPatients(doctor.uid);
+            }
             closeForm();
         } catch (error) {
             console.error("Failed to save patient", error);
