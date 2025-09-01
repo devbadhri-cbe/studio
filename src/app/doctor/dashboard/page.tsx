@@ -33,7 +33,8 @@ export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
     const { setPatientData } = useApp();
-    const doctorName = 'Dr. Jane Doe'; // Hardcoded doctor name
+    const doctorName = 'Dr. Badhrinathan N';
+    const doctorEmail = 'drbadhri@gmail.com';
     const [patients, setPatients] = React.useState<Patient[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
@@ -176,9 +177,9 @@ export default function DoctorDashboardPage() {
               </div>
               <div className="text-center md:text-right text-sm text-muted-foreground">
                   <p className="font-semibold text-lg text-foreground">{doctorName}</p>
-                   <a href="mailto:doctor@example.com" className="flex items-center justify-center md:justify-end gap-1.5 hover:text-primary">
+                   <a href={`mailto:${doctorEmail}`} className="flex items-center justify-center md:justify-end gap-1.5 hover:text-primary">
                       <Mail className="h-3 w-3" />
-                      doctor@example.com
+                      {doctorEmail}
                   </a>
               </div>
             </div>

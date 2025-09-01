@@ -153,7 +153,7 @@ export async function getPatient(id: string): Promise<Patient | null> {
   }
 }
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastHba1c' | 'lastLipid'>, doctorId?: string, doctorName?: string): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastHba1c' | 'lastLipid'>, doctorId: string = 'default-doctor-id', doctorName: string = 'Dr. Badhrinathan N'): Promise<Patient> {
     const docData = {
         ...patientData,
         doctorId,
