@@ -62,7 +62,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const country = countries.find(c => c.code === patient.country);
   const countryName = country?.name || patient.country;
   const formattedPhone = formatDisplayPhoneNumber(patient.phone, patient.country);
-  const hasPendingItems = (patient.dashboardSuggestions?.some(s => s.status === 'pending')) || (patient.presentMedicalConditions.some(c => c.status === 'pending_review'));
+  const hasPendingItems = (patient.dashboardSuggestions?.some(s => s.status === 'pending')) || (patient.presentMedicalConditions?.some(c => c.status === 'pending_review'));
   
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest('button, [role="menuitem"], [role="dialog"]')) {
@@ -250,3 +250,5 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     </Card>
   );
 }
+
+    
