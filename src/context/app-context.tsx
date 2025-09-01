@@ -2,9 +2,9 @@
 
 'use client';
 
-import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type AnemiaRecord, type NutritionRecord } from '@/lib/types';
+import { type Doctor, type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type AnemiaRecord, type NutritionRecord } from '@/lib/types';
 import * as React from 'react';
-import { updatePatient } from '@/lib/firestore';
+import { updatePatient, getDoctor } from '@/lib/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { toast } from '@/hooks/use-toast';
@@ -16,7 +16,6 @@ import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommenda
 
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'] };
-const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
 type DashboardView = 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'hypertension' | 'renal' | 'report' | 'none';
 type Theme = 'dark' | 'light' | 'system';
@@ -90,9 +89,10 @@ interface AppContextType {
   isClient: boolean;
   dashboardView: DashboardView;
   setDashboardView: (view: DashboardView) => void;
+  doctor: Doctor | null;
+  setDoctor: (doctor: Doctor | null) => void;
   isDoctorLoggedIn: boolean;
   setIsDoctorLoggedIn: (isLoggedIn: boolean) => void;
-  doctorName: string;
   setPatientData: (patient: Patient) => void;
   biomarkerUnit: BiomarkerUnitSystem;
   getDisplayLipidValue: (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides') => number;
@@ -123,6 +123,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [tips, setTipsState] = React.useState<string[]>([]);
   const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('report');
   const [isClient, setIsClient] = React.useState(false);
+  const [doctor, setDoctorState] = React.useState<Doctor | null>(null);
   const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
 
@@ -185,15 +186,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return value;
   }
 
+  const setDoctor = (doctor: Doctor | null) => {
+    setDoctorState(doctor);
+    if (doctor) {
+        localStorage.setItem('doctor', JSON.stringify(doctor));
+    } else {
+        localStorage.removeItem('doctor');
+    }
+  }
+
   React.useEffect(() => {
-    
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
             setIsDoctorLoggedInState(true);
-            localStorage.setItem('doctor_logged_in', 'true');
+            const doctorProfile = await getDoctor(user.uid);
+            if (doctorProfile) {
+                setDoctor(doctorProfile);
+            }
         } else {
             setIsDoctorLoggedInState(false);
-            localStorage.removeItem('doctor_logged_in');
+            setDoctor(null);
         }
     });
 
@@ -202,11 +214,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
       setIsDoctorLoggedInState(isLoggedIn);
-      if (isLoggedIn) {
-        localStorage.setItem('doctor_logged_in', 'true');
-      } else {
-        localStorage.removeItem('doctor_logged_in');
-      }
   }
   
   const setPatientData = React.useCallback((patient: Patient) => {
@@ -225,6 +232,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
       enabledDashboards: Array.isArray(patient.enabledDashboards) ? patient.enabledDashboards : ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
       bmi: patient.bmi,
+      doctorName: patient.doctorName,
     };
     setProfileState(patientProfile);
     setRecordsState(patient.records || []);
@@ -364,9 +372,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setMedicationNil = () => {
-    const nilMedication = [{ id: 'nil', name: 'Nil', dosage: '', frequency: '' }];
-    setProfileState(p => ({...p, medication: nilMedication}));
-    updatePatientData(profile.id, { medication: nilMedication });
+      const nilMedication = [{ id: 'nil', name: 'Nil', dosage: '', frequency: '' }];
+      setProfileState(p => ({...p, medication: nilMedication}));
+      updatePatientData(profile.id, { medication: nilMedication });
   }
 
   const addRecord = (record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
@@ -706,7 +714,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     mineralBoneDiseaseRecords,
     addMineralBoneDiseaseRecord,
     removeMineralBoneDiseaseRecord,
-    anemiaRecords,
+anemiaRecords,
     addAnemiaRecord,
     removeAnemiaRecord,
     nutritionRecords,
@@ -724,9 +732,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isClient,
     dashboardView,
     setDashboardView,
-isDoctorLoggedIn,
+    doctor,
+    setDoctor,
+    isDoctorLoggedIn,
     setIsDoctorLoggedIn,
-    doctorName: DOCTOR_NAME,
     setPatientData,
     biomarkerUnit,
     getDisplayLipidValue,

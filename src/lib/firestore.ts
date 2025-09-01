@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -153,9 +154,10 @@ const processPatientDoc = (doc: any): Patient => {
 };
 
 
-export async function getPatients(): Promise<Patient[]> {
+export async function getPatients(doctorId: string): Promise<Patient[]> {
   const q = query(
     collection(db, PATIENTS_COLLECTION),
+    where('doctorId', '==', doctorId),
     orderBy('name', 'asc')
   );
   
@@ -170,6 +172,7 @@ export async function getPatient(id: string): Promise<Patient | null> {
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
+    // Note: This does not enforce security rules. The rules themselves should do that.
     return processPatientDoc(docSnap);
   } else {
     return null;
@@ -237,7 +240,19 @@ export async function deletePatient(id: string): Promise<void> {
   await deleteDoc(doc(db, PATIENTS_COLLECTION, id));
 }
 
-// NOTE: Specific record management (add/remove individual records) will be handled
-// in the AppContext to manage local state first, then persist the entire patient object.
-// This is more efficient than writing to Firestore for every small change.
-// The updatePatient function is the primary method for persisting any changes.
+export async function createDoctor(uid: string, name: string, email: string): Promise<Doctor> {
+  const docRef = doc(db, DOCTORS_COLLECTION, uid);
+  const newDoctor: Doctor = { uid, name, email };
+  await setDoc(docRef, newDoctor);
+  return newDoctor;
+}
+
+export async function getDoctor(uid: string): Promise<Doctor | null> {
+    const docRef = doc(db, DOCTORS_COLLECTION, uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        return docSnap.data() as Doctor;
+    }
+    return null;
+}

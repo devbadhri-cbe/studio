@@ -1,18 +1,39 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
   
-    // Doctors collection
-    match /doctors/{doctorId} {
-      allow read;
-      allow write: if request.auth != null && request.auth.uid == doctorId;
+    function isDoctorAuthenticated() {
+      return request.auth != null;
     }
     
+    function isOwner(resource) {
+      return request.auth.uid == resource.data.doctorId;
+    }
+
+    // Doctors collection
+    match /doctors/{doctorId} {
+      allow read: if isDoctorAuthenticated();
+      allow create: if isDoctorAuthenticated() && request.auth.uid == doctorId;
+    }
+
     // Patients collection
     match /patients/{patientId} {
-    	allow read;
-      allow write: if request.auth != null;
+      // Allow any user (authenticated or not) to read a patient document.
+      // This is needed so patients can access their dashboard via a direct link without logging in.
+      // Security is maintained because the patientId is a long, unguessable string.
+      allow get: if true;
+      
+      // Allow an authenticated doctor to list patients, but only their own.
+      allow list: if isDoctorAuthenticated() && request.query.where.doctorId == request.auth.uid;
+      
+      // Allow an authenticated doctor to create a patient.
+      // We check that the doctorId being set in the new document matches the creator's ID.
+      allow create: if isDoctorAuthenticated() && request.resource.data.doctorId == request.auth.uid;
+      
+      // Allow an authenticated doctor to update or delete a patient, but only if they are the owner.
+      allow update, delete: if isDoctorAuthenticated() && isOwner(resource);
     }
   }
 }
