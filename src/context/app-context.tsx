@@ -256,6 +256,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             conditionId: newCondition.id,
             conditionName: newCondition.condition,
             suggestedDashboard: result.recommendedDashboard,
+            requiredBiomarkers: result.requiredBiomarkers,
             status: 'pending',
           };
           const updatedSuggestions = [...dashboardSuggestions, newSuggestion];
@@ -275,7 +276,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
   
   const approveMedicalCondition = (conditionId: string, suggestionId?: string) => {
-    // Verify the condition
     const updatedConditions = profile.presentMedicalConditions.map(c => 
       c.id === conditionId ? { ...c, status: 'verified' as const } : c
     );
@@ -286,12 +286,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (suggestionId) {
       const suggestion = dashboardSuggestions.find(s => s.id === suggestionId);
       if (suggestion) {
-        // Acknowledge suggestion
         updatedSuggestions = dashboardSuggestions.map(s => 
           s.id === suggestionId ? { ...s, status: 'acknowledged' as const } : s
         );
-        // Enable the dashboard if it's not already
-        if (!updatedEnabledDashboards.includes(suggestion.suggestedDashboard)) {
+        
+        const isNewDashboardRequest = suggestion.suggestedDashboard === 'new_dashboard_needed';
+
+        if (!isNewDashboardRequest && !updatedEnabledDashboards.includes(suggestion.suggestedDashboard)) {
           updatedEnabledDashboards = [...updatedEnabledDashboards, suggestion.suggestedDashboard];
         }
       }
@@ -303,12 +304,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
   
   const dismissSuggestion = (conditionId: string, suggestionId?: string) => {
-    // Mark the condition as needing revision by the patient
     const updatedConditions = profile.presentMedicalConditions.map(c => 
       c.id === conditionId ? { ...c, status: 'needs_revision' as const } : c
     );
 
-    // Acknowledge the suggestion so it disappears from the doctor's review queue
     let updatedSuggestions = dashboardSuggestions;
     if (suggestionId) {
        updatedSuggestions = dashboardSuggestions.map(s => 

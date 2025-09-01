@@ -17,6 +17,7 @@ export interface DashboardSuggestion {
   conditionId: string;
   conditionName: string;
   suggestedDashboard: string;
+  requiredBiomarkers?: string[];
   status: 'pending' | 'acknowledged';
 }
 
@@ -138,6 +139,6 @@ export interface Patient {
   bloodPressureRecords: BloodPressureRecord[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
-  dashboardSuggestions?: DashboardSuggestion[];
-  enabledDashboards?: string[];
+  dashboardSuggestions: DashboardSuggestion[];
+  enabledDashboards: string[];
 }

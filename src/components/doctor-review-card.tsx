@@ -1,9 +1,8 @@
 
-
 'use client';
 
 import { useApp } from '@/context/app-context';
-import { AlertTriangle, BadgeCheck, XCircle } from 'lucide-react';
+import { AlertTriangle, BadgeCheck, XCircle, Wrench } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -23,8 +22,8 @@ const getDashboardName = (key: string) => {
 export function DoctorReviewCard() {
   const { profile, dashboardSuggestions, approveMedicalCondition, dismissSuggestion } = useApp();
 
-  const pendingConditions = profile.presentMedicalConditions.filter(c => c.status === 'pending_review');
-  const pendingSuggestions = dashboardSuggestions.filter(s => s.status === 'pending');
+  const pendingConditions = (profile.presentMedicalConditions || []).filter(c => c.status === 'pending_review');
+  const pendingSuggestions = (dashboardSuggestions || []).filter(s => s.status === 'pending');
   
   if (pendingConditions.length === 0) return null;
 
@@ -44,6 +43,8 @@ export function DoctorReviewCard() {
       <CardContent className="space-y-4">
         {pendingConditions.map((condition, index) => {
           const suggestion = pendingSuggestions.find(s => s.conditionId === condition.id);
+          const isNewDashboardRequest = suggestion?.suggestedDashboard === 'new_dashboard_needed';
+
           return (
             <React.Fragment key={condition.id}>
               {index > 0 && <Separator />}
@@ -54,7 +55,17 @@ export function DoctorReviewCard() {
                     <p className="text-sm text-muted-foreground">AI-suggested ICD-11: {condition.icdCode}</p>
                   )}
                   {suggestion && (
-                    <p className="text-sm text-muted-foreground">Suggested Dashboard: <span className="font-medium text-primary">{getDashboardName(suggestion.suggestedDashboard)}</span></p>
+                    isNewDashboardRequest ? (
+                      <div className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                          <p className="font-semibold flex items-center gap-2">
+                            <Wrench className="h-4 w-4"/>
+                            New Dashboard Required
+                          </p>
+                          <p className="text-xs">This condition requires monitoring of: <span className="font-medium">{suggestion.requiredBiomarkers?.join(', ') || 'N/A'}</span>. A new dashboard is pending development.</p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Suggested Dashboard: <span className="font-medium text-primary">{getDashboardName(suggestion.suggestedDashboard)}</span></p>
+                    )
                   )}
                 </div>
                 <div className="flex gap-2 shrink-0">
