@@ -56,7 +56,7 @@ const processPatientDoc = (doc: any): Patient => {
     return records.map(r => {
       if (r && r.date) {
         const dateObj = r.date.seconds ? new Timestamp(r.date.seconds, r.date.nanoseconds).toDate() : new Date(r.date);
-        r.date = !isNaN(dateObj.getTime()) ? dateObj.toISOString() : new Date().toISOString();
+        r.date = !isNaN(dateObj.getTime()) ? dateObj.toISOString() : new Date(0).toISOString();
       }
       return r;
     });
@@ -101,7 +101,7 @@ const processPatientDoc = (doc: any): Patient => {
   const patientData: Partial<Patient> = {
     ...data,
     id: doc.id,
-    dob: !isNaN(dobTimestamp.getTime()) ? dobTimestamp.toISOString() : new Date().toISOString(),
+    dob: !isNaN(dobTimestamp.getTime()) ? dobTimestamp.toISOString() : new Date(0).toISOString(),
     lastLogin: lastLoginTimestamp && !isNaN(lastLoginTimestamp.getTime()) ? lastLoginTimestamp.toISOString() : undefined,
     records,
     lipidRecords,
