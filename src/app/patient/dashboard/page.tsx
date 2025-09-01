@@ -8,7 +8,7 @@ import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
-import { ArrowLeft, UploadCloud, LayoutGrid, GaugeCircle } from 'lucide-react';
+import { ArrowLeft, UploadCloud, LayoutGrid, GaugeCircle, Check } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -28,6 +28,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { UploadRecordDialog } from '@/components/upload-record-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -38,7 +41,7 @@ import { DoctorReviewCard } from '@/components/doctor-review-card';
 
 
 export default function PatientDashboard() {
-  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName, profile } = useApp();
+  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName, profile, toggleDashboard } = useApp();
   const router = useRouter();
   const isMobile = useIsMobile();
   const [shouldAnimate, setShouldAnimate] = React.useState(false);
@@ -169,18 +172,38 @@ export default function PatientDashboard() {
                         </Button>
                     </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    {Object.entries(dashboardOptions)
-                        .filter(([key]) => profile.enabledDashboards?.includes(key))
-                        .map(([key, value]) => (
-                        <DropdownMenuItem 
-                            key={key}
-                            onSelect={() => handleDashboardSelect(key)}
-                            className={dashboardView === key ? 'bg-accent' : ''}
-                        >
-                            {value.icon}
-                            <span className="ml-2">{value.name}</span>
-                        </DropdownMenuItem>
-                    ))}
+                    {isDoctorLoggedIn ? (
+                        <>
+                           <DropdownMenuLabel>Manage Dashboards</DropdownMenuLabel>
+                           <DropdownMenuSeparator />
+                           {Object.entries(dashboardOptions).map(([key, value]) => (
+                                <DropdownMenuCheckboxItem
+                                    key={key}
+                                    checked={profile.enabledDashboards?.includes(key)}
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        toggleDashboard(key);
+                                    }}
+                                >
+                                    {value.icon}
+                                    <span className="ml-2">{value.name}</span>
+                                </DropdownMenuCheckboxItem>
+                           ))}
+                        </>
+                    ) : (
+                        Object.entries(dashboardOptions)
+                            .filter(([key]) => profile.enabledDashboards?.includes(key))
+                            .map(([key, value]) => (
+                            <DropdownMenuItem 
+                                key={key}
+                                onSelect={() => handleDashboardSelect(key)}
+                                className={dashboardView === key ? 'bg-accent' : ''}
+                            >
+                                {value.icon}
+                                <span className="ml-2">{value.name}</span>
+                            </DropdownMenuItem>
+                        ))
+                    )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

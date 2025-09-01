@@ -81,6 +81,7 @@ interface AppContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   acknowledgeSuggestion: (conditionId: string) => void;
+  toggleDashboard: (dashboardKey: string) => void;
 }
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -501,6 +502,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setDashboardView = (view: DashboardView) => {
     setDashboardViewState(view);
   }
+
+  const toggleDashboard = (dashboardKey: string) => {
+    const currentDashboards = profile.enabledDashboards || [];
+    const isEnabled = currentDashboards.includes(dashboardKey);
+    let updatedDashboards: string[];
+
+    if (isEnabled) {
+        updatedDashboards = currentDashboards.filter(d => d !== dashboardKey);
+    } else {
+        updatedDashboards = [...currentDashboards, dashboardKey];
+    }
+    
+    setProfile({ ...profile, enabledDashboards: updatedDashboards });
+  };
   
   const value: AppContextType = {
     profile,
@@ -547,6 +562,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     getDbVitaminDValue,
     theme,
     setTheme: setThemeState,
+    toggleDashboard,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
