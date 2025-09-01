@@ -16,7 +16,7 @@ import { Separator } from './ui/separator';
 import type { Patient } from '@/lib/types';
 import { parseISO } from 'date-fns';
 import { calculateAge } from '@/lib/utils';
-import { DateField } from './ui/date-field';
+import { DatePicker } from './ui/date-picker';
 
 
 const FormSchema = z.object({
@@ -94,12 +94,23 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             )}
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                 <DateField
-                    name="dob"
-                    label="Date of Birth"
+                 <FormField
                     control={form.control}
-                    fromYear={new Date().getFullYear() - 120}
-                    toYear={new Date().getFullYear()}
+                    name="dob"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                            <FormLabel>Date of Birth</FormLabel>
+                            <FormControl>
+                                <DatePicker
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    fromYear={new Date().getFullYear() - 120}
+                                    toYear={new Date().getFullYear()}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
                  />
                  <FormItem>
                     <FormLabel>Age</FormLabel>

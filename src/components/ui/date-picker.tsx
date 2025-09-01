@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-interface DatePickerProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'onChange' | 'value'> {
+interface DatePickerProps {
   value?: Date;
   onChange: (date?: Date) => void;
   placeholder?: string;
@@ -22,43 +22,44 @@ interface DatePickerProps extends Omit<React.ComponentPropsWithoutRef<'button'>,
   toYear?: number;
 }
 
-export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
-  ({ value, onChange, className, placeholder, fromYear, toYear, ...props }, ref) => {
-    const captionLayout = fromYear && toYear ? "dropdown-buttons" : "buttons";
-  
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            ref={ref}
-            variant={"outline"}
-            className={cn(
-              "w-full justify-start text-left font-normal h-10",
-              !value && "text-muted-foreground",
-              className
-            )}
-            {...props}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {value ? format(value, "PPP") : <span>{placeholder || 'Pick a date'}</span>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
-          <Calendar
-            mode="single"
-            selected={value}
-            onSelect={onChange}
-            defaultMonth={value}
-            initialFocus
-            disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-            captionLayout={captionLayout}
-            fromYear={fromYear || new Date().getFullYear() - 100}
-            toYear={toYear || new Date().getFullYear()}
-          />
-        </PopoverContent>
-      </Popover>
-    )
-  }
-)
+export function DatePicker({
+  value,
+  onChange,
+  placeholder,
+  fromYear,
+  toYear,
+}: DatePickerProps) {
+  const captionLayout = fromYear && toYear ? "dropdown-buttons" : "buttons";
 
-DatePicker.displayName = 'DatePicker';
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant={"outline"}
+          className={cn(
+            "w-full justify-start text-left font-normal h-10",
+            !value && "text-muted-foreground"
+          )}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {value ? format(value, "PPP") : <span>{placeholder || "Pick a date"}</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0">
+        <Calendar
+          mode="single"
+          selected={value}
+          onSelect={onChange}
+          defaultMonth={value}
+          initialFocus
+          disabled={(date) =>
+            date > new Date() || date < new Date("1900-01-01")
+          }
+          captionLayout={captionLayout}
+          fromYear={fromYear}
+          toYear={toYear}
+        />
+      </PopoverContent>
+    </Popover>
+  )
+}

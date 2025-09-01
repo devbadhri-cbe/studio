@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
-import { DateField } from './ui/date-field';
+import { DatePicker } from './ui/date-picker';
 
 type CreatinineUnit = 'mg/dL' | 'umol/L';
 
@@ -114,12 +114,23 @@ export function AddRenalRecordDialog() {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-              <DateField
-                name="date"
-                label="Test Date"
+              <FormField
                 control={form.control}
-                fromYear={new Date().getFullYear() - 10}
-                toYear={new Date().getFullYear()}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Test Date</FormLabel>
+                    <FormControl>
+                      <DatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        fromYear={new Date().getFullYear() - 10}
+                        toYear={new Date().getFullYear()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
               <FormField
                 control={form.control}

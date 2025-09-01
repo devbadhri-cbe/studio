@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { lbsToKg } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { AddRecordButton } from './add-record-button';
-import { DateField } from './ui/date-field';
+import { DatePicker } from './ui/date-picker';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -101,12 +101,23 @@ export function AddWeightRecordDialog({ children }: AddWeightRecordDialogProps) 
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-              <DateField
-                name="date"
-                label="Date"
+              <FormField
                 control={form.control}
-                fromYear={new Date().getFullYear() - 10}
-                toYear={new Date().getFullYear()}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <DatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        fromYear={new Date().getFullYear() - 10}
+                        toYear={new Date().getFullYear()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
               <FormField
                   control={form.control}

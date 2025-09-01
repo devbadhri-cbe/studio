@@ -25,7 +25,7 @@ import { toNgDl } from '@/lib/unit-conversions';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import { AddRecordButton } from './add-record-button';
-import { DateField } from './ui/date-field';
+import { DatePicker } from './ui/date-picker';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -123,12 +123,23 @@ export function AddVitaminDRecordDialog() {
                 />
                 <Label htmlFor="unit-switch">nmol/L</Label>
               </div>
-              <DateField
-                name="date"
-                label="Test Date"
+              <FormField
                 control={form.control}
-                fromYear={new Date().getFullYear() - 10}
-                toYear={new Date().getFullYear()}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Test Date</FormLabel>
+                    <FormControl>
+                      <DatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        fromYear={new Date().getFullYear() - 10}
+                        toYear={new Date().getFullYear()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
               <FormField
                 control={form.control}
