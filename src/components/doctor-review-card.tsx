@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -15,8 +16,8 @@ export function DoctorReviewCard() {
   const { profile, approveMedicalCondition, acknowledgeSuggestion } = useApp();
   const formatDate = useDateFormatter();
 
-  const pendingSuggestions = profile.dashboardSuggestions?.filter(s => s.status === 'pending') || [];
   const pendingConditions = profile.presentMedicalConditions.filter(c => c.status === 'pending_review');
+  const pendingSuggestions = profile.dashboardSuggestions?.filter(s => s.status === 'pending') || [];
   
   if (pendingConditions.length === 0) {
     return null;
@@ -52,13 +53,13 @@ export function DoctorReviewCard() {
                     <div className="flex-1">
                         <p className="font-semibold">{condition.condition}</p>
                         {condition.icdCode && <p className="text-xs text-muted-foreground">Suggested ICD-11: {condition.icdCode}</p>}
-                        <p className="text-sm text-muted-foreground">Patient added on {formatDate(condition.date)}</p>
                          {suggestion && suggestion.suggestedDashboard !== 'none' && (
                             <div className="flex items-center gap-2 mt-1 text-xs text-primary">
                                 <GitMerge className="h-3 w-3" />
                                 <span>Suggested Dashboard: {getDashboardName(suggestion.suggestedDashboard)}</span>
                             </div>
                         )}
+                        <p className="text-sm text-muted-foreground mt-1">Patient added on {formatDate(condition.date)}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                         <Tooltip>

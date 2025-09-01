@@ -240,12 +240,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const updatedConditions = [...profile.presentMedicalConditions, newCondition];
     let updatedSuggestions = [...(profile.dashboardSuggestions || [])];
 
+    // Set local state immediately for UI responsiveness
     setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
 
+    // If a patient is adding, get AI suggestions
     if (isPatientAdding) {
         try {
             const result = await getDashboardRecommendations({ conditionName: newCondition.condition, icdCode: newCondition.icdCode || '' });
-            if (result.recommendedDashboard) {
+            if (result.recommendedDashboard !== 'none') {
                 const alreadySuggested = updatedSuggestions.some(s => s.conditionId === newCondition.id);
                 if (!alreadySuggested) {
                     updatedSuggestions.push({
@@ -261,7 +263,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
     }
     
-    setProfileState(p => ({ ...p, dashboardSuggestions: updatedSuggestions }));
+    setProfileState(p => ({ ...p, dashboardSuggestions: updatedSuggestions, presentMedicalConditions: updatedConditions }));
     updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions });
   };
   
@@ -288,7 +290,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         s.conditionId === conditionId ? { ...s, status: 'acknowledged' as const } : s
     );
     let updatedEnabledDashboards = [...(profile.enabledDashboards || [])];
-    if (suggestion) {
+    if (suggestion && suggestion.suggestedDashboard !== 'none') {
         if (!updatedEnabledDashboards.includes(suggestion.suggestedDashboard)) {
             updatedEnabledDashboards.push(suggestion.suggestedDashboard);
         }
