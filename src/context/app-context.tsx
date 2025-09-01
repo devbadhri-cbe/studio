@@ -303,11 +303,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
   
   const dismissSuggestion = (conditionId: string, suggestionId?: string) => {
-     // Still verify the condition
+    // Mark the condition as needing revision by the patient
     const updatedConditions = profile.presentMedicalConditions.map(c => 
-      c.id === conditionId ? { ...c, status: 'verified' as const } : c
+      c.id === conditionId ? { ...c, status: 'needs_revision' as const } : c
     );
 
+    // Acknowledge the suggestion so it disappears from the doctor's review queue
     let updatedSuggestions = dashboardSuggestions;
     if (suggestionId) {
        updatedSuggestions = dashboardSuggestions.map(s => 

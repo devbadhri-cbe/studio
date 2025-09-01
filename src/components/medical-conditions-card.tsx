@@ -2,7 +2,7 @@
 
 'use client';
 
-import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle } from 'lucide-react';
+import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle, AlertTriangle, Edit } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,6 +19,8 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { DatePicker } from './ui/date-picker';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 import type { MedicalCondition } from '@/lib/types';
+import { cn } from '@/lib/utils';
+import { Alert, AlertDescription } from './ui/alert';
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
@@ -114,6 +116,12 @@ function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave
   );
 }
 
+const statusConfig = {
+  verified: { icon: CheckCircle, text: "Verified by doctor", color: "text-green-500" },
+  pending_review: { icon: Info, text: "Pending doctor review", color: "text-yellow-500" },
+  needs_revision: { icon: AlertTriangle, text: "Doctor requested revision", color: "text-destructive" },
+};
+
 
 export function MedicalConditionsCard() {
   const { profile, addMedicalCondition, removeMedicalCondition, isDoctorLoggedIn } = useApp();
@@ -132,6 +140,11 @@ export function MedicalConditionsCard() {
       if (activeSynopsis?.type === 'condition' && activeSynopsis.id === id) {
           setActiveSynopsis(null);
       }
+  }
+
+  const handleReviseCondition = (id: string) => {
+      handleRemoveCondition(id);
+      setIsAddingCondition(true);
   }
   
   const handleSynopsisToggle = (type: 'condition', id: string) => {
@@ -169,48 +182,59 @@ export function MedicalConditionsCard() {
                 {isAddingCondition && <MedicalConditionForm onSave={handleSaveCondition} onCancel={() => setIsAddingCondition(false)} existingConditions={profile.presentMedicalConditions} />}
                 {profile.presentMedicalConditions.length > 0 ? (
                     <ul className="space-y-1 mt-2">
-                        {profile.presentMedicalConditions.map((condition) => (
-                            <React.Fragment key={condition.id}>
-                                <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-semibold text-foreground">{condition.condition}</p>
-                                        {condition.status === 'verified' ? (
+                        {profile.presentMedicalConditions.map((condition) => {
+                            const statusInfo = statusConfig[condition.status] || statusConfig.pending_review;
+                            const Icon = statusInfo.icon;
+                            return (
+                                <React.Fragment key={condition.id}>
+                                    <li className="group flex items-start gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-semibold text-foreground">{condition.condition}</p>
                                             <Tooltip>
-                                                <TooltipTrigger><CheckCircle className="h-3.5 w-3.5 text-green-500" /></TooltipTrigger>
-                                                <TooltipContent>Verified by doctor</TooltipContent>
+                                                <TooltipTrigger><Icon className={cn("h-3.5 w-3.5", statusInfo.color)} /></TooltipTrigger>
+                                                <TooltipContent>{statusInfo.text}</TooltipContent>
                                             </Tooltip>
-                                        ) : (
-                                            <Tooltip>
-                                                <TooltipTrigger><Info className="h-3.5 w-3.5 text-yellow-500" /></TooltipTrigger>
-                                                <TooltipContent>Pending doctor review</TooltipContent>
-                                            </Tooltip>
-                                        )}
+                                        </div>
+                                        {condition.icdCode && <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>}
+                                        <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
                                     </div>
-                                    {condition.icdCode && <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>}
-                                    <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
-                                </div>
-                                    <div className="flex items-center shrink-0">
-                                        {isDoctorLoggedIn && (
-                                            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveCondition(condition.id); }}>
-                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                        <div className="flex items-center shrink-0">
+                                            {isDoctorLoggedIn && (
+                                                <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveCondition(condition.id); }}>
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
+                                            )}
+                                            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => handleSynopsisToggle('condition', condition.id)}>
+                                                <Info className="h-4 w-4 text-blue-500" />
                                             </Button>
-                                        )}
-                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => handleSynopsisToggle('condition', condition.id)}>
-                                            <Info className="h-4 w-4 text-blue-500" />
-                                        </Button>
-                                    </div>
-                                </li>
-                                {activeSynopsis?.type === 'condition' && activeSynopsis.id === condition.id && (
-                                    <li className="pl-5 pb-2">
-                                        <ConditionSynopsisDialog
-                                            conditionName={condition.condition}
-                                            onClose={() => setActiveSynopsis(null)}
-                                        />
+                                        </div>
                                     </li>
-                                )}
-                            </React.Fragment>
-                        ))}
+                                     {condition.status === 'needs_revision' && !isDoctorLoggedIn && (
+                                        <li className="pl-3 pb-2">
+                                            <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive text-xs p-2">
+                                                <AlertTriangle className="h-4 w-4 !text-destructive" />
+                                                <AlertDescription>
+                                                    Your doctor has requested a revision. Please update the condition name.
+                                                    <Button size="xs" className="ml-2" onClick={() => handleReviseCondition(condition.id)}>
+                                                         <Edit className="mr-1 h-3 w-3" />
+                                                         Revise & Resubmit
+                                                    </Button>
+                                                </AlertDescription>
+                                            </Alert>
+                                        </li>
+                                    )}
+                                    {activeSynopsis?.type === 'condition' && activeSynopsis.id === condition.id && (
+                                        <li className="pl-5 pb-2">
+                                            <ConditionSynopsisDialog
+                                                conditionName={condition.condition}
+                                                onClose={() => setActiveSynopsis(null)}
+                                            />
+                                        </li>
+                                    )}
+                                </React.Fragment>
+                            )
+                        })}
                     </ul>
                 ) : (
                     !isAddingCondition && <p className="text-xs text-muted-foreground pl-8">No conditions recorded.</p>

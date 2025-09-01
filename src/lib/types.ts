@@ -9,10 +9,11 @@ export interface MedicalCondition {
   date: string; // Stored as 'YYYY-MM-DD' string
   condition: string;
   icdCode?: string;
-  status: 'verified' | 'pending_review';
+  status: 'verified' | 'pending_review' | 'needs_revision';
 }
 
 export interface DashboardSuggestion {
+  id: string;
   conditionId: string;
   conditionName: string;
   suggestedDashboard: string;
