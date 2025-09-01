@@ -8,7 +8,7 @@ import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from '@/components/hba1c-card';
-import { ArrowLeft, UploadCloud, LayoutGrid, GaugeCircle, Check } from 'lucide-react';
+import { ArrowLeft, UploadCloud, LayoutGrid, GaugeCircle, Check, RefreshCw } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -16,6 +16,7 @@ import { VitaminDCard } from '@/components/vitamin-d-card';
 import { ReportCard } from '@/components/report-card';
 import { ThyroidCard } from '@/components/thyroid-card';
 import { HypertensionCard } from '@/components/hypertension-card';
+import { RenalCard } from '@/components/renal-card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { TitleBar } from '@/components/title-bar';
 import { MedicalConditionsCard } from '@/components/medical-conditions-card';
@@ -100,6 +101,8 @@ export default function PatientDashboard() {
         return <ThyroidCard />;
       case 'hypertension':
         return <HypertensionCard />;
+      case 'renal':
+        return <RenalCard />;
       default:
         return null;
     }
@@ -111,14 +114,15 @@ export default function PatientDashboard() {
     vitaminD: { name: 'Vitamin D Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     thyroid: { name: 'Thyroid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
     hypertension: { name: 'Hypertension Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
+    renal: { name: 'Renal Dashboard', icon: <RefreshCw className="w-4 h-4" /> },
   }
   
   const handleDashboardSelect = (key: string) => {
-    setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension' | 'none');
+    setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension' | 'renal' | 'none');
   }
   
-  const ActiveDashboardIcon = dashboardView !== 'none' && dashboardView !== 'report' ? dashboardOptions[dashboardView]?.icon : <GaugeCircle className="w-4 h-4" />;
-  const dashboardButtonLabel = dashboardView !== 'none' && dashboardView !== 'report' ? dashboardOptions[dashboardView].name : "Select a Dashboard";
+  const ActiveDashboardIcon = dashboardView !== 'none' && dashboardView !== 'report' ? dashboardOptions[dashboardView as keyof typeof dashboardOptions]?.icon : <GaugeCircle className="w-4 h-4" />;
+  const dashboardButtonLabel = dashboardView !== 'none' && dashboardView !== 'report' ? dashboardOptions[dashboardView as keyof typeof dashboardOptions].name : "Select a Dashboard";
 
 
   return (

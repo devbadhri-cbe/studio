@@ -4,7 +4,7 @@
 import type { LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, FlaskConical, Sun, Droplet, Activity, Zap, AlertCircle } from 'lucide-react';
+import { FileText, FlaskConical, Sun, Droplet, Activity, Zap, AlertCircle, RefreshCw } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -36,6 +36,8 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
     tsh: '',
     t3: '',
     t4: '',
+    egfr: '',
+    uacr: '',
   });
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -43,7 +45,7 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
   const { toast } = useToast();
   const formatDate = useDateFormatter();
 
-  const hasAnyData = extractedData.hba1cValue || extractedData.lipidPanel || extractedData.vitaminDValue || extractedData.thyroidPanel || extractedData.bloodPressure;
+  const hasAnyData = extractedData.hba1cValue || extractedData.lipidPanel || extractedData.vitaminDValue || extractedData.thyroidPanel || extractedData.bloodPressure || extractedData.renalPanel;
   const isDateValid = extractedData.date && isValid(parseISO(extractedData.date));
 
   const expectedLipidUnit = biomarkerUnit === 'conventional' ? 'mg/dL' : 'mmol/L';
@@ -59,7 +61,7 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
 
     setIsSubmitting(true);
 
-    const { hba1cValue, lipidPanel, vitaminDValue, vitaminDUnits, thyroidPanel, bloodPressure, date } = extractedData;
+    const { hba1cValue, lipidPanel, vitaminDValue, vitaminDUnits, thyroidPanel, bloodPressure, renalPanel, date } = extractedData;
     
     if (!date || !isValid(parseISO(date))) {
         toast({
@@ -77,6 +79,7 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
       vitaminD: (vitaminDValue && vitaminDUnits) ? { value: vitaminDValue, date, units: vitaminDUnits } : undefined,
       thyroid: thyroidPanel ? { ...thyroidPanel, date } : undefined,
       bloodPressure: bloodPressure ? { ...bloodPressure, date } : undefined,
+      renal: renalPanel ? { ...renalPanel, date } : undefined,
     });
     
     if (added.length > 0 && duplicates.length === 0) {
@@ -300,6 +303,25 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
                     <Label htmlFor="t4-manual" className="font-semibold">T4 (μg/dL)</Label>
                     {extractedData.thyroidPanel?.t4 ? (<p>{extractedData.thyroidPanel.t4}</p>) : (<Input id="t4-manual" type="number" className="h-7 mt-1 text-center" 
                         value={manualInputs.t4} onChange={e => handleManualEntryChange('t4', e.target.value)} onBlur={() => handleManualEntryBlur('thyroidPanel', 't4')} />) }
+                </div>
+            </div>
+        </div>
+        
+         <div className="rounded-md border p-2 space-y-2">
+            <div className="flex items-center gap-3">
+                 <RefreshCw className="h-5 w-5 text-primary/80" />
+                 <p className="font-semibold">Renal Panel</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-center text-xs">
+                 <div className="rounded-md bg-muted/50 p-2">
+                    <Label htmlFor="egfr-manual" className="font-semibold">eGFR</Label>
+                    {extractedData.renalPanel?.egfr ? (<p>{extractedData.renalPanel.egfr}</p>) : (<Input id="egfr-manual" type="number" className="h-7 mt-1 text-center" 
+                        value={manualInputs.egfr} onChange={e => handleManualEntryChange('egfr', e.target.value)} onBlur={() => handleManualEntryBlur('renalPanel', 'egfr')} />) }
+                </div>
+                <div className="rounded-md bg-muted/50 p-2">
+                    <Label htmlFor="uacr-manual" className="font-semibold">UACR</Label>
+                    {extractedData.renalPanel?.uacr ? (<p>{extractedData.renalPanel.uacr}</p>) : (<Input id="uacr-manual" type="number" className="h-7 mt-1 text-center" 
+                        value={manualInputs.uacr} onChange={e => handleManualEntryChange('uacr', e.target.value)} onBlur={() => handleManualEntryBlur('renalPanel', 'uacr')} />) }
                 </div>
             </div>
         </div>

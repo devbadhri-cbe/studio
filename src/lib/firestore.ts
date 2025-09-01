@@ -11,6 +11,7 @@ import { LipidRecord } from './types';
 import { VitaminDRecord } from './types';
 import { ThyroidRecord } from './types';
 import { WeightRecord } from './types';
+import { RenalRecord } from './types';
 import { MedicalCondition } from './types';
 import { Medication } from './types';
 import { countries } from './countries';
@@ -26,12 +27,14 @@ const recalculatePatientStatus = (patient: Patient): Patient => {
     const sortedThyroid = [...(updatedPatient.thyroidRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const sortedBloodPressure = [...(updatedPatient.bloodPressureRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const sortedWeight = [...(updatedPatient.weightRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const sortedRenal = [...(updatedPatient.renalRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     updatedPatient.lastHba1c = sortedHba1c[0] ? { value: sortedHba1c[0].value, date: new Date(sortedHba1c[0].date).toISOString() } : null;
     updatedPatient.lastLipid = sortedLipids[0] ? { ldl: sortedLipids[0].ldl, date: new Date(sortedLipids[0].date).toISOString() } : null;
     updatedPatient.lastVitaminD = sortedVitaminD[0] ? { value: sortedVitaminD[0].value, date: new Date(sortedVitaminD[0].date).toISOString() } : null;
     updatedPatient.lastThyroid = sortedThyroid[0] ? { tsh: sortedThyroid[0].tsh, date: new Date(sortedThyroid[0].date).toISOString() } : null;
     updatedPatient.lastBloodPressure = sortedBloodPressure[0] ? { systolic: sortedBloodPressure[0].systolic, diastolic: sortedBloodPressure[0].diastolic, heartRate: sortedBloodPressure[0].heartRate, date: new Date(sortedBloodPressure[0].date).toISOString() } : null;
+    updatedPatient.lastRenal = sortedRenal[0] ? { egfr: sortedRenal[0].egfr, uacr: sortedRenal[0].uacr, date: new Date(sortedRenal[0].date).toISOString() } : null;
     
     if (updatedPatient.height && sortedWeight.length > 0) {
         updatedPatient.bmi = calculateBmi(sortedWeight[0].value, updatedPatient.height);
@@ -48,11 +51,14 @@ const recalculatePatientStatus = (patient: Patient): Patient => {
         status = 'Urgent';
     } else if (updatedPatient.lastBloodPressure && (updatedPatient.lastBloodPressure.systolic >= 140 || updatedPatient.lastBloodPressure.diastolic >= 90)) {
         status = 'Urgent';
+    } else if (updatedPatient.lastRenal && updatedPatient.lastRenal.egfr < 60) {
+        status = 'Urgent';
     } else if (
         (updatedPatient.lastHba1c && updatedPatient.lastHba1c.value >= 5.7) ||
         (updatedPatient.lastLipid && updatedPatient.lastLipid.ldl >= 130) ||
         (updatedPatient.lastThyroid && (updatedPatient.lastThyroid.tsh < 0.4 || updatedPatient.lastThyroid.tsh > 4.0)) ||
-        (updatedPatient.lastBloodPressure && (updatedPatient.lastBloodPressure.systolic >= 130 || updatedPatient.lastBloodPressure.diastolic >= 80))
+        (updatedPatient.lastBloodPressure && (updatedPatient.lastBloodPressure.systolic >= 130 || updatedPatient.lastBloodPressure.diastolic >= 80)) ||
+        (updatedPatient.lastRenal && updatedPatient.lastRenal.uacr > 30)
     ) {
         status = 'Needs Review';
     }
@@ -111,7 +117,7 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
 };
 
 // Add a new patient
-export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi' | 'height' | 'lastLogin' | 'dashboardSuggestions' | 'enabledDashboards'>): Promise<Patient> => {
+export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | 'lipidRecords' | 'vitaminDRecords' | 'thyroidRecords' | 'bloodPressureRecords' | 'weightRecords' | 'renalRecords' | 'lastHba1c' | 'lastLipid' | 'lastVitaminD' | 'lastThyroid' | 'lastBloodPressure' | 'lastRenal' | 'status' | 'medication' | 'presentMedicalConditions' | 'bmi' | 'height' | 'lastLogin' | 'dashboardSuggestions' | 'enabledDashboards'>): Promise<Patient> => {
     const countryInfo = countries.find(c => c.code === patientData.country);
 
     let newPatientObject: Omit<Patient, 'id'> = {
@@ -123,16 +129,18 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
         lastVitaminD: null,
         lastThyroid: null,
         lastBloodPressure: null,
+        lastRenal: null,
         status: 'On Track',
         records: [] as Hba1cRecord[],
         lipidRecords: [] as LipidRecord[],
         vitaminDRecords: [] as VitaminDRecord[],
         thyroidRecords: [] as ThyroidRecord[],
+        renalRecords: [] as RenalRecord[],
         weightRecords: [] as WeightRecord[],
         bloodPressureRecords: [] as BloodPressureRecord[],
         medication: [] as Medication[],
         presentMedicalConditions: [] as MedicalCondition[],
-        enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension'],
+        enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
         dashboardSuggestions: [],
     };
     

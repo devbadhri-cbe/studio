@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, DashboardSuggestion } from '@/lib/types';
+import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -15,10 +15,10 @@ import { calculateBmi } from '@/lib/utils';
 import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
 
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension'] };
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'] };
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
-type DashboardView = 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'hypertension' | 'report' | 'none';
+type DashboardView = 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'hypertension' | 'renal' | 'report' | 'none';
 type Theme = 'dark' | 'light' | 'system';
 
 interface BatchRecords {
@@ -27,6 +27,7 @@ interface BatchRecords {
     vitaminD?: Omit<VitaminDRecord, 'id' | 'medication'> & { units?: 'ng/mL' | 'nmol/L' };
     thyroid?: Omit<ThyroidRecord, 'id' | 'medication'>;
     bloodPressure?: Omit<BloodPressureRecord, 'id' | 'medication'>;
+    renal?: Omit<RenalRecord, 'id' | 'medication'>;
 }
 
 type BiomarkerUnitSystem = 'conventional' | 'si';
@@ -58,6 +59,9 @@ interface AppContextType {
   thyroidRecords: ThyroidRecord[];
   addThyroidRecord: (record: Omit<ThyroidRecord, 'id' | 'medication'>) => void;
   removeThyroidRecord: (id: string) => void;
+  renalRecords: RenalRecord[];
+  addRenalRecord: (record: Omit<RenalRecord, 'id' | 'medication'>) => void;
+  removeRenalRecord: (id: string) => void;
   weightRecords: WeightRecord[];
   addWeightRecord: (record: Omit<WeightRecord, 'id'>) => void;
   removeWeightRecord: (id: string) => void;
@@ -92,6 +96,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [lipidRecords, setLipidRecordsState] = React.useState<LipidRecord[]>([]);
   const [vitaminDRecords, setVitaminDRecordsState] = React.useState<VitaminDRecord[]>([]);
   const [thyroidRecords, setThyroidRecordsState] = React.useState<ThyroidRecord[]>([]);
+  const [renalRecords, setRenalRecordsState] = React.useState<RenalRecord[]>([]);
   const [weightRecords, setWeightRecordsState] = React.useState<WeightRecord[]>([]);
   const [bloodPressureRecords, setBloodPressureRecordsState] = React.useState<BloodPressureRecord[]>([]);
   const [dashboardSuggestions, setDashboardSuggestions] = React.useState<DashboardSuggestion[]>([]);
@@ -198,7 +203,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       unitSystem: patient.unitSystem || countries.find(c => c.code === patient.country)?.unitSystem || 'metric',
       medication: Array.isArray(patient.medication) ? patient.medication : [],
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
-      enabledDashboards: Array.isArray(patient.enabledDashboards) ? patient.enabledDashboards : ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension'],
+      enabledDashboards: Array.isArray(patient.enabledDashboards) ? patient.enabledDashboards : ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
       bmi: patient.bmi,
     };
     setProfileState(patientProfile);
@@ -206,6 +211,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setLipidRecordsState(patient.lipidRecords || []);
     setVitaminDRecordsState(patient.vitaminDRecords || []);
     setThyroidRecordsState(patient.thyroidRecords || []);
+    setRenalRecordsState(patient.renalRecords || []);
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
     setDashboardSuggestions(patient.dashboardSuggestions || []);
@@ -386,6 +392,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { thyroidRecords: updatedRecords });
   };
   
+  const addRenalRecord = (record: Omit<RenalRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    const updatedRecords = [...renalRecords, newRecord];
+    setRenalRecordsState(updatedRecords);
+    updatePatientData(profile.id, { renalRecords: updatedRecords });
+  };
+
+  const removeRenalRecord = (id: string) => {
+    const updatedRecords = renalRecords.filter(r => r.id !== id);
+    setRenalRecordsState(updatedRecords);
+    updatePatientData(profile.id, { renalRecords: updatedRecords });
+  };
+  
   const addWeightRecord = (record: Omit<WeightRecord, 'id'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     const updatedRecords = [...weightRecords, newRecord];
@@ -426,7 +445,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
     const updates: Partial<Patient> = {};
-    const date = batch.hba1c?.date || batch.lipid?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date;
+    const date = batch.hba1c?.date || batch.lipid?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date || batch.renal?.date;
 
     const result: AddBatchRecordsResult = { added: [], duplicates: [] };
 
@@ -495,6 +514,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         result.added.push('Thyroid Panel');
       } else { result.duplicates.push('Thyroid Panel'); }
     }
+    
     if (batch.bloodPressure && batch.bloodPressure.systolic && batch.bloodPressure.diastolic) {
        const dateExists = bloodPressureRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
        if (!dateExists) {
@@ -503,6 +523,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setBloodPressureRecordsState(updates.bloodPressureRecords);
         result.added.push('Blood Pressure');
       } else { result.duplicates.push('Blood Pressure'); }
+    }
+    
+    if (batch.renal && batch.renal.egfr && batch.renal.uacr) {
+       const dateExists = renalRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+       if (!dateExists) {
+        const newRecord: RenalRecord = { ...batch.renal, id: `renal-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+        updates.renalRecords = [...renalRecords, newRecord];
+        setRenalRecordsState(updates.renalRecords);
+        result.added.push('Renal Panel');
+      } else { result.duplicates.push('Renal Panel'); }
     }
     
     if (Object.keys(updates).length > 0) {
@@ -542,6 +572,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     thyroidRecords,
     addThyroidRecord,
     removeThyroidRecord,
+    renalRecords,
+    addRenalRecord,
+    removeRenalRecord,
     weightRecords,
     addWeightRecord,
     removeWeightRecord,
@@ -554,7 +587,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isClient,
     dashboardView,
     setDashboardView,
-    isDoctorLoggedIn,
+isDoctorLoggedIn,
     setIsDoctorLoggedIn,
     doctorName: DOCTOR_NAME,
     setPatientData,

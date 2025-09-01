@@ -93,6 +93,15 @@ export interface BloodPressureRecord {
   medication?: string;
 }
 
+export interface RenalRecord {
+  id: string;
+  date: Date | string;
+  egfr: number; // estimated Glomerular Filtration Rate
+  uacr: number; // Urine Albumin-to-Creatinine Ratio
+  medication?: string;
+}
+
+
 export interface Patient {
   id: string;
   name: string;
@@ -128,12 +137,18 @@ export interface Patient {
     heartRate?: number;
     date: string;
   } | null;
+  lastRenal?: {
+    egfr: number;
+    uacr: number;
+    date: string;
+  } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
   // Add full record history to the patient object
   records: Hba1cRecord[];
   lipidRecords: LipidRecord[];
   vitaminDRecords: VitaminDRecord[];
   thyroidRecords: ThyroidRecord[];
+  renalRecords: RenalRecord[];
   weightRecords: WeightRecord[];
   bloodPressureRecords: BloodPressureRecord[];
   medication: Medication[];

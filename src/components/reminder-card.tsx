@@ -3,13 +3,13 @@
 
 import { useApp } from '@/context/app-context';
 import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears, differenceInDays } from 'date-fns';
-import { Bell, CheckCircle2, Heart, Droplet, Sun, Activity, Zap } from 'lucide-react';
+import { Bell, CheckCircle2, Heart, Droplet, Sun, Activity, Zap, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { calculateAge } from '@/lib/utils';
 import { Separator } from './ui/separator';
 
 export function ReminderCard() {
-  const { records, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, profile } = useApp();
+  const { records, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, renalRecords, profile } = useApp();
 
   const hasMedicalConditions = profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0;
   const age = calculateAge(profile.dob);
@@ -237,6 +237,49 @@ export function ReminderCard() {
     }
   }
 
+  // Renal Logic
+  const sortedRenalRecords = [...(renalRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const lastRenalRecord = sortedRenalRecords[0];
+  let renalContent;
+
+  if (!lastRenalRecord) {
+      renalContent = {
+          icon: <RefreshCw className="h-5 w-5 text-yellow-500" />,
+          title: 'Time for your first Renal Panel!',
+          description: 'Add a record to start tracking kidney health.',
+          color: 'bg-yellow-500/10',
+      };
+  } else {
+      const lastTestDate = new Date(lastRenalRecord.date);
+      // Retesting for renal function is highly variable. General reminder is yearly for those at risk.
+      const retestYears = 1;
+      const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
+      const nextTestDate = addYears(lastTestDate, retestYears);
+
+      if (lastRenalRecord.egfr < 60 || lastRenalRecord.uacr > 30) {
+           renalContent = {
+              icon: <RefreshCw className="h-5 w-5 text-destructive" />,
+              title: 'Follow-up on Kidney Function',
+              description: `Last results were abnormal. Please consult your doctor.`,
+              color: 'bg-destructive/10',
+          };
+      } else if (yearsSinceLastTest >= retestYears) {
+          renalContent = {
+              icon: <RefreshCw className="h-5 w-5 text-destructive" />,
+              title: 'Renal Panel Due',
+              description: `Last test was ${formatDistanceToNow(lastTestDate)} ago. Retesting is recommended.`,
+              color: 'bg-destructive/10',
+          };
+      } else {
+          renalContent = {
+              icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+              title: 'Renal Function On Track',
+              description: `Next test is around ${format(nextTestDate, 'MMM yyyy')}.`,
+              color: 'bg-green-500/10',
+          };
+      }
+  }
+
 
   return (
     <Card className="h-full">
@@ -299,6 +342,16 @@ export function ReminderCard() {
           <div>
             <p className="font-semibold">{bloodPressureContent.title}</p>
             <p className="text-sm text-muted-foreground">{bloodPressureContent.description}</p>
+          </div>
+        </div>
+        <Separator />
+        <div className="flex items-center gap-4">
+          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${renalContent.color}`}>
+            {renalContent.icon}
+          </div>
+          <div>
+            <p className="font-semibold">{renalContent.title}</p>
+            <p className="text-sm text-muted-foreground">{renalContent.description}</p>
           </div>
         </div>
       </CardContent>

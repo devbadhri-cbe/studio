@@ -43,6 +43,10 @@ const LabResultUploadOutputSchema = z.object({
       diastolic: z.number().optional().describe('Diastolic blood pressure.'),
       heartRate: z.number().optional().describe('Heart rate (pulse) in beats per minute.'),
   }).optional().describe('The blood pressure results extracted.'),
+  renalPanel: z.object({
+      egfr: z.number().optional().describe('eGFR (estimated Glomerular Filtration Rate).'),
+      uacr: z.number().optional().describe('UACR (Urine Albumin-to-Creatinine Ratio).'),
+  }).optional().describe('The renal panel results extracted.'),
 });
 export type LabResultUploadOutput = z.infer<typeof LabResultUploadOutputSchema>;
 
@@ -65,6 +69,7 @@ Then, scan the document for the following biomarkers. For each biomarker, extrac
 - Vitamin D (as a numerical value). Common units are ng/mL or nmol/L.
 - Thyroid Panel (TSH, T3, T4). Units for TSH are typically μIU/mL, T3 as ng/dL, and T4 as μg/dL. Ignore these units for extraction.
 - Blood Pressure (Systolic, Diastolic) and Heart Rate (Pulse). Units are typically mmHg and bpm. Ignore these units for extraction.
+- Renal Panel (eGFR, UACR).
 
 Return the extracted information in the specified format.
 
