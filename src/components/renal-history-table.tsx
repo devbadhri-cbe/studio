@@ -47,7 +47,7 @@ export function RenalHistoryTable() {
 
   const getStatus = (egfr: number, uacr: number) => {
     if (egfr < 60 || uacr > 30) return { text: 'High Risk', variant: 'destructive' as const };
-    if (egfr < 90 || uacr > 0) return { text: 'Needs Monitoring', variant: 'secondary' as const };
+    if (egfr < 90) return { text: 'Needs Monitoring', variant: 'secondary' as const };
     return { text: 'Normal', variant: 'outline' as const };
   }
 

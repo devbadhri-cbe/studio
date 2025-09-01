@@ -64,7 +64,7 @@ export function RenalChart() {
                 domain={[0, yAxisMaxUacr]} 
                 tickLine={true} 
                 axisLine={true} 
-                label={{ value: 'UACR', angle: 90, position: 'insideRight' }}
+                label={{ value: 'UACR (mg/g)', angle: 90, position: 'insideRight' }}
             />
             <Tooltip
               cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
@@ -96,9 +96,15 @@ export function RenalChart() {
                 return null;
               }}
             />
-             <ReferenceArea yAxisId="left" y1={90} y2={yAxisMaxEgfr} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1} />
-             <ReferenceLine yAxisId="left" y={60} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
-             <ReferenceLine yAxisId="right" y={30} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
+             <ReferenceArea yAxisId="left" y1={90} y2={yAxisMaxEgfr} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
+                 <Label value="Normal eGFR" position="insideTopLeft" fill="hsl(var(--accent))" fontSize={10} />
+             </ReferenceArea>
+             <ReferenceLine yAxisId="left" y={60} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
+                <Label value="CKD Threshold" position="top" fill="hsl(var(--destructive))" fontSize={10} dy={-5}/>
+             </ReferenceLine>
+             <ReferenceLine yAxisId="right" y={30} stroke="hsl(var(--destructive))" strokeDasharray="3 3">
+                 <Label value="Albuminuria" position="top" fill="hsl(var(--destructive))" fontSize={10} dy={-5}/>
+             </ReferenceLine>
             
             <Line yAxisId="left" type="monotone" dataKey='egfr' stroke="hsl(var(--chart-1))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--chart-1))' }} activeDot={{ r: 6 }} name="eGFR"/>
             <Line yAxisId="right" type="monotone" dataKey='uacr' stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--chart-2))' }} activeDot={{ r: 6 }} name="UACR"/>

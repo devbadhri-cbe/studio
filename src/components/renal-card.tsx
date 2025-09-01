@@ -15,8 +15,8 @@ export function RenalCard() {
     <Card className="h-full">
       <CardHeader className="flex flex-row items-start">
         <div className="grid gap-2">
-          <CardTitle>Renal & Blood Pressure Dashboard</CardTitle>
-          <CardDescription>Monitor key indicators for kidney health and associated blood pressure.</CardDescription>
+          <CardTitle>Chronic Kidney Disease (CKD) Dashboard</CardTitle>
+          <CardDescription>Monitor key indicators like eGFR, UACR, and associated blood pressure to track kidney health.</CardDescription>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <AddRenalRecordDialog />
