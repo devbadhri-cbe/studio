@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { SharePatientAccessDialog } from './share-patient-access-dialog';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { useApp } from '@/context/app-context';
 
 // A simple SVG for WhatsApp icon
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -55,6 +56,7 @@ const statusDescriptions: Record<Patient['status'], string> = {
 
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
   const { toast } = useToast();
+  const { isDoctorLoggedIn } = useApp();
   const statusVariant = getStatusVariant(patient.status);
   const age = calculateAge(patient.dob);
   const country = countries.find(c => c.code === patient.country);
@@ -116,7 +118,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                     <CardTitle className="text-lg truncate">{patient.name}</CardTitle>
-                    {needsReview && (
+                    {isDoctorLoggedIn && needsReview && (
                         <Tooltip>
                             <TooltipTrigger>
                                 <div className="relative">

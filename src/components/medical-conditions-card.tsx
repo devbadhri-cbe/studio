@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle, AlertTriangle, Edit } from 'lucide-react';
@@ -202,10 +203,12 @@ export function MedicalConditionsCard() {
                                         <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
                                     </div>
                                         <div className="flex items-center shrink-0">
-                                            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveCondition(condition.id); }}>
-                                                <Trash2 className="h-4 w-4 text-destructive" />
-                                            </Button>
-                                            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => handleSynopsisToggle('condition', condition.id)}>
+                                            {isDoctorLoggedIn &&
+                                                <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0" onClick={(e) => { e.stopPropagation(); handleRemoveCondition(condition.id); }}>
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
+                                            }
+                                            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0" onClick={() => handleSynopsisToggle('condition', condition.id)}>
                                                 <Info className="h-4 w-4 text-blue-500" />
                                             </Button>
                                         </div>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -9,7 +10,7 @@ import { getPatient, updatePatient } from '@/lib/firestore';
 import { Button } from '@/components/ui/button';
 
 export default function PatientDashboardPage() {
-    const { setPatientData, isClient, doctor } = useApp();
+    const { setPatientData, isClient, setIsDoctorLoggedIn } = useApp();
     const router = useRouter();
     const params = useParams();
     const patientId = params.patientId as string;
@@ -23,17 +24,16 @@ export default function PatientDashboardPage() {
             setIsLoading(true);
             setError(null);
 
+            // Determine if the doctor is viewing this page.
+            // This is a simple check, a more robust system would use session or auth state.
+            const isDoctorViewing = window.location.pathname.startsWith('/doctor');
+            setIsDoctorLoggedIn(isDoctorViewing);
+
             try {
                 const patient = await getPatient(patientId);
                 if (patient) {
-                    if (doctor && patient.doctorId !== doctor.uid) {
-                         setError(`This patient is managed by another doctor. Access denied.`);
-                         localStorage.removeItem('patient_id');
-                         return;
-                    }
-
                     setPatientData(patient);
-                    if (!doctor) { // Only update lastLogin if it's a patient logging in
+                    if (!isDoctorViewing) { // Only update lastLogin if it's a patient logging in
                         await updatePatient(patient.id, { lastLogin: new Date().toISOString() });
                     }
                 } else {
@@ -51,7 +51,7 @@ export default function PatientDashboardPage() {
 
         loadData();
 
-    }, [patientId, setPatientData, router, isClient, doctor]);
+    }, [patientId, setPatientData, router, isClient, setIsDoctorLoggedIn]);
 
     if (isLoading) {
         return (

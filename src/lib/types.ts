@@ -4,6 +4,7 @@ import { Timestamp } from "firebase/firestore";
 
 export type UnitSystem = 'metric' | 'imperial';
 
+// The Doctor type is not used in the single-doctor model, but kept for future reference.
 export interface Doctor {
   uid: string;
   name: string;
@@ -55,7 +56,6 @@ export interface UserProfile {
   medication: Medication[];
   bmi?: number;
   enabledDashboards?: string[];
-  doctorId?: string; // Link to the doctor
   doctorName?: string;
 }
 
@@ -211,6 +211,5 @@ export interface Patient {
   presentMedicalConditions: MedicalCondition[];
   dashboardSuggestions: DashboardSuggestion[];
   enabledDashboards: string[];
-  doctorId?: string; // Link to the doctor who created this patient
   doctorName?: string;
 }

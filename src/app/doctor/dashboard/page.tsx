@@ -1,10 +1,12 @@
 
+
 'use client';
 
 import * as React from 'react';
+import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Search, UserPlus, X } from 'lucide-react';
+import { Mail, Search, UserPlus, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Patient } from '@/lib/types';
 import {
@@ -29,7 +31,7 @@ import { TitleBar } from '@/components/title-bar';
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
-    const { setPatientData, doctor, isClient } = useApp();
+    const { setPatientData, setIsDoctorLoggedIn } = useApp();
     const [patients, setPatients] = React.useState<Patient[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
@@ -40,13 +42,9 @@ export default function DoctorDashboardPage() {
 
 
     const fetchPatients = React.useCallback(async () => {
-        if (!doctor?.uid) {
-            // Don't fetch if doctor isn't loaded yet.
-            return;
-        }
         setIsLoading(true);
         try {
-            const fetchedPatients = await getPatients(doctor.uid);
+            const fetchedPatients = await getPatients();
             setPatients(fetchedPatients);
         } catch (error) {
             console.error("Failed to fetch patients from Firestore", error);
@@ -58,21 +56,18 @@ export default function DoctorDashboardPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast, doctor]);
+    }, [toast]);
 
     React.useEffect(() => {
-        if (!isClient) return;
-        if (!doctor) {
-            router.replace('/doctor/login');
-        } else {
-            fetchPatients();
-        }
-    }, [isClient, doctor, router, fetchPatients]);
+        setIsDoctorLoggedIn(true);
+        fetchPatients();
+        return () => setIsDoctorLoggedIn(false);
+    }, [fetchPatients, setIsDoctorLoggedIn]);
     
     // Re-fetch data when the page is focused
     React.useEffect(() => {
         const handleFocus = () => {
-            if (!isFormOpen && doctor) {
+            if (!isFormOpen) {
                 fetchPatients();
             }
         };
@@ -80,7 +75,7 @@ export default function DoctorDashboardPage() {
         return () => {
             window.removeEventListener('focus', handleFocus);
         };
-    }, [fetchPatients, isFormOpen, doctor]);
+    }, [fetchPatients, isFormOpen]);
 
 
     const viewPatientDashboard = (patient: Patient) => {
@@ -108,11 +103,6 @@ export default function DoctorDashboardPage() {
     }
 
     const handleFormSubmit = async (data: PatientFormData) => {
-        if (!doctor) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Doctor not logged in.' });
-            return;
-        }
-
         setIsSubmitting(true);
         const patientData = {
             name: data.name,
@@ -131,7 +121,7 @@ export default function DoctorDashboardPage() {
                     description: `${updatedPatient.name}'s details have been updated.`,
                 });
             } else {
-                 const newPatient = await addPatient(patientData, doctor.uid, doctor.name);
+                 const newPatient = await addPatient(patientData);
                 toast({
                     title: 'Patient Added',
                     description: `${newPatient.name} has been successfully added.`,
@@ -175,18 +165,9 @@ export default function DoctorDashboardPage() {
         );
     });
 
-  if (!doctor) {
-      return (
-          <div className="flex h-screen items-center justify-center bg-background">
-                <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                <p className="ml-4">Redirecting to login...</p>
-            </div>
-      )
-  }
-
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <TitleBar doctorName={doctor.name} doctorEmail={doctor.email} />
+       <TitleBar doctorName="Dr. Badhrinathan N" doctorEmail="drbadhri@gmail.com" />
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
             {isFormOpen ? (

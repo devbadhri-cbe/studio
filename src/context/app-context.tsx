@@ -89,8 +89,6 @@ interface AppContextType {
   setDashboardView: (view: DashboardView) => void;
   isDoctorLoggedIn: boolean;
   setIsDoctorLoggedIn: (isLoggedIn: boolean) => void;
-  doctor: Doctor | null;
-  setDoctor: (doctor: Doctor | null) => void;
   setPatientData: (patient: Patient) => void;
   biomarkerUnit: BiomarkerUnitSystem;
   getDisplayLipidValue: (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides') => number;
@@ -121,28 +119,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [tips, setTipsState] = React.useState<string[]>([]);
   const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('report');
   const [isClient, setIsClient] = React.useState(false);
-  const [doctor, setDoctorState] = React.useState<Doctor | null>(null);
+  const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
 
-  const isDoctorLoggedIn = !!doctor;
   
-  const setDoctor = (doctorData: Doctor | null) => {
-      setDoctorState(doctorData);
-      if (doctorData) {
-          localStorage.setItem('doctor', JSON.stringify(doctorData));
-      } else {
-          localStorage.removeItem('doctor');
-      }
-  }
-
   React.useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
     if (storedTheme) {
       setThemeState(storedTheme);
-    }
-    const storedDoctor = localStorage.getItem('doctor');
-    if (storedDoctor) {
-        setDoctorState(JSON.parse(storedDoctor));
     }
     setIsClient(true);
   }, []);
@@ -196,10 +180,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
-      // This function is now derived from doctor state, but kept for compatibility.
-      if (!isLoggedIn) {
-          setDoctor(null);
-      }
+    setIsDoctorLoggedInState(isLoggedIn);
   }
   
   const setPatientData = React.useCallback((patient: Patient) => {
@@ -219,7 +200,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       enabledDashboards: Array.isArray(patient.enabledDashboards) ? patient.enabledDashboards : ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
       bmi: patient.bmi,
       doctorName: patient.doctorName,
-      doctorId: patient.doctorId,
     };
     setProfileState(patientProfile);
     setRecordsState(patient.records || []);
@@ -270,14 +250,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...condition,
         date: validDate,
         id: Date.now().toString(), 
-        status: isPatientAdding ? 'pending_review' : 'verified' 
+        status: isDoctorLoggedIn ? 'verified' : 'pending_review'
     } as MedicalCondition;
     
     const updatedConditions = [...profile.presentMedicalConditions, newCondition];
     setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
     updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
 
-    if (isPatientAdding) {
+    if (!isDoctorLoggedIn) {
       try {
         const { recommendedDashboard } = await getDashboardRecommendations({ conditionName: newCondition.condition, icdCode: newCondition.icdCode });
         if (recommendedDashboard !== 'none') {
@@ -723,8 +703,6 @@ anemiaRecords,
     setDashboardView,
     isDoctorLoggedIn,
     setIsDoctorLoggedIn,
-    doctor,
-    setDoctor,
     setPatientData,
     biomarkerUnit,
     getDisplayLipidValue,
