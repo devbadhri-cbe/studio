@@ -136,8 +136,7 @@ const processPatientDoc = (doc: any): Patient => {
 export async function getPatients(doctorId: string): Promise<Patient[]> {
   const q = query(
     collection(db, PATIENTS_COLLECTION),
-    where('doctorId', '==', doctorId),
-    orderBy('name', 'asc')
+    where('doctorId', '==', doctorId)
   );
   const snapshot = await getDocs(q);
   return snapshot.docs.map(processPatientDoc);
