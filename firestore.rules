@@ -1,13 +1,22 @@
 
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow public read access to all documents
-    // Allow write access only for authenticated users
-    match /{document=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
+    // Doctors can read and write to their own document.
+    match /doctors/{doctorId} {
+      allow read, write: if request.auth != null && request.auth.uid == doctorId;
+    }
+    
+    // Rules for the patients collection
+    match /patients/{patientId} {
+      // Allow any user to read a single patient document. This is required
+      // for patients to view their own dashboard via a unique link. It is
+      // secure because patient IDs are unguessable.
+      allow get;
+      
+      // Allow authenticated doctors to list, create, update, and delete
+      // patients that are assigned to them.
+      allow list, create, update, delete: if request.auth != null && request.auth.uid == resource.data.doctorId;
     }
   }
 }
