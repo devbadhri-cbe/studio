@@ -61,14 +61,7 @@ export const getPatients = async (): Promise<Patient[]> => {
     const patientsSnapshot = await getDocs(patientsCollection);
     const patientsList = patientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Patient));
     
-    const processedPatients = patientsList.map(p => {
-        const patientWithDefaults = {
-            ...p,
-            presentMedicalConditions: p.presentMedicalConditions || [],
-            dashboardSuggestions: p.dashboardSuggestions || []
-        };
-        return recalculatePatientStatus(patientWithDefaults);
-    });
+    const processedPatients = patientsList.map(recalculatePatientStatus);
 
     return processedPatients.sort((a, b) => {
         const dateA = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
@@ -89,12 +82,7 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
     const patientDoc = await getDoc(patientDocRef);
     if (patientDoc.exists()) {
         const patientData = { id: patientDoc.id, ...patientDoc.data() } as Patient;
-        const patientWithDefaults = {
-            ...patientData,
-            presentMedicalConditions: patientData.presentMedicalConditions || [],
-            dashboardSuggestions: patientData.dashboardSuggestions || []
-        };
-        return recalculatePatientStatus(patientWithDefaults);
+        return recalculatePatientStatus(patientData);
     }
     return null;
 };
@@ -121,7 +109,6 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
         bloodPressureRecords: [] as BloodPressureRecord[],
         medication: [] as Medication[],
         presentMedicalConditions: [] as MedicalCondition[],
-        dashboardSuggestions: [] as DashboardSuggestion[],
         enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension'],
     };
     

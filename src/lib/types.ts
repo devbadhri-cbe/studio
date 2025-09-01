@@ -47,7 +47,6 @@ export interface UserProfile {
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
   bmi?: number;
-  dashboardSuggestions?: DashboardSuggestion[];
   enabledDashboards?: string[];
 }
 

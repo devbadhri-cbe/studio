@@ -37,19 +37,15 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import type { LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
 import { UploadConfirmationForm } from '@/components/upload-confirmation-form';
-import { DoctorReviewCard } from '@/components/doctor-review-card';
 
 
 export default function PatientDashboard() {
-  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName, profile, toggleDashboard } = useApp();
+  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName, profile, setProfile } = useApp();
   const router = useRouter();
   const isMobile = useIsMobile();
   const [shouldAnimate, setShouldAnimate] = React.useState(false);
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   
-  const hasPendingItems = (profile.dashboardSuggestions?.some(s => s.status === 'pending')) || (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
-
-
   React.useEffect(() => {
     if (isMobile && dashboardView === 'none') {
         const timer = setTimeout(() => {
@@ -146,7 +142,6 @@ export default function PatientDashboard() {
           <div className="mx-auto grid w-full max-w-7xl gap-6">
             <div className="space-y-6">
               <PatientHeader />
-              {isDoctorLoggedIn && hasPendingItems && <DoctorReviewCard />}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ProfileCard />
                 <WeightRecordCard />
@@ -182,7 +177,15 @@ export default function PatientDashboard() {
                                     checked={profile.enabledDashboards?.includes(key)}
                                     onSelect={(e) => {
                                         e.preventDefault();
-                                        toggleDashboard(key);
+                                        const currentDashboards = profile.enabledDashboards || [];
+                                        const isEnabled = currentDashboards.includes(key);
+                                        let updatedDashboards: string[];
+                                        if (isEnabled) {
+                                            updatedDashboards = currentDashboards.filter(d => d !== key);
+                                        } else {
+                                            updatedDashboards = [...currentDashboards, key];
+                                        }
+                                        setProfile({ ...profile, enabledDashboards: updatedDashboards });
                                     }}
                                 >
                                     {value.icon}
