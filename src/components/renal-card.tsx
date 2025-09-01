@@ -15,6 +15,8 @@ import { AddElectrolyteRecordDialog } from './add-electrolyte-record-dialog';
 import { Separator } from './ui/separator';
 import { AnemiaCard } from './anemia-card';
 import { NutritionCard } from './nutrition-card';
+import { MineralBoneCard } from './mineral-bone-card';
+import { AddMineralBoneRecordDialog } from './add-mineral-bone-record-dialog';
 
 export function RenalCard() {
   return (
@@ -28,6 +30,7 @@ export function RenalCard() {
           <AddRenalRecordDialog />
           <AddBloodPressureRecordDialog />
           <AddElectrolyteRecordDialog />
+          <AddMineralBoneRecordDialog />
         </div>
       </CardHeader>
       <CardContent className="grid gap-6 px-2 md:px-6">
@@ -55,6 +58,8 @@ export function RenalCard() {
           </TabsContent>
            <TabsContent value="bone-anemia" className="mt-6">
             <div className="grid gap-6">
+              <MineralBoneCard />
+              <Separator />
               <AnemiaCard />
               <Separator />
               <NutritionCard />
