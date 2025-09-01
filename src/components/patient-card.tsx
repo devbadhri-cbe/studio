@@ -6,7 +6,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format, formatDistanceToNow } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2, MessageSquare, Clock, Info } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2, MessageSquare, Clock, Info, Bell } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
@@ -49,7 +49,7 @@ const getStatusVariant = (status: Patient['status']) => {
 
 const statusDescriptions: Record<Patient['status'], string> = {
     'Urgent': 'Set when HbA1c ≥ 7.0%, or BP ≥ 140/90.',
-    'Needs Review': 'Set when HbA1c ≥ 5.7%, LDL ≥ 130, abnormal TSH, or BP ≥ 130/80.',
+    'Needs Review': 'Set when key biomarkers are abnormal, or when a patient-added condition requires verification.',
     'On Track': 'Set when all key biomarkers are within their target ranges.'
 };
 
@@ -62,6 +62,8 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const country = countries.find(c => c.code === patient.country);
   const countryName = country?.name || patient.country;
   const formattedPhone = formatDisplayPhoneNumber(patient.phone, patient.country);
+
+  const needsReview = patient.presentMedicalConditions?.some(c => c.status === 'pending_review') || patient.dashboardSuggestions?.some(s => s.status === 'pending');
   
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest('button, [role="menuitem"], [role="dialog"]')) {
@@ -114,7 +116,25 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </AvatarFallback>
              </Avatar>
              <div className="flex-1 min-w-0">
-                <CardTitle className="text-lg truncate">{patient.name}</CardTitle>
+                <div className="flex items-center gap-2">
+                    <CardTitle className="text-lg truncate">{patient.name}</CardTitle>
+                    {needsReview && (
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <div className="relative">
+                                    <Bell className="h-4 w-4 text-destructive" />
+                                    <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+                                    </span>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Needs doctor's review</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
+                </div>
                 <p className="text-xs text-muted-foreground truncate">
                     {age ? `${age} years` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
                 </p>
@@ -233,5 +253,3 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     </Card>
   );
 }
-
-    

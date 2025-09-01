@@ -18,7 +18,7 @@ import { countries } from './countries';
 const PATIENTS_COLLECTION = 'patients';
 
 const recalculatePatientStatus = (patient: Patient): Patient => {
-    const updatedPatient: Patient = { ...patient };
+    const updatedPatient = { ...patient };
     
     const sortedHba1c = [...(updatedPatient.records || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const sortedLipids = [...(updatedPatient.lipidRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -40,9 +40,15 @@ const recalculatePatientStatus = (patient: Patient): Patient => {
     }
 
     let status: Patient['status'] = 'On Track';
-    if (updatedPatient.lastHba1c && updatedPatient.lastHba1c.value >= 7.0) status = 'Urgent';
-    else if (updatedPatient.lastBloodPressure && (updatedPatient.lastBloodPressure.systolic >= 140 || updatedPatient.lastBloodPressure.diastolic >= 90)) status = 'Urgent';
-    else if (
+    const hasPendingReview = updatedPatient.presentMedicalConditions?.some(c => c.status === 'pending_review') || updatedPatient.dashboardSuggestions?.some(s => s.status === 'pending');
+
+    if (hasPendingReview) {
+        status = 'Needs Review';
+    } else if (updatedPatient.lastHba1c && updatedPatient.lastHba1c.value >= 7.0) {
+        status = 'Urgent';
+    } else if (updatedPatient.lastBloodPressure && (updatedPatient.lastBloodPressure.systolic >= 140 || updatedPatient.lastBloodPressure.diastolic >= 90)) {
+        status = 'Urgent';
+    } else if (
         (updatedPatient.lastHba1c && updatedPatient.lastHba1c.value >= 5.7) ||
         (updatedPatient.lastLipid && updatedPatient.lastLipid.ldl >= 130) ||
         (updatedPatient.lastThyroid && (updatedPatient.lastThyroid.tsh < 0.4 || updatedPatient.lastThyroid.tsh > 4.0)) ||
@@ -55,11 +61,21 @@ const recalculatePatientStatus = (patient: Patient): Patient => {
     return updatedPatient;
 };
 
+
 // Fetch all patients
 export const getPatients = async (): Promise<Patient[]> => {
     const patientsCollection = collection(db, PATIENTS_COLLECTION);
     const patientsSnapshot = await getDocs(patientsCollection);
-    const patientsList = patientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Patient));
+    const patientsList = patientsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return { 
+        id: doc.id,
+        ...data,
+        // Ensure arrays are initialized
+        presentMedicalConditions: data.presentMedicalConditions || [],
+        dashboardSuggestions: data.dashboardSuggestions || [],
+      } as Patient;
+    });
     
     const processedPatients = patientsList.map(recalculatePatientStatus);
 
@@ -76,12 +92,19 @@ export const getPatients = async (): Promise<Patient[]> => {
     });
 };
 
+
 // Fetch a single patient
 export const getPatient = async (id: string): Promise<Patient | null> => {
     const patientDocRef = doc(db, PATIENTS_COLLECTION, id);
     const patientDoc = await getDoc(patientDocRef);
     if (patientDoc.exists()) {
-        const patientData = { id: patientDoc.id, ...patientDoc.data() } as Patient;
+        const patientData = { 
+          id: patientDoc.id, 
+          ...patientDoc.data(),
+          // Ensure arrays are initialized
+          presentMedicalConditions: patientDoc.data().presentMedicalConditions || [],
+          dashboardSuggestions: patientDoc.data().dashboardSuggestions || [],
+        } as Patient;
         return recalculatePatientStatus(patientData);
     }
     return null;
@@ -110,6 +133,7 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
         medication: [] as Medication[],
         presentMedicalConditions: [] as MedicalCondition[],
         enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension'],
+        dashboardSuggestions: [],
     };
     
     let patientToSave = recalculatePatientStatus(newPatientObject as Patient);
@@ -136,17 +160,6 @@ export const updatePatient = async (patientId: string, patientData: Partial<Pati
     const currentData = currentDocSnap.data() as Patient;
 
     let updatedData: Patient = { ...currentData, ...patientData };
-    
-    const newWeight = (patientData as any).weight;
-    if (newWeight) {
-        const newWeightRecord = {
-            id: `weight-${Date.now()}`,
-            date: new Date().toISOString(),
-            value: Number(Number(newWeight).toFixed(2)),
-        };
-        updatedData.weightRecords = [...(updatedData.weightRecords || []), newWeightRecord];
-        delete (updatedData as any).weight;
-    }
     
     updatedData = recalculatePatientStatus(updatedData);
 
