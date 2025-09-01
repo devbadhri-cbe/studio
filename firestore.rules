@@ -1,13 +1,24 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Doctors can read and create their own profile.
+    match /doctors/{doctorId} {
+      allow read, create: if request.auth.uid == doctorId;
+    }
+
+    // Patients collection rules
     match /patients/{patientId} {
-      // Allow anyone to read a single patient's document (for patient portal access)
-      allow get: if true;
+      // A patient can read/update their own data. The patientId is public but unguessable.
+      allow read, update: if resource.data.id == patientId;
       
-      // Allow authenticated users (doctors) to list and write to patient documents
-      allow list, write: if request.auth != null;
+      // The assigned doctor can perform all actions on their patients.
+      allow read, create, update, delete: if request.auth.uid == resource.data.doctorId;
+      
+      // A doctor can create a new patient record.
+      allow create: if request.auth.uid == request.resource.data.doctorId;
     }
   }
 }
