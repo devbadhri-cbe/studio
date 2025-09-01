@@ -18,7 +18,7 @@ export function DoctorReviewCard() {
   const pendingSuggestions = profile.dashboardSuggestions?.filter(s => s.status === 'pending') || [];
   const pendingConditions = profile.presentMedicalConditions.filter(c => c.status === 'pending_review');
   
-  if (pendingSuggestions.length === 0 && pendingConditions.length === 0) {
+  if (pendingConditions.length === 0) {
     return null;
   }
 
