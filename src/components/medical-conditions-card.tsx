@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { Stethoscope, PlusCircle, Trash2, Loader2, Info } from 'lucide-react';
+import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -63,7 +64,7 @@ function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave
          await onSave(data, fullIcdCode);
          toast({
           title: 'Condition Added',
-          description: `Suggested ICD-11 code: ${icdCode}`,
+          description: `This will be sent to your doctor for review. Suggested ICD-11 code: ${icdCode}`,
         });
       }
     } catch (error) {
@@ -115,14 +116,14 @@ function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave
 
 
 export function MedicalConditionsCard() {
-  const { profile, addMedicalCondition, removeMedicalCondition } = useApp();
+  const { profile, addMedicalCondition, removeMedicalCondition, isDoctorLoggedIn } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
 
   const formatDate = useDateFormatter();
   
   const handleSaveCondition = async (data: { condition: string, date: Date }, icdCode?: string) => {
-    addMedicalCondition({ ...data, date: data.date.toISOString(), icdCode });
+    addMedicalCondition({ ...data, date: data.date.toISOString(), icdCode }, !isDoctorLoggedIn);
     setIsAddingCondition(false);
   };
   
@@ -170,17 +171,32 @@ export function MedicalConditionsCard() {
                     <ul className="space-y-1 mt-2">
                         {profile.presentMedicalConditions.map((condition) => (
                             <React.Fragment key={condition.id}>
-                                <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md cursor-pointer" onClick={() => handleSynopsisToggle('condition', condition.id)}>
+                                <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                                 <div className="flex-1">
-                                    <p className="font-semibold text-foreground">{condition.condition}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold text-foreground">{condition.condition}</p>
+                                        {condition.status === 'verified' ? (
+                                            <Tooltip>
+                                                <TooltipTrigger><CheckCircle className="h-3.5 w-3.5 text-green-500" /></TooltipTrigger>
+                                                <TooltipContent>Verified by doctor</TooltipContent>
+                                            </Tooltip>
+                                        ) : (
+                                            <Tooltip>
+                                                <TooltipTrigger><Info className="h-3.5 w-3.5 text-yellow-500" /></TooltipTrigger>
+                                                <TooltipContent>Pending doctor review</TooltipContent>
+                                            </Tooltip>
+                                        )}
+                                    </div>
                                     {condition.icdCode && <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>}
                                     <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
                                 </div>
                                     <div className="flex items-center shrink-0">
-                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveCondition(condition.id); }}>
-                                            <Trash2 className="h-4 w-4 text-destructive" />
-                                        </Button>
-                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100">
+                                        {isDoctorLoggedIn && (
+                                            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveCondition(condition.id); }}>
+                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                        )}
+                                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => handleSynopsisToggle('condition', condition.id)}>
                                             <Info className="h-4 w-4 text-blue-500" />
                                         </Button>
                                     </div>

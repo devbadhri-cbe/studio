@@ -9,6 +9,14 @@ export interface MedicalCondition {
   date: string; // Stored as 'YYYY-MM-DD' string
   condition: string;
   icdCode?: string;
+  status: 'verified' | 'pending_review';
+}
+
+export interface DashboardSuggestion {
+  conditionId: string;
+  conditionName: string;
+  suggestedDashboard: string;
+  status: 'pending' | 'acknowledged';
 }
 
 export interface Medication {
@@ -39,6 +47,8 @@ export interface UserProfile {
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
   bmi?: number;
+  dashboardSuggestions?: DashboardSuggestion[];
+  enabledDashboards?: string[];
 }
 
 export interface Hba1cRecord {
@@ -128,4 +138,6 @@ export interface Patient {
   bloodPressureRecords: BloodPressureRecord[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
+  dashboardSuggestions?: DashboardSuggestion[];
+  enabledDashboards?: string[];
 }

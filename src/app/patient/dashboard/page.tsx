@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -33,15 +34,18 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import type { LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
 import { UploadConfirmationForm } from '@/components/upload-confirmation-form';
+import { DoctorReviewCard } from '@/components/doctor-review-card';
 
 
 export default function PatientDashboard() {
-  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName } = useApp();
+  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName, profile } = useApp();
   const router = useRouter();
   const isMobile = useIsMobile();
   const [shouldAnimate, setShouldAnimate] = React.useState(false);
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   
+  const hasPendingSuggestions = profile.dashboardSuggestions?.some(s => s.status === 'pending');
+
   React.useEffect(() => {
     if (isMobile && dashboardView === 'none') {
         const timer = setTimeout(() => {
@@ -138,6 +142,7 @@ export default function PatientDashboard() {
           <div className="mx-auto grid w-full max-w-7xl gap-6">
             <div className="space-y-6">
               <PatientHeader />
+              {isDoctorLoggedIn && hasPendingSuggestions && <DoctorReviewCard />}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ProfileCard />
                 <WeightRecordCard />
@@ -163,7 +168,9 @@ export default function PatientDashboard() {
                         </Button>
                     </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    {Object.entries(dashboardOptions).map(([key, value]) => (
+                    {Object.entries(dashboardOptions)
+                        .filter(([key]) => profile.enabledDashboards?.includes(key))
+                        .map(([key, value]) => (
                         <DropdownMenuItem 
                             key={key}
                             onSelect={() => handleDashboardSelect(key)}

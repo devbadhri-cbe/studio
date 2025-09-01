@@ -6,7 +6,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format, formatDistanceToNow } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2, MessageSquare, Clock, Info } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2, MessageSquare, Clock, Info, Bell } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
@@ -62,6 +62,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const country = countries.find(c => c.code === patient.country);
   const countryName = country?.name || patient.country;
   const formattedPhone = formatDisplayPhoneNumber(patient.phone, patient.country);
+  const hasPendingSuggestions = patient.dashboardSuggestions?.some(s => s.status === 'pending');
   
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest('button, [role="menuitem"], [role="dialog"]')) {
@@ -104,7 +105,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   }
 
   return (
-    <Card className="w-full flex flex-col cursor-pointer transition-all group md:hover:border-primary/50 shadow-md md:hover:shadow-lg active:shadow-xl active:scale-[0.98]" onClick={handleCardClick}>
+    <Card className="w-full flex flex-col cursor-pointer transition-all group md:hover:border-primary/50 shadow-md active:shadow-xl active:scale-[0.98] md:hover:shadow-lg" onClick={handleCardClick}>
       <CardHeader className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1 flex items-center gap-3 min-w-0">
@@ -121,6 +122,22 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
              </div>
           </div>
           <div className="flex items-center" onClick={handleActionClick}>
+               {hasPendingSuggestions && (
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div className="relative mr-1">
+                            <Bell className="h-5 w-5 text-yellow-500" />
+                            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive"></span>
+                            </span>
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Pending review items</p>
+                    </TooltipContent>
+                </Tooltip>
+               )}
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8">

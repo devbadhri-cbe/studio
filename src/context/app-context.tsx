@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem } from '@/lib/types';
+import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, DashboardSuggestion } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -12,8 +12,10 @@ import { startOfDay, parseISO } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMgDl, toMmolL, toNgDl, toNmolL } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
+import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [] };
+
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension'], dashboardSuggestions: [] };
 const DOCTOR_NAME = 'Dr. Badhrinathan N';
 
 type DashboardView = 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'hypertension' | 'report' | 'none';
@@ -37,8 +39,9 @@ interface AddBatchRecordsResult {
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
-  addMedicalCondition: (condition: Omit<MedicalCondition, 'id'>) => void;
+  addMedicalCondition: (condition: Omit<MedicalCondition, 'id' | 'status'>, isPatientAdding: boolean) => void;
   removeMedicalCondition: (id: string) => void;
+  approveMedicalCondition: (conditionId: string, suggestion?: DashboardSuggestion) => void;
   addMedication: (medication: Omit<Medication, 'id'>) => void;
   removeMedication: (id: string) => void;
   setMedicationNil: () => void;
@@ -77,6 +80,7 @@ interface AppContextType {
   getDbVitaminDValue: (value: number) => number;
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  acknowledgeSuggestion: (conditionId: string) => void;
 }
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -192,6 +196,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       unitSystem: patient.unitSystem || countries.find(c => c.code === patient.country)?.unitSystem || 'metric',
       medication: Array.isArray(patient.medication) ? patient.medication : [],
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
+      dashboardSuggestions: Array.isArray(patient.dashboardSuggestions) ? patient.dashboardSuggestions : [],
+      enabledDashboards: Array.isArray(patient.enabledDashboards) ? patient.enabledDashboards : ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension'],
       bmi: patient.bmi,
     };
     setProfileState(patientProfile);
@@ -228,17 +234,67 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updatePatientData(newProfile.id, { ...newProfile });
   }
   
-  const addMedicalCondition = (condition: Omit<MedicalCondition, 'id'>) => {
-    const newCondition = { ...condition, id: Date.now().toString() };
+  const addMedicalCondition = async (condition: Omit<MedicalCondition, 'id' | 'status'>, isPatientAdding: boolean) => {
+    const newCondition = { ...condition, id: Date.now().toString(), status: isPatientAdding ? 'pending_review' : 'verified' } as MedicalCondition;
     const updatedConditions = [...profile.presentMedicalConditions, newCondition];
+    let updatedSuggestions = [...(profile.dashboardSuggestions || [])];
+
     setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
-    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
+
+    if (isPatientAdding) {
+        try {
+            const result = await getDashboardRecommendations({ conditionName: newCondition.condition, icdCode: newCondition.icdCode || '' });
+            if (result.recommendedDashboard) {
+                const alreadySuggested = updatedSuggestions.some(s => s.conditionId === newCondition.id);
+                if (!alreadySuggested) {
+                    updatedSuggestions.push({
+                        conditionId: newCondition.id,
+                        conditionName: newCondition.condition,
+                        suggestedDashboard: result.recommendedDashboard,
+                        status: 'pending'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Failed to get dashboard recommendation:", error);
+        }
+    }
+    
+    setProfileState(p => ({ ...p, dashboardSuggestions: updatedSuggestions }));
+    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions });
   };
   
   const removeMedicalCondition = (id: string) => {
     const updatedConditions = profile.presentMedicalConditions.filter(c => c.id !== id);
-    setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
-    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
+    const updatedSuggestions = (profile.dashboardSuggestions || []).filter(s => s.conditionId !== id);
+    setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions }));
+    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions });
+  };
+  
+  const acknowledgeSuggestion = (conditionId: string) => {
+    const updatedSuggestions = (profile.dashboardSuggestions || []).map(s => 
+        s.conditionId === conditionId ? { ...s, status: 'acknowledged' as const } : s
+    );
+     setProfileState(p => ({ ...p, dashboardSuggestions: updatedSuggestions }));
+     updatePatientData(profile.id, { dashboardSuggestions: updatedSuggestions });
+  };
+
+  const approveMedicalCondition = (conditionId: string, suggestion?: DashboardSuggestion) => {
+    const updatedConditions = profile.presentMedicalConditions.map(c => 
+        c.id === conditionId ? { ...c, status: 'verified' as const } : c
+    );
+    const updatedSuggestions = (profile.dashboardSuggestions || []).map(s => 
+        s.conditionId === conditionId ? { ...s, status: 'acknowledged' as const } : s
+    );
+    let updatedEnabledDashboards = [...(profile.enabledDashboards || [])];
+    if (suggestion) {
+        if (!updatedEnabledDashboards.includes(suggestion.suggestedDashboard)) {
+            updatedEnabledDashboards.push(suggestion.suggestedDashboard);
+        }
+    }
+
+    setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions, enabledDashboards: updatedEnabledDashboards }));
+    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions, enabledDashboards: updatedEnabledDashboards });
   };
 
    const addMedication = (medication: Omit<Medication, 'id'>) => {
@@ -379,7 +435,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     
     if (batch.lipid && batch.lipid.ldl && batch.lipid.hdl && batch.lipid.triglycerides && batch.lipid.total) {
       const dateExists = lipidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
-      const expectedUnit = biomarkerUnit === 'conventional' ? 'mg/dL' : 'mmol/L';
       
       let lipidRecordForDb = { ...batch.lipid };
       if (batch.lipid.units && batch.lipid.units !== 'mg/dL') {
@@ -452,6 +507,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setProfile,
     addMedicalCondition,
     removeMedicalCondition,
+    approveMedicalCondition,
+    acknowledgeSuggestion,
     addMedication,
     removeMedication,
     setMedicationNil,

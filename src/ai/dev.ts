@@ -13,4 +13,4 @@ import '@/ai/flows/standardize-medication.ts';
 import '@/ai/flows/medication-synopsis.ts';
 import '@/ai/flows/condition-synopsis.ts';
 import '@/ai/flows/translate-text.ts';
-
+import '@/ai/flows/get-dashboard-recommendations.ts';
