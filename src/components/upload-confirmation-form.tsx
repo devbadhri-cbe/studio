@@ -167,6 +167,9 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
                                   setExtractedData({ ...extractedData, date: newDate.toISOString().split('T')[0] })
                               }
                           }}
+                          fromYear={new Date().getFullYear() - 10}
+                          toYear={new Date().getFullYear()}
+                          modal={true}
                       />
                   </div>
               )}
@@ -224,7 +227,7 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
                <Zap className="h-5 w-5 text-primary/80" />
                <div className="flex-1">
                    <p className="font-semibold">Blood Pressure</p>
-                   {extractedData.bloodPressure ? (
+                   {extractedData.bloodPressure?.systolic && extractedData.bloodPressure?.diastolic ? (
                        <p>{extractedData.bloodPressure.systolic}/{extractedData.bloodPressure.diastolic} mmHg</p>
                    ) : (
                         <div className="flex gap-2 mt-1">
