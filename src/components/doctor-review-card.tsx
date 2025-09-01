@@ -23,7 +23,6 @@ export function DoctorReviewCard() {
   const { profile, dashboardSuggestions, approveMedicalCondition, dismissSuggestion } = useApp();
 
   const pendingConditions = (profile.presentMedicalConditions || []).filter(c => c.status === 'pending_review');
-  const pendingSuggestions = (dashboardSuggestions || []).filter(s => s.status === 'pending');
   
   if (pendingConditions.length === 0) return null;
 
@@ -42,7 +41,7 @@ export function DoctorReviewCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         {pendingConditions.map((condition, index) => {
-          const suggestion = pendingSuggestions.find(s => s.conditionId === condition.id);
+          const suggestion = (dashboardSuggestions || []).find(s => s.conditionId === condition.id && s.status === 'pending');
           const isNewDashboardRequest = suggestion?.suggestedDashboard === 'new_dashboard_needed';
 
           return (
@@ -54,18 +53,19 @@ export function DoctorReviewCard() {
                   {condition.icdCode && (
                     <p className="text-sm text-muted-foreground">AI-suggested ICD-11: {condition.icdCode}</p>
                   )}
-                  {suggestion && (
+                  {suggestion ? (
                     isNewDashboardRequest ? (
-                      <div className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                       <div className="text-sm text-blue-600 dark:text-blue-400 mt-1">
                           <p className="font-semibold flex items-center gap-2">
-                            <Wrench className="h-4 w-4"/>
-                            New Dashboard Required
+                            Suggested Dashboard: New Dashboard to be created
                           </p>
-                          <p className="text-xs">This condition requires monitoring of: <span className="font-medium">{suggestion.requiredBiomarkers?.join(', ') || 'N/A'}</span>. A new dashboard is pending development.</p>
+                          <p className="text-xs">This condition requires monitoring of: <span className="font-medium">{suggestion.requiredBiomarkers?.join(', ') || 'N/A'}</span>.</p>
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground">Suggested Dashboard: <span className="font-medium text-primary">{getDashboardName(suggestion.suggestedDashboard)}</span></p>
                     )
+                  ) : (
+                     <p className="text-sm text-muted-foreground">No dashboard suggestion available.</p>
                   )}
                 </div>
                 <div className="flex gap-2 shrink-0">
