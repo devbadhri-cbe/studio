@@ -18,7 +18,7 @@ import { countries } from './countries';
 const PATIENTS_COLLECTION = 'patients';
 
 const recalculatePatientStatus = (patient: Patient): Patient => {
-    const updatedPatient = { ...patient };
+    const updatedPatient: Patient = { ...patient };
     
     const sortedHba1c = [...(updatedPatient.records || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const sortedLipids = [...(updatedPatient.lipidRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -89,7 +89,12 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
     const patientDoc = await getDoc(patientDocRef);
     if (patientDoc.exists()) {
         const patientData = { id: patientDoc.id, ...patientDoc.data() } as Patient;
-        return recalculatePatientStatus(patientData);
+        const patientWithDefaults = {
+            ...patientData,
+            presentMedicalConditions: patientData.presentMedicalConditions || [],
+            dashboardSuggestions: patientData.dashboardSuggestions || []
+        };
+        return recalculatePatientStatus(patientWithDefaults);
     }
     return null;
 };
@@ -116,6 +121,7 @@ export const addPatient = async (patientData: Omit<Patient, 'id' | 'records' | '
         bloodPressureRecords: [] as BloodPressureRecord[],
         medication: [] as Medication[],
         presentMedicalConditions: [] as MedicalCondition[],
+        dashboardSuggestions: [] as DashboardSuggestion[],
     };
     
     let patientToSave = recalculatePatientStatus(newPatientObject as Patient);
