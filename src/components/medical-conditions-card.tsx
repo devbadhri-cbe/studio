@@ -32,7 +32,7 @@ type ActiveSynopsis = {
     id: string;
 } | null;
 
-function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave: (data: {condition: string, date: Date}, icdCode?: string) => Promise<void>, onCancel: () => void, existingConditions: MedicalCondition[] }) {
+function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave: (data: {condition: string, date: string}, icdCode?: string) => Promise<void>, onCancel: () => void, existingConditions: MedicalCondition[] }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -63,7 +63,7 @@ function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave
             description: `This condition (or a similar one with ICD-11 code ${icdCode}) already exists.`,
         });
       } else {
-         await onSave(data, fullIcdCode);
+         await onSave({ ...data, date: data.date.toISOString() }, fullIcdCode);
          toast({
           title: 'Condition Added',
           description: `This will be sent to your doctor for review. Suggested ICD-11 code: ${icdCode}`,
@@ -76,7 +76,7 @@ function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave
         title: 'An error occurred',
         description: 'Could not get ICD code suggestion. The condition will be added without it.',
       });
-      await onSave(data);
+      await onSave({ ...data, date: data.date.toISOString() });
     } finally {
       setIsSubmitting(false);
       onCancel();
@@ -130,8 +130,8 @@ export function MedicalConditionsCard() {
 
   const formatDate = useDateFormatter();
   
-  const handleSaveCondition = async (data: { condition: string, date: Date }, icdCode?: string) => {
-    addMedicalCondition({ ...data, date: data.date.toISOString(), icdCode }, !isDoctorLoggedIn);
+  const handleSaveCondition = async (data: { condition: string, date: string }, icdCode?: string) => {
+    addMedicalCondition({ ...data, date: data.date }, !isDoctorLoggedIn);
     setIsAddingCondition(false);
   };
   
