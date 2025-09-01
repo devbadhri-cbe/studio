@@ -19,6 +19,7 @@ import { auth, db } from '@/lib/firebase';
 import { useApp } from '@/context/app-context';
 import type { Doctor } from '@/lib/types';
 import { doc, getDoc } from 'firebase/firestore';
+import { Separator } from '@/components/ui/separator';
 
 
 const FormSchema = z.object({
