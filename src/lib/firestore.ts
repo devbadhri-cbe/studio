@@ -20,8 +20,8 @@ import { db } from './firebase';
 import type { Patient, Doctor } from './types';
 import { calculateAge, calculateBmi, calculateEgfr } from './utils';
 
-const PATIENTS_COLLECTION = 'patients';
 const DOCTORS_COLLECTION = 'doctors';
+const PATIENTS_SUBCOLLECTION = 'patients';
 
 const getPatientStatus = (patientData: Partial<Patient>): 'On Track' | 'Needs Review' | 'Urgent' => {
   const lastHba1c = patientData.records && patientData.records.length > 0 
@@ -134,23 +134,25 @@ const processPatientDoc = (doc: any): Patient => {
 
 
 export async function getPatients(doctorId: string): Promise<Patient[]> {
-  const q = query(
-    collection(db, PATIENTS_COLLECTION),
-    where('doctorId', '==', doctorId)
-  );
+  const patientsCollectionRef = collection(db, DOCTORS_COLLECTION, doctorId, PATIENTS_SUBCOLLECTION);
+  const q = query(patientsCollectionRef);
   const snapshot = await getDocs(q);
   return snapshot.docs.map(processPatientDoc);
 }
 
-export async function getPatient(id: string): Promise<Patient | null> {
-  const docRef = doc(db, PATIENTS_COLLECTION, id);
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    return processPatientDoc(docSnap);
-  } else {
-    return null;
+export async function getPatient(patientId: string): Promise<Patient | null> {
+  const q = query(collection(db, DOCTORS_COLLECTION));
+  const doctorsSnapshot = await getDocs(q);
+  
+  for (const doctorDoc of doctorsSnapshot.docs) {
+    const patientDocRef = doc(db, DOCTORS_COLLECTION, doctorDoc.id, PATIENTS_SUBCOLLECTION, patientId);
+    const patientDocSnap = await getDoc(patientDocRef);
+    if (patientDocSnap.exists()) {
+      return processPatientDoc(patientDocSnap);
+    }
   }
+  
+  return null;
 }
 
 export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastHba1c' | 'lastLipid'>, doctorId: string, doctorName: string): Promise<Patient> {
@@ -177,14 +179,29 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
         createdAt: serverTimestamp(),
     }
-  const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), docData);
-  const newPatient = await getPatient(docRef.id);
-  if (!newPatient) throw new Error("Failed to create and retrieve patient.");
-  return newPatient;
+  const patientsCollectionRef = collection(db, DOCTORS_COLLECTION, doctorId, PATIENTS_SUBCOLLECTION);
+  const docRef = await addDoc(patientsCollectionRef, docData);
+  
+  // To return the full patient object, we construct it manually since getPatient is now complex
+   return {
+    ...docData,
+    id: docRef.id,
+    dob: docData.dob.toISOString(),
+    status: 'On Track',
+    lastHba1c: null,
+    lastLipid: null,
+  } as Patient;
 }
 
 export async function updatePatient(id: string, updates: Partial<Patient>): Promise<Patient> {
-    const docRef = doc(db, PATIENTS_COLLECTION, id);
+    if (!updates.doctorId) {
+        const patient = await getPatient(id);
+        if (!patient || !patient.doctorId) {
+            throw new Error("Patient or patient's doctorId not found, cannot update.");
+        }
+        updates.doctorId = patient.doctorId;
+    }
+    const docRef = doc(db, DOCTORS_COLLECTION, updates.doctorId, PATIENTS_SUBCOLLECTION, id);
     
     const updateData: {[key: string]: any} = { ...updates };
     if (updates.dob && typeof updates.dob === 'string') {
@@ -209,7 +226,12 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
 }
 
 export async function deletePatient(id: string): Promise<void> {
-  await deleteDoc(doc(db, PATIENTS_COLLECTION, id));
+  const patient = await getPatient(id);
+  if (!patient || !patient.doctorId) {
+    throw new Error("Patient or patient's doctorId not found, cannot delete.");
+  }
+  const docRef = doc(db, DOCTORS_COLLECTION, patient.doctorId, PATIENTS_SUBCOLLECTION, id);
+  await deleteDoc(docRef);
 }
 
 // Doctor specific functions
