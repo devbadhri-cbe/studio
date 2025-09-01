@@ -17,7 +17,7 @@ const DashboardRecommendationInputSchema = z.object({
 export type DashboardRecommendationInput = z.infer<typeof DashboardRecommendationInputSchema>;
 
 const DashboardRecommendationOutputSchema = z.object({
-  recommendedDashboard: z.enum(['hba1c', 'lipids', 'hypertension', 'thyroid', 'vitaminD', 'none']).describe('The key of the recommended dashboard or "none".'),
+  recommendedDashboard: z.enum(['hba1c', 'lipids', 'hypertension', 'thyroid', 'vitaminD', 'renal', 'none']).describe('The key of the recommended dashboard or "none".'),
 });
 export type DashboardRecommendationOutput = z.infer<typeof DashboardRecommendationOutputSchema>;
 
@@ -41,8 +41,9 @@ Available Dashboards and their primary biomarkers:
 - 'hypertension': Monitors blood pressure.
 - 'thyroid': Monitors TSH, T3, T4 for thyroid function.
 - 'vitaminD': Monitors Vitamin D levels.
+- 'renal': Monitors eGFR and UACR for kidney function.
 
-Analyze the condition and choose the most appropriate dashboard key. For example, for "Type 2 Diabetes", recommend "hba1c". For "Hypercholesterolemia", recommend "lipids". For "Hypothyroidism", recommend "thyroid". If no specific dashboard is a good fit, recommend "none".
+Analyze the condition and choose the most appropriate dashboard key. For example, for "Type 2 Diabetes", recommend "hba1c". For "Hypercholesterolemia", recommend "lipids". For "Chronic Kidney Disease", recommend "renal". If no specific dashboard is a good fit, recommend "none".
 `,
 });
 
