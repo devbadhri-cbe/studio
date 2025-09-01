@@ -164,41 +164,61 @@ export default function PatientDashboard() {
                     Upload Result
                 </Button>
               </UploadRecordDialog>
-              <DropdownMenu>
+               <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className={cn("justify-center", shouldAnimate && 'animate-pulse-once bg-primary/20')}>
                             {ActiveDashboardIcon}
                             <span className="ml-2">{dashboardButtonLabel}</span>
                         </Button>
                     </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuLabel>Manage Dashboards</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {Object.entries(dashboardOptions).map(([key, value]) => (
-                      <DropdownMenuCheckboxItem
-                          key={key}
-                          checked={profile.enabledDashboards?.includes(key)}
-                          onSelect={(e) => {
-                              e.preventDefault();
-                              if (!isDoctorLoggedIn) return;
-                              const currentDashboards = profile.enabledDashboards || [];
-                              const isEnabled = currentDashboards.includes(key);
-                              let updatedDashboards: string[];
-                              if (isEnabled) {
-                                  updatedDashboards = currentDashboards.filter(d => d !== key);
-                              } else {
-                                  updatedDashboards = [...currentDashboards, key];
-                              }
-                              setProfile({ ...profile, enabledDashboards: updatedDashboards });
-                          }}
-                          disabled={!isDoctorLoggedIn}
-                      >
-                          {value.icon}
-                          <span className="ml-2">{value.name}</span>
-                      </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuContent>
+                        {isDoctorLoggedIn ? (
+                            <>
+                                <DropdownMenuLabel>Manage Dashboards</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                {Object.entries(dashboardOptions).map(([key, value]) => (
+                                    <DropdownMenuCheckboxItem
+                                        key={key}
+                                        checked={profile.enabledDashboards?.includes(key)}
+                                        onSelect={(e) => {
+                                            e.preventDefault();
+                                            const currentDashboards = profile.enabledDashboards || [];
+                                            const isEnabled = currentDashboards.includes(key);
+                                            let updatedDashboards: string[];
+                                            if (isEnabled) {
+                                                updatedDashboards = currentDashboards.filter(d => d !== key);
+                                            } else {
+                                                updatedDashboards = [...currentDashboards, key];
+                                            }
+                                            setProfile({ ...profile, enabledDashboards: updatedDashboards });
+                                        }}
+                                    >
+                                        {value.icon}
+                                        <span className="ml-2">{value.name}</span>
+                                    </DropdownMenuCheckboxItem>
+                                ))}
+                            </>
+                        ) : (
+                             <>
+                                <DropdownMenuLabel>Select Dashboard</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                {(profile.enabledDashboards || []).map((key) => {
+                                    const dashboard = dashboardOptions[key as keyof typeof dashboardOptions];
+                                    if (!dashboard) return null;
+                                    return (
+                                        <DropdownMenuItem key={key} onSelect={() => handleDashboardSelect(key)}>
+                                            {dashboard.icon}
+                                            <span className="ml-2">{dashboard.name}</span>
+                                        </DropdownMenuItem>
+                                    )
+                                })}
+                                {(profile.enabledDashboards?.length === 0) && (
+                                     <DropdownMenuItem disabled>No dashboards enabled.</DropdownMenuItem>
+                                )}
+                            </>
+                        )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
             
              {extractedData && (
