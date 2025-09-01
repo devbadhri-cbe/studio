@@ -98,7 +98,7 @@ export interface RenalRecord {
   date: Date | string;
   serumCreatinine: number;
   serumCreatinineUnits: 'mg/dL' | 'umol/L';
-  bun: number; // Blood Urea Nitrogen
+  bun?: number; // Blood Urea Nitrogen
   uacr: number; // Urine Albumin-to-Creatinine Ratio
   medication?: string;
   eGFR?: number; // Optional: to store the calculated value
@@ -120,6 +120,20 @@ export interface MineralBoneDiseaseRecord {
   calcium: number;
   phosphorus: number;
   pth: number; // Parathyroid Hormone
+  medication?: string;
+}
+
+export interface AnemiaRecord {
+  id: string;
+  date: Date | string;
+  hemoglobin: number; // in g/dL
+  medication?: string;
+}
+
+export interface NutritionRecord {
+  id: string;
+  date: Date | string;
+  albumin: number; // in g/dL
   medication?: string;
 }
 
@@ -164,9 +178,13 @@ export interface Patient {
     uacr: number;
     date: string;
   } | null;
-  hemoglobin?: {
+  lastHemoglobin?: {
     value: number;
     date: string;
+  } | null;
+  lastAlbumin?: {
+      value: number;
+      date: string;
   } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
   // Add full record history to the patient object
@@ -176,7 +194,9 @@ export interface Patient {
   thyroidRecords: ThyroidRecord[];
   renalRecords: RenalRecord[];
   electrolyteRecords: ElectrolyteRecord[];
-  mineralBoneDiseaseRecords?: MineralBoneDiseaseRecord[];
+  mineralBoneDiseaseRecords: MineralBoneDiseaseRecord[];
+  anemiaRecords: AnemiaRecord[];
+  nutritionRecords: NutritionRecord[];
   weightRecords: WeightRecord[];
   bloodPressureRecords: BloodPressureRecord[];
   medication: Medication[];

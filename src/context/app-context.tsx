@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord } from '@/lib/types';
+import { type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type AnemiaRecord, type NutritionRecord } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -31,6 +31,7 @@ interface BatchRecords {
     electrolytes?: Omit<ElectrolyteRecord, 'id' | 'medication'>;
     mineralBone?: Omit<MineralBoneDiseaseRecord, 'id' | 'medication'>;
     hemoglobin?: number;
+    albumin?: number;
 }
 
 type BiomarkerUnitSystem = 'conventional' | 'si';
@@ -71,6 +72,12 @@ interface AppContextType {
   mineralBoneDiseaseRecords: MineralBoneDiseaseRecord[];
   addMineralBoneDiseaseRecord: (record: Omit<MineralBoneDiseaseRecord, 'id' | 'medication'>) => void;
   removeMineralBoneDiseaseRecord: (id: string) => void;
+  anemiaRecords: AnemiaRecord[];
+  addAnemiaRecord: (record: Omit<AnemiaRecord, 'id' | 'medication'>) => void;
+  removeAnemiaRecord: (id: string) => void;
+  nutritionRecords: NutritionRecord[];
+  addNutritionRecord: (record: Omit<NutritionRecord, 'id' | 'medication'>) => void;
+  removeNutritionRecord: (id: string) => void;
   weightRecords: WeightRecord[];
   addWeightRecord: (record: Omit<WeightRecord, 'id'>) => void;
   removeWeightRecord: (id: string) => void;
@@ -108,6 +115,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [renalRecords, setRenalRecordsState] = React.useState<RenalRecord[]>([]);
   const [electrolyteRecords, setElectrolyteRecordsState] = React.useState<ElectrolyteRecord[]>([]);
   const [mineralBoneDiseaseRecords, setMineralBoneDiseaseRecordsState] = React.useState<MineralBoneDiseaseRecord[]>([]);
+  const [anemiaRecords, setAnemiaRecordsState] = React.useState<AnemiaRecord[]>([]);
+  const [nutritionRecords, setNutritionRecordsState] = React.useState<NutritionRecord[]>([]);
   const [weightRecords, setWeightRecordsState] = React.useState<WeightRecord[]>([]);
   const [bloodPressureRecords, setBloodPressureRecordsState] = React.useState<BloodPressureRecord[]>([]);
   const [dashboardSuggestions, setDashboardSuggestions] = React.useState<DashboardSuggestion[]>([]);
@@ -225,6 +234,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setRenalRecordsState(patient.renalRecords || []);
     setElectrolyteRecordsState(patient.electrolyteRecords || []);
     setMineralBoneDiseaseRecordsState(patient.mineralBoneDiseaseRecords || []);
+    setAnemiaRecordsState(patient.anemiaRecords || []);
+    setNutritionRecordsState(patient.nutritionRecords || []);
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
     setDashboardSuggestions(patient.dashboardSuggestions || []);
@@ -449,6 +460,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { mineralBoneDiseaseRecords: updatedRecords });
   };
 
+  const addAnemiaRecord = (record: Omit<AnemiaRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    const updatedRecords = [...anemiaRecords, newRecord];
+    setAnemiaRecordsState(updatedRecords);
+    updatePatientData(profile.id, { anemiaRecords: updatedRecords });
+  };
+
+  const removeAnemiaRecord = (id: string) => {
+    const updatedRecords = anemiaRecords.filter(r => r.id !== id);
+    setAnemiaRecordsState(updatedRecords);
+    updatePatientData(profile.id, { anemiaRecords: updatedRecords });
+  };
+  
+  const addNutritionRecord = (record: Omit<NutritionRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    const updatedRecords = [...nutritionRecords, newRecord];
+    setNutritionRecordsState(updatedRecords);
+    updatePatientData(profile.id, { nutritionRecords: updatedRecords });
+  };
+
+  const removeNutritionRecord = (id: string) => {
+    const updatedRecords = nutritionRecords.filter(r => r.id !== id);
+    setNutritionRecordsState(updatedRecords);
+    updatePatientData(profile.id, { nutritionRecords: updatedRecords });
+  };
+
   const addWeightRecord = (record: Omit<WeightRecord, 'id'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     const updatedRecords = [...weightRecords, newRecord];
@@ -578,6 +615,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         result.added.push('Renal Panel');
       } else { result.duplicates.push('Renal Panel'); }
     }
+
+    if (batch.hemoglobin) {
+       const dateExists = anemiaRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+       if (!dateExists) {
+        const newRecord: AnemiaRecord = { hemoglobin: batch.hemoglobin, id: `anemia-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+        updates.anemiaRecords = [...anemiaRecords, newRecord];
+        setAnemiaRecordsState(updates.anemiaRecords);
+        result.added.push('Anemia (Hb)');
+      } else { result.duplicates.push('Anemia (Hb)'); }
+    }
+    
+    if (batch.albumin) {
+        const dateExists = nutritionRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+        if (!dateExists) {
+         const newRecord: NutritionRecord = { albumin: batch.albumin, id: `nutrition-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+         updates.nutritionRecords = [...nutritionRecords, newRecord];
+         setNutritionRecordsState(updates.nutritionRecords);
+         result.added.push('Nutrition (Albumin)');
+       } else { result.duplicates.push('Nutrition (Albumin)'); }
+    }
     
     if (Object.keys(updates).length > 0) {
         await updatePatientData(profile.id, updates);
@@ -625,6 +682,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     mineralBoneDiseaseRecords,
     addMineralBoneDiseaseRecord,
     removeMineralBoneDiseaseRecord,
+    anemiaRecords,
+    addAnemiaRecord,
+    removeAnemiaRecord,
+    nutritionRecords,
+    addNutritionRecord,
+    removeNutritionRecord,
     weightRecords,
     addWeightRecord,
     removeWeightRecord,

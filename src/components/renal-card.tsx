@@ -12,14 +12,17 @@ import { AddBloodPressureRecordDialog } from './add-blood-pressure-record-dialog
 import { ElectrolytesChart } from './electrolytes-chart';
 import { ElectrolytesHistoryTable } from './electrolytes-history-table';
 import { AddElectrolyteRecordDialog } from './add-electrolyte-record-dialog';
+import { Separator } from './ui/separator';
+import { AnemiaCard } from './anemia-card';
+import { NutritionCard } from './nutrition-card';
 
 export function RenalCard() {
   return (
     <Card className="h-full">
       <CardHeader className="flex flex-row items-start">
         <div className="grid gap-2">
-          <CardTitle>Chronic Kidney Disease (CKD) Dashboard</CardTitle>
-          <CardDescription>Monitor key indicators like eGFR, UACR, and associated blood pressure to track kidney health.</CardDescription>
+          <CardTitle>CKD Monitoring Dashboard</CardTitle>
+          <CardDescription>Comprehensive monitoring for Chronic Kidney Disease based on clinical guidelines.</CardDescription>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <AddRenalRecordDialog />
@@ -28,28 +31,33 @@ export function RenalCard() {
         </div>
       </CardHeader>
       <CardContent className="grid gap-6 px-2 md:px-6">
-        <Tabs defaultValue="renal">
+        <Tabs defaultValue="core">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="renal">Renal Function</TabsTrigger>
-            <TabsTrigger value="bp">Blood Pressure</TabsTrigger>
+            <TabsTrigger value="core">Core Tests</TabsTrigger>
             <TabsTrigger value="electrolytes">Electrolytes</TabsTrigger>
+            <TabsTrigger value="bone-anemia">Bone, Anemia &amp; Nutrition</TabsTrigger>
           </TabsList>
-          <TabsContent value="renal" className="mt-6">
+          <TabsContent value="core" className="mt-6">
              <div className="grid gap-6">
                 <RenalChart />
                 <RenalHistoryTable />
+                <Separator />
+                <h3 className="text-md font-semibold text-center text-muted-foreground">Associated Blood Pressure</h3>
+                <BloodPressureChart />
+                <BloodPressureHistoryTable />
              </div>
           </TabsContent>
-          <TabsContent value="bp" className="mt-6">
-            <div className="grid gap-6">
-              <BloodPressureChart />
-              <BloodPressureHistoryTable />
-            </div>
-          </TabsContent>
-           <TabsContent value="electrolytes" className="mt-6">
+          <TabsContent value="electrolytes" className="mt-6">
             <div className="grid gap-6">
               <ElectrolytesChart />
               <ElectrolytesHistoryTable />
+            </div>
+          </TabsContent>
+           <TabsContent value="bone-anemia" className="mt-6">
+            <div className="grid gap-6">
+              <AnemiaCard />
+              <Separator />
+              <NutritionCard />
             </div>
           </TabsContent>
         </Tabs>
