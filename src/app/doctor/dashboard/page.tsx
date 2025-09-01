@@ -23,15 +23,17 @@ import { PatientCard } from '@/components/patient-card';
 import { addPatient, deletePatient, getPatients, updatePatient } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
-import { TitleBar } from '@/components/title-bar';
+import { Logo } from '@/components/logo';
+import { Mail } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useApp } from '@/context/app-context';
-import { Loader2 } from 'lucide-react';
+
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
-    const { doctor, isClient, setPatientData } = useApp();
+    const { setPatientData } = useApp();
+    const doctorName = 'Dr. Jane Doe'; // Hardcoded doctor name
     const [patients, setPatients] = React.useState<Patient[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
@@ -41,10 +43,10 @@ export default function DoctorDashboardPage() {
     const [isSubmitting, setIsSubmitting] = React.useState(false);
 
 
-    const fetchPatients = React.useCallback(async (doctorId: string) => {
+    const fetchPatients = React.useCallback(async () => {
         setIsLoading(true);
         try {
-            const fetchedPatients = await getPatients(doctorId);
+            const fetchedPatients = await getPatients();
             setPatients(fetchedPatients);
         } catch (error) {
             console.error("Failed to fetch patients from Firestore", error);
@@ -59,27 +61,21 @@ export default function DoctorDashboardPage() {
     }, [toast]);
 
     React.useEffect(() => {
-        // Only fetch patients if we are on the client and the doctor object with a UID is available.
-        if (isClient && doctor?.uid) {
-            fetchPatients(doctor.uid);
-        } else if (isClient && !doctor?.uid) {
-            // Handle case where app is loaded but doctor auth isn't ready yet
-            setIsLoading(false);
-        }
-    }, [fetchPatients, isClient, doctor]);
+        fetchPatients();
+    }, [fetchPatients]);
     
     // Re-fetch data when the page is focused
     React.useEffect(() => {
         const handleFocus = () => {
-            if (!isFormOpen && doctor?.uid) {
-                fetchPatients(doctor.uid);
+            if (!isFormOpen) {
+                fetchPatients();
             }
         };
         window.addEventListener('focus', handleFocus);
         return () => {
             window.removeEventListener('focus', handleFocus);
         };
-    }, [fetchPatients, isFormOpen, doctor]);
+    }, [fetchPatients, isFormOpen]);
 
 
     const viewPatientDashboard = (patient: Patient) => {
@@ -125,15 +121,13 @@ export default function DoctorDashboardPage() {
                     description: `${updatedPatient.name}'s details have been updated.`,
                 });
             } else {
-                 const newPatient = await addPatient(patientData, doctor?.uid, doctor?.name);
+                 const newPatient = await addPatient(patientData, 'default-doctor-id', doctorName);
                 toast({
                     title: 'Patient Added',
                     description: `${newPatient.name} has been successfully added.`,
                 });
             }
-             if (doctor?.uid) {
-                await fetchPatients(doctor.uid);
-            }
+            await fetchPatients();
             closeForm();
         } catch (error) {
             console.error("Failed to save patient", error);
@@ -174,7 +168,21 @@ export default function DoctorDashboardPage() {
   return (
     <TooltipProvider>
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <TitleBar doctorName={doctor?.name || ''} doctorEmail={doctor?.email || ''} />
+       <header className="border-b px-4 py-4 md:px-6">
+            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 md:flex-row md:justify-between">
+              <div className="flex items-center gap-2">
+                  <Logo className="h-8 w-8 text-primary" />
+                  <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
+              </div>
+              <div className="text-center md:text-right text-sm text-muted-foreground">
+                  <p className="font-semibold text-lg text-foreground">{doctorName}</p>
+                   <a href="mailto:doctor@example.com" className="flex items-center justify-center md:justify-end gap-1.5 hover:text-primary">
+                      <Mail className="h-3 w-3" />
+                      doctor@example.com
+                  </a>
+              </div>
+            </div>
+        </header>
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
             {isFormOpen ? (

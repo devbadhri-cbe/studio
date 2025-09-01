@@ -18,7 +18,6 @@ import { ThyroidCard } from '@/components/thyroid-card';
 import { HypertensionCard } from '@/components/hypertension-card';
 import { RenalCard } from '@/components/renal-card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { TitleBar } from '@/components/title-bar';
 import { MedicalConditionsCard } from '@/components/medical-conditions-card';
 import { MedicationCard } from '@/components/medication-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
@@ -42,7 +41,7 @@ import { DoctorReviewCard } from '@/components/doctor-review-card';
 
 
 export default function PatientDashboard() {
-  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctor, profile, setProfile, dashboardSuggestions } = useApp();
+  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, profile, setProfile, dashboardSuggestions } = useApp();
   const router = useRouter();
   const isMobile = useIsMobile();
   const [shouldAnimate, setShouldAnimate] = React.useState(false);
@@ -128,24 +127,20 @@ export default function PatientDashboard() {
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
-         {doctor && (
-            <TitleBar doctorName={doctor.name} doctorEmail={doctor.email}>
-                {isDoctorLoggedIn && (
-                    <div className="absolute top-4 left-4">
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="ghost">
-                                <ArrowLeft className="h-4 w-4" />
-                                <span className="sr-only">Back to Patient List</span>
-                            </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                            <p>Patient List</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </div>
-                )}
-            </TitleBar>
+         {isDoctorLoggedIn && (
+            <div className="border-b p-2 text-center text-sm bg-secondary">
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                    <Button onClick={() => router.push('/doctor/dashboard')} size="sm" variant="ghost" className="gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Doctor's Dashboard
+                    </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                    <p>Return to Patient List</p>
+                    </TooltipContent>
+                </Tooltip>
+            </div>
          )}
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">

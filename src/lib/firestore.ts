@@ -11,18 +11,14 @@ import {
   deleteDoc,
   query,
   orderBy,
-  limit,
   serverTimestamp,
   Timestamp,
-  where,
-  setDoc,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Patient, Doctor } from './types';
+import type { Patient } from './types';
 import { calculateAge, calculateBmi, calculateEgfr } from './utils';
 
 const PATIENTS_COLLECTION = 'patients';
-const DOCTORS_COLLECTION = 'doctors';
 
 const getPatientStatus = (patientData: Partial<Patient>): 'On Track' | 'Needs Review' | 'Urgent' => {
   const lastHba1c = patientData.records && patientData.records.length > 0 
@@ -47,23 +43,6 @@ const getPatientStatus = (patientData: Partial<Patient>): 'On Track' | 'Needs Re
   return 'On Track';
 };
 
-
-// Helper function to convert Firestore Timestamps to ISO strings
-const convertTimestampsToISO = (data: any): any => {
-    if (!data) return data;
-    for (const key in data) {
-        if (data[key] instanceof Timestamp) {
-            data[key] = data[key].toDate().toISOString();
-        } else if (typeof data[key] === 'object' && data[key] !== null) {
-            if (Array.isArray(data[key])) {
-                data[key] = data[key].map(item => convertTimestampsToISO(item));
-            } else {
-                convertTimestampsToISO(data[key]);
-            }
-        }
-    }
-    return data;
-}
 
 const processPatientDoc = (doc: any): Patient => {
   let data = doc.data();
@@ -154,21 +133,13 @@ const processPatientDoc = (doc: any): Patient => {
 };
 
 
-export async function getPatients(doctorId: string): Promise<Patient[]> {
-  // First, "test" the connection by getting the doctor's document.
-  // This ensures the auth state is ready before the more complex query.
-  await getDoc(doc(db, DOCTORS_COLLECTION, doctorId));
-
+export async function getPatients(): Promise<Patient[]> {
   const q = query(
     collection(db, PATIENTS_COLLECTION),
-    where('doctorId', '==', doctorId)
+    orderBy('name', 'asc')
   );
-  
   const snapshot = await getDocs(q);
-  const allPatients = snapshot.docs.map(processPatientDoc);
-  
-  // Sorting on the client-side after fetching
-  return allPatients.sort((a, b) => a.name.localeCompare(b.name));
+  return snapshot.docs.map(processPatientDoc);
 }
 
 export async function getPatient(id: string): Promise<Patient | null> {
@@ -241,21 +212,4 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
 
 export async function deletePatient(id: string): Promise<void> {
   await deleteDoc(doc(db, PATIENTS_COLLECTION, id));
-}
-
-export async function createDoctor(uid: string, name: string, email: string): Promise<Doctor> {
-  const docRef = doc(db, DOCTORS_COLLECTION, uid);
-  const newDoctor: Doctor = { uid, name, email };
-  await setDoc(docRef, newDoctor);
-  return newDoctor;
-}
-
-export async function getDoctor(uid: string): Promise<Doctor | null> {
-    const docRef = doc(db, DOCTORS_COLLECTION, uid);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-        return docSnap.data() as Doctor;
-    }
-    return null;
 }

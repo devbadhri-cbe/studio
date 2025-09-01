@@ -4,9 +4,7 @@
 
 import { type Doctor, type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type AnemiaRecord, type NutritionRecord } from '@/lib/types';
 import * as React from 'react';
-import { updatePatient, getDoctor } from '@/lib/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
@@ -89,8 +87,6 @@ interface AppContextType {
   isClient: boolean;
   dashboardView: DashboardView;
   setDashboardView: (view: DashboardView) => void;
-  doctor: Doctor | null;
-  setDoctor: (doctor: Doctor | null) => void;
   isDoctorLoggedIn: boolean;
   setIsDoctorLoggedIn: (isLoggedIn: boolean) => void;
   setPatientData: (patient: Patient) => void;
@@ -123,7 +119,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [tips, setTipsState] = React.useState<string[]>([]);
   const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('report');
   const [isClient, setIsClient] = React.useState(false);
-  const [doctor, setDoctorState] = React.useState<Doctor | null>(null);
   const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
 
@@ -185,32 +180,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     return value;
   }
-
-  const setDoctor = (doctor: Doctor | null) => {
-    setDoctorState(doctor);
-    if (doctor) {
-        localStorage.setItem('doctor', JSON.stringify(doctor));
-    } else {
-        localStorage.removeItem('doctor');
-    }
-  }
-
-  React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            setIsDoctorLoggedInState(true);
-            const doctorProfile = await getDoctor(user.uid);
-            if (doctorProfile) {
-                setDoctor(doctorProfile);
-            }
-        } else {
-            setIsDoctorLoggedInState(false);
-            setDoctor(null);
-        }
-    });
-
-    return () => unsubscribe();
-  }, []);
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
       setIsDoctorLoggedInState(isLoggedIn);
@@ -732,8 +701,6 @@ anemiaRecords,
     isClient,
     dashboardView,
     setDashboardView,
-    doctor,
-    setDoctor,
     isDoctorLoggedIn,
     setIsDoctorLoggedIn,
     setPatientData,

@@ -1,10 +1,11 @@
+
 'use client';
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { useParams, useRouter } from 'next/navigation';
 import PatientDashboard from '@/app/patient/dashboard/page';
-import { getPatient } from '@/lib/firestore';
+import { getPatient, updatePatient } from '@/lib/firestore';
 import { Button } from '@/components/ui/button';
 
 export default function PatientDashboardPage() {
@@ -26,6 +27,7 @@ export default function PatientDashboardPage() {
                 const patient = await getPatient(patientId);
                 if (patient) {
                     setPatientData(patient);
+                    // No longer attempting to write lastLogin for unauthenticated users
                 } else {
                     setError(`No patient found with ID ${patientId}. Please check the link.`);
                     localStorage.removeItem('patient_id');

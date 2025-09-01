@@ -21,7 +21,7 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export function PatientHeader() {
-  const { profile, isDoctorLoggedIn, doctor } = useApp();
+  const { profile, isDoctorLoggedIn } = useApp();
   const { toast } = useToast();
   
   const pageTitle = isDoctorLoggedIn
@@ -29,7 +29,7 @@ export function PatientHeader() {
     : `Welcome, ${profile.name || 'User'}!`;
   
   const handleContactDoctor = (method: 'whatsapp' | 'sms') => {
-      if (!doctor?.uid) {
+      if (!profile.doctorName) {
           toast({
               variant: 'destructive',
               title: 'Doctor Information Missing',
@@ -37,11 +37,9 @@ export function PatientHeader() {
           });
           return;
       }
-      // This is a placeholder. In a real app you'd fetch the doctor's phone number.
-      // For now, we'll use a placeholder and show a toast.
       toast({
           title: 'Contact Feature Placeholder',
-          description: `This would open ${method} to contact ${profile.doctorName || 'your doctor'}.`
+          description: `This would open ${method} to contact ${profile.doctorName}.`
       })
   }
     
