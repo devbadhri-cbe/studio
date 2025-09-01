@@ -7,6 +7,7 @@ import { useApp } from '@/context/app-context';
 import { Utensils } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { AddNutritionRecordDialog } from './add-nutrition-record-dialog';
 
 export function NutritionCard() {
   const { profile } = useApp();
@@ -28,14 +29,17 @@ export function NutritionCard() {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <Utensils className="h-5 w-5 text-green-600" />
-          <CardTitle>Nutrition Status (Albumin)</CardTitle>
+      <CardHeader className="flex flex-row items-start justify-between">
+        <div>
+            <div className="flex items-center gap-3">
+            <Utensils className="h-5 w-5 text-green-600" />
+            <CardTitle>Nutrition (Albumin)</CardTitle>
+            </div>
+            <CardDescription className="pt-2">
+            Serum albumin is a key marker for nutritional status, which is important to monitor in CKD.
+            </CardDescription>
         </div>
-        <CardDescription>
-          Serum albumin is a key marker for nutritional status, which is important to monitor in later stages of CKD.
-        </CardDescription>
+        <AddNutritionRecordDialog />
       </CardHeader>
       <CardContent className="space-y-4">
         {lastAlbumin ? (

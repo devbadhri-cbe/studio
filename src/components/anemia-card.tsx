@@ -7,6 +7,7 @@ import { useApp } from '@/context/app-context';
 import { Droplet } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { AddAnemiaRecordDialog } from './add-anemia-record-dialog';
 
 export function AnemiaCard() {
   const { profile } = useApp();
@@ -32,14 +33,17 @@ export function AnemiaCard() {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <Droplet className="h-5 w-5 text-destructive" />
-          <CardTitle>Anemia Monitoring (Hemoglobin)</CardTitle>
+      <CardHeader className="flex flex-row items-start justify-between">
+        <div>
+            <div className="flex items-center gap-3">
+              <Droplet className="h-5 w-5 text-destructive" />
+              <CardTitle>Anemia (Hemoglobin)</CardTitle>
+            </div>
+            <CardDescription className="pt-2">
+              Anemia is a common complication of CKD. Hemoglobin levels are monitored to guide treatment.
+            </CardDescription>
         </div>
-        <CardDescription>
-          Anemia is a common complication of CKD. Hemoglobin levels are monitored to guide treatment.
-        </CardDescription>
+        <AddAnemiaRecordDialog />
       </CardHeader>
       <CardContent className="space-y-4">
         {lastHemoglobin ? (
