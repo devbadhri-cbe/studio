@@ -13,12 +13,15 @@ import {
   orderBy,
   serverTimestamp,
   Timestamp,
+  where,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Patient } from './types';
+import type { Patient, Doctor } from './types';
 import { calculateAge, calculateBmi, calculateEgfr } from './utils';
 
 const PATIENTS_COLLECTION = 'patients';
+const DOCTORS_COLLECTION = 'doctors';
 
 const getPatientStatus = (patientData: Partial<Patient>): 'On Track' | 'Needs Review' | 'Urgent' => {
   const lastHba1c = patientData.records && patientData.records.length > 0 
@@ -47,10 +50,8 @@ const getPatientStatus = (patientData: Partial<Patient>): 'On Track' | 'Needs Re
 const processPatientDoc = (doc: any): Patient => {
   let data = doc.data();
 
-  // Deep clone to avoid issues with modifying the original data object
   data = JSON.parse(JSON.stringify(data));
 
-  // Ensure all date fields are valid ISO strings
   const sanitizeRecords = (records: any[]) => {
     if (!Array.isArray(records)) return [];
     return records.map(r => {
@@ -74,7 +75,6 @@ const processPatientDoc = (doc: any): Patient => {
   const presentMedicalConditions = sanitizeRecords(data.presentMedicalConditions);
 
 
-  // Recalculate eGFR for all renal records
   const age = calculateAge(data.dob);
   const processedRenalRecords = renalRecords.map((record: any) => {
     if (record.serumCreatinine && age && data.gender) {
@@ -133,9 +133,10 @@ const processPatientDoc = (doc: any): Patient => {
 };
 
 
-export async function getPatients(): Promise<Patient[]> {
+export async function getPatients(doctorId: string): Promise<Patient[]> {
   const q = query(
     collection(db, PATIENTS_COLLECTION),
+    where('doctorId', '==', doctorId),
     orderBy('name', 'asc')
   );
   const snapshot = await getDocs(q);
@@ -153,7 +154,7 @@ export async function getPatient(id: string): Promise<Patient | null> {
   }
 }
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastHba1c' | 'lastLipid'>, doctorId: string = 'default-doctor-id', doctorName: string = 'Dr. Badhrinathan N'): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastHba1c' | 'lastLipid'>, doctorId: string, doctorName: string): Promise<Patient> {
     const docData = {
         ...patientData,
         doctorId,
@@ -186,7 +187,6 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
 export async function updatePatient(id: string, updates: Partial<Patient>): Promise<Patient> {
     const docRef = doc(db, PATIENTS_COLLECTION, id);
     
-    // Convert date strings back to Firestore Timestamps where necessary
     const updateData: {[key: string]: any} = { ...updates };
     if (updates.dob && typeof updates.dob === 'string') {
         updateData.dob = new Date(updates.dob);
@@ -194,7 +194,6 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
     if (updates.lastLogin && typeof updates.lastLogin === 'string') {
         updateData.lastLogin = new Date(updates.lastLogin);
     }
-    // Handle dates within record arrays
     ['records', 'lipidRecords', 'vitaminDRecords', 'thyroidRecords', 'renalRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'anemiaRecords', 'nutritionRecords', 'electrolyteRecords', 'mineralBoneDiseaseRecords'].forEach(key => {
         if (updateData[key] && Array.isArray(updateData[key])) {
             updateData[key] = updateData[key].map((item: any) => ({
@@ -212,4 +211,11 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
 
 export async function deletePatient(id: string): Promise<void> {
   await deleteDoc(doc(db, PATIENTS_COLLECTION, id));
+}
+
+// Doctor specific functions
+export async function createDoctor(uid: string, name: string, email: string): Promise<Doctor> {
+  const doctorData = { name, email };
+  await setDoc(doc(db, DOCTORS_COLLECTION, uid), doctorData);
+  return { uid, ...doctorData };
 }

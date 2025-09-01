@@ -15,6 +15,7 @@ import { Logo } from '@/components/logo';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getPatient } from '@/lib/firestore';
+import { Separator } from '@/components/ui/separator';
 
 const FormSchema = z.object({
   patientId: z.string().min(1, { message: 'Patient ID is required.' }),

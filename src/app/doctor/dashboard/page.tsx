@@ -23,18 +23,13 @@ import { PatientCard } from '@/components/patient-card';
 import { addPatient, deletePatient, getPatients, updatePatient } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
-import { Logo } from '@/components/logo';
-import { Mail } from 'lucide-react';
-import { TooltipProvider } from '@/components/ui/tooltip';
 import { useApp } from '@/context/app-context';
-
+import { TitleBar } from '@/components/title-bar';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
-    const { setPatientData } = useApp();
-    const doctorName = 'Dr. Badhrinathan N';
-    const doctorEmail = 'drbadhri@gmail.com';
+    const { setPatientData, doctor, isClient } = useApp();
     const [patients, setPatients] = React.useState<Patient[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
@@ -45,9 +40,13 @@ export default function DoctorDashboardPage() {
 
 
     const fetchPatients = React.useCallback(async () => {
+        if (!doctor?.uid) {
+            // Don't fetch if doctor isn't loaded yet.
+            return;
+        }
         setIsLoading(true);
         try {
-            const fetchedPatients = await getPatients();
+            const fetchedPatients = await getPatients(doctor.uid);
             setPatients(fetchedPatients);
         } catch (error) {
             console.error("Failed to fetch patients from Firestore", error);
@@ -59,16 +58,21 @@ export default function DoctorDashboardPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast]);
+    }, [toast, doctor]);
 
     React.useEffect(() => {
-        fetchPatients();
-    }, [fetchPatients]);
+        if (!isClient) return;
+        if (!doctor) {
+            router.replace('/doctor/login');
+        } else {
+            fetchPatients();
+        }
+    }, [isClient, doctor, router, fetchPatients]);
     
     // Re-fetch data when the page is focused
     React.useEffect(() => {
         const handleFocus = () => {
-            if (!isFormOpen) {
+            if (!isFormOpen && doctor) {
                 fetchPatients();
             }
         };
@@ -76,7 +80,7 @@ export default function DoctorDashboardPage() {
         return () => {
             window.removeEventListener('focus', handleFocus);
         };
-    }, [fetchPatients, isFormOpen]);
+    }, [fetchPatients, isFormOpen, doctor]);
 
 
     const viewPatientDashboard = (patient: Patient) => {
@@ -104,6 +108,11 @@ export default function DoctorDashboardPage() {
     }
 
     const handleFormSubmit = async (data: PatientFormData) => {
+        if (!doctor) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Doctor not logged in.' });
+            return;
+        }
+
         setIsSubmitting(true);
         const patientData = {
             name: data.name,
@@ -122,7 +131,7 @@ export default function DoctorDashboardPage() {
                     description: `${updatedPatient.name}'s details have been updated.`,
                 });
             } else {
-                 const newPatient = await addPatient(patientData, 'default-doctor-id', doctorName);
+                 const newPatient = await addPatient(patientData, doctor.uid, doctor.name);
                 toast({
                     title: 'Patient Added',
                     description: `${newPatient.name} has been successfully added.`,
@@ -166,24 +175,18 @@ export default function DoctorDashboardPage() {
         );
     });
 
-  return (
-    <TooltipProvider>
-    <div className="flex min-h-screen w-full flex-col bg-background">
-       <header className="border-b px-4 py-4 md:px-6">
-            <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 md:flex-row md:justify-between">
-              <div className="flex items-center gap-2">
-                  <Logo className="h-8 w-8 text-primary" />
-                  <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
-              </div>
-              <div className="text-center md:text-right text-sm text-muted-foreground">
-                  <p className="font-semibold text-lg text-foreground">{doctorName}</p>
-                   <a href={`mailto:${doctorEmail}`} className="flex items-center justify-center md:justify-end gap-1.5 hover:text-primary">
-                      <Mail className="h-3 w-3" />
-                      {doctorEmail}
-                  </a>
-              </div>
+  if (!doctor) {
+      return (
+          <div className="flex h-screen items-center justify-center bg-background">
+                <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <p className="ml-4">Redirecting to login...</p>
             </div>
-        </header>
+      )
+  }
+
+  return (
+    <div className="flex min-h-screen w-full flex-col bg-background">
+       <TitleBar doctorName={doctor.name} doctorEmail={doctor.email} />
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
             {isFormOpen ? (
@@ -289,6 +292,5 @@ export default function DoctorDashboardPage() {
         </AlertDialogContent>
     </AlertDialog>
     </div>
-    </TooltipProvider>
   );
 }

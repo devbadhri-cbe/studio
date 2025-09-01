@@ -9,7 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMgDl, toMmolL, toNgDl, toNmolL } from '@/lib/unit-conversions';
-import { calculateBmi } from '@/lib/utils';
+import { calculateBmi, calculateEgfr } from '@/lib/utils';
 import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
 
 
@@ -89,6 +89,8 @@ interface AppContextType {
   setDashboardView: (view: DashboardView) => void;
   isDoctorLoggedIn: boolean;
   setIsDoctorLoggedIn: (isLoggedIn: boolean) => void;
+  doctor: Doctor | null;
+  setDoctor: (doctor: Doctor | null) => void;
   setPatientData: (patient: Patient) => void;
   biomarkerUnit: BiomarkerUnitSystem;
   getDisplayLipidValue: (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides') => number;
@@ -119,13 +121,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [tips, setTipsState] = React.useState<string[]>([]);
   const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('report');
   const [isClient, setIsClient] = React.useState(false);
-  const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
+  const [doctor, setDoctorState] = React.useState<Doctor | null>(null);
   const [theme, setThemeState] = React.useState<Theme>('system');
+
+  const isDoctorLoggedIn = !!doctor;
+  
+  const setDoctor = (doctorData: Doctor | null) => {
+      setDoctorState(doctorData);
+      if (doctorData) {
+          localStorage.setItem('doctor', JSON.stringify(doctorData));
+      } else {
+          localStorage.removeItem('doctor');
+      }
+  }
 
   React.useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
     if (storedTheme) {
       setThemeState(storedTheme);
+    }
+    const storedDoctor = localStorage.getItem('doctor');
+    if (storedDoctor) {
+        setDoctorState(JSON.parse(storedDoctor));
     }
     setIsClient(true);
   }, []);
@@ -150,7 +167,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return countries.find(c => c.code === profile.country)?.biomarkerUnit || 'conventional';
   }, [profile.country]);
 
-  // All lipid values are stored in mg/dL in the database.
   const getDisplayLipidValue = (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides'): number => {
     if (biomarkerUnit === 'si') {
       return parseFloat(toMmolL(value, type).toFixed(2));
@@ -158,7 +174,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return Math.round(value);
   }
   
-  // All Vitamin D values are stored in ng/mL in the database.
   const getDisplayVitaminDValue = (value: number): number => {
       if (biomarkerUnit === 'si') {
           return parseFloat(toNmolL(value).toFixed(2));
@@ -166,7 +181,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return Math.round(value);
   }
 
-  // Convert displayed SI value back to conventional for DB storage
   const getDbLipidValue = (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides'): number => {
     if (biomarkerUnit === 'si') {
         return toMgDl(value, type);
@@ -182,7 +196,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
-      setIsDoctorLoggedInState(isLoggedIn);
+      // This function is now derived from doctor state, but kept for compatibility.
+      if (!isLoggedIn) {
+          setDoctor(null);
+      }
   }
   
   const setPatientData = React.useCallback((patient: Patient) => {
@@ -202,6 +219,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       enabledDashboards: Array.isArray(patient.enabledDashboards) ? patient.enabledDashboards : ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
       bmi: patient.bmi,
       doctorName: patient.doctorName,
+      doctorId: patient.doctorId,
     };
     setProfileState(patientProfile);
     setRecordsState(patient.records || []);
@@ -216,8 +234,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
     setDashboardSuggestions(patient.dashboardSuggestions || []);
-    setTips([]); // Clear tips for new patient
-    setDashboardViewState('report'); // Reset to default view
+    setTips([]); 
+    setDashboardViewState('report');
   }, []);
   
   const updatePatientData = async (patientId: string, updates: Partial<Patient>) => {
@@ -399,7 +417,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
   
   const addRenalRecord = (record: Omit<RenalRecord, 'id' | 'medication'>) => {
-    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+     const age = calculateAge(profile.dob);
+     const eGFR = age ? calculateEgfr(record.serumCreatinine, record.serumCreatinineUnits, age, profile.gender) : undefined;
+    const newRecord = { ...record, eGFR, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     const updatedRecords = [...renalRecords, newRecord];
     setRenalRecordsState(updatedRecords);
     updatePatientData(profile.id, { renalRecords: updatedRecords });
@@ -703,6 +723,8 @@ anemiaRecords,
     setDashboardView,
     isDoctorLoggedIn,
     setIsDoctorLoggedIn,
+    doctor,
+    setDoctor,
     setPatientData,
     biomarkerUnit,
     getDisplayLipidValue,

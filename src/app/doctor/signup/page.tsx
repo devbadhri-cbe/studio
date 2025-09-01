@@ -46,8 +46,7 @@ export default function DoctorSignUpPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
-      await createDoctor(user.uid, data.name, data.email);
-      const newDoctor = { uid: user.uid, name: data.name, email: data.email };
+      const newDoctor = await createDoctor(user.uid, data.name, data.email);
       
       setDoctor(newDoctor);
 

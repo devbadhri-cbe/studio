@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Logo } from '@/components/logo';
@@ -9,6 +10,8 @@ import { useApp } from '@/context/app-context';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
 
 interface TitleBarProps {
     doctorName: string;
@@ -22,12 +25,22 @@ export function TitleBar({ doctorName, doctorEmail, children }: TitleBarProps) {
     const { toast } = useToast();
 
     const handleSignOut = async () => {
-        setDoctor(null);
-        toast({
-            title: 'Signed Out',
-            description: 'You have been successfully signed out.',
-        });
-        router.push('/doctor/login');
+        try {
+            await signOut(auth);
+            setDoctor(null);
+            toast({
+                title: 'Signed Out',
+                description: 'You have been successfully signed out.',
+            });
+            router.push('/doctor/login');
+        } catch (error) {
+            console.error("Sign out error", error);
+            toast({
+                variant: 'destructive',
+                title: 'Sign Out Failed',
+                description: 'Could not sign you out. Please try again.',
+            });
+        }
     };
 
     return (

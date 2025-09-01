@@ -9,7 +9,7 @@ import { getPatient, updatePatient } from '@/lib/firestore';
 import { Button } from '@/components/ui/button';
 
 export default function PatientDashboardPage() {
-    const { setPatientData, isClient } = useApp();
+    const { setPatientData, isClient, doctor } = useApp();
     const router = useRouter();
     const params = useParams();
     const patientId = params.patientId as string;
@@ -26,8 +26,16 @@ export default function PatientDashboardPage() {
             try {
                 const patient = await getPatient(patientId);
                 if (patient) {
+                    if (doctor && patient.doctorId !== doctor.uid) {
+                         setError(`This patient is managed by another doctor. Access denied.`);
+                         localStorage.removeItem('patient_id');
+                         return;
+                    }
+
                     setPatientData(patient);
-                    // No longer attempting to write lastLogin for unauthenticated users
+                    if (!doctor) { // Only update lastLogin if it's a patient logging in
+                        await updatePatient(patient.id, { lastLogin: new Date().toISOString() });
+                    }
                 } else {
                     setError(`No patient found with ID ${patientId}. Please check the link.`);
                     localStorage.removeItem('patient_id');
@@ -43,7 +51,7 @@ export default function PatientDashboardPage() {
 
         loadData();
 
-    }, [patientId, setPatientData, router, isClient]);
+    }, [patientId, setPatientData, router, isClient, doctor]);
 
     if (isLoading) {
         return (
