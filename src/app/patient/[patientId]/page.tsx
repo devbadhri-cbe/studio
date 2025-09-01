@@ -49,7 +49,8 @@ export default function PatientDashboardPage() {
                     localStorage.setItem('patient_id', patient.id);
                     setPatientData(patient);
                     // Update last login timestamp, but don't wait for it
-                    updatePatient(patient.id, { lastLogin: new Date().toISOString() });
+                    // Commenting out to fix permission errors for unauthenticated users
+                    // updatePatient(patient.id, { lastLogin: new Date().toISOString() });
                 } else {
                     setError(`No patient found with ID ${patientId}. Please check the link.`);
                     localStorage.removeItem('patient_id');
