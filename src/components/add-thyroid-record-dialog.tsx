@@ -148,9 +148,9 @@ export function AddThyroidRecordDialog() {
                   name="t3"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>T3 (ng/dL)</FormLabel>
+                      <FormLabel>T3 (pg/mL)</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 150" {...field} />
+                        <Input type="number" placeholder="e.g., 3.0" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -161,9 +161,9 @@ export function AddThyroidRecordDialog() {
                   name="t4"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>T4 (μg/dL)</FormLabel>
+                      <FormLabel>T4 (ng/dL)</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.1" placeholder="e.g., 8.0" {...field} />
+                        <Input type="number" step="0.1" placeholder="e.g., 1.2" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

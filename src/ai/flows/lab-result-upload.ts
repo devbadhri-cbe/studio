@@ -83,7 +83,7 @@ Then, scan the document for the following biomarkers. For each biomarker, extrac
 - HbA1c (as a percentage value, units are always '%')
 - Lipid Panel (LDL, HDL, Triglycerides, Total Cholesterol). Common units are mg/dL or mmol/L.
 - Vitamin D (as a numerical value). Common units are ng/mL or nmol/L.
-- Thyroid Panel (TSH, T3, T4). Units for TSH are typically μIU/mL, T3 as ng/dL, and T4 as μg/dL. Ignore these units for extraction.
+- Thyroid Panel (TSH, T3, T4). Extract the numeric values only. Do not extract the units.
 - Blood Pressure (Systolic, Diastolic) and Heart Rate (Pulse). Units are typically mmHg and bpm. Ignore these units for extraction.
 - Renal Panel (Serum Creatinine, eGFR, UACR, BUN). Units for BUN are typically mg/dL.
 - Electrolytes (Sodium/Na, Potassium/K, Chloride/Cl, Bicarbonate/HCO3-). Units are typically mEq/L.

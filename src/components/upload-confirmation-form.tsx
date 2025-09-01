@@ -264,11 +264,11 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
                     {extractedData.thyroidPanel?.tsh ? (<p>{extractedData.thyroidPanel.tsh}</p>) : (<Input id="tsh-manual" type="number" className="h-7 mt-1 text-center" value={manualInputs.tsh} onChange={e => handleManualEntryChange('tsh', e.target.value)} onBlur={() => handleManualEntryBlur('thyroidPanel', 'tsh')} />) }
                 </div>
                 <div className="rounded-md bg-muted/50 p-2">
-                    <Label htmlFor="t3-manual" className="font-semibold">T3 (ng/dL)</Label>
+                    <Label htmlFor="t3-manual" className="font-semibold">T3 (pg/mL)</Label>
                     {extractedData.thyroidPanel?.t3 ? (<p>{extractedData.thyroidPanel.t3}</p>) : (<Input id="t3-manual" type="number" className="h-7 mt-1 text-center" value={manualInputs.t3} onChange={e => handleManualEntryChange('t3', e.target.value)} onBlur={() => handleManualEntryBlur('thyroidPanel', 't3')} />) }
                 </div>
                 <div className="rounded-md bg-muted/50 p-2">
-                    <Label htmlFor="t4-manual" className="font-semibold">T4 (μg/dL)</Label>
+                    <Label htmlFor="t4-manual" className="font-semibold">T4 (ng/dL)</Label>
                     {extractedData.thyroidPanel?.t4 ? (<p>{extractedData.thyroidPanel.t4}</p>) : (<Input id="t4-manual" type="number" className="h-7 mt-1 text-center" value={manualInputs.t4} onChange={e => handleManualEntryChange('t4', e.target.value)} onBlur={() => handleManualEntryBlur('thyroidPanel', 't4')} />) }
                 </div>
             </div>
