@@ -7,14 +7,23 @@ import { useParams, useRouter } from 'next/navigation';
 import PatientDashboard from '@/app/patient/dashboard/page';
 import { getPatient, updatePatient } from '@/lib/firestore';
 import { Button } from '@/components/ui/button';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export default function PatientDashboardPage() {
-    const { setPatientData, isDoctorLoggedIn, isClient } = useApp();
+    const { setPatientData, isDoctorLoggedIn, setIsDoctorLoggedIn, isClient } = useApp();
     const router = useRouter();
     const params = useParams();
     const patientId = params.patientId as string;
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+          setIsDoctorLoggedIn(!!user);
+      });
+      return () => unsubscribe();
+    }, [setIsDoctorLoggedIn]);
 
     React.useEffect(() => {
         if (!patientId || !isClient) return;
@@ -23,42 +32,25 @@ export default function PatientDashboardPage() {
             setIsLoading(true);
             setError(null);
 
-            // Flow for a logged-in doctor viewing a patient's dashboard
-            if (isDoctorLoggedIn) {
-                try {
-                    const patient = await getPatient(patientId);
-                    if (patient) {
-                        setPatientData(patient);
-                    } else {
-                        setError(`Patient with ID ${patientId} not found.`);
-                    }
-                } catch (e) {
-                    console.error("Failed to load patient data for doctor:", e);
-                    setError('Failed to load patient data.');
-                } finally {
-                    setIsLoading(false);
-                }
-                return;
-            }
-
-            // Flow for a patient accessing via direct link.
-            // This acts as the "login" mechanism for patients.
             try {
                 const patient = await getPatient(patientId);
                 if (patient) {
-                    localStorage.setItem('patient_id', patient.id);
+                    // For both doctors and patients, set the patient data
                     setPatientData(patient);
-                    // Update last login timestamp, but don't wait for it
-                    // Commenting out to fix permission errors for unauthenticated users
-                    // updatePatient(patient.id, { lastLogin: new Date().toISOString() });
+
+                    // For patients, set their "logged in" state in localStorage
+                    if (!isDoctorLoggedIn) {
+                         localStorage.setItem('patient_id', patient.id);
+                         // await updatePatient(patient.id, { lastLogin: new Date().toISOString() });
+                    }
                 } else {
                     setError(`No patient found with ID ${patientId}. Please check the link.`);
-                    localStorage.removeItem('patient_id');
+                    if (!isDoctorLoggedIn) localStorage.removeItem('patient_id');
                 }
             } catch (e) {
-                console.error("Failed to load patient data for patient:", e);
-                setError('Could not load your dashboard. Please try again or contact your doctor.');
-                localStorage.removeItem('patient_id');
+                console.error("Failed to load patient data:", e);
+                setError('Could not load patient dashboard. Please try again or contact your doctor.');
+                if (!isDoctorLoggedIn) localStorage.removeItem('patient_id');
             } finally {
                 setIsLoading(false);
             }
