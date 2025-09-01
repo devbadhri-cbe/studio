@@ -59,7 +59,7 @@ const getDashboardRecommendationsFlow = ai.defineFlow(
         
         // This is a strict check: every required biomarker must be found in the dashboard's list.
         const areAllCovered = lowerCaseBiomarkers.every(requiredBiomarker => 
-            lowerCaseCovered.includes(requiredBiomarker)
+            lowerCaseCovered.some(covered => requiredBiomarker.includes(covered) || covered.includes(requiredBiomarker))
         );
 
         if (areAllCovered) {
@@ -74,3 +74,4 @@ const getDashboardRecommendationsFlow = ai.defineFlow(
     }
   }
 );
+
