@@ -14,17 +14,18 @@ import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useApp } from '@/context/app-context';
-import { getDoctor } from '@/lib/firestore';
+import { createDoctor } from '@/lib/firestore';
 
 const FormSchema = z.object({
+  name: z.string().min(2, { message: 'Please enter a valid name.' }),
   email: z.string().email({ message: 'Please enter a valid email.' }),
-  password: z.string().min(1, { message: 'Password is required.' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
-export default function DoctorLoginPage() {
+export default function DoctorSignUpPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { setDoctor } = useApp();
@@ -33,6 +34,7 @@ export default function DoctorLoginPage() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
     },
@@ -41,24 +43,29 @@ export default function DoctorLoginPage() {
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-      const doctor = await getDoctor(userCredential.user.uid);
-      if (doctor) {
-        setDoctor(doctor);
-        toast({
-          title: 'Login Successful',
-          description: `Welcome, ${doctor.name}! Redirecting to your dashboard...`,
-        });
-        router.push('/doctor/dashboard');
-      } else {
-        throw new Error("Doctor data not found in Firestore.");
-      }
-    } catch (error) {
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user;
+      
+      await createDoctor(user.uid, data.name, data.email);
+      const newDoctor = { uid: user.uid, name: data.name, email: data.email };
+      
+      setDoctor(newDoctor);
+
+      toast({
+        title: 'Account Created',
+        description: `Welcome, ${data.name}! Redirecting to your dashboard...`,
+      });
+      router.push('/doctor/dashboard');
+    } catch (error: any) {
       console.error("Firebase Auth Error:", error);
+      let description = 'An unexpected error occurred. Please try again.';
+      if (error.code === 'auth/email-already-in-use') {
+          description = 'This email address is already in use. Please log in instead.';
+      }
       toast({
         variant: 'destructive',
-        title: 'Login Failed',
-        description: 'The email or password you entered is incorrect. Please try again.',
+        title: 'Sign-up Failed',
+        description,
       });
       setIsSubmitting(false);
     }
@@ -72,12 +79,25 @@ export default function DoctorLoginPage() {
               <Logo className="h-8 w-8 text-primary" />
               <span className="text-2xl font-bold font-headline">Health Guardian</span>
             </div>
-          <CardTitle className="text-2xl">Doctor's Portal</CardTitle>
-          <CardDescription>Please enter your credentials to access the dashboard.</CardDescription>
+          <CardTitle className="text-2xl">Doctor Sign-up</CardTitle>
+          <CardDescription>Create a new account to manage your patients.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                        <Input type="text" placeholder="Dr. Jane Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
                <FormField
                 control={form.control}
                 name="email"
@@ -108,21 +128,18 @@ export default function DoctorLoginPage() {
                 {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing In...
+                      Creating Account...
                     </>
                   ) : (
-                    'Sign In'
+                    'Sign Up'
                   )}
               </Button>
             </form>
           </Form>
         </CardContent>
-         <CardFooter className="flex flex-col justify-center text-xs gap-4">
-            <Link href="/doctor/signup" className="text-muted-foreground hover:text-primary">
-                Don't have an account? Sign up here.
-            </Link>
-            <Link href="/" className="text-muted-foreground hover:text-primary">
-                Are you a patient? Log in here.
+         <CardFooter className="flex justify-center text-xs">
+            <Link href="/doctor/login" className="text-muted-foreground hover:text-primary">
+                Already have an account? Log in here.
             </Link>
         </CardFooter>
       </Card>

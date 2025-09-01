@@ -24,14 +24,14 @@ import { addPatient, deletePatient, getPatients, updatePatient } from '@/lib/fir
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { TitleBar } from '@/components/title-bar';
-import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { useApp } from '@/context/app-context';
+import { Loader2 } from 'lucide-react';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
-    const doctorName = 'Dr. Badhrinathan N';
-    const doctorEmail = 'drbadhri@gmail.com';
+    const { doctor, isDoctorLoggedIn, isClient } = useApp();
     const [patients, setPatients] = React.useState<Patient[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
@@ -42,9 +42,10 @@ export default function DoctorDashboardPage() {
 
 
     const fetchPatients = React.useCallback(async () => {
+        if (!doctor?.uid) return;
         setIsLoading(true);
         try {
-            const fetchedPatients = await getPatients();
+            const fetchedPatients = await getPatients(doctor.uid);
             setPatients(fetchedPatients);
         } catch (error) {
             console.error("Failed to fetch patients from Firestore", error);
@@ -56,11 +57,15 @@ export default function DoctorDashboardPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast]);
+    }, [toast, doctor]);
 
     React.useEffect(() => {
-        fetchPatients();
-    }, [fetchPatients]);
+        if (isClient && isDoctorLoggedIn && doctor?.uid) {
+            fetchPatients();
+        } else if (isClient && !isDoctorLoggedIn) {
+            router.replace('/doctor/login');
+        }
+    }, [fetchPatients, isClient, isDoctorLoggedIn, doctor, router]);
     
     // Re-fetch data when the page is focused
     React.useEffect(() => {
@@ -100,6 +105,7 @@ export default function DoctorDashboardPage() {
     }
 
     const handleFormSubmit = async (data: PatientFormData) => {
+        if (!doctor) return;
         setIsSubmitting(true);
         const patientData = {
             name: data.name,
@@ -118,7 +124,7 @@ export default function DoctorDashboardPage() {
                     description: `${updatedPatient.name}'s details have been updated.`,
                 });
             } else {
-                 const newPatient = await addPatient(patientData);
+                 const newPatient = await addPatient(patientData, doctor.uid, doctor.name);
                 toast({
                     title: 'Patient Added',
                     description: `${newPatient.name} has been successfully added.`,
@@ -162,10 +168,18 @@ export default function DoctorDashboardPage() {
         );
     });
 
+    if (!isClient || !doctor) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        )
+    }
+
   return (
     <TooltipProvider>
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <TitleBar doctorName={doctorName} doctorEmail={doctorEmail} />
+       <TitleBar doctorName={doctor.name} doctorEmail={doctor.email} />
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
             {isFormOpen ? (

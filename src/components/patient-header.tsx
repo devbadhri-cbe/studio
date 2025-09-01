@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -20,12 +21,29 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export function PatientHeader() {
-  const { profile, isDoctorLoggedIn } = useApp();
-  const doctorPhoneNumber = '+919791377716';
-
+  const { profile, isDoctorLoggedIn, doctor } = useApp();
+  const { toast } = useToast();
+  
   const pageTitle = isDoctorLoggedIn
     ? `${profile.name}'s Dashboard`
     : `Welcome, ${profile.name || 'User'}!`;
+  
+  const handleContactDoctor = (method: 'whatsapp' | 'sms') => {
+      if (!doctor?.uid) {
+          toast({
+              variant: 'destructive',
+              title: 'Doctor Information Missing',
+              description: 'Could not find contact information for your doctor.'
+          });
+          return;
+      }
+      // This is a placeholder. In a real app you'd fetch the doctor's phone number.
+      // For now, we'll use a placeholder and show a toast.
+      toast({
+          title: 'Contact Feature Placeholder',
+          description: `This would open ${method} to contact ${profile.doctorName || 'your doctor'}.`
+      })
+  }
     
   return (
     <Card>
@@ -35,23 +53,23 @@ export function PatientHeader() {
                 <h1 className="text-2xl md:text-3xl font-semibold font-headline">
                     {pageTitle}
                 </h1>
-                <p className="text-sm text-muted-foreground">Your health overview. Consult your doctor before making any decisions.</p>
+                <p className="text-sm text-muted-foreground">Your health overview. Consult {profile.doctorName || 'your doctor'} before making any decisions.</p>
             </div>
             <div className="flex w-full flex-wrap justify-center md:justify-start gap-2">
-                {!isDoctorLoggedIn && (
+                {!isDoctorLoggedIn && profile.doctorName && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
                                 <MessageSquareText className="mr-2 h-4 w-4" />
-                                Contact Doctor
+                                Contact {profile.doctorName}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuItem onSelect={() => window.open(`https://wa.me/${doctorPhoneNumber.replace(/\D/g, '')}`, '_blank')}>
+                            <DropdownMenuItem onSelect={() => handleContactDoctor('whatsapp')}>
                                 <WhatsAppIcon className="w-4 h-4 mr-2" />
                                 <span>WhatsApp</span>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => window.open(`sms:${doctorPhoneNumber.replace(/\D/g, '')}`)}>
+                            <DropdownMenuItem onSelect={() => handleContactDoctor('sms')}>
                                 <MessageSquareText className="w-4 h-4 mr-2" />
                                 <span>SMS / iMessage</span>
                             </DropdownMenuItem>

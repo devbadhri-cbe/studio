@@ -4,6 +4,12 @@ import { Timestamp } from "firebase/firestore";
 
 export type UnitSystem = 'metric' | 'imperial';
 
+export interface Doctor {
+  uid: string;
+  name: string;
+  email: string;
+}
+
 export interface MedicalCondition {
   id: string;
   date: string; // Stored as 'YYYY-MM-DD' string
@@ -49,6 +55,8 @@ export interface UserProfile {
   medication: Medication[];
   bmi?: number;
   enabledDashboards?: string[];
+  doctorId?: string; // Link to the doctor
+  doctorName?: string;
 }
 
 export interface Hba1cRecord {
@@ -203,4 +211,6 @@ export interface Patient {
   presentMedicalConditions: MedicalCondition[];
   dashboardSuggestions: DashboardSuggestion[];
   enabledDashboards: string[];
+  doctorId?: string; // Link to the doctor who created this patient
+  doctorName?: string;
 }

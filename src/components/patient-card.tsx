@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { SharePatientAccessDialog } from './share-patient-access-dialog';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { useApp } from '@/context/app-context';
 
 
 interface PatientCardProps {
@@ -57,6 +58,7 @@ const statusDescriptions: Record<Patient['status'], string> = {
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { doctor } = useApp();
   const statusVariant = getStatusVariant(patient.status);
   const age = calculateAge(patient.dob);
   const country = countries.find(c => c.code === patient.country);
@@ -77,7 +79,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   };
 
   const handleContact = (method: 'whatsapp' | 'sms' | 'email') => {
-    const doctorName = 'Dr. Badhrinathan N';
+    const doctorName = doctor?.name || "your doctor";
     switch (method) {
         case 'whatsapp':
             if (!patient.phone) {

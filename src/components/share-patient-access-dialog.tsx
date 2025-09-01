@@ -23,6 +23,7 @@ import {
 } from './ui/dropdown-menu';
 import { Input } from './ui/input';
 import { Separator } from './ui/separator';
+import { useApp } from '@/context/app-context';
 
 // A simple SVG for WhatsApp icon
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -43,6 +44,7 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
   const [loginPageLink, setLoginPageLink] = React.useState('');
   const qrRef = React.useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { doctor } = useApp();
 
   React.useEffect(() => {
     if (open && typeof window !== 'undefined') {
@@ -115,7 +117,7 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
                 return;
             }
             const subject = `Your Health Guardian Dashboard Access`;
-            const body = `Hello ${patient.name},\n\nYou can access your Health Guardian dashboard via this link:\n\n${dashboardLink}\n\nAlternatively, you can scan the QR code (if attached) or use your Patient ID on the main login page.\n\nBest,\n${'Dr. Badhrinathan N'}`;
+            const body = `Hello ${patient.name},\n\nYou can access your Health Guardian dashboard via this link:\n\n${dashboardLink}\n\nAlternatively, you can scan the QR code (if attached) or use your Patient ID on the main login page.\n\nBest,\n${doctor?.name || 'Your Doctor'}`;
             window.location.href = `mailto:${patient.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         }
     },

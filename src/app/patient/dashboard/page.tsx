@@ -42,7 +42,7 @@ import { DoctorReviewCard } from '@/components/doctor-review-card';
 
 
 export default function PatientDashboard() {
-  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctorName, profile, setProfile, dashboardSuggestions } = useApp();
+  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, doctor, profile, setProfile, dashboardSuggestions } = useApp();
   const router = useRouter();
   const isMobile = useIsMobile();
   const [shouldAnimate, setShouldAnimate] = React.useState(false);
@@ -128,23 +128,25 @@ export default function PatientDashboard() {
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
-         <TitleBar doctorName={doctorName} doctorEmail={'drbadhri@gmail.com'}>
-            {isDoctorLoggedIn && (
-                 <div className="absolute top-4 left-4">
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                        <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="ghost">
-                            <ArrowLeft className="h-4 w-4" />
-                            <span className="sr-only">Back to Patient List</span>
-                        </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                        <p>Patient List</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </div>
-            )}
-         </TitleBar>
+         {doctor && (
+            <TitleBar doctorName={doctor.name} doctorEmail={doctor.email}>
+                {isDoctorLoggedIn && (
+                    <div className="absolute top-4 left-4">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                            <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="ghost">
+                                <ArrowLeft className="h-4 w-4" />
+                                <span className="sr-only">Back to Patient List</span>
+                            </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                            <p>Patient List</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </div>
+                )}
+            </TitleBar>
+         )}
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}

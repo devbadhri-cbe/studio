@@ -7,28 +7,34 @@ import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import PatientLoginPage from './patient/login/page';
+import { getDoctor } from '@/lib/firestore';
 
 export default function AppRootPage() {
-  const { isClient, setIsDoctorLoggedIn } = useApp();
+  const { isClient, setDoctor } = useApp();
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    // This handles the case where a doctor is logged in via Firebase Auth
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setIsDoctorLoggedIn(true);
-        // If a doctor is logged in, always redirect to their dashboard
-        router.replace('/doctor/dashboard');
+        // User is signed in, check if they are a doctor
+        const doctor = await getDoctor(user.uid);
+        if (doctor) {
+          setDoctor(doctor);
+          router.replace('/doctor/dashboard');
+        } else {
+          // Not a doctor, treat as logged out from doctor portal
+          setIsLoading(false);
+        }
       } else {
-        setIsDoctorLoggedIn(false);
-        // If no doctor is logged in, we can stop loading and show the patient login page.
+        // No user is signed in
+        setDoctor(null);
         setIsLoading(false);
       }
     });
 
     return () => unsubscribe();
-  }, [router, setIsDoctorLoggedIn]);
+  }, [router, setDoctor]);
   
 
   if (!isClient || isLoading) {
