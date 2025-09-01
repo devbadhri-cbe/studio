@@ -168,13 +168,21 @@ const processPatientDoc = (doc: any): Patient => {
 
 
 export async function getPatients(doctorId: string): Promise<Patient[]> {
-  const q = query(
-    collection(db, PATIENTS_COLLECTION),
-    where('doctorId', '==', doctorId),
-    orderBy('name', 'asc')
-  );
+  // WORKAROUND: Firestore requires an index for this query. 
+  // Fetching all and filtering on the client avoids this for now.
+  // This is not scalable for a large number of patients.
+  // const q = query(
+  //   collection(db, PATIENTS_COLLECTION),
+  //   where('doctorId', '==', doctorId),
+  //   orderBy('name', 'asc')
+  // );
+  
+  const q = query(collection(db, PATIENTS_COLLECTION), orderBy('name', 'asc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(processPatientDoc);
+  const allPatients = snapshot.docs.map(processPatientDoc);
+  
+  // Filter on the client-side
+  return allPatients.filter(p => p.doctorId === doctorId);
 }
 
 export async function getPatient(id: string): Promise<Patient | null> {
