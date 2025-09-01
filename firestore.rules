@@ -3,29 +3,20 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
+
     match /doctors/{doctorId} {
-      // A doctor can create their own document
-      allow create: if request.auth.uid == doctorId;
-      // A doctor can read their own document
-      allow get: if request.auth.uid == doctorId;
+      allow read, write: if request.auth != null && request.auth.uid == doctorId;
     }
-  
+
     match /patients/{patientId} {
-      // Allow anyone to read a patient document. Patient-level access is not secured.
-      // This is okay for this app as patient access is via a non-guessable ID.
-      // A production app would require more stringent rules.
-      allow read: if true;
+      // A doctor can GET a patient document if the patient's doctorId matches their own uid.
+      allow get: if request.auth != null && request.auth.uid == resource.data.doctorId;
       
-      // A doctor can create a patient document and must be the owner.
-      allow create: if request.auth.uid == request.resource.data.doctorId;
+      // A doctor can LIST patients. The query must be secured on the client-side.
+      allow list: if request.auth != null;
       
-      // A doctor can only update patients they own.
-      // A patient can also update their own record (for lastLogin etc).
-      allow update: if request.auth.uid == resource.data.doctorId || request.auth.uid == null;
-      
-      // A doctor can only delete patients they own.
-      allow delete: if request.auth.uid == resource.data.doctorId;
+      // Allow create/update/delete for authenticated users (doctors)
+      allow write: if request.auth != null;
     }
   }
 }
