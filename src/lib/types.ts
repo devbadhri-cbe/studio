@@ -98,9 +98,20 @@ export interface RenalRecord {
   date: Date | string;
   serumCreatinine: number;
   serumCreatinineUnits: 'mg/dL' | 'umol/L';
+  bun: number; // Blood Urea Nitrogen
   uacr: number; // Urine Albumin-to-Creatinine Ratio
   medication?: string;
   eGFR?: number; // Optional: to store the calculated value
+}
+
+export interface ElectrolyteRecord {
+    id: string;
+    date: Date | string;
+    sodium: number;
+    potassium: number;
+    chloride: number;
+    bicarbonate: number;
+    medication?: string;
 }
 
 
@@ -151,6 +162,7 @@ export interface Patient {
   vitaminDRecords: VitaminDRecord[];
   thyroidRecords: ThyroidRecord[];
   renalRecords: RenalRecord[];
+  electrolyteRecords: ElectrolyteRecord[];
   weightRecords: WeightRecord[];
   bloodPressureRecords: BloodPressureRecord[];
   medication: Medication[];

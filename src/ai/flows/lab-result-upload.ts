@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview This flow extracts HbA1c, Lipid Panel, Vitamin D, and Thyroid data from a lab result screenshot.
+ * @fileOverview This flow extracts biomarker data from a lab result screenshot.
  *
  * - labResultUpload - A function that handles the lab result upload process.
  * - LabResultUploadInput - The input type for the labResultUpload function.
@@ -44,9 +44,18 @@ const LabResultUploadOutputSchema = z.object({
       heartRate: z.number().optional().describe('Heart rate (pulse) in beats per minute.'),
   }).optional().describe('The blood pressure results extracted.'),
   renalPanel: z.object({
+      serumCreatinine: z.number().optional().describe('Serum Creatinine level.'),
+      serumCreatinineUnits: z.enum(['mg/dL', 'umol/L']).optional().describe('The units for Serum Creatinine.'),
+      bun: z.number().optional().describe('Blood Urea Nitrogen (BUN) level in mg/dL.'),
       egfr: z.number().optional().describe('eGFR (estimated Glomerular Filtration Rate).'),
       uacr: z.number().optional().describe('UACR (Urine Albumin-to-Creatinine Ratio).'),
   }).optional().describe('The renal panel results extracted.'),
+  electrolytes: z.object({
+      sodium: z.number().optional().describe('Sodium (Na) level in mEq/L.'),
+      potassium: z.number().optional().describe('Potassium (K) level in mEq/L.'),
+      chloride: z.number().optional().describe('Chloride (Cl) level in mEq/L.'),
+      bicarbonate: z.number().optional().describe('Bicarbonate (HCO3-) level in mEq/L.'),
+  }).optional().describe('The electrolyte panel results extracted.'),
 });
 export type LabResultUploadOutput = z.infer<typeof LabResultUploadOutputSchema>;
 
@@ -69,7 +78,8 @@ Then, scan the document for the following biomarkers. For each biomarker, extrac
 - Vitamin D (as a numerical value). Common units are ng/mL or nmol/L.
 - Thyroid Panel (TSH, T3, T4). Units for TSH are typically μIU/mL, T3 as ng/dL, and T4 as μg/dL. Ignore these units for extraction.
 - Blood Pressure (Systolic, Diastolic) and Heart Rate (Pulse). Units are typically mmHg and bpm. Ignore these units for extraction.
-- Renal Panel (eGFR, UACR).
+- Renal Panel (Serum Creatinine, eGFR, UACR, BUN). Units for BUN are typically mg/dL.
+- Electrolytes (Sodium/Na, Potassium/K, Chloride/Cl, Bicarbonate/HCO3-). Units are typically mEq/L.
 
 Return the extracted information in the specified format.
 
