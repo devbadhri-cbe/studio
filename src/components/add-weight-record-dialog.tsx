@@ -105,6 +105,8 @@ export function AddWeightRecordDialog({ children }: AddWeightRecordDialogProps) 
                 name="date"
                 label="Date"
                 control={form.control}
+                fromYear={new Date().getFullYear() - 10}
+                toYear={new Date().getFullYear()}
               />
               <FormField
                   control={form.control}

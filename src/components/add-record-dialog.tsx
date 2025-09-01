@@ -107,6 +107,8 @@ export function AddRecordDialog() {
                 name="date"
                 label="Test Date"
                 control={form.control}
+                fromYear={new Date().getFullYear() - 10}
+                toYear={new Date().getFullYear()}
               />
               <FormField
                 control={form.control}
