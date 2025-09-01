@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import {
@@ -24,18 +22,6 @@ import { calculateAge, calculateBmi, calculateEgfr } from './utils';
 
 const PATIENTS_COLLECTION = 'patients';
 const DOCTORS_COLLECTION = 'doctors';
-
-
-export async function createDoctor(uid: string, name: string, email: string) {
-    const doctorRef = doc(db, DOCTORS_COLLECTION, uid);
-    await setDoc(doctorRef, { uid, name, email });
-}
-
-export async function getDoctor(uid: string): Promise<Doctor | null> {
-    const doctorRef = doc(db, DOCTORS_COLLECTION, uid);
-    const docSnap = await getDoc(doctorRef);
-    return docSnap.exists() ? docSnap.data() as Doctor : null;
-}
 
 const getPatientStatus = (patientData: Partial<Patient>): 'On Track' | 'Needs Review' | 'Urgent' => {
   const lastHba1c = patientData.records && patientData.records.length > 0 
@@ -167,10 +153,9 @@ const processPatientDoc = (doc: any): Patient => {
 };
 
 
-export async function getPatients(doctorId: string): Promise<Patient[]> {
+export async function getPatients(): Promise<Patient[]> {
   const q = query(
     collection(db, PATIENTS_COLLECTION),
-    where('doctorId', '==', doctorId),
     orderBy('name', 'asc')
   );
   
@@ -191,7 +176,7 @@ export async function getPatient(id: string): Promise<Patient | null> {
   }
 }
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastHba1c' | 'lastLipid'>, doctorId: string, doctorName: string): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastHba1c' | 'lastLipid'>, doctorId?: string, doctorName?: string): Promise<Patient> {
     const docData = {
         ...patientData,
         doctorId,

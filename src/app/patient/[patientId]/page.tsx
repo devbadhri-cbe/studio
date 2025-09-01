@@ -1,29 +1,19 @@
-
 'use client';
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { useParams, useRouter } from 'next/navigation';
 import PatientDashboard from '@/app/patient/dashboard/page';
-import { getPatient, updatePatient } from '@/lib/firestore';
+import { getPatient } from '@/lib/firestore';
 import { Button } from '@/components/ui/button';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 
 export default function PatientDashboardPage() {
-    const { setPatientData, isDoctorLoggedIn, setIsDoctorLoggedIn, isClient } = useApp();
+    const { setPatientData, isClient } = useApp();
     const router = useRouter();
     const params = useParams();
     const patientId = params.patientId as string;
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
-
-    React.useEffect(() => {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-          setIsDoctorLoggedIn(!!user);
-      });
-      return () => unsubscribe();
-    }, [setIsDoctorLoggedIn]);
 
     React.useEffect(() => {
         if (!patientId || !isClient) return;
@@ -35,22 +25,16 @@ export default function PatientDashboardPage() {
             try {
                 const patient = await getPatient(patientId);
                 if (patient) {
-                    // For both doctors and patients, set the patient data
                     setPatientData(patient);
-
-                    // For patients, set their "logged in" state in localStorage
-                    if (!isDoctorLoggedIn) {
-                         localStorage.setItem('patient_id', patient.id);
-                         // await updatePatient(patient.id, { lastLogin: new Date().toISOString() });
-                    }
+                    localStorage.setItem('patient_id', patient.id);
                 } else {
                     setError(`No patient found with ID ${patientId}. Please check the link.`);
-                    if (!isDoctorLoggedIn) localStorage.removeItem('patient_id');
+                    localStorage.removeItem('patient_id');
                 }
             } catch (e) {
                 console.error("Failed to load patient data:", e);
                 setError('Could not load patient dashboard. Please try again or contact your doctor.');
-                if (!isDoctorLoggedIn) localStorage.removeItem('patient_id');
+                localStorage.removeItem('patient_id');
             } finally {
                 setIsLoading(false);
             }
@@ -58,7 +42,7 @@ export default function PatientDashboardPage() {
 
         loadData();
 
-    }, [patientId, setPatientData, router, isDoctorLoggedIn, isClient]);
+    }, [patientId, setPatientData, router, isClient]);
 
     if (isLoading) {
         return (

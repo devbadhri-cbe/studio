@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -14,10 +13,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { useApp } from '@/context/app-context';
-import { getDoctor } from '@/lib/firestore';
 
 const FormSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -27,7 +22,6 @@ const FormSchema = z.object({
 export default function DoctorLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { setDoctor } = useApp();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -40,28 +34,14 @@ export default function DoctorLoginPage() {
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-      const doctor = await getDoctor(userCredential.user.uid);
-      if (doctor) {
-        setDoctor(doctor);
+    // This is a placeholder for actual authentication
+    setTimeout(() => {
         toast({
-          title: 'Login Successful',
-          description: `Welcome, ${doctor.name}! Redirecting to your dashboard...`,
+            title: 'Login Successful',
+            description: "Welcome, Doctor! Redirecting to your dashboard...",
         });
         router.push('/doctor/dashboard');
-      } else {
-        throw new Error("Doctor data not found in Firestore.");
-      }
-    } catch (error) {
-      console.error("Firebase Auth Error:", error);
-      toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: 'The email or password you entered is incorrect. Please try again.',
-      });
-      setIsSubmitting(false);
-    }
+    }, 1000);
   };
 
   return (
@@ -118,9 +98,6 @@ export default function DoctorLoginPage() {
           </Form>
         </CardContent>
          <CardFooter className="flex flex-col justify-center text-xs gap-4">
-            <Link href="/doctor/signup" className="text-muted-foreground hover:text-primary">
-                Don't have an account? Sign up here.
-            </Link>
             <Link href="/" className="text-muted-foreground hover:text-primary">
                 Are you a patient? Log in here.
             </Link>

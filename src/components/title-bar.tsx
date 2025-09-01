@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Logo } from '@/components/logo';
@@ -6,7 +5,6 @@ import { Mail, LogOut } from 'lucide-react';
 import * as React from 'react';
 import { ThemeToggle } from './theme-toggle';
 import { Button } from './ui/button';
-import { auth } from '@/lib/firebase';
 import { useApp } from '@/context/app-context';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -24,21 +22,12 @@ export function TitleBar({ doctorName, doctorEmail, children }: TitleBarProps) {
     const { toast } = useToast();
 
     const handleSignOut = async () => {
-        try {
-            await auth.signOut();
-            setDoctor(null);
-            toast({
-                title: 'Signed Out',
-                description: 'You have been successfully signed out.',
-            });
-            router.push('/doctor/login');
-        } catch (error) {
-            toast({
-                variant: 'destructive',
-                title: 'Sign Out Failed',
-                description: 'There was an error signing you out. Please try again.',
-            })
-        }
+        setDoctor(null);
+        toast({
+            title: 'Signed Out',
+            description: 'You have been successfully signed out.',
+        });
+        router.push('/doctor/login');
     };
 
     return (

@@ -1,10 +1,9 @@
-
 'use client';
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Search, UserPlus } from 'lucide-react';
+import { Search, UserPlus, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Patient } from '@/lib/types';
 import {
@@ -31,7 +30,7 @@ import { Loader2 } from 'lucide-react';
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
-    const { doctor, isDoctorLoggedIn, isClient } = useApp();
+    const { doctor, isDoctorLoggedIn, isClient, setPatientData } = useApp();
     const [patients, setPatients] = React.useState<Patient[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
@@ -42,10 +41,9 @@ export default function DoctorDashboardPage() {
 
 
     const fetchPatients = React.useCallback(async () => {
-        if (!doctor?.uid) return;
         setIsLoading(true);
         try {
-            const fetchedPatients = await getPatients(doctor.uid);
+            const fetchedPatients = await getPatients();
             setPatients(fetchedPatients);
         } catch (error) {
             console.error("Failed to fetch patients from Firestore", error);
@@ -57,15 +55,13 @@ export default function DoctorDashboardPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast, doctor]);
+    }, [toast]);
 
     React.useEffect(() => {
-        if (isClient && isDoctorLoggedIn && doctor?.uid) {
+        if (isClient) {
             fetchPatients();
-        } else if (isClient && !isDoctorLoggedIn) {
-            router.replace('/doctor/login');
         }
-    }, [fetchPatients, isClient, isDoctorLoggedIn, doctor, router]);
+    }, [fetchPatients, isClient]);
     
     // Re-fetch data when the page is focused
     React.useEffect(() => {
@@ -82,6 +78,7 @@ export default function DoctorDashboardPage() {
 
 
     const viewPatientDashboard = (patient: Patient) => {
+        setPatientData(patient);
         router.push(`/patient/${patient.id}`);
     }
     
@@ -105,7 +102,6 @@ export default function DoctorDashboardPage() {
     }
 
     const handleFormSubmit = async (data: PatientFormData) => {
-        if (!doctor) return;
         setIsSubmitting(true);
         const patientData = {
             name: data.name,
@@ -124,7 +120,7 @@ export default function DoctorDashboardPage() {
                     description: `${updatedPatient.name}'s details have been updated.`,
                 });
             } else {
-                 const newPatient = await addPatient(patientData, doctor.uid, doctor.name);
+                 const newPatient = await addPatient(patientData, doctor?.uid, doctor?.name);
                 toast({
                     title: 'Patient Added',
                     description: `${newPatient.name} has been successfully added.`,
@@ -168,23 +164,21 @@ export default function DoctorDashboardPage() {
         );
     });
 
-    if (!isClient || !doctor) {
-        return (
-            <div className="flex h-screen items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-        )
-    }
-
   return (
     <TooltipProvider>
     <div className="flex min-h-screen w-full flex-col bg-background">
-       <TitleBar doctorName={doctor.name} doctorEmail={doctor.email} />
+       <TitleBar doctorName={doctor?.name || ''} doctorEmail={doctor?.email || ''} />
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto w-full max-w-7xl">
             {isFormOpen ? (
                 <Card className="max-w-[800px] mx-auto">
-                    <CardContent className="p-6">
+                     <CardHeader>
+                        <CardTitle>{editingPatient ? 'Edit Patient' : 'Add New Patient'}</CardTitle>
+                        <CardDescription>
+                            {editingPatient ? "Update the patient's details below." : "Enter the new patient's information to get started."}
+                        </CardDescription>
+                     </CardHeader>
+                    <CardContent className="p-6 pt-0">
                          <PatientForm 
                             patient={editingPatient ?? undefined}
                             onSubmit={handleFormSubmit} 
