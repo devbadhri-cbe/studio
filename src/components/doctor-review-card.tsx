@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { AlertTriangle, Check, GaugeCircle, GitMerge, Info, X } from 'lucide-react';
+import { AlertTriangle, Check, GitMerge, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import type { DashboardSuggestion } from '@/lib/types';
@@ -51,6 +51,7 @@ export function DoctorReviewCard() {
                 <div key={condition.id} className="flex flex-col sm:flex-row sm:items-center gap-2 rounded-md border bg-background p-3">
                     <div className="flex-1">
                         <p className="font-semibold">{condition.condition}</p>
+                        {condition.icdCode && <p className="text-xs text-muted-foreground">Suggested ICD-11: {condition.icdCode}</p>}
                         <p className="text-sm text-muted-foreground">Patient added on {formatDate(condition.date)}</p>
                          {suggestion && (
                             <div className="flex items-center gap-2 mt-1 text-xs text-primary">
