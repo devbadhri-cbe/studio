@@ -155,6 +155,10 @@ const processPatientDoc = (doc: any): Patient => {
 
 
 export async function getPatients(doctorId: string): Promise<Patient[]> {
+  // First, "test" the connection by getting the doctor's document.
+  // This ensures the auth state is ready before the more complex query.
+  await getDoc(doc(db, DOCTORS_COLLECTION, doctorId));
+
   const q = query(
     collection(db, PATIENTS_COLLECTION),
     where('doctorId', '==', doctorId)
@@ -172,13 +176,7 @@ export async function getPatient(id: string): Promise<Patient | null> {
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
-    // This will update the lastLogin timestamp when a patient is viewed by anyone.
-    // We are keeping this simple and not distinguishing between doctor and patient views for this field.
-    // In a real-world scenario, you might have separate fields or more complex logic.
-    await updateDoc(docRef, { lastLogin: serverTimestamp() });
-    
-    const freshDoc = await getDoc(docRef);
-    return processPatientDoc(freshDoc);
+    return processPatientDoc(docSnap);
   } else {
     return null;
   }

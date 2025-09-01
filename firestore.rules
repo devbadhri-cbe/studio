@@ -1,35 +1,19 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Doctors collection
-    match /doctors/{doctor} {
-      // Anyone can create a doctor account (sign-up)
-      allow create: if true;
-      // Only the authenticated doctor can read or update their own document
-      allow read, update: if request.auth.uid == doctor;
+    match /doctors/{doctorId} {
+      // Allow a doctor to create their own document and read it.
+      allow read: if request.auth != null && request.auth.uid == doctorId;
+      allow create: if request.auth != null && request.auth.uid == doctorId;
     }
-    
-    // Patients collection
-    match /patients/{patientId} {
-      // Doctors can create patients
-      allow create: if request.auth != null;
-      
-      // Allow read access for the assigned doctor
-      // and for any user (for patient dashboard access via direct URL)
-      allow get: if request.auth.uid == resource.data.doctorId || request.auth == null;
 
-      // Allow a doctor to list the patients that belong to them.
-      allow list: if request.auth.uid == request.query.where.doctorId;
+    match /patients/{patientId} {
+      // Allow anyone to read a patient document. Access is controlled by the unguessable patientId.
+      allow get: if true;
       
-      // Allow updates only by the assigned doctor OR for anyone to update ONLY the lastLogin field
-      allow update: if request.auth.uid == resource.data.doctorId || 
-                      (request.auth == null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLogin']));
-      
-      // Allow deletes only by the assigned doctor
-      allow delete: if request.auth.uid == resource.data.doctorId;
+      // Allow an authenticated doctor to perform all actions on their own patients.
+      allow list, create, delete, update: if request.auth != null && request.auth.uid == resource.data.doctorId;
     }
   }
 }
