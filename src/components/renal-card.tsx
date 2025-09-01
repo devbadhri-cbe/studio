@@ -9,6 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BloodPressureChart } from './blood-pressure-chart';
 import { BloodPressureHistoryTable } from './blood-pressure-history-table';
 import { AddBloodPressureRecordDialog } from './add-blood-pressure-record-dialog';
+import { ElectrolytesChart } from './electrolytes-chart';
+import { ElectrolytesHistoryTable } from './electrolytes-history-table';
+import { AddElectrolyteRecordDialog } from './add-electrolyte-record-dialog';
 
 export function RenalCard() {
   return (
@@ -21,13 +24,15 @@ export function RenalCard() {
         <div className="ml-auto flex items-center gap-2">
           <AddRenalRecordDialog />
           <AddBloodPressureRecordDialog />
+          <AddElectrolyteRecordDialog />
         </div>
       </CardHeader>
       <CardContent className="grid gap-6 px-2 md:px-6">
         <Tabs defaultValue="renal">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="renal">Renal Function</TabsTrigger>
             <TabsTrigger value="bp">Blood Pressure</TabsTrigger>
+            <TabsTrigger value="electrolytes">Electrolytes</TabsTrigger>
           </TabsList>
           <TabsContent value="renal" className="mt-6">
              <div className="grid gap-6">
@@ -39,6 +44,12 @@ export function RenalCard() {
             <div className="grid gap-6">
               <BloodPressureChart />
               <BloodPressureHistoryTable />
+            </div>
+          </TabsContent>
+           <TabsContent value="electrolytes" className="mt-6">
+            <div className="grid gap-6">
+              <ElectrolytesChart />
+              <ElectrolytesHistoryTable />
             </div>
           </TabsContent>
         </Tabs>

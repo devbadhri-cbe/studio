@@ -56,6 +56,12 @@ const LabResultUploadOutputSchema = z.object({
       chloride: z.number().optional().describe('Chloride (Cl) level in mEq/L.'),
       bicarbonate: z.number().optional().describe('Bicarbonate (HCO3-) level in mEq/L.'),
   }).optional().describe('The electrolyte panel results extracted.'),
+  hemoglobin: z.number().optional().describe('Hemoglobin (Hb or Hgb) level in g/dL.'),
+  mineralBone: z.object({
+    calcium: z.number().optional().describe('Calcium level in mg/dL.'),
+    phosphorus: z.number().optional().describe('Phosphorus level in mg/dL.'),
+    pth: z.number().optional().describe('Parathyroid Hormone (PTH) level in pg/mL.'),
+  }).optional().describe('Mineral and bone disease markers.'),
 });
 export type LabResultUploadOutput = z.infer<typeof LabResultUploadOutputSchema>;
 
@@ -80,6 +86,8 @@ Then, scan the document for the following biomarkers. For each biomarker, extrac
 - Blood Pressure (Systolic, Diastolic) and Heart Rate (Pulse). Units are typically mmHg and bpm. Ignore these units for extraction.
 - Renal Panel (Serum Creatinine, eGFR, UACR, BUN). Units for BUN are typically mg/dL.
 - Electrolytes (Sodium/Na, Potassium/K, Chloride/Cl, Bicarbonate/HCO3-). Units are typically mEq/L.
+- Hemoglobin (Hb or Hgb). Unit is g/dL.
+- Mineral & Bone Markers: Calcium (Ca) in mg/dL, Phosphorus (PO4) in mg/dL, and Parathyroid Hormone (PTH) in pg/mL.
 
 Return the extracted information in the specified format.
 

@@ -114,6 +114,15 @@ export interface ElectrolyteRecord {
     medication?: string;
 }
 
+export interface MineralBoneDiseaseRecord {
+  id: string;
+  date: Date | string;
+  calcium: number;
+  phosphorus: number;
+  pth: number; // Parathyroid Hormone
+  medication?: string;
+}
+
 
 export interface Patient {
   id: string;
@@ -155,6 +164,10 @@ export interface Patient {
     uacr: number;
     date: string;
   } | null;
+  hemoglobin?: {
+    value: number;
+    date: string;
+  } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
   // Add full record history to the patient object
   records: Hba1cRecord[];
@@ -163,6 +176,7 @@ export interface Patient {
   thyroidRecords: ThyroidRecord[];
   renalRecords: RenalRecord[];
   electrolyteRecords: ElectrolyteRecord[];
+  mineralBoneDiseaseRecords?: MineralBoneDiseaseRecord[];
   weightRecords: WeightRecord[];
   bloodPressureRecords: BloodPressureRecord[];
   medication: Medication[];
