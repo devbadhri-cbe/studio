@@ -256,13 +256,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   
   const addMedicalCondition = async (condition: Omit<MedicalCondition, 'id' | 'status'>, isPatientAdding: boolean) => {
-    if (!condition.date || !isValid(parseISO(condition.date))) {
-        console.error("Attempted to add medical condition with invalid date", condition);
-        return;
-    }
+    const validDate = condition.date && isValid(parseISO(condition.date)) 
+        ? condition.date 
+        : new Date().toISOString();
 
     const newCondition = { 
-        ...condition, 
+        ...condition,
+        date: validDate,
         id: Date.now().toString(), 
         status: isPatientAdding ? 'pending_review' : 'verified' 
     } as MedicalCondition;

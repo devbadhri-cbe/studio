@@ -65,16 +65,32 @@ const convertTimestampsToISO = (data: any): any => {
 }
 
 const processPatientDoc = (doc: any): Patient => {
-  const data = doc.data();
+  let data = doc.data();
 
-  // Ensure all date fields in records are ISO strings
-  const records = (data.records || []).map(convertTimestampsToISO);
-  const lipidRecords = (data.lipidRecords || []).map(convertTimestampsToISO);
-  const vitaminDRecords = (data.vitaminDRecords || []).map(convertTimestampsToISO);
-  const thyroidRecords = (data.thyroidRecords || []).map(convertTimestampsToISO);
-  const weightRecords = (data.weightRecords || []).map(convertTimestampsToISO);
-  const bloodPressureRecords = (data.bloodPressureRecords || []).map(convertTimestampsToISO);
-  const renalRecords = (data.renalRecords || []).map(convertTimestampsToISO);
+  // Deep clone to avoid issues with modifying the original data object
+  data = JSON.parse(JSON.stringify(data));
+
+  // Ensure all date fields are valid ISO strings
+  const sanitizeRecords = (records: any[]) => {
+    if (!Array.isArray(records)) return [];
+    return records.map(r => {
+      if (r && r.date) {
+        const dateObj = r.date.seconds ? new Timestamp(r.date.seconds, r.date.nanoseconds).toDate() : new Date(r.date);
+        r.date = !isNaN(dateObj.getTime()) ? dateObj.toISOString() : new Date().toISOString();
+      }
+      return r;
+    });
+  }
+
+  const records = sanitizeRecords(data.records);
+  const lipidRecords = sanitizeRecords(data.lipidRecords);
+  const vitaminDRecords = sanitizeRecords(data.vitaminDRecords);
+  const thyroidRecords = sanitizeRecords(data.thyroidRecords);
+  const weightRecords = sanitizeRecords(data.weightRecords);
+  const bloodPressureRecords = sanitizeRecords(data.bloodPressureRecords);
+  const renalRecords = sanitizeRecords(data.renalRecords);
+  const presentMedicalConditions = sanitizeRecords(data.presentMedicalConditions);
+
 
   // Recalculate eGFR for all renal records
   const age = calculateAge(data.dob);
@@ -95,11 +111,14 @@ const processPatientDoc = (doc: any): Patient => {
   const latestWeight = weightRecords.length > 0 ? [...weightRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const bmi = calculateBmi(latestWeight?.value, data.height);
 
+  const dobTimestamp = data.dob && data.dob.seconds ? new Timestamp(data.dob.seconds, data.dob.nanoseconds).toDate() : new Date(data.dob);
+  const lastLoginTimestamp = data.lastLogin && data.lastLogin.seconds ? new Timestamp(data.lastLogin.seconds, data.lastLogin.nanoseconds).toDate() : (data.lastLogin ? new Date(data.lastLogin) : null);
+
   const patientData: Partial<Patient> = {
     ...data,
     id: doc.id,
-    dob: data.dob ? convertTimestampsToISO({ date: data.dob }).date : new Date().toISOString(),
-    lastLogin: data.lastLogin ? convertTimestampsToISO({ date: data.lastLogin }).date : undefined,
+    dob: !isNaN(dobTimestamp.getTime()) ? dobTimestamp.toISOString() : new Date().toISOString(),
+    lastLogin: lastLoginTimestamp && !isNaN(lastLoginTimestamp.getTime()) ? lastLoginTimestamp.toISOString() : undefined,
     records,
     lipidRecords,
     vitaminDRecords,
@@ -107,6 +126,7 @@ const processPatientDoc = (doc: any): Patient => {
     renalRecords: processedRenalRecords,
     weightRecords,
     bloodPressureRecords,
+    presentMedicalConditions,
     bmi,
   };
 
@@ -181,7 +201,7 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
         if (updateData[key] && Array.isArray(updateData[key])) {
             updateData[key] = updateData[key].map((item: any) => ({
                 ...item,
-                date: item.date && typeof item.date === 'string' ? new Date(item.date) : item.date
+                date: item.date && typeof item.date === 'string' ? new Date(item.date) : (item.date || new Date())
             }));
         }
     });
@@ -200,4 +220,3 @@ export async function deletePatient(id: string): Promise<void> {
 // in the AppContext to manage local state first, then persist the entire patient object.
 // This is more efficient than writing to Firestore for every small change.
 // The updatePatient function is the primary method for persisting any changes.
-

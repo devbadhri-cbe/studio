@@ -21,6 +21,7 @@ import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 import type { MedicalCondition } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from './ui/alert';
+import { isValid, parseISO } from 'date-fns';
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
@@ -51,6 +52,7 @@ function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave
   const handleSubmit = async (data: z.infer<typeof ConditionSchema>) => {
     setIsSubmitting(true);
     try {
+      const dateString = data.date.toISOString();
       const { icdCode, description } = await suggestIcdCode({ condition: data.condition });
       const fullIcdCode = `${icdCode}: ${description}`;
 
@@ -63,7 +65,7 @@ function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave
             description: `This condition (or a similar one with ICD-11 code ${icdCode}) already exists.`,
         });
       } else {
-         await onSave({ ...data, date: data.date.toISOString() }, fullIcdCode);
+         await onSave({ ...data, date: dateString }, fullIcdCode);
          toast({
           title: 'Condition Added',
           description: `This will be sent to your doctor for review. Suggested ICD-11 code: ${icdCode}`,
@@ -183,6 +185,7 @@ export function MedicalConditionsCard() {
                 {profile.presentMedicalConditions.length > 0 ? (
                     <ul className="space-y-1 mt-2">
                         {profile.presentMedicalConditions.map((condition) => {
+                            if (!condition || !condition.id) return null; // Safeguard against invalid condition objects
                             const statusInfo = statusConfig[condition.status] || statusConfig.pending_review;
                             const Icon = statusInfo.icon;
                             return (
