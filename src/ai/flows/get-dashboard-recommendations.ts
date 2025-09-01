@@ -5,13 +5,11 @@
  * @fileOverview Suggests a monitoring dashboard based on a medical condition.
  *
  * - getDashboardRecommendations - A function that suggests a dashboard.
- * - DashboardRecommendationInput - The input type for the function.
- * - DashboardRecommendationOutput - The return type for the function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { getBiomarkersForCondition } from './get-biomarkers-for-condition';
+import { getBiomarkersForCondition, type BiomarkersForConditionOutput } from './get-biomarkers-for-condition';
 
 const DashboardRecommendationInputSchema = z.object({
   conditionName: z.string().describe('The name of the medical condition.'),
@@ -51,23 +49,23 @@ const getDashboardRecommendationsFlow = ai.defineFlow(
         return { recommendedDashboard: 'none' };
     }
 
-    const lowerCaseBiomarkers = biomarkers.map(b => b.toLowerCase().trim());
+    const requiredBiomarkers = biomarkers.map(b => b.toLowerCase().trim());
 
     // Check if an existing dashboard covers all required biomarkers
-    for (const [dashboard, coveredBiomarkers] of Object.entries(availableDashboardBiomarkers)) {
-        const lowerCaseCovered = coveredBiomarkers.map(b => b.toLowerCase().trim());
+    for (const [dashboardKey, dashboardBiomarkers] of Object.entries(availableDashboardBiomarkers)) {
+        const dashboardBiomarkersLower = dashboardBiomarkers.map(b => b.toLowerCase().trim());
         
-        // This is a strict check: every required biomarker must be found in the dashboard's list.
-        const areAllCovered = lowerCaseBiomarkers.every(requiredBiomarker => 
-            lowerCaseCovered.some(covered => requiredBiomarker.includes(covered) || covered.includes(requiredBiomarker))
+        // Correct Logic: Check if ALL required biomarkers are covered by the current dashboard
+        const allRequiredAreCovered = requiredBiomarkers.every(req => 
+            dashboardBiomarkersLower.includes(req)
         );
 
-        if (areAllCovered) {
-            return { recommendedDashboard: dashboard as 'hba1c' | 'lipids' | 'hypertension' | 'thyroid' | 'vitaminD' };
+        if (allRequiredAreCovered) {
+            return { recommendedDashboard: dashboardKey as 'hba1c' | 'lipids' | 'hypertension' | 'thyroid' | 'vitaminD' };
         }
     }
     
-    // If no existing dashboard is sufficient, recommend a new one
+    // If no existing dashboard is sufficient after checking all of them, recommend a new one
     return {
         recommendedDashboard: 'new_dashboard_needed',
         requiredBiomarkers: biomarkers,
