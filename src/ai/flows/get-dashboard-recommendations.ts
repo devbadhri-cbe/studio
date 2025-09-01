@@ -51,13 +51,17 @@ const getDashboardRecommendationsFlow = ai.defineFlow(
         return { recommendedDashboard: 'none' };
     }
 
-    const lowerCaseBiomarkers = biomarkers.map(b => b.toLowerCase());
+    const lowerCaseBiomarkers = biomarkers.map(b => b.toLowerCase().trim());
 
     // Check if an existing dashboard covers all required biomarkers
     for (const [dashboard, coveredBiomarkers] of Object.entries(availableDashboardBiomarkers)) {
-        const areAllCovered = lowerCaseBiomarkers.every(req => 
-            coveredBiomarkers.some(avail => req.includes(avail))
+        const lowerCaseCovered = coveredBiomarkers.map(b => b.toLowerCase().trim());
+        
+        // This is a strict check: every required biomarker must be found in the dashboard's list.
+        const areAllCovered = lowerCaseBiomarkers.every(requiredBiomarker => 
+            lowerCaseCovered.includes(requiredBiomarker)
         );
+
         if (areAllCovered) {
             return { recommendedDashboard: dashboard as 'hba1c' | 'lipids' | 'hypertension' | 'thyroid' | 'vitaminD' };
         }
