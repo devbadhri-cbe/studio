@@ -173,6 +173,11 @@ export default function DoctorDashboardPage() {
             
             if (aNeedsReview && !bNeedsReview) return -1;
             if (!aNeedsReview && bNeedsReview) return 1;
+
+            const aDate = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
+            const bDate = b.lastLogin ? new Date(b.lastLogin).getTime() : 0;
+            if (aDate !== bDate) return bDate - aDate;
+            
             return a.name.localeCompare(b.name);
         });
     }, [patients, searchQuery]);
