@@ -12,7 +12,7 @@ import { ScrollArea } from './ui/scroll-area';
 
 export function BiomarkersCard() {
     return (
-        <Card className="h-full md:h-[60vh] flex flex-col">
+        <Card className="h-auto md:row-span-2 flex flex-col">
             <CardHeader className="flex flex-row items-center gap-3">
                 <Shapes className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <CardTitle>Key Biomarkers</CardTitle>
