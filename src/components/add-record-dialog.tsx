@@ -63,7 +63,7 @@ export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
     setIsSubmitting(true);
     const newDate = startOfDay(data.date);
     
-    const dateExists = hba1cRecords.some((record) => {
+    const dateExists = (hba1cRecords || []).some((record) => {
         const storedDate = startOfDay(parseISO(record.date as string));
         return storedDate.getTime() === newDate.getTime();
     });
