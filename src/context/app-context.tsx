@@ -38,6 +38,11 @@ interface AddBatchRecordsResult {
     duplicates: string[];
 }
 
+interface EnableDashboardResult {
+  alreadyExists: boolean;
+  name: string;
+}
+
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
@@ -103,6 +108,7 @@ interface AppContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   dashboardSuggestions: DashboardSuggestion[];
+  enableDashboard: (dashboardKey: string) => EnableDashboardResult;
   customBiomarkers: CustomBiomarker[];
   addCustomBiomarker: (name: string) => Promise<void>;
   removeCustomBiomarker: (id: string) => void;
@@ -558,6 +564,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { customBiomarkers: updatedBiomarkers });
   };
 
+  const getDashboardName = (key: string): string => {
+      const names: Record<string, string> = {
+        hba1c: 'HbA1c',
+        lipids: 'Lipid',
+        vitaminD: 'Vitamin D',
+        thyroid: 'Thyroid',
+        hypertension: 'Hypertension',
+        renal: 'Renal'
+      };
+      return names[key] || 'Unknown';
+  };
+  
+  const enableDashboard = (dashboardKey: string): EnableDashboardResult => {
+    const currentDashboards = profile.enabledDashboards || [];
+    if (currentDashboards.includes(dashboardKey)) {
+        return { alreadyExists: true, name: getDashboardName(dashboardKey) };
+    }
+    const updatedDashboards = [...currentDashboards, dashboardKey];
+    setProfileState(p => ({ ...p, enabledDashboards: updatedDashboards }));
+    updatePatientData(profile.id, { enabledDashboards: updatedDashboards });
+    return { alreadyExists: false, name: getDashboardName(dashboardKey) };
+  };
+
   const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
     const updates: Partial<Patient> = {};
@@ -775,6 +804,7 @@ anemiaRecords,
     theme,
     setTheme: setThemeState,
     dashboardSuggestions,
+    enableDashboard,
     customBiomarkers,
     addCustomBiomarker,
     removeCustomBiomarker,
