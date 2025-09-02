@@ -3,6 +3,7 @@
 
 import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface BiomarkerCardTemplateProps {
   title: string;
@@ -11,6 +12,7 @@ interface BiomarkerCardTemplateProps {
   recordsList: React.ReactNode;
   statusDisplay: React.ReactNode;
   chart: React.ReactNode;
+  className?: string;
 }
 
 export function BiomarkerCardTemplate({
@@ -20,9 +22,10 @@ export function BiomarkerCardTemplate({
   recordsList,
   statusDisplay,
   chart,
+  className
 }: BiomarkerCardTemplateProps) {
   return (
-    <Card className="w-full flex flex-col">
+    <Card className={cn("w-full flex flex-col", className)}>
       <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
         {/* 1. Heading with action button */}
         <div className="flex items-center justify-between">
