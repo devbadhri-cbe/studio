@@ -39,11 +39,11 @@ export function BiomarkerCardTemplate({
         </div>
 
         {/* 2. Records and Status in a horizontal grid */}
-        <div className="flex border border-blue-500 rounded-md">
-          <div className="border-r rounded-l-md p-2 flex flex-1 items-center justify-center min-h-[140px]">
+        <div className="flex border border-blue-500 rounded-md flex-1 min-h-0">
+          <div className="border-r rounded-l-md p-2 flex flex-1 items-center justify-center">
             {recordsList}
           </div>
-          <div className="p-2 flex flex-1 items-center justify-center min-h-[140px]">
+          <div className="p-2 flex flex-1 items-center justify-center">
             {statusDisplay}
           </div>
         </div>
