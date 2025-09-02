@@ -19,9 +19,10 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useApp } from '@/context/app-context';
 import { Loader2 } from 'lucide-react';
+import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
 
 const FormSchema = z.object({
-  name: z.string().min(2, { message: 'Biomarker name is required.' }),
+  name: z.string().min(2, { message: 'Biomarker or condition name is required.' }),
 });
 
 interface CreateBiomarkerDialogProps {
@@ -31,7 +32,7 @@ interface CreateBiomarkerDialogProps {
 
 export function CreateBiomarkerDialog({ open, onOpenChange }: CreateBiomarkerDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addCustomBiomarker, customBiomarkers } = useApp();
+  const { addCustomBiomarker, customBiomarkers, enableDashboard } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -47,33 +48,49 @@ export function CreateBiomarkerDialog({ open, onOpenChange }: CreateBiomarkerDia
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
-    const existingBiomarker = customBiomarkers.find(
-      (b) => b.name.toLowerCase() === data.name.toLowerCase()
-    );
-
-    if (existingBiomarker) {
-      toast({
-        variant: 'destructive',
-        title: 'Duplicate Biomarker',
-        description: `A biomarker named "${data.name}" already exists.`,
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
-      await addCustomBiomarker(data.name);
-      toast({
-        title: 'Biomarker Created',
-        description: `The "${data.name}" card has been added to your dashboard.`,
-      });
+      const { recommendedDashboard } = await getDashboardRecommendations({ conditionName: data.name });
+
+      if (recommendedDashboard !== 'none') {
+        const result = enableDashboard(recommendedDashboard);
+        if (result.alreadyExists) {
+            toast({
+                variant: 'default',
+                title: 'Dashboard Already Enabled',
+                description: `The ${result.name} dashboard is already on your patient view.`,
+            });
+        } else {
+             toast({
+                title: 'Dashboard Enabled',
+                description: `The ${result.name} dashboard has been added to your view.`,
+            });
+        }
+      } else {
+        const existingBiomarker = customBiomarkers.find(
+          (b) => b.name.toLowerCase() === data.name.toLowerCase()
+        );
+
+        if (existingBiomarker) {
+          toast({
+            variant: 'destructive',
+            title: 'Duplicate Biomarker',
+            description: `A custom biomarker named "${data.name}" already exists.`,
+          });
+        } else {
+           await addCustomBiomarker(data.name);
+            toast({
+                title: 'Biomarker Created',
+                description: `The "${data.name}" card has been added to your dashboard.`,
+            });
+        }
+      }
       onOpenChange(false);
     } catch (error) {
-      console.error('Failed to create biomarker', error);
+      console.error('Failed to create biomarker or enable dashboard', error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Could not create the new biomarker.',
+        description: 'Could not perform the requested action.',
       });
     } finally {
       setIsSubmitting(false);
@@ -84,9 +101,9 @@ export function CreateBiomarkerDialog({ open, onOpenChange }: CreateBiomarkerDia
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Biomarker</DialogTitle>
+          <DialogTitle>Add Dashboard or Biomarker</DialogTitle>
           <DialogDescription>
-            Enter a name for the new biomarker card you want to add to your dashboard.
+            Enter a condition (e.g., "Diabetes") to add a relevant dashboard, or a biomarker name to create a custom card.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -96,18 +113,19 @@ export function CreateBiomarkerDialog({ open, onOpenChange }: CreateBiomarkerDia
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Biomarker Name</FormLabel>
+                  <FormLabel>Condition or Biomarker Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Uric Acid" {...field} />
+                    <Input placeholder="e.g., HbA1c, Diabetes..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Card
+                Add to Dashboard
               </Button>
             </DialogFooter>
           </form>

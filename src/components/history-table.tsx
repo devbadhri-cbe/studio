@@ -30,14 +30,14 @@ import { format } from 'date-fns';
 const RECORDS_PER_PAGE = 5;
 
 export function HistoryTable() {
-  const { records, removeRecord } = useApp();
+  const { hba1cRecords, removeHba1cRecord } = useApp();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [selectedRecord, setSelectedRecord] = React.useState<Hba1cRecord | null>(null);
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
-    return [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [records]);
+    return [...(hba1cRecords || [])].sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime());
+  }, [hba1cRecords]);
 
   const totalPages = Math.ceil(sortedRecords.length / RECORDS_PER_PAGE);
   
@@ -114,7 +114,7 @@ export function HistoryTable() {
                                 <Eye className="mr-2 h-4 w-4" />
                                 View Medication
                              </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => removeRecord(record.id)}>Delete</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => removeHba1cRecord(record.id)}>Delete</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

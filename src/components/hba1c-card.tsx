@@ -15,13 +15,13 @@ import { AddRecordDialog } from './add-record-dialog';
 import { Hba1cChart } from './hba1c-chart';
 
 export function Hba1cCard() {
-  const { records, removeRecord } = useApp();
+  const { hba1cRecords, removeHba1cRecord } = useApp();
   const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
-    return [...(records || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
-  }, [records]);
+    return [...(hba1cRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
+  }, [hba1cRecords]);
   
   const getStatus = (value: number) => {
     if (value < 4.0) return { text: 'Low', variant: 'default' as const };
@@ -64,7 +64,7 @@ export function Hba1cCard() {
                   <div className="flex items-center shrink-0">
                   <Tooltip>
                       <TooltipTrigger asChild>
-                      <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeRecord(record.id)}>
+                      <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeHba1cRecord(record.id)}>
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
                       </TooltipTrigger>
@@ -97,9 +97,7 @@ export function Hba1cCard() {
     </div>
   );
 
-  const Chart = (
-    <Hba1cChart />
-  );
+  const Chart = <Hba1cChart />;
   
   return (
     <BiomarkerCardTemplate

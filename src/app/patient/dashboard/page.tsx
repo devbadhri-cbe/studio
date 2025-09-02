@@ -28,10 +28,11 @@ import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
 import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
 import { BiomarkersCard } from '@/components/biomarkers-card';
+import { Hba1cCard } from '@/components/hba1c-card';
 
 
 export default function PatientDashboard() {
-  const { isClient, isDoctorLoggedIn, profile, dashboardSuggestions } = useApp();
+  const { isClient, isDoctorLoggedIn, profile, dashboardSuggestions, enabledDashboards } = useApp();
   const router = useRouter();
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
@@ -130,11 +131,12 @@ export default function PatientDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <BiomarkersCard />
-                 <LipidCard />
-                 <VitaminDCard />
-                 <ThyroidCard />
-                 <HypertensionCard />
-                 <RenalCard />
+                 {enabledDashboards?.includes('hba1c') && <Hba1cCard />}
+                 {enabledDashboards?.includes('lipids') && <LipidCard />}
+                 {enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
+                 {enabledDashboards?.includes('thyroid') && <ThyroidCard />}
+                 {enabledDashboards?.includes('hypertension') && <HypertensionCard />}
+                 {enabledDashboards?.includes('renal') && <RenalCard />}
             </div>
 
             <Separator />

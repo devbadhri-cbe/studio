@@ -39,7 +39,7 @@ interface AddRecordDialogProps {
 export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addRecord, records } = useApp();
+  const { addHba1cRecord, hba1cRecords } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -63,7 +63,7 @@ export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
     setIsSubmitting(true);
     const newDate = startOfDay(data.date);
     
-    const dateExists = records.some((record) => {
+    const dateExists = hba1cRecords.some((record) => {
         const storedDate = startOfDay(parseISO(record.date as string));
         return storedDate.getTime() === newDate.getTime();
     });
@@ -79,7 +79,7 @@ export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
     }
     
     try {
-        addRecord({
+        addHba1cRecord({
           date: newDate.toISOString(),
           value: data.value,
         });
