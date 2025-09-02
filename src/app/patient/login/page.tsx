@@ -105,7 +105,7 @@ export default function PatientLoginPage() {
           </Form>
         </CardContent>
         <CardFooter className="flex justify-center text-xs">
-            <Link href="/doctor/login" className="text-muted-foreground hover:text-primary">
+            <Link href="/doctor/dashboard" className="text-muted-foreground hover:text-primary">
                 Are you a doctor? Log in here.
             </Link>
         </CardFooter>
