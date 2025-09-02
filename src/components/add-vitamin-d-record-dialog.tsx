@@ -21,9 +21,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { toNgDl } from '@/lib/unit-conversions';
-import { Label } from './ui/label';
-import { Switch } from './ui/switch';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
 
@@ -32,15 +29,17 @@ const FormSchema = z.object({
   value: z.coerce.number().min(1, 'Value is required.'),
 });
 
-type VitaminDUnit = 'conventional' | 'si';
+interface AddVitaminDRecordDialogProps {
+    children?: React.ReactNode;
+    onSuccess?: () => void;
+}
 
-export function AddVitaminDRecordDialog() {
+export function AddVitaminDRecordDialog({ children, onSuccess }: AddVitaminDRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const { addVitaminDRecord, profile, vitaminDRecords, biomarkerUnit } = useApp();
+  const { addVitaminDRecord, vitaminDRecords, biomarkerUnit, getDbVitaminDValue } = useApp();
   const { toast } = useToast();
-  const [inputUnit, setInputUnit] = React.useState<VitaminDUnit>(biomarkerUnit);
 
-  const getUnitLabel = (unit: VitaminDUnit) => (unit === 'si' ? 'nmol/L' : 'ng/mL');
+  const getUnitLabel = (unit: 'conventional' | 'si') => (unit === 'si' ? 'nmol/L' : 'ng/mL');
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -52,7 +51,6 @@ export function AddVitaminDRecordDialog() {
 
   React.useEffect(() => {
     if (open) {
-      setInputUnit(biomarkerUnit);
       form.reset({
         date: new Date(),
         value: '' as any,
@@ -77,7 +75,7 @@ export function AddVitaminDRecordDialog() {
       return;
     }
     
-    const dbValue = inputUnit === 'si' ? toNgDl(data.value) : data.value;
+    const dbValue = getDbVitaminDValue(data.value);
 
     addVitaminDRecord({
       date: newDate.toISOString(),
@@ -88,24 +86,15 @@ export function AddVitaminDRecordDialog() {
       description: 'Your new Vitamin D record has been added.',
     });
     setOpen(false);
+    onSuccess?.();
   };
 
-  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication || profile.medication.length === 0) {
-      e.preventDefault();
-      toast({
-        variant: 'destructive',
-        title: 'Medication Required',
-        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
-      });
-    }
-  };
+  const triggerButton = children || <AddRecordButton tooltipContent="Add Vitamin D Record" />;
 
   return (
-    <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-           <AddRecordButton tooltipContent="Add Vitamin D Record" onClick={handleTriggerClick} />
+           {triggerButton}
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -114,15 +103,6 @@ export function AddVitaminDRecordDialog() {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-               <div className="flex items-center space-x-2">
-                <Label htmlFor="unit-switch">ng/mL</Label>
-                <Switch
-                    id="unit-switch"
-                    checked={inputUnit === 'si'}
-                    onCheckedChange={(checked) => setInputUnit(checked ? 'si' : 'conventional')}
-                />
-                <Label htmlFor="unit-switch">nmol/L</Label>
-              </div>
               <FormField
                 control={form.control}
                 name="date"
@@ -146,9 +126,9 @@ export function AddVitaminDRecordDialog() {
                 name="value"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Vitamin D ({getUnitLabel(inputUnit)})</FormLabel>
+                    <FormLabel>Vitamin D ({getUnitLabel(biomarkerUnit)})</FormLabel>
                     <FormControl>
-                      <Input type="number" step="any" placeholder={inputUnit === 'si' ? "e.g., 75" : "e.g., 30"} {...field} />
+                      <Input type="number" step="any" placeholder={biomarkerUnit === 'si' ? "e.g., 75" : "e.g., 30"} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -161,6 +141,5 @@ export function AddVitaminDRecordDialog() {
           </Form>
         </DialogContent>
       </Dialog>
-    </>
   );
 }

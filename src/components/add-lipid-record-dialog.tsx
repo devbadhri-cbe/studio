@@ -21,9 +21,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { Switch } from './ui/switch';
-import { Label } from './ui/label';
-import { toMgDl } from '@/lib/unit-conversions';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
 
@@ -35,15 +32,17 @@ const FormSchema = z.object({
   total: z.coerce.number().min(0.1, 'Value is required.'),
 });
 
-type LipidUnit = 'conventional' | 'si';
+interface AddLipidRecordDialogProps {
+    children?: React.ReactNode;
+    onSuccess?: () => void;
+}
 
-export function AddLipidRecordDialog() {
+export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const { addLipidRecord, profile, lipidRecords, biomarkerUnit } = useApp();
+  const { addLipidRecord, lipidRecords, getDbLipidValue, biomarkerUnit } = useApp();
   const { toast } = useToast();
-  const [inputUnit, setInputUnit] = React.useState<LipidUnit>(biomarkerUnit);
 
-  const getUnitLabel = (unit: LipidUnit) => (unit === 'si' ? 'mmol/L' : 'mg/dL');
+  const getUnitLabel = (unit: 'conventional' | 'si') => (unit === 'si' ? 'mmol/L' : 'mg/dL');
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -58,7 +57,6 @@ export function AddLipidRecordDialog() {
 
   React.useEffect(() => {
     if (open) {
-      setInputUnit(biomarkerUnit);
       form.reset({
         date: new Date(),
         ldl: '' as any,
@@ -89,10 +87,10 @@ export function AddLipidRecordDialog() {
     // Convert values to mg/dL for storage if input was in SI units
     const dbRecord = {
         date: newDate.toISOString(),
-        ldl: inputUnit === 'si' ? toMgDl(data.ldl, 'ldl') : data.ldl,
-        hdl: inputUnit === 'si' ? toMgDl(data.hdl, 'hdl') : data.hdl,
-        triglycerides: inputUnit === 'si' ? toMgDl(data.triglycerides, 'triglycerides') : data.triglycerides,
-        total: inputUnit === 'si' ? toMgDl(data.total, 'total') : data.total,
+        ldl: getDbLipidValue(data.ldl, 'ldl'),
+        hdl: getDbLipidValue(data.hdl, 'hdl'),
+        triglycerides: getDbLipidValue(data.triglycerides, 'triglycerides'),
+        total: getDbLipidValue(data.total, 'total'),
     }
 
     addLipidRecord(dbRecord);
@@ -102,24 +100,15 @@ export function AddLipidRecordDialog() {
       description: 'Your new lipid record has been added.',
     });
     setOpen(false);
-  };
-  
-  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication || profile.medication.length === 0) {
-      e.preventDefault();
-      toast({
-        variant: 'destructive',
-        title: 'Medication Required',
-        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
-      });
-    }
+    onSuccess?.();
   };
 
+  const triggerButton = children || <AddRecordButton tooltipContent="Add Lipid Record" />;
+  
   return (
-    <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <AddRecordButton tooltipContent="Add Lipid Record" onClick={handleTriggerClick} />
+          {triggerButton}
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -128,15 +117,6 @@ export function AddLipidRecordDialog() {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="unit-switch">mg/dL</Label>
-                <Switch
-                    id="unit-switch"
-                    checked={inputUnit === 'si'}
-                    onCheckedChange={(checked) => setInputUnit(checked ? 'si' : 'conventional')}
-                />
-                <Label htmlFor="unit-switch">mmol/L</Label>
-              </div>
               <FormField
                 control={form.control}
                 name="date"
@@ -161,9 +141,9 @@ export function AddLipidRecordDialog() {
                   name="ldl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>LDL ({getUnitLabel(inputUnit)})</FormLabel>
+                      <FormLabel>LDL ({getUnitLabel(biomarkerUnit)})</FormLabel>
                       <FormControl>
-                        <Input type="number" step="any" placeholder={inputUnit === 'si' ? "e.g., 2.6" : "e.g., 100"} {...field} />
+                        <Input type="number" step="any" placeholder={biomarkerUnit === 'si' ? "e.g., 2.6" : "e.g., 100"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -174,9 +154,9 @@ export function AddLipidRecordDialog() {
                   name="hdl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>HDL ({getUnitLabel(inputUnit)})</FormLabel>
+                      <FormLabel>HDL ({getUnitLabel(biomarkerUnit)})</FormLabel>
                       <FormControl>
-                        <Input type="number" step="any" placeholder={inputUnit === 'si' ? "e.g., 1.3" : "e.g., 50"} {...field} />
+                        <Input type="number" step="any" placeholder={biomarkerUnit === 'si' ? "e.g., 1.3" : "e.g., 50"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -187,9 +167,9 @@ export function AddLipidRecordDialog() {
                   name="triglycerides"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Triglycerides ({getUnitLabel(inputUnit)})</FormLabel>
+                      <FormLabel>Triglycerides ({getUnitLabel(biomarkerUnit)})</FormLabel>
                       <FormControl>
-                        <Input type="number" step="any" placeholder={inputUnit === 'si' ? "e.g., 1.7" : "e.g., 150"} {...field} />
+                        <Input type="number" step="any" placeholder={biomarkerUnit === 'si' ? "e.g., 1.7" : "e.g., 150"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -200,9 +180,9 @@ export function AddLipidRecordDialog() {
                   name="total"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Total ({getUnitLabel(inputUnit)})</FormLabel>
+                      <FormLabel>Total ({getUnitLabel(biomarkerUnit)})</FormLabel>
                       <FormControl>
-                        <Input type="number" step="any" placeholder={inputUnit === 'si' ? "e.g., 5.2" : "e.g., 200"} {...field} />
+                        <Input type="number" step="any" placeholder={biomarkerUnit === 'si' ? "e.g., 5.2" : "e.g., 200"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -216,6 +196,5 @@ export function AddLipidRecordDialog() {
           </Form>
         </DialogContent>
       </Dialog>
-    </>
   );
 }

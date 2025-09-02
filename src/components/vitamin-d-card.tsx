@@ -1,27 +1,131 @@
 
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import * as React from 'react';
+import { useApp } from '@/context/app-context';
+import { Button } from './ui/button';
+import { Trash2, Sun, Settings } from 'lucide-react';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { AddVitaminDRecordDialog } from './add-vitamin-d-record-dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { VitaminDChart } from './vitamin-d-chart';
-import { VitaminDHistoryTable } from './vitamin-d-history-table';
+import { ScrollArea } from './ui/scroll-area';
+import { Badge } from './ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Separator } from './ui/separator';
+import { Label } from './ui/label';
+import { Switch } from './ui/switch';
+import { BiomarkerCardTemplate } from './biomarker-card-template';
 
 export function VitaminDCard() {
+  const { vitaminDRecords, removeVitaminDRecord, getDisplayVitaminDValue, biomarkerUnit, setBiomarkerUnit } = useApp();
+  const [isActionsOpen, setIsActionsOpen] = React.useState(false);
+  const formatDate = useDateFormatter();
+
+  const sortedRecords = React.useMemo(() => {
+    return [...(vitaminDRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [vitaminDRecords]);
+
+  const getStatus = (value: number) => {
+    // Status based on ng/mL
+    if (value < 20) return { text: 'Deficient', variant: 'destructive' as const };
+    if (value < 30) return { text: 'Insufficient', variant: 'secondary' as const };
+    return { text: 'Sufficient', variant: 'outline' as const };
+  };
+
+  const latestRecord = sortedRecords[0];
+  const currentStatus = latestRecord ? getStatus(latestRecord.value) : null;
+  const unitLabel = biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL';
+
+  const Title = `Vitamin D (${unitLabel})`;
+  const Icon = <Sun className="h-5 w-5 shrink-0 text-muted-foreground" />;
+
+  const Actions = (
+    <Popover open={isActionsOpen} onOpenChange={setIsActionsOpen}>
+      <PopoverTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-8 w-8">
+          <Settings className="h-4 w-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64" align="end">
+        <div className="space-y-4">
+          <AddVitaminDRecordDialog onSuccess={() => setIsActionsOpen(false)}>
+            <Button variant="outline" className="w-full">Add New Record</Button>
+          </AddVitaminDRecordDialog>
+          <Separator />
+          <div className="space-y-2">
+            <Label>Biomarker Units</Label>
+            <div className="flex items-center justify-center space-x-2 py-2">
+              <Label htmlFor="unit-switch-vitd" className="text-xs">ng/mL</Label>
+              <Switch
+                id="unit-switch-vitd"
+                checked={biomarkerUnit === 'si'}
+                onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
+              />
+              <Label htmlFor="unit-switch-vitd" className="text-xs">nmol/L</Label>
+            </div>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+
+  const RecordsList = (
+    <ScrollArea className="h-[140px] pr-3">
+      {sortedRecords.length > 0 ? (
+        <ul className="space-y-1 mt-2">
+          {sortedRecords.map((record) => (
+            <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+              <p className="flex-1">
+                <span className="font-semibold text-foreground">{getDisplayVitaminDValue(record.value)}</span>
+                <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
+              </p>
+              <div className="flex items-center shrink-0">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeVitaminDRecord(record.id)}>
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Delete record</TooltipContent>
+                </Tooltip>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="flex h-full items-center justify-center">
+          <p className="text-xs text-muted-foreground text-center">No records.</p>
+        </div>
+      )}
+    </ScrollArea>
+  );
+
+  const StatusDisplay = (
+    <div className="flex flex-col items-center justify-center flex-1">
+      {currentStatus && (
+        <div className="text-center text-xs text-muted-foreground">
+          <div className="flex flex-col items-center gap-1">
+            <span>Current Status:</span>
+            <Badge variant={currentStatus.variant} className={currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
+              {currentStatus.text}
+            </Badge>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const Chart = <VitaminDChart />;
+
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-start">
-        <div className="grid gap-2">
-          <CardTitle>Vitamin D Trend</CardTitle>
-          <CardDescription>Visualize your Vitamin D levels over time.</CardDescription>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <AddVitaminDRecordDialog />
-        </div>
-      </CardHeader>
-      <CardContent className="grid gap-6 px-2 md:px-6">
-        <VitaminDChart />
-        <VitaminDHistoryTable />
-      </CardContent>
-    </Card>
+    <BiomarkerCardTemplate
+      title={Title}
+      icon={Icon}
+      actions={Actions}
+      recordsList={RecordsList}
+      statusDisplay={StatusDisplay}
+      chart={Chart}
+    />
   );
 }
