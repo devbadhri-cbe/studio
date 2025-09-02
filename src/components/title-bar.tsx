@@ -16,7 +16,7 @@ export function TitleBar({ children }: TitleBarProps) {
     return (
         <header className="border-b px-4 py-2 md:px-6">
             <div className="mx-auto w-full max-w-7xl flex items-center justify-between">
-                 <div className="flex justify-start w-10 h-10">
+                 <div className="flex justify-start w-10 h-10 border-2 border-red-500">
                     {children}
                 </div>
                 <div className="flex-1 flex justify-center">
