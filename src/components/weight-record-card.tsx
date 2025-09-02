@@ -155,7 +155,6 @@ export function WeightRecordCard() {
         recordsList={RecordsList}
         statusDisplay={StatusDisplay}
         chart={Chart}
-        className="border-green-500"
     />
   );
 }
