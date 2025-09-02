@@ -153,9 +153,7 @@ export function WeightRecordCard() {
                 </div>
             </div>
             
-            <Separator />
-
-            <div className="border rounded-md p-2 h-[200px]">
+            <div className="border rounded-md p-2 h-[200px] flex-1">
                 <WeightChart />
             </div>
         </CardContent>
