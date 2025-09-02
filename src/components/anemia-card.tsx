@@ -5,7 +5,7 @@ import * as React from 'react';
 import { CardContent } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Trash2, HeartCrack, Settings } from 'lucide-react';
+import { Trash2, Droplet, Settings } from 'lucide-react';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { AddAnemiaRecordDialog } from './add-anemia-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
@@ -48,8 +48,8 @@ export function AnemiaCard() {
 
   const Title = (
     <div className='flex items-center gap-3 flex-1'>
-      <HeartCrack className="h-5 w-5 shrink-0 text-muted-foreground" />
-      <h3 className="font-medium">Anemia (Hemoglobin) ({unitLabel})</h3>
+      <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />
+      <h3 className="font-medium">Hemoglobin ({unitLabel})</h3>
     </div>
   );
 
