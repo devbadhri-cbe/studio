@@ -23,8 +23,9 @@ export function BiomarkerCardTemplate({
   chart,
 }: BiomarkerCardTemplateProps) {
   return (
-    <Card className="w-full h-full">
+    <Card className="w-full h-full flex flex-col">
       <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
+        {/* 1. Heading with action button */}
         <div className="flex items-center justify-between">
            <div className='flex items-center gap-3 flex-1'>
              {icon}
@@ -35,23 +36,22 @@ export function BiomarkerCardTemplate({
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col md:flex-row md:gap-4">
-            {/* Left Column (Records & Status) */}
-            <div className="flex flex-col md:w-1/3 space-y-4">
-                 <div className="flex flex-row items-stretch gap-4">
-                    <div className="flex-1">
-                        {recordsList}
-                    </div>
-                    <div className="flex-1 flex items-center justify-center">
-                        {statusDisplay}
-                    </div>
-                </div>
-                <Separator className="md:hidden" />
-            </div>
-            {/* Right Column (Chart) */}
-            <div className="flex-1 flex flex-col min-h-[150px] pt-2 md:pt-0">
-                {chart}
-            </div>
+        {/* 2. Records and Status horizontally */}
+        <div className="flex flex-row items-start gap-4">
+          <div className="flex-1">
+              {recordsList}
+          </div>
+          <div className="flex-1 flex items-center justify-center h-full">
+              {statusDisplay}
+          </div>
+        </div>
+        
+        {/* Separator before the chart */}
+        <Separator />
+
+        {/* 3. Chart in the bottom */}
+        <div className="flex-1 flex flex-col min-h-[150px]">
+            {chart}
         </div>
       </CardContent>
     </Card>
