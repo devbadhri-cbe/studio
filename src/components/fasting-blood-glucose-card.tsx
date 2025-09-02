@@ -11,6 +11,8 @@ import { AddFastingBloodGlucoseRecordDialog } from './add-fasting-blood-glucose-
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { FastingBloodGlucoseChart } from './fasting-blood-glucose-chart';
 import { ScrollArea } from './ui/scroll-area';
+import { Badge } from './ui/badge';
+import { cn } from '@/lib/utils';
 
 export function FastingBloodGlucoseCard() {
   const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord } = useApp();
@@ -19,6 +21,12 @@ export function FastingBloodGlucoseCard() {
   const sortedRecords = React.useMemo(() => {
     return [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   }, [fastingBloodGlucoseRecords]);
+  
+  const getStatus = (value: number) => {
+    if (value < 100) return { text: 'Normal', variant: 'outline' as const };
+    if (value <= 125) return { text: 'Prediabetes', variant: 'secondary' as const };
+    return { text: 'Diabetes', variant: 'destructive' as const };
+  }
 
   return (
     <Card>
@@ -38,10 +46,14 @@ export function FastingBloodGlucoseCard() {
               {sortedRecords.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                   {sortedRecords.map((record) => {
+                    const status = getStatus(record.value);
                     return (
                       <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                         <div className="flex-1">
-                          <span className="font-semibold text-foreground">{record.value} mg/dL</span>
+                          <div>
+                            <span className="font-semibold text-foreground">{record.value} mg/dL</span>
+                            <Badge variant={status.variant} className={cn("ml-2 text-xs", status.variant === 'outline' ? 'border-green-500 text-green-600' : '')}>{status.text}</Badge>
+                          </div>
                           <span className="block text-xs">on {formatDate(record.date)}</span>
                         </div>
                         <div className="flex items-center shrink-0">
