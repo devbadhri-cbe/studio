@@ -130,7 +130,7 @@ export default function PatientDashboard() {
             <Separator />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <BiomarkersCard />
+                 {isDoctorLoggedIn && <BiomarkersCard />}
                  {enabledDashboards?.includes('hba1c') && <Hba1cCard />}
                  {enabledDashboards?.includes('lipids') && <LipidCard />}
                  {enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
