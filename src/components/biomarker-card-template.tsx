@@ -46,7 +46,7 @@ export function BiomarkerCardTemplate({
         </div>
         
         {/* 3. Chart in the bottom, expanding to fill space */}
-        <div className="border rounded-md p-2 flex-1 flex flex-col">
+        <div className="border rounded-md p-2 flex-1 flex flex-col min-h-0">
             {chart}
         </div>
       </CardContent>
