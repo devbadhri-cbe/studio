@@ -22,7 +22,7 @@ export function BiomarkerCardTemplate({
   chart,
 }: BiomarkerCardTemplateProps) {
   return (
-    <Card className="w-full h-full flex flex-col aspect-[1/1.25]">
+    <Card className="w-full h-full">
       <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
         {/* 1. Heading with action button */}
         <div className="flex items-center justify-between">
@@ -36,7 +36,7 @@ export function BiomarkerCardTemplate({
         </div>
 
         {/* 2. Records and Status in a horizontal grid */}
-        <div className="grid grid-cols-2 gap-4 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <div className="border rounded-md p-2 min-h-[140px]">
             {recordsList}
           </div>
