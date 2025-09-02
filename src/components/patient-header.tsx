@@ -28,8 +28,10 @@ export function PatientHeader() {
     ? `${profile.name}'s Dashboard`
     : `Welcome, ${profile.name || 'User'}!`;
   
+  const doctorName = profile.doctorName || 'your doctor';
+
   const handleContactDoctor = (method: 'whatsapp' | 'sms') => {
-      if (!profile.doctorName) {
+      if (!doctorName) {
           toast({
               variant: 'destructive',
               title: 'Doctor Information Missing',
@@ -39,7 +41,7 @@ export function PatientHeader() {
       }
       toast({
           title: 'Contact Feature Placeholder',
-          description: `This would open ${method} to contact ${profile.doctorName}.`
+          description: `This would open ${method} to contact ${doctorName}.`
       })
   }
     
@@ -51,15 +53,15 @@ export function PatientHeader() {
                 <h1 className="text-2xl md:text-3xl font-semibold font-headline">
                     {pageTitle}
                 </h1>
-                <p className="text-sm text-muted-foreground">Your health overview. Consult {profile.doctorName || 'your doctor'} before making any decisions.</p>
+                <p className="text-sm text-muted-foreground">Your health overview. Consult {doctorName} before making any decisions.</p>
             </div>
             <div className="flex w-full flex-wrap justify-center md:justify-start gap-2">
-                {!isDoctorLoggedIn && profile.doctorName && (
+                {!isDoctorLoggedIn && doctorName !== 'your doctor' && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
                                 <MessageSquareText className="mr-2 h-4 w-4" />
-                                Contact {profile.doctorName}
+                                Contact {doctorName}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
