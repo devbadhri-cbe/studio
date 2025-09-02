@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Logo } from '@/components/logo';
@@ -9,19 +8,19 @@ import { ThemeToggle } from './theme-toggle';
 
 interface TitleBarProps {
     children?: React.ReactNode;
+    doctorName: string;
+    doctorEmail: string;
 }
 
-export function TitleBar({ children }: TitleBarProps) {
-    const doctorName = "Dr. Badhrinathan N";
-    const doctorEmail = "drbadhri@gmail.com";
+export function TitleBar({ children, doctorName, doctorEmail }: TitleBarProps) {
 
     return (
         <header className="border-b px-4 py-4 md:px-6">
             <div className="relative mx-auto flex w-full max-w-7xl items-center justify-between">
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 w-1/3">
                     {children}
                 </div>
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                <div className="flex-shrink-0 w-1/3 flex flex-col items-center">
                     <div className="flex items-center gap-2">
                         <Logo className="h-8 w-8 text-primary" />
                         <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
@@ -37,7 +36,7 @@ export function TitleBar({ children }: TitleBarProps) {
                         </a>
                     </div>
                 </div>
-                 <div className="flex-shrink-0">
+                 <div className="flex-shrink-0 w-1/3 flex justify-end">
                     <ThemeToggle />
                 </div>
             </div>
