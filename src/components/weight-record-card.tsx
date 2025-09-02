@@ -120,35 +120,31 @@ export function WeightRecordCard() {
 
   const StatusDisplay = (
     <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-2 flex-1">
-      <div className="text-center text-xs text-muted-foreground">
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground">
             <span>Height: <span className="font-bold text-foreground">{heightDisplay}</span></span>
+            {bmiStatus && (
+                <div className="flex flex-col items-center gap-1">
+                    <span>Current BMI: <span className="font-bold text-foreground">{profile.bmi?.toFixed(1)}</span></span>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Badge variant={bmiStatus.variant} className={`cursor-pointer ${bmiStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
+                                {bmiStatus.text}
+                            </Badge>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-64 text-sm">
+                        <div className="space-y-1 text-left">
+                            <h4 className="font-bold">BMI Categories</h4>
+                            {BMI_CATEGORIES.map(category => (
+                            <p key={category.text}>
+                                {category.min === 40 ? '≥ 40' : (category.max === 18.4 ? `< 18.5` : `${category.min} - ${category.max}`)}: {category.text}
+                            </p>
+                            ))}
+                        </div>
+                        </PopoverContent>
+                    </Popover>
+                </div>
+            )}
         </div>
-      </div>
-      {bmiStatus && (
-        <div className="text-center text-xs text-muted-foreground">
-          <div className="flex flex-col items-center gap-1">
-            <span>Current BMI: <span className="font-bold text-foreground">{profile.bmi?.toFixed(1)}</span></span>
-              <Popover>
-                <PopoverTrigger asChild>
-                    <Badge variant={bmiStatus.variant} className={`cursor-pointer ${bmiStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
-                        {bmiStatus.text}
-                    </Badge>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 text-sm">
-                  <div className="space-y-1 text-left">
-                    <h4 className="font-bold">BMI Categories</h4>
-                      {BMI_CATEGORIES.map(category => (
-                      <p key={category.text}>
-                          {category.min === 40 ? '≥ 40' : (category.max === 18.4 ? `< 18.5` : `${category.min} - ${category.max}`)}: {category.text}
-                      </p>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-          </div>
-        </div>
-      )}
     </div>
   );
 
