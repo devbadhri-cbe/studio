@@ -5,14 +5,12 @@ import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { PlusCircle, Trash2, Droplet } from 'lucide-react';
+import { Trash2, Droplet } from 'lucide-react';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { AddFastingBloodGlucoseRecordDialog } from './add-fasting-blood-glucose-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { FastingBloodGlucoseChart } from './fasting-blood-glucose-chart';
-import { Badge } from './ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Separator } from './ui/separator';
+import { ScrollArea } from './ui/scroll-area';
 
 export function FastingBloodGlucoseCard() {
   const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord } = useApp();
@@ -36,10 +34,10 @@ export function FastingBloodGlucoseCard() {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <ScrollArea className="h-[140px] pr-3">
               {sortedRecords.length > 0 ? (
                 <ul className="space-y-1 mt-2">
-                  {sortedRecords.slice(0, 5).map((record) => {
+                  {sortedRecords.map((record) => {
                     return (
                       <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                         <div className="flex-1">
@@ -61,9 +59,11 @@ export function FastingBloodGlucoseCard() {
                   })}
                 </ul>
               ) : (
-                <p className="text-xs text-muted-foreground pl-8 h-full flex items-center justify-center">No records.</p>
+                <div className="flex h-full items-center justify-center">
+                  <p className="text-xs text-muted-foreground text-center">No records.</p>
+                </div>
               )}
-            </div>
+            </ScrollArea>
             <div className="min-h-[150px]">
               <FastingBloodGlucoseChart />
             </div>
