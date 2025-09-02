@@ -5,7 +5,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { startOfDay, parseISO } from 'date-fns';
+import { startOfDay } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,24 +21,31 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
-  hemoglobin: z.coerce.number().min(5, 'Value seems too low.').max(25, 'Value seems too high.'),
+  value: z.coerce.number().min(5, 'Value seems too low.').max(25, 'Value seems too high.'),
 });
 
-export function AddAnemiaRecordDialog() {
+interface AddAnemiaRecordDialogProps {
+    children?: React.ReactNode;
+    onSuccess?: () => void;
+}
+
+export function AddAnemiaRecordDialog({ children, onSuccess }: AddAnemiaRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const { addAnemiaRecord, profile, anemiaRecords } = useApp();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { addAnemiaRecord } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       date: new Date(),
-      hemoglobin: '' as any,
+      value: '' as any,
     },
   });
   
@@ -46,60 +53,50 @@ export function AddAnemiaRecordDialog() {
     if (open) {
       form.reset({
         date: new Date(),
-        hemoglobin: '' as any,
+        value: '' as any,
       });
     }
   }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    const newDate = startOfDay(data.date);
-
-    const dateExists = anemiaRecords.some((record) => {
-        const storedDate = startOfDay(parseISO(record.date as string));
-        return storedDate.getTime() === newDate.getTime();
-    });
-
-    if (dateExists) {
-      toast({
-        variant: 'destructive',
-        title: 'Duplicate Entry',
-        description: 'An anemia record for this date already exists. Please choose a different date.',
-      });
-      return;
+    setIsSubmitting(true);
+    try {
+        addAnemiaRecord({
+            date: startOfDay(data.date).toISOString(),
+            hemoglobin: data.value,
+        });
+        toast({
+            title: 'Success!',
+            description: 'Your new hemoglobin record has been added.',
+        });
+        setOpen(false);
+        onSuccess?.();
+    } catch (error) {
+        console.error("Failed to add record", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not save your record."
+        });
+    } finally {
+        setIsSubmitting(false);
     }
-    
-    addAnemiaRecord({
-      date: newDate.toISOString(),
-      hemoglobin: data.hemoglobin,
-    });
-    toast({
-      title: 'Success!',
-      description: 'Your new hemoglobin record has been added.',
-    });
-    setOpen(false);
   };
   
-  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication || profile.medication.length === 0) {
-      e.preventDefault();
-      toast({
-        variant: 'destructive',
-        title: 'Medication Required',
-        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
-      });
-    }
-  };
+   const triggerButton = children || (
+      <AddRecordButton tooltipContent="Add Hemoglobin Record" />
+   );
+
 
   return (
-    <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-           <AddRecordButton tooltipContent="Add Hemoglobin Record" onClick={handleTriggerClick} />
+            {triggerButton}
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add New Hemoglobin Record</DialogTitle>
-            <DialogDescription>Enter your hemoglobin (Hb) value and the test date.</DialogDescription>
+            <DialogDescription>Enter your value and the date it was measured.</DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -108,7 +105,7 @@ export function AddAnemiaRecordDialog() {
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Test Date</FormLabel>
+                    <FormLabel>Date</FormLabel>
                     <FormControl>
                       <DatePicker
                         value={field.value}
@@ -123,24 +120,26 @@ export function AddAnemiaRecordDialog() {
               />
               <FormField
                   control={form.control}
-                  name="hemoglobin"
+                  name="value"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Hemoglobin (g/dL)</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.1" placeholder="e.g., 13.5" {...field} />
+                        <Input type="number" step="0.1" placeholder={'e.g., 13.5'} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               <DialogFooter>
-                <Button type="submit">Save Record</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Record
+                </Button>
               </DialogFooter>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
-    </>
   );
 }

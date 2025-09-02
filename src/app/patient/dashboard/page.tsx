@@ -40,6 +40,7 @@ import type { LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
 import { UploadConfirmationForm } from '@/components/upload-confirmation-form';
 import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
+import { AnemiaCard } from '@/components/anemia-card';
 
 
 export default function PatientDashboard() {
@@ -154,6 +155,7 @@ export default function PatientDashboard() {
                 <ProfileCard />
                 <WeightRecordCard />
                 <FastingBloodGlucoseCard />
+                <AnemiaCard />
                 <MedicalConditionsCard />
                 <MedicationCard />
               </div>
