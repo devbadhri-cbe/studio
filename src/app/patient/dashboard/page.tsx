@@ -42,6 +42,7 @@ import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
 import { AnemiaCard } from '@/components/anemia-card';
 import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
+import { DiabetesCard } from '@/components/diabetes-card';
 
 
 export default function PatientDashboard() {
@@ -162,6 +163,7 @@ export default function PatientDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ProfileCard />
                 <WeightRecordCard />
+                <DiabetesCard />
                 <Hba1cCard />
                 <FastingBloodGlucoseCard />
                 <AnemiaCard />
@@ -179,61 +181,6 @@ export default function PatientDashboard() {
                     Upload Result
                 </Button>
               </UploadRecordDialog>
-               <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className={cn("justify-center", shouldAnimate && 'animate-pulse-once bg-primary/20')}>
-                            {ActiveDashboardIcon}
-                            <span className="ml-2">{dashboardButtonLabel}</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        {isDoctorLoggedIn ? (
-                            <>
-                                <DropdownMenuLabel>Manage Dashboards</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                {Object.entries(dashboardOptions).map(([key, value]) => (
-                                    <DropdownMenuCheckboxItem
-                                        key={key}
-                                        checked={profile.enabledDashboards?.includes(key)}
-                                        onSelect={(e) => {
-                                            e.preventDefault();
-                                            const currentDashboards = profile.enabledDashboards || [];
-                                            const isEnabled = currentDashboards.includes(key);
-                                            let updatedDashboards: string[];
-                                            if (isEnabled) {
-                                                updatedDashboards = currentDashboards.filter(d => d !== key);
-                                            } else {
-                                                updatedDashboards = [...currentDashboards, key];
-                                            }
-                                            setProfile({ ...profile, enabledDashboards: updatedDashboards });
-                                        }}
-                                    >
-                                        {value.icon}
-                                        <span className="ml-2">{value.name}</span>
-                                    </DropdownMenuCheckboxItem>
-                                ))}
-                            </>
-                        ) : (
-                             <>
-                                <DropdownMenuLabel>Select Dashboard</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                {(profile.enabledDashboards || []).map((key) => {
-                                    const dashboard = dashboardOptions[key as keyof typeof dashboardOptions];
-                                    if (!dashboard) return null;
-                                    return (
-                                        <DropdownMenuItem key={key} onSelect={() => handleDashboardSelect(key)}>
-                                            {dashboard.icon}
-                                            <span className="ml-2">{dashboard.name}</span>
-                                        </DropdownMenuItem>
-                                    )
-                                })}
-                                {(profile.enabledDashboards?.length === 0) && (
-                                     <DropdownMenuItem disabled>No dashboards enabled.</DropdownMenuItem>
-                                )}
-                            </>
-                        )}
-                    </DropdownMenuContent>
-                </DropdownMenu>
             </div>
             
              {extractedData && (
@@ -249,7 +196,6 @@ export default function PatientDashboard() {
                     <ReminderCard />
                 </div>
                 <div className="lg:col-span-2 flex flex-col gap-6">
-                    {dashboardView !== 'none' && dashboardView !== 'report' && renderDashboard()}
                     <InsightsCard />
                 </div>
             </div>
