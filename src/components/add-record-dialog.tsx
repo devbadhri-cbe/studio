@@ -23,15 +23,23 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
+import { Loader2 } from 'lucide-react';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
   value: z.coerce.number().min(1, 'Value is required.').max(25, 'Value seems too high.'),
 });
 
-export function AddRecordDialog() {
+interface AddRecordDialogProps {
+    children?: React.ReactNode;
+    onSuccess?: () => void;
+}
+
+
+export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const { addRecord, records, profile } = useApp();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { addRecord, records } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -52,6 +60,7 @@ export function AddRecordDialog() {
   }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    setIsSubmitting(true);
     const newDate = startOfDay(data.date);
     
     const dateExists = records.some((record) => {
@@ -65,36 +74,41 @@ export function AddRecordDialog() {
         title: 'Duplicate Entry',
         description: 'A record for this date already exists. Please choose a different date.',
       });
+      setIsSubmitting(false);
       return;
     }
     
-    addRecord({
-      date: newDate.toISOString(),
-      value: data.value,
-    });
-    toast({
-      title: 'Success!',
-      description: 'Your new HbA1c record has been added.',
-    });
-    setOpen(false);
-  };
-
-  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication || profile.medication.length === 0) {
-      e.preventDefault();
-      toast({
-        variant: 'destructive',
-        title: 'Medication Required',
-        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
-      });
+    try {
+        addRecord({
+          date: newDate.toISOString(),
+          value: data.value,
+        });
+        toast({
+          title: 'Success!',
+          description: 'Your new HbA1c record has been added.',
+        });
+        setOpen(false);
+        onSuccess?.();
+    } catch (error) {
+        console.error("Failed to add record", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not save your record."
+        });
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
+  const triggerButton = children || (
+      <AddRecordButton tooltipContent="Add HbA1c Record" />
+   );
+
   return (
-    <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <AddRecordButton tooltipContent="Add HbA1c Record" onClick={handleTriggerClick} />
+          {triggerButton}
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -135,12 +149,14 @@ export function AddRecordDialog() {
                 )}
               />
               <DialogFooter>
-                <Button type="submit">Save Record</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Record
+                </Button>
               </DialogFooter>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
-    </>
   );
 }
