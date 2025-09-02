@@ -13,7 +13,10 @@ interface TitleBarProps {
     children?: React.ReactNode;
 }
 
-export function TitleBar({ doctorName, doctorEmail, children }: TitleBarProps) {
+export function TitleBar({ children }: TitleBarProps) {
+    const doctorName = "Dr. Badhrinathan N";
+    const doctorEmail = "drbadhri@gmail.com";
+
     return (
         <header className="border-b px-4 py-4 md:px-6">
             <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 relative">
@@ -28,15 +31,13 @@ export function TitleBar({ doctorName, doctorEmail, children }: TitleBarProps) {
                  <div className="text-center text-xs text-muted-foreground">
                     by
                 </div>
-                {doctorName && doctorEmail && (
-                    <div className="text-center text-sm text-muted-foreground mt-2">
-                        <p className="font-semibold text-lg text-foreground">{doctorName}</p>
-                        <a href={`mailto:${doctorEmail}`} className="flex items-center justify-center gap-1.5 hover:text-primary">
-                            <Mail className="h-3 w-3" />
-                            {doctorEmail}
-                        </a>
-                    </div>
-                )}
+                <div className="text-center text-sm text-muted-foreground">
+                    <p className="font-semibold text-lg text-foreground">{doctorName}</p>
+                    <a href={`mailto:${doctorEmail}`} className="flex items-center justify-center gap-1.5 hover:text-primary">
+                        <Mail className="h-3 w-3" />
+                        {doctorEmail}
+                    </a>
+                </div>
             </div>
         </header>
     );
