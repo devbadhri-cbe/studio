@@ -133,7 +133,6 @@ export default function PatientDashboard() {
                 <TooltipTrigger asChild>
                 <Button onClick={() => router.push(isDoctorLoggedIn ? '/doctor/dashboard' : '/')} size="icon" variant="ghost">
                     <ArrowLeft className="h-4 w-4" />
-                    <span className="sr-only">Back</span>
                 </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -142,7 +141,7 @@ export default function PatientDashboard() {
             </Tooltip>
          </TitleBar>
 
-        <main className="flex-1 p-4 pt-8 md:p-6 md:pt-10">
+        <main className="flex-1 p-4 pt-10 md:p-6 md:pt-10">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
