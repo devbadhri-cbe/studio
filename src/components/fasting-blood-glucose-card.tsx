@@ -38,8 +38,8 @@ export function FastingBloodGlucoseCard() {
   const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
   return (
-    <Card>
-      <CardContent className="space-y-4 text-sm p-4">
+    <Card className="h-full flex flex-col">
+      <CardContent className="flex flex-col flex-1 text-sm p-4 space-y-4">
         <div className="flex items-center justify-between mb-2 border border-red-500">
             <div className='flex items-center gap-3 flex-1'>
               <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />
@@ -76,7 +76,7 @@ export function FastingBloodGlucoseCard() {
             </div>
         </div>
           
-        <div className="flex flex-col gap-4 border border-red-500">
+        <div className="flex flex-col flex-1 gap-4 border border-red-500">
             <div className="flex flex-col border border-red-500">
               <ScrollArea className="h-[140px] pr-3">
                 {sortedRecords.length > 0 ? (
