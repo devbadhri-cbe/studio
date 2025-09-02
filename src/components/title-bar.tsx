@@ -8,8 +8,6 @@ import * as React from 'react';
 import { ThemeToggle } from './theme-toggle';
 
 interface TitleBarProps {
-    doctorName?: string;
-    doctorEmail?: string;
     children?: React.ReactNode;
 }
 
