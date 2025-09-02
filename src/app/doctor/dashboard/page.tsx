@@ -61,7 +61,6 @@ export default function DoctorDashboardPage() {
     React.useEffect(() => {
         setIsDoctorLoggedIn(true);
         fetchPatients();
-        return () => setIsDoctorLoggedIn(false);
     }, [fetchPatients, setIsDoctorLoggedIn]);
     
     // Re-fetch data when the page is focused
