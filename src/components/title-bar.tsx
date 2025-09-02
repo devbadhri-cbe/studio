@@ -26,7 +26,7 @@ export function TitleBar({ doctorName, doctorEmail, children }: TitleBarProps) {
                     <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
                 </div>
                  <div className="text-center text-xs text-muted-foreground">
-                    by Dr. Badhrinathan N
+                    by
                 </div>
                 {doctorName && doctorEmail && (
                     <div className="text-center text-sm text-muted-foreground mt-2">
