@@ -103,8 +103,6 @@ export default function PatientDashboard() {
 
   const renderDashboard = () => {
     switch (dashboardView) {
-      case 'hba1c':
-        return <Hba1cCard />;
       case 'lipids':
         return <LipidCard />;
       case 'vitaminD':
@@ -164,6 +162,7 @@ export default function PatientDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ProfileCard />
                 <WeightRecordCard />
+                <Hba1cCard />
                 <FastingBloodGlucoseCard />
                 <AnemiaCard />
                 <MedicalConditionsCard />
