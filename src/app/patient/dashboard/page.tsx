@@ -130,19 +130,17 @@ export default function PatientDashboard() {
       <div className="flex min-h-screen w-full flex-col bg-background">
          <TitleBar>
             {isDoctorLoggedIn && (
-                <div className="absolute top-1/2 left-4 -translate-y-1/2">
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                        <Button onClick={() => router.push('/doctor/dashboard')} size="sm" variant="ghost" className="gap-2">
-                            <ArrowLeft className="h-4 w-4" />
-                            Back to Patient List
-                        </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                        <p>Return to Patient List</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </div>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                    <Button onClick={() => router.push('/doctor/dashboard')} size="sm" variant="ghost" className="gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Patient List
+                    </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                    <p>Return to Patient List</p>
+                    </TooltipContent>
+                </Tooltip>
             )}
          </TitleBar>
 

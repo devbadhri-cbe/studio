@@ -3,10 +3,9 @@
 'use client';
 
 import * as React from 'react';
-import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Mail, Search, UserPlus, X } from 'lucide-react';
+import { Search, UserPlus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Patient } from '@/lib/types';
 import {
@@ -185,7 +184,7 @@ export default function DoctorDashboardPage() {
   return (
     <TooltipProvider>
         <div className="flex min-h-screen w-full flex-col bg-background">
-        <TitleBar doctorName="Dr. Badhrinathan N" doctorEmail="drbadhri@gmail.com" />
+        <TitleBar />
         <main className="flex-1 p-4 md:p-6">
             <div className="mx-auto w-full max-w-7xl">
                 {isFormOpen ? (
