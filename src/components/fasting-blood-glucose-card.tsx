@@ -101,7 +101,7 @@ export function FastingBloodGlucoseCard() {
                 )}
               </ScrollArea>
             </div>
-            <div className="min-h-[150px]">
+            <div className="flex flex-col border border-red-500 min-h-[150px]">
               <FastingBloodGlucoseChart />
             </div>
           </div>
