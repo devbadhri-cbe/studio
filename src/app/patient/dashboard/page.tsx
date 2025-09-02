@@ -129,7 +129,7 @@ export default function PatientDashboard() {
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
          <TitleBar>
-            {isDoctorLoggedIn && (
+            {isDoctorLoggedIn ? (
                 <Tooltip>
                     <TooltipTrigger asChild>
                     <Button onClick={() => router.push('/doctor/dashboard')} size="sm" variant="ghost" className="gap-2">
@@ -139,6 +139,18 @@ export default function PatientDashboard() {
                     </TooltipTrigger>
                     <TooltipContent>
                     <p>Return to Patient List</p>
+                    </TooltipContent>
+                </Tooltip>
+            ) : (
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                    <Button onClick={() => router.push('/')} size="sm" variant="ghost" className="gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        Logout
+                    </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                    <p>Return to Login Page</p>
                     </TooltipContent>
                 </Tooltip>
             )}
