@@ -77,7 +77,7 @@ export function BiomarkersCard() {
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 flex-1 flex flex-col">
-        <div className="flex-1 flex flex-col rounded-lg md:aspect-[4/3] shadow-lg">
+        <div className="flex-1 flex flex-col rounded-lg md:aspect-[4/3] shadow-xl">
           {biomarkerCards[activeView]?.component}
         </div>
       </CardContent>
