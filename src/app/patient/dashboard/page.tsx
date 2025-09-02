@@ -28,7 +28,10 @@ import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
 import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
 import { DiabetesCard } from '@/components/diabetes-card';
-import { BiomarkersCard } from '@/components/biomarkers-card';
+import { AnemiaCard } from '@/components/anemia-card';
+import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
+import { Hba1cCard } from '@/components/hba1c-card';
+import { WeightRecordCard } from '@/components/weight-record-card';
 
 
 export default function PatientDashboard() {
@@ -130,8 +133,10 @@ export default function PatientDashboard() {
             <Separator />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <BiomarkersCard />
-                 <DiabetesCard />
+                 <Hba1cCard />
+                 <FastingBloodGlucoseCard />
+                 <AnemiaCard />
+                 <WeightRecordCard />
                  <LipidCard />
                  <VitaminDCard />
                  <ThyroidCard />
