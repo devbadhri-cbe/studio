@@ -46,12 +46,8 @@ export function AnemiaCard() {
   const currentStatus = getStatus(latestRecord?.hemoglobin, profile.gender);
   const unitLabel = biomarkerUnit === 'si' ? 'g/L' : 'g/dL';
 
-  const Title = (
-    <div className='flex items-center gap-3 flex-1'>
-      <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />
-      <h3 className="font-medium">Hemoglobin ({unitLabel})</h3>
-    </div>
-  );
+  const Title = `Hemoglobin (${unitLabel})`;
+  const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = (
     <Popover open={isActionsOpen} onOpenChange={setIsActionsOpen}>
@@ -136,6 +132,7 @@ export function AnemiaCard() {
   return (
     <BiomarkerCardTemplate
       title={Title}
+      icon={Icon}
       actions={Actions}
       recordsList={RecordsList}
       statusDisplay={StatusDisplay}

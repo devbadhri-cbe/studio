@@ -5,7 +5,8 @@ import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface BiomarkerCardTemplateProps {
-  title: React.ReactNode;
+  title: string;
+  icon: React.ReactNode;
   actions?: React.ReactNode;
   recordsList: React.ReactNode;
   statusDisplay: React.ReactNode;
@@ -14,6 +15,7 @@ interface BiomarkerCardTemplateProps {
 
 export function BiomarkerCardTemplate({
   title,
+  icon,
   actions,
   recordsList,
   statusDisplay,
@@ -23,7 +25,10 @@ export function BiomarkerCardTemplate({
     <Card>
       <CardContent className="flex flex-col flex-1 text-sm p-4 space-y-4 h-full">
         <div className="flex items-center justify-between mb-2">
-          {title}
+           <div className='flex items-center gap-3 flex-1'>
+             {icon}
+             <h3 className="font-medium">{title}</h3>
+           </div>
           <div className="flex items-center gap-1 shrink-0">
             {actions}
           </div>
