@@ -22,10 +22,6 @@ import { calculateAge, calculateBmi, calculateEgfr } from './utils';
 const PATIENTS_COLLECTION = 'patients';
 
 const getPatientStatus = (patientData: Partial<Patient>): 'On Track' | 'Needs Review' | 'Urgent' => {
-  const lastHba1c = patientData.records && patientData.records.length > 0 
-    ? [...patientData.records].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0] 
-    : null;
-    
   const lastBP = patientData.bloodPressureRecords && patientData.bloodPressureRecords.length > 0 
     ? [...patientData.bloodPressureRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0] 
     : null;
@@ -36,7 +32,6 @@ const getPatientStatus = (patientData: Partial<Patient>): 'On Track' | 'Needs Re
     
   const needsReview = patientData.presentMedicalConditions?.some(c => c.status === 'pending_review');
 
-  if (lastHba1c && lastHba1c.value >= 7.0) return 'Urgent';
   if (lastBP && (lastBP.systolic >= 140 || lastBP.diastolic >= 90)) return 'Urgent';
   if (lastRenal && (lastRenal.eGFR && lastRenal.eGFR < 30)) return 'Urgent';
   if (needsReview) return 'Needs Review';
@@ -61,7 +56,6 @@ const processPatientDoc = (doc: any): Patient => {
     });
   }
 
-  const records = sanitizeRecords(data.records);
   const fastingBloodGlucoseRecords = sanitizeRecords(data.fastingBloodGlucoseRecords);
   const lipidRecords = sanitizeRecords(data.lipidRecords);
   const vitaminDRecords = sanitizeRecords(data.vitaminDRecords);
@@ -84,7 +78,6 @@ const processPatientDoc = (doc: any): Patient => {
     return record;
   });
 
-  const lastHba1c = records.length > 0 ? [...records].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastLipid = lipidRecords.length > 0 ? [...lipidRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastVitaminD = vitaminDRecords.length > 0 ? [...vitaminDRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastThyroid = thyroidRecords.length > 0 ? [...thyroidRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
@@ -104,7 +97,6 @@ const processPatientDoc = (doc: any): Patient => {
     id: doc.id,
     dob: !isNaN(dobTimestamp.getTime()) ? dobTimestamp.toISOString() : new Date(0).toISOString(),
     lastLogin: lastLoginTimestamp && !isNaN(lastLoginTimestamp.getTime()) ? lastLoginTimestamp.toISOString() : undefined,
-    records,
     fastingBloodGlucoseRecords,
     lipidRecords,
     vitaminDRecords,
@@ -125,7 +117,6 @@ const processPatientDoc = (doc: any): Patient => {
   return {
     ...patientData,
     status,
-    lastHba1c: lastHba1c ? { value: lastHba1c.value, date: lastHba1c.date } : null,
     lastLipid: lastLipid ? { ldl: lastLipid.ldl, date: lastLipid.date } : null,
     lastVitaminD: lastVitaminD ? { value: lastVitaminD.value, date: lastVitaminD.date } : null,
     lastThyroid: lastThyroid ? { tsh: lastThyroid.tsh, date: lastThyroid.date } : null,
@@ -152,12 +143,11 @@ export async function getPatient(id: string): Promise<Patient | null> {
   return null;
 }
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastHba1c' | 'lastLipid' | 'lastLogin' | 'doctorName'>): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLipid' | 'lastLogin' | 'doctorName'>): Promise<Patient> {
     const docData = {
         ...patientData,
         doctorName: 'Dr. Badhrinathan N',
         lastLogin: null,
-        records: [],
         fastingBloodGlucoseRecords: [],
         lipidRecords: [],
         vitaminDRecords: [],
@@ -172,7 +162,7 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         presentMedicalConditions: [],
         medication: [],
         dashboardSuggestions: [],
-        enabledDashboards: ['hba1c', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
+        enabledDashboards: ['lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
         createdAt: serverTimestamp(),
     }
   const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), docData);
@@ -181,7 +171,6 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
     ...docData,
     id: docRef.id,
     status: 'On Track',
-    lastHba1c: null,
     lastLipid: null,
   } as Patient;
 }
@@ -196,7 +185,7 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
     if (updates.lastLogin && typeof updates.lastLogin === 'string') {
         updateData.lastLogin = new Date(updates.lastLogin);
     }
-    ['records', 'fastingBloodGlucoseRecords', 'lipidRecords', 'vitaminDRecords', 'thyroidRecords', 'renalRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'anemiaRecords', 'nutritionRecords', 'electrolyteRecords', 'mineralBoneDiseaseRecords'].forEach(key => {
+    ['fastingBloodGlucoseRecords', 'lipidRecords', 'vitaminDRecords', 'thyroidRecords', 'renalRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'anemiaRecords', 'nutritionRecords', 'electrolyteRecords', 'mineralBoneDiseaseRecords'].forEach(key => {
         if (updateData[key] && Array.isArray(updateData[key])) {
             updateData[key] = updateData[key].map((item: any) => ({
                 ...item,

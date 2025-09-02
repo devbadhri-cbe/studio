@@ -30,7 +30,6 @@ import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edi
 import { DiabetesCard } from '@/components/diabetes-card';
 import { AnemiaCard } from '@/components/anemia-card';
 import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
-import { Hba1cCard } from '@/components/hba1c-card';
 import { BiomarkersCard } from '@/components/biomarkers-card';
 
 
@@ -135,7 +134,6 @@ export default function PatientDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <BiomarkersCard />
                  <DiabetesCard />
-                 <Hba1cCard />
                  <FastingBloodGlucoseCard />
                  <AnemiaCard />
                  <LipidCard />

@@ -2,7 +2,6 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Hba1cChart } from './hba1c-chart';
 import { LdlChart } from './ldl-chart';
 import { VitaminDChart } from './vitamin-d-chart';
 import { Separator } from './ui/separator';
@@ -14,13 +13,14 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { WeightChart } from './weight-chart';
 import { kgToLbs } from '@/lib/utils';
 import { Button } from './ui/button';
+import { FastingBloodGlucoseChart } from './fasting-blood-glucose-chart';
 
 
 export function ReportCard() {
-  const { records, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, weightRecords, getDisplayLipidValue, getDisplayVitaminDValue, biomarkerUnit, profile } = useApp();
+  const { fastingBloodGlucoseRecords, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, weightRecords, getDisplayLipidValue, getDisplayVitaminDValue, getDisplayGlucoseValue, biomarkerUnit, profile } = useApp();
   const formatDate = useDateFormatter();
 
-  const latestHba1c = [...records].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  const latestFastingBloodGlucose = [...fastingBloodGlucoseRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestLipid = [...lipidRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestVitaminD = [...vitaminDRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestThyroid = [...(thyroidRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
@@ -30,6 +30,7 @@ export function ReportCard() {
   const isImperial = profile.unitSystem === 'imperial';
   const lipidUnit = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
   const vitDUnit = biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL';
+  const glucoseUnit = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
   const weightUnit = isImperial ? 'lbs' : 'kg';
 
   return (
@@ -51,15 +52,15 @@ export function ReportCard() {
         <section>
           <CardTitle className="text-lg mb-2">Latest Results</CardTitle>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {records.length > 0 && (
+            {fastingBloodGlucoseRecords.length > 0 && (
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">HbA1c</CardTitle>
+                    <CardTitle className="text-sm font-medium">Fasting Glucose</CardTitle>
                     <Droplet className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{latestHba1c.value}%</div>
-                    <p className="text-xs text-muted-foreground">on {formatDate(latestHba1c.date)}</p>
+                    <div className="text-2xl font-bold">{getDisplayGlucoseValue(latestFastingBloodGlucose.value)} <span className="text-base font-normal text-muted-foreground">{glucoseUnit}</span></div>
+                    <p className="text-xs text-muted-foreground">on {formatDate(latestFastingBloodGlucose.date)}</p>
                   </CardContent>
                 </Card>
             )}
@@ -148,12 +149,12 @@ export function ReportCard() {
           </div>
         </section>
 
-        {records && records.length > 0 && (
+        {fastingBloodGlucoseRecords && fastingBloodGlucoseRecords.length > 0 && (
           <>
             <Separator />
             <section>
-              <CardTitle className="text-lg mb-4">HbA1c Trend</CardTitle>
-              <Hba1cChart />
+              <CardTitle className="text-lg mb-4">Fasting Blood Glucose Trend</CardTitle>
+              <FastingBloodGlucoseChart />
             </section>
           </>
         )}

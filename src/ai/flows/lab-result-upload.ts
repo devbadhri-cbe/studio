@@ -23,7 +23,6 @@ export type LabResultUploadInput = z.infer<typeof LabResultUploadInputSchema>;
 
 const LabResultUploadOutputSchema = z.object({
   date: z.string().describe('The date the lab result was taken (YYYY-MM-DD format).'),
-  hba1cValue: z.number().optional().describe('The HbA1c result extracted from the lab result (as a number).'),
   fastingBloodGlucoseValue: z.number().optional().describe('The Fasting Blood Glucose result extracted from the lab result (as a number).'),
   lipidPanel: z.object({
     ldl: z.number().optional().describe('LDL cholesterol level.'),
@@ -81,7 +80,6 @@ const prompt = ai.definePrompt({
 First, extract the test date. It MUST be formatted as YYYY-MM-DD. If you cannot find a date, leave the field empty.
 
 Then, scan the document for the following biomarkers. For each biomarker, extract its value AND the units of measurement if available.
-- HbA1c (as a percentage value, units are always '%')
 - Fasting Blood Glucose (units are typically mg/dL or mmol/L, but do not extract units)
 - Lipid Panel (LDL, HDL, Triglycerides, Total Cholesterol). Common units are mg/dL or mmol/L.
 - Vitamin D (as a numerical value). Common units are ng/mL or nmol/L.

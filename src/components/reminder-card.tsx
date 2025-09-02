@@ -3,42 +3,39 @@
 
 import { useApp } from '@/context/app-context';
 import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears, differenceInDays } from 'date-fns';
-import { Bell, CheckCircle2, Heart, Droplet, Sun, Activity, Zap, RefreshCw } from 'lucide-react';
+import { Bell, CheckCircle2, Heart, Sun, Activity, Zap, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { calculateAge } from '@/lib/utils';
 import { Separator } from './ui/separator';
 
 export function ReminderCard() {
-  const { records, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, renalRecords, profile } = useApp();
+  const { fastingBloodGlucoseRecords, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, renalRecords, profile } = useApp();
 
   const hasMedicalConditions = profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0;
   const age = calculateAge(profile.dob);
 
-  // HbA1c Logic
-  const sortedHba1cRecords = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const lastHba1cRecord = sortedHba1cRecords[0];
-  let hba1cContent;
+  // FBG Logic
+  const sortedFastingBloodGlucoseRecords = [...fastingBloodGlucoseRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const lastFastingBloodGlucoseRecord = sortedFastingBloodGlucoseRecords[0];
+  let fastingBloodGlucoseContent;
 
-  if (!lastHba1cRecord) {
-    hba1cContent = {
-      icon: <Droplet className="h-5 w-5 text-yellow-500" />,
-      title: 'Time for your first HbA1c test!',
+  if (!lastFastingBloodGlucoseRecord) {
+    fastingBloodGlucoseContent = {
+      icon: <Heart className="h-5 w-5 text-yellow-500" />,
+      title: 'Time for your first Fasting Glucose test!',
       description: 'Add a record to start tracking.',
       color: 'bg-yellow-500/10',
     };
   } else {
-    const lastTestDate = new Date(lastHba1cRecord.date);
-    const lastTestValue = lastHba1cRecord.value;
+    const lastTestDate = new Date(lastFastingBloodGlucoseRecord.date);
+    const lastTestValue = lastFastingBloodGlucoseRecord.value;
     
-    let status = 'Healthy';
     let retestMonths = 36;
     
-    if (lastTestValue >= 5.7 && lastTestValue <= 6.4) {
-      status = 'Prediabetes';
-      retestMonths = 12; // Yearly
-    } else if (lastTestValue >= 6.5) {
-      status = 'Diabetes';
-      retestMonths = 4; // Every 3-4 months
+    if (lastTestValue >= 100 && lastTestValue <= 125) {
+      retestMonths = 12; // Yearly for prediabetes
+    } else if (lastTestValue > 125) {
+      retestMonths = 4; // Every 3-4 months for diabetes
     } else if (hasMedicalConditions || (age && age > 45)) {
       retestMonths = 12; // Yearly
     }
@@ -47,16 +44,16 @@ export function ReminderCard() {
     const nextTestDate = addMonths(lastTestDate, retestMonths);
     
     if (monthsSinceLastTest >= retestMonths) {
-       hba1cContent = {
-        icon: <Droplet className="h-5 w-5 text-destructive" />,
-        title: 'HbA1c Test Due',
+       fastingBloodGlucoseContent = {
+        icon: <Heart className="h-5 w-5 text-destructive" />,
+        title: 'Fasting Glucose Test Due',
         description: `Last test was ${formatDistanceToNow(lastTestDate)} ago. Retesting is recommended.`,
         color: 'bg-destructive/10',
       };
     } else {
-       hba1cContent = {
+       fastingBloodGlucoseContent = {
         icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
-        title: 'HbA1c On Track',
+        title: 'Fasting Glucose On Track',
         description: `Next test is around ${format(nextTestDate, 'MMM yyyy')}.`,
         color: 'bg-green-500/10',
       };
@@ -256,7 +253,7 @@ export function ReminderCard() {
       const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
       const nextTestDate = addYears(lastTestDate, retestYears);
 
-      if (lastRenalRecord.egfr < 60 || lastRenalRecord.uacr > 30) {
+      if (lastRenalRecord.eGFR < 60 || lastRenalRecord.uacr > 30) {
            renalContent = {
               icon: <RefreshCw className="h-5 w-5 text-destructive" />,
               title: 'Follow-up on Kidney Function',
@@ -296,12 +293,12 @@ export function ReminderCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-4">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${hba1cContent.color}`}>
-            {hba1cContent.icon}
+          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${fastingBloodGlucoseContent.color}`}>
+            {fastingBloodGlucoseContent.icon}
           </div>
           <div>
-            <p className="font-semibold">{hba1cContent.title}</p>
-            <p className="text-sm text-muted-foreground">{hba1cContent.description}</p>
+            <p className="font-semibold">{fastingBloodGlucoseContent.title}</p>
+            <p className="text-sm text-muted-foreground">{fastingBloodGlucoseContent.description}</p>
           </div>
         </div>
         <Separator />

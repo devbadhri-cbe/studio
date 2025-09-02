@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Droplet, Sun, Zap, Globe, User, Share2, MessageSquare, Clock, Info, Bell } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Sun, Zap, Globe, User, Share2, MessageSquare, Clock, Info, Bell, Droplet } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
@@ -47,7 +47,7 @@ const getStatusVariant = (status: Patient['status']) => {
 }
 
 const statusDescriptions: Record<Patient['status'], string> = {
-    'Urgent': 'Set when HbA1c ≥ 7.0%, or BP ≥ 140/90.',
+    'Urgent': 'Set when BP ≥ 140/90 or other critical values are met.',
     'Needs Review': 'Set when key biomarkers are abnormal, or when a patient-added condition requires verification.',
     'On Track': 'Set when all key biomarkers are within their target ranges.'
 };
@@ -210,8 +210,8 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         <div className="grid grid-cols-3 gap-2 text-center text-xs">
             <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
                 <Droplet className="h-4 w-4 mb-1 text-primary" />
-                <span className="font-semibold">{patient.lastHba1c ? `${patient.lastHba1c.value.toFixed(1)}%` : 'N/A'}</span>
-                <span className="text-muted-foreground text-[10px]">HbA1c</span>
+                <span className="font-semibold">{patient.fastingBloodGlucoseRecords && patient.fastingBloodGlucoseRecords.length > 0 ? `${[...patient.fastingBloodGlucoseRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].value}` : 'N/A'}</span>
+                <span className="text-muted-foreground text-[10px]">Glucose</span>
             </div>
             <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
                 <Zap className="h-4 w-4 mb-1 text-primary" />

@@ -60,13 +60,6 @@ export interface UserProfile {
   doctorName?: string;
 }
 
-export interface Hba1cRecord {
-  id: string;
-  date: Date | string;
-  value: number; // in %
-  medication?: string;
-}
-
 export interface FastingBloodGlucoseRecord {
   id: string;
   date: Date | string;
@@ -167,10 +160,6 @@ export interface Patient {
   unitSystem: UnitSystem;
   lastLogin?: string; // ISO string
   bmi?: number;
-  lastHba1c: {
-    value: number;
-    date: string;
-  } | null;
   lastLipid: {
     ldl: number;
     date: string;
@@ -204,7 +193,6 @@ export interface Patient {
   } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
   // Add full record history to the patient object
-  records: Hba1cRecord[];
   fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
   lipidRecords: LipidRecord[];
   vitaminDRecords: VitaminDRecord[];
