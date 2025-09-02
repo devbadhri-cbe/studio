@@ -77,7 +77,7 @@ export function FastingBloodGlucoseCard() {
         </div>
           
         <div className="flex flex-col flex-1 border border-blue-500">
-            <div className="flex flex-col md:flex-row border border-green-500">
+            <div className="flex flex-row border border-green-500">
                 <div className="flex flex-col border border-red-500 flex-1">
                   <ScrollArea className="h-[140px] pr-3">
                     {sortedRecords.length > 0 ? (
@@ -88,11 +88,9 @@ export function FastingBloodGlucoseCard() {
                               <Tooltip key={record.id}>
                                   <TooltipTrigger asChild>
                                       <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                                          <div className="flex-1">
-                                          <div>
+                                          <div className="flex-1 flex items-center justify-between">
                                               <span className="font-semibold text-foreground">{getDisplayGlucoseValue(record.value)} {unitLabel}</span>
-                                          </div>
-                                          <span className="block text-xs">on {formatDate(record.date)}</span>
+                                              <span className="block text-xs">on {formatDate(record.date)}</span>
                                           </div>
                                           <div className="flex items-center shrink-0">
                                           <Tooltip>
