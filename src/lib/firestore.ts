@@ -56,6 +56,7 @@ const processPatientDoc = (doc: any): Patient => {
     });
   }
 
+  const hba1cRecords = sanitizeRecords(data.hba1cRecords);
   const fastingBloodGlucoseRecords = sanitizeRecords(data.fastingBloodGlucoseRecords);
   const lipidRecords = sanitizeRecords(data.lipidRecords);
   const vitaminDRecords = sanitizeRecords(data.vitaminDRecords);
@@ -77,7 +78,8 @@ const processPatientDoc = (doc: any): Patient => {
     }
     return record;
   });
-
+  
+  const lastHba1c = hba1cRecords.length > 0 ? [...hba1cRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastLipid = lipidRecords.length > 0 ? [...lipidRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastVitaminD = vitaminDRecords.length > 0 ? [...vitaminDRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastThyroid = thyroidRecords.length > 0 ? [...thyroidRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
@@ -97,6 +99,7 @@ const processPatientDoc = (doc: any): Patient => {
     id: doc.id,
     dob: !isNaN(dobTimestamp.getTime()) ? dobTimestamp.toISOString() : new Date(0).toISOString(),
     lastLogin: lastLoginTimestamp && !isNaN(lastLoginTimestamp.getTime()) ? lastLoginTimestamp.toISOString() : undefined,
+    hba1cRecords,
     fastingBloodGlucoseRecords,
     lipidRecords,
     vitaminDRecords,
@@ -117,6 +120,7 @@ const processPatientDoc = (doc: any): Patient => {
   return {
     ...patientData,
     status,
+    lastHba1c: lastHba1c ? { value: lastHba1c.value, date: lastHba1c.date } : null,
     lastLipid: lastLipid ? { ldl: lastLipid.ldl, date: lastLipid.date } : null,
     lastVitaminD: lastVitaminD ? { value: lastVitaminD.value, date: lastVitaminD.date } : null,
     lastThyroid: lastThyroid ? { tsh: lastThyroid.tsh, date: lastThyroid.date } : null,
@@ -148,6 +152,7 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         ...patientData,
         doctorName: 'Dr. Badhrinathan N',
         lastLogin: null,
+        hba1cRecords: [],
         fastingBloodGlucoseRecords: [],
         lipidRecords: [],
         vitaminDRecords: [],
@@ -185,7 +190,7 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
     if (updates.lastLogin && typeof updates.lastLogin === 'string') {
         updateData.lastLogin = new Date(updates.lastLogin);
     }
-    ['fastingBloodGlucoseRecords', 'lipidRecords', 'vitaminDRecords', 'thyroidRecords', 'renalRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'anemiaRecords', 'nutritionRecords', 'electrolyteRecords', 'mineralBoneDiseaseRecords'].forEach(key => {
+    ['hba1cRecords', 'fastingBloodGlucoseRecords', 'lipidRecords', 'vitaminDRecords', 'thyroidRecords', 'renalRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'anemiaRecords', 'nutritionRecords', 'electrolyteRecords', 'mineralBoneDiseaseRecords'].forEach(key => {
         if (updateData[key] && Array.isArray(updateData[key])) {
             updateData[key] = updateData[key].map((item: any) => ({
                 ...item,

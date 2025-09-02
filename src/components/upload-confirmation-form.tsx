@@ -26,6 +26,7 @@ interface UploadConfirmationFormProps {
 export function UploadConfirmationForm({ extractedData: initialData, onCancel, onSuccess }: UploadConfirmationFormProps) {
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput>(initialData);
   const [manualInputs, setManualInputs] = React.useState({
+    hba1c: '',
     fastingBloodGlucose: '',
     vitD: '',
     systolic: '',
@@ -71,7 +72,7 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
 
     setIsSubmitting(true);
 
-    const { fastingBloodGlucoseValue, lipidPanel, vitaminDValue, vitaminDUnits, thyroidPanel, bloodPressure, renalPanel, electrolytes, mineralBone, hemoglobin, albumin, date } = extractedData;
+    const { hba1c, fastingBloodGlucoseValue, lipidPanel, vitaminDValue, vitaminDUnits, thyroidPanel, bloodPressure, renalPanel, electrolytes, mineralBone, hemoglobin, albumin, date } = extractedData;
     
     if (!date || !isValid(parseISO(date))) {
         toast({
@@ -84,6 +85,7 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
     }
     
     const { added, duplicates } = await addBatchRecords({
+      hba1c: hba1c?.value ? { value: hba1c.value, date } : undefined,
       fastingBloodGlucose: fastingBloodGlucoseValue ? { value: fastingBloodGlucoseValue, date } : undefined,
       lipid: lipidPanel ? { ...lipidPanel, date, units: lipidPanel.units } : undefined,
       vitaminD: (vitaminDValue && vitaminDUnits) ? { value: vitaminDValue, date, units: vitaminDUnits } : undefined,
@@ -194,6 +196,15 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
             {/* General & Common Panels */}
+             <div className="flex items-center gap-3 rounded-md border p-2">
+                <Droplet className="h-5 w-5 text-primary/80" />
+                <div className="flex-1">
+                    <Label htmlFor="hba1c-manual" className="font-semibold">HbA1c (%)</Label>
+                    {extractedData.hba1c?.value ? ( <p>{extractedData.hba1c.value}%</p> ) : (
+                         <Input id="hba1c-manual" type="number" placeholder="Enter HbA1c" className="h-8 mt-1" 
+                           value={manualInputs.hba1c} onChange={e => handleManualEntryChange('hba1c', e.target.value)} onBlur={() => handleManualEntryBlur('hba1c', 'value')} /> )}
+                </div>
+            </div>
             <div className="flex items-center gap-3 rounded-md border p-2">
                 <Droplet className="h-5 w-5 text-primary/80" />
                 <div className="flex-1">

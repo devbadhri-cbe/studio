@@ -13,6 +13,10 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const PersonalizedInsightsInputSchema = z.object({
+  hba1cData: z
+    .array(z.object({ date: z.string(), value: z.number() }))
+    .optional()
+    .describe('Array of historical HbA1c data.'),
   lipidData: z
     .array(z.object({
       date: z.string(),
@@ -96,6 +100,13 @@ Gender: {{{userProfile.gender}}}
 Present Medical Conditions: {{#if userProfile.presentMedicalConditions}}{{#each userProfile.presentMedicalConditions}}{{{this.condition}}} (Diagnosed: {{this.date}}), {{/each}}{{else}}None{{/if}}
 Medication: {{#if userProfile.medication}}{{{userProfile.medication}}}{{else}}None{{/if}}
 
+{{#if hba1cData}}
+Historical HbA1c Data (most recent first):
+{{#each hba1cData}}
+  - Date: {{{this.date}}}, Value: {{{this.value}}}%
+{{/each}}
+{{/if}}
+
 {{#if lipidData}}
 Historical Lipid Data (most recent first):
 {{#each lipidData}}
@@ -131,6 +142,9 @@ const personalizedInsightsFlow = ai.defineFlow(
   },
   async input => {
     // Sort data to ensure the prompt receives the most recent records first
+    if (input.hba1cData) {
+      input.hba1cData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
     if (input.lipidData) {
       input.lipidData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }

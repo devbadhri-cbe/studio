@@ -35,7 +35,7 @@ const LANGUAGES = [
 ];
 
 export function InsightsCard() {
-  const { profile, records, lipidRecords, bloodPressureRecords, tips, setTips, weightRecords } = useApp();
+  const { profile, hba1cRecords, lipidRecords, bloodPressureRecords, tips, setTips, weightRecords } = useApp();
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
   const [originalTips, setOriginalTips] = React.useState<string[]>([]);
@@ -58,7 +58,7 @@ export function InsightsCard() {
       const age = calculateAge(profile.dob);
       if (age === null) throw new Error('Could not calculate age.');
 
-      const hba1cData = records.map((r) => ({ date: new Date(r.date).toISOString(), value: r.value }));
+      const hba1cData = hba1cRecords.map((r) => ({ date: new Date(r.date).toISOString(), value: r.value }));
       const lipidData = lipidRecords.map(r => ({date: new Date(r.date).toISOString(), ldl: r.ldl, hdl: r.hdl, total: r.total, triglycerides: r.triglycerides}));
       const bloodPressureData = bloodPressureRecords.map(r => ({date: new Date(r.date).toISOString(), systolic: r.systolic, diastolic: r.diastolic}));
       

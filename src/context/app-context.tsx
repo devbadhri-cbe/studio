@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Doctor, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type AnemiaRecord, type NutritionRecord, type FastingBloodGlucoseRecord, CustomBiomarker } from '@/lib/types';
+import { type Doctor, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type AnemiaRecord, type NutritionRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -19,6 +19,7 @@ type DashboardView = 'lipids' | 'vitaminD' | 'thyroid' | 'hypertension' | 'renal
 type Theme = 'dark' | 'light' | 'system';
 
 interface BatchRecords {
+    hba1c?: Omit<Hba1cRecord, 'id' | 'medication'>;
     fastingBloodGlucose?: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>;
     lipid?: Omit<LipidRecord, 'id' | 'medication'> & { units?: 'mg/dL' | 'mmol/L' };
     vitaminD?: Omit<VitaminDRecord, 'id' | 'medication'> & { units?: 'ng/mL' | 'nmol/L' };
@@ -53,6 +54,9 @@ interface AppContextType {
   addMedication: (medication: Omit<Medication, 'id'>) => void;
   removeMedication: (id: string) => void;
   setMedicationNil: () => void;
+  hba1cRecords: Hba1cRecord[];
+  addHba1cRecord: (record: Omit<Hba1cRecord, 'id' | 'medication'>) => void;
+  removeHba1cRecord: (id: string) => void;
   fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
   addFastingBloodGlucoseRecord: (record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => void;
   removeFastingBloodGlucoseRecord: (id: string) => void;
@@ -118,6 +122,7 @@ const AppContext = React.createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfileState] = React.useState<UserProfile>(initialProfile);
+  const [hba1cRecords, setHba1cRecordsState] = React.useState<Hba1cRecord[]>([]);
   const [fastingBloodGlucoseRecords, setFastingBloodGlucoseRecordsState] = React.useState<FastingBloodGlucoseRecord[]>([]);
   const [lipidRecords, setLipidRecordsState] = React.useState<LipidRecord[]>([]);
   const [vitaminDRecords, setVitaminDRecordsState] = React.useState<VitaminDRecord[]>([]);
@@ -248,6 +253,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       customBiomarkers: patient.customBiomarkers || [],
     };
     setProfileState(patientProfile);
+    setHba1cRecordsState(patient.hba1cRecords || []);
     setFastingBloodGlucoseRecordsState(patient.fastingBloodGlucoseRecords || []);
     setLipidRecordsState(patient.lipidRecords || []);
     setVitaminDRecordsState(patient.vitaminDRecords || []);
@@ -392,6 +398,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updatePatientData(profile.id, { medication: nilMedication });
   }
 
+  const addHba1cRecord = (record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    const updatedRecords = [...hba1cRecords, newRecord];
+    setHba1cRecordsState(updatedRecords);
+    updatePatientData(profile.id, { hba1cRecords: updatedRecords });
+  };
+
+  const removeHba1cRecord = (id: string) => {
+    const updatedRecords = hba1cRecords.filter(r => r.id !== id);
+    setHba1cRecordsState(updatedRecords);
+    updatePatientData(profile.id, { hba1cRecords: updatedRecords });
+  };
+  
   const addFastingBloodGlucoseRecord = (record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     const updatedRecords = [...fastingBloodGlucoseRecords, newRecord];
@@ -590,7 +609,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
     const updates: Partial<Patient> = {};
-    const date = batch.fastingBloodGlucose?.date || batch.lipid?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date || batch.renal?.date;
+    const date = batch.hba1c?.date || batch.fastingBloodGlucose?.date || batch.lipid?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date || batch.renal?.date;
 
     const result: AddBatchRecordsResult = { added: [], duplicates: [] };
 
@@ -604,6 +623,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     
     const newRecordDate = startOfDay(new Date(date));
+
+    if (batch.hba1c && batch.hba1c.value) {
+      const dateExists = hba1cRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+      if (!dateExists) {
+        const newRecord: Hba1cRecord = { ...batch.hba1c, id: `hba1c-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+        updates.hba1cRecords = [...hba1cRecords, newRecord];
+        setHba1cRecordsState(updates.hba1cRecords);
+        result.added.push('HbA1c');
+      } else { result.duplicates.push('HbA1c'); }
+    }
 
     if (batch.fastingBloodGlucose && batch.fastingBloodGlucose.value) {
       const dateExists = fastingBloodGlucoseRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
@@ -749,6 +778,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addMedication,
     removeMedication,
     setMedicationNil,
+    hba1cRecords,
+    addHba1cRecord,
+    removeHba1cRecord,
     fastingBloodGlucoseRecords,
     addFastingBloodGlucoseRecord,
     removeFastingBloodGlucoseRecord,
