@@ -37,7 +37,7 @@ export function MineralBoneChart() {
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         {mineralBoneDiseaseRecords && mineralBoneDiseaseRecords.length > 0 ? (
-          <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 20 }}>
+          <ComposedChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"

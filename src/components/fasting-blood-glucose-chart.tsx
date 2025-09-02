@@ -44,7 +44,7 @@ export function FastingBloodGlucoseChart() {
       <div className="flex-1">
         <ResponsiveContainer width="100%" height="100%">
           {fastingBloodGlucoseRecords && fastingBloodGlucoseRecords.length > 0 ? (
-            <LineChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 20 }}>
+            <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="date"

@@ -10,7 +10,7 @@ export function LdlChart() {
   const { lipidRecords, getDisplayLipidValue, biomarkerUnit } = useApp();
   const formatDate = useDateFormatter();
 
-  const sortedRecords = [...lipidRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sortedRecords = [...lipidRecords].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const latestRecords = sortedRecords.slice(0, 5).reverse();
   
   const chartData = latestRecords.map((r) => ({
@@ -34,7 +34,7 @@ export function LdlChart() {
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         {lipidRecords.length > 0 ? (
-          <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 20 }}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"

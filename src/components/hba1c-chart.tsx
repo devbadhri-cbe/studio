@@ -17,8 +17,8 @@ export function Hba1cChart() {
   const { records } = useApp();
   const formatDate = useDateFormatter();
 
-  const sortedRecords = [...records].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const latestRecords = sortedRecords.slice(0, 5).reverse();
+  const sortedRecords = [...records].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const latestRecords = sortedRecords.slice(Math.max(sortedRecords.length - 5, 0));
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
@@ -34,7 +34,7 @@ export function Hba1cChart() {
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         {records.length > 0 ? (
-          <LineChart data={chartData} margin={{ top: 20, right: 20, left: 10, bottom: 20 }}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
