@@ -64,19 +64,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
 
   const needsReview = patient.presentMedicalConditions?.some(c => c.status === 'pending_review') || patient.dashboardSuggestions?.some(s => s.status === 'pending');
   
-  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // This check prevents navigation when clicking on any interactive element like buttons or menu items.
-    if ((e.target as HTMLElement).closest('button, [role="menuitem"], [role="dialog"], a')) {
-      e.stopPropagation();
-      return;
-    }
-    onView(patient);
-  };
-  
-  const handleActionClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   const handleContact = (method: 'whatsapp' | 'sms' | 'email') => {
     const doctorName = patient.doctorName || "your doctor";
     switch (method) {
@@ -107,7 +94,10 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   }
 
   return (
-    <Card className="w-full flex flex-col cursor-pointer transition-all group md:hover:border-primary/50 shadow-md active:shadow-xl active:scale-[0.98] md:hover:shadow-lg" onClick={handleCardClick}>
+    <Card 
+        className="w-full flex flex-col cursor-pointer transition-all group md:hover:border-primary/50 shadow-md active:shadow-xl active:scale-[0.98] md:hover:shadow-lg" 
+        onClick={() => onView(patient)}
+    >
       <CardHeader className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1 flex items-center gap-3 min-w-0">
@@ -141,7 +131,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </p>
              </div>
           </div>
-          <div className="flex items-center" onClick={handleActionClick}>
+          <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
