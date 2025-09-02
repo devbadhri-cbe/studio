@@ -15,11 +15,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
 import { useApp } from '@/context/app-context';
-import { Hba1cCard } from './hba1c-card';
-import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
-import { AnemiaCard } from './anemia-card';
-import { WeightRecordCard } from './weight-record-card';
-import { cn } from '@/lib/utils';
 import { Card, CardContent } from './ui/card';
 
 type Checked = DropdownMenuCheckboxItemProps["checked"]
@@ -30,13 +25,6 @@ export function DiabetesCard() {
   const [showFastingBloodGlucose, setShowFastingBloodGlucose] = React.useState<Checked>(true);
   const [showAnemia, setShowAnemia] = React.useState<Checked>(false);
   const [showWeight, setShowWeight] = React.useState<Checked>(false);
-  
-  const selectedCards = [
-    showHbA1c && <Hba1cCard key="hba1c" />,
-    showFastingBloodGlucose && <FastingBloodGlucoseCard key="fbg" />,
-    showAnemia && <AnemiaCard key="anemia" />,
-    showWeight && <WeightRecordCard key="weight" />,
-  ].filter(Boolean);
 
   return (
     <Card className="h-full">
@@ -84,33 +72,11 @@ export function DiabetesCard() {
                     </DropdownMenu>
                 )}
              </div>
-
-            {selectedCards.length > 0 ? (
-                <div className="relative space-y-4">
-                     {selectedCards.map((card, index) => (
-                        <div
-                            key={index}
-                            className={cn(
-                                "transition-all duration-300 ease-in-out",
-                            )}
-                            style={{
-                                transform: `translateY(${index * -20}px) scale(${1 - index * 0.05})`,
-                                zIndex: selectedCards.length - index,
-                                opacity: 1 - index * 0.1,
-                                position: 'relative',
-                                top: `${index * 20}px`,
-                            }}
-                        >
-                            {card}
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                 <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
-                    <p className="text-center text-xs text-muted-foreground">No biomarker cards selected for this panel.</p>
-                     {isDoctorLoggedIn && <p className="text-center text-xs text-muted-foreground mt-1">Click the <Settings className="inline-block h-3 w-3" /> icon to add cards.</p>}
-                </div>
-            )}
+             
+             <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
+                <p className="text-center text-xs text-muted-foreground">No biomarker cards selected for this panel.</p>
+                 {isDoctorLoggedIn && <p className="text-center text-xs text-muted-foreground mt-1">Click the <Settings className="inline-block h-3 w-3" /> icon to add cards.</p>}
+            </div>
 
         </CardContent>
     </Card>
