@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Doctor, type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type AnemiaRecord, type NutritionRecord } from '@/lib/types';
+import { type Doctor, type Hba1cRecord, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type AnemiaRecord, type NutritionRecord, FastingBloodGlucoseRecord } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -20,6 +20,7 @@ type Theme = 'dark' | 'light' | 'system';
 
 interface BatchRecords {
     hba1c?: Omit<Hba1cRecord, 'id' | 'medication'>;
+    fastingBloodGlucose?: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>;
     lipid?: Omit<LipidRecord, 'id' | 'medication'> & { units?: 'mg/dL' | 'mmol/L' };
     vitaminD?: Omit<VitaminDRecord, 'id' | 'medication'> & { units?: 'ng/mL' | 'nmol/L' };
     thyroid?: Omit<ThyroidRecord, 'id' | 'medication'>;
@@ -51,6 +52,9 @@ interface AppContextType {
   records: Hba1cRecord[];
   addRecord: (record: Omit<Hba1cRecord, 'id' | 'medication'>) => void;
   removeRecord: (id: string) => void;
+  fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
+  addFastingBloodGlucoseRecord: (record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => void;
+  removeFastingBloodGlucoseRecord: (id: string) => void;
   lipidRecords: LipidRecord[];
   addLipidRecord: (record: Omit<LipidRecord, 'id' | 'medication'>) => void;
   removeLipidRecord: (id: string) => void;
@@ -105,6 +109,7 @@ const AppContext = React.createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfileState] = React.useState<UserProfile>(initialProfile);
   const [records, setRecordsState] = React.useState<Hba1cRecord[]>([]);
+  const [fastingBloodGlucoseRecords, setFastingBloodGlucoseRecordsState] = React.useState<FastingBloodGlucoseRecord[]>([]);
   const [lipidRecords, setLipidRecordsState] = React.useState<LipidRecord[]>([]);
   const [vitaminDRecords, setVitaminDRecordsState] = React.useState<VitaminDRecord[]>([]);
   const [thyroidRecords, setThyroidRecordsState] = React.useState<ThyroidRecord[]>([]);
@@ -203,6 +208,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     setProfileState(patientProfile);
     setRecordsState(patient.records || []);
+    setFastingBloodGlucoseRecordsState(patient.fastingBloodGlucoseRecords || []);
     setLipidRecordsState(patient.lipidRecords || []);
     setVitaminDRecordsState(patient.vitaminDRecords || []);
     setThyroidRecordsState(patient.thyroidRecords || []);
@@ -357,6 +363,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { records: updatedRecords });
   };
 
+  const addFastingBloodGlucoseRecord = (record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    const updatedRecords = [...fastingBloodGlucoseRecords, newRecord];
+    setFastingBloodGlucoseRecordsState(updatedRecords);
+    updatePatientData(profile.id, { fastingBloodGlucoseRecords: updatedRecords });
+  };
+
+  const removeFastingBloodGlucoseRecord = (id: string) => {
+    const updatedRecords = fastingBloodGlucoseRecords.filter(r => r.id !== id);
+    setFastingBloodGlucoseRecordsState(updatedRecords);
+    updatePatientData(profile.id, { fastingBloodGlucoseRecords: updatedRecords });
+  };
+
   const addLipidRecord = (record: Omit<LipidRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     const updatedRecords = [...lipidRecords, newRecord];
@@ -503,7 +522,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
     const updates: Partial<Patient> = {};
-    const date = batch.hba1c?.date || batch.lipid?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date || batch.renal?.date;
+    const date = batch.hba1c?.date || batch.lipid?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date || batch.renal?.date || batch.fastingBloodGlucose?.date;
 
     const result: AddBatchRecordsResult = { added: [], duplicates: [] };
 
@@ -528,6 +547,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       } else { result.duplicates.push('HbA1c'); }
     }
     
+    if (batch.fastingBloodGlucose && batch.fastingBloodGlucose.value) {
+      const dateExists = fastingBloodGlucoseRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+      if (!dateExists) {
+        const newRecord: FastingBloodGlucoseRecord = { ...batch.fastingBloodGlucose, id: `fbg-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+        updates.fastingBloodGlucoseRecords = [...fastingBloodGlucoseRecords, newRecord];
+        setFastingBloodGlucoseRecordsState(updates.fastingBloodGlucoseRecords);
+        result.added.push('Fasting Blood Glucose');
+      } else { result.duplicates.push('Fasting Blood Glucose'); }
+    }
+
     if (batch.lipid && batch.lipid.ldl && batch.lipid.hdl && batch.lipid.triglycerides && batch.lipid.total) {
       const dateExists = lipidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
       
@@ -665,6 +694,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     records,
     addRecord,
     removeRecord,
+    fastingBloodGlucoseRecords,
+    addFastingBloodGlucoseRecord,
+    removeFastingBloodGlucoseRecord,
     lipidRecords,
     addLipidRecord,
     removeLipidRecord,

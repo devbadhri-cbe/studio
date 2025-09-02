@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
@@ -26,6 +27,7 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput>(initialData);
   const [manualInputs, setManualInputs] = React.useState({
     hba1c: '',
+    fastingBloodGlucose: '',
     vitD: '',
     systolic: '',
     diastolic: '',
@@ -70,7 +72,7 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
 
     setIsSubmitting(true);
 
-    const { hba1cValue, lipidPanel, vitaminDValue, vitaminDUnits, thyroidPanel, bloodPressure, renalPanel, electrolytes, mineralBone, hemoglobin, albumin, date } = extractedData;
+    const { hba1cValue, fastingBloodGlucoseValue, lipidPanel, vitaminDValue, vitaminDUnits, thyroidPanel, bloodPressure, renalPanel, electrolytes, mineralBone, hemoglobin, albumin, date } = extractedData;
     
     if (!date || !isValid(parseISO(date))) {
         toast({
@@ -84,6 +86,7 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
     
     const { added, duplicates } = await addBatchRecords({
       hba1c: hba1cValue ? { value: hba1cValue, date } : undefined,
+      fastingBloodGlucose: fastingBloodGlucoseValue ? { value: fastingBloodGlucoseValue, date } : undefined,
       lipid: lipidPanel ? { ...lipidPanel, date, units: lipidPanel.units } : undefined,
       vitaminD: (vitaminDValue && vitaminDUnits) ? { value: vitaminDValue, date, units: vitaminDUnits } : undefined,
       thyroid: thyroidPanel ? { ...thyroidPanel, date } : undefined,
@@ -200,6 +203,15 @@ export function UploadConfirmationForm({ extractedData: initialData, onCancel, o
                     {extractedData.hba1cValue ? ( <p>{extractedData.hba1cValue}%</p> ) : (
                          <Input id="hba1c-manual" type="number" step="0.1" placeholder="Enter HbA1c" className="h-8 mt-1" 
                            value={manualInputs.hba1c} onChange={e => handleManualEntryChange('hba1c', e.target.value)} onBlur={() => handleManualEntryBlur('hba1cValue')} /> )}
+                </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-md border p-2">
+                <Droplet className="h-5 w-5 text-primary/80" />
+                <div className="flex-1">
+                    <Label htmlFor="fbg-manual" className="font-semibold">Fasting Glucose</Label>
+                    {extractedData.fastingBloodGlucoseValue ? ( <p>{extractedData.fastingBloodGlucoseValue} mg/dL</p> ) : (
+                         <Input id="fbg-manual" type="number" placeholder="Enter Glucose" className="h-8 mt-1" 
+                           value={manualInputs.fastingBloodGlucose} onChange={e => handleManualEntryChange('fastingBloodGlucose', e.target.value)} onBlur={() => handleManualEntryBlur('fastingBloodGlucoseValue')} /> )}
                 </div>
             </div>
             <div className="flex items-center gap-3 rounded-md border p-2">

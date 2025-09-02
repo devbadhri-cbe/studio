@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -61,6 +62,7 @@ const processPatientDoc = (doc: any): Patient => {
   }
 
   const records = sanitizeRecords(data.records);
+  const fastingBloodGlucoseRecords = sanitizeRecords(data.fastingBloodGlucoseRecords);
   const lipidRecords = sanitizeRecords(data.lipidRecords);
   const vitaminDRecords = sanitizeRecords(data.vitaminDRecords);
   const thyroidRecords = sanitizeRecords(data.thyroidRecords);
@@ -103,6 +105,7 @@ const processPatientDoc = (doc: any): Patient => {
     dob: !isNaN(dobTimestamp.getTime()) ? dobTimestamp.toISOString() : new Date(0).toISOString(),
     lastLogin: lastLoginTimestamp && !isNaN(lastLoginTimestamp.getTime()) ? lastLoginTimestamp.toISOString() : undefined,
     records,
+    fastingBloodGlucoseRecords,
     lipidRecords,
     vitaminDRecords,
     thyroidRecords,
@@ -155,6 +158,7 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         doctorName: 'Dr. Badhrinathan N',
         lastLogin: null,
         records: [],
+        fastingBloodGlucoseRecords: [],
         lipidRecords: [],
         vitaminDRecords: [],
         thyroidRecords: [],
@@ -192,7 +196,7 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
     if (updates.lastLogin && typeof updates.lastLogin === 'string') {
         updateData.lastLogin = new Date(updates.lastLogin);
     }
-    ['records', 'lipidRecords', 'vitaminDRecords', 'thyroidRecords', 'renalRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'anemiaRecords', 'nutritionRecords', 'electrolyteRecords', 'mineralBoneDiseaseRecords'].forEach(key => {
+    ['records', 'fastingBloodGlucoseRecords', 'lipidRecords', 'vitaminDRecords', 'thyroidRecords', 'renalRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'anemiaRecords', 'nutritionRecords', 'electrolyteRecords', 'mineralBoneDiseaseRecords'].forEach(key => {
         if (updateData[key] && Array.isArray(updateData[key])) {
             updateData[key] = updateData[key].map((item: any) => ({
                 ...item,

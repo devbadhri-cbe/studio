@@ -67,6 +67,13 @@ export interface Hba1cRecord {
   medication?: string;
 }
 
+export interface FastingBloodGlucoseRecord {
+  id: string;
+  date: Date | string;
+  value: number; // in mg/dL
+  medication?: string;
+}
+
 export interface LipidRecord {
   id:string;
   date: Date | string;
@@ -198,6 +205,7 @@ export interface Patient {
   status: 'On Track' | 'Needs Review' | 'Urgent';
   // Add full record history to the patient object
   records: Hba1cRecord[];
+  fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
   lipidRecords: LipidRecord[];
   vitaminDRecords: VitaminDRecord[];
   thyroidRecords: ThyroidRecord[];

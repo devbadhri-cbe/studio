@@ -21,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { MedicalConditionsCard } from '@/components/medical-conditions-card';
 import { MedicationCard } from '@/components/medication-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
+import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -152,6 +153,7 @@ export default function PatientDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ProfileCard />
                 <WeightRecordCard />
+                <FastingBloodGlucoseCard />
                 <MedicalConditionsCard />
                 <MedicationCard />
               </div>
