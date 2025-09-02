@@ -6,11 +6,11 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { useParams, useRouter } from 'next/navigation';
 import PatientDashboard from '@/app/patient/dashboard/page';
-import { getPatient, updatePatient } from '@/lib/firestore';
+import { getPatient } from '@/lib/firestore';
 import { Button } from '@/components/ui/button';
 
 export default function PatientDashboardPage() {
-    const { setPatientData, isClient, setIsDoctorLoggedIn } = useApp();
+    const { setPatientData, isClient } = useApp();
     const router = useRouter();
     const params = useParams();
     const patientId = params.patientId as string;
@@ -23,19 +23,10 @@ export default function PatientDashboardPage() {
         const loadData = async () => {
             setIsLoading(true);
             setError(null);
-
-            // Determine if the doctor is viewing this page.
-            // This is a simple check, a more robust system would use session or auth state.
-            const isDoctorViewing = window.location.pathname.startsWith('/doctor');
-            setIsDoctorLoggedIn(isDoctorViewing);
-
             try {
                 const patient = await getPatient(patientId);
                 if (patient) {
                     setPatientData(patient);
-                    if (!isDoctorViewing) { // Only update lastLogin if it's a patient logging in
-                        await updatePatient(patient.id, { lastLogin: new Date().toISOString() });
-                    }
                 } else {
                     setError(`No patient found with ID ${patientId}. Please check the link.`);
                     localStorage.removeItem('patient_id');
@@ -51,7 +42,7 @@ export default function PatientDashboardPage() {
 
         loadData();
 
-    }, [patientId, setPatientData, router, isClient, setIsDoctorLoggedIn]);
+    }, [patientId, setPatientData, router, isClient]);
 
     if (isLoading) {
         return (
@@ -71,6 +62,5 @@ export default function PatientDashboardPage() {
         );
     }
     
-    // If there are no errors and loading is complete, render the dashboard.
     return <PatientDashboard />;
 }

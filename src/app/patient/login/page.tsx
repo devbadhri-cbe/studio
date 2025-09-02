@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { getPatient } from '@/lib/firestore';
+import { getPatient, updatePatient } from '@/lib/firestore';
 import { Separator } from '@/components/ui/separator';
 
 const FormSchema = z.object({
@@ -39,6 +39,7 @@ export default function PatientLoginPage() {
         const patient = await getPatient(data.patientId);
         if (patient) {
             localStorage.setItem('patient_id', patient.id);
+            await updatePatient(patient.id, { lastLogin: new Date().toISOString() });
             toast({
                 title: 'Login Successful',
                 description: `Welcome, ${patient.name}! Redirecting to your dashboard...`,
