@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Line, LineChart, CartesianGrid, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot, ReferenceArea, Label } from 'recharts';
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { format, parseISO } from 'date-fns';
 
 export function FastingBloodGlucoseChart() {
   const { fastingBloodGlucoseRecords } = useApp();
@@ -29,6 +30,10 @@ export function FastingBloodGlucoseChart() {
     return [Math.max(0, Math.floor(min - padding)), Math.ceil(max + padding)];
   }, [chartData]);
   
+  const formatShortDate = (tickItem: string) => {
+    return format(parseISO(tickItem), "MMM d");
+  }
+
   return (
     <div className="h-full w-full flex flex-col">
       <div className="flex-1">
@@ -38,12 +43,12 @@ export function FastingBloodGlucoseChart() {
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="date"
-                tickFormatter={(tick) => formatDate(tick)}
+                tickFormatter={formatShortDate}
                 tickLine={true}
                 axisLine={true}
-                angle={-60}
+                angle={-45}
                 textAnchor="end"
-                height={70}
+                height={50}
                 tick={{ fontSize: 10 }}
               />
               <YAxis
