@@ -39,8 +39,8 @@ export function BiomarkerCardTemplate({
         </div>
 
         {/* 2. Records and Status in a horizontal grid */}
-        <div className="flex flex-col md:flex-row border rounded-md flex-1 min-h-0">
-            <div className="flex-1 border-b md:border-b-0 md:border-r p-2 flex items-center justify-center">
+        <div className="flex flex-col md:flex-row rounded-md flex-1 min-h-0">
+            <div className="flex-1 p-2 flex items-center justify-center">
                 {recordsList}
             </div>
             <div className="flex-1 p-2 flex items-center justify-center">
@@ -49,7 +49,7 @@ export function BiomarkerCardTemplate({
         </div>
         
         {/* 3. Chart in the bottom, expanding to fill space */}
-        <div className="border rounded-md p-2 flex-1 flex flex-col min-h-0">
+        <div className="p-2 flex-1 flex flex-col min-h-0">
             {chart}
         </div>
       </CardContent>
