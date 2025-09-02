@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Trash2, Droplet } from 'lucide-react';
+import { Trash2, Droplet, Settings } from 'lucide-react';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { AddFastingBloodGlucoseRecordDialog } from './add-fasting-blood-glucose-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 export function FastingBloodGlucoseCard() {
   const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord, getDisplayGlucoseValue, biomarkerUnit, setBiomarkerUnit } = useApp();
@@ -32,7 +33,7 @@ export function FastingBloodGlucoseCard() {
     return { text: 'Diabetes', variant: 'destructive' as const };
   }
 
-  const latestRecord = sortedRecords[0];
+  const latestRecord = sortedRecords.length > 0 ? sortedRecords[0] : null;
   const currentStatus = latestRecord ? getStatus(latestRecord.value) : null;
   const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
@@ -40,26 +41,44 @@ export function FastingBloodGlucoseCard() {
     <Card>
       <CardContent className="space-y-4 text-sm p-4">
         <div>
-          <div className="flex items-center justify-between mb-2 border border-red-500">
+          <div className="flex items-center justify-between mb-2">
             <div className='flex items-center gap-3 flex-1'>
               <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />
               <h3 className="font-medium">Fasting Blood Glucose</h3>
             </div>
             <div className="flex items-center gap-1 shrink-0">
-               <AddFastingBloodGlucoseRecordDialog />
+                <Popover>
+                    <PopoverTrigger asChild>
+                         <Button size="icon" variant="ghost" className="h-8 w-8">
+                             <Settings className="h-4 w-4" />
+                         </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64" align="end">
+                         <div className="space-y-4">
+                             <AddFastingBloodGlucoseRecordDialog>
+                                <Button variant="outline" className="w-full">Add New Record</Button>
+                             </AddFastingBloodGlucoseRecordDialog>
+                             <Separator />
+                             <div className="space-y-2">
+                                <Label>Biomarker Units</Label>
+                                <div className="flex items-center justify-center space-x-2 py-2">
+                                    <Label htmlFor="unit-switch-fbg" className="text-xs">mg/dL</Label>
+                                    <Switch
+                                        id="unit-switch-fbg"
+                                        checked={biomarkerUnit === 'si'}
+                                        onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
+                                    />
+                                    <Label htmlFor="unit-switch-fbg" className="text-xs">mmol/L</Label>
+                                </div>
+                            </div>
+                         </div>
+                    </PopoverContent>
+                </Popover>
             </div>
           </div>
-           <div className="flex items-center justify-center space-x-2 mb-2 border border-red-500 py-2">
-                <Label htmlFor="unit-switch-fbg">mg/dL</Label>
-                <Switch
-                    id="unit-switch-fbg"
-                    checked={biomarkerUnit === 'si'}
-                    onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
-                />
-                <Label htmlFor="unit-switch-fbg">mmol/L</Label>
-            </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex flex-col border border-red-500">
+            <div className="flex flex-col">
               <ScrollArea className="h-[140px] pr-3">
                 {sortedRecords.length > 0 ? (
                   <ul className="space-y-1 mt-2">
@@ -101,14 +120,14 @@ export function FastingBloodGlucoseCard() {
                 )}
               </ScrollArea>
             </div>
-            <div className="flex flex-col border border-red-500 min-h-[150px]">
+            <div className="flex flex-col min-h-[150px]">
               <FastingBloodGlucoseChart />
             </div>
           </div>
           {currentStatus && (
             <>
               <Separator className="my-2" />
-              <div className="text-center text-xs text-muted-foreground mt-2 flex items-center justify-center flex-wrap gap-x-4 gap-y-2 border border-red-500">
+              <div className="text-center text-xs text-muted-foreground mt-2 flex items-center justify-center flex-wrap gap-x-4 gap-y-2">
                  <div className="flex items-center gap-2">
                     <span>Current Status:</span>
                     <Badge variant={currentStatus.variant} className={cn("text-xs", currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : '')}>
