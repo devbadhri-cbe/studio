@@ -14,9 +14,12 @@ import { Badge } from './ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { ScrollArea } from './ui/scroll-area';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
+import { Separator } from './ui/separator';
+import { Label } from './ui/label';
+import { Switch } from './ui/switch';
 
 export function AnemiaCard() {
-  const { anemiaRecords, removeAnemiaRecord, profile } = useApp();
+  const { anemiaRecords, removeAnemiaRecord, profile, biomarkerUnit, setBiomarkerUnit, getDisplayHemoglobinValue } = useApp();
   const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
 
@@ -41,11 +44,12 @@ export function AnemiaCard() {
   
   const latestRecord = sortedRecords[0];
   const currentStatus = getStatus(latestRecord?.hemoglobin, profile.gender);
+  const unitLabel = biomarkerUnit === 'si' ? 'g/L' : 'g/dL';
 
   const Title = (
     <div className='flex items-center gap-3 flex-1'>
       <HeartCrack className="h-5 w-5 shrink-0 text-muted-foreground" />
-      <h3 className="font-medium">Anemia (Hemoglobin)</h3>
+      <h3 className="font-medium">Anemia (Hemoglobin) ({unitLabel})</h3>
     </div>
   );
 
@@ -61,6 +65,19 @@ export function AnemiaCard() {
                   <AddAnemiaRecordDialog onSuccess={() => setIsActionsOpen(false)}>
                     <Button variant="outline" className="w-full">Add New Record</Button>
                   </AddAnemiaRecordDialog>
+                  <Separator />
+                   <div className="space-y-2">
+                        <Label>Biomarker Units</Label>
+                        <div className="flex items-center justify-center space-x-2 py-2">
+                            <Label htmlFor="unit-switch-anemia" className="text-xs">g/dL</Label>
+                            <Switch
+                                id="unit-switch-anemia"
+                                checked={biomarkerUnit === 'si'}
+                                onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
+                            />
+                            <Label htmlFor="unit-switch-anemia" className="text-xs">g/L</Label>
+                        </div>
+                    </div>
               </div>
         </PopoverContent>
     </Popover>
@@ -73,7 +90,7 @@ export function AnemiaCard() {
           {sortedRecords.map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                   <p className="flex-1">
-                      <span className="font-semibold text-foreground">{record.hemoglobin.toFixed(1)} g/dL</span>
+                      <span className="font-semibold text-foreground">{getDisplayHemoglobinValue(record.hemoglobin)}</span>
                       <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
                   </p>
                   <div className="flex items-center shrink-0">

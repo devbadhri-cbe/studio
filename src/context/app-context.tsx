@@ -8,7 +8,7 @@ import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
-import { toMgDl, toMmolL, toNgDl, toNmolL } from '@/lib/unit-conversions';
+import { toMgDl, toMmolL, toNgDl, toNmolL, toGDL, toGL } from '@/lib/unit-conversions';
 import { calculateBmi, calculateEgfr } from '@/lib/utils';
 import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
 
@@ -99,9 +99,11 @@ interface AppContextType {
   getDisplayLipidValue: (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides') => number;
   getDisplayVitaminDValue: (value: number) => number;
   getDisplayGlucoseValue: (value: number) => number;
+  getDisplayHemoglobinValue: (value: number) => number;
   getDbLipidValue: (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides') => number;
   getDbVitaminDValue: (value: number) => number;
   getDbGlucoseValue: (value: number) => number;
+  getDbHemoglobinValue: (value: number) => number;
   theme: Theme;
   setTheme: (theme: Theme) => void;
   dashboardSuggestions: DashboardSuggestion[];
@@ -181,6 +183,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return Math.round(value);
   }
+  
+  const getDisplayHemoglobinValue = (value: number): number => {
+    if (biomarkerUnit === 'si') {
+        return parseFloat(toGL(value).toFixed(1));
+    }
+    return parseFloat(value.toFixed(1));
+  }
 
   const getDbLipidValue = (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides'): number => {
     if (biomarkerUnit === 'si') {
@@ -201,6 +210,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return toMgDl(value, 'glucose');
       }
       return value;
+  }
+  
+  const getDbHemoglobinValue = (value: number): number => {
+    if (biomarkerUnit === 'si') {
+        return toGDL(value);
+    }
+    return value;
   }
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
@@ -761,9 +777,11 @@ anemiaRecords,
     getDisplayLipidValue,
     getDisplayVitaminDValue,
     getDisplayGlucoseValue,
+    getDisplayHemoglobinValue,
     getDbLipidValue,
     getDbVitaminDValue,
     getDbGlucoseValue,
+    getDbHemoglobinValue,
     theme,
     setTheme: setThemeState,
     dashboardSuggestions,

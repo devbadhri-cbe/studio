@@ -8,8 +8,9 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { format, parseISO } from 'date-fns';
 
 export function AnemiaChart() {
-  const { anemiaRecords, profile } = useApp();
+  const { anemiaRecords, profile, biomarkerUnit, getDisplayHemoglobinValue } = useApp();
   const formatDate = useDateFormatter();
+  const unitLabel = biomarkerUnit === 'si' ? 'g/L' : 'g/dL';
 
   const sortedRecords = [...(anemiaRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
   
@@ -17,23 +18,31 @@ export function AnemiaChart() {
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
-    value: r.hemoglobin,
+    value: getDisplayHemoglobinValue(r.hemoglobin),
   }));
   
   const yAxisDomain = React.useMemo(() => {
-    if (chartData.length === 0) return [5, 20];
+    const defaultMin = biomarkerUnit === 'si' ? 50 : 5;
+    const defaultMax = biomarkerUnit === 'si' ? 200 : 20;
+    if (chartData.length === 0) return [defaultMin, defaultMax];
     const values = chartData.map(d => d.value);
     const min = Math.min(...values);
-    const max = Math.max(...values, 18);
+    const max = Math.max(...values, getDisplayHemoglobinValue(18));
     const padding = (max - min) * 0.2;
     return [Math.max(0, Math.floor(min - padding)), Math.ceil(max + padding)];
-  }, [chartData]);
+  }, [chartData, biomarkerUnit, getDisplayHemoglobinValue]);
   
   const formatShortDate = (tickItem: string) => {
     return format(parseISO(tickItem), "MMM d");
   }
   
-  const normalRange = profile.gender === 'male' ? { low: 13.5, high: 17.5 } : { low: 12.0, high: 15.5 };
+  const normalRange = {
+    male: { low: getDisplayHemoglobinValue(13.5), high: getDisplayHemoglobinValue(17.5) },
+    female: { low: getDisplayHemoglobinValue(12.0), high: getDisplayHemoglobinValue(15.5) },
+    other: { low: getDisplayHemoglobinValue(12.0), high: getDisplayHemoglobinValue(17.5) },
+  };
+
+  const selectedRange = normalRange[profile.gender || 'other'];
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -74,7 +83,7 @@ export function AnemiaChart() {
                           <div className="flex flex-col">
                             <span className="text-[0.70rem] uppercase text-muted-foreground">Hemoglobin</span>
                             <span className="font-bold" style={{ color: 'hsl(var(--chart-1))' }}>
-                              {payload[0].value} g/dL
+                              {payload[0].value} {unitLabel}
                             </span>
                           </div>
                         </div>
@@ -84,10 +93,10 @@ export function AnemiaChart() {
                   return null;
                 }}
               />
-                <ReferenceArea y1={normalRange.low} y2={normalRange.high} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
+                <ReferenceArea y1={selectedRange.low} y2={selectedRange.high} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
                    <Label value="Normal" position="insideTopLeft" fill="hsl(var(--accent))" fontSize={10} />
                 </ReferenceArea>
-                 <ReferenceLine y={normalRange.low} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
+                 <ReferenceLine y={selectedRange.low} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
 
               <Line type="monotone" dataKey="value" name="Hemoglobin" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--chart-1))" />} activeDot={{ r: 6 }} />
             </LineChart>

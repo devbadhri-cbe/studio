@@ -5,6 +5,7 @@ const LIPID_CONVERSION_FACTOR_LDL_HDL_TOTAL = 0.0259;
 const LIPID_CONVERSION_FACTOR_TRIG = 0.0113;
 const VITAMIN_D_CONVERSION_FACTOR = 2.496;
 const GLUCOSE_CONVERSION_FACTOR = 18.018;
+const HEMOGLOBIN_CONVERSION_FACTOR = 10;
 
 
 /**
@@ -55,4 +56,22 @@ export function toNmolL(value: number): number {
  */
 export function toNgDl(value: number): number {
     return value / VITAMIN_D_CONVERSION_FACTOR;
+}
+
+/**
+ * Converts Hemoglobin from g/dL to g/L.
+ * @param value The value in g/dL.
+ * @returns The value in g/L.
+ */
+export function toGL(value: number): number {
+    return value * HEMOGLOBIN_CONVERSION_FACTOR;
+}
+
+/**
+ * Converts Hemoglobin from g/L to g/dL.
+ * @param value The value in g/L.
+ * @returns The value in g/dL.
+ */
+export function toGDL(value: number): number {
+    return value / HEMOGLOBIN_CONVERSION_FACTOR;
 }

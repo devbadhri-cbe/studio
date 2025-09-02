@@ -27,7 +27,7 @@ import { DatePicker } from './ui/date-picker';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
-  value: z.coerce.number().min(5, 'Value seems too low.').max(25, 'Value seems too high.'),
+  value: z.coerce.number().min(1, 'Value seems too low.').max(250, 'Value seems too high.'),
 });
 
 interface AddAnemiaRecordDialogProps {
@@ -38,8 +38,9 @@ interface AddAnemiaRecordDialogProps {
 export function AddAnemiaRecordDialog({ children, onSuccess }: AddAnemiaRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addAnemiaRecord } = useApp();
+  const { addAnemiaRecord, getDbHemoglobinValue, biomarkerUnit } = useApp();
   const { toast } = useToast();
+  const unitLabel = biomarkerUnit === 'si' ? 'g/L' : 'g/dL';
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -63,7 +64,7 @@ export function AddAnemiaRecordDialog({ children, onSuccess }: AddAnemiaRecordDi
     try {
         addAnemiaRecord({
             date: startOfDay(data.date).toISOString(),
-            hemoglobin: data.value,
+            hemoglobin: getDbHemoglobinValue(data.value),
         });
         toast({
             title: 'Success!',
@@ -123,9 +124,9 @@ export function AddAnemiaRecordDialog({ children, onSuccess }: AddAnemiaRecordDi
                   name="value"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Hemoglobin (g/dL)</FormLabel>
+                      <FormLabel>Hemoglobin ({unitLabel})</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.1" placeholder={'e.g., 13.5'} {...field} />
+                        <Input type="number" step="0.1" placeholder={unitLabel === 'g/dL' ? 'e.g., 13.5' : 'e.g., 135'} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
