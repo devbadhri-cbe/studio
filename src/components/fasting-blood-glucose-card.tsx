@@ -41,15 +41,15 @@ export function FastingBloodGlucoseCard() {
       <CardContent className="space-y-4 text-sm p-4">
         <div>
           <div className="flex items-center justify-between mb-2 border border-red-500">
-            <div className='flex items-center gap-3 flex-1 border border-red-500'>
+            <div className='flex items-center gap-3 flex-1'>
               <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />
               <h3 className="font-medium">Fasting Blood Glucose</h3>
             </div>
-            <div className="flex items-center gap-1 shrink-0 border border-red-500">
+            <div className="flex items-center gap-1 shrink-0">
                <AddFastingBloodGlucoseRecordDialog />
             </div>
           </div>
-           <div className="flex items-center justify-end space-x-2 mb-2 border border-red-500">
+           <div className="flex items-center justify-center space-x-2 mb-2 border border-red-500 py-2">
                 <Label htmlFor="unit-switch-fbg">mg/dL</Label>
                 <Switch
                     id="unit-switch-fbg"
