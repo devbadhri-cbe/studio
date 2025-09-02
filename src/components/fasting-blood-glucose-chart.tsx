@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Line, LineChart, CartesianGrid, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot } from 'recharts';
+import { Line, LineChart, CartesianGrid, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot, ReferenceArea, Label } from 'recharts';
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 
@@ -21,10 +21,10 @@ export function FastingBloodGlucoseChart() {
   }));
 
   const yAxisDomain = React.useMemo(() => {
-    if (chartData.length === 0) return [50, 150];
+    if (chartData.length === 0) return [50, 200];
     const values = chartData.map(d => d.value);
     const min = Math.min(...values);
-    const max = Math.max(...values);
+    const max = Math.max(...values, 126); // Ensure the top of the diabetes range is visible
     const padding = (max - min) * 0.2;
     return [Math.max(0, Math.floor(min - padding)), Math.ceil(max + padding)];
   }, [chartData]);
@@ -76,6 +76,16 @@ export function FastingBloodGlucoseChart() {
                   return null;
                 }}
               />
+                <ReferenceArea y1={0} y2={99} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
+                   <Label value="Normal" position="insideTopLeft" fill="hsl(var(--accent))" fontSize={10} />
+                </ReferenceArea>
+                <ReferenceArea y1={100} y2={125} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
+                   <Label value="Prediabetes" position="insideTopLeft" fill="hsl(var(--chart-3))" fontSize={10} />
+                </ReferenceArea>
+                <ReferenceArea y1={126} y2={yAxisDomain[1]} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
+                  <Label value="Diabetes" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
+                </ReferenceArea>
+
               <Line type="monotone" dataKey="value" name="Glucose" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--chart-1))" />} activeDot={{ r: 6 }} />
             </LineChart>
           ) : (
