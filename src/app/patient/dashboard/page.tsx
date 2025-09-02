@@ -132,7 +132,7 @@ export default function PatientDashboard() {
             <Tooltip>
                 <TooltipTrigger asChild>
                 <Button onClick={() => router.push(isDoctorLoggedIn ? '/doctor/dashboard' : '/')} size="icon" variant="ghost">
-                    <ArrowLeft className="h-4 w-4 text-transparent" />
+                    <ArrowLeft className={cn("h-4 w-4", !isDoctorLoggedIn && 'text-transparent')} />
                 </Button>
                 </TooltipTrigger>
                 <TooltipContent>
