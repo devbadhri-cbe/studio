@@ -44,8 +44,8 @@ export function WeightRecordCard() {
   }
 
   return (
-    <Card className="w-full h-full flex flex-col border-none shadow-none bg-transparent">
-        <CardContent className="flex flex-col h-full text-sm p-0 space-y-4">
+    <Card className="w-full h-full flex flex-col border-red-500">
+        <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
             <div className="flex items-center justify-between">
                 <div className='flex items-center gap-3 flex-1'>
                     <Weight className="h-5 w-5 shrink-0 text-muted-foreground" />
