@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -21,7 +20,7 @@ export function Hba1cCard() {
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
-    return [...(hba1cRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
+    return [...(hba1cRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime())
   }, [hba1cRecords]);
   
   const getStatus = (value: number) => {
@@ -31,7 +30,7 @@ export function Hba1cCard() {
     return { text: 'Diabetes', variant: 'destructive' as const };
   }
   
-  const latestRecord = sortedRecords[0];
+  const latestRecord = sortedRecords[sortedRecords.length - 1];
   const currentStatus = latestRecord ? getStatus(latestRecord.value) : null;
 
   const Title = 'HbA1c (%)';
@@ -56,7 +55,7 @@ export function Hba1cCard() {
     <ScrollArea className="h-[140px] pr-3">
       {sortedRecords.length > 0 ? (
         <ul className="space-y-1 mt-2">
-          {sortedRecords.map((record) => (
+          {sortedRecords.slice().reverse().map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                   <p className="flex-1">
                       <span className="font-semibold text-foreground">{record.value.toFixed(1)}%</span>

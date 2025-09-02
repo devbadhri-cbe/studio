@@ -15,6 +15,7 @@ import { Shapes, Settings } from 'lucide-react';
 import { WeightRecordCard } from './weight-record-card';
 import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
 import { AnemiaCard } from './anemia-card';
+import { Hba1cCard } from './hba1c-card';
 
 const biomarkerCards = {
   weight: {
@@ -28,6 +29,10 @@ const biomarkerCards = {
   anemia: {
     label: 'Hemoglobin',
     component: <AnemiaCard />,
+  },
+  hba1c: {
+    label: 'HbA1c',
+    component: <Hba1cCard />,
   },
 };
 
