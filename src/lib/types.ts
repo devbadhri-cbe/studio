@@ -58,6 +58,7 @@ export interface UserProfile {
   bmi?: number;
   enabledDashboards?: string[];
   doctorName?: string;
+  customBiomarkers?: CustomBiomarker[];
 }
 
 export interface FastingBloodGlucoseRecord {
@@ -146,6 +147,11 @@ export interface NutritionRecord {
   medication?: string;
 }
 
+export interface CustomBiomarker {
+    id: string;
+    name: string;
+}
+
 
 export interface Patient {
   id: string;
@@ -209,4 +215,5 @@ export interface Patient {
   dashboardSuggestions: DashboardSuggestion[];
   enabledDashboards: string[];
   doctorName?: string;
+  customBiomarkers?: CustomBiomarker[];
 }

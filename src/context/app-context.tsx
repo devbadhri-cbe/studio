@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Doctor, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type AnemiaRecord, type NutritionRecord, type FastingBloodGlucoseRecord } from '@/lib/types';
+import { type Doctor, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type AnemiaRecord, type NutritionRecord, type FastingBloodGlucoseRecord, CustomBiomarker } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -13,7 +13,7 @@ import { calculateBmi, calculateEgfr } from '@/lib/utils';
 import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
 
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'] };
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'], customBiomarkers: [] };
 
 type DashboardView = 'lipids' | 'vitaminD' | 'thyroid' | 'hypertension' | 'renal' | 'report' | 'none';
 type Theme = 'dark' | 'light' | 'system';
@@ -103,6 +103,9 @@ interface AppContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   dashboardSuggestions: DashboardSuggestion[];
+  customBiomarkers: CustomBiomarker[];
+  addCustomBiomarker: (name: string) => Promise<void>;
+  removeCustomBiomarker: (id: string) => void;
 }
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -127,6 +130,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
   const [biomarkerUnit, setBiomarkerUnitState] = React.useState<BiomarkerUnitSystem>('conventional');
+  const [customBiomarkers, setCustomBiomarkersState] = React.useState<CustomBiomarker[]>([]);
   
   React.useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
@@ -235,6 +239,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       enabledDashboards: Array.isArray(patient.enabledDashboards) ? patient.enabledDashboards : ['lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
       bmi: patient.bmi,
       doctorName: patient.doctorName,
+      customBiomarkers: patient.customBiomarkers || [],
     };
     setProfileState(patientProfile);
     setFastingBloodGlucoseRecordsState(patient.fastingBloodGlucoseRecords || []);
@@ -249,6 +254,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
     setDashboardSuggestions(patient.dashboardSuggestions || []);
+    setCustomBiomarkersState(patient.customBiomarkers || []);
     setTips([]); 
     setDashboardViewState('report');
     setBiomarkerUnitState(countries.find(c => c.code === patient.country)?.biomarkerUnit || 'conventional');
@@ -535,6 +541,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setBloodPressureRecordsState(updatedRecords);
     updatePatientData(profile.id, { bloodPressureRecords: updatedRecords });
   };
+  
+  const addCustomBiomarker = async (name: string): Promise<void> => {
+    const newBiomarker: CustomBiomarker = {
+      id: `custom-${Date.now()}`,
+      name,
+    };
+    const updatedBiomarkers = [...(profile.customBiomarkers || []), newBiomarker];
+    setCustomBiomarkersState(updatedBiomarkers);
+    await updatePatientData(profile.id, { customBiomarkers: updatedBiomarkers });
+  };
+
+  const removeCustomBiomarker = (id: string) => {
+    const updatedBiomarkers = (profile.customBiomarkers || []).filter(b => b.id !== id);
+    setCustomBiomarkersState(updatedBiomarkers);
+    updatePatientData(profile.id, { customBiomarkers: updatedBiomarkers });
+  };
 
   const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
@@ -753,6 +775,9 @@ anemiaRecords,
     theme,
     setTheme: setThemeState,
     dashboardSuggestions,
+    customBiomarkers,
+    addCustomBiomarker,
+    removeCustomBiomarker,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
