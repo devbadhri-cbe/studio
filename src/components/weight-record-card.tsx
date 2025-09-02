@@ -69,7 +69,7 @@ export function WeightRecordCard() {
   );
 
   const RecordsList = (
-    <ScrollArea className="h-[140px]">
+    <ScrollArea className="h-[140px] pr-3">
       {sortedWeights.length > 0 ? (
         <ul className="space-y-1 mt-2">
           {sortedWeights.slice(0, 5).map((weight) => {
