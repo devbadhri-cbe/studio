@@ -32,7 +32,7 @@ export function BiomarkersCard() {
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 flex-1">
-        <div className="flex flex-col gap-4 border border-red-500 p-4 rounded-lg">
+        <div className="flex flex-col gap-4 border border-red-500 p-4 rounded-lg aspect-[4/3]">
           {biomarkerCards.map((card) => (
             <React.Fragment key={card.key}>
               {card.component}
