@@ -36,21 +36,18 @@ export function BiomarkerCardTemplate({
           </div>
         </div>
 
-        {/* 2. Records and Status horizontally */}
-        <div className="flex flex-row items-start gap-4">
-          <div className="flex-1">
-              {recordsList}
+        {/* 2. Records and Status in a responsive grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+          <div className="border rounded-md p-2 min-h-[140px]">
+            {recordsList}
           </div>
-          <div className="flex-1 flex items-center justify-center h-full">
-              {statusDisplay}
+          <div className="border rounded-md p-2 flex items-center justify-center min-h-[140px]">
+            {statusDisplay}
           </div>
         </div>
         
-        {/* Separator before the chart */}
-        <Separator />
-
         {/* 3. Chart in the bottom */}
-        <div className="flex-1 flex flex-col min-h-[150px]">
+        <div className="border rounded-md p-2 flex-1 flex flex-col min-h-[150px]">
             {chart}
         </div>
       </CardContent>
