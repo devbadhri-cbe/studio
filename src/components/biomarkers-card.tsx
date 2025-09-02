@@ -13,7 +13,7 @@ export function BiomarkersCard() {
                 <Shapes className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <CardTitle>Key Biomarkers</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
                 <WeightRecordCard />
             </CardContent>
         </Card>
