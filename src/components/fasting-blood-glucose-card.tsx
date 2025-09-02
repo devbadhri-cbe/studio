@@ -43,7 +43,7 @@ export function FastingBloodGlucoseCard() {
         <div className="flex items-center justify-between mb-2">
             <div className='flex items-center gap-3 flex-1'>
               <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />
-              <h3 className="font-medium">Fasting Blood Glucose</h3>
+              <h3 className="font-medium">Fasting Blood Glucose ({unitLabel})</h3>
             </div>
             <div className="flex items-center gap-1 shrink-0">
                 <Popover>
@@ -89,7 +89,7 @@ export function FastingBloodGlucoseCard() {
                                   <TooltipTrigger asChild>
                                       <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                                           <div className="flex-1 flex items-center justify-between">
-                                              <span className="font-semibold text-foreground">{getDisplayGlucoseValue(record.value)} {unitLabel}</span>
+                                              <span className="font-semibold text-foreground">{getDisplayGlucoseValue(record.value)}</span>
                                               <span className="block text-xs">on {formatDate(record.date)}</span>
                                           </div>
                                           <div className="flex items-center shrink-0">
