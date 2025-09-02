@@ -15,55 +15,45 @@ import { useApp } from '@/context/app-context';
 import { CreateBiomarkerDialog } from './create-biomarker-dialog';
 import { Separator } from './ui/separator';
 
-type ActiveView = 'anemia' | 'glucose' | 'weight';
+type ActiveView = 'anemia' | 'glucose' | 'weight' | string;
 
-const allBiomarkerOptions: { value: ActiveView; label: string }[] = [
-  { value: 'anemia', label: 'Hemoglobin' },
-  { value: 'glucose', label: 'Fasting Blood Glucose' },
-  { value: 'weight', label: 'Weight & BMI' },
-];
+const biomarkerCardMap: Record<string, { label: string; component: React.FC }> = {
+  anemia: { label: 'Hemoglobin', component: AnemiaCard },
+  glucose: { label: 'Fasting Blood Glucose', component: FastingBloodGlucoseCard },
+  weight: { label: 'Weight & BMI', component: WeightRecordCard },
+};
 
 export function BiomarkersCard() {
-  const { customBiomarkers, enabledDashboards } = useApp();
+  const { customBiomarkers, profile } = useApp();
   
-  const availableBiomarkerKeys = React.useMemo(() => {
-    const keys = new Set<string>();
-    if (enabledDashboards?.includes('anemia')) keys.add('anemia');
-    if (enabledDashboards?.includes('glucose')) keys.add('glucose');
-    if (enabledDashboards?.includes('weight')) keys.add('weight');
-    return Array.from(keys) as ActiveView[];
-  }, [enabledDashboards]);
-  
-  const [activeView, setActiveView] = React.useState<ActiveView>(availableBiomarkerKeys[0] || 'weight');
+  const [activeView, setActiveView] = React.useState<ActiveView>('weight');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
 
+  const availableBiomarkerOptions = React.useMemo(() => {
+    return Object.keys(biomarkerCardMap)
+      .map(key => ({ value: key as ActiveView, label: biomarkerCardMap[key].label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, []);
+
   React.useEffect(() => {
-    if (availableBiomarkerKeys.length > 0 && !availableBiomarkerKeys.includes(activeView)) {
-        setActiveView(availableBiomarkerKeys[0]);
+    if (availableBiomarkerOptions.length > 0) {
+      setActiveView(availableBiomarkerOptions[0].value);
     }
-  }, [availableBiomarkerKeys, activeView]);
+  }, [availableBiomarkerOptions]);
+
 
   const renderActiveCard = () => {
-    switch (activeView) {
-      case 'glucose':
-        return <FastingBloodGlucoseCard />;
-      case 'anemia':
-        return <AnemiaCard />;
-      case 'weight':
-      default:
-        return <WeightRecordCard />;
+    const cardInfo = biomarkerCardMap[activeView];
+    if (cardInfo) {
+      const CardComponent = cardInfo.component;
+      return <CardComponent />;
     }
+    return <WeightRecordCard />; // Default fallback
   };
-  
-  const allOptions = React.useMemo(() => {
-    const standardOptions = allBiomarkerOptions.filter(opt => availableBiomarkerKeys.includes(opt.value));
-    const customOptions = customBiomarkers.map(b => ({ value: b.id, label: b.name, isCustom: true }));
-    return [...standardOptions, ...customOptions].sort((a, b) => a.label.localeCompare(b.label));
-  }, [customBiomarkers, availableBiomarkerKeys]);
 
-  const filteredOptions = allOptions.filter((option) =>
+  const filteredOptions = availableBiomarkerOptions.filter((option) =>
     option.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
