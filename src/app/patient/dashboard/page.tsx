@@ -129,34 +129,20 @@ export default function PatientDashboard() {
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
          <TitleBar>
-            {isDoctorLoggedIn ? (
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                    <Button onClick={() => router.push('/doctor/dashboard')} size="sm" variant="ghost" className="gap-2">
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to Patient List
-                    </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                    <p>Return to Patient List</p>
-                    </TooltipContent>
-                </Tooltip>
-            ) : (
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                    <Button onClick={() => router.push('/')} size="icon" variant="ghost">
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="sr-only">Logout</span>
-                    </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                    <p>Return to Login Page</p>
-                    </TooltipContent>
-                </Tooltip>
-            )}
+            <Tooltip>
+                <TooltipTrigger asChild>
+                <Button onClick={() => router.push(isDoctorLoggedIn ? '/doctor/dashboard' : '/')} size="icon" variant="ghost">
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="sr-only">Back</span>
+                </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                <p>{isDoctorLoggedIn ? 'Return to Patient List' : 'Logout'}</p>
+                </TooltipContent>
+            </Tooltip>
          </TitleBar>
 
-        <main className="flex-1 p-4 md:p-6">
+        <main className="flex-1 p-4 pt-8 md:p-6 md:pt-10">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
