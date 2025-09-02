@@ -34,15 +34,17 @@ export function FastingBloodGlucoseChart() {
       <div className="flex-1">
         <ResponsiveContainer width="100%" height="100%">
           {fastingBloodGlucoseRecords && fastingBloodGlucoseRecords.length > 0 ? (
-            <LineChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+            <LineChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="date"
                 tickFormatter={(tick) => formatDate(tick)}
-                tickLine={false}
-                axisLine={false}
+                tickLine={true}
+                axisLine={true}
+                angle={-60}
+                textAnchor="end"
+                height={70}
                 tick={{ fontSize: 10 }}
-                dy={10}
               />
               <YAxis
                 domain={yAxisDomain}
