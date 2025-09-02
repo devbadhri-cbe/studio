@@ -7,8 +7,7 @@ import { ProfileCard } from '@/components/profile-card';
 import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
-import { Hba1cCard } from '@/components/hba1c-card';
-import { ArrowLeft, UploadCloud, LayoutGrid, GaugeCircle, Check, RefreshCw } from 'lucide-react';
+import { ArrowLeft, UploadCloud } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -20,58 +19,25 @@ import { RenalCard } from '@/components/renal-card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MedicalConditionsCard } from '@/components/medical-conditions-card';
 import { MedicationCard } from '@/components/medication-card';
-import { WeightRecordCard } from '@/components/weight-record-card';
-import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
 import { UploadRecordDialog } from '@/components/upload-record-dialog';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
 import type { LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
 import { UploadConfirmationForm } from '@/components/upload-confirmation-form';
 import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
-import { AnemiaCard } from '@/components/anemia-card';
 import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
 import { DiabetesCard } from '@/components/diabetes-card';
 
 
 export default function PatientDashboard() {
-  const { isClient, dashboardView, setDashboardView, isDoctorLoggedIn, profile, setProfile, dashboardSuggestions } = useApp();
+  const { isClient, isDoctorLoggedIn, profile, dashboardSuggestions } = useApp();
   const router = useRouter();
-  const isMobile = useIsMobile();
-  const [shouldAnimate, setShouldAnimate] = React.useState(false);
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
 
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review') || dashboardSuggestions.some(s => s.status === 'pending'));
   
-  React.useEffect(() => {
-    if (isMobile && dashboardView === 'none') {
-        const timer = setTimeout(() => {
-            setShouldAnimate(true);
-        }, 500); // Small delay to ensure page is settled
-        
-        const clearTimer = setTimeout(() => {
-            setShouldAnimate(false);
-        }, 2500); // Animation is 2s, give it a bit more time
-
-        return () => {
-            clearTimeout(timer);
-            clearTimeout(clearTimer);
-        }
-    }
-  }, [isMobile, dashboardView]);
-
   React.useEffect(() => {
     // Pass the ref to the weight card component instance
     const weightCardElement = document.getElementById('weight-record-card');
@@ -101,41 +67,6 @@ export default function PatientDashboard() {
     setExtractedData(null);
   }
 
-
-  const renderDashboard = () => {
-    switch (dashboardView) {
-      case 'lipids':
-        return <LipidCard />;
-      case 'vitaminD':
-        return <VitaminDCard />;
-      case 'thyroid':
-        return <ThyroidCard />;
-      case 'hypertension':
-        return <HypertensionCard />;
-      case 'renal':
-        return <RenalCard />;
-      default:
-        return null;
-    }
-  }
-  
-   const dashboardOptions = {
-    hba1c: { name: 'HbA1c Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-    lipids: { name: 'Lipid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-    vitaminD: { name: 'Vitamin D Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-    thyroid: { name: 'Thyroid Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-    hypertension: { name: 'Hypertension Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-    renal: { name: 'Renal Dashboard', icon: <GaugeCircle className="w-4 h-4" /> },
-  }
-  
-  const handleDashboardSelect = (key: string) => {
-    setDashboardView(key as 'hba1c' | 'lipids' | 'vitaminD' | 'thyroid' | 'report' | 'hypertension' | 'renal' | 'none');
-  }
-  
-  const ActiveDashboardIcon = dashboardView !== 'none' && dashboardView !== 'report' ? dashboardOptions[dashboardView as keyof typeof dashboardOptions]?.icon : <GaugeCircle className="w-4 h-4" />;
-  const dashboardButtonLabel = dashboardView !== 'none' && dashboardView !== 'report' ? dashboardOptions[dashboardView as keyof typeof dashboardOptions].name : "Select a Dashboard";
-
-
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
@@ -162,11 +93,6 @@ export default function PatientDashboard() {
               <PatientHeader />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ProfileCard />
-                <WeightRecordCard />
-                <DiabetesCard />
-                <Hba1cCard />
-                <FastingBloodGlucoseCard />
-                <AnemiaCard />
                 <MedicalConditionsCard />
                 <MedicationCard />
               </div>
@@ -198,6 +124,12 @@ export default function PatientDashboard() {
                 <div className="lg:col-span-2 flex flex-col gap-6">
                     <InsightsCard />
                 </div>
+            </div>
+            
+            <Separator />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <DiabetesCard />
             </div>
 
             <Separator />
