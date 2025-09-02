@@ -95,10 +95,13 @@ interface AppContextType {
   setIsDoctorLoggedIn: (isLoggedIn: boolean) => void;
   setPatientData: (patient: Patient) => void;
   biomarkerUnit: BiomarkerUnitSystem;
+  setBiomarkerUnit: (unit: BiomarkerUnitSystem) => void;
   getDisplayLipidValue: (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides') => number;
   getDisplayVitaminDValue: (value: number) => number;
+  getDisplayGlucoseValue: (value: number) => number;
   getDbLipidValue: (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides') => number;
   getDbVitaminDValue: (value: number) => number;
+  getDbGlucoseValue: (value: number) => number;
   theme: Theme;
   setTheme: (theme: Theme) => void;
   dashboardSuggestions: DashboardSuggestion[];
@@ -126,15 +129,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isClient, setIsClient] = React.useState(false);
   const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
-
+  const [biomarkerUnit, setBiomarkerUnitState] = React.useState<BiomarkerUnitSystem>('conventional');
   
   React.useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
     if (storedTheme) {
       setThemeState(storedTheme);
     }
+    const countryUnit = countries.find(c => c.code === profile.country)?.biomarkerUnit || 'conventional';
+    setBiomarkerUnitState(countryUnit);
     setIsClient(true);
-  }, []);
+  }, [profile.country]);
 
   React.useEffect(() => {
     const root = window.document.documentElement;
@@ -152,9 +157,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
   
 
-  const biomarkerUnit = React.useMemo(() => {
-    return countries.find(c => c.code === profile.country)?.biomarkerUnit || 'conventional';
-  }, [profile.country]);
+  const setBiomarkerUnit = (unit: BiomarkerUnitSystem) => {
+    setBiomarkerUnitState(unit);
+  }
 
   const getDisplayLipidValue = (value: number, type: 'ldl' | 'hdl' | 'total' | 'triglycerides'): number => {
     if (biomarkerUnit === 'si') {
@@ -166,6 +171,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const getDisplayVitaminDValue = (value: number): number => {
       if (biomarkerUnit === 'si') {
           return parseFloat(toNmolL(value).toFixed(2));
+      }
+      return Math.round(value);
+  }
+
+  const getDisplayGlucoseValue = (value: number): number => {
+      if (biomarkerUnit === 'si') {
+          return parseFloat(toMmolL(value, 'glucose').toFixed(1));
       }
       return Math.round(value);
   }
@@ -182,6 +194,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return toNgDl(value);
     }
     return value;
+  }
+
+  const getDbGlucoseValue = (value: number): number => {
+      if (biomarkerUnit === 'si') {
+        return toMgDl(value, 'glucose');
+      }
+      return value;
   }
   
   const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
@@ -222,6 +241,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setDashboardSuggestions(patient.dashboardSuggestions || []);
     setTips([]); 
     setDashboardViewState('report');
+    setBiomarkerUnitState(countries.find(c => c.code === patient.country)?.biomarkerUnit || 'conventional');
   }, []);
   
   const updatePatientData = async (patientId: string, updates: Partial<Patient>) => {
@@ -737,10 +757,13 @@ anemiaRecords,
     setIsDoctorLoggedIn,
     setPatientData,
     biomarkerUnit,
+    setBiomarkerUnit,
     getDisplayLipidValue,
     getDisplayVitaminDValue,
+    getDisplayGlucoseValue,
     getDbLipidValue,
     getDbVitaminDValue,
+    getDbGlucoseValue,
     theme,
     setTheme: setThemeState,
     dashboardSuggestions,

@@ -27,7 +27,7 @@ import { DatePicker } from './ui/date-picker';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
-  value: z.coerce.number().min(30, 'Value seems too low.').max(800, 'Value seems too high.'),
+  value: z.coerce.number().min(1, 'Value seems too low.').max(800, 'Value seems too high.'),
 });
 
 interface AddFastingBloodGlucoseRecordDialogProps {
@@ -37,8 +37,10 @@ interface AddFastingBloodGlucoseRecordDialogProps {
 export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBloodGlucoseRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addFastingBloodGlucoseRecord } = useApp();
+  const { addFastingBloodGlucoseRecord, biomarkerUnit, getDbGlucoseValue } = useApp();
   const { toast } = useToast();
+  const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
+
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -62,7 +64,7 @@ export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBlood
     try {
         addFastingBloodGlucoseRecord({
             date: startOfDay(data.date).toISOString(),
-            value: data.value,
+            value: getDbGlucoseValue(data.value),
         });
         toast({
             title: 'Success!',
@@ -121,9 +123,9 @@ export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBlood
                   name="value"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fasting Blood Glucose (mg/dL)</FormLabel>
+                      <FormLabel>Fasting Blood Glucose ({unitLabel})</FormLabel>
                       <FormControl>
-                        <Input type="number" step="1" placeholder={"e.g., 95"} {...field} />
+                        <Input type="number" step="any" placeholder={unitLabel === 'mg/dL' ? 'e.g., 95' : 'e.g., 5.3'} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

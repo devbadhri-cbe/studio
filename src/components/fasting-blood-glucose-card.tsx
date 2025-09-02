@@ -14,9 +14,11 @@ import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
 import { Separator } from './ui/separator';
+import { Label } from './ui/label';
+import { Switch } from './ui/switch';
 
 export function FastingBloodGlucoseCard() {
-  const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord } = useApp();
+  const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord, getDisplayGlucoseValue, biomarkerUnit, setBiomarkerUnit } = useApp();
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
@@ -24,6 +26,7 @@ export function FastingBloodGlucoseCard() {
   }, [fastingBloodGlucoseRecords]);
   
   const getStatus = (value: number) => {
+    // Status is always checked against the stored mg/dL value
     if (value < 100) return { text: 'Normal', variant: 'outline' as const };
     if (value <= 125) return { text: 'Prediabetes', variant: 'secondary' as const };
     return { text: 'Diabetes', variant: 'destructive' as const };
@@ -31,6 +34,7 @@ export function FastingBloodGlucoseCard() {
 
   const latestRecord = sortedRecords[0];
   const currentStatus = latestRecord ? getStatus(latestRecord.value) : null;
+  const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
   return (
     <Card>
@@ -45,6 +49,15 @@ export function FastingBloodGlucoseCard() {
                <AddFastingBloodGlucoseRecordDialog />
             </div>
           </div>
+           <div className="flex items-center justify-end space-x-2 mb-2">
+                <Label htmlFor="unit-switch-fbg">mg/dL</Label>
+                <Switch
+                    id="unit-switch-fbg"
+                    checked={biomarkerUnit === 'si'}
+                    onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
+                />
+                <Label htmlFor="unit-switch-fbg">mmol/L</Label>
+            </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ScrollArea className="h-[140px] pr-3">
               {sortedRecords.length > 0 ? (
@@ -57,7 +70,7 @@ export function FastingBloodGlucoseCard() {
                                 <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                                     <div className="flex-1">
                                     <div>
-                                        <span className="font-semibold text-foreground">{record.value} mg/dL</span>
+                                        <span className="font-semibold text-foreground">{getDisplayGlucoseValue(record.value)} {unitLabel}</span>
                                     </div>
                                     <span className="block text-xs">on {formatDate(record.date)}</span>
                                     </div>

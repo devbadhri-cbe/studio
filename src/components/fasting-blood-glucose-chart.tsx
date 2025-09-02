@@ -8,9 +8,9 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { format, parseISO } from 'date-fns';
 
 export function FastingBloodGlucoseChart() {
-  const { fastingBloodGlucoseRecords } = useApp();
+  const { fastingBloodGlucoseRecords, biomarkerUnit, getDisplayGlucoseValue } = useApp();
   const formatDate = useDateFormatter();
-  const unitLabel = 'mg/dL';
+  const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
   const sortedRecords = [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
   
@@ -18,17 +18,22 @@ export function FastingBloodGlucoseChart() {
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
-    value: r.value,
+    value: getDisplayGlucoseValue(r.value),
   }));
+  
+  const normalRangeMax = getDisplayGlucoseValue(99);
+  const prediabetesRangeMin = getDisplayGlucoseValue(100);
+  const prediabetesRangeMax = getDisplayGlucoseValue(125);
+  const diabetesRangeMin = getDisplayGlucoseValue(126);
 
   const yAxisDomain = React.useMemo(() => {
-    if (chartData.length === 0) return [50, 200];
+    if (chartData.length === 0) return biomarkerUnit === 'si' ? [2, 12] : [50, 200];
     const values = chartData.map(d => d.value);
     const min = Math.min(...values);
-    const max = Math.max(...values, 126); // Ensure the top of the diabetes range is visible
+    const max = Math.max(...values, diabetesRangeMin);
     const padding = (max - min) * 0.2;
     return [Math.max(0, Math.floor(min - padding)), Math.ceil(max + padding)];
-  }, [chartData]);
+  }, [chartData, biomarkerUnit, diabetesRangeMin]);
   
   const formatShortDate = (tickItem: string) => {
     return format(parseISO(tickItem), "MMM d");
@@ -53,7 +58,7 @@ export function FastingBloodGlucoseChart() {
               />
               <YAxis
                 domain={yAxisDomain}
-                allowDecimals={false}
+                allowDecimals={true}
                 tickLine={false}
                 axisLine={false}
                 tick={{ fontSize: 10 }}
@@ -83,13 +88,13 @@ export function FastingBloodGlucoseChart() {
                   return null;
                 }}
               />
-                <ReferenceArea y1={0} y2={99} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
+                <ReferenceArea y1={0} y2={normalRangeMax} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
                    <Label value="Normal" position="insideTopLeft" fill="hsl(var(--accent))" fontSize={10} />
                 </ReferenceArea>
-                <ReferenceArea y1={100} y2={125} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
+                <ReferenceArea y1={prediabetesRangeMin} y2={prediabetesRangeMax} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
                    <Label value="Prediabetes" position="insideTopLeft" fill="hsl(var(--chart-3))" fontSize={10} />
                 </ReferenceArea>
-                <ReferenceArea y1={126} y2={yAxisDomain[1]} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
+                <ReferenceArea y1={diabetesRangeMin} y2={yAxisDomain[1]} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
                   <Label value="Diabetes" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
                 </ReferenceArea>
 
