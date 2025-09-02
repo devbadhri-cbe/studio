@@ -40,7 +40,7 @@ export function FastingBloodGlucoseCard() {
   return (
     <Card className="h-full flex flex-col">
       <CardContent className="flex flex-col flex-1 text-sm p-4 space-y-4">
-        <div className="flex items-center justify-between mb-2 border border-red-500">
+        <div className="flex items-center justify-between mb-2">
             <div className='flex items-center gap-3 flex-1'>
               <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />
               <h3 className="font-medium">Fasting Blood Glucose</h3>
@@ -77,68 +77,67 @@ export function FastingBloodGlucoseCard() {
         </div>
           
         <div className="flex flex-col flex-1 border border-red-500">
-            <div className="flex flex-col border border-red-500">
-              <ScrollArea className="h-[140px] pr-3">
-                {sortedRecords.length > 0 ? (
-                  <ul className="space-y-1 mt-2">
-                    {sortedRecords.map((record) => {
-                      const status = getStatus(record.value);
-                      return (
-                          <Tooltip key={record.id}>
-                              <TooltipTrigger asChild>
-                                  <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                                      <div className="flex-1">
-                                      <div>
-                                          <span className="font-semibold text-foreground">{getDisplayGlucoseValue(record.value)} {unitLabel}</span>
-                                      </div>
-                                      <span className="block text-xs">on {formatDate(record.date)}</span>
-                                      </div>
-                                      <div className="flex items-center shrink-0">
-                                      <Tooltip>
-                                          <TooltipTrigger asChild>
-                                          <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeFastingBloodGlucoseRecord(record.id)}>
-                                              <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                          </Button>
-                                          </TooltipTrigger>
-                                          <TooltipContent>Delete record</TooltipContent>
-                                      </Tooltip>
-                                      </div>
-                                  </li>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                  <p>{status.text}</p>
-                              </TooltipContent>
-                          </Tooltip>
-                        );
-                      })}
-                    </ul>
-                  ) : (
-                    <div className="flex h-full items-center justify-center">
-                      <p className="text-xs text-muted-foreground text-center">No records.</p>
+            <div className="flex flex-row border border-green-500">
+                <div className="flex flex-col border border-red-500 flex-1">
+                  <ScrollArea className="h-[140px] pr-3">
+                    {sortedRecords.length > 0 ? (
+                      <ul className="space-y-1 mt-2">
+                        {sortedRecords.map((record) => {
+                          const status = getStatus(record.value);
+                          return (
+                              <Tooltip key={record.id}>
+                                  <TooltipTrigger asChild>
+                                      <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                                          <div className="flex-1">
+                                          <div>
+                                              <span className="font-semibold text-foreground">{getDisplayGlucoseValue(record.value)} {unitLabel}</span>
+                                          </div>
+                                          <span className="block text-xs">on {formatDate(record.date)}</span>
+                                          </div>
+                                          <div className="flex items-center shrink-0">
+                                          <Tooltip>
+                                              <TooltipTrigger asChild>
+                                              <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeFastingBloodGlucoseRecord(record.id)}>
+                                                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                              </Button>
+                                              </TooltipTrigger>
+                                              <TooltipContent>Delete record</TooltipContent>
+                                          </Tooltip>
+                                          </div>
+                                      </li>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                      <p>{status.text}</p>
+                                  </TooltipContent>
+                              </Tooltip>
+                            );
+                          })}
+                        </ul>
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <p className="text-xs text-muted-foreground text-center">No records.</p>
+                        </div>
+                      )}
+                    </ScrollArea>
+                </div>
+                {currentStatus && (
+                <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-2 border border-red-500 flex-1">
+                    <div className="text-center text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                            <span>Current Status:</span>
+                            <Badge variant={currentStatus.variant} className={cn("text-xs", currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : '')}>
+                            {currentStatus.text}
+                            </Badge>
+                        </div>
                     </div>
-                  )}
-                </ScrollArea>
+                </div>
+                )}
             </div>
             <div className="flex flex-col flex-1 min-h-[150px] border border-red-500">
               <FastingBloodGlucoseChart />
             </div>
         </div>
 
-        {currentStatus && (
-          <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-2 border border-red-500">
-            <>
-              <Separator className="my-2" />
-              <div className="text-center text-xs text-muted-foreground mt-2">
-                 <div className="flex items-center gap-2">
-                    <span>Current Status:</span>
-                    <Badge variant={currentStatus.variant} className={cn("text-xs", currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : '')}>
-                      {currentStatus.text}
-                    </Badge>
-                </div>
-              </div>
-            </>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
