@@ -5,7 +5,6 @@ import * as React from 'react';
 import { Settings, Droplet, Check } from 'lucide-react';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { Button } from './ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -15,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
-import { Label } from './ui/label';
 
 type Checked = DropdownMenuCheckboxItemProps["checked"]
 
@@ -28,38 +26,35 @@ export function DiabetesCard() {
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = (
-    <Popover>
-        <PopoverTrigger asChild>
-              <Button size="icon" variant="ghost" className="h-8 w-8">
-                  <Settings className="h-4 w-4" />
-              </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-64" align="end">
-              <div className="space-y-4">
-                  <Label className="font-semibold">Panel Components</Label>
-                  <div className="space-y-1">
-                     <DropdownMenuCheckboxItem
-                        checked={showHbA1c}
-                        onCheckedChange={setShowHbA1c}
-                      >
-                        HbA1c Card
-                      </DropdownMenuCheckboxItem>
-                       <DropdownMenuCheckboxItem
-                        checked={showFastingBloodGlucose}
-                        onCheckedChange={setShowFastingBloodGlucose}
-                      >
-                        Fasting Blood Glucose Card
-                      </DropdownMenuCheckboxItem>
-                       <DropdownMenuCheckboxItem
-                        checked={showAnemia}
-                        onCheckedChange={setShowAnemia}
-                      >
-                        Anemia Card
-                      </DropdownMenuCheckboxItem>
-                  </div>
-              </div>
-        </PopoverContent>
-    </Popover>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-8 w-8">
+            <Settings className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-64" align="end">
+        <DropdownMenuLabel>Panel Components</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuCheckboxItem
+          checked={showHbA1c}
+          onCheckedChange={setShowHbA1c}
+        >
+          HbA1c Card
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={showFastingBloodGlucose}
+          onCheckedChange={setShowFastingBloodGlucose}
+        >
+          Fasting Blood Glucose Card
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={showAnemia}
+          onCheckedChange={setShowAnemia}
+        >
+          Anemia Card
+        </DropdownMenuCheckboxItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 
   const RecordsList = (
