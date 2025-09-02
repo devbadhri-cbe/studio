@@ -38,6 +38,7 @@ import { cn } from '@/lib/utils';
 import type { LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
 import { UploadConfirmationForm } from '@/components/upload-confirmation-form';
 import { DoctorReviewCard } from '@/components/doctor-review-card';
+import { TitleBar } from '@/components/title-bar';
 
 
 export default function PatientDashboard() {
@@ -127,21 +128,24 @@ export default function PatientDashboard() {
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
-         {isDoctorLoggedIn && (
-            <div className="border-b p-2 text-center text-sm bg-secondary">
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                    <Button onClick={() => router.push('/doctor/dashboard')} size="sm" variant="ghost" className="gap-2">
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to Doctor's Dashboard
-                    </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                    <p>Return to Patient List</p>
-                    </TooltipContent>
-                </Tooltip>
-            </div>
-         )}
+         <TitleBar>
+            {isDoctorLoggedIn && (
+                <div className="absolute top-1/2 left-0 -translate-y-1/2">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                        <Button onClick={() => router.push('/doctor/dashboard')} size="sm" variant="ghost" className="gap-2">
+                            <ArrowLeft className="h-4 w-4" />
+                            Back to Patient List
+                        </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                        <p>Return to Patient List</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
+            )}
+         </TitleBar>
+
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
