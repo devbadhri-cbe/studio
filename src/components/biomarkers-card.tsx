@@ -51,11 +51,13 @@ export function BiomarkersCard() {
                                     transform: `translateY(${isActive ? 0 : isBehind ? -40 : (index - activeIndex) * 40}px)`,
                                     opacity: isBehind ? 0 : 1,
                                     zIndex: cards.length - index,
-                                    clipPath: isActive ? 'inset(0 0 0 0)' : 'inset(0 0 calc(100% - 70px) 0)',
                                 }}
                                 onClick={() => !isActive && setActiveCardId(card.id)}
                             >
-                                <div className={cn("w-full h-full")}>
+                                <div
+                                    className={cn("w-full h-full transition-all", !isActive && "overflow-hidden rounded-lg")}
+                                    style={{ clipPath: !isActive ? 'inset(0 0 calc(100% - 70px) 0)' : undefined }}
+                                >
                                      {!isActive && <div className="absolute inset-0 bg-background/70 backdrop-blur-sm z-20" />}
                                     {card.component}
                                 </div>
