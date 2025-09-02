@@ -5,19 +5,22 @@ import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Trash2, Weight } from 'lucide-react';
+import { Trash2, Weight, Settings } from 'lucide-react';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { AddWeightRecordDialog } from './add-weight-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { kgToLbs, cmToFtIn, getBmiStatus, BMI_CATEGORIES } from '@/lib/utils';
+import { kgToLbs, getBmiStatus, BMI_CATEGORIES } from '@/lib/utils';
 import { WeightChart } from './weight-chart';
 import { Badge } from './ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { ScrollArea } from './ui/scroll-area';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
+import { Separator } from './ui/separator';
+import { Label } from './ui/label';
+import { Switch } from './ui/switch';
 
 export function WeightRecordCard() {
-  const { weightRecords, removeWeightRecord, profile } = useApp();
+  const { weightRecords, removeWeightRecord, profile, setProfile } = useApp();
   const formatDate = useDateFormatter();
   const isImperial = profile.unitSystem === 'imperial';
   const weightUnit = isImperial ? 'lbs' : 'kg';
@@ -31,12 +34,38 @@ export function WeightRecordCard() {
   const Title = (
     <div className='flex items-center gap-3 flex-1'>
       <Weight className="h-5 w-5 shrink-0 text-muted-foreground" />
-      <h3 className="font-medium">Weight Records</h3>
+      <h3 className="font-medium">Weight Records ({weightUnit})</h3>
     </div>
   );
 
   const Actions = (
-    <AddWeightRecordDialog />
+    <Popover>
+        <PopoverTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-8 w-8">
+                  <Settings className="h-4 w-4" />
+              </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-64" align="end">
+              <div className="space-y-4">
+                  <AddWeightRecordDialog>
+                    <Button variant="outline" className="w-full">Add New Record</Button>
+                  </AddWeightRecordDialog>
+                  <Separator />
+                  <div className="space-y-2">
+                    <Label>Unit System</Label>
+                    <div className="flex items-center justify-center space-x-2 py-2">
+                        <Label htmlFor="unit-switch-weight" className="text-xs">kg</Label>
+                        <Switch
+                            id="unit-switch-weight"
+                            checked={isImperial}
+                            onCheckedChange={(checked) => setProfile({...profile, unitSystem: checked ? 'imperial' : 'metric'})}
+                        />
+                        <Label htmlFor="unit-switch-weight" className="text-xs">lbs</Label>
+                    </div>
+                </div>
+              </div>
+        </PopoverContent>
+    </Popover>
   );
 
   const RecordsList = (
