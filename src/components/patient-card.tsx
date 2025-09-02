@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { Patient } from '@/lib/types';
@@ -66,7 +65,9 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const needsReview = patient.presentMedicalConditions?.some(c => c.status === 'pending_review') || patient.dashboardSuggestions?.some(s => s.status === 'pending');
   
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if ((e.target as HTMLElement).closest('button, [role="menuitem"], [role="dialog"]')) {
+    // This check prevents navigation when clicking on any interactive element like buttons or menu items.
+    if ((e.target as HTMLElement).closest('button, [role="menuitem"], [role="dialog"], a')) {
+      e.stopPropagation();
       return;
     }
     onView(patient);
@@ -120,7 +121,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                     <CardTitle className="text-lg truncate">{patient.name}</CardTitle>
                     {isDoctorLoggedIn && needsReview && (
                         <Tooltip>
-                            <TooltipTrigger>
+                            <TooltipTrigger asChild>
                                 <div className="relative">
                                     <Bell className="h-4 w-4 text-destructive" />
                                     <span className="absolute -top-1 -right-1 flex h-2 w-2">
