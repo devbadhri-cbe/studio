@@ -51,7 +51,7 @@ export function BiomarkersCard() {
   };
 
   return (
-    <Card className="h-auto md:row-span-2 flex flex-col">
+    <Card className="h-auto flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Shapes className="h-5 w-5 shrink-0 text-muted-foreground" />
