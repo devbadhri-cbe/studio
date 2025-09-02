@@ -144,9 +144,9 @@ export default function PatientDashboard() {
             ) : (
                 <Tooltip>
                     <TooltipTrigger asChild>
-                    <Button onClick={() => router.push('/')} size="sm" variant="ghost" className="gap-2">
+                    <Button onClick={() => router.push('/')} size="icon" variant="ghost">
                         <ArrowLeft className="h-4 w-4" />
-                        Logout
+                        <span className="sr-only">Logout</span>
                     </Button>
                     </TooltipTrigger>
                     <TooltipContent>
