@@ -5,11 +5,11 @@ import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Trash2, Weight, Settings } from 'lucide-react';
+import { Trash2, Weight, Settings, Edit } from 'lucide-react';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { AddWeightRecordDialog } from './add-weight-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { kgToLbs, getBmiStatus, BMI_CATEGORIES } from '@/lib/utils';
+import { kgToLbs, getBmiStatus, BMI_CATEGORIES, cmToFtIn } from '@/lib/utils';
 import { WeightChart } from './weight-chart';
 import { Badge } from './ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -18,6 +18,7 @@ import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { Separator } from './ui/separator';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
+import type { EditHeightDialogHandles } from './edit-height-dialog';
 
 export function WeightRecordCard() {
   const { weightRecords, removeWeightRecord, profile, setProfile } = useApp();
@@ -25,12 +26,23 @@ export function WeightRecordCard() {
   const formatDate = useDateFormatter();
   const isImperial = profile.unitSystem === 'imperial';
   const weightUnit = isImperial ? 'lbs' : 'kg';
+  const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
 
   const sortedWeights = React.useMemo(() => {
     return [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   }, [weightRecords]);
   
   const bmiStatus = getBmiStatus(profile.bmi);
+
+  let heightDisplay = 'N/A';
+  if (profile.height) {
+    if (isImperial) {
+        const { feet, inches } = cmToFtIn(profile.height);
+        heightDisplay = `${feet}' ${inches}"`;
+    } else {
+        heightDisplay = `${profile.height} cm`;
+    }
+  }
 
   const Title = `Weight Records (${weightUnit})`;
   const Icon = <Weight className="h-5 w-5 shrink-0 text-muted-foreground" />;
@@ -47,6 +59,10 @@ export function WeightRecordCard() {
                   <AddWeightRecordDialog onSuccess={() => setIsActionsOpen(false)}>
                     <Button variant="outline" className="w-full">Add New Record</Button>
                   </AddWeightRecordDialog>
+                  <Button variant="outline" className="w-full" onClick={() => editHeightDialogRef.current?.open()}>
+                      <Edit className="mr-2 h-4 w-4"/>
+                      Edit Height
+                  </Button>
                   <Separator />
                   <div className="space-y-2">
                     <Label>Unit System</Label>
@@ -104,6 +120,11 @@ export function WeightRecordCard() {
 
   const StatusDisplay = (
     <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-2 flex-1">
+      <div className="text-center text-xs text-muted-foreground">
+        <div className="flex flex-col items-center gap-1">
+            <span>Height: <span className="font-bold text-foreground">{heightDisplay}</span></span>
+        </div>
+      </div>
       {bmiStatus && (
         <div className="text-center text-xs text-muted-foreground">
           <div className="flex flex-col items-center gap-1">
@@ -136,13 +157,15 @@ export function WeightRecordCard() {
   );
   
   return (
-    <BiomarkerCardTemplate
-      title={Title}
-      icon={Icon}
-      actions={Actions}
-      recordsList={RecordsList}
-      statusDisplay={StatusDisplay}
-      chart={Chart}
-    />
+    <>
+      <BiomarkerCardTemplate
+        title={Title}
+        icon={Icon}
+        actions={Actions}
+        recordsList={RecordsList}
+        statusDisplay={StatusDisplay}
+        chart={Chart}
+      />
+    </>
   );
 }

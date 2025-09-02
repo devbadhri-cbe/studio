@@ -41,6 +41,7 @@ import { UploadConfirmationForm } from '@/components/upload-confirmation-form';
 import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
 import { AnemiaCard } from '@/components/anemia-card';
+import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
 
 
 export default function PatientDashboard() {
@@ -49,6 +50,7 @@ export default function PatientDashboard() {
   const isMobile = useIsMobile();
   const [shouldAnimate, setShouldAnimate] = React.useState(false);
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
+  const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
 
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review') || dashboardSuggestions.some(s => s.status === 'pending'));
   
@@ -68,6 +70,14 @@ export default function PatientDashboard() {
         }
     }
   }, [isMobile, dashboardView]);
+
+  React.useEffect(() => {
+    // Pass the ref to the weight card component instance
+    const weightCardElement = document.getElementById('weight-record-card');
+    if (weightCardElement) {
+        (weightCardElement as any).editHeightDialogRef = editHeightDialogRef;
+    }
+  }, []);
 
 
   if (!isClient) {
@@ -254,6 +264,7 @@ export default function PatientDashboard() {
           </div>
         </main>
       </div>
+      <EditHeightDialog ref={editHeightDialogRef} />
     </TooltipProvider>
   );
 }
