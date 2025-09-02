@@ -18,7 +18,7 @@ export function TitleBar({ children }: TitleBarProps) {
                 <div className="flex justify-start min-w-[150px]">
                     {children}
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center border-2 border-red-500">
                     <div className="flex items-center gap-2">
                         <Logo className="h-8 w-8 text-primary" />
                         <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
