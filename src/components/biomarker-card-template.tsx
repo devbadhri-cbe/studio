@@ -3,7 +3,6 @@
 
 import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from './ui/separator';
 
 interface BiomarkerCardTemplateProps {
   title: string;
@@ -23,7 +22,7 @@ export function BiomarkerCardTemplate({
   chart,
 }: BiomarkerCardTemplateProps) {
   return (
-    <Card className="w-full h-full flex flex-col">
+    <Card className="w-full h-full flex flex-col aspect-[1/1.25]">
       <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
         {/* 1. Heading with action button */}
         <div className="flex items-center justify-between">
@@ -36,8 +35,8 @@ export function BiomarkerCardTemplate({
           </div>
         </div>
 
-        {/* 2. Records and Status in a responsive grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+        {/* 2. Records and Status in a horizontal grid */}
+        <div className="grid grid-cols-2 gap-4 items-start">
           <div className="border rounded-md p-2 min-h-[140px]">
             {recordsList}
           </div>
@@ -46,8 +45,8 @@ export function BiomarkerCardTemplate({
           </div>
         </div>
         
-        {/* 3. Chart in the bottom */}
-        <div className="border rounded-md p-2 flex-1 flex flex-col min-h-[150px]">
+        {/* 3. Chart in the bottom, expanding to fill space */}
+        <div className="border rounded-md p-2 flex-1 flex flex-col">
             {chart}
         </div>
       </CardContent>
