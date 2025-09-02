@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -10,7 +11,7 @@ export function FastingBloodGlucoseChart() {
   const formatDate = useDateFormatter();
   const unitLabel = 'mg/dL';
 
-  const sortedRecords = [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const sortedRecords = [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
   
   const latestRecords = sortedRecords.slice(-5);
   
