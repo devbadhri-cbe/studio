@@ -13,6 +13,7 @@ import { FastingBloodGlucoseChart } from './fasting-blood-glucose-chart';
 import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
+import { Separator } from './ui/separator';
 
 export function FastingBloodGlucoseCard() {
   const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord } = useApp();
@@ -27,6 +28,9 @@ export function FastingBloodGlucoseCard() {
     if (value <= 125) return { text: 'Prediabetes', variant: 'secondary' as const };
     return { text: 'Diabetes', variant: 'destructive' as const };
   }
+
+  const latestRecord = sortedRecords[0];
+  const currentStatus = latestRecord ? getStatus(latestRecord.value) : null;
 
   return (
     <Card>
@@ -80,6 +84,19 @@ export function FastingBloodGlucoseCard() {
               <FastingBloodGlucoseChart />
             </div>
           </div>
+          {currentStatus && (
+            <>
+              <Separator className="my-2" />
+              <div className="text-center text-xs text-muted-foreground mt-2 flex items-center justify-center flex-wrap gap-x-4 gap-y-2">
+                 <div className="flex items-center gap-2">
+                    <span>Current Status:</span>
+                    <Badge variant={currentStatus.variant} className={cn("text-xs", currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : '')}>
+                      {currentStatus.text}
+                    </Badge>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
