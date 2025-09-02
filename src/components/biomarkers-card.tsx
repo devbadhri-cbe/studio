@@ -48,7 +48,7 @@ export function BiomarkersCard() {
   }
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col md:col-span-1">
       <CardHeader>
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ export function BiomarkersCard() {
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 flex-1 flex flex-col">
-        <div className="flex-1 flex flex-col border rounded-lg md:aspect-[4/3]">
+        <div className="flex-1 flex flex-col rounded-lg md:aspect-[4/3] shadow-lg">
           {biomarkerCards[activeView]?.component}
         </div>
       </CardContent>
