@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -78,7 +77,7 @@ export function BiomarkersCard() {
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 flex-1 flex flex-col">
-        <div className="flex flex-col gap-4 border border-green-500 p-4 rounded-lg md:aspect-[4/3]">
+        <div className="flex flex-col gap-4 border border-red-500 p-4 rounded-lg md:aspect-[4/3]">
           {biomarkerCards[activeView]?.component}
         </div>
       </CardContent>
