@@ -123,7 +123,7 @@ export function FastingBloodGlucoseCard() {
                 {currentStatus && (
                 <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-2 border border-red-500 flex-1">
                     <div className="text-center text-xs text-muted-foreground">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col items-center gap-1">
                             <span>Current Status:</span>
                             <Badge variant={currentStatus.variant} className={cn("text-xs", currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : '')}>
                             {currentStatus.text}
@@ -133,7 +133,7 @@ export function FastingBloodGlucoseCard() {
                 </div>
                 )}
             </div>
-            <div className="flex flex-col flex-1 min-h-[150px] border border-red-500">
+            <div className="flex flex-col flex-1 min-h-[150px] border border-blue-500">
               <FastingBloodGlucoseChart />
             </div>
         </div>
