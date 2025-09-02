@@ -22,7 +22,7 @@ export function BiomarkerCardTemplate({
   chart,
 }: BiomarkerCardTemplateProps) {
   return (
-    <Card className="w-full h-full">
+    <Card className="w-full flex flex-col aspect-[4/3]">
       <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
         {/* 1. Heading with action button */}
         <div className="flex items-center justify-between">
