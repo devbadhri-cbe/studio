@@ -52,25 +52,31 @@ export function FastingBloodGlucoseCard() {
                   {sortedRecords.map((record) => {
                     const status = getStatus(record.value);
                     return (
-                      <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                        <div className="flex-1">
-                          <div>
-                            <span className="font-semibold text-foreground">{record.value} mg/dL</span>
-                            <Badge variant={status.variant} className={cn("ml-2 text-xs", status.variant === 'outline' ? 'border-green-500 text-green-600' : '')}>{status.text}</Badge>
-                          </div>
-                          <span className="block text-xs">on {formatDate(record.date)}</span>
-                        </div>
-                        <div className="flex items-center shrink-0">
-                          <Tooltip>
+                        <Tooltip key={record.id}>
                             <TooltipTrigger asChild>
-                              <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeFastingBloodGlucoseRecord(record.id)}>
-                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                              </Button>
+                                <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                                    <div className="flex-1">
+                                    <div>
+                                        <span className="font-semibold text-foreground">{record.value} mg/dL</span>
+                                    </div>
+                                    <span className="block text-xs">on {formatDate(record.date)}</span>
+                                    </div>
+                                    <div className="flex items-center shrink-0">
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeFastingBloodGlucoseRecord(record.id)}>
+                                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                        </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Delete record</TooltipContent>
+                                    </Tooltip>
+                                    </div>
+                                </li>
                             </TooltipTrigger>
-                            <TooltipContent>Delete record</TooltipContent>
-                          </Tooltip>
-                        </div>
-                      </li>
+                            <TooltipContent>
+                                <p>{status.text}</p>
+                            </TooltipContent>
+                      </Tooltip>
                     );
                   })}
                 </ul>
