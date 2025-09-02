@@ -129,19 +129,21 @@ export default function PatientDashboard() {
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
          <TitleBar>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                <Button onClick={() => router.push(isDoctorLoggedIn ? '/doctor/dashboard' : '/')} size="icon" variant="ghost">
-                    <ArrowLeft className="h-4 w-4" />
-                </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                <p>{isDoctorLoggedIn ? 'Return to Patient List' : 'Logout'}</p>
-                </TooltipContent>
-            </Tooltip>
+            {isDoctorLoggedIn && (
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                    <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="ghost">
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                    <p>Return to Patient List</p>
+                    </TooltipContent>
+                </Tooltip>
+            )}
          </TitleBar>
 
-        <main className="flex-1 p-4 pt-10 md:p-6 md:pt-10">
+        <main className="flex-1 p-4 md:pt-10 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
