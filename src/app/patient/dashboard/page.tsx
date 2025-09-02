@@ -130,7 +130,7 @@ export default function PatientDashboard() {
       <div className="flex min-h-screen w-full flex-col bg-background">
          <TitleBar>
             {isDoctorLoggedIn && (
-                <div className="absolute top-1/2 left-0 -translate-y-1/2">
+                <div className="absolute top-1/2 left-4 -translate-y-1/2">
                     <Tooltip>
                         <TooltipTrigger asChild>
                         <Button onClick={() => router.push('/doctor/dashboard')} size="sm" variant="ghost" className="gap-2">

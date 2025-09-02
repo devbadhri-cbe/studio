@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Logo } from '@/components/logo';
@@ -8,11 +9,9 @@ import { ThemeToggle } from './theme-toggle';
 
 interface TitleBarProps {
     children?: React.ReactNode;
-    doctorName: string;
-    doctorEmail: string;
 }
 
-export function TitleBar({ children, doctorName, doctorEmail }: TitleBarProps) {
+export function TitleBar({ children }: TitleBarProps) {
 
     return (
         <header className="border-b px-4 py-4 md:px-6">
@@ -29,10 +28,10 @@ export function TitleBar({ children, doctorName, doctorEmail }: TitleBarProps) {
                         by
                     </div>
                     <div className="text-center text-sm text-muted-foreground">
-                        <p className="font-semibold text-lg text-foreground">{doctorName}</p>
-                        <a href={`mailto:${doctorEmail}`} className="flex items-center justify-center gap-1.5 hover:text-primary">
+                        <p className="font-semibold text-lg text-foreground">Dr. Badhrinathan N</p>
+                        <a href={`mailto:drbadhri@gmail.com`} className="flex items-center justify-center gap-1.5 hover:text-primary">
                             <Mail className="h-3 w-3" />
-                            {doctorEmail}
+                            drbadhri@gmail.com
                         </a>
                     </div>
                 </div>
