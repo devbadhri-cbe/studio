@@ -31,7 +31,7 @@ export function Hba1cCard() {
   }
   
   const latestRecord = sortedRecords[0];
-  const currentStatus = getStatus(latestRecord?.value);
+  const currentStatus = latestRecord ? getStatus(latestRecord.value) : null;
 
   const Title = 'HbA1c (%)';
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
