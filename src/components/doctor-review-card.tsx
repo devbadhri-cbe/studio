@@ -2,7 +2,7 @@
 'use client';
 
 import { useApp } from '@/context/app-context';
-import { AlertTriangle, BadgeCheck, XCircle } from 'lucide-react';
+import { AlertTriangle, BadgeCheck, XCircle, Code } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -15,6 +15,7 @@ const getDashboardName = (key: string) => {
       case 'vitaminD': return 'Vitamin D Dashboard';
       case 'thyroid': return 'Thyroid Dashboard';
       case 'hypertension': return 'Hypertension Dashboard';
+      case 'renal': return 'Renal Dashboard';
       default: return 'Dashboard';
     }
 }
@@ -51,8 +52,20 @@ export function DoctorReviewCard() {
                   {condition.icdCode && (
                     <p className="text-sm text-muted-foreground">AI-suggested ICD-11: {condition.icdCode}</p>
                   )}
-                  {suggestion && (
+                  {suggestion ? (
                     <p className="text-sm text-muted-foreground">Suggested Dashboard: <span className="font-medium text-primary">{getDashboardName(suggestion.suggestedDashboard)}</span></p>
+                  ) : (
+                    condition.requiredBiomarkers && condition.requiredBiomarkers.length > 0 && (
+                        <div className="text-sm text-muted-foreground mt-1">
+                            <div className="flex items-center gap-2">
+                                <Code className="h-4 w-4 text-destructive" />
+                                <span className="font-medium">New card needed for:</span>
+                            </div>
+                            <ul className="list-disc pl-8">
+                                {condition.requiredBiomarkers.map(b => <li key={b}>{b}</li>)}
+                            </ul>
+                        </div>
+                    )
                   )}
                 </div>
                 <div className="flex gap-2 shrink-0">

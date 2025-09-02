@@ -17,6 +17,7 @@ export interface MedicalCondition {
   condition: string;
   icdCode?: string;
   status: 'verified' | 'pending_review' | 'needs_revision';
+  requiredBiomarkers?: string[];
 }
 
 export interface DashboardSuggestion {

@@ -41,7 +41,7 @@ interface AddBatchRecordsResult {
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
-  addMedicalCondition: (condition: Omit<MedicalCondition, 'id' | 'status'>, isPatientAdding: boolean) => void;
+  addMedicalCondition: (condition: Partial<Omit<MedicalCondition, 'id' | 'status'>> & {condition: string, date: string}, isPatientAdding: boolean) => void;
   removeMedicalCondition: (id: string) => void;
   approveMedicalCondition: (conditionId: string, suggestionId?: string) => void;
   dismissSuggestion: (conditionId: string, suggestionId?: string) => void;
@@ -241,7 +241,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updatePatientData(newProfile.id, { ...newProfile });
   }
   
-  const addMedicalCondition = async (condition: Omit<MedicalCondition, 'id' | 'status'>, isPatientAdding: boolean) => {
+  const addMedicalCondition = async (condition: Partial<Omit<MedicalCondition, 'id' | 'status'>> & {condition: string, date: string}, isPatientAdding: boolean) => {
     const validDate = condition.date && isValid(parseISO(condition.date)) 
         ? condition.date 
         : new Date().toISOString();
@@ -257,10 +257,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
     updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
 
-    if (!isDoctorLoggedIn) {
+    if (isPatientAdding && !isDoctorLoggedIn) {
       try {
         const { recommendedDashboard } = await getDashboardRecommendations({ conditionName: newCondition.condition, icdCode: newCondition.icdCode });
-        if (recommendedDashboard !== 'none') {
+        if (recommendedDashboard !== 'none' && !profile.enabledDashboards?.includes(recommendedDashboard)) {
           const newSuggestion: DashboardSuggestion = {
             id: `sugg-${Date.now()}`,
             conditionId: newCondition.id,

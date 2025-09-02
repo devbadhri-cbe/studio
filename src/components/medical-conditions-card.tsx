@@ -22,6 +22,8 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from './ui/alert';
 import { isValid, parseISO } from 'date-fns';
 import { DatePicker } from './ui/date-picker';
+import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
+import { getBiomarkersForCondition } from '@/ai/flows/get-biomarkers-for-condition';
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
@@ -33,7 +35,7 @@ type ActiveSynopsis = {
     id: string;
 } | null;
 
-function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave: (data: {condition: string, date: string}, icdCode?: string) => Promise<void>, onCancel: () => void, existingConditions: MedicalCondition[] }) {
+function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave: (data: {condition: string, date: string, icdCode?: string, requiredBiomarkers?: string[]}) => Promise<void>, onCancel: () => void, existingConditions: MedicalCondition[] }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -51,37 +53,42 @@ function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave
   
   const handleSubmit = async (data: z.infer<typeof ConditionSchema>) => {
     setIsSubmitting(true);
+    let icdCodeString: string | undefined;
+    let biomarkers: string[] | undefined;
+
     try {
-      const dateString = data.date.toISOString();
       const { icdCode, description } = await suggestIcdCode({ condition: data.condition });
-      const fullIcdCode = `${icdCode}: ${description}`;
+      icdCodeString = `${icdCode}: ${description}`;
 
       const isDuplicate = existingConditions.some(c => c.icdCode?.startsWith(icdCode));
-
       if (isDuplicate) {
         toast({
             variant: 'destructive',
             title: 'Duplicate Condition',
             description: `This condition (or a similar one with ICD-11 code ${icdCode}) already exists.`,
         });
-      } else {
-         await onSave({ ...data, date: dateString }, fullIcdCode);
-         toast({
-          title: 'Condition Added',
-          description: `This will be sent to your doctor for review. Suggested ICD-11 code: ${icdCode}`,
-        });
+        setIsSubmitting(false);
+        onCancel();
+        return;
       }
+      
+      const { recommendedDashboard } = await getDashboardRecommendations({ conditionName: data.condition, icdCode });
+      if (recommendedDashboard === 'none') {
+          const biomarkerResult = await getBiomarkersForCondition({ conditionName: data.condition });
+          biomarkers = biomarkerResult.biomarkers;
+      }
+
     } catch (error) {
-       console.error('Failed to get ICD code suggestion', error);
+       console.error('Failed to get AI suggestions', error);
       toast({
         variant: 'destructive',
-        title: 'An error occurred',
-        description: 'Could not get ICD code suggestion. The condition will be added without it.',
+        title: 'Suggestion Error',
+        description: 'Could not get AI suggestions. The condition will be added for manual review.',
       });
-      await onSave({ ...data, date: data.date.toISOString() });
     } finally {
-      setIsSubmitting(false);
-      onCancel();
+       await onSave({ ...data, date: data.date.toISOString(), icdCode: icdCodeString, requiredBiomarkers: biomarkers });
+       setIsSubmitting(false);
+       onCancel();
     }
   }
 
@@ -132,8 +139,8 @@ export function MedicalConditionsCard() {
 
   const formatDate = useDateFormatter();
   
-  const handleSaveCondition = async (data: { condition: string, date: string }, icdCode?: string) => {
-    addMedicalCondition({ ...data, icdCode }, !isDoctorLoggedIn);
+  const handleSaveCondition = async (data: { condition: string, date: string, icdCode?: string, requiredBiomarkers?: string[]}) => {
+    addMedicalCondition(data, !isDoctorLoggedIn);
     setIsAddingCondition(false);
   };
   
