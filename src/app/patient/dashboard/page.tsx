@@ -141,6 +141,8 @@ export default function PatientDashboard() {
                  <LipidCard />
                  <VitaminDCard />
                  <ThyroidCard />
+                 <HypertensionCard />
+                 <RenalCard />
             </div>
 
             <Separator />

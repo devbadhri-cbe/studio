@@ -16,6 +16,10 @@ import {
 import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
 import { useApp } from '@/context/app-context';
 import { Card, CardContent } from './ui/card';
+import { Hba1cCard } from './hba1c-card';
+import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
+import { AnemiaCard } from './anemia-card';
+import { WeightRecordCard } from './weight-record-card';
 
 type Checked = DropdownMenuCheckboxItemProps["checked"]
 
