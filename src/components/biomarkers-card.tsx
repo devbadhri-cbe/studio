@@ -9,6 +9,7 @@ import { Shapes } from 'lucide-react';
 import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
 import { Separator } from './ui/separator';
 import { ScrollArea } from './ui/scroll-area';
+import { AnemiaCard } from './anemia-card';
 
 export function BiomarkersCard() {
     return (
@@ -23,6 +24,8 @@ export function BiomarkersCard() {
                         <WeightRecordCard />
                         <Separator />
                         <FastingBloodGlucoseCard />
+                        <Separator />
+                        <AnemiaCard />
                     </div>
                 </ScrollArea>
             </CardContent>
