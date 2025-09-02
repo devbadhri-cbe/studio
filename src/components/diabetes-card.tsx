@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Settings, Droplet, Check } from 'lucide-react';
+import { Settings, Droplet } from 'lucide-react';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { Button } from './ui/button';
 import {
@@ -21,6 +21,7 @@ export function DiabetesCard() {
   const [showHbA1c, setShowHbA1c] = React.useState<Checked>(true)
   const [showFastingBloodGlucose, setShowFastingBloodGlucose] = React.useState<Checked>(true)
   const [showAnemia, setShowAnemia] = React.useState<Checked>(false)
+  const [showWeight, setShowWeight] = React.useState<Checked>(false)
 
   const Title = 'Diabetes Panel';
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
@@ -52,6 +53,12 @@ export function DiabetesCard() {
           onCheckedChange={setShowAnemia}
         >
           Anemia Card
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={showWeight}
+          onCheckedChange={setShowWeight}
+        >
+          Weight Card
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>
