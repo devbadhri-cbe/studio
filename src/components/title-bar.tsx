@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Logo } from '@/components/logo';
@@ -17,7 +16,7 @@ export function TitleBar({ children }: TitleBarProps) {
     return (
         <header className="border-b px-4 py-2 md:px-6">
             <div className="mx-auto w-full max-w-7xl border-2 border-purple-500 p-2 flex items-center justify-between">
-                 <div className="border-2 border-red-500 flex justify-start">
+                 <div className="border-2 border-red-500 flex justify-start w-10 h-10">
                     {children}
                 </div>
                 <div className="border-2 border-green-500 flex-1 flex justify-center">
@@ -38,7 +37,7 @@ export function TitleBar({ children }: TitleBarProps) {
                         </div>
                     </div>
                 </div>
-                <div className="border-2 border-blue-500 flex justify-end">
+                <div className="border-2 border-blue-500 flex justify-end w-10 h-10">
                     <ThemeToggle />
                 </div>
             </div>
