@@ -14,11 +14,11 @@ export function TitleBar({ children }: TitleBarProps) {
 
     return (
         <header className="border-b px-4 py-4 md:px-6">
-            <div className="relative mx-auto flex w-full max-w-7xl items-center justify-between">
-                <div className="flex w-1/3 justify-start">
+            <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
+                <div className="flex items-center justify-start w-1/3">
                     {children}
                 </div>
-                <div className="flex w-1/3 justify-center">
+                <div className="flex items-center justify-center w-1/3">
                     <div className="flex flex-col items-center">
                         <div className="flex items-center gap-2">
                             <Logo className="h-8 w-8 text-primary" />
@@ -36,7 +36,7 @@ export function TitleBar({ children }: TitleBarProps) {
                         </div>
                     </div>
                 </div>
-                 <div className="flex w-1/3 justify-end">
+                 <div className="flex items-center justify-end w-1/3">
                     <ThemeToggle />
                 </div>
             </div>
