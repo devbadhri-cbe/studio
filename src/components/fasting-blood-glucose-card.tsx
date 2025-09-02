@@ -76,7 +76,7 @@ export function FastingBloodGlucoseCard() {
             </div>
         </div>
           
-        <div className="flex flex-col flex-1 gap-4 border border-red-500">
+        <div className="flex flex-col flex-1 border border-red-500">
             <div className="flex flex-col border border-red-500">
               <ScrollArea className="h-[140px] pr-3">
                 {sortedRecords.length > 0 ? (
