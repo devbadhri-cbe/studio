@@ -15,10 +15,10 @@ export function TitleBar({ children }: TitleBarProps) {
     return (
         <header className="border-b px-4 py-4 md:px-6">
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
-                <div className="flex justify-start min-w-[150px]">
+                <div className="flex justify-start min-w-[150px] border-2 border-red-500">
                     {children}
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center border-2 border-green-500">
                     <div className="flex items-center gap-2">
                         <Logo className="h-8 w-8 text-primary" />
                         <span className="text-3xl font-bold md:text-4xl font-headline">Health Guardian</span>
@@ -34,7 +34,7 @@ export function TitleBar({ children }: TitleBarProps) {
                         </a>
                     </div>
                 </div>
-                 <div className="flex justify-end min-w-[150px]">
+                 <div className="flex justify-end min-w-[150px] border-2 border-blue-500">
                     <ThemeToggle />
                 </div>
             </div>
