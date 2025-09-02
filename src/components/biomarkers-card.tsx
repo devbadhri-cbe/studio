@@ -17,20 +17,33 @@ import { Separator } from './ui/separator';
 
 type ActiveView = 'anemia' | 'glucose' | 'weight';
 
-const biomarkerOptions: { value: ActiveView; label: string }[] = [
+const allBiomarkerOptions: { value: ActiveView; label: string }[] = [
   { value: 'anemia', label: 'Hemoglobin' },
   { value: 'glucose', label: 'Fasting Blood Glucose' },
   { value: 'weight', label: 'Weight & BMI' },
 ];
 
-biomarkerOptions.sort((a, b) => a.label.localeCompare(b.label));
-
 export function BiomarkersCard() {
-  const [activeView, setActiveView] = React.useState<ActiveView>('weight');
+  const { customBiomarkers, enabledDashboards } = useApp();
+  
+  const availableBiomarkerKeys = React.useMemo(() => {
+    const keys = new Set<string>();
+    if (enabledDashboards?.includes('anemia')) keys.add('anemia');
+    if (enabledDashboards?.includes('glucose')) keys.add('glucose');
+    if (enabledDashboards?.includes('weight')) keys.add('weight');
+    return Array.from(keys) as ActiveView[];
+  }, [enabledDashboards]);
+  
+  const [activeView, setActiveView] = React.useState<ActiveView>(availableBiomarkerKeys[0] || 'weight');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
-  const { customBiomarkers } = useApp();
+
+  React.useEffect(() => {
+    if (availableBiomarkerKeys.length > 0 && !availableBiomarkerKeys.includes(activeView)) {
+        setActiveView(availableBiomarkerKeys[0]);
+    }
+  }, [availableBiomarkerKeys, activeView]);
 
   const renderActiveCard = () => {
     switch (activeView) {
@@ -45,9 +58,10 @@ export function BiomarkersCard() {
   };
   
   const allOptions = React.useMemo(() => {
+    const standardOptions = allBiomarkerOptions.filter(opt => availableBiomarkerKeys.includes(opt.value));
     const customOptions = customBiomarkers.map(b => ({ value: b.id, label: b.name, isCustom: true }));
-    return [...biomarkerOptions, ...customOptions].sort((a, b) => a.label.localeCompare(b.label));
-  }, [customBiomarkers]);
+    return [...standardOptions, ...customOptions].sort((a, b) => a.label.localeCompare(b.label));
+  }, [customBiomarkers, availableBiomarkerKeys]);
 
   const filteredOptions = allOptions.filter((option) =>
     option.label.toLowerCase().includes(searchQuery.toLowerCase())
