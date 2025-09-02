@@ -21,6 +21,7 @@ import { Switch } from './ui/switch';
 
 export function WeightRecordCard() {
   const { weightRecords, removeWeightRecord, profile, setProfile } = useApp();
+  const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
   const isImperial = profile.unitSystem === 'imperial';
   const weightUnit = isImperial ? 'lbs' : 'kg';
@@ -39,7 +40,7 @@ export function WeightRecordCard() {
   );
 
   const Actions = (
-    <Popover>
+    <Popover open={isActionsOpen} onOpenChange={setIsActionsOpen}>
         <PopoverTrigger asChild>
               <Button size="icon" variant="ghost" className="h-8 w-8">
                   <Settings className="h-4 w-4" />
@@ -47,7 +48,7 @@ export function WeightRecordCard() {
         </PopoverTrigger>
         <PopoverContent className="w-64" align="end">
               <div className="space-y-4">
-                  <AddWeightRecordDialog>
+                  <AddWeightRecordDialog onSuccess={() => setIsActionsOpen(false)}>
                     <Button variant="outline" className="w-full">Add New Record</Button>
                   </AddWeightRecordDialog>
                   <Separator />

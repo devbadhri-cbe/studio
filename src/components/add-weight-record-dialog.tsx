@@ -33,9 +33,10 @@ const FormSchema = z.object({
 
 interface AddWeightRecordDialogProps {
     children?: React.ReactNode;
+    onSuccess?: () => void;
 }
 
-export function AddWeightRecordDialog({ children }: AddWeightRecordDialogProps) {
+export function AddWeightRecordDialog({ children, onSuccess }: AddWeightRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addWeightRecord, profile } = useApp();
@@ -72,6 +73,7 @@ export function AddWeightRecordDialog({ children }: AddWeightRecordDialogProps) 
             description: 'Your new weight record has been added.',
         });
         setOpen(false);
+        onSuccess?.();
     } catch (error) {
         console.error("Failed to add weight record", error);
         toast({
