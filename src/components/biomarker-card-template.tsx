@@ -34,7 +34,9 @@ export function BiomarkerCardTemplate({
             <div className="flex flex-col flex-1 pr-3">
               {recordsList}
             </div>
-            {statusDisplay}
+             <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-2 flex-1">
+                {statusDisplay}
+             </div>
           </div>
           <div className="flex flex-col flex-1 min-h-[150px]">
             {chart}
