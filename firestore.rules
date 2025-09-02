@@ -1,15 +1,16 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // For this simplified example, we are allowing reads and writes.
-    // In a real production app, you would secure this data based on
-    // user authentication (e.g., only a logged-in doctor can access
-    // their patients, and a patient can only access their own data).
-    match /{document=**} {
+    // Allow public read and write access to the patients collection for now.
+    // WARNING: These rules are insecure for a production environment with real data.
+    // They should be replaced with authenticated rules before launch.
+    match /patients/{patientId} {
       allow read, write: if true;
+    }
+
+    match /patients/{patientId}/{subcollection}/{document=**} {
+        allow read, write: if true;
     }
   }
 }
