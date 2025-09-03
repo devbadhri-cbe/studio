@@ -43,7 +43,7 @@ User Input:
 - Frequency: {{{frequency}}}
 
 Instructions:
-1.  **Medication Name:** Correct any spelling errors and ensure it is properly capitalized (e.g., "atorvastatin" becomes "Atorvastatin").
+1.  **Medication Name:** Identify the pharmacological (generic) name of the medication. If the user enters a brand name (e.g., Lipitor), convert it to its generic name (e.g., Atorvastatin). Correct any spelling errors and ensure the final generic name is properly capitalized.
 2.  **Dosage:** Standardize the dosage format. Ensure there is a space between the number and the unit (e.g., "10mg" becomes "10 mg").
 3.  **Frequency:** Standardize the frequency description. Convert numerical or shorthand inputs into a clear, human-readable format.
     - "1" or "daily" should become "Once daily".
@@ -69,3 +69,4 @@ const standardizeMedicationFlow = ai.defineFlow(
     return output!;
   }
 );
+
