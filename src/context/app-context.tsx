@@ -11,6 +11,8 @@ import { countries } from '@/lib/countries';
 import { toMgDl, toMmolL, toNgDl, toNmolL, toGDL, toGL } from '@/lib/unit-conversions';
 import { calculateBmi, calculateEgfr } from '@/lib/utils';
 import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
+import { getBiomarkersForCondition } from '@/ai/flows/get-biomarkers-for-condition';
+import { suggestNewBiomarkers } from '@/ai/flows/suggest-new-biomarkers';
 
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'], customBiomarkers: [] };
@@ -295,42 +297,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updatePatientData(newProfile.id, { ...newProfile });
   }
   
-  const addMedicalCondition = async (condition: Partial<Omit<MedicalCondition, 'id' | 'status'>> & {condition: string, date: string}, isPatientAdding: boolean) => {
+  const addMedicalCondition = async (condition: Partial<Omit<MedicalCondition, 'id' | 'status'>> & {condition: string, date: string, icdCode?: string, requiredBiomarkers?: string[]}) => {
     const validDate = condition.date && isValid(parseISO(condition.date)) 
         ? condition.date 
         : new Date().toISOString();
 
-    const newCondition = { 
+    let newCondition: MedicalCondition = { 
         ...condition,
         date: validDate,
         id: Date.now().toString(), 
         status: 'pending_review'
-    } as MedicalCondition;
+    };
+
+    let dashboardRecommended = false;
+
+    // Always check for dashboard recommendations for both patient and doctor
+    try {
+        const { recommendedDashboard } = await getDashboardRecommendations({ conditionName: newCondition.condition, icdCode: newCondition.icdCode });
+        if (recommendedDashboard !== 'none' && !profile.enabledDashboards?.includes(recommendedDashboard)) {
+            const newSuggestion: DashboardSuggestion = {
+                id: `sugg-${Date.now()}`,
+                conditionId: newCondition.id,
+                conditionName: newCondition.condition,
+                suggestedDashboard: recommendedDashboard,
+                status: 'pending',
+            };
+            const updatedSuggestions = [...dashboardSuggestions, newSuggestion];
+            setDashboardSuggestions(updatedSuggestions);
+            updatePatientData(profile.id, { dashboardSuggestions: updatedSuggestions });
+            dashboardRecommended = true;
+        }
+    } catch (error) {
+        console.error("Failed to get dashboard suggestion:", error);
+    }
     
+    // If no dashboard was recommended, check for individual biomarkers
+    if (!dashboardRecommended && condition.requiredBiomarkers) {
+        newCondition.requiredBiomarkers = condition.requiredBiomarkers;
+    }
+
     const updatedConditions = [...profile.presentMedicalConditions, newCondition];
     setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
     updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
-
-    if (isPatientAdding && !isDoctorLoggedIn) {
-      try {
-        const { recommendedDashboard } = await getDashboardRecommendations({ conditionName: newCondition.condition, icdCode: newCondition.icdCode });
-        if (recommendedDashboard !== 'none' && !profile.enabledDashboards?.includes(recommendedDashboard)) {
-          const newSuggestion: DashboardSuggestion = {
-            id: `sugg-${Date.now()}`,
-            conditionId: newCondition.id,
-            conditionName: newCondition.condition,
-            suggestedDashboard: recommendedDashboard,
-            status: 'pending',
-          };
-          const updatedSuggestions = [...dashboardSuggestions, newSuggestion];
-          setDashboardSuggestions(updatedSuggestions);
-          updatePatientData(profile.id, { dashboardSuggestions: updatedSuggestions });
-        }
-      } catch (error) {
-        console.error("Failed to get dashboard suggestion:", error);
-      }
-    }
-  };
+};
   
   const removeMedicalCondition = (id: string) => {
     const updatedConditions = profile.presentMedicalConditions.filter(c => c.id !== id);

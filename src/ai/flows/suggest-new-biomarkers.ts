@@ -36,6 +36,9 @@ const prompt = ai.definePrompt({
 
 IMPORTANT: Do NOT suggest any biomarkers that are already in the "Current Biomarkers" list. Only suggest net new ones. If there are no new relevant biomarkers to suggest, return an empty list.
 
+Known Panels:
+- Diabetes Panel: Covers HbA1c, Glucose, Weight, Anemia. If any of the patient's conditions are diabetes-related, do not suggest these individual biomarkers as they are covered by the panel.
+
 Patient's Diagnosed Conditions:
 {{#each conditions}}
 - {{{this}}}
