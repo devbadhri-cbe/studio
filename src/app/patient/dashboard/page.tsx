@@ -29,13 +29,16 @@ import { TitleBar } from '@/components/title-bar';
 import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
 import { BiomarkersCard } from '@/components/biomarkers-card';
 import { Hba1cCard } from '@/components/hba1c-card';
+import { suggestNewBiomarkers } from '@/ai/flows/suggest-new-biomarkers';
+import { BiomarkerSuggestionCard } from '@/components/biomarker-suggestion-card';
 
 
 export default function PatientDashboard() {
-  const { isClient, isDoctorLoggedIn, profile, dashboardSuggestions, enabledDashboards } = useApp();
+  const { isClient, isDoctorLoggedIn, profile, dashboardSuggestions, enabledDashboards, customBiomarkers } = useApp();
   const router = useRouter();
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
+  const [biomarkerSuggestions, setBiomarkerSuggestions] = React.useState<string[]>([]);
 
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review') || dashboardSuggestions.some(s => s.status === 'pending'));
   
@@ -46,6 +49,27 @@ export default function PatientDashboard() {
         (weightCardElement as any).editHeightDialogRef = editHeightDialogRef;
     }
   }, []);
+
+  React.useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (isDoctorLoggedIn && profile.presentMedicalConditions.length > 0) {
+        const currentBiomarkers = [
+          ...(enabledDashboards || []),
+          ...(customBiomarkers?.map(b => b.name) || [])
+        ];
+        const conditions = profile.presentMedicalConditions
+          .filter(c => c.status === 'verified')
+          .map(c => c.condition);
+
+        if (conditions.length > 0) {
+          const result = await suggestNewBiomarkers({ conditions, currentBiomarkers });
+          setBiomarkerSuggestions(result.suggestions);
+        }
+      }
+    };
+
+    fetchSuggestions();
+  }, [isDoctorLoggedIn, profile.presentMedicalConditions, enabledDashboards, customBiomarkers]);
 
 
   if (!isClient) {
@@ -66,6 +90,10 @@ export default function PatientDashboard() {
 
   const handleConfirmationSuccess = () => {
     setExtractedData(null);
+  }
+
+  const handleSuggestionDismiss = () => {
+    setBiomarkerSuggestions([]);
   }
 
   return (
@@ -89,6 +117,12 @@ export default function PatientDashboard() {
         <main className="flex-1 p-4 md:pt-10 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
+             {isDoctorLoggedIn && biomarkerSuggestions.length > 0 && (
+              <BiomarkerSuggestionCard 
+                suggestions={biomarkerSuggestions} 
+                onDismiss={handleSuggestionDismiss} 
+              />
+             )}
 
             <div className="space-y-6">
               <PatientHeader />
