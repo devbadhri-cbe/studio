@@ -177,11 +177,11 @@ export default function PatientDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
                  {isDoctorLoggedIn && <BiomarkersCard />}
-                 {enabledDashboards?.includes('diabetes') && <DiabetesCard />}
-                 {enabledDashboards?.includes('hba1c') && !enabledDashboards?.includes('diabetes') && <Hba1cCard />}
-                 {enabledDashboards?.includes('glucose') && !enabledDashboards?.includes('diabetes') && <FastingBloodGlucoseCard />}
-                 {enabledDashboards?.includes('anemia') && !enabledDashboards?.includes('diabetes') && <HemoglobinCard />}
-                 {enabledDashboards?.includes('weight') && !enabledDashboards?.includes('diabetes') && <WeightRecordCard />}
+                 {(isDoctorLoggedIn || enabledDashboards?.includes('diabetes')) && <DiabetesCard />}
+                 {!isDoctorLoggedIn && enabledDashboards?.includes('hba1c') && !enabledDashboards?.includes('diabetes') && <Hba1cCard />}
+                 {!isDoctorLoggedIn && enabledDashboards?.includes('glucose') && !enabledDashboards?.includes('diabetes') && <FastingBloodGlucoseCard />}
+                 {!isDoctorLoggedIn && enabledDashboards?.includes('anemia') && !enabledDashboards?.includes('diabetes') && <HemoglobinCard />}
+                 {!isDoctorLoggedIn && enabledDashboards?.includes('weight') && !enabledDashboards?.includes('diabetes') && <WeightRecordCard />}
                  {enabledDashboards?.includes('lipids') && <LipidCard />}
                  {enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
                  {enabledDashboards?.includes('thyroid') && <ThyroidCard />}
