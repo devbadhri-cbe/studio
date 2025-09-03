@@ -3,7 +3,6 @@
 
 import * as React from 'react';
 import { Settings, Droplet } from 'lucide-react';
-import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
@@ -18,7 +17,7 @@ import { useApp } from '@/context/app-context';
 import { Card, CardContent } from './ui/card';
 import { Hba1cCard } from './hba1c-card';
 import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
-import { AnemiaCard } from './anemia-card';
+import { HemoglobinCard } from './hemoglobin-card';
 import { WeightRecordCard } from './weight-record-card';
 
 type Checked = DropdownMenuCheckboxItemProps["checked"]
@@ -27,8 +26,15 @@ export function DiabetesCard() {
   const { isDoctorLoggedIn } = useApp();
   const [showHbA1c, setShowHbA1c] = React.useState<Checked>(true);
   const [showFastingBloodGlucose, setShowFastingBloodGlucose] = React.useState<Checked>(true);
-  const [showAnemia, setShowAnemia] = React.useState<Checked>(false);
+  const [showHemoglobin, setShowHemoglobin] = React.useState<Checked>(false);
   const [showWeight, setShowWeight] = React.useState<Checked>(false);
+
+  const visibleCards = [
+      showHbA1c && <Hba1cCard key="hba1c" />,
+      showFastingBloodGlucose && <FastingBloodGlucoseCard key="fbg" />,
+      showHemoglobin && <HemoglobinCard key="hemoglobin" />,
+      showWeight && <WeightRecordCard key="weight" />,
+  ].filter(Boolean);
 
   return (
     <Card className="h-full">
@@ -61,27 +67,32 @@ export function DiabetesCard() {
                             Fasting Blood Glucose Card
                             </DropdownMenuCheckboxItem>
                             <DropdownMenuCheckboxItem
-                            checked={showAnemia}
-                            onCheckedChange={setShowAnemia}
+                            checked={showHemoglobin}
+                            onCheckedChange={setShowHemoglobin}
                             >
-                            Anemia Card
+                            Hemoglobin (Anemia) Card
                             </DropdownMenuCheckboxItem>
                              <DropdownMenuCheckboxItem
                             checked={showWeight}
                             onCheckedChange={setShowWeight}
                             >
-                            Weight Card
+                            Weight & BMI Card
                             </DropdownMenuCheckboxItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )}
              </div>
              
-             <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
-                <p className="text-center text-xs text-muted-foreground">No biomarker cards selected for this panel.</p>
-                 {isDoctorLoggedIn && <p className="text-center text-xs text-muted-foreground mt-1">Click the <Settings className="inline-block h-3 w-3" /> icon to add cards.</p>}
-            </div>
-
+             {visibleCards.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {visibleCards}
+                </div>
+             ) : (
+                <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
+                    <p className="text-center text-xs text-muted-foreground">No biomarker cards selected for this panel.</p>
+                    {isDoctorLoggedIn && <p className="text-center text-xs text-muted-foreground mt-1">Click the <Settings className="inline-block h-3 w-3" /> icon to add cards.</p>}
+                </div>
+             )}
         </CardContent>
     </Card>
   );

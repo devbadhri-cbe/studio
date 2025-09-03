@@ -17,7 +17,7 @@ const DashboardRecommendationInputSchema = z.object({
 export type DashboardRecommendationInput = z.infer<typeof DashboardRecommendationInputSchema>;
 
 const DashboardRecommendationOutputSchema = z.object({
-  recommendedDashboard: z.enum(['hba1c', 'lipids', 'hypertension', 'thyroid', 'vitaminD', 'renal', 'none']).describe('The key of the recommended dashboard or "none".'),
+  recommendedDashboard: z.enum(['diabetes', 'lipids', 'hypertension', 'thyroid', 'vitaminD', 'renal', 'none']).describe('The key of the recommended dashboard or "none".'),
 });
 export type DashboardRecommendationOutput = z.infer<typeof DashboardRecommendationOutputSchema>;
 
@@ -35,15 +35,15 @@ const prompt = ai.definePrompt({
 Condition: {{{conditionName}}}
 {{#if icdCode}}ICD Code: {{{icdCode}}}{{/if}}
 
-Available Dashboards and their primary biomarkers:
-- 'hba1c': Monitors HbA1c for diabetes.
+Available Dashboards and their primary focus:
+- 'diabetes': Monitors biomarkers related to diabetes like HbA1c, glucose, weight, and anemia.
 - 'lipids': Monitors LDL, HDL, Triglycerides for cholesterol management.
 - 'hypertension': Monitors blood pressure.
 - 'thyroid': Monitors TSH, T3, T4 for thyroid function.
 - 'vitaminD': Monitors Vitamin D levels.
 - 'renal': Monitors eGFR and UACR for kidney function.
 
-Analyze the condition and choose the most appropriate dashboard key. For example, for "Type 2 Diabetes", recommend "hba1c". For "Hypercholesterolemia", recommend "lipids". For "Chronic Kidney Disease", recommend "renal". If no specific dashboard is a good fit, recommend "none".
+Analyze the condition and choose the most appropriate dashboard key. For example, for "Type 2 Diabetes", recommend "diabetes". For "Hypercholesterolemia", recommend "lipids". For "Chronic Kidney Disease", recommend "renal". If no specific dashboard is a good fit, recommend "none".
 `,
 });
 
