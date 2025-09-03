@@ -12,13 +12,13 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const SuggestNewBiomarkersInputSchema = z.object({
+const SuggestNewBiomarkersInputSchema = z.object({
   conditions: z.array(z.string()).describe("The patient's diagnosed medical conditions."),
   currentBiomarkers: z.array(z.string()).describe('A list of biomarkers and dashboards currently being monitored.'),
 });
 export type SuggestNewBiomarkersInput = z.infer<typeof SuggestNewBiomarkersInputSchema>;
 
-export const SuggestNewBiomarkersOutputSchema = z.object({
+const SuggestNewBiomarkersOutputSchema = z.object({
   suggestions: z.array(z.string()).describe('A list of new, relevant biomarker names to start monitoring. The list should be empty if no new suggestions are applicable.'),
 });
 export type SuggestNewBiomarkersOutput = z.infer<typeof SuggestNewBiomarkersOutputSchema>;
