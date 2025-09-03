@@ -27,7 +27,6 @@ import { UploadConfirmationForm } from '@/components/upload-confirmation-form';
 import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
 import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
-import { BiomarkersCard } from '@/components/biomarkers-card';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { suggestNewBiomarkers } from '@/ai/flows/suggest-new-biomarkers';
 import { BiomarkerSuggestionCard } from '@/components/biomarker-suggestion-card';
