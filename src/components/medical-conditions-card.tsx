@@ -2,7 +2,7 @@
 
 'use client';
 
-import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle, AlertTriangle, Edit } from 'lucide-react';
+import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle, AlertTriangle, Edit, Code } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -208,6 +208,15 @@ export function MedicalConditionsCard() {
                                         </div>
                                         {condition.icdCode && <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>}
                                         <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
+                                        {condition.requiredBiomarkers && condition.requiredBiomarkers.length > 0 && (
+                                            <div className="text-xs text-muted-foreground mt-1">
+                                                <div className="flex items-center gap-2">
+                                                    <Code className="h-3 w-3 text-destructive" />
+                                                    <span className="font-medium">Suggested biomarkers:</span>
+                                                </div>
+                                                <p className="pl-5">{condition.requiredBiomarkers.join(', ')}</p>
+                                            </div>
+                                        )}
                                     </div>
                                         <div className="flex items-center shrink-0">
                                             {isDoctorLoggedIn &&
@@ -254,3 +263,4 @@ export function MedicalConditionsCard() {
     </Card>
   );
 }
+

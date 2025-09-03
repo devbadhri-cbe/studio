@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useApp } from '@/context/app-context';
@@ -59,7 +60,7 @@ export function DoctorReviewCard() {
                         <div className="text-sm text-muted-foreground mt-1">
                             <div className="flex items-center gap-2">
                                 <Code className="h-4 w-4 text-destructive" />
-                                <span className="font-medium">New card needed for:</span>
+                                <span className="font-medium">Suggested new biomarkers to track:</span>
                             </div>
                             <ul className="list-disc pl-8">
                                 {condition.requiredBiomarkers.map(b => <li key={b}>{b}</li>)}
@@ -86,3 +87,4 @@ export function DoctorReviewCard() {
     </Card>
   );
 }
+
