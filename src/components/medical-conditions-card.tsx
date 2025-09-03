@@ -86,7 +86,15 @@ function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave
         description: 'Could not get AI suggestions. The condition will be added for manual review.',
       });
     } finally {
-       await onSave({ ...data, date: data.date.toISOString(), icdCode: icdCodeString, requiredBiomarkers: biomarkers });
+       const saveData: { condition: string, date: string, icdCode?: string, requiredBiomarkers?: string[] } = { 
+            ...data, 
+            date: data.date.toISOString(), 
+            icdCode: icdCodeString 
+       };
+       if (biomarkers) {
+           saveData.requiredBiomarkers = biomarkers;
+       }
+       await onSave(saveData);
        setIsSubmitting(false);
        onCancel();
     }
@@ -263,4 +271,3 @@ export function MedicalConditionsCard() {
     </Card>
   );
 }
-
