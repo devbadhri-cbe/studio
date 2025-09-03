@@ -339,12 +339,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
   
   const approveMedicalCondition = (conditionId: string, suggestionId?: string) => {
+    let updatedEnabledDashboards = profile.enabledDashboards || [];
+    let updatedCustomBiomarkers = profile.customBiomarkers || [];
+
+    const condition = profile.presentMedicalConditions.find(c => c.id === conditionId);
+
+    if (condition?.requiredBiomarkers) {
+        condition.requiredBiomarkers.forEach(biomarkerName => {
+            if (!updatedCustomBiomarkers.some(b => b.name.toLowerCase() === biomarkerName.toLowerCase())) {
+                const newBiomarker: CustomBiomarker = {
+                    id: `custom-${Date.now()}-${biomarkerName.replace(/\s+/g, '-')}`,
+                    name: biomarkerName,
+                };
+                updatedCustomBiomarkers.push(newBiomarker);
+            }
+        });
+    }
+    
     const updatedConditions = profile.presentMedicalConditions.map(c => 
       c.id === conditionId ? { ...c, status: 'verified' as const } : c
     );
     
     let updatedSuggestions = dashboardSuggestions;
-    let updatedEnabledDashboards = profile.enabledDashboards || [];
     
     if (suggestionId) {
       const suggestion = dashboardSuggestions.find(s => s.id === suggestionId);
@@ -357,9 +373,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
     }
     
-    setProfileState(p => ({...p, presentMedicalConditions: updatedConditions, enabledDashboards: updatedEnabledDashboards}));
+    setProfileState(p => ({...p, presentMedicalConditions: updatedConditions, enabledDashboards: updatedEnabledDashboards, customBiomarkers: updatedCustomBiomarkers}));
     setDashboardSuggestions(updatedSuggestions);
-    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions, enabledDashboards: updatedEnabledDashboards });
+    setCustomBiomarkersState(updatedCustomBiomarkers);
+    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions, enabledDashboards: updatedEnabledDashboards, customBiomarkers: updatedCustomBiomarkers });
   };
   
   const dismissSuggestion = (conditionId: string, suggestionId?: string) => {
