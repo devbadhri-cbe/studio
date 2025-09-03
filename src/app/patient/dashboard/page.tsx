@@ -34,7 +34,6 @@ import { WeightRecordCard } from '@/components/weight-record-card';
 import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
 import { HemoglobinCard } from '@/components/hemoglobin-card';
 import { OnboardingTour } from '@/components/onboarding-tour';
-import { BiomarkersCard } from '@/components/biomarkers-card';
 import { DiabetesCard } from '@/components/diabetes-card';
 
 
@@ -176,12 +175,11 @@ export default function PatientDashboard() {
             <Separator />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
-                 {isDoctorLoggedIn && <BiomarkersCard />}
+                 <WeightRecordCard />
                  {(isDoctorLoggedIn || enabledDashboards?.includes('diabetes')) && <DiabetesCard />}
                  {!isDoctorLoggedIn && enabledDashboards?.includes('hba1c') && !enabledDashboards?.includes('diabetes') && <Hba1cCard />}
                  {!isDoctorLoggedIn && enabledDashboards?.includes('glucose') && !enabledDashboards?.includes('diabetes') && <FastingBloodGlucoseCard />}
                  {!isDoctorLoggedIn && enabledDashboards?.includes('anemia') && !enabledDashboards?.includes('diabetes') && <HemoglobinCard />}
-                 {!isDoctorLoggedIn && enabledDashboards?.includes('weight') && !enabledDashboards?.includes('diabetes') && <WeightRecordCard />}
                  {(isDoctorLoggedIn || enabledDashboards?.includes('lipids')) && <LipidCard />}
                  {(isDoctorLoggedIn || enabledDashboards?.includes('vitaminD')) && <VitaminDCard />}
                  {(isDoctorLoggedIn || enabledDashboards?.includes('thyroid')) && <ThyroidCard />}

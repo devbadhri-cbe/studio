@@ -12,16 +12,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Shapes, Settings } from 'lucide-react';
-import { WeightRecordCard } from './weight-record-card';
 import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
 import { HemoglobinCard } from './hemoglobin-card';
 import { Hba1cCard } from './hba1c-card';
 
 const biomarkerCards = {
-  weight: {
-    label: 'Weight & BMI',
-    component: <WeightRecordCard />,
-  },
   glucose: {
     label: 'Fasting Blood Glucose',
     component: <FastingBloodGlucoseCard />,
@@ -39,12 +34,12 @@ const biomarkerCards = {
 type BiomarkerKey = keyof typeof biomarkerCards;
 
 export function BiomarkersCard() {
-  const [activeView, setActiveView] = React.useState<BiomarkerKey>('weight');
+  const [activeView, setActiveView] = React.useState<BiomarkerKey>('glucose');
   const availableBiomarkerOptions = Object.keys(biomarkerCards) as BiomarkerKey[];
 
   React.useEffect(() => {
     if (!availableBiomarkerOptions.includes(activeView)) {
-      setActiveView(availableBiomarkerOptions[0] || 'weight');
+      setActiveView(availableBiomarkerOptions[0] || 'glucose');
     }
   }, [activeView, availableBiomarkerOptions]);
 

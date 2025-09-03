@@ -18,7 +18,6 @@ import { Card, CardContent } from './ui/card';
 import { Hba1cCard } from './hba1c-card';
 import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
 import { HemoglobinCard } from './hemoglobin-card';
-import { WeightRecordCard } from './weight-record-card';
 
 type Checked = DropdownMenuCheckboxItemProps["checked"]
 
@@ -27,13 +26,11 @@ export function DiabetesCard() {
   const [showHbA1c, setShowHbA1c] = React.useState<Checked>(true);
   const [showFastingBloodGlucose, setShowFastingBloodGlucose] = React.useState<Checked>(true);
   const [showHemoglobin, setShowHemoglobin] = React.useState<Checked>(false);
-  const [showWeight, setShowWeight] = React.useState<Checked>(false);
 
   const visibleCards = [
       showHbA1c && <Hba1cCard key="hba1c" />,
       showFastingBloodGlucose && <FastingBloodGlucoseCard key="fbg" />,
       showHemoglobin && <HemoglobinCard key="hemoglobin" />,
-      showWeight && <WeightRecordCard key="weight" />,
   ].filter(Boolean);
 
   return (
@@ -71,12 +68,6 @@ export function DiabetesCard() {
                             onCheckedChange={setShowHemoglobin}
                             >
                             Hemoglobin (Anemia) Card
-                            </DropdownMenuCheckboxItem>
-                             <DropdownMenuCheckboxItem
-                            checked={showWeight}
-                            onCheckedChange={setShowWeight}
-                            >
-                            Weight & BMI Card
                             </DropdownMenuCheckboxItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
