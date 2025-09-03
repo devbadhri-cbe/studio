@@ -31,6 +31,9 @@ import { BiomarkersCard } from '@/components/biomarkers-card';
 import { Hba1cCard } from '@/components/hba1c-card';
 import { suggestNewBiomarkers } from '@/ai/flows/suggest-new-biomarkers';
 import { BiomarkerSuggestionCard } from '@/components/biomarker-suggestion-card';
+import { WeightRecordCard } from '@/components/weight-record-card';
+import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
+import { AnemiaCard } from '@/components/anemia-card';
 
 
 export default function PatientDashboard() {
@@ -173,6 +176,9 @@ export default function PatientDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  {isDoctorLoggedIn && <BiomarkersCard />}
                  {enabledDashboards?.includes('hba1c') && <Hba1cCard />}
+                 {enabledDashboards?.includes('glucose') && <FastingBloodGlucoseCard />}
+                 {enabledDashboards?.includes('anemia') && <AnemiaCard />}
+                 {enabledDashboards?.includes('weight') && <WeightRecordCard />}
                  {enabledDashboards?.includes('lipids') && <LipidCard />}
                  {enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
                  {enabledDashboards?.includes('thyroid') && <ThyroidCard />}
