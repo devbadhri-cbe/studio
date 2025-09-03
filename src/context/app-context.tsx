@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Doctor, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type AnemiaRecord, type NutritionRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord } from '@/lib/types';
+import { type Doctor, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type HemoglobinRecord, type NutritionRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -78,9 +78,9 @@ interface AppContextType {
   mineralBoneDiseaseRecords: MineralBoneDiseaseRecord[];
   addMineralBoneDiseaseRecord: (record: Omit<MineralBoneDiseaseRecord, 'id' | 'medication'>) => void;
   removeMineralBoneDiseaseRecord: (id: string) => void;
-  anemiaRecords: AnemiaRecord[];
-  addAnemiaRecord: (record: Omit<AnemiaRecord, 'id' | 'medication'>) => void;
-  removeAnemiaRecord: (id: string) => void;
+  hemoglobinRecords: HemoglobinRecord[];
+  addHemoglobinRecord: (record: Omit<HemoglobinRecord, 'id' | 'medication'>) => void;
+  removeHemoglobinRecord: (id: string) => void;
   nutritionRecords: NutritionRecord[];
   addNutritionRecord: (record: Omit<NutritionRecord, 'id' | 'medication'>) => void;
   removeNutritionRecord: (id: string) => void;
@@ -130,7 +130,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [renalRecords, setRenalRecordsState] = React.useState<RenalRecord[]>([]);
   const [electrolyteRecords, setElectrolyteRecordsState] = React.useState<ElectrolyteRecord[]>([]);
   const [mineralBoneDiseaseRecords, setMineralBoneDiseaseRecordsState] = React.useState<MineralBoneDiseaseRecord[]>([]);
-  const [anemiaRecords, setAnemiaRecordsState] = React.useState<AnemiaRecord[]>([]);
+  const [hemoglobinRecords, setHemoglobinRecordsState] = React.useState<HemoglobinRecord[]>([]);
   const [nutritionRecords, setNutritionRecordsState] = React.useState<NutritionRecord[]>([]);
   const [weightRecords, setWeightRecordsState] = React.useState<WeightRecord[]>([]);
   const [bloodPressureRecords, setBloodPressureRecordsState] = React.useState<BloodPressureRecord[]>([]);
@@ -261,7 +261,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setRenalRecordsState(patient.renalRecords || []);
     setElectrolyteRecordsState(patient.electrolyteRecords || []);
     setMineralBoneDiseaseRecordsState(patient.mineralBoneDiseaseRecords || []);
-    setAnemiaRecordsState(patient.anemiaRecords || []);
+    setHemoglobinRecordsState(patient.hemoglobinRecords || []);
     setNutritionRecordsState(patient.nutritionRecords || []);
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
@@ -521,17 +521,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { mineralBoneDiseaseRecords: updatedRecords });
   };
 
-  const addAnemiaRecord = (record: Omit<AnemiaRecord, 'id' | 'medication'>) => {
+  const addHemoglobinRecord = (record: Omit<HemoglobinRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...anemiaRecords, newRecord];
-    setAnemiaRecordsState(updatedRecords);
-    updatePatientData(profile.id, { anemiaRecords: updatedRecords });
+    const updatedRecords = [...hemoglobinRecords, newRecord];
+    setHemoglobinRecordsState(updatedRecords);
+    updatePatientData(profile.id, { hemoglobinRecords: updatedRecords });
   };
 
-  const removeAnemiaRecord = (id: string) => {
-    const updatedRecords = anemiaRecords.filter(r => r.id !== id);
-    setAnemiaRecordsState(updatedRecords);
-    updatePatientData(profile.id, { anemiaRecords: updatedRecords });
+  const removeHemoglobinRecord = (id: string) => {
+    const updatedRecords = hemoglobinRecords.filter(r => r.id !== id);
+    setHemoglobinRecordsState(updatedRecords);
+    updatePatientData(profile.id, { hemoglobinRecords: updatedRecords });
   };
   
   const addNutritionRecord = (record: Omit<NutritionRecord, 'id' | 'medication'>) => {
@@ -727,13 +727,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (batch.hemoglobin) {
-       const dateExists = anemiaRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
+       const dateExists = hemoglobinRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
        if (!dateExists) {
-        const newRecord: AnemiaRecord = { hemoglobin: batch.hemoglobin, id: `anemia-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        updates.anemiaRecords = [...anemiaRecords, newRecord];
-        setAnemiaRecordsState(updates.anemiaRecords);
-        result.added.push('Anemia (Hb)');
-      } else { result.duplicates.push('Anemia (Hb)'); }
+        const newRecord: HemoglobinRecord = { hemoglobin: batch.hemoglobin, id: `anemia-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+        updates.hemoglobinRecords = [...hemoglobinRecords, newRecord];
+        setHemoglobinRecordsState(updates.hemoglobinRecords);
+        result.added.push('Hemoglobin');
+      } else { result.duplicates.push('Hemoglobin'); }
     }
     
     if (batch.albumin) {
@@ -819,9 +819,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     mineralBoneDiseaseRecords,
     addMineralBoneDiseaseRecord,
     removeMineralBoneDiseaseRecord,
-anemiaRecords,
-    addAnemiaRecord,
-    removeAnemiaRecord,
+    hemoglobinRecords,
+    addHemoglobinRecord,
+    removeHemoglobinRecord,
     nutritionRecords,
     addNutritionRecord,
     removeNutritionRecord,

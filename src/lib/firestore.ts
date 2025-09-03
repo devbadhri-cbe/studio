@@ -64,7 +64,7 @@ const processPatientDoc = (doc: any): Patient => {
   const weightRecords = sanitizeRecords(data.weightRecords);
   const bloodPressureRecords = sanitizeRecords(data.bloodPressureRecords);
   const renalRecords = sanitizeRecords(data.renalRecords);
-  const anemiaRecords = sanitizeRecords(data.anemiaRecords);
+  const hemoglobinRecords = sanitizeRecords(data.hemoglobinRecords);
   const nutritionRecords = sanitizeRecords(data.nutritionRecords);
   const presentMedicalConditions = sanitizeRecords(data.presentMedicalConditions);
   const electrolyteRecords = sanitizeRecords(data.electrolyteRecords);
@@ -85,7 +85,7 @@ const processPatientDoc = (doc: any): Patient => {
   const lastThyroid = thyroidRecords.length > 0 ? [...thyroidRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastBloodPressure = bloodPressureRecords.length > 0 ? [...bloodPressureRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastRenal = processedRenalRecords.length > 0 ? [...processedRenalRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
-  const lastHemoglobin = anemiaRecords.length > 0 ? [...anemiaRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
+  const lastHemoglobin = hemoglobinRecords.length > 0 ? [...hemoglobinRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastAlbumin = nutritionRecords.length > 0 ? [...nutritionRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
 
   const latestWeight = weightRecords.length > 0 ? [...weightRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
@@ -108,7 +108,7 @@ const processPatientDoc = (doc: any): Patient => {
     weightRecords,
     bloodPressureRecords,
     presentMedicalConditions,
-    anemiaRecords,
+    hemoglobinRecords,
     nutritionRecords,
     electrolyteRecords,
     mineralBoneDiseaseRecords,
@@ -160,7 +160,7 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         renalRecords: [],
         electrolyteRecords: [],
         mineralBoneDiseaseRecords: [],
-        anemiaRecords: [],
+        hemoglobinRecords: [],
         nutritionRecords: [],
         weightRecords: [],
         bloodPressureRecords: [],
@@ -190,7 +190,7 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
     if (updates.lastLogin && typeof updates.lastLogin === 'string') {
         updateData.lastLogin = new Date(updates.lastLogin);
     }
-    ['hba1cRecords', 'fastingBloodGlucoseRecords', 'lipidRecords', 'vitaminDRecords', 'thyroidRecords', 'renalRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'anemiaRecords', 'nutritionRecords', 'electrolyteRecords', 'mineralBoneDiseaseRecords'].forEach(key => {
+    ['hba1cRecords', 'fastingBloodGlucoseRecords', 'lipidRecords', 'vitaminDRecords', 'thyroidRecords', 'renalRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'hemoglobinRecords', 'nutritionRecords', 'electrolyteRecords', 'mineralBoneDiseaseRecords'].forEach(key => {
         if (updateData[key] && Array.isArray(updateData[key])) {
             updateData[key] = updateData[key].map((item: any) => ({
                 ...item,

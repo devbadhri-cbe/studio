@@ -13,7 +13,7 @@ import { ElectrolytesChart } from './electrolytes-chart';
 import { ElectrolytesHistoryTable } from './electrolytes-history-table';
 import { AddElectrolyteRecordDialog } from './add-electrolyte-record-dialog';
 import { Separator } from './ui/separator';
-import { AnemiaCard } from './anemia-card';
+import { HemoglobinCard } from './hemoglobin-card';
 import { NutritionCard } from './nutrition-card';
 import { MineralBoneCard } from './mineral-bone-card';
 import { AddMineralBoneRecordDialog } from './add-mineral-bone-record-dialog';
@@ -60,7 +60,7 @@ export function RenalCard() {
             <div className="grid gap-6">
               <MineralBoneCard />
               <Separator />
-              <AnemiaCard />
+              <HemoglobinCard />
               <Separator />
               <NutritionCard />
             </div>

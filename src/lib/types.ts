@@ -140,7 +140,7 @@ export interface MineralBoneDiseaseRecord {
   medication?: string;
 }
 
-export interface AnemiaRecord {
+export interface HemoglobinRecord {
   id: string;
   date: Date | string;
   hemoglobin: number; // in g/dL
@@ -218,7 +218,7 @@ export interface Patient {
   renalRecords: RenalRecord[];
   electrolyteRecords: ElectrolyteRecord[];
   mineralBoneDiseaseRecords: MineralBoneDiseaseRecord[];
-  anemiaRecords: AnemiaRecord[];
+  hemoglobinRecords: HemoglobinRecord[];
   nutritionRecords: NutritionRecord[];
   weightRecords: WeightRecord[];
   bloodPressureRecords: BloodPressureRecord[];
