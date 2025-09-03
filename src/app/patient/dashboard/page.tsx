@@ -54,7 +54,7 @@ export default function PatientDashboard() {
     const fetchSuggestions = async () => {
       if (isDoctorLoggedIn && profile.presentMedicalConditions.length > 0) {
         const currentBiomarkers = [
-          ...(enabledDashboards || []),
+          ...(enabledDashboards || []).map(d => d.replace(/([A-Z])/g, ' $1').trim()),
           ...(customBiomarkers?.map(b => b.name) || [])
         ];
         const conditions = profile.presentMedicalConditions
@@ -62,13 +62,20 @@ export default function PatientDashboard() {
           .map(c => c.condition);
 
         if (conditions.length > 0) {
-          const result = await suggestNewBiomarkers({ conditions, currentBiomarkers });
-          setBiomarkerSuggestions(result.suggestions);
+          try {
+            const result = await suggestNewBiomarkers({ conditions, currentBiomarkers });
+            setBiomarkerSuggestions(result.suggestions);
+          } catch(error) {
+            console.error("Failed to fetch biomarker suggestions", error);
+            // Don't show toast to doctor as it could be annoying
+          }
         }
       }
     };
 
-    fetchSuggestions();
+    if (isDoctorLoggedIn) {
+        fetchSuggestions();
+    }
   }, [isDoctorLoggedIn, profile.presentMedicalConditions, enabledDashboards, customBiomarkers]);
 
 
