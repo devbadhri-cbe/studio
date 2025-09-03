@@ -11,6 +11,7 @@ import { Separator } from './ui/separator';
 
 const getDashboardName = (key: string) => {
     switch (key) {
+      case 'diabetes': return 'Diabetes Panel';
       case 'hba1c': return 'HbA1c Dashboard';
       case 'lipids': return 'Lipid Dashboard';
       case 'vitaminD': return 'Vitamin D Dashboard';
@@ -87,4 +88,3 @@ export function DoctorReviewCard() {
     </Card>
   );
 }
-
