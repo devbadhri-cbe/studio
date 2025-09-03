@@ -304,7 +304,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...condition,
         date: validDate,
         id: Date.now().toString(), 
-        status: isDoctorLoggedIn ? 'verified' : 'pending_review'
+        status: 'pending_review'
     } as MedicalCondition;
     
     const updatedConditions = [...profile.presentMedicalConditions, newCondition];
