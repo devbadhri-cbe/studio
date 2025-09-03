@@ -31,6 +31,7 @@ const LANGUAGES = [
     { value: 'Arabic', label: 'Arabic' },
     { value: 'Tamil', label: 'Tamil' },
     { value: 'Japanese', label: 'Japanese' },
+    { value: 'Malayalam', label: 'Malayalam' },
 ];
 
 export function MedicationSynopsisDialog({ medicationName, onClose }: MedicationSynopsisProps) {
