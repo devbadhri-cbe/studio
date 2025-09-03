@@ -7,7 +7,6 @@ import { RenalChart } from './renal-chart';
 import { RenalHistoryTable } from './renal-history-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BloodPressureChart } from './blood-pressure-chart';
-import { BloodPressureHistoryTable } from './blood-pressure-history-table';
 import { AddBloodPressureRecordDialog } from './add-blood-pressure-record-dialog';
 import { ElectrolytesChart } from './electrolytes-chart';
 import { ElectrolytesHistoryTable } from './electrolytes-history-table';
@@ -17,6 +16,7 @@ import { HemoglobinCard } from './hemoglobin-card';
 import { NutritionCard } from './nutrition-card';
 import { MineralBoneCard } from './mineral-bone-card';
 import { AddMineralBoneRecordDialog } from './add-mineral-bone-record-dialog';
+import { BloodPressureCard } from './blood-pressure-card';
 
 export function RenalCard() {
   return (
@@ -46,8 +46,7 @@ export function RenalCard() {
                 <RenalHistoryTable />
                 <Separator />
                 <h3 className="text-md font-semibold text-center text-muted-foreground">Associated Blood Pressure</h3>
-                <BloodPressureChart />
-                <BloodPressureHistoryTable />
+                <BloodPressureCard />
              </div>
           </TabsContent>
           <TabsContent value="electrolytes" className="mt-6">
