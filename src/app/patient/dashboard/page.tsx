@@ -182,11 +182,11 @@ export default function PatientDashboard() {
                  {!isDoctorLoggedIn && enabledDashboards?.includes('glucose') && !enabledDashboards?.includes('diabetes') && <FastingBloodGlucoseCard />}
                  {!isDoctorLoggedIn && enabledDashboards?.includes('anemia') && !enabledDashboards?.includes('diabetes') && <HemoglobinCard />}
                  {!isDoctorLoggedIn && enabledDashboards?.includes('weight') && !enabledDashboards?.includes('diabetes') && <WeightRecordCard />}
-                 {enabledDashboards?.includes('lipids') && <LipidCard />}
-                 {enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
-                 {enabledDashboards?.includes('thyroid') && <ThyroidCard />}
-                 {enabledDashboards?.includes('hypertension') && <HypertensionCard />}
-                 {enabledDashboards?.includes('renal') && <RenalCard />}
+                 {(isDoctorLoggedIn || enabledDashboards?.includes('lipids')) && <LipidCard />}
+                 {(isDoctorLoggedIn || enabledDashboards?.includes('vitaminD')) && <VitaminDCard />}
+                 {(isDoctorLoggedIn || enabledDashboards?.includes('thyroid')) && <ThyroidCard />}
+                 {(isDoctorLoggedIn || enabledDashboards?.includes('hypertension')) && <HypertensionCard />}
+                 {(isDoctorLoggedIn || enabledDashboards?.includes('renal')) && <RenalCard />}
             </div>
 
             <Separator />
