@@ -34,6 +34,7 @@ import { WeightRecordCard } from '@/components/weight-record-card';
 import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
 import { HemoglobinCard } from '@/components/hemoglobin-card';
 import { OnboardingTour } from '@/components/onboarding-tour';
+import { BiomarkersCard } from '@/components/biomarkers-card';
 
 
 export default function PatientDashboard() {
