@@ -34,6 +34,7 @@ import { BiomarkerSuggestionCard } from '@/components/biomarker-suggestion-card'
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
 import { HemoglobinCard } from '@/components/hemoglobin-card';
+import { OnboardingTour } from '@/components/onboarding-tour';
 
 
 export default function PatientDashboard() {
@@ -134,7 +135,7 @@ export default function PatientDashboard() {
               />
              )}
 
-            <div className="space-y-6">
+            <div className="space-y-6" id="tour-step-1">
               <PatientHeader />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ProfileCard />
@@ -145,7 +146,7 @@ export default function PatientDashboard() {
             
             <Separator />
 
-             <div className="flex w-full flex-wrap justify-center gap-2">
+             <div className="flex w-full flex-wrap justify-center gap-2" id="tour-step-2">
               <UploadRecordDialog onExtractionComplete={handleExtractionComplete}>
                 <Button variant="outline">
                     <UploadCloud className="mr-2 h-4 w-4" />
@@ -162,7 +163,7 @@ export default function PatientDashboard() {
               />
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start" id="tour-step-3">
                 <div className="lg:col-span-1 flex flex-col gap-6">
                     <ReminderCard />
                 </div>
@@ -173,7 +174,7 @@ export default function PatientDashboard() {
             
             <Separator />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
                  {isDoctorLoggedIn && <BiomarkersCard />}
                  {enabledDashboards?.includes('hba1c') && <Hba1cCard />}
                  {enabledDashboards?.includes('glucose') && <FastingBloodGlucoseCard />}
@@ -188,7 +189,7 @@ export default function PatientDashboard() {
 
             <Separator />
             
-            <div className="printable-area">
+            <div className="printable-area" id="tour-step-5">
                 <ReportCard />
             </div>
             
@@ -196,6 +197,7 @@ export default function PatientDashboard() {
         </main>
       </div>
       <EditHeightDialog ref={editHeightDialogRef} />
+      {!isDoctorLoggedIn && <OnboardingTour />}
     </TooltipProvider>
   );
 }
