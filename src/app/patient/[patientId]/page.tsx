@@ -1,68 +1,25 @@
 
-
 'use client';
 
 import * as React from 'react';
-import { useApp } from '@/context/app-context';
-import { useParams, useRouter } from 'next/navigation';
-import PatientDashboard from '@/app/patient/dashboard/page';
-import { getPatient } from '@/lib/firestore';
-import { Button } from '@/components/ui/button';
+import { useRouter, useParams } from 'next/navigation';
 
-export default function PatientDashboardPage() {
-    const { setPatientData, isClient } = useApp();
+// This page is temporarily redirected to a safe mode diagnostic page.
+export default function PatientDashboardRedirector() {
     const router = useRouter();
     const params = useParams();
     const patientId = params.patientId as string;
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
-        if (!patientId || !isClient) {
-            return;
+        if (patientId) {
+            router.replace(`/patient/${patientId}/safe`);
         }
+    }, [router, patientId]);
 
-        const loadData = async () => {
-            setIsLoading(true);
-            setError(null);
-            try {
-                const patient = await getPatient(patientId);
-                if (patient) {
-                    setPatientData(patient);
-                } else {
-                    setError(`No patient found with ID ${patientId}. Please check the link.`);
-                    localStorage.removeItem('patient_id');
-                }
-            } catch (e) {
-                console.error("PatientDashboardPage: Error in loadData:", e);
-                setError('Could not load patient dashboard. Please try again or contact your doctor.');
-                localStorage.removeItem('patient_id');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadData();
-
-    }, [patientId, setPatientData, router, isClient]);
-
-    if (isLoading) {
-        return (
-            <div className="flex h-screen items-center justify-center bg-background">
-                <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                <p className="ml-4">Loading patient dashboard...</p>
-            </div>
-        );
-    }
-    
-    if (error) {
-         return (
-            <div className="flex h-screen flex-col items-center justify-center bg-background text-destructive text-center p-4">
-                <p>{error}</p>
-                <Button onClick={() => router.push('/')} className="mt-4">Go to Login</Button>
-            </div>
-        );
-    }
-    
-    return <PatientDashboard />;
+    return (
+        <div className="flex h-screen items-center justify-center bg-background">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <p className="ml-4">Redirecting to diagnostic mode...</p>
+        </div>
+    );
 }
