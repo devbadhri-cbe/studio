@@ -81,34 +81,35 @@ export default function PatientDashboard() {
         <main className="flex-1 p-4 md:pt-10 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              
-            <PatientHeader>
-                {isDoctorLoggedIn && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Collapsible open={isDiseasePanelOpen} onOpenChange={(isOpen) => { setIsDiseasePanelOpen(isOpen); if (isOpen) setIsBiomarkersPanelOpen(false); }}>
-                            <CollapsibleTrigger asChild>
-                                <Button variant="outline" className="w-full">
-                                    <Stethoscope className="mr-2 h-4 w-4" />
-                                    Disease Panels
-                                </Button>
-                            </CollapsibleTrigger>
-                             <CollapsibleContent>
-                                <DiseasePanel />
-                            </CollapsibleContent>
-                        </Collapsible>
-                        <Collapsible open={isBiomarkersPanelOpen} onOpenChange={(isOpen) => { setIsBiomarkersPanelOpen(isOpen); if (isOpen) setIsDiseasePanelOpen(false); }}>
-                            <CollapsibleTrigger asChild>
-                                 <Button variant="outline" className="w-full">
-                                    <DropletIcon className="mr-2 h-4 w-4" />
-                                    Biomarker cards
-                                </Button>
-                            </CollapsibleTrigger>
-                             <CollapsibleContent>
-                                <BiomarkersPanel />
-                            </CollapsibleContent>
-                        </Collapsible>
-                    </div>
-                )}
-            </PatientHeader>
+            <PatientHeader />
+            
+            {isDoctorLoggedIn && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Collapsible open={isDiseasePanelOpen} onOpenChange={(isOpen) => { setIsDiseasePanelOpen(isOpen); if (isOpen) setIsBiomarkersPanelOpen(false); }}>
+                      <CollapsibleTrigger asChild>
+                          <Button variant="outline" className="w-full">
+                              <Stethoscope className="mr-2 h-4 w-4" />
+                              Disease Panels
+                          </Button>
+                      </CollapsibleTrigger>
+                  </Collapsible>
+                  <Collapsible open={isBiomarkersPanelOpen} onOpenChange={(isOpen) => { setIsBiomarkersPanelOpen(isOpen); if (isOpen) setIsDiseasePanelOpen(false); }}>
+                      <CollapsibleTrigger asChild>
+                           <Button variant="outline" className="w-full">
+                              <DropletIcon className="mr-2 h-4 w-4" />
+                              Biomarker cards
+                          </Button>
+                      </CollapsibleTrigger>
+                  </Collapsible>
+                </div>
+
+                <CollapsibleContent>
+                    {isDiseasePanelOpen && <DiseasePanel />}
+                    {isBiomarkersPanelOpen && <BiomarkersPanel />}
+                </CollapsibleContent>
+              </>
+            )}
             
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 

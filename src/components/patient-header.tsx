@@ -30,7 +30,6 @@ export function PatientHeader({ children }: PatientHeaderProps) {
                 <p className="text-sm text-muted-foreground">Your health overview. Consult {doctorName} before making any decisions.</p>
             </div>
         </div>
-         {children}
       </CardContent>
     </Card>
   );
