@@ -30,7 +30,7 @@ export function ThyroidChart() {
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         {thyroidRecords && thyroidRecords.length > 0 ? (
-          <LineChart data={chartData}>
+          <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"

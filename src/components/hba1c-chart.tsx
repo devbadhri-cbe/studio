@@ -32,7 +32,7 @@ export function Hba1cChart() {
        <div className="flex-1">
           <ResponsiveContainer width="100%" height="100%">
             {hba1cRecords && hba1cRecords.length > 0 ? (
-              <LineChart data={chartData}>
+              <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis
                   dataKey="date"

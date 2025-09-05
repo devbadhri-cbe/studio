@@ -44,7 +44,7 @@ export function ElectrolytesChart() {
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         {electrolyteRecords && electrolyteRecords.length > 0 ? (
-          <ComposedChart data={chartData}>
+          <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
