@@ -4,7 +4,7 @@
 import { ComposedChart, Line, CartesianGrid, Label, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
-import { subYears } from 'date-fns';
+import { format, subYears, parseISO } from 'date-fns';
 
 export function MineralBoneChart() {
   const { mineralBoneDiseaseRecords } = useApp();
@@ -18,7 +18,7 @@ export function MineralBoneChart() {
 
   if (latestRecords.length < 5 && sortedRecords.length >= 5) {
       latestRecords = sortedRecords.slice(sortedRecords.length - 5);
-  } else if (sortedRecords.length < 5) {
+  } else if (latestRecords.length < 5) {
       latestRecords = sortedRecords;
   }
   
@@ -32,6 +32,9 @@ export function MineralBoneChart() {
   const yAxisDomainPrimary = [0, 20];
   const yAxisDomainSecondary = [0, Math.max(...chartData.map(d => d.pth), 100) + 50];
 
+  const formatShortDate = (tickItem: string) => {
+    return format(parseISO(tickItem), "MMM d");
+  }
 
   return (
     <div className="h-[300px] w-full">
@@ -41,7 +44,7 @@ export function MineralBoneChart() {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick) => formatDate(tick)}
+              tickFormatter={formatShortDate}
               tickLine={true}
               axisLine={true}
               padding={{ left: 20, right: 20 }}

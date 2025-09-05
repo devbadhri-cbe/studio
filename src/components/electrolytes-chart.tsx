@@ -4,7 +4,7 @@
 import { ComposedChart, Line, CartesianGrid, Label, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
-import { subYears } from 'date-fns';
+import { format, subYears, parseISO } from 'date-fns';
 
 export function ElectrolytesChart() {
   const { electrolyteRecords } = useApp();
@@ -35,6 +35,10 @@ export function ElectrolytesChart() {
       Math.max(...chartData.map(d => d.sodium), 150)
   ]
 
+  const formatShortDate = (tickItem: string) => {
+    return format(parseISO(tickItem), "MMM d");
+  }
+
 
   return (
     <div className="h-[300px] w-full">
@@ -44,7 +48,7 @@ export function ElectrolytesChart() {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick) => formatDate(tick)}
+              tickFormatter={formatShortDate}
               tickLine={true}
               axisLine={true}
               padding={{ left: 20, right: 20 }}

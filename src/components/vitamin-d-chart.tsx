@@ -4,6 +4,7 @@
 import { Line, LineChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot } from 'recharts';
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { format, parseISO } from 'date-fns';
 
 export function VitaminDChart() {
   const { vitaminDRecords, getDisplayVitaminDValue, biomarkerUnit } = useApp();
@@ -28,6 +29,10 @@ export function VitaminDChart() {
   const sufficient = biomarkerUnit === 'si' ? getDisplayVitaminDValue(30) : 30;
   const insufficient = biomarkerUnit === 'si' ? getDisplayVitaminDValue(20) : 20;
 
+  const formatShortDate = (tickItem: string) => {
+    return format(parseISO(tickItem), "MMM d");
+  }
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -36,7 +41,7 @@ export function VitaminDChart() {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick) => formatDate(tick)}
+              tickFormatter={formatShortDate}
               tickLine={true}
               axisLine={true}
               padding={{ left: 20, right: 20 }}

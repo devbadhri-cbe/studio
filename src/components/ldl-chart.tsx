@@ -5,6 +5,7 @@ import { Line, LineChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea
 import type { ChartConfig } from '@/components/ui/chart';
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { format, parseISO } from 'date-fns';
 
 export function LdlChart() {
   const { lipidRecords, getDisplayLipidValue, biomarkerUnit } = useApp();
@@ -30,6 +31,10 @@ export function LdlChart() {
   const nearOptimal = biomarkerUnit === 'si' ? getDisplayLipidValue(100, 'ldl') : 100;
   const idealTarget = biomarkerUnit === 'si' ? getDisplayLipidValue(70, 'ldl') : 70;
 
+  const formatShortDate = (tickItem: string) => {
+    return format(parseISO(tickItem), "MMM d");
+  }
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -38,7 +43,7 @@ export function LdlChart() {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick) => formatDate(tick)}
+              tickFormatter={formatShortDate}
               tickLine={true}
               axisLine={true}
               padding={{ left: 20, right: 20 }}

@@ -4,7 +4,7 @@
 import { ComposedChart, Area, Line, CartesianGrid, Label, Rectangle, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine } from 'recharts';
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
-import { subYears } from 'date-fns';
+import { format, subYears, parseISO } from 'date-fns';
 
 export function RenalChart() {
   const { renalRecords } = useApp();
@@ -31,6 +31,10 @@ export function RenalChart() {
   const yAxisMaxEgfr = 150;
   const yAxisMaxUacr = 300;
 
+  const formatShortDate = (tickItem: string) => {
+    return format(parseISO(tickItem), "MMM d");
+  }
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -39,7 +43,7 @@ export function RenalChart() {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick) => formatDate(tick)}
+              tickFormatter={formatShortDate}
               tickLine={true}
               axisLine={true}
               padding={{ left: 20, right: 20 }}

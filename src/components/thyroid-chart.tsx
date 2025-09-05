@@ -4,6 +4,7 @@
 import { Line, LineChart, CartesianGrid, Label, Legend, Rectangle, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis, Dot } from 'recharts';
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { format, parseISO } from 'date-fns';
 
 export function ThyroidChart() {
   const { thyroidRecords } = useApp();
@@ -21,6 +22,10 @@ export function ThyroidChart() {
   const yAxisMax = Math.max(10, Math.ceil(maxValue / 2) * 2 + 2);
   const yAxisTicks = Array.from({ length: Math.floor(yAxisMax / 2) }, (_, i) => (i + 1) * 2);
 
+  const formatShortDate = (tickItem: string) => {
+    return format(parseISO(tickItem), "MMM d");
+  }
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -29,7 +34,7 @@ export function ThyroidChart() {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick) => formatDate(tick)}
+              tickFormatter={formatShortDate}
               tickLine={true}
               axisLine={true}
               padding={{ left: 20, right: 20 }}
