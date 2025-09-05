@@ -18,7 +18,7 @@ export function ElectrolytesChart() {
 
   if (latestRecords.length < 5 && sortedRecords.length >= 5) {
       latestRecords = sortedRecords.slice(sortedRecords.length - 5);
-  } else if (sortedRecords.length < 5) {
+  } else if (latestRecords.length < 5) {
       latestRecords = sortedRecords;
   }
   
@@ -51,11 +51,10 @@ export function ElectrolytesChart() {
               tickFormatter={formatShortDate}
               tickLine={true}
               axisLine={true}
-              padding={{ left: 20, right: 20 }}
-              angle={-60}
+              angle={-45}
               textAnchor="end"
-              height={70}
-              tick={{ fontSize: 12 }}
+              height={50}
+              tick={{ fontSize: 10 }}
             />
             <YAxis
               dataKey="sodium"

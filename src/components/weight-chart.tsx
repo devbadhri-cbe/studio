@@ -56,10 +56,12 @@ export function WeightChart() {
               <XAxis
                 dataKey="date"
                 tickFormatter={formatShortDate}
-                tickLine={false}
-                axisLine={false}
+                tickLine={true}
+                axisLine={true}
+                angle={-45}
+                textAnchor="end"
+                height={50}
                 tick={{ fontSize: 10 }}
-                dy={10}
               />
               <YAxis
                 domain={yAxisDomain}

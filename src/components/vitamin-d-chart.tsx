@@ -44,11 +44,10 @@ export function VitaminDChart() {
               tickFormatter={formatShortDate}
               tickLine={true}
               axisLine={true}
-              padding={{ left: 20, right: 20 }}
-              angle={-60}
+              angle={-45}
               textAnchor="end"
-              height={70}
-              tick={{ fontSize: 12 }}
+              height={50}
+              tick={{ fontSize: 10 }}
             />
             <YAxis
               domain={[0, yAxisMax]}
