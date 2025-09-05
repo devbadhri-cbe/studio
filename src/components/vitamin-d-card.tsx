@@ -21,6 +21,7 @@ export function VitaminDCard() {
   const { vitaminDRecords, removeVitaminDRecord, getDisplayVitaminDValue, biomarkerUnit, setBiomarkerUnit } = useApp();
   const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
+   const [, setForceRender] = React.useState(0);
 
   const sortedRecords = React.useMemo(() => {
     return [...(vitaminDRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -32,6 +33,11 @@ export function VitaminDCard() {
     if (value < 30) return { text: 'Insufficient', variant: 'secondary' as const };
     return { text: 'Sufficient', variant: 'outline' as const };
   };
+
+  const handleSuccess = () => {
+    setIsActionsOpen(false);
+    setForceRender(c => c + 1);
+  }
 
   const latestRecord = sortedRecords[0];
   const currentStatus = latestRecord ? getStatus(latestRecord.value) : null;
@@ -49,7 +55,7 @@ export function VitaminDCard() {
       </PopoverTrigger>
       <PopoverContent className="w-64" align="end">
         <div className="space-y-4">
-          <AddVitaminDRecordDialog onSuccess={() => setIsActionsOpen(false)}>
+          <AddVitaminDRecordDialog onSuccess={handleSuccess}>
             <Button variant="outline" className="w-full">Add New Record</Button>
           </AddVitaminDRecordDialog>
           <Separator />

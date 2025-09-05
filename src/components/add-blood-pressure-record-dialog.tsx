@@ -23,6 +23,7 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
+import { Loader2 } from 'lucide-react';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -31,8 +32,14 @@ const FormSchema = z.object({
   heartRate: z.coerce.number().min(30, 'Value seems too low.').max(250, 'Value seems too high.').optional(),
 });
 
-export function AddBloodPressureRecordDialog() {
+interface AddBloodPressureRecordDialogProps {
+    children?: React.ReactNode;
+    onSuccess?: () => void;
+}
+
+export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPressureRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addBloodPressureRecord, profile, bloodPressureRecords } = useApp();
   const { toast } = useToast();
 
@@ -58,6 +65,7 @@ export function AddBloodPressureRecordDialog() {
   }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    setIsSubmitting(true);
     const newDate = startOfDay(data.date);
 
     const dateExists = bloodPressureRecords.some((record) => {
@@ -71,6 +79,7 @@ export function AddBloodPressureRecordDialog() {
         title: 'Duplicate Entry',
         description: 'A blood pressure record for this date already exists. Please choose a different date.',
       });
+      setIsSubmitting(false);
       return;
     }
     
@@ -84,7 +93,9 @@ export function AddBloodPressureRecordDialog() {
       title: 'Success!',
       description: 'Your new blood pressure record has been added.',
     });
+    setIsSubmitting(false);
     setOpen(false);
+    onSuccess?.();
   };
   
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -98,11 +109,12 @@ export function AddBloodPressureRecordDialog() {
     }
   };
 
+  const triggerButton = children || <AddRecordButton tooltipContent="Add Blood Pressure Record" onClick={handleTriggerClick} />;
+
   return (
-    <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-           <AddRecordButton tooltipContent="Add Blood Pressure Record" onClick={handleTriggerClick} />
+           {triggerButton}
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -171,12 +183,14 @@ export function AddBloodPressureRecordDialog() {
                   )}
                 />
               <DialogFooter>
-                <Button type="submit">Save Record</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Record
+                </Button>
               </DialogFooter>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
-    </>
   );
 }

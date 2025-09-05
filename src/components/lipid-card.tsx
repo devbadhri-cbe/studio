@@ -21,6 +21,7 @@ export function LipidCard() {
   const { lipidRecords, removeLipidRecord, getDisplayLipidValue, biomarkerUnit, setBiomarkerUnit } = useApp();
   const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
+  const [, setForceRender] = React.useState(0);
 
   const sortedRecords = React.useMemo(() => {
     return [...lipidRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -34,6 +35,11 @@ export function LipidCard() {
     if (value <= 189) return { text: 'High', variant: 'destructive' as const };
     return { text: 'Very High', variant: 'destructive' as const };
   };
+  
+  const handleSuccess = () => {
+    setIsActionsOpen(false);
+    setForceRender(c => c + 1);
+  }
 
   const latestRecord = sortedRecords[0];
   const currentStatus = latestRecord ? getStatus(latestRecord.ldl) : null;
@@ -51,7 +57,7 @@ export function LipidCard() {
       </PopoverTrigger>
       <PopoverContent className="w-64" align="end">
         <div className="space-y-4">
-          <AddLipidRecordDialog onSuccess={() => setIsActionsOpen(false)}>
+          <AddLipidRecordDialog onSuccess={handleSuccess}>
             <Button variant="outline" className="w-full">Add New Record</Button>
           </AddLipidRecordDialog>
           <Separator />

@@ -18,6 +18,7 @@ export function BloodPressureCard() {
   const { bloodPressureRecords, removeBloodPressureRecord } = useApp();
   const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
+  const [, setForceRender] = React.useState(0);
 
   const sortedRecords = React.useMemo(() => {
     return [...(bloodPressureRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -30,6 +31,11 @@ export function BloodPressureCard() {
     return { text: 'Normal', variant: 'outline' as const };
   }
   
+  const handleSuccess = () => {
+    setIsActionsOpen(false);
+    setForceRender(c => c + 1);
+  }
+
   const latestRecord = sortedRecords[0];
   const currentStatus = latestRecord ? getStatus(latestRecord.systolic, latestRecord.diastolic) : null;
 
@@ -44,7 +50,7 @@ export function BloodPressureCard() {
               </Button>
         </PopoverTrigger>
         <PopoverContent className="w-64" align="end">
-            <AddBloodPressureRecordDialog>
+            <AddBloodPressureRecordDialog onSuccess={handleSuccess}>
                 <Button variant="outline" className="w-full">Add New Record</Button>
             </AddBloodPressureRecordDialog>
         </PopoverContent>

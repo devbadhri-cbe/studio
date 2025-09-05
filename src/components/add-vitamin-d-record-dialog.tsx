@@ -23,6 +23,7 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
+import { Loader2 } from 'lucide-react';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -36,6 +37,7 @@ interface AddVitaminDRecordDialogProps {
 
 export function AddVitaminDRecordDialog({ children, onSuccess }: AddVitaminDRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addVitaminDRecord, vitaminDRecords, biomarkerUnit, getDbVitaminDValue } = useApp();
   const { toast } = useToast();
 
@@ -59,6 +61,7 @@ export function AddVitaminDRecordDialog({ children, onSuccess }: AddVitaminDReco
   }, [open, biomarkerUnit, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    setIsSubmitting(true);
     const newDate = startOfDay(data.date);
     
     const dateExists = vitaminDRecords.some((record) => {
@@ -72,6 +75,7 @@ export function AddVitaminDRecordDialog({ children, onSuccess }: AddVitaminDReco
         title: 'Duplicate Entry',
         description: 'A Vitamin D record for this date already exists. Please choose a different date.',
       });
+      setIsSubmitting(false);
       return;
     }
     
@@ -85,6 +89,7 @@ export function AddVitaminDRecordDialog({ children, onSuccess }: AddVitaminDReco
       title: 'Success!',
       description: 'Your new Vitamin D record has been added.',
     });
+    setIsSubmitting(false);
     setOpen(false);
     onSuccess?.();
   };
@@ -135,7 +140,10 @@ export function AddVitaminDRecordDialog({ children, onSuccess }: AddVitaminDReco
                 )}
               />
               <DialogFooter>
-                <Button type="submit">Save Record</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Record
+                </Button>
               </DialogFooter>
             </form>
           </Form>

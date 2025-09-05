@@ -23,6 +23,7 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
+import { Loader2 } from 'lucide-react';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -39,6 +40,7 @@ interface AddLipidRecordDialogProps {
 
 export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addLipidRecord, lipidRecords, getDbLipidValue, biomarkerUnit } = useApp();
   const { toast } = useToast();
 
@@ -68,6 +70,7 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
   }, [open, biomarkerUnit, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    setIsSubmitting(true);
     const newDate = startOfDay(data.date);
 
     const dateExists = lipidRecords.some((record) => {
@@ -81,10 +84,10 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
         title: 'Duplicate Entry',
         description: 'A lipid record for this date already exists. Please choose a different date.',
       });
+       setIsSubmitting(false);
       return;
     }
     
-    // Convert values to mg/dL for storage if input was in SI units
     const dbRecord = {
         date: newDate.toISOString(),
         ldl: getDbLipidValue(data.ldl, 'ldl'),
@@ -99,6 +102,7 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
       title: 'Success!',
       description: 'Your new lipid record has been added.',
     });
+    setIsSubmitting(false);
     setOpen(false);
     onSuccess?.();
   };
@@ -190,7 +194,10 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
                 />
               </div>
               <DialogFooter>
-                <Button type="submit">Save Record</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Record
+                </Button>
               </DialogFooter>
             </form>
           </Form>

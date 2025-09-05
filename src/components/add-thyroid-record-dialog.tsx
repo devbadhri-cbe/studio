@@ -23,6 +23,7 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
+import { Loader2 } from 'lucide-react';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -31,8 +32,15 @@ const FormSchema = z.object({
   t4: z.coerce.number().min(0, 'Value is required.'),
 });
 
-export function AddThyroidRecordDialog() {
+interface AddThyroidRecordDialogProps {
+    children?: React.ReactNode;
+    onSuccess?: () => void;
+}
+
+
+export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addThyroidRecord, profile, thyroidRecords } = useApp();
   const { toast } = useToast();
 
@@ -58,6 +66,7 @@ export function AddThyroidRecordDialog() {
   }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    setIsSubmitting(true);
     const newDate = startOfDay(data.date);
 
     const dateExists = thyroidRecords.some((record) => {
@@ -71,6 +80,7 @@ export function AddThyroidRecordDialog() {
         title: 'Duplicate Entry',
         description: 'A thyroid record for this date already exists. Please choose a different date.',
       });
+      setIsSubmitting(false);
       return;
     }
     
@@ -84,7 +94,9 @@ export function AddThyroidRecordDialog() {
       title: 'Success!',
       description: 'Your new thyroid record has been added.',
     });
+    setIsSubmitting(false);
     setOpen(false);
+    onSuccess?.();
   };
   
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -98,11 +110,13 @@ export function AddThyroidRecordDialog() {
     }
   };
 
+  const triggerButton = children || <AddRecordButton tooltipContent="Add Thyroid Record" onClick={handleTriggerClick} />;
+
+
   return (
-    <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <AddRecordButton tooltipContent="Add Thyroid Record" onClick={handleTriggerClick} />
+          {triggerButton}
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -171,12 +185,14 @@ export function AddThyroidRecordDialog() {
                 />
               </div>
               <DialogFooter>
-                <Button type="submit">Save Record</Button>
+                 <Button type="submit" disabled={isSubmitting}>
+                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Record
+                </Button>
               </DialogFooter>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
-    </>
   );
 }
