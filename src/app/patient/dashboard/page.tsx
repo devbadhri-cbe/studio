@@ -13,18 +13,13 @@ import { Separator } from '@/components/ui/separator';
 import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
 import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
-import { WeightRecordCard } from '@/components/weight-record-card';
 import { OnboardingTour } from '@/components/onboarding-tour';
-import { BloodPressureCard } from '@/components/blood-pressure-card';
 import { DiseasePanel } from '@/components/disease-panel';
 import { BiomarkersPanel } from '@/components/biomarkers-panel';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
-import { VitaminDCard } from '@/components/vitamin-d-card';
 import { ReportCard } from '@/components/report-card';
-import { ThyroidCard } from '@/components/thyroid-card';
-import { BiomarkersCard } from '@/components/biomarkers-card';
 import { ProfileCard } from '@/components/profile-card';
 
 
@@ -36,7 +31,6 @@ export default function PatientDashboard() {
   const [isBiomarkersPanelOpen, setIsBiomarkersPanelOpen] = React.useState(false);
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
-  const showBiomarkersCard = (profile.enabledDashboards?.includes('hba1c') || profile.enabledDashboards?.includes('glucose') || profile.enabledDashboards?.includes('anemia')) && !profile.enabledDashboards?.includes('diabetes');
   
   React.useEffect(() => {
     // Pass the ref to the weight card component instance
@@ -82,17 +76,6 @@ export default function PatientDashboard() {
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Collapsible open={isBiomarkersPanelOpen} onOpenChange={setIsBiomarkersPanelOpen}>
-                    <CollapsibleTrigger asChild>
-                        <Button variant="outline" className="w-full">
-                            <DropletIcon className="mr-2 h-4 w-4" />
-                            Biomarker Cards
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                        <BiomarkersPanel />
-                    </CollapsibleContent>
-                </Collapsible>
                 <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
                     <CollapsibleTrigger asChild>
                         <Button variant="outline" className="w-full">
@@ -100,8 +83,19 @@ export default function PatientDashboard() {
                             Disease Panels
                         </Button>
                     </CollapsibleTrigger>
-                    <CollapsibleContent>
+                    <CollapsibleContent className="mt-2">
                         <DiseasePanel />
+                    </CollapsibleContent>
+                </Collapsible>
+                 <Collapsible open={isBiomarkersPanelOpen} onOpenChange={setIsBiomarkersPanelOpen}>
+                    <CollapsibleTrigger asChild>
+                        <Button variant="outline" className="w-full">
+                            <DropletIcon className="mr-2 h-4 w-4" />
+                            Biomarker Cards
+                        </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2">
+                        <BiomarkersPanel />
                     </CollapsibleContent>
                 </Collapsible>
             </div>
@@ -117,11 +111,6 @@ export default function PatientDashboard() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <BloodPressureCard />
-                <WeightRecordCard />
-            </div>
-
             <Separator />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start" id="tour-step-3">
@@ -133,14 +122,6 @@ export default function PatientDashboard() {
                 </div>
             </div>
             
-            <Separator />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
-                 {showBiomarkersCard && <BiomarkersCard />}
-                 {profile.enabledDashboards?.includes('thyroid') && <ThyroidCard />}
-                 {profile.enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
-            </div>
-
             <Separator />
             
             <div className="printable-area" id="tour-step-5">
