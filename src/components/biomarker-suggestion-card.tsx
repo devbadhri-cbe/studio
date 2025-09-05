@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Lightbulb, Loader2, RefreshCw, X } from 'lucide-react';
+import { Lightbulb, Loader2 } from 'lucide-react';
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
@@ -13,59 +13,60 @@ export function BiomarkerSuggestionCard() {
   const { addCustomBiomarker, customBiomarkers, profile, enabledDashboards } = useApp();
   const { toast } = useToast();
   const [isAdding, setIsAdding] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [suggestions, setSuggestions] = React.useState<string[]>([]);
-  const [hasChecked, setHasChecked] = React.useState(false);
   
-  const fetchSuggestions = async () => {
-    setIsLoading(true);
-    setHasChecked(true);
+  React.useEffect(() => {
+    const fetchSuggestions = async () => {
+        setIsLoading(true);
+        const verifiedConditions = profile.presentMedicalConditions
+            .filter(c => c.status === 'verified')
+            .map(c => c.condition);
 
-    const verifiedConditions = profile.presentMedicalConditions
-        .filter(c => c.status === 'verified')
-        .map(c => c.condition);
+        if (verifiedConditions.length === 0) {
+            setSuggestions([]);
+            toast({
+                variant: 'default',
+                title: 'No Verified Conditions',
+                description: `There are no verified medical conditions for this patient to generate suggestions.`,
+            });
+            setIsLoading(false);
+            return;
+        };
 
-    if (verifiedConditions.length === 0) {
-        setSuggestions([]);
-        toast({
-            variant: 'default',
-            title: 'No Verified Conditions',
-            description: `There are no verified medical conditions for this patient to generate suggestions.`,
-        });
-        setIsLoading(false);
-        return;
+        const currentBiomarkers = [
+        ...(enabledDashboards || []).map(d => d.replace(/([A-Z])/g, ' $1').trim()),
+        ...(customBiomarkers?.map(b => b.name) || [])
+        ];
+        
+        try {
+            const result = await suggestNewBiomarkers({ conditions: verifiedConditions, currentBiomarkers });
+            setSuggestions(result.suggestions);
+            if (result.suggestions.length > 0) {
+                toast({
+                    title: 'Suggestions Found',
+                    description: 'New biomarker suggestions are available below.',
+                });
+            } else {
+                toast({
+                    title: 'No New Suggestions',
+                    description: 'The patient is already monitoring all relevant biomarkers for their conditions.',
+                });
+            }
+        } catch(error) {
+            console.error("Failed to fetch biomarker suggestions", error);
+            toast({
+                variant: 'destructive',
+                title: 'Suggestion Error',
+                description: 'Could not fetch biomarker suggestions at this time.',
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const currentBiomarkers = [
-      ...(enabledDashboards || []).map(d => d.replace(/([A-Z])/g, ' $1').trim()),
-      ...(customBiomarkers?.map(b => b.name) || [])
-    ];
-    
-    try {
-        const result = await suggestNewBiomarkers({ conditions: verifiedConditions, currentBiomarkers });
-        setSuggestions(result.suggestions);
-        if (result.suggestions.length > 0) {
-            toast({
-                title: 'Suggestions Found',
-                description: 'New biomarker suggestions are available below.',
-            });
-        } else {
-             toast({
-                title: 'No New Suggestions',
-                description: 'The patient is already monitoring all relevant biomarkers for their conditions.',
-            });
-        }
-    } catch(error) {
-        console.error("Failed to fetch biomarker suggestions", error);
-        toast({
-            variant: 'destructive',
-            title: 'Suggestion Error',
-            description: 'Could not fetch biomarker suggestions at this time.',
-        });
-    } finally {
-        setIsLoading(false);
-    }
-  };
+    fetchSuggestions();
+  }, [profile.presentMedicalConditions, enabledDashboards, customBiomarkers, toast]);
 
 
   const handleAddBiomarker = async (name: string) => {
@@ -109,30 +110,30 @@ export function BiomarkerSuggestionCard() {
             </CardDescription>
           </div>
         </div>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={fetchSuggestions} disabled={isLoading}>
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-        </Button>
       </CardHeader>
-      {hasChecked && (
-          <CardContent className="flex flex-wrap gap-2">
-            {suggestions.length > 0 ? (
-                suggestions.map((suggestion, index) => (
-                    <Button 
-                        key={index}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleAddBiomarker(suggestion)}
-                        disabled={isAdding}
-                    >
-                        {isAdding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : '+'}
-                        {suggestion}
-                    </Button>
-                ))
-            ) : (
-                <p className="text-sm text-muted-foreground">No new suggestions at this time.</p>
-            )}
-        </CardContent>
-      )}
+       <CardContent className="flex flex-wrap gap-2">
+        {isLoading ? (
+             <div className="flex items-center text-sm text-muted-foreground">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span>Checking for suggestions...</span>
+            </div>
+        ) : suggestions.length > 0 ? (
+            suggestions.map((suggestion, index) => (
+                <Button 
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddBiomarker(suggestion)}
+                    disabled={isAdding}
+                >
+                    {isAdding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : '+'}
+                    {suggestion}
+                </Button>
+            ))
+        ) : (
+            <p className="text-sm text-muted-foreground">No new suggestions at this time.</p>
+        )}
+    </CardContent>
     </Card>
   );
 }
