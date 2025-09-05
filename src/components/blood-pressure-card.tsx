@@ -108,7 +108,7 @@ export function BloodPressureCard() {
       recordsList={RecordsList}
       statusDisplay={StatusDisplay}
       chart={Chart}
-      className="shadow-xl border-2 border-green-500"
+      className="shadow-xl"
       hasRecords={(bloodPressureRecords || []).length > 0}
       noRecordsMessage="No blood pressure records yet."
     />
