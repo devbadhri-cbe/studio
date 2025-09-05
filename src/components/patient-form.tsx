@@ -124,12 +124,12 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         )}
                      />
                  </div>
-                <div className="flex flex-col border border-blue-500">
+                <div className="flex flex-col border border-blue-500 md:col-span-2">
                     <FormField
                         control={form.control}
                         name="gender"
                         render={({ field }) => (
-                            <FormItem className="md:col-span-2">
+                            <FormItem>
                                 <FormLabel>Gender</FormLabel>
                                 <FormControl>
                                     <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 h-10">
