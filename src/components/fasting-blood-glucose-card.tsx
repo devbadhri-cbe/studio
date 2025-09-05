@@ -17,7 +17,11 @@ import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 
-export function FastingBloodGlucoseCard() {
+interface FastingBloodGlucoseCardProps {
+  isReadOnly?: boolean;
+}
+
+export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGlucoseCardProps) {
   const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord, getDisplayGlucoseValue, biomarkerUnit, setBiomarkerUnit } = useApp();
   const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
@@ -40,7 +44,7 @@ export function FastingBloodGlucoseCard() {
   const Title = `Fasting Blood Glucose (${unitLabel})`;
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
-  const Actions = (
+  const Actions = !isReadOnly ? (
     <Popover open={isActionsOpen} onOpenChange={setIsActionsOpen}>
         <PopoverTrigger asChild>
               <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -68,7 +72,7 @@ export function FastingBloodGlucoseCard() {
               </div>
         </PopoverContent>
     </Popover>
-  );
+  ) : null;
 
   const RecordsList = (
     <ScrollArea className="h-[140px] pr-3">

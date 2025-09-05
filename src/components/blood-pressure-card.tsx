@@ -15,7 +15,11 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { Separator } from './ui/separator';
 
-export function BloodPressureCard() {
+interface BloodPressureCardProps {
+  isReadOnly?: boolean;
+}
+
+export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps) {
   const { bloodPressureRecords, removeBloodPressureRecord } = useApp();
   const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
@@ -43,7 +47,7 @@ export function BloodPressureCard() {
   const Title = 'Blood Pressure';
   const Icon = <Heart className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
-  const Actions = (
+  const Actions = !isReadOnly ? (
     <Popover open={isActionsOpen} onOpenChange={setIsActionsOpen}>
         <PopoverTrigger asChild>
               <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -56,7 +60,7 @@ export function BloodPressureCard() {
             </AddBloodPressureRecordDialog>
         </PopoverContent>
     </Popover>
-  );
+  ) : null;
 
   const RecordsList = (
     <ScrollArea className="h-[140px] pr-3">

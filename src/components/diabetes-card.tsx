@@ -28,9 +28,9 @@ export function DiabetesCard() {
   const [showHemoglobin, setShowHemoglobin] = React.useState<Checked>(false);
 
   const visibleCards = [
-      showHbA1c && <Hba1cCard key="hba1c" />,
-      showFastingBloodGlucose && <FastingBloodGlucoseCard key="fbg" />,
-      showHemoglobin && <HemoglobinCard key="hemoglobin" />,
+      showHbA1c && <Hba1cCard key="hba1c" isReadOnly />,
+      showFastingBloodGlucose && <FastingBloodGlucoseCard key="fbg" isReadOnly />,
+      showHemoglobin && <HemoglobinCard key="hemoglobin" isReadOnly />,
   ].filter(Boolean);
   
   const icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;

@@ -17,7 +17,11 @@ import { Separator } from './ui/separator';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 
-export function HemoglobinCard() {
+interface HemoglobinCardProps {
+  isReadOnly?: boolean;
+}
+
+export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
   const { hemoglobinRecords, removeHemoglobinRecord, profile, biomarkerUnit, setBiomarkerUnit, getDisplayHemoglobinValue } = useApp();
   const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
@@ -48,7 +52,7 @@ export function HemoglobinCard() {
   const Title = `Hemoglobin (${unitLabel})`;
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
-  const Actions = (
+  const Actions = !isReadOnly ? (
     <Popover open={isActionsOpen} onOpenChange={setIsActionsOpen}>
         <PopoverTrigger asChild>
               <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -76,7 +80,7 @@ export function HemoglobinCard() {
               </div>
         </PopoverContent>
     </Popover>
-  );
+  ) : null;
 
   const RecordsList = (
     <ScrollArea className="h-[140px] pr-3">

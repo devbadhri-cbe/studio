@@ -14,7 +14,11 @@ import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { AddRecordDialog } from './add-record-dialog';
 import { Hba1cChart } from './hba1c-chart';
 
-export function Hba1cCard() {
+interface Hba1cCardProps {
+  isReadOnly?: boolean;
+}
+
+export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
   const { hba1cRecords, removeHba1cRecord } = useApp();
   const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
@@ -36,7 +40,7 @@ export function Hba1cCard() {
   const Title = 'HbA1c (%)';
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
-  const Actions = (
+  const Actions = !isReadOnly ? (
     <Popover open={isActionsOpen} onOpenChange={setIsActionsOpen}>
         <PopoverTrigger asChild>
               <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -49,7 +53,7 @@ export function Hba1cCard() {
             </AddRecordDialog>
         </PopoverContent>
     </Popover>
-  );
+  ) : null;
 
   const RecordsList = (
     <ScrollArea className="h-[140px] pr-3">
