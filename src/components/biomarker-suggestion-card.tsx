@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Lightbulb, Loader2 } from 'lucide-react';
+import { Lightbulb, Loader2, RefreshCw } from 'lucide-react';
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
@@ -13,7 +13,7 @@ export function BiomarkerSuggestionCard() {
   const { addCustomBiomarker, customBiomarkers, profile, enabledDashboards } = useApp();
   const { toast } = useToast();
   const [isAdding, setIsAdding] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [suggestions, setSuggestions] = React.useState<string[]>([]);
   
   const verifiedConditions = React.useMemo(() => {
@@ -21,49 +21,46 @@ export function BiomarkerSuggestionCard() {
         .filter(c => c.status === 'verified')
         .map(c => c.condition);
   }, [profile.presentMedicalConditions]);
-
-  // Create stable dependencies for the useEffect hook
-  const dependencies = JSON.stringify({
-      verifiedConditions,
-      enabledDashboards,
-      customBiomarkers: customBiomarkers?.map(b => b.name),
-  });
   
-  React.useEffect(() => {
-    const fetchSuggestions = async () => {
-        const { verifiedConditions, enabledDashboards, customBiomarkers: customBiomarkerNames } = JSON.parse(dependencies);
-
-        if (verifiedConditions.length === 0) {
-            setSuggestions([]);
-            setIsLoading(false);
-            return;
-        };
-
-        setIsLoading(true);
-
-        const currentBiomarkers = [
-            ...(enabledDashboards || []).map(d => d.replace(/([A-Z])/g, ' $1').trim()),
-            ...(customBiomarkerNames || [])
-        ];
-        
-        try {
-            const result = await suggestNewBiomarkers({ conditions: verifiedConditions, currentBiomarkers });
-            setSuggestions(result.suggestions);
-        } catch(error) {
-            console.error("Failed to fetch biomarker suggestions", error);
-            toast({
-                variant: 'destructive',
-                title: 'Suggestion Error',
-                description: 'Could not fetch biomarker suggestions at this time.',
-            });
-        } finally {
-            setIsLoading(false);
-        }
+  const fetchSuggestions = async () => {
+    if (verifiedConditions.length === 0) {
+        setSuggestions([]);
+        toast({
+            variant: 'destructive',
+            title: 'No Verified Conditions',
+            description: 'Please verify at least one medical condition to get AI suggestions.',
+        });
+        return;
     };
 
-    fetchSuggestions();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dependencies, toast]);
+    setIsLoading(true);
+    setSuggestions([]);
+
+    const currentBiomarkerNames = [
+        ...(enabledDashboards || []).map(d => d.replace(/([A-Z])/g, ' $1').trim()),
+        ...(customBiomarkers || []).map(b => b.name)
+    ];
+    
+    try {
+        const result = await suggestNewBiomarkers({ conditions: verifiedConditions, currentBiomarkers: currentBiomarkerNames });
+        setSuggestions(result.suggestions);
+        if (result.suggestions.length === 0) {
+             toast({
+                title: 'No New Suggestions',
+                description: 'The AI did not find any new relevant biomarkers to suggest based on the current conditions.',
+            });
+        }
+    } catch(error) {
+        console.error("Failed to fetch biomarker suggestions", error);
+        toast({
+            variant: 'destructive',
+            title: 'Suggestion Error',
+            description: 'Could not fetch biomarker suggestions at this time.',
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  };
 
 
   const handleAddBiomarker = async (name: string) => {
@@ -113,32 +110,32 @@ export function BiomarkerSuggestionCard() {
           <div>
             <CardTitle className="text-blue-800">AI Biomarker Suggestions</CardTitle>
             <CardDescription className="text-blue-700">
-              Based on verified conditions, here are additional biomarkers you may want to monitor.
+              Based on verified conditions, AI can suggest additional biomarkers to monitor.
             </CardDescription>
           </div>
         </div>
       </CardHeader>
-       <CardContent className="flex flex-wrap gap-2">
-        {isLoading ? (
-             <div className="flex items-center text-sm text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                <span>Checking for suggestions...</span>
+       <CardContent className="flex flex-col gap-4">
+         <Button onClick={fetchSuggestions} disabled={isLoading}>
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+            Get Suggestions
+         </Button>
+
+        {suggestions.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+                {suggestions.map((suggestion, index) => (
+                    <Button 
+                        key={index}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAddBiomarker(suggestion)}
+                        disabled={isAdding}
+                    >
+                        {isAdding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : '+'}
+                        {suggestion}
+                    </Button>
+                ))}
             </div>
-        ) : suggestions.length > 0 ? (
-            suggestions.map((suggestion, index) => (
-                <Button 
-                    key={index}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleAddBiomarker(suggestion)}
-                    disabled={isAdding}
-                >
-                    {isAdding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : '+'}
-                    {suggestion}
-                </Button>
-            ))
-        ) : (
-            <p className="text-sm text-muted-foreground">No new suggestions available at this time.</p>
         )}
     </CardContent>
     </Card>
