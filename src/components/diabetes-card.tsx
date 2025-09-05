@@ -37,7 +37,7 @@ export function DiabetesCard() {
 
   return (
     <DiseasePanelCard title="Diabetes Panel" icon={icon}>
-        <div className="space-y-4 flex-1">
+        <div className="flex-1">
             {isDoctorLoggedIn && (
                     <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -71,7 +71,7 @@ export function DiabetesCard() {
             )}
             
             {visibleCards.length > 0 ? (
-            <div className="flex flex-wrap gap-4 border-2 border-blue-500 flex-1">
+            <div className="flex flex-wrap gap-4 border-2 border-blue-500 flex-1 md:aspect-[4/3]">
                 {visibleCards}
             </div>
             ) : (
