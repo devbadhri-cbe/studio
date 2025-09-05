@@ -93,30 +93,32 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 </FormItem>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 border p-4 rounded-md items-start">
-                 <FormField
-                    control={form.control}
-                    name="dob"
-                    render={({ field }) => (
-                        <FormItem className="md:col-span-2 p-2 border border-blue-500">
-                            <FormLabel>Date of Birth</FormLabel>
-                            <FormControl>
-                                <DatePicker
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                 />
-                 <div className="p-2 border border-blue-500">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 border border-red-500 p-4 rounded-md items-start">
+                 <div className="md:col-span-2 p-2">
+                    <FormLabel>Date of Birth</FormLabel>
+                    <FormField
+                        control={form.control}
+                        name="dob"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormControl>
+                                    <DatePicker
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                 </div>
+                 <div className="p-2">
+                     <FormLabel>Age</FormLabel>
                      <FormField
                         control={form.control}
                         name="age"
                         render={() => (
                              <FormItem>
-                                <FormLabel>Age</FormLabel>
                                 <FormControl>
                                     <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
                                 </FormControl>
@@ -124,7 +126,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         )}
                      />
                  </div>
-                <div className="md:col-span-2 p-2 border border-blue-500">
+                <div className="md:col-span-2 p-2">
                     <FormField
                         control={form.control}
                         name="gender"
