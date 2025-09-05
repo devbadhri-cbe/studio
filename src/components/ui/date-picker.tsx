@@ -73,6 +73,8 @@ export function DatePicker({
       if (isValid(newDate)) {
         onChange(newDate);
       }
+    } else if (!newDay && !newMonth && !newYear) {
+      onChange(undefined);
     }
   };
   
@@ -102,7 +104,7 @@ export function DatePicker({
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 border border-red-500 p-2 rounded-md">
       <div className="flex items-center gap-2 border border-input rounded-md px-3 h-10 w-full">
          <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
          <Input 
