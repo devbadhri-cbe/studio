@@ -55,17 +55,7 @@ export function DoctorReviewCard() {
                   )}
                   {suggestion ? (
                     <p className="text-sm text-muted-foreground">Suggested Dashboard: <span className="font-medium text-primary">{getDashboardName(suggestion.suggestedDashboard)}</span></p>
-                  ) : (
-                    condition.requiredBiomarkers && condition.requiredBiomarkers.length > 0 && (
-                        <div className="text-sm text-muted-foreground mt-1">
-                            <div className="flex items-center gap-2">
-                                <Code className="h-4 w-4 text-destructive" />
-                                <span className="font-medium">Suggested new biomarkers:</span>
-                            </div>
-                             <p className="pl-5">{condition.requiredBiomarkers.join(', ')}</p>
-                        </div>
-                    )
-                  )}
+                  ) : null}
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <Button size="sm" variant="outline" onClick={() => dismissSuggestion(condition.id, suggestion?.id)}>

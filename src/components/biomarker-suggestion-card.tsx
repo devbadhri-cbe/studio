@@ -7,7 +7,7 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { getBiomarkersForCondition } from '@/ai/flows/get-biomarkers-for-condition';
+import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
 
 const getDashboardName = (key: string) => {
     switch (key) {
@@ -23,7 +23,7 @@ const getDashboardName = (key: string) => {
 
 
 export function BiomarkerSuggestionCard() {
-  const { addCustomBiomarker, customBiomarkers, profile, enabledDashboards, enableDashboard } = useApp();
+  const { enableDashboard, profile } = useApp();
   const { toast } = useToast();
   const [isAdding, setIsAdding] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -32,7 +32,7 @@ export function BiomarkerSuggestionCard() {
   const verifiedConditions = React.useMemo(() => {
     return profile.presentMedicalConditions
         .filter(c => c.status === 'verified')
-        .map(c => c.condition);
+        .map(c => ({ condition: c.condition, icdCode: c.icdCode }));
   }, [profile.presentMedicalConditions]);
   
   const fetchSuggestions = React.useCallback(async () => {
@@ -49,8 +49,12 @@ export function BiomarkerSuggestionCard() {
     setSuggestion(null);
     
     try {
+        // Use the primary condition for the suggestion
         const primaryCondition = verifiedConditions[0];
-        const result = await getBiomarkersForCondition({ conditionName: primaryCondition });
+        const result = await getDashboardRecommendations({ 
+            conditionName: primaryCondition.condition,
+            icdCode: primaryCondition.icdCode,
+        });
         
         if (result.recommendedDashboard !== 'none') {
             setSuggestion(result.recommendedDashboard);
@@ -61,7 +65,7 @@ export function BiomarkerSuggestionCard() {
             });
         }
     } catch(error) {
-        console.error("Failed to fetch biomarker suggestions", error);
+        console.error("Failed to fetch dashboard suggestions", error);
         toast({
             variant: 'destructive',
             title: 'Suggestion Error',
