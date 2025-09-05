@@ -109,7 +109,7 @@ export function DatePicker({
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 border border-blue-500 w-fit">
        {label && <Label>{label}</Label>}
       <div className="flex items-center border border-red-500 rounded-md h-10 w-fit">
          <Input 
