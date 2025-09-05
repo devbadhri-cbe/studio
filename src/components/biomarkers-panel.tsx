@@ -3,7 +3,6 @@
 
 import { WeightRecordCard } from './weight-record-card';
 import { BloodPressureCard } from './blood-pressure-card';
-import { DiabetesCard } from './diabetes-card';
 import { VitaminDCard } from './vitamin-d-card';
 import { ThyroidCard } from './thyroid-card';
 import { RenalCard } from './renal-card';
@@ -15,7 +14,6 @@ export function BiomarkersPanel() {
             <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <WeightRecordCard />
                 <BloodPressureCard />
-                <DiabetesCard />
                 <VitaminDCard />
                 <ThyroidCard />
                 <RenalCard />

@@ -2,18 +2,10 @@
 'use client';
 
 import * as React from 'react';
-import { ProfileCard } from '@/components/profile-card';
-import { InsightsCard } from '@/components/insights-card';
-import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { ArrowLeft, Stethoscope, DropletIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { VitaminDCard } from '@/components/vitamin-d-card';
-import { ReportCard } from '@/components/report-card';
-import { ThyroidCard } from '@/components/thyroid-card';
-import { HypertensionCard } from '@/components/hypertension-card';
-import { RenalCard } from '@/components/renal-card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { PatientHeader } from '@/components/patient-header';
@@ -23,16 +15,21 @@ import { TitleBar } from '@/components/title-bar';
 import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { OnboardingTour } from '@/components/onboarding-tour';
-import { DiabetesCard } from '@/components/diabetes-card';
-import { BiomarkersCard } from '@/components/biomarkers-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
 import { DiseasePanel } from '@/components/disease-panel';
 import { BiomarkersPanel } from '@/components/biomarkers-panel';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { InsightsCard } from '@/components/insights-card';
+import { ReminderCard } from '@/components/reminder-card';
+import { VitaminDCard } from '@/components/vitamin-d-card';
+import { ReportCard } from '@/components/report-card';
+import { ThyroidCard } from '@/components/thyroid-card';
+import { RenalCard } from '@/components/renal-card';
+import { BiomarkersCard } from '@/components/biomarkers-card';
 
 
 export default function PatientDashboard() {
-  const { isClient, isDoctorLoggedIn, profile, dashboardSuggestions } = useApp();
+  const { isClient, isDoctorLoggedIn, profile } = useApp();
   const router = useRouter();
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(false);
@@ -82,35 +79,33 @@ export default function PatientDashboard() {
              
             <PatientHeader />
             
-            {isDoctorLoggedIn && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
-                  <CollapsibleTrigger asChild>
-                      <Button variant="outline" className="w-full">
-                          <Stethoscope className="mr-2 h-4 w-4" />
-                          Disease Panels
-                      </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                      <DiseasePanel />
-                  </CollapsibleContent>
-                </Collapsible>
-                <Collapsible open={isBiomarkersPanelOpen} onOpenChange={setIsBiomarkersPanelOpen}>
-                  <CollapsibleTrigger asChild>
-                       <Button variant="outline" className="w-full">
-                          <DropletIcon className="mr-2 h-4 w-4" />
-                          Biomarker cards
-                      </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                      <BiomarkersPanel />
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
-            )}
-            
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
+                <CollapsibleTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                        <Stethoscope className="mr-2 h-4 w-4" />
+                        Disease Panels
+                    </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                    <DiseasePanel />
+                </CollapsibleContent>
+              </Collapsible>
+              <Collapsible open={isBiomarkersPanelOpen} onOpenChange={setIsBiomarkersPanelOpen}>
+                <CollapsibleTrigger asChild>
+                     <Button variant="outline" className="w-full">
+                        <DropletIcon className="mr-2 h-4 w-4" />
+                        Biomarker Cards
+                    </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                    <BiomarkersPanel />
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+            
             <div className="space-y-6" id="tour-step-1">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1 flex flex-col gap-6">
@@ -126,8 +121,6 @@ export default function PatientDashboard() {
                 <WeightRecordCard />
                 <BloodPressureCard />
             </div>
-            
-            {profile.enabledDashboards?.includes('diabetes') && <DiabetesCard />}
 
             <Separator />
 
