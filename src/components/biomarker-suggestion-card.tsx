@@ -13,46 +13,42 @@ export function BiomarkerSuggestionCard() {
   const { addCustomBiomarker, customBiomarkers, profile, enabledDashboards } = useApp();
   const { toast } = useToast();
   const [isAdding, setIsAdding] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [suggestions, setSuggestions] = React.useState<string[]>([]);
+  
+  const verifiedConditions = React.useMemo(() => {
+    return profile.presentMedicalConditions
+        .filter(c => c.status === 'verified')
+        .map(c => c.condition);
+  }, [profile.presentMedicalConditions]);
+
+  // Create stable dependencies for the useEffect hook
+  const dependencies = JSON.stringify({
+      verifiedConditions,
+      enabledDashboards,
+      customBiomarkers: customBiomarkers?.map(b => b.name),
+  });
   
   React.useEffect(() => {
     const fetchSuggestions = async () => {
-        const verifiedConditions = profile.presentMedicalConditions
-            .filter(c => c.status === 'verified')
-            .map(c => c.condition);
+        const { verifiedConditions, enabledDashboards, customBiomarkers: customBiomarkerNames } = JSON.parse(dependencies);
 
         if (verifiedConditions.length === 0) {
-            toast({
-                variant: 'default',
-                title: 'No Verified Conditions',
-                description: `There are no verified medical conditions to generate suggestions from. Please approve a condition first.`,
-            });
             setSuggestions([]);
+            setIsLoading(false);
             return;
         };
 
         setIsLoading(true);
 
         const currentBiomarkers = [
-        ...(enabledDashboards || []).map(d => d.replace(/([A-Z])/g, ' $1').trim()),
-        ...(customBiomarkers?.map(b => b.name) || [])
+            ...(enabledDashboards || []).map(d => d.replace(/([A-Z])/g, ' $1').trim()),
+            ...(customBiomarkerNames || [])
         ];
         
         try {
             const result = await suggestNewBiomarkers({ conditions: verifiedConditions, currentBiomarkers });
             setSuggestions(result.suggestions);
-            if (result.suggestions.length > 0) {
-                toast({
-                    title: 'Suggestions Found',
-                    description: 'New biomarker suggestions are available below.',
-                });
-            } else {
-                toast({
-                    title: 'No New Suggestions',
-                    description: 'The patient is already monitoring all relevant biomarkers for their conditions.',
-                });
-            }
         } catch(error) {
             console.error("Failed to fetch biomarker suggestions", error);
             toast({
@@ -66,7 +62,8 @@ export function BiomarkerSuggestionCard() {
     };
 
     fetchSuggestions();
-  }, [profile.presentMedicalConditions, enabledDashboards, customBiomarkers, toast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dependencies, toast]);
 
 
   const handleAddBiomarker = async (name: string) => {
@@ -98,6 +95,16 @@ export function BiomarkerSuggestionCard() {
     }
   }
 
+  if (verifiedConditions.length === 0) {
+      return (
+          <Card className="border-blue-500 bg-blue-500/5">
+              <CardContent className="p-4">
+                 <p className="text-sm text-center text-blue-700">No verified conditions to generate suggestions from. Please verify a condition first.</p>
+              </CardContent>
+          </Card>
+      )
+  }
+
   return (
     <Card className="border-blue-500 bg-blue-500/5">
       <CardHeader className="flex-row items-start justify-between">
@@ -106,7 +113,7 @@ export function BiomarkerSuggestionCard() {
           <div>
             <CardTitle className="text-blue-800">AI Biomarker Suggestions</CardTitle>
             <CardDescription className="text-blue-700">
-              Based on verified conditions, suggest additional biomarkers to monitor.
+              Based on verified conditions, here are additional biomarkers you may want to monitor.
             </CardDescription>
           </div>
         </div>
