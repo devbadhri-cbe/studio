@@ -50,6 +50,8 @@ export function DiseasePanelCard({
     const [searchQuery, setSearchQuery] = React.useState('');
     const [dialogTriggers, setDialogTriggers] = React.useState<Record<string, React.RefObject<HTMLButtonElement>>>({});
     const [isManagingBiomarkers, setIsManagingBiomarkers] = React.useState(false);
+    const [isNewRecordOpen, setIsNewRecordOpen] = React.useState(false);
+    const [isDisplaySettingsOpen, setIsDisplaySettingsOpen] = React.useState(false);
 
     const enabledForPanel = profile.enabledBiomarkers?.[panelKey] || [];
 
@@ -114,13 +116,26 @@ export function DiseasePanelCard({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-80" align="end" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenuLabel>New Record</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {addRecordActions.map(({ label, action }) => (
-                        <DropdownMenuItem key={label} onSelect={action}>
-                            {label}
-                        </DropdownMenuItem>
-                    ))}
+                    <DropdownMenuItem
+                        onSelect={(e) => {
+                            e.preventDefault();
+                            setIsNewRecordOpen(!isNewRecordOpen);
+                        }}
+                        className="flex justify-between items-center"
+                    >
+                        <span className="font-semibold">New Record</span>
+                        <ChevronDown className={cn("h-4 w-4 transition-transform", isNewRecordOpen && "rotate-180")} />
+                    </DropdownMenuItem>
+                    
+                    {isNewRecordOpen && (
+                         <div className="px-2 py-1 space-y-1">
+                            {addRecordActions.map(({ label, action }) => (
+                                <DropdownMenuItem key={label} onSelect={action}>
+                                    {label}
+                                </DropdownMenuItem>
+                            ))}
+                         </div>
+                    )}
                     <DropdownMenuSeparator />
                      <DropdownMenuItem
                         onSelect={(e) => {
@@ -168,55 +183,67 @@ export function DiseasePanelCard({
                     )}
                     
                     <DropdownMenuSeparator />
-                     <DropdownMenuLabel>Display Settings</DropdownMenuLabel>
-                     <div className="grid gap-2 px-2 py-1">
-                        <div className="grid grid-cols-3 items-center gap-4">
-                            <Label htmlFor="date-format" className="text-xs">Date Format</Label>
-                            <Select
-                                value={profile.dateFormat}
-                                onValueChange={(value) => setProfile({...profile, dateFormat: value})}
-                            >
-                                <SelectTrigger className="col-span-2 h-8 text-xs">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {dateFormats.map(df => (
-                                        <SelectItem key={df.format} value={df.format} className="text-xs">{df.label}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                     <DropdownMenuItem
+                        onSelect={(e) => {
+                            e.preventDefault();
+                            setIsDisplaySettingsOpen(!isDisplaySettingsOpen);
+                        }}
+                        className="flex justify-between items-center"
+                    >
+                        <span className="font-semibold">Display Settings</span>
+                        <ChevronDown className={cn("h-4 w-4 transition-transform", isDisplaySettingsOpen && "rotate-180")} />
+                    </DropdownMenuItem>
+
+                    {isDisplaySettingsOpen && (
+                        <div className="grid gap-2 px-2 py-1 mt-1">
+                            <div className="grid grid-cols-3 items-center gap-4">
+                                <Label htmlFor="date-format" className="text-xs">Date Format</Label>
+                                <Select
+                                    value={profile.dateFormat}
+                                    onValueChange={(value) => setProfile({...profile, dateFormat: value})}
+                                >
+                                    <SelectTrigger className="col-span-2 h-8 text-xs">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {dateFormats.map(df => (
+                                            <SelectItem key={df.format} value={df.format} className="text-xs">{df.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid grid-cols-3 items-center gap-4">
+                                <Label htmlFor="unit-system" className="text-xs">Units</Label>
+                                <Select
+                                    value={profile.unitSystem}
+                                    onValueChange={(value) => setProfile({...profile, unitSystem: value as UnitSystem})}
+                                >
+                                    <SelectTrigger className="col-span-2 h-8 text-xs">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="metric" className="text-xs">Metric (cm, kg)</SelectItem>
+                                        <SelectItem value="imperial" className="text-xs">Imperial (ft/in, lbs)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid grid-cols-3 items-center gap-4">
+                                <Label htmlFor="biomarker-units" className="text-xs">Lab Units</Label>
+                                <Select
+                                    value={biomarkerUnit}
+                                    onValueChange={(value) => setBiomarkerUnit(value as 'conventional' | 'si')}
+                                >
+                                    <SelectTrigger className="col-span-2 h-8 text-xs">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="conventional" className="text-xs">Conventional</SelectItem>
+                                        <SelectItem value="si" className="text-xs">SI Units</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <div className="grid grid-cols-3 items-center gap-4">
-                            <Label htmlFor="unit-system" className="text-xs">Units</Label>
-                            <Select
-                                value={profile.unitSystem}
-                                onValueChange={(value) => setProfile({...profile, unitSystem: value as UnitSystem})}
-                            >
-                                <SelectTrigger className="col-span-2 h-8 text-xs">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="metric" className="text-xs">Metric (cm, kg)</SelectItem>
-                                    <SelectItem value="imperial" className="text-xs">Imperial (ft/in, lbs)</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                         <div className="grid grid-cols-3 items-center gap-4">
-                            <Label htmlFor="biomarker-units" className="text-xs">Lab Units</Label>
-                            <Select
-                                value={biomarkerUnit}
-                                onValueChange={(value) => setBiomarkerUnit(value as 'conventional' | 'si')}
-                            >
-                                <SelectTrigger className="col-span-2 h-8 text-xs">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="conventional" className="text-xs">Conventional</SelectItem>
-                                    <SelectItem value="si" className="text-xs">SI Units</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
             <CreateBiomarkerDialog 
