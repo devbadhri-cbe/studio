@@ -6,7 +6,7 @@ import { ProfileCard } from '@/components/profile-card';
 import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Stethoscope, DropletIcon } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -27,6 +27,8 @@ import { OnboardingTour } from '@/components/onboarding-tour';
 import { DiabetesCard } from '@/components/diabetes-card';
 import { BiomarkersCard } from '@/components/biomarkers-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
+import { DiseasePanel } from '@/components/disease-panel';
+import { BiomarkersPanel } from '@/components/biomarkers-panel';
 
 
 export default function PatientDashboard() {
@@ -58,16 +60,18 @@ export default function PatientDashboard() {
       <div className="flex min-h-screen w-full flex-col bg-background">
          <TitleBar>
             {isDoctorLoggedIn && (
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                    <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="ghost">
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                    <p>Return to Patient List</p>
-                    </TooltipContent>
-                </Tooltip>
+                <div className="flex items-center gap-2">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                        <Button onClick={() => router.push('/doctor/dashboard')} size="icon" variant="ghost">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                        <p>Return to Patient List</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
             )}
          </TitleBar>
 
@@ -77,6 +81,12 @@ export default function PatientDashboard() {
 
             <div className="space-y-6" id="tour-step-1">
               <PatientHeader />
+                {isDoctorLoggedIn && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <DiseasePanel />
+                        <BiomarkersPanel />
+                    </div>
+                )}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1 flex flex-col gap-6">
                     <ProfileCard />
