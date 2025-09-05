@@ -125,7 +125,7 @@ export function WeightRecordCard() {
   );
 
   const StatusDisplay = (
-    <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground text-center">
+    <div className="flex flex-col items-center justify-center flex-1 gap-2 text-sm text-muted-foreground text-center">
         <span>Height: <span className="font-bold text-foreground">{heightDisplay}</span></span>
         {bmiStatus && (
             <div className="flex flex-col items-center gap-1">
@@ -154,28 +154,6 @@ export function WeightRecordCard() {
 
   const Chart = <WeightChart />;
 
-  if (sortedWeights.length === 0) {
-      return (
-        <Card className="w-full flex flex-col h-full">
-            <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                    <div className='flex items-center gap-3 flex-1'>
-                        {Icon}
-                        <h3 className="font-medium">{Title}</h3>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                        {Actions}
-                    </div>
-                </div>
-                <div className="flex-1 flex flex-col items-center justify-center gap-4">
-                    <p className="text-sm text-muted-foreground">No weight records yet.</p>
-                    {StatusDisplay}
-                </div>
-            </CardContent>
-        </Card>
-      )
-  }
-
   return (
     <BiomarkerCardTemplate
         title={Title}
@@ -184,7 +162,8 @@ export function WeightRecordCard() {
         recordsList={RecordsList}
         statusDisplay={StatusDisplay}
         chart={Chart}
-        hasRecords={sortedWeights.length > 0}
+        hasRecords={(weightRecords || []).length > 0}
+        noRecordsMessage="No weight records yet."
     />
   );
 }

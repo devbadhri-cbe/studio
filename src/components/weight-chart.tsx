@@ -6,6 +6,8 @@ import { Line, LineChart, CartesianGrid, Rectangle, ResponsiveContainer, Tooltip
 import { useApp } from '@/context/app-context';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { kgToLbs } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
+
 
 export function WeightChart() {
   const { weightRecords, profile } = useApp();
@@ -27,7 +29,7 @@ export function WeightChart() {
     const values = chartData.map(d => d.value);
     const min = Math.min(...values);
     const max = Math.max(...values);
-    const padding = (max - min) * 0.2;
+    const padding = (max - min) * 0.2 || 5;
     return [Math.max(0, Math.floor(min - padding)), Math.ceil(max + padding)];
   }, [chartData]);
   
@@ -39,6 +41,10 @@ export function WeightChart() {
       return parseFloat(value.toFixed(1));
   }, [profile.height, isImperial]);
 
+   const formatShortDate = (tickItem: string) => {
+    return format(parseISO(tickItem), "MMM d");
+  }
+
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -49,7 +55,7 @@ export function WeightChart() {
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="date"
-                tickFormatter={(tick) => formatDate(tick)}
+                tickFormatter={formatShortDate}
                 tickLine={false}
                 axisLine={false}
                 tick={{ fontSize: 10 }}

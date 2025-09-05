@@ -108,7 +108,7 @@ export function BloodPressureCard() {
       statusDisplay={StatusDisplay}
       chart={Chart}
       className="shadow-xl"
-      hasRecords={bloodPressureRecords.length > 0}
+      hasRecords={(bloodPressureRecords || []).length > 0}
     />
   );
 }
