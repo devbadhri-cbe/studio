@@ -32,7 +32,6 @@ interface DiseasePanelCardProps {
   children: React.ReactNode; // For hidden dialogs
   className?: string;
   isDoctorLoggedIn: boolean;
-  addRecordActions: { label: string; action: () => void }[];
   panelKey: string;
   allPanelBiomarkers: BiomarkerKey[];
   enabledBiomarkers: BiomarkerKey[];
@@ -44,12 +43,12 @@ export function DiseasePanelCard({
     children, 
     className, 
     isDoctorLoggedIn, 
-    addRecordActions,
     panelKey,
 }: DiseasePanelCardProps) {
     const { profile, setProfile, biomarkerUnit, setBiomarkerUnit, toggleDiseaseBiomarker, customBiomarkers } = useApp();
     const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState('');
+    const [dialogTriggers, setDialogTriggers] = React.useState<Record<string, React.RefObject<HTMLButtonElement>>>({});
 
     const enabledForPanel = profile.enabledBiomarkers?.[panelKey] || [];
 
@@ -58,6 +57,33 @@ export function DiseasePanelCard({
         const custom = (customBiomarkers || []).map(b => ({ key: b.id, label: b.name, isCustom: true }));
         return [...standard, ...custom];
     }, [customBiomarkers]);
+    
+    const addRecordActions = React.useMemo(() => {
+        return enabledForPanel
+            .map(key => availableBiomarkerCards[key as BiomarkerKey])
+            .filter(Boolean) // Filter out undefined/null entries
+            .map(cardInfo => ({
+                label: cardInfo.addRecordLabel,
+                dialog: cardInfo.addRecordDialog,
+                action: () => {
+                    dialogTriggers[cardInfo.addRecordLabel]?.current?.click();
+                }
+            }));
+    }, [enabledForPanel, dialogTriggers]);
+
+    // Create refs for all possible dialogs
+    React.useEffect(() => {
+        const allLabels = Object.values(availableBiomarkerCards).map(v => v.addRecordLabel);
+        setDialogTriggers(triggers => {
+            const newTriggers = { ...triggers };
+            allLabels.forEach(label => {
+                if (!newTriggers[label]) {
+                    newTriggers[label] = React.createRef<HTMLButtonElement>();
+                }
+            });
+            return newTriggers;
+        });
+    }, []);
 
     const sortedAndFilteredBiomarkers = React.useMemo(() => {
         const lowercasedQuery = searchQuery.toLowerCase();
@@ -87,7 +113,7 @@ export function DiseasePanelCard({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-80" align="end" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenuLabel>Add New Record</DropdownMenuLabel>
+                    <DropdownMenuLabel>New Record</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {addRecordActions.map(({ label, action }) => (
                         <DropdownMenuItem key={label} onSelect={action}>
@@ -190,7 +216,13 @@ export function DiseasePanelCard({
 
     return (
         <Card className={cn("h-full shadow-xl flex flex-col", className)}>
-            {children}
+             {Object.entries(availableBiomarkerCards).map(([key, cardInfo]) => (
+                <div key={key} style={{ display: 'none' }}>
+                    {React.cloneElement(cardInfo.addRecordDialog, {
+                        children: <button ref={dialogTriggers[cardInfo.addRecordLabel]}></button>
+                    })}
+                </div>
+            ))}
             <div className="flex flex-col flex-1 p-4 space-y-4">
                 <div className="flex items-center justify-between">
                     <div className='flex items-center gap-3 flex-1'>
@@ -203,7 +235,7 @@ export function DiseasePanelCard({
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
                         {enabledForPanel.map(key => {
                             const cardInfo = allAvailableBiomarkers.find(b => b.key === key);
-                            if (cardInfo && !cardInfo.isCustom) {
+                            if (cardInfo && !cardInfo.isCustom && availableBiomarkerCards[key as BiomarkerKey]) {
                                 return React.cloneElement(availableBiomarkerCards[key as BiomarkerKey].component, { key });
                             }
                             // Note: Rendering for custom biomarkers would go here if they have a visual component
@@ -215,4 +247,3 @@ export function DiseasePanelCard({
         </Card>
     );
 }
-
