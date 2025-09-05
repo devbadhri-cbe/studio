@@ -20,7 +20,7 @@ export function BiomarkersPanel() {
             <SheetTrigger asChild>
                 <Button variant="outline" className="w-full">
                     <DropletIcon className="mr-2 h-4 w-4" />
-                    Biomarker Panels
+                    Biomarker cards
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-full sm:w-[500px] p-0">
