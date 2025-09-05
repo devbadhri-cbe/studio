@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
 import { useApp } from '@/context/app-context';
-import { Card, CardContent } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Hba1cCard } from './hba1c-card';
 import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
 import { HemoglobinCard } from './hemoglobin-card';
@@ -35,11 +35,11 @@ export function DiabetesCard() {
 
   return (
     <Card className="h-full shadow-xl">
-        <CardContent className="p-4 space-y-4">
-             <div className="flex items-center justify-between">
+        <CardHeader>
+            <div className="flex items-center justify-between">
                 <div className='flex items-center gap-3 flex-1'>
                     <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />
-                    <h3 className="font-medium">Diabetes Panel</h3>
+                    <CardTitle className="text-base font-semibold">Diabetes Panel</CardTitle>
                 </div>
                 {isDoctorLoggedIn && (
                      <DropdownMenu>
@@ -73,6 +73,8 @@ export function DiabetesCard() {
                     </DropdownMenu>
                 )}
              </div>
+        </CardHeader>
+        <CardContent className="p-4 pt-0 space-y-4">
              
              {visibleCards.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
