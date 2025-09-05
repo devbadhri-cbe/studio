@@ -98,7 +98,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                     control={form.control}
                     name="dob"
                     render={({ field }) => (
-                        <FormItem className="md:col-span-2">
+                        <FormItem className="md:col-span-2 p-2">
                             <FormControl>
                                 <DatePicker
                                     label="Date of Birth"
@@ -110,12 +110,12 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         </FormItem>
                     )}
                  />
-                 <div className="flex flex-col border border-blue-500 w-fit">
+                 <div className="p-2">
                      <FormField
                         control={form.control}
                         name="age"
                         render={() => (
-                             <FormItem className="flex-1">
+                             <FormItem>
                                 <FormLabel>Age</FormLabel>
                                 <FormControl>
                                     <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
@@ -124,7 +124,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         )}
                      />
                  </div>
-                <div className="flex flex-col border border-blue-500 md:col-span-2 p-2">
+                <div className="md:col-span-2 p-2">
                     <FormField
                         control={form.control}
                         name="gender"
