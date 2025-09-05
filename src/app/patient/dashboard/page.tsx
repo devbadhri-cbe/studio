@@ -55,25 +55,27 @@ export default function PatientDashboard() {
 
   React.useEffect(() => {
     const fetchSuggestions = async () => {
-      if (isDoctorLoggedIn && profile.presentMedicalConditions.length > 0) {
-        const currentBiomarkers = [
-          ...(enabledDashboards || []).map(d => d.replace(/([A-Z])/g, ' $1').trim()),
-          ...(customBiomarkers?.map(b => b.name) || [])
-        ];
         const conditions = profile.presentMedicalConditions
           .filter(c => c.status === 'verified')
           .map(c => c.condition);
 
-        if (conditions.length > 0) {
-          try {
+        if (conditions.length === 0) {
+            setBiomarkerSuggestions([]);
+            return;
+        };
+
+        const currentBiomarkers = [
+          ...(enabledDashboards || []).map(d => d.replace(/([A-Z])/g, ' $1').trim()),
+          ...(customBiomarkers?.map(b => b.name) || [])
+        ];
+        
+        try {
             const result = await suggestNewBiomarkers({ conditions, currentBiomarkers });
             setBiomarkerSuggestions(result.suggestions);
-          } catch(error) {
+        } catch(error) {
             console.error("Failed to fetch biomarker suggestions", error);
             // Don't show toast to doctor as it could be annoying
-          }
         }
-      }
     };
 
     if (isDoctorLoggedIn) {
