@@ -424,7 +424,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { thyroidRecords: updatedRecords });
   };
   
-  const addRenalRecord = (record: Omit<RenalRecord, 'id' | 'medication'>) => {
+  const addRenalRecord = (record: Omit<RenalRecord, 'id' | 'medication' | 'eGFR'>) => {
      const age = calculateAge(profile.dob);
      const eGFR = age ? calculateEgfr(record.serumCreatinine, record.serumCreatinineUnits, age, profile.gender) : undefined;
     const newRecord = { ...record, eGFR, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };

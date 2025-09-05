@@ -17,7 +17,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Patient } from './types';
-import { calculateAge, calculateBmi, calculateEgfr } from './utils';
+import { calculateAge, calculateBmi } from './utils';
 
 const PATIENTS_COLLECTION = 'patients';
 
@@ -71,20 +71,13 @@ const processPatientDoc = (doc: any): Patient => {
   const mineralBoneDiseaseRecords = sanitizeRecords(data.mineralBoneDiseaseRecords || []);
 
 
-  const age = calculateAge(data.dob);
-  const processedRenalRecords = renalRecords.map((record: any) => {
-    if (record.serumCreatinine && age && data.gender) {
-        record.eGFR = calculateEgfr(record.serumCreatinine, record.serumCreatinineUnits, age, data.gender);
-    }
-    return record;
-  });
   
   const lastHba1c = hba1cRecords.length > 0 ? [...hba1cRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastLipid = lipidRecords.length > 0 ? [...lipidRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastVitaminD = vitaminDRecords.length > 0 ? [...vitaminDRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastThyroid = thyroidRecords.length > 0 ? [...thyroidRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastBloodPressure = bloodPressureRecords.length > 0 ? [...bloodPressureRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
-  const lastRenal = processedRenalRecords.length > 0 ? [...processedRenalRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
+  const lastRenal = renalRecords.length > 0 ? [...renalRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastHemoglobin = hemoglobinRecords.length > 0 ? [...hemoglobinRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastAlbumin = nutritionRecords.length > 0 ? [...nutritionRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
 
@@ -104,7 +97,7 @@ const processPatientDoc = (doc: any): Patient => {
     lipidRecords,
     vitaminDRecords,
     thyroidRecords,
-    renalRecords: processedRenalRecords,
+    renalRecords,
     weightRecords,
     bloodPressureRecords,
     presentMedicalConditions,
@@ -223,7 +216,3 @@ export async function deletePatient(id: string): Promise<void> {
 }
 
 // Doctor specific functions are removed for single-doctor model
-
-
-
-
