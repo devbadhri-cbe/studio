@@ -46,7 +46,7 @@ export function BiomarkerCardTemplate({
         {hasRecords ? (
           <div className="flex-1 flex flex-col min-h-0">
               {/* Top Section: Records & Status */}
-              <div className="flex flex-row gap-4 min-h-[120px] items-center">
+              <div className="flex flex-col gap-4 min-h-[120px]">
                   <div className="flex-1 w-full p-2 flex items-center justify-center">
                       {recordsList}
                   </div>
