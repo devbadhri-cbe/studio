@@ -91,8 +91,7 @@ export function DatePicker({
     };
     
     return (
-        <div className="flex flex-col gap-2">
-            {label && <Label>{label}</Label>}
+        <div>
             <Input
                 type="date"
                 value={value && isValid(value) ? format(value, 'yyyy-MM-dd') : ''}
@@ -109,9 +108,8 @@ export function DatePicker({
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex flex-col gap-2 border border-blue-500 w-fit">
-       {label && <Label>{label}</Label>}
-      <div className="flex items-center border border-red-500 rounded-md h-10 w-fit">
+    <div>
+      <div className="flex items-center rounded-md h-10 w-fit">
          <Input 
             placeholder="DD"
             value={day}
