@@ -109,7 +109,7 @@ export default function PatientDashboard() {
                 <WeightRecordCard />
                 <BloodPressureCard />
             </div>
-             {profile.enabledDashboards?.includes('diabetes') && <DiabetesCard />}
+             <DiabetesCard />
 
             <Separator />
 
