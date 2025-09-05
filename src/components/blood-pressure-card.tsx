@@ -13,6 +13,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
+import { Separator } from './ui/separator';
 
 export function BloodPressureCard() {
   const { bloodPressureRecords, removeBloodPressureRecord } = useApp();
@@ -107,7 +108,7 @@ export function BloodPressureCard() {
       recordsList={RecordsList}
       statusDisplay={StatusDisplay}
       chart={Chart}
-      className="shadow-xl"
+      className="shadow-xl border-2 border-green-500"
       hasRecords={(bloodPressureRecords || []).length > 0}
       noRecordsMessage="No blood pressure records yet."
     />
