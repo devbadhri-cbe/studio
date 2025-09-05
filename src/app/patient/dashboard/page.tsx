@@ -35,6 +35,7 @@ import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card
 import { HemoglobinCard } from '@/components/hemoglobin-card';
 import { OnboardingTour } from '@/components/onboarding-tour';
 import { DiabetesCard } from '@/components/diabetes-card';
+import { BiomarkersCard } from '@/components/biomarkers-card';
 
 
 export default function PatientDashboard() {
@@ -45,6 +46,7 @@ export default function PatientDashboard() {
   const [biomarkerSuggestions, setBiomarkerSuggestions] = React.useState<string[]>([]);
 
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review') || dashboardSuggestions.some(s => s.status === 'pending'));
+  const showBiomarkersCardForPatient = !isDoctorLoggedIn && (enabledDashboards?.includes('hba1c') || enabledDashboards?.includes('glucose') || enabledDashboards?.includes('anemia')) && !enabledDashboards?.includes('diabetes');
   
   React.useEffect(() => {
     // Pass the ref to the weight card component instance
@@ -177,9 +179,7 @@ export default function PatientDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
                  <WeightRecordCard />
                  {(isDoctorLoggedIn || enabledDashboards?.includes('diabetes')) && <DiabetesCard />}
-                 {!isDoctorLoggedIn && enabledDashboards?.includes('hba1c') && !enabledDashboards?.includes('diabetes') && <Hba1cCard />}
-                 {!isDoctorLoggedIn && enabledDashboards?.includes('glucose') && !enabledDashboards?.includes('diabetes') && <FastingBloodGlucoseCard />}
-                 {!isDoctorLoggedIn && enabledDashboards?.includes('anemia') && !enabledDashboards?.includes('diabetes') && <HemoglobinCard />}
+                 {showBiomarkersCardForPatient && <BiomarkersCard />}
                  {(isDoctorLoggedIn || enabledDashboards?.includes('lipids')) && <LipidCard />}
                  {(isDoctorLoggedIn || enabledDashboards?.includes('vitaminD')) && <VitaminDCard />}
                  {(isDoctorLoggedIn || enabledDashboards?.includes('thyroid')) && <ThyroidCard />}

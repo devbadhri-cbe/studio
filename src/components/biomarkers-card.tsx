@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -15,8 +16,13 @@ import { Shapes, Settings } from 'lucide-react';
 import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
 import { HemoglobinCard } from './hemoglobin-card';
 import { Hba1cCard } from './hba1c-card';
+import { useApp } from '@/context/app-context';
 
 const biomarkerCards = {
+  hba1c: {
+    label: 'HbA1c',
+    component: <Hba1cCard />,
+  },
   glucose: {
     label: 'Fasting Blood Glucose',
     component: <FastingBloodGlucoseCard />,
@@ -25,21 +31,24 @@ const biomarkerCards = {
     label: 'Hemoglobin',
     component: <HemoglobinCard />,
   },
-  hba1c: {
-    label: 'HbA1c',
-    component: <Hba1cCard />,
-  },
 };
 
 type BiomarkerKey = keyof typeof biomarkerCards;
 
 export function BiomarkersCard() {
-  const [activeView, setActiveView] = React.useState<BiomarkerKey>('glucose');
-  const availableBiomarkerOptions = Object.keys(biomarkerCards) as BiomarkerKey[];
+  const { enabledDashboards } = useApp();
+  
+  const availableBiomarkerOptions = React.useMemo(() => {
+    return (Object.keys(biomarkerCards) as BiomarkerKey[]).filter(key => 
+      enabledDashboards?.includes(key)
+    );
+  }, [enabledDashboards]);
+
+  const [activeView, setActiveView] = React.useState<BiomarkerKey>(availableBiomarkerOptions[0] || 'hba1c');
 
   React.useEffect(() => {
     if (!availableBiomarkerOptions.includes(activeView)) {
-      setActiveView(availableBiomarkerOptions[0] || 'glucose');
+      setActiveView(availableBiomarkerOptions[0] || 'hba1c');
     }
   }, [activeView, availableBiomarkerOptions]);
 
