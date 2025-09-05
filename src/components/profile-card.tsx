@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake, Edit, Save, X } from 'lucide-react';
@@ -136,7 +137,7 @@ export function ProfileCard() {
 
 
   return (
-    <Card className="h-full">
+    <Card className="h-full shadow-xl">
       <CardHeader>
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Pill, PlusCircle, Trash2, Loader2, ShieldAlert, Info, XCircle } from 'lucide-react';
@@ -99,7 +100,7 @@ export function MedicationCard() {
   };
   
   return (
-    <Card>
+    <Card className="shadow-xl">
         <CardContent className="space-y-4 text-sm p-4">
             <div>
                 <div className="flex items-center justify-between mb-2">
