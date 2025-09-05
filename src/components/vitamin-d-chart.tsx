@@ -10,7 +10,7 @@ export function VitaminDChart() {
   const formatDate = useDateFormatter();
 
   const sortedRecords = [...(vitaminDRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const latestRecords = sortedRecords.slice(0, 5).reverse();
+  const latestRecords = sortedRecords.slice(-5);
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,

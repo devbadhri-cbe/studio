@@ -91,7 +91,7 @@ export function WeightRecordCard() {
      <ScrollArea className="h-[140px] pr-3">
         {sortedWeights.length > 0 ? (
             <ul className="space-y-1 mt-2">
-            {sortedWeights.slice(0, 5).map((weight) => {
+            {sortedWeights.map((weight) => {
                 const displayWeight = isImperial
                 ? `${kgToLbs(weight.value).toFixed(1)} lbs`
                 : `${weight.value.toFixed(1)} kg`;
