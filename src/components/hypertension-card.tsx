@@ -51,8 +51,8 @@ export function HypertensionCard() {
         ))}
         
         {enabledBiomarkers.map(key => {
-            const card = availableBiomarkerCards[key];
-            return card ? card.component : null;
+            const cardInfo = availableBiomarkerCards[key];
+            return cardInfo ? cardInfo.component : null;
         })}
     </DiseasePanelCard>
   );
