@@ -111,7 +111,7 @@ export function DatePicker({
   return (
     <div className="flex flex-col gap-2">
        {label && <Label>{label}</Label>}
-      <div className="flex items-center gap-2 border border-red-500 rounded-md px-3 h-10 w-fit">
+      <div className="flex items-center gap-2 border border-red-500 rounded-md h-10 w-fit">
          <Input 
             placeholder="DD"
             value={day}
