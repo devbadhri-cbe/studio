@@ -11,7 +11,6 @@ import { Loader2, Info, Trash2, CheckCircle, AlertTriangle, Edit } from 'lucide-
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
-import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 import { useToast } from '@/hooks/use-toast';
 
 interface DiseaseCardProps {
@@ -53,23 +52,11 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
 
   const handleSuggestIcdCode = async (condition: MedicalCondition) => {
     setIsSuggesting(condition.id);
-    try {
-      const { icdCode, description } = await suggestIcdCode({ condition: condition.condition });
-      const updatedCondition = { ...condition, icdCode: `${icdCode}: ${description}` };
-      updateMedicalCondition(updatedCondition);
-      toast({
-        title: 'ICD-11 Code Suggested',
-        description: `Code ${icdCode} has been added to ${condition.condition}.`,
-      });
-    } catch (e) {
-      toast({
-        variant: 'destructive',
-        title: 'Suggestion Failed',
-        description: 'Could not get an ICD-11 code suggestion at this time.',
-      });
-    } finally {
-      setIsSuggesting(null);
-    }
+    toast({
+        title: 'Feature Disabled',
+        description: 'AI-powered ICD-11 code suggestions are temporarily disabled.',
+    });
+    setIsSuggesting(null);
   };
 
   return (

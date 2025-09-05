@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { type Doctor, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type HemoglobinRecord, type NutritionRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord } from '@/lib/types';
@@ -10,8 +9,6 @@ import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMgDl, toMmolL, toNgDl, toNmolL, toGDL, toGL } from '@/lib/unit-conversions';
 import { calculateBmi, calculateEgfr } from '@/lib/utils';
-import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
-
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'], customBiomarkers: [] };
 

@@ -6,7 +6,7 @@ import { ProfileCard } from '@/components/profile-card';
 import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
-import { ArrowLeft, UploadCloud } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { LipidCard } from '@/components/lipid-card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -19,9 +19,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
-import { UploadRecordDialog } from '@/components/upload-record-dialog';
-import type { LabResultUploadOutput } from '@/ai/flows/lab-result-upload';
-import { UploadConfirmationForm } from '@/components/upload-confirmation-form';
 import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
 import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
@@ -35,7 +32,6 @@ import { BloodPressureCard } from '@/components/blood-pressure-card';
 export default function PatientDashboard() {
   const { isClient, isDoctorLoggedIn, profile, dashboardSuggestions } = useApp();
   const router = useRouter();
-  const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
@@ -55,18 +51,6 @@ export default function PatientDashboard() {
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
-  }
-  
-  const handleExtractionComplete = (data: LabResultUploadOutput) => {
-    setExtractedData(data);
-  };
-
-  const handleConfirmationCancel = () => {
-    setExtractedData(null);
-  };
-
-  const handleConfirmationSuccess = () => {
-    setExtractedData(null);
   }
 
   return (
@@ -111,23 +95,6 @@ export default function PatientDashboard() {
             {profile.enabledDashboards?.includes('diabetes') && <DiabetesCard />}
 
             <Separator />
-
-             <div className="flex w-full flex-wrap justify-center gap-2" id="tour-step-2">
-              <UploadRecordDialog onExtractionComplete={handleExtractionComplete}>
-                <Button variant="outline">
-                    <UploadCloud className="mr-2 h-4 w-4" />
-                    Upload Result
-                </Button>
-              </UploadRecordDialog>
-            </div>
-            
-             {extractedData && (
-              <UploadConfirmationForm 
-                extractedData={extractedData}
-                onCancel={handleConfirmationCancel}
-                onSuccess={handleConfirmationSuccess}
-              />
-            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start" id="tour-step-3">
                 <div className="lg:col-span-1 flex flex-col gap-6">

@@ -19,7 +19,6 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useApp } from '@/context/app-context';
 import { Loader2 } from 'lucide-react';
-import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
 
 const FormSchema = z.object({
   name: z.string().min(2, { message: 'Biomarker or condition name is required.' }),

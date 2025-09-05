@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, ShieldAlert, Info, XCircle, Trash2 } from 'lucide-react';
@@ -7,7 +6,6 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { standardizeMedication } from '@/ai/flows/standardize-medication';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
@@ -124,21 +122,22 @@ export function MedicalHistoryCard() {
 
   const handleSaveMedication = async (data: z.infer<typeof MedicationSchema>) => {
     setIsSubmitting(true);
-    try {
-        const standardized = await standardizeMedication(data);
-        addMedication({
-            name: standardized.name,
-            brandName: standardized.brandName,
-            dosage: standardized.dosage,
-            frequency: standardized.frequency,
-        });
-        medicationForm.reset();
-        setIsAddingMedication(false);
-    } catch (error) {
-        console.error("Failed to standardize or add medication", error);
-    } finally {
-        setIsSubmitting(false);
-    }
+    // AI standardization is removed. Direct entry.
+    const standardized = {
+        name: data.medicationName,
+        dosage: data.dosage,
+        frequency: data.frequency,
+        brandName: data.medicationName,
+    };
+    addMedication({
+        name: standardized.name,
+        brandName: standardized.brandName,
+        dosage: standardized.dosage,
+        frequency: standardized.frequency,
+    });
+    medicationForm.reset();
+    setIsAddingMedication(false);
+    setIsSubmitting(false);
   };
   
   React.useEffect(() => {
