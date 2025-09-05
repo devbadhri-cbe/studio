@@ -165,7 +165,7 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         bloodPressureRecords: [],
         presentMedicalConditions: [],
         medication: [],
-        enabledDashboards: ['lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
+        enabledDashboards: ['diabetes', 'lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
         createdAt: serverTimestamp(),
     }
   const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), docData);
