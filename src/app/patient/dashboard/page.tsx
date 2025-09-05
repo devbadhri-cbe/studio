@@ -84,9 +84,9 @@ export default function PatientDashboard() {
             <PatientHeader />
             
             {isDoctorLoggedIn && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Collapsible open={isDiseasePanelOpen} onOpenChange={(isOpen) => { setIsDiseasePanelOpen(isOpen); if (isOpen) setIsBiomarkersPanelOpen(false); }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid gap-4">
+                  <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
                       <CollapsibleTrigger asChild>
                           <Button variant="outline" className="w-full">
                               <Stethoscope className="mr-2 h-4 w-4" />
@@ -94,10 +94,12 @@ export default function PatientDashboard() {
                           </Button>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                          {isDiseasePanelOpen && <DiseasePanel />}
+                          <DiseasePanel />
                       </CollapsibleContent>
                   </Collapsible>
-                  <Collapsible open={isBiomarkersPanelOpen} onOpenChange={(isOpen) => { setIsBiomarkersPanelOpen(isOpen); if (isOpen) setIsDiseasePanelOpen(false); }}>
+                </div>
+                <div className="grid gap-4">
+                   <Collapsible open={isBiomarkersPanelOpen} onOpenChange={setIsBiomarkersPanelOpen}>
                       <CollapsibleTrigger asChild>
                            <Button variant="outline" className="w-full">
                               <DropletIcon className="mr-2 h-4 w-4" />
@@ -105,11 +107,11 @@ export default function PatientDashboard() {
                           </Button>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                          {isBiomarkersPanelOpen && <BiomarkersPanel />}
+                          <BiomarkersPanel />
                       </CollapsibleContent>
                   </Collapsible>
                 </div>
-              </>
+              </div>
             )}
             
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
