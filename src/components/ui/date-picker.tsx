@@ -73,7 +73,13 @@ export function DatePicker({
           {value ? format(value, "PPP") : <span>{placeholder || "Pick a date"}</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
+      <PopoverContent 
+        className="w-auto p-0"
+        onInteractOutside={(e) => {
+          // This prevents the popover from closing when interacting with the month/year select dropdowns
+          e.preventDefault();
+        }}
+        >
         <Calendar
           mode="single"
           selected={value}
