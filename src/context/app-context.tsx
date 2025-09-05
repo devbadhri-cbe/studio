@@ -298,7 +298,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updatePatientData(newProfile.id, { ...newProfile });
   }
   
-  const addMedicalCondition = async (condition: Partial<Omit<MedicalCondition, 'id' | 'status'>> & {condition: string, date: string, icdCode?: string, requiredBiomarkers?: string[]}) => {
+  const addMedicalCondition = (condition: Partial<Omit<MedicalCondition, 'id' | 'status'>> & {condition: string, date: string, icdCode?: string, requiredBiomarkers?: string[]}) => {
     const validDate = condition.date && isValid(parseISO(condition.date)) 
         ? condition.date 
         : new Date().toISOString();
