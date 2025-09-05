@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -8,7 +9,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,112 +19,123 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { countries } from '@/lib/countries';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Save } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import type { UserProfile } from '@/lib/types';
 import { Separator } from './ui/separator';
+import { parseISO } from 'date-fns';
+import { updatePatient } from '@/lib/firestore';
+import { DatePicker } from './ui/date-picker';
+import { cmToFtIn, ftInToCm } from '@/lib/utils';
 
-const FormSchema = z.object({
-  name: z.string(), // Keep name for structure, but will be disabled
-  dob: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "A valid date is required." }),
+const ProfileSchema = z.object({
+  name: z.string().min(2, "Name is required."),
+  dob: z.date({ required_error: "A valid date is required." }),
   gender: z.enum(['male', 'female', 'other'], { required_error: "Gender is required." }),
   email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')),
   country: z.string().min(1, { message: "Country is required." }),
-  phone: z.string().min(5, { message: "Phone number is too short." }),
+  phone: z.string().min(5, { message: "Phone number is too short." }).optional().or(z.literal('')),
   height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional().or(z.literal('')),
-  weight: z.coerce.number().min(2, 'Weight must be at least 2kg.').optional().or(z.literal('')),
+  height_ft: z.coerce.number().optional().or(z.literal('')),
+  height_in: z.coerce.number().optional().or(z.literal('')),
 });
 
 interface EditProfileDialogProps {
-    children: React.ReactNode;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
 }
 
-export function ProfileSettingsDialog({ children }: EditProfileDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { profile, setProfile, addWeightRecord } = useApp();
+  const { profile, setProfile } = useApp();
   const { toast } = useToast();
-
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  
+  const form = useForm<z.infer<typeof ProfileSchema>>({
+    resolver: zodResolver(ProfileSchema),
     defaultValues: {
       name: '',
-      dob: '',
       gender: undefined,
       email: '',
       country: '',
       phone: '',
       height: '',
-      weight: '',
+      height_ft: '',
+      height_in: '',
     },
   });
-  
-  const watchCountry = form.watch('country');
+
+  const isImperial = profile.unitSystem === 'imperial';
 
   React.useEffect(() => {
-    if (watchCountry) {
-        const countryData = countries.find(c => c.code === watchCountry);
-        const currentPhone = form.getValues('phone');
-        if (countryData && (!currentPhone || !countries.some(c => currentPhone.startsWith(c.phoneCode)))) {
-             form.setValue('phone', countryData.phoneCode, { shouldValidate: true });
+    if (open) {
+        let height_ft = '';
+        let height_in = '';
+        if(profile.height && isImperial) {
+            const { feet, inches } = cmToFtIn(profile.height);
+            height_ft = feet.toString();
+            height_in = Math.round(inches).toString();
         }
+
+        form.reset({
+            name: profile?.name || '',
+            dob: profile?.dob ? parseISO(profile.dob) : new Date(),
+            gender: profile?.gender,
+            email: profile?.email || '',
+            country: profile?.country || '',
+            phone: profile?.phone || '',
+            height: !isImperial ? profile?.height || '' : '',
+            height_ft: isImperial ? height_ft : '',
+            height_in: isImperial ? height_in : '',
+        });
     }
-  }, [watchCountry, form]);
-  
-  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+  }, [open, profile, form, isImperial]);
+
+   const onProfileSubmit = async (data: z.infer<typeof ProfileSchema>) => {
     setIsSubmitting(true);
-    const updatedProfile: Partial<UserProfile> = {
-        dob: data.dob,
+
+    let heightInCm: number | undefined;
+    if (isImperial) {
+        const ft = data.height_ft ? Number(data.height_ft) : 0;
+        const inches = data.height_in ? Number(data.height_in) : 0;
+        heightInCm = ft > 0 || inches > 0 ? ftInToCm(ft, inches) : undefined;
+    } else {
+        heightInCm = data.height ? Number(data.height) : undefined;
+    }
+
+     const updatedProfileData = {
+        name: data.name,
+        dob: data.dob.toISOString(),
         gender: data.gender,
         email: data.email,
         country: data.country,
-        phone: data.phone,
-        height: data.height || undefined,
+        phone: data.phone || '',
+        height: heightInCm,
     };
+
     try {
-        setProfile({ ...profile, ...updatedProfile });
-        if (data.weight) {
-          addWeightRecord({ value: data.weight, date: new Date().toISOString() });
-        }
+        const updatedPatient = await updatePatient(profile.id, updatedProfileData);
+        setProfile(updatedPatient);
         toast({
             title: 'Profile Updated',
             description: 'Your details have been successfully saved.',
         });
-        setOpen(false);
+        onOpenChange(false);
     } catch (error) {
         console.error("Failed to update profile", error);
         toast({
             variant: 'destructive',
-            title: 'Error',
-            description: 'Could not update your profile. Please try again.',
+            title: 'Update Failed',
+            description: 'Could not update profile. Please try again.',
         });
+    } finally {
+        setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
-  
-  React.useEffect(() => {
-      if (open) {
-          form.reset({
-            name: profile?.name || '',
-            dob: profile?.dob ? new Date(profile.dob).toISOString().split('T')[0] : '',
-            gender: profile?.gender || undefined,
-            email: profile?.email || '',
-            country: profile?.country || '',
-            phone: profile?.phone || '',
-            height: profile?.height || '',
-            weight: '',
-          });
-      }
-  }, [open, profile, form]);
 
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-          {children}
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full max-w-lg max-h-[90vh] flex flex-col p-0">
         <DialogHeader className="p-6 pb-4 border-b">
           <DialogTitle>Edit Profile</DialogTitle>
@@ -137,48 +148,46 @@ export function ProfileSettingsDialog({ children }: EditProfileDialogProps) {
             <ScrollArea className="h-full">
                 <div className="p-6">
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <form onSubmit={form.handleSubmit(onProfileSubmit)} className="space-y-6">
                            
                             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled /></FormControl><FormMessage /></FormItem> )} />
-                            <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                            <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
-                            
-                            <Separator />
-                            
                             <FormField
                                 control={form.control}
-                                name="country"
+                                name="dob"
                                 render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Country</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormItem className="flex flex-col">
+                                        <FormLabel>Date of Birth</FormLabel>
                                         <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select a country" />
-                                        </SelectTrigger>
+                                            <DatePicker
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                fromYear={new Date().getFullYear() - 100}
+                                                toYear={new Date().getFullYear()}
+                                            />
                                         </FormControl>
-                                        <SelectContent>
-                                        {countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
+                                        <FormMessage />
                                     </FormItem>
                                 )}
-                                />
-                            <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                            <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
-
+                            />
+                            <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
+                            {isImperial ? (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem><FormLabel>Height (ft)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                                    <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem><FormLabel>Height (in)</FormLabel><FormControl><Input type="number" placeholder="e.g., 9" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                                </div>
+                            ) : (
+                                <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                            )}
+                            
                             <Separator />
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                              <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Current Weight (kg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 70" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                            </div>
+                             <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+                             <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                             <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
 
                              <div className="flex justify-end gap-2 pt-4">
-                                <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                                <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
                                 <Button type="submit" disabled={isSubmitting}>
-                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                     {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                                     Save Changes
                                 </Button>
                             </div>

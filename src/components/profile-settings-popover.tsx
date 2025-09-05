@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -13,10 +14,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { dateFormats } from '@/lib/countries';
 import { useApp } from '@/context/app-context';
 import type { UnitSystem } from '@/lib/types';
-import { Settings } from 'lucide-react';
+import { Settings, Edit } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { Separator } from './ui/separator';
 
-export function ProfileSettingsPopover() {
+interface ProfileSettingsPopoverProps {
+    onEdit: () => void;
+}
+
+export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) {
   const { profile, setProfile } = useApp();
 
   return (
@@ -36,6 +42,17 @@ export function ProfileSettingsPopover() {
         </Tooltip>
         <PopoverContent className="w-64" align="end">
             <div className="grid gap-4">
+                 <div className="space-y-2">
+                    <h4 className="font-medium leading-none">Profile</h4>
+                    <p className="text-sm text-muted-foreground">
+                       Edit your personal details.
+                    </p>
+                </div>
+                 <Button variant="outline" size="sm" onClick={onEdit}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Profile
+                </Button>
+                <Separator />
                 <div className="space-y-2">
                     <h4 className="font-medium leading-none">Display Settings</h4>
                     <p className="text-sm text-muted-foreground">
