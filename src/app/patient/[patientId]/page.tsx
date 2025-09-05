@@ -1,9 +1,69 @@
+
 'use client';
 
 import * as React from 'react';
+import { useParams } from 'next/navigation';
+import { useApp } from '@/context/app-context';
+import { getPatient } from '@/lib/firestore';
+import type { Patient } from '@/lib/types';
 import PatientDashboard from '../dashboard/page';
 
-// This page now directly renders the dashboard component.
-export default function PatientDashboardPage() {
-    return <PatientDashboard />;
+export default function PatientPage() {
+  const params = useParams();
+  const { setPatientData, isClient } = useApp();
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const loadPatientData = async () => {
+      const patientId = params.patientId as string;
+      if (!patientId) {
+          setError("No patient ID provided.");
+          setIsLoading(false);
+          return;
+      };
+
+      try {
+        const patientData = await getPatient(patientId);
+        if (patientData) {
+          setPatientData(patientData);
+        } else {
+          setError(`No patient found with ID: ${patientId}`);
+        }
+      } catch (err) {
+        console.error("Failed to fetch patient data", err);
+        setError("Failed to load patient data. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (isClient) {
+        loadPatientData();
+    }
+    
+  }, [params.patientId, setPatientData, isClient]);
+
+  if (isLoading || !isClient) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+         <p className="ml-4">Loading patient data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+     return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center text-destructive">
+            <h1 className="text-xl font-bold">Error</h1>
+            <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // The PatientDashboard component will now have the correct data from the context
+  return <PatientDashboard />;
 }
