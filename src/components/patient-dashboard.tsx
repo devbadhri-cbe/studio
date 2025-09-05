@@ -71,8 +71,8 @@ export function PatientDashboard() {
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
              {(isDoctorLoggedIn || hasEnabledBiomarkers) && (
-                <div className="space-y-4">
-                    <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen} className="col-span-1">
                         <CollapsibleTrigger asChild>
                             <Button
                                 variant={isDiseasePanelOpen ? 'default' : 'outline'}
@@ -89,7 +89,7 @@ export function PatientDashboard() {
                     </Collapsible>
 
                     {isDoctorLoggedIn && (
-                        <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
+                        <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen} className="col-span-1">
                             <CollapsibleTrigger asChild>
                                 <Button
                                     variant={isBiomarkersOpen ? 'default' : 'outline'}
