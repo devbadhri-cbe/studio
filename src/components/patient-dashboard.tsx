@@ -25,8 +25,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 export function PatientDashboard() {
   const { isClient, isDoctorLoggedIn, profile } = useApp();
   const router = useRouter();
-  const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(true);
-  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
+  const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(false);
+  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
   
