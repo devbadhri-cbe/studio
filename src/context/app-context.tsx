@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Doctor, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, DashboardSuggestion, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type HemoglobinRecord, type NutritionRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord } from '@/lib/types';
+import { type Doctor, type UserProfile, type LipidRecord, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type HemoglobinRecord, type NutritionRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -10,9 +10,7 @@ import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMgDl, toMmolL, toNgDl, toNmolL, toGDL, toGL } from '@/lib/unit-conversions';
 import { calculateBmi, calculateEgfr } from '@/lib/utils';
-import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
-import { getBiomarkersForCondition } from '@/ai/flows/get-biomarkers-for-condition';
-import { suggestNewBiomarkers } from '@/ai/flows/suggest-new-biomarkers';
+import { suggestIcdCode } from '@/ai/flows/suggest-icd-code';
 
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'], customBiomarkers: [] };
@@ -52,8 +50,8 @@ interface AppContextType {
   addMedicalCondition: (condition: Partial<Omit<MedicalCondition, 'id' | 'status'>> & {condition: string, date: string}, isPatientAdding: boolean) => void;
   updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
-  approveMedicalCondition: (conditionId: string, suggestionId?: string) => void;
-  dismissSuggestion: (conditionId: string, suggestionId?: string) => void;
+  approveMedicalCondition: (conditionId: string) => void;
+  dismissSuggestion: (conditionId: string) => void;
   addMedication: (medication: Omit<Medication, 'id'>) => void;
   removeMedication: (id: string) => void;
   setMedicationNil: () => void;
@@ -114,7 +112,7 @@ interface AppContextType {
   getDbHemoglobinValue: (value: number) => number;
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  dashboardSuggestions: DashboardSuggestion[];
+  dashboardSuggestions: [];
   enableDashboard: (dashboardKey: string) => EnableDashboardResult;
   customBiomarkers: CustomBiomarker[];
   addCustomBiomarker: (name: string) => Promise<void>;
@@ -137,7 +135,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [nutritionRecords, setNutritionRecordsState] = React.useState<NutritionRecord[]>([]);
   const [weightRecords, setWeightRecordsState] = React.useState<WeightRecord[]>([]);
   const [bloodPressureRecords, setBloodPressureRecordsState] = React.useState<BloodPressureRecord[]>([]);
-  const [dashboardSuggestions, setDashboardSuggestions] = React.useState<DashboardSuggestion[]>([]);
   const [tips, setTipsState] = React.useState<string[]>([]);
   const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('report');
   const [isClient, setIsClient] = React.useState(false);
@@ -268,7 +265,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setNutritionRecordsState(patient.nutritionRecords || []);
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
-    setDashboardSuggestions(patient.dashboardSuggestions || []);
     setCustomBiomarkersState(patient.customBiomarkers || []);
     setTips([]); 
     setDashboardViewState('report');
@@ -307,7 +303,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...condition,
         date: validDate,
         id: Date.now().toString(), 
-        status: 'pending_review'
+        status: isDoctorLoggedIn ? 'verified' : 'pending_review'
     };
 
     const updatedConditions = [...profile.presentMedicalConditions, newCondition];
@@ -327,62 +323,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
   };
   
-  const approveMedicalCondition = (conditionId: string, suggestionId?: string) => {
-    let updatedEnabledDashboards = profile.enabledDashboards || [];
-    let updatedCustomBiomarkers = profile.customBiomarkers || [];
-
-    const condition = profile.presentMedicalConditions.find(c => c.id === conditionId);
-
-    if (condition?.requiredBiomarkers) {
-        condition.requiredBiomarkers.forEach(biomarkerName => {
-            if (!updatedCustomBiomarkers.some(b => b.name.toLowerCase() === biomarkerName.toLowerCase())) {
-                const newBiomarker: CustomBiomarker = {
-                    id: `custom-${Date.now()}-${biomarkerName.replace(/\s+/g, '-')}`,
-                    name: biomarkerName,
-                };
-                updatedCustomBiomarkers.push(newBiomarker);
-            }
-        });
-    }
-    
+  const approveMedicalCondition = (conditionId: string) => {
     const updatedConditions = profile.presentMedicalConditions.map(c => 
       c.id === conditionId ? { ...c, status: 'verified' as const } : c
     );
-    
-    let updatedSuggestions = dashboardSuggestions;
-    
-    if (suggestionId) {
-      const suggestion = dashboardSuggestions.find(s => s.id === suggestionId);
-      if (suggestion && !updatedEnabledDashboards.includes(suggestion.suggestedDashboard)) {
-        updatedEnabledDashboards = [...updatedEnabledDashboards, suggestion.suggestedDashboard];
-      }
-      
-      updatedSuggestions = dashboardSuggestions.map(s => 
-        s.id === suggestionId ? { ...s, status: 'acknowledged' as const } : s
-      );
-    }
-    
-    setProfileState(p => ({...p, presentMedicalConditions: updatedConditions, enabledDashboards: updatedEnabledDashboards, customBiomarkers: updatedCustomBiomarkers}));
-    setDashboardSuggestions(updatedSuggestions);
-    setCustomBiomarkersState(updatedCustomBiomarkers);
-    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions, enabledDashboards: updatedEnabledDashboards, customBiomarkers: updatedCustomBiomarkers });
+    setProfileState(p => ({...p, presentMedicalConditions: updatedConditions }));
+    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
   };
   
-  const dismissSuggestion = (conditionId: string, suggestionId?: string) => {
+  const dismissSuggestion = (conditionId: string) => {
     const updatedConditions = profile.presentMedicalConditions.map(c => 
       c.id === conditionId ? { ...c, status: 'needs_revision' as const } : c
     );
-
-    let updatedSuggestions = dashboardSuggestions;
-    if (suggestionId) {
-       updatedSuggestions = dashboardSuggestions.map(s => 
-        s.id === suggestionId ? { ...s, status: 'acknowledged' as const } : s
-      );
-    }
     
     setProfileState(p => ({...p, presentMedicalConditions: updatedConditions }));
-    setDashboardSuggestions(updatedSuggestions);
-    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: updatedSuggestions });
+    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
   };
 
    const addMedication = (medication: Omit<Medication, 'id'>) => {
@@ -842,7 +797,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     getDbHemoglobinValue,
     theme,
     setTheme: setThemeState,
-    dashboardSuggestions,
+    dashboardSuggestions: [],
     enableDashboard,
     customBiomarkers,
     addCustomBiomarker,

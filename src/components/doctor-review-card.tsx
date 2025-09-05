@@ -3,29 +3,17 @@
 'use client';
 
 import { useApp } from '@/context/app-context';
-import { AlertTriangle, BadgeCheck, XCircle, Code } from 'lucide-react';
+import { AlertTriangle, BadgeCheck, XCircle } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Separator } from './ui/separator';
 
-const getDashboardName = (key: string) => {
-    switch (key) {
-      case 'diabetes': return 'Diabetes Panel';
-      case 'lipids': return 'Lipid Panel';
-      case 'hypertension': return 'Hypertension Panel';
-      case 'thyroid': return 'Thyroid Panel';
-      case 'vitaminD': return 'Vitamin D Panel';
-      case 'renal': return 'Renal Panel';
-      default: return 'Dashboard';
-    }
-}
-
 export function DoctorReviewCard() {
-  const { profile, dashboardSuggestions, approveMedicalCondition, dismissSuggestion } = useApp();
+  const { profile, approveMedicalCondition, dismissSuggestion } = useApp();
 
   const pendingConditions = (profile.presentMedicalConditions || []).filter(c => c.status === 'pending_review');
-  const hasPendingItems = pendingConditions.length > 0 || (dashboardSuggestions || []).some(s => s.status === 'pending');
+  const hasPendingItems = pendingConditions.length > 0;
   
   if (!hasPendingItems) return null;
 
@@ -37,14 +25,13 @@ export function DoctorReviewCard() {
           <div>
             <CardTitle className="text-yellow-800">Doctor's Review Needed</CardTitle>
             <CardDescription className="text-yellow-700">
-              The patient has added new medical conditions. Please verify them and approve or dismiss any AI-suggested actions.
+              The patient has added new medical conditions. Please verify them.
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {pendingConditions.map((condition, index) => {
-          const suggestion = (dashboardSuggestions || []).find(s => s.conditionId === condition.id && s.status === 'pending');
           return (
             <React.Fragment key={condition.id}>
               {index > 0 && <Separator />}
@@ -54,16 +41,13 @@ export function DoctorReviewCard() {
                   {condition.icdCode && (
                     <p className="text-sm text-muted-foreground">AI-suggested ICD-11: {condition.icdCode}</p>
                   )}
-                  {suggestion ? (
-                    <p className="text-sm text-muted-foreground">Suggested Dashboard: <span className="font-medium text-primary">{getDashboardName(suggestion.suggestedDashboard)}</span></p>
-                  ) : null}
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  <Button size="sm" variant="outline" onClick={() => dismissSuggestion(condition.id, suggestion?.id)}>
+                  <Button size="sm" variant="outline" onClick={() => dismissSuggestion(condition.id)}>
                     <XCircle className="h-4 w-4 mr-2" />
                     Dismiss
                   </Button>
-                  <Button size="sm" onClick={() => approveMedicalCondition(condition.id, suggestion?.id)}>
+                  <Button size="sm" onClick={() => approveMedicalCondition(condition.id)}>
                     <BadgeCheck className="h-4 w-4 mr-2" />
                     Approve
                   </Button>

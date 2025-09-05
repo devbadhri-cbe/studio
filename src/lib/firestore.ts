@@ -172,7 +172,6 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         bloodPressureRecords: [],
         presentMedicalConditions: [],
         medication: [],
-        dashboardSuggestions: [],
         enabledDashboards: ['lipids', 'vitaminD', 'thyroid', 'hypertension', 'renal'],
         createdAt: serverTimestamp(),
     }
@@ -217,5 +216,6 @@ export async function deletePatient(id: string): Promise<void> {
 }
 
 // Doctor specific functions are removed for single-doctor model
+
 
 

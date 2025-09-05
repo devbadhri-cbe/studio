@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle, AlertTriangle, Edit, Code, Lightbulb } from 'lucide-react';
+import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle, AlertTriangle, Edit, Code } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,8 +21,7 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from './ui/alert';
 import { isValid, parseISO } from 'date-fns';
 import { DatePicker } from './ui/date-picker';
-import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
-import { getBiomarkersForCondition } from '@/ai/flows/get-biomarkers-for-condition';
+
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
@@ -33,11 +32,6 @@ type ActiveSynopsis = {
     type: 'condition';
     id: string;
 } | null;
-
-interface MedicalConditionsCardProps {
-    onToggleSuggestions: () => void;
-    isSuggestionsVisible: boolean;
-}
 
 function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition: string, date: string}) => void, onCancel: () => void }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -54,7 +48,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
     defaultValues: { condition: '', date: new Date() },
   });
   
-  const handleSubmit = async (data: z.infer<typeof ConditionSchema>) => {
+  const handleSubmit = async (data: z.infer<typeof ConditionSchema>>) => {
     setIsSubmitting(true);
     await onSave({
         ...data,
@@ -104,11 +98,12 @@ const statusConfig = {
 };
 
 
-export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisible }: MedicalConditionsCardProps) {
+export function MedicalConditionsCard() {
   const { profile, addMedicalCondition, removeMedicalCondition, isDoctorLoggedIn, updateMedicalCondition } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
   const { toast } = useToast();
+  const [isSuggesting, setIsSuggesting] = React.useState<string | null>(null);
 
   const formatDate = useDateFormatter();
   
@@ -138,6 +133,7 @@ export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisibl
   };
 
   const handleSuggestIcdCode = async (condition: MedicalCondition) => {
+    setIsSuggesting(condition.id);
     try {
         const { icdCode, description } = await suggestIcdCode({ condition: condition.condition });
         const updatedCondition = { ...condition, icdCode: `${icdCode}: ${description}` };
@@ -152,6 +148,8 @@ export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisibl
             title: 'Suggestion Failed',
             description: 'Could not get an ICD-11 code suggestion at this time.',
         });
+    } finally {
+        setIsSuggesting(null);
     }
   }
 
@@ -166,19 +164,6 @@ export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisibl
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                         {!isAddingCondition && (
-                            <>
-                            {isDoctorLoggedIn && (
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button size="icon" variant="outline" className="h-8 w-8" onClick={onToggleSuggestions}>
-                                            <Lightbulb className={cn("h-4 w-4", isSuggestionsVisible ? "text-blue-500" : "")} />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>AI Biomarker Suggestions</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            )}
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setIsAddingCondition(true)}>
@@ -189,7 +174,6 @@ export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisibl
                                     <p>Add Condition</p>
                                 </TooltipContent>
                             </Tooltip>
-                            </>
                         )}
                     </div>
                 </div>
@@ -200,6 +184,7 @@ export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisibl
                             if (!condition || !condition.id) return null; // Safeguard against invalid condition objects
                             const statusInfo = statusConfig[condition.status] || statusConfig.pending_review;
                             const Icon = statusInfo.icon;
+                            const isLoadingSuggestion = isSuggesting === condition.id;
                             return (
                                 <React.Fragment key={condition.id}>
                                     <li className="group flex items-start gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
@@ -215,19 +200,13 @@ export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisibl
                                              <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>
                                         ) : (
                                             isDoctorLoggedIn && (
-                                                <Button size="xs" variant="link" className="p-0 h-auto text-xs" onClick={() => handleSuggestIcdCode(condition)}>Get ICD-11 Suggestion</Button>
+                                                <Button size="xs" variant="link" className="p-0 h-auto text-xs" onClick={() => handleSuggestIcdCode(condition)} disabled={isLoadingSuggestion}>
+                                                    {isLoadingSuggestion && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+                                                    Get ICD-11 Suggestion
+                                                </Button>
                                             )
                                         )}
                                         <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
-                                        {condition.requiredBiomarkers && condition.requiredBiomarkers.length > 0 && (
-                                            <div className="text-xs text-muted-foreground mt-1">
-                                                <div className="flex items-center gap-2">
-                                                    <Code className="h-3 w-3 text-destructive" />
-                                                    <span className="font-medium">Suggested biomarkers:</span>
-                                                </div>
-                                                <p className="pl-5">{condition.requiredBiomarkers.join(', ')}</p>
-                                            </div>
-                                        )}
                                     </div>
                                         <div className="flex items-center shrink-0">
                                             {isDoctorLoggedIn &&

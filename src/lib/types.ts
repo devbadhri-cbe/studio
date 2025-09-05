@@ -17,15 +17,6 @@ export interface MedicalCondition {
   condition: string;
   icdCode?: string;
   status: 'verified' | 'pending_review' | 'needs_revision';
-  requiredBiomarkers?: string[];
-}
-
-export interface DashboardSuggestion {
-  id: string;
-  conditionId: string;
-  conditionName: string;
-  suggestedDashboard: string;
-  status: 'pending' | 'acknowledged';
 }
 
 export interface Medication {
@@ -224,7 +215,6 @@ export interface Patient {
   bloodPressureRecords: BloodPressureRecord[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
-  dashboardSuggestions: DashboardSuggestion[];
   enabledDashboards: string[];
   doctorName?: string;
   customBiomarkers?: CustomBiomarker[];

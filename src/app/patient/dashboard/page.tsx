@@ -26,7 +26,6 @@ import { UploadConfirmationForm } from '@/components/upload-confirmation-form';
 import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
 import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
-import { BiomarkerSuggestionCard } from '@/components/biomarker-suggestion-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { OnboardingTour } from '@/components/onboarding-tour';
 import { DiabetesCard } from '@/components/diabetes-card';
@@ -39,10 +38,8 @@ export default function PatientDashboard() {
   const router = useRouter();
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
-  const [showBiomarkerSuggestions, setShowBiomarkerSuggestions] = React.useState(false);
-
-
-  const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review') || dashboardSuggestions.some(s => s.status === 'pending'));
+  
+  const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
   const showBiomarkersCard = (profile.enabledDashboards?.includes('hba1c') || profile.enabledDashboards?.includes('glucose') || profile.enabledDashboards?.includes('anemia')) && !profile.enabledDashboards?.includes('diabetes');
   
   React.useEffect(() => {
@@ -102,11 +99,7 @@ export default function PatientDashboard() {
                     <ProfileCard />
                 </div>
                  <div className="lg:col-span-2 flex flex-col gap-6">
-                    <MedicalConditionsCard 
-                        onToggleSuggestions={() => setShowBiomarkerSuggestions(s => !s)} 
-                        isSuggestionsVisible={showBiomarkerSuggestions} 
-                    />
-                    {isDoctorLoggedIn && showBiomarkerSuggestions && <BiomarkerSuggestionCard />}
+                    <MedicalConditionsCard />
                     <MedicationCard />
                 </div>
               </div>
