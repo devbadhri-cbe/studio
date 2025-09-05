@@ -51,7 +51,7 @@ export function DatePicker({
   React.useEffect(() => {
     if (value && isValid(value)) {
       setDay(format(value, 'dd'));
-      setMonth(format(value, 'MM'));
+      setMonth(String(value.getMonth()));
       setYear(format(value, 'yyyy'));
     } else {
       setDay('');
@@ -61,23 +61,23 @@ export function DatePicker({
   }, [value]);
 
   const handleDateChange = (newDay: string, newMonth: string, newYear: string) => {
-    const dayInt = parseInt(newDay, 10);
-    const monthInt = parseInt(newMonth, 10);
-    const yearInt = parseInt(newYear, 10);
-
-    // Update local state immediately for responsiveness
     setDay(newDay);
     setMonth(newMonth);
     setYear(newYear);
 
-    if (dayInt > 0 && monthInt > 0 && newYear.length === 4) {
-      const dateStr = `${newYear}-${newMonth}-${newDay}`;
-      const newDate = parse(dateStr, 'yyyy-MM-dd', new Date());
-      if (isValid(newDate)) {
+    if (newDay && newMonth && newYear.length === 4) {
+      const dayInt = parseInt(newDay, 10);
+      const monthInt = parseInt(newMonth, 10);
+      const yearInt = parseInt(newYear, 10);
+      const newDate = new Date(yearInt, monthInt, dayInt);
+
+      if (isValid(newDate) && newDate.getFullYear() === yearInt && newDate.getMonth() === monthInt && newDate.getDate() === dayInt) {
         onChange(newDate);
+      } else {
+        onChange(undefined);
       }
     } else if (!newDay && !newMonth && !newYear) {
-      onChange(undefined);
+        onChange(undefined);
     }
   };
   
@@ -112,7 +112,7 @@ export function DatePicker({
   return (
     <div className="flex flex-col gap-2">
        {label && <Label>{label}</Label>}
-      <div className="flex items-center gap-2 border border-input rounded-md px-3 h-10 w-full">
+      <div className="flex items-center gap-2 border border-input rounded-md px-3 h-10 w-fit">
          <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
          <Input 
             placeholder="DD"
@@ -128,7 +128,7 @@ export function DatePicker({
           </SelectTrigger>
           <SelectContent>
             {months.map(m => (
-              <SelectItem key={m.value} value={(m.value + 1).toString().padStart(2, '0')}>
+              <SelectItem key={m.value} value={String(m.value)}>
                 {m.label}
               </SelectItem>
             ))}
