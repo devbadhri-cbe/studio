@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Settings, PlusCircle, Pencil, Search, ChevronDown } from 'lucide-react';
+import { Settings, Pencil, Search, ChevronDown } from 'lucide-react';
 import { availableBiomarkerCards, type BiomarkerKey } from '@/lib/biomarker-cards';
 import { useApp } from '@/context/app-context';
 import { Label } from './ui/label';
@@ -118,7 +118,6 @@ export function DiseasePanelCard({
                     <DropdownMenuSeparator />
                     {addRecordActions.map(({ label, action }) => (
                         <DropdownMenuItem key={label} onSelect={action}>
-                           <PlusCircle className="mr-2 h-4 w-4" />
                             {label}
                         </DropdownMenuItem>
                     ))}
@@ -160,7 +159,7 @@ export function DiseasePanelCard({
                                     </DropdownMenuItem>
                                 ))}
                             </ScrollArea>
-                             <DropdownMenuSeparator />
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem onSelect={() => setIsCreateDialogOpen(true)}>
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Create New Biomarker
