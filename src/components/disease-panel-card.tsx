@@ -12,11 +12,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent,
+  DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
 import { Settings, PlusCircle } from 'lucide-react';
-import { AddBiomarkerToPanelDialog } from './add-biomarker-to-panel-dialog';
-import { BiomarkerKey } from '@/lib/biomarker-cards';
+import { availableBiomarkerCards, type BiomarkerKey } from '@/lib/biomarker-cards';
+import { useApp } from '@/context/app-context';
 
 interface DiseasePanelCardProps {
   title: string;
@@ -39,7 +44,9 @@ export function DiseasePanelCard({
     panelKey,
     enabledBiomarkers
 }: DiseasePanelCardProps) {
-    const [isAddBiomarkerOpen, setIsAddBiomarkerOpen] = React.useState(false);
+    const { toggleDiseaseBiomarker } = useApp();
+    const allBiomarkerKeys = Object.keys(availableBiomarkerCards) as BiomarkerKey[];
+
 
     const Actions = isDoctorLoggedIn ? (
         <>
@@ -58,18 +65,33 @@ export function DiseasePanelCard({
                         </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={() => setIsAddBiomarkerOpen(true)}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Add/Remove Biomarkers
-                    </DropdownMenuItem>
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add/Remove Biomarkers
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                             <DropdownMenuSubContent>
+                                {allBiomarkerKeys.map((key) => {
+                                    const isChecked = enabledBiomarkers.includes(key);
+                                    return (
+                                        <DropdownMenuCheckboxItem
+                                            key={key}
+                                            checked={isChecked}
+                                            onSelect={(e) => {
+                                                e.preventDefault();
+                                                toggleDiseaseBiomarker(panelKey, key);
+                                            }}
+                                        >
+                                            {availableBiomarkerCards[key].label}
+                                        </DropdownMenuCheckboxItem>
+                                    );
+                                })}
+                            </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                    </DropdownMenuSub>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <AddBiomarkerToPanelDialog 
-                panelKey={panelKey}
-                enabledKeys={enabledBiomarkers}
-                open={isAddBiomarkerOpen} 
-                onOpenChange={setIsAddBiomarkerOpen} 
-            />
         </>
     ) : null;
 
