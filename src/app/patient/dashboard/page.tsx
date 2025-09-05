@@ -26,7 +26,6 @@ import { UploadConfirmationForm } from '@/components/upload-confirmation-form';
 import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
 import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
-import { suggestNewBiomarkers } from '@/ai/flows/suggest-new-biomarkers';
 import { BiomarkerSuggestionCard } from '@/components/biomarker-suggestion-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { OnboardingTour } from '@/components/onboarding-tour';
@@ -36,14 +35,13 @@ import { BloodPressureCard } from '@/components/blood-pressure-card';
 
 
 export default function PatientDashboard() {
-  const { isClient, isDoctorLoggedIn, profile, dashboardSuggestions, enabledDashboards, customBiomarkers } = useApp();
+  const { isClient, isDoctorLoggedIn, profile, dashboardSuggestions } = useApp();
   const router = useRouter();
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
-  const [biomarkerSuggestions, setBiomarkerSuggestions] = React.useState<string[]>([]);
 
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review') || dashboardSuggestions.some(s => s.status === 'pending'));
-  const showBiomarkersCard = (enabledDashboards?.includes('hba1c') || enabledDashboards?.includes('glucose') || enabledDashboards?.includes('anemia')) && !enabledDashboards?.includes('diabetes');
+  const showBiomarkersCard = (profile.enabledDashboards?.includes('hba1c') || profile.enabledDashboards?.includes('glucose') || profile.enabledDashboards?.includes('anemia')) && !profile.enabledDashboards?.includes('diabetes');
   
   React.useEffect(() => {
     // Pass the ref to the weight card component instance
@@ -52,37 +50,6 @@ export default function PatientDashboard() {
         (weightCardElement as any).editHeightDialogRef = editHeightDialogRef;
     }
   }, []);
-
-  const verifiedConditionsString = JSON.stringify(profile.presentMedicalConditions.filter(c => c.status === 'verified').map(c => c.condition));
-
-  React.useEffect(() => {
-    const fetchSuggestions = async () => {
-        const verifiedConditions = JSON.parse(verifiedConditionsString);
-
-        if (verifiedConditions.length === 0) {
-            setBiomarkerSuggestions([]);
-            return;
-        };
-
-        const currentBiomarkers = [
-          ...(enabledDashboards || []).map(d => d.replace(/([A-Z])/g, ' $1').trim()),
-          ...(customBiomarkers?.map(b => b.name) || [])
-        ];
-        
-        try {
-            const result = await suggestNewBiomarkers({ conditions: verifiedConditions, currentBiomarkers });
-            setBiomarkerSuggestions(result.suggestions);
-        } catch(error) {
-            console.error("Failed to fetch biomarker suggestions", error);
-            // Don't show toast to doctor as it could be annoying
-        }
-    };
-
-    if (isDoctorLoggedIn) {
-        fetchSuggestions();
-    }
-  }, [isDoctorLoggedIn, verifiedConditionsString, enabledDashboards, customBiomarkers]);
-
 
   if (!isClient) {
     return (
@@ -102,10 +69,6 @@ export default function PatientDashboard() {
 
   const handleConfirmationSuccess = () => {
     setExtractedData(null);
-  }
-
-  const handleSuggestionDismiss = () => {
-    setBiomarkerSuggestions([]);
   }
 
   return (
@@ -129,12 +92,7 @@ export default function PatientDashboard() {
         <main className="flex-1 p-4 md:pt-10 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
-             {isDoctorLoggedIn && biomarkerSuggestions.length > 0 && (
-              <BiomarkerSuggestionCard 
-                suggestions={biomarkerSuggestions} 
-                onDismiss={handleSuggestionDismiss} 
-              />
-             )}
+             {isDoctorLoggedIn && <BiomarkerSuggestionCard />}
 
             <div className="space-y-6" id="tour-step-1">
               <PatientHeader />
@@ -185,12 +143,12 @@ export default function PatientDashboard() {
             <Separator />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
-                 {enabledDashboards?.includes('diabetes') && <DiabetesCard />}
+                 {profile.enabledDashboards?.includes('diabetes') && <DiabetesCard />}
                  {showBiomarkersCard && <BiomarkersCard />}
-                 {enabledDashboards?.includes('lipids') && <LipidCard />}
-                 {enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
-                 {enabledDashboards?.includes('thyroid') && <ThyroidCard />}
-                 {enabledDashboards?.includes('renal') && <RenalCard />}
+                 {profile.enabledDashboards?.includes('lipids') && <LipidCard />}
+                 {profile.enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
+                 {profile.enabledDashboards?.includes('thyroid') && <ThyroidCard />}
+                 {profile.enabledDashboards?.includes('renal') && <RenalCard />}
             </div>
 
             <Separator />

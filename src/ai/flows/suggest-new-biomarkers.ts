@@ -61,7 +61,7 @@ const suggestNewBiomarkersFlow = ai.defineFlow(
   },
   async (input) => {
     // If there are no conditions, there's nothing to suggest.
-    if (input.conditions.length === 0) {
+    if (!input.conditions || input.conditions.length === 0) {
         return { suggestions: [] };
     }
     const {output} = await prompt(input);
