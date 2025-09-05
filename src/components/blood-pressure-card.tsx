@@ -117,6 +117,7 @@ export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps
       className="shadow-xl"
       hasRecords={(bloodPressureRecords || []).length > 0}
       noRecordsMessage="No blood pressure records yet."
+      statusVariant={currentStatus?.variant}
     />
   );
 }

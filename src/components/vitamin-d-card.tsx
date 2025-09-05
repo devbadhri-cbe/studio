@@ -128,6 +128,7 @@ export function VitaminDCard() {
       chart={Chart}
       hasRecords={(vitaminDRecords || []).length > 0}
       noRecordsMessage="No Vitamin D records yet."
+      statusVariant={currentStatus?.variant}
     />
   );
 }

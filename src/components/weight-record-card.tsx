@@ -167,6 +167,7 @@ export function WeightRecordCard() {
         className="shadow-xl"
         hasRecords={(weightRecords || []).length > 0}
         noRecordsMessage="No weight records yet."
+        statusVariant={bmiStatus?.variant}
     />
   );
 }

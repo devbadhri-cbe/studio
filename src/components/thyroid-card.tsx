@@ -112,6 +112,7 @@ export function ThyroidCard() {
       chart={Chart}
       hasRecords={(thyroidRecords || []).length > 0}
       noRecordsMessage="No thyroid records yet."
+      statusVariant={currentStatus?.variant}
     />
   );
 }

@@ -137,6 +137,7 @@ export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGluc
       statusDisplay={StatusDisplay}
       chart={Chart}
       hasRecords={(fastingBloodGlucoseRecords || []).length > 0}
+      statusVariant={currentStatus?.variant}
     />
   );
 }

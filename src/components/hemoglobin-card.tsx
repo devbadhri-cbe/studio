@@ -135,6 +135,7 @@ export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
       statusDisplay={StatusDisplay}
       chart={Chart}
       hasRecords={(hemoglobinRecords || []).length > 0}
+      statusVariant={currentStatus?.variant}
     />
   );
 }

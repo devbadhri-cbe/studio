@@ -110,6 +110,7 @@ export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
       statusDisplay={StatusDisplay}
       chart={Chart}
       hasRecords={(hba1cRecords || []).length > 0}
+      statusVariant={currentStatus?.variant}
     />
   );
 }

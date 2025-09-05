@@ -16,6 +16,7 @@ interface BiomarkerCardTemplateProps {
   className?: string;
   hasRecords: boolean;
   noRecordsMessage?: string;
+  statusVariant?: 'destructive' | 'secondary' | 'outline' | 'default';
 }
 
 export function BiomarkerCardTemplate({
@@ -27,8 +28,17 @@ export function BiomarkerCardTemplate({
   chart,
   className,
   hasRecords,
-  noRecordsMessage = "No records yet."
+  noRecordsMessage = "No records yet.",
+  statusVariant = 'default',
 }: BiomarkerCardTemplateProps) {
+
+  const borderClass = {
+    'destructive': 'border-destructive',
+    'secondary': 'border-yellow-500',
+    'outline': 'border-green-500',
+    'default': 'border-transparent',
+  }[statusVariant];
+
   return (
     <Card className={cn("w-full flex flex-col h-full shadow-xl border-primary", className)}>
       <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
@@ -46,19 +56,19 @@ export function BiomarkerCardTemplate({
         {hasRecords ? (
           <div className="flex-1 flex flex-col min-h-0">
               {/* Top Section: Records & Status */}
-              <div className="flex-1 flex flex-col gap-4 min-h-0">
-                  <div className="flex-1 w-full p-2 flex items-center justify-center">
+              <div className={cn("flex-1 flex flex-col gap-4 min-h-0 border-2 rounded-lg p-2", borderClass)}>
+                  <div className="flex-1 w-full flex items-center justify-center">
                       {recordsList}
                   </div>
-                  <div className="flex-1 w-full p-2 flex items-center justify-center">
+                  <div className="flex-1 w-full flex items-center justify-center">
                       {statusDisplay}
                   </div>
               </div>
               
-              <Separator />
+              <Separator className="my-4" />
 
               {/* Bottom Section: Chart */}
-              <div className="pt-4 flex-1 flex flex-col min-h-0 w-full">
+              <div className="flex-1 flex flex-col min-h-0 w-full">
                   {chart}
               </div>
           </div>
