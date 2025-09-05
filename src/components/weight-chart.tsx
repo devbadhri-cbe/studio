@@ -47,63 +47,59 @@ export function WeightChart() {
 
 
   return (
-    <div className="h-full w-full flex flex-col">
-      <div className="flex-1">
-        <ResponsiveContainer width="100%" height="100%">
-          {weightRecords && weightRecords.length > 0 ? (
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis
-                dataKey="date"
-                tickFormatter={formatShortDate}
-                tickLine={true}
-                axisLine={true}
-                angle={-45}
-                textAnchor="end"
-                height={50}
-                tick={{ fontSize: 10 }}
-              />
-              <YAxis
-                domain={yAxisDomain}
-                allowDecimals={true}
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 10 }}
-                dx={-5}
-              />
-              <Tooltip
-                cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
-                content={({ active, payload, label }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="rounded-lg border bg-background p-2 shadow-sm">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="flex flex-col">
-                            <span className="text-[0.70rem] uppercase text-muted-foreground">Date</span>
-                            <span className="font-bold text-foreground">{formatDate(label)}</span>
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-[0.70rem] uppercase text-muted-foreground">Weight</span>
-                            <span className="font-bold" style={{ color: 'hsl(var(--chart-5))' }}>
-                              {payload[0].value} {unitLabel}
-                            </span>
-                          </div>
+      <ResponsiveContainer width="100%" height="100%">
+        {weightRecords && weightRecords.length > 0 ? (
+          <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis
+              dataKey="date"
+              tickFormatter={formatShortDate}
+              tickLine={true}
+              axisLine={true}
+              angle={-45}
+              textAnchor="end"
+              height={50}
+              tick={{ fontSize: 10 }}
+            />
+            <YAxis
+              domain={yAxisDomain}
+              allowDecimals={true}
+              tickLine={false}
+              axisLine={false}
+              tick={{ fontSize: 10 }}
+              dx={-5}
+            />
+            <Tooltip
+              cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
+              content={({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <div className="rounded-lg border bg-background p-2 shadow-sm">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex flex-col">
+                          <span className="text-[0.70rem] uppercase text-muted-foreground">Date</span>
+                          <span className="font-bold text-foreground">{formatDate(label)}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[0.70rem] uppercase text-muted-foreground">Weight</span>
+                          <span className="font-bold" style={{ color: 'hsl(var(--chart-5))' }}>
+                            {payload[0].value} {unitLabel}
+                          </span>
                         </div>
                       </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Line type="monotone" dataKey="value" name="Weight" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--chart-5))" />} activeDot={{ r: 6 }} />
-            </LineChart>
-          ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
-              <p className="text-center text-xs text-muted-foreground">Not enough data to display chart.</p>
-            </div>
-          )}
-        </ResponsiveContainer>
-      </div>
-    </div>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
+            <Line type="monotone" dataKey="value" name="Weight" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--chart-5))" />} activeDot={{ r: 6 }} />
+          </LineChart>
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
+            <p className="text-center text-xs text-muted-foreground">Not enough data to display chart.</p>
+          </div>
+        )}
+      </ResponsiveContainer>
   );
 }
