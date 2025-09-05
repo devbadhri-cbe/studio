@@ -1,16 +1,12 @@
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Allow public read and write access to the patients collection for now.
-    // WARNING: These rules are insecure for a production environment with real data.
-    // They should be replaced with authenticated rules before launch.
-    match /patients/{patientId} {
-      allow read, write: if true;
-    }
-
-    match /patients/{patientId}/{subcollection}/{document=**} {
-        allow read, write: if true;
+{
+  "rules": {
+    "service": "cloud.firestore",
+    "databases": {
+      "database": {
+        "match": "{document=**}" {
+          "allow": "read, write: if true;"
+        }
+      }
     }
   }
 }
