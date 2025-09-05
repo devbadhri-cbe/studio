@@ -39,6 +39,8 @@ export default function PatientDashboard() {
   const router = useRouter();
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
+  const [showMedication, setShowMedication] = React.useState(false);
+
 
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review') || dashboardSuggestions.some(s => s.status === 'pending'));
   const showBiomarkersCard = (profile.enabledDashboards?.includes('hba1c') || profile.enabledDashboards?.includes('glucose') || profile.enabledDashboards?.includes('anemia')) && !profile.enabledDashboards?.includes('diabetes');
@@ -101,8 +103,8 @@ export default function PatientDashboard() {
                     <ProfileCard />
                 </div>
                  <div className="lg:col-span-2 flex flex-col gap-6">
-                    <MedicalConditionsCard />
-                    <MedicationCard />
+                    <MedicalConditionsCard onToggleMedication={() => setShowMedication(s => !s)} isMedicationVisible={showMedication} />
+                    {showMedication && <MedicationCard />}
                 </div>
               </div>
             </div>
