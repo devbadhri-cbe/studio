@@ -87,21 +87,24 @@ export function PatientDashboard() {
                             <DiseasePanel />
                         </CollapsibleContent>
                     </Collapsible>
-                    <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
-                        <CollapsibleTrigger asChild>
-                            <Button
-                                variant={isBiomarkersOpen ? 'default' : 'outline'}
-                                className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
-                            >
-                                <DropletIcon className="mr-2 h-5 w-5" />
-                                Biomarker Cards
-                                <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
-                            </Button>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-4">
-                            <BiomarkersPanel />
-                        </CollapsibleContent>
-                    </Collapsible>
+
+                    {isDoctorLoggedIn && (
+                        <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
+                            <CollapsibleTrigger asChild>
+                                <Button
+                                    variant={isBiomarkersOpen ? 'default' : 'outline'}
+                                    className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
+                                >
+                                    <DropletIcon className="mr-2 h-5 w-5" />
+                                    Biomarker Cards
+                                    <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
+                                </Button>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="mt-4">
+                                <BiomarkersPanel />
+                            </CollapsibleContent>
+                        </Collapsible>
+                    )}
                 </div>
              )}
 
