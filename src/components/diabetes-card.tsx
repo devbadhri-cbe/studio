@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -12,26 +13,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
 import { useApp } from '@/context/app-context';
 import { Hba1cCard } from './hba1c-card';
 import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
 import { HemoglobinCard } from './hemoglobin-card';
 import { DiseasePanelCard } from './disease-panel-card';
 
-type Checked = DropdownMenuCheckboxItemProps["checked"]
+const DIABETES_PANEL_KEY = 'diabetes';
+
+const availableBiomarkers = {
+  hba1c: {
+    label: 'HbA1c Card',
+    component: <Hba1cCard key="hba1c" isReadOnly />,
+  },
+  glucose: {
+    label: 'Fasting Blood Glucose Card',
+    component: <FastingBloodGlucoseCard key="fbg" isReadOnly />,
+  },
+  hemoglobin: {
+    label: 'Hemoglobin (Anemia) Card',
+    component: <HemoglobinCard key="hemoglobin" isReadOnly />,
+  },
+};
+
+type BiomarkerKey = keyof typeof availableBiomarkers;
 
 export function DiabetesCard() {
-  const { isDoctorLoggedIn } = useApp();
-  const [showHbA1c, setShowHbA1c] = React.useState<Checked>(true);
-  const [showFastingBloodGlucose, setShowFastingBloodGlucose] = React.useState<Checked>(true);
-  const [showHemoglobin, setShowHemoglobin] = React.useState<Checked>(false);
+  const { profile, isDoctorLoggedIn, toggleDiseaseBiomarker } = useApp();
+  const enabledBiomarkers = profile.enabledBiomarkers?.[DIABETES_PANEL_KEY] || [];
 
-  const visibleCards = [
-      showHbA1c && <Hba1cCard key="hba1c" isReadOnly />,
-      showFastingBloodGlucose && <FastingBloodGlucoseCard key="fbg" isReadOnly />,
-      showHemoglobin && <HemoglobinCard key="hemoglobin" isReadOnly />,
-  ].filter(Boolean);
+  const visibleCards = (Object.keys(availableBiomarkers) as BiomarkerKey[])
+    .filter(key => enabledBiomarkers.includes(key))
+    .map(key => availableBiomarkers[key].component);
   
   const icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
   
@@ -45,24 +58,15 @@ export function DiabetesCard() {
         <DropdownMenuContent className="w-64" align="end">
             <DropdownMenuLabel>Panel Components</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuCheckboxItem
-            checked={showHbA1c}
-            onCheckedChange={setShowHbA1c}
-            >
-            HbA1c Card
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-            checked={showFastingBloodGlucose}
-            onCheckedChange={setShowFastingBloodGlucose}
-            >
-            Fasting Blood Glucose Card
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-            checked={showHemoglobin}
-            onCheckedChange={setShowHemoglobin}
-            >
-            Hemoglobin (Anemia) Card
-            </DropdownMenuCheckboxItem>
+            {(Object.keys(availableBiomarkers) as BiomarkerKey[]).map(key => (
+              <DropdownMenuCheckboxItem
+                key={key}
+                checked={enabledBiomarkers.includes(key)}
+                onCheckedChange={() => toggleDiseaseBiomarker(DIABETES_PANEL_KEY, key)}
+              >
+                {availableBiomarkers[key].label}
+              </DropdownMenuCheckboxItem>
+            ))}
         </DropdownMenuContent>
     </DropdownMenu>
   ) : null;

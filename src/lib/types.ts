@@ -48,7 +48,7 @@ export interface UserProfile {
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
   bmi?: number;
-  enabledDashboards?: string[];
+  enabledBiomarkers?: { [key: string]: string[] };
   doctorName?: string;
   customBiomarkers?: CustomBiomarker[];
 }
@@ -151,7 +151,7 @@ export interface Patient {
   bloodPressureRecords: BloodPressureRecord[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
-  enabledDashboards: string[];
+  enabledBiomarkers: { [key: string]: string[] };
   doctorName?: string;
   customBiomarkers?: CustomBiomarker[];
 }

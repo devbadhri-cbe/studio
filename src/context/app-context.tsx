@@ -11,7 +11,7 @@ import { countries } from '@/lib/countries';
 import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['vitaminD', 'thyroid', 'hypertension'], customBiomarkers: [] };
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, customBiomarkers: [] };
 
 type DashboardView = 'vitaminD' | 'thyroid' | 'hypertension' | 'report' | 'none';
 type Theme = 'dark' | 'light' | 'system';
@@ -89,7 +89,7 @@ interface AppContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   dashboardSuggestions: [];
-  enableDashboard: (dashboardKey: string) => EnableDashboardResult;
+  toggleDiseaseBiomarker: (panelKey: string, biomarkerKey: string) => void;
   customBiomarkers: CustomBiomarker[];
   addCustomBiomarker: (name: string) => Promise<void>;
   removeCustomBiomarker: (id: string) => void;
@@ -204,7 +204,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       unitSystem: patient.unitSystem || countries.find(c => c.code === patient.country)?.unitSystem || 'metric',
       medication: Array.isArray(patient.medication) ? patient.medication : [],
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
-      enabledDashboards: Array.isArray(patient.enabledDashboards) ? patient.enabledDashboards : ['vitaminD', 'thyroid', 'hypertension'],
+      enabledBiomarkers: patient.enabledBiomarkers || {},
       bmi: patient.bmi,
       doctorName: patient.doctorName,
       customBiomarkers: patient.customBiomarkers || [],
@@ -428,26 +428,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCustomBiomarkersState(updatedBiomarkers);
     updatePatientData(profile.id, { customBiomarkers: updatedBiomarkers });
   };
-
-  const getDashboardName = (key: string): string => {
-      const names: Record<string, string> = {
-        hba1c: 'HbA1c',
-        vitaminD: 'Vitamin D',
-        thyroid: 'Thyroid',
-        hypertension: 'Hypertension'
-      };
-      return names[key] || 'Unknown';
-  };
   
-  const enableDashboard = (dashboardKey: string): EnableDashboardResult => {
-    const currentDashboards = profile.enabledDashboards || [];
-    if (currentDashboards.includes(dashboardKey)) {
-        return { alreadyExists: true, name: getDashboardName(dashboardKey) };
-    }
-    const updatedDashboards = [...currentDashboards, dashboardKey];
-    setProfileState(p => ({ ...p, enabledDashboards: updatedDashboards }));
-    updatePatientData(profile.id, { enabledDashboards: updatedDashboards });
-    return { alreadyExists: false, name: getDashboardName(dashboardKey) };
+  const toggleDiseaseBiomarker = (panelKey: string, biomarkerKey: string) => {
+    const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
+    const panelBiomarkers = currentEnabled[panelKey] || [];
+    
+    const newPanelBiomarkers = panelBiomarkers.includes(biomarkerKey)
+      ? panelBiomarkers.filter(b => b !== biomarkerKey)
+      : [...panelBiomarkers, biomarkerKey];
+
+    const updatedEnabledBiomarkers = {
+      ...currentEnabled,
+      [panelKey]: newPanelBiomarkers
+    };
+    
+    setProfileState(p => ({ ...p, enabledBiomarkers: updatedEnabledBiomarkers }));
+    updatePatientData(profile.id, { enabledBiomarkers: updatedEnabledBiomarkers });
   };
 
   const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
@@ -601,7 +597,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     theme,
     setTheme: setThemeState,
     dashboardSuggestions: [],
-    enableDashboard,
+    toggleDiseaseBiomarker,
     customBiomarkers,
     addCustomBiomarker,
     removeCustomBiomarker,

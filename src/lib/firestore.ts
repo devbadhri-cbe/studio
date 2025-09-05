@@ -88,6 +88,7 @@ const processPatientDoc = (doc: any): Patient => {
     presentMedicalConditions,
     hemoglobinRecords,
     bmi,
+    enabledBiomarkers: data.enabledBiomarkers || {},
   };
 
   const status = getPatientStatus(patientData);
@@ -139,7 +140,10 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         bloodPressureRecords: [],
         presentMedicalConditions: [],
         medication: [],
-        enabledDashboards: ['vitaminD', 'thyroid', 'hypertension'],
+        enabledBiomarkers: {
+          diabetes: ['hba1c', 'glucose'],
+          hypertension: ['bloodPressure']
+        },
         createdAt: serverTimestamp(),
     }
   const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), docData);
