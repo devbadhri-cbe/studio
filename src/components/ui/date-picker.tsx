@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { format, parse, isValid } from "date-fns"
+import { format, isValid, parse } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -31,36 +31,40 @@ export function DatePicker({
   fromYear,
   toYear,
 }: DatePickerProps) {
-  const [open, setOpen] = React.useState(false);
   const isMobile = useIsMobile();
+  
+  const handleDateSelect = (selectedDate?: Date) => {
+    onChange(selectedDate);
+  }
 
-  const handleNativeDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const dateString = e.target.value;
-    // The native input returns a "yyyy-MM-dd" string.
-    const newDate = parse(dateString, 'yyyy-MM-dd', new Date());
-    if (isValid(newDate)) {
-      onChange(newDate);
-    } else {
-      onChange(undefined);
-    }
-  };
-
+  // For mobile devices, render the native date input for better UX.
   if (isMobile) {
+    const handleMobileDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // The native input gives a "yyyy-MM-dd" string.
+        const date = parse(e.target.value, 'yyyy-MM-dd', new Date());
+        if (isValid(date)) {
+            onChange(date);
+        } else {
+            onChange(undefined);
+        }
+    };
+    
     return (
-      <Input
-        type="date"
-        value={value ? format(value, 'yyyy-MM-dd') : ''}
-        onChange={handleNativeDateChange}
-        className={cn(
-          "w-full justify-start text-left font-normal h-10",
-          !value && "text-muted-foreground"
-        )}
-      />
+        <Input
+            type="date"
+            value={value ? format(value, 'yyyy-MM-dd') : ''}
+            onChange={handleMobileDateChange}
+            className={cn(
+                "w-full justify-start text-left font-normal h-10",
+                !value && "text-muted-foreground"
+            )}
+        />
     )
   }
 
+  // For desktop, use the popover-based calendar.
   return (
-    <Popover open={open} onOpenChange={setOpen} modal={true}>
+    <Popover modal={true}>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
@@ -77,10 +81,7 @@ export function DatePicker({
         <Calendar
           mode="single"
           selected={value}
-          onSelect={(date) => {
-            onChange(date)
-            setOpen(false)
-          }}
+          onSelect={handleDateSelect}
           initialFocus
           captionLayout="dropdown-buttons"
           fromYear={fromYear}
