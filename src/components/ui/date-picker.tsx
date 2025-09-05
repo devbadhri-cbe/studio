@@ -42,12 +42,12 @@ export function DatePicker({
 }: DatePickerProps) {
   const isMobile = useIsMobile();
 
-  const [day, setDay] = React.useState<string>(value ? format(value, 'dd') : '');
-  const [month, setMonth] = React.useState<string>(value ? format(value, 'MM') : '');
-  const [year, setYear] = React.useState<string>(value ? format(value, 'yyyy') : '');
+  const [day, setDay] = React.useState<string>(value && isValid(value) ? format(value, 'dd') : '');
+  const [month, setMonth] = React.useState<string>(value && isValid(value) ? format(value, 'MM') : '');
+  const [year, setYear] = React.useState<string>(value && isValid(value) ? format(value, 'yyyy') : '');
 
   React.useEffect(() => {
-    if (value) {
+    if (value && isValid(value)) {
       setDay(format(value, 'dd'));
       setMonth(format(value, 'MM'));
       setYear(format(value, 'yyyy'));
@@ -57,21 +57,25 @@ export function DatePicker({
       setYear('');
     }
   }, [value]);
-  
-  React.useEffect(() => {
-    const dayInt = parseInt(day, 10);
-    const monthInt = parseInt(month, 10);
-    const yearInt = parseInt(year, 10);
 
-    if (dayInt > 0 && monthInt > 0 && year.length === 4) {
-      const dateStr = `${year}-${month}-${day}`;
+  const handleDateChange = (newDay: string, newMonth: string, newYear: string) => {
+    setDay(newDay);
+    setMonth(newMonth);
+    setYear(newYear);
+
+    const dayInt = parseInt(newDay, 10);
+    const monthInt = parseInt(newMonth, 10);
+    const yearInt = parseInt(newYear, 10);
+
+    if (dayInt > 0 && monthInt > 0 && newYear.length === 4) {
+      const dateStr = `${newYear}-${newMonth}-${newDay}`;
       const newDate = parse(dateStr, 'yyyy-MM-dd', new Date());
       if (isValid(newDate)) {
         onChange(newDate);
       }
     }
-  }, [day, month, year, onChange]);
-
+  };
+  
   if (isMobile) {
     const handleMobileDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const date = parse(e.target.value, 'yyyy-MM-dd', new Date());
@@ -85,7 +89,7 @@ export function DatePicker({
     return (
         <Input
             type="date"
-            value={value ? format(value, 'yyyy-MM-dd') : ''}
+            value={value && isValid(value) ? format(value, 'yyyy-MM-dd') : ''}
             onChange={handleMobileDateChange}
             className={cn(
                 "w-full justify-start text-left font-normal h-10",
@@ -104,12 +108,12 @@ export function DatePicker({
          <Input 
             placeholder="DD"
             value={day}
-            onChange={(e) => setDay(e.target.value)}
+            onChange={(e) => handleDateChange(e.target.value, month, year)}
             className="w-10 border-0 p-0 shadow-none focus-visible:ring-0 text-center"
             maxLength={2}
          />
          <span className="text-muted-foreground">/</span>
-        <Select value={month} onValueChange={setMonth}>
+        <Select value={month} onValueChange={(newMonth) => handleDateChange(day, newMonth, year)}>
           <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-24 focus-visible:ring-0">
             <SelectValue placeholder="Month" />
           </SelectTrigger>
@@ -122,7 +126,7 @@ export function DatePicker({
           </SelectContent>
         </Select>
         <span className="text-muted-foreground">/</span>
-         <Select value={year} onValueChange={setYear}>
+         <Select value={year} onValueChange={(newYear) => handleDateChange(day, month, newYear)}>
           <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-20 focus-visible:ring-0">
             <SelectValue placeholder="Year" />
           </SelectTrigger>
@@ -138,4 +142,3 @@ export function DatePicker({
     </div>
   );
 }
-
