@@ -56,19 +56,19 @@ const processPatientDoc = (doc: any): Patient => {
     });
   }
 
-  const hba1cRecords = sanitizeRecords(data.hba1cRecords);
-  const fastingBloodGlucoseRecords = sanitizeRecords(data.fastingBloodGlucoseRecords);
-  const lipidRecords = sanitizeRecords(data.lipidRecords);
-  const vitaminDRecords = sanitizeRecords(data.vitaminDRecords);
-  const thyroidRecords = sanitizeRecords(data.thyroidRecords);
-  const weightRecords = sanitizeRecords(data.weightRecords);
-  const bloodPressureRecords = sanitizeRecords(data.bloodPressureRecords);
-  const renalRecords = sanitizeRecords(data.renalRecords);
-  const hemoglobinRecords = sanitizeRecords(data.hemoglobinRecords);
-  const nutritionRecords = sanitizeRecords(data.nutritionRecords);
-  const presentMedicalConditions = sanitizeRecords(data.presentMedicalConditions);
-  const electrolyteRecords = sanitizeRecords(data.electrolyteRecords);
-  const mineralBoneDiseaseRecords = sanitizeRecords(data.mineralBoneDiseaseRecords);
+  const hba1cRecords = sanitizeRecords(data.hba1cRecords || []);
+  const fastingBloodGlucoseRecords = sanitizeRecords(data.fastingBloodGlucoseRecords || []);
+  const lipidRecords = sanitizeRecords(data.lipidRecords || []);
+  const vitaminDRecords = sanitizeRecords(data.vitaminDRecords || []);
+  const thyroidRecords = sanitizeRecords(data.thyroidRecords || []);
+  const weightRecords = sanitizeRecords(data.weightRecords || []);
+  const bloodPressureRecords = sanitizeRecords(data.bloodPressureRecords || []);
+  const renalRecords = sanitizeRecords(data.renalRecords || []);
+  const hemoglobinRecords = sanitizeRecords(data.hemoglobinRecords || []);
+  const nutritionRecords = sanitizeRecords(data.nutritionRecords || []);
+  const presentMedicalConditions = sanitizeRecords(data.presentMedicalConditions || []);
+  const electrolyteRecords = sanitizeRecords(data.electrolyteRecords || []);
+  const mineralBoneDiseaseRecords = sanitizeRecords(data.mineralBoneDiseaseRecords || []);
 
 
   const age = calculateAge(data.dob);
@@ -217,4 +217,5 @@ export async function deletePatient(id: string): Promise<void> {
 }
 
 // Doctor specific functions are removed for single-doctor model
+
 
