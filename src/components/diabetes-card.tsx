@@ -34,7 +34,7 @@ export function DiabetesCard() {
   ].filter(Boolean);
 
   return (
-    <Card className="h-full shadow-xl">
+    <Card className="h-full shadow-xl border-2 border-green-500">
         <CardHeader>
             <div className="flex items-center justify-between">
                 <div className='flex items-center gap-3 flex-1'>
