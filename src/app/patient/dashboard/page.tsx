@@ -16,19 +16,18 @@ import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edi
 import { OnboardingTour } from '@/components/onboarding-tour';
 import { DiseasePanel } from '@/components/disease-panel';
 import { BiomarkersPanel } from '@/components/biomarkers-panel';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { ReportCard } from '@/components/report-card';
 import { ProfileCard } from '@/components/profile-card';
+import { cn } from '@/lib/utils';
 
 
 export default function PatientDashboard() {
   const { isClient, isDoctorLoggedIn, profile } = useApp();
   const router = useRouter();
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
-  const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(false);
-  const [isBiomarkersPanelOpen, setIsBiomarkersPanelOpen] = React.useState(false);
+  const [activeView, setActiveView] = React.useState<'diseasePanels' | 'biomarkerCards'>('diseasePanels');
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
   
@@ -76,29 +75,26 @@ export default function PatientDashboard() {
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
-                    <CollapsibleTrigger asChild>
-                        <Button variant="outline" className="w-full">
-                            <Stethoscope className="mr-2 h-4 w-4" />
-                            Disease Panels
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="mt-2">
-                        <DiseasePanel />
-                    </CollapsibleContent>
-                </Collapsible>
-                 <Collapsible open={isBiomarkersPanelOpen} onOpenChange={setIsBiomarkersPanelOpen}>
-                    <CollapsibleTrigger asChild>
-                        <Button variant="outline" className="w-full">
-                            <DropletIcon className="mr-2 h-4 w-4" />
-                            Biomarker Cards
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="mt-2">
-                        <BiomarkersPanel />
-                    </CollapsibleContent>
-                </Collapsible>
+                <Button
+                    variant={activeView === 'diseasePanels' ? 'default' : 'outline'}
+                    className={cn("w-full py-6 text-base", activeView === 'diseasePanels' && "shadow-lg")}
+                    onClick={() => setActiveView('diseasePanels')}
+                >
+                    <Stethoscope className="mr-2 h-5 w-5" />
+                    Disease Panels
+                </Button>
+                 <Button
+                    variant={activeView === 'biomarkerCards' ? 'default' : 'outline'}
+                    className={cn("w-full py-6 text-base", activeView === 'biomarkerCards' && "shadow-lg")}
+                    onClick={() => setActiveView('biomarkerCards')}
+                >
+                    <DropletIcon className="mr-2 h-5 w-5" />
+                    Biomarker Cards
+                </Button>
             </div>
+
+            {activeView === 'diseasePanels' && <DiseasePanel />}
+            {activeView === 'biomarkerCards' && <BiomarkersPanel />}
 
             <div className="space-y-6" id="tour-step-1">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
