@@ -10,7 +10,7 @@ export function HypertensionCard() {
   const icon = <Heart className="h-5 w-5 shrink-0 text-muted-foreground" />;
   return (
     <DiseasePanelCard title="Hypertension Panel" icon={icon}>
-        <div className="flex flex-wrap gap-4 border-2 border-blue-500">
+        <div className="flex flex-wrap gap-4 border-2 border-blue-500 flex-1">
             <BloodPressureCard />
         </div>
     </DiseasePanelCard>

@@ -15,7 +15,7 @@ interface DiseasePanelCardProps {
 export function DiseasePanelCard({ title, icon, children, className }: DiseasePanelCardProps) {
   return (
     <Card className={cn("h-full shadow-xl border-2 border-red-500 flex flex-col", className)}>
-        <div className="border-2 border-purple-500 flex flex-col flex-1 p-4">
+        <div className="border-2 border-purple-500 flex flex-col flex-1 p-4 space-y-0">
             <CardHeader className="py-0 p-0">
                 <div className="flex items-center justify-between border-2 border-green-500">
                     <div className='flex items-center gap-3 flex-1'>
@@ -24,7 +24,7 @@ export function DiseasePanelCard({ title, icon, children, className }: DiseasePa
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="p-0 pt-0 space-y-4 flex-1 flex flex-col">
+            <CardContent className="p-0 pt-0 space-y-4 flex flex-col">
                 {children}
             </CardContent>
         </div>

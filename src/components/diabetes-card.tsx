@@ -37,7 +37,7 @@ export function DiabetesCard() {
 
   return (
     <DiseasePanelCard title="Diabetes Panel" icon={icon}>
-        <div className="space-y-4">
+        <div className="space-y-4 flex-1">
             {isDoctorLoggedIn && (
                     <DropdownMenu>
                     <DropdownMenuTrigger asChild>
