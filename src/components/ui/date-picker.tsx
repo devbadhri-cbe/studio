@@ -73,18 +73,7 @@ export function DatePicker({
           {value ? format(value, "PPP") : <span>{placeholder || "Pick a date"}</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent
-        className="w-auto p-0"
-        onInteractOutside={(e) => {
-          if (
-            e.target instanceof HTMLElement &&
-            (e.target.closest('[data-radix-select-content]') ||
-             e.target.closest('[data-radix-select-trigger]'))
-          ) {
-            e.preventDefault();
-          }
-        }}
-        >
+      <PopoverContent className="w-auto p-0">
         <Calendar
           mode="single"
           selected={value}
