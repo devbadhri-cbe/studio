@@ -1,0 +1,72 @@
+
+'use client';
+
+import * as React from 'react';
+import { Button } from './ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface InteractivePanelGridProps {
+    children: React.ReactNode;
+}
+
+export function InteractivePanelGrid({ children }: InteractivePanelGridProps) {
+    const [expandedIndex, setExpandedIndex] = React.useState<number | null>(null);
+    
+    const validChildren = React.Children.toArray(children).filter(React.isValidElement);
+
+    React.useEffect(() => {
+        // If there's only one card, default to expanded view
+        if (validChildren.length === 1) {
+            setExpandedIndex(0);
+        } else {
+            setExpandedIndex(null);
+        }
+    }, [validChildren.length]);
+    
+    const handleCardClick = (index: number) => {
+        setExpandedIndex(index);
+    };
+
+    const handleBackClick = () => {
+        // Don't go back to grid if there's only one item
+        if (validChildren.length > 1) {
+            setExpandedIndex(null);
+        }
+    };
+
+    if (expandedIndex !== null) {
+        return (
+            <div className="flex-1 flex flex-col h-full">
+                {validChildren.length > 1 && (
+                     <div className="mb-2">
+                        <Button variant="ghost" size="sm" onClick={handleBackClick}>
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to Panel
+                        </Button>
+                    </div>
+                )}
+                <div className="flex-1 flex flex-col">
+                    {validChildren[expandedIndex]}
+                </div>
+            </div>
+        );
+    }
+    
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+            {validChildren.map((child, index) => (
+                <button
+                    key={index}
+                    onClick={() => handleCardClick(index)}
+                    className={cn(
+                        "text-left h-full transition-all duration-200 ease-in-out",
+                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+                    )}
+                >
+                    {child}
+                </button>
+            ))}
+        </div>
+    );
+}
