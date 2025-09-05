@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { format } from "date-fns"
+import { format, parse, isValid } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -13,6 +13,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { Input } from "./input"
 
 interface DatePickerProps {
   value?: Date;
@@ -29,7 +31,33 @@ export function DatePicker({
   fromYear,
   toYear,
 }: DatePickerProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
+  const isMobile = useIsMobile();
+
+  const handleNativeDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dateString = e.target.value;
+    // The native input returns a "yyyy-MM-dd" string.
+    const newDate = parse(dateString, 'yyyy-MM-dd', new Date());
+    if (isValid(newDate)) {
+      onChange(newDate);
+    } else {
+      onChange(undefined);
+    }
+  };
+
+  if (isMobile) {
+    return (
+      <Input
+        type="date"
+        value={value ? format(value, 'yyyy-MM-dd') : ''}
+        onChange={handleNativeDateChange}
+        className={cn(
+          "w-full justify-start text-left font-normal h-10",
+          !value && "text-muted-foreground"
+        )}
+      />
+    )
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
