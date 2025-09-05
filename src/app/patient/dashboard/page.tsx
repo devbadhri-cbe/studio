@@ -143,6 +143,11 @@ export default function PatientDashboard() {
               </div>
             </div>
             
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <WeightRecordCard />
+                <BloodPressureCard />
+            </div>
+
             <Separator />
 
              <div className="flex w-full flex-wrap justify-center gap-2" id="tour-step-2">
@@ -174,8 +179,6 @@ export default function PatientDashboard() {
             <Separator />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
-                 <WeightRecordCard />
-                 <BloodPressureCard />
                  {enabledDashboards?.includes('diabetes') && <DiabetesCard />}
                  {showBiomarkersCard && <BiomarkersCard />}
                  {enabledDashboards?.includes('lipids') && <LipidCard />}
