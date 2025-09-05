@@ -126,7 +126,8 @@ export function VitaminDCard() {
       recordsList={RecordsList}
       statusDisplay={StatusDisplay}
       chart={Chart}
-      hasRecords={vitaminDRecords.length > 0}
+      hasRecords={(vitaminDRecords || []).length > 0}
+      noRecordsMessage="No Vitamin D records yet."
     />
   );
 }

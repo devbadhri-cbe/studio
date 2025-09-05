@@ -162,6 +162,7 @@ export function WeightRecordCard() {
         recordsList={RecordsList}
         statusDisplay={StatusDisplay}
         chart={Chart}
+        className="shadow-xl"
         hasRecords={(weightRecords || []).length > 0}
         noRecordsMessage="No weight records yet."
     />

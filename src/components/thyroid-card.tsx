@@ -107,7 +107,8 @@ export function ThyroidCard() {
       recordsList={RecordsList}
       statusDisplay={StatusDisplay}
       chart={Chart}
-      hasRecords={thyroidRecords.length > 0}
+      hasRecords={(thyroidRecords || []).length > 0}
+      noRecordsMessage="No thyroid records yet."
     />
   );
 }

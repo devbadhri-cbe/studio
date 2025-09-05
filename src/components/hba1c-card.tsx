@@ -102,7 +102,7 @@ export function Hba1cCard() {
       recordsList={RecordsList}
       statusDisplay={StatusDisplay}
       chart={Chart}
-      hasRecords={hba1cRecords.length > 0}
+      hasRecords={(hba1cRecords || []).length > 0}
     />
   );
 }

@@ -24,7 +24,7 @@ export function LipidCard() {
   const [, setForceRender] = React.useState(0);
 
   const sortedRecords = React.useMemo(() => {
-    return [...lipidRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return [...(lipidRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [lipidRecords]);
 
   const getStatus = (value: number) => {
@@ -128,7 +128,8 @@ export function LipidCard() {
       recordsList={RecordsList}
       statusDisplay={StatusDisplay}
       chart={Chart}
-      hasRecords={lipidRecords.length > 0}
+      hasRecords={(lipidRecords || []).length > 0}
+      noRecordsMessage="No lipid records yet."
     />
   );
 }

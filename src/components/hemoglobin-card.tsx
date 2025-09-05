@@ -130,7 +130,7 @@ export function HemoglobinCard() {
       recordsList={RecordsList}
       statusDisplay={StatusDisplay}
       chart={Chart}
-      hasRecords={hemoglobinRecords.length > 0}
+      hasRecords={(hemoglobinRecords || []).length > 0}
     />
   );
 }

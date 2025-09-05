@@ -132,7 +132,7 @@ export function FastingBloodGlucoseCard() {
       recordsList={RecordsList}
       statusDisplay={StatusDisplay}
       chart={Chart}
-      hasRecords={fastingBloodGlucoseRecords.length > 0}
+      hasRecords={(fastingBloodGlucoseRecords || []).length > 0}
     />
   );
 }
