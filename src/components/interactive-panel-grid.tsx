@@ -34,6 +34,13 @@ export function InteractivePanelGrid({ children }: InteractivePanelGridProps) {
             setExpandedIndex(null);
         }
     };
+    
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, index: number) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCardClick(index);
+        }
+    };
 
     if (expandedIndex !== null) {
         return (
@@ -56,16 +63,19 @@ export function InteractivePanelGrid({ children }: InteractivePanelGridProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
             {validChildren.map((child, index) => (
-                <button
+                <div
                     key={index}
                     onClick={() => handleCardClick(index)}
+                    onKeyDown={(e) => handleKeyDown(e, index)}
+                    role="button"
+                    tabIndex={0}
                     className={cn(
-                        "text-left h-full transition-all duration-200 ease-in-out",
+                        "text-left h-full transition-all duration-200 ease-in-out cursor-pointer",
                         "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
                     )}
                 >
                     {child}
-                </button>
+                </div>
             ))}
         </div>
     );
