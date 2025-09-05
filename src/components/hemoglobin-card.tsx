@@ -10,12 +10,19 @@ import { AddHemoglobinRecordDialog } from './add-hemoglobin-record-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { HemoglobinChart } from './hemoglobin-chart';
 import { Badge } from './ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { ScrollArea } from './ui/scroll-area';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { Separator } from './ui/separator';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface HemoglobinCardProps {
   isReadOnly?: boolean;
@@ -23,7 +30,6 @@ interface HemoglobinCardProps {
 
 export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
   const { hemoglobinRecords, removeHemoglobinRecord, profile, biomarkerUnit, setBiomarkerUnit, getDisplayHemoglobinValue } = useApp();
-  const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
@@ -53,37 +59,33 @@ export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = !isReadOnly ? (
-    <Popover open={isActionsOpen} onOpenChange={setIsActionsOpen}>
-        <PopoverTrigger asChild>
+    <DropdownMenu>
+        <DropdownMenuTrigger asChild>
               <Button size="icon" variant="ghost" className="h-8 w-8">
                   <Settings className="h-4 w-4" />
               </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-64" align="end">
-              <div className="space-y-4">
-                  <AddHemoglobinRecordDialog onSuccess={() => setIsActionsOpen(false)}>
-                    <Button variant="outline" className="w-full">Add New Record</Button>
-                  </AddHemoglobinRecordDialog>
-                  <Separator />
-                   <div className="space-y-2">
-                        <Label>Biomarker Units</Label>
-                        <div className="flex items-center justify-center space-x-2 py-2">
-                            <Label htmlFor="unit-switch-anemia" className="text-xs">g/dL</Label>
-                            <Switch
-                                id="unit-switch-anemia"
-                                checked={biomarkerUnit === 'si'}
-                                onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
-                            />
-                            <Label htmlFor="unit-switch-anemia" className="text-xs">g/L</Label>
-                        </div>
-                    </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-64" align="end">
+              <AddHemoglobinRecordDialog>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Add New Record</DropdownMenuItem>
+              </AddHemoglobinRecordDialog>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Biomarker Units</DropdownMenuLabel>
+              <div className="flex items-center justify-center space-x-2 py-2">
+                  <Label htmlFor="unit-switch-anemia" className="text-xs">g/dL</Label>
+                  <Switch
+                      id="unit-switch-anemia"
+                      checked={biomarkerUnit === 'si'}
+                      onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
+                  />
+                  <Label htmlFor="unit-switch-anemia" className="text-xs">g/L</Label>
               </div>
-        </PopoverContent>
-    </Popover>
+        </DropdownMenuContent>
+    </DropdownMenu>
   ) : null;
 
   const RecordsList = (
-    <ScrollArea className="h-[140px] pr-3">
+    <ScrollArea className="h-full max-h-[100px] w-full">
         <ul className="space-y-1 mt-2">
           {sortedRecords.map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
@@ -108,15 +110,15 @@ export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
   );
 
   const StatusDisplay = (
-    <div className="text-center text-xs text-muted-foreground">
-      {currentStatus && (
+    <div className="text-center text-xs text-muted-foreground flex items-center justify-center h-full">
+      {currentStatus ? (
         <div className="flex flex-col items-center gap-1">
             <span>Current Status:</span>
             <Badge variant={currentStatus.variant} className={currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
             {currentStatus.text}
             </Badge>
         </div>
-      )}
+      ) : <p>No status</p>}
     </div>
   );
 

@@ -11,17 +11,23 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { kgToLbs, getBmiStatus, BMI_CATEGORIES, cmToFtIn } from '@/lib/utils';
 import { WeightChart } from './weight-chart';
 import { Badge } from './ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ScrollArea } from './ui/scroll-area';
-import { Separator } from './ui/separator';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import type { EditHeightDialogHandles } from './edit-height-dialog';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 export function WeightRecordCard() {
   const { weightRecords, removeWeightRecord, profile, setProfile } = useApp();
-  const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
   const isImperial = profile.unitSystem === 'imperial';
   const weightUnit = isImperial ? 'lbs' : 'kg';
@@ -45,7 +51,6 @@ export function WeightRecordCard() {
   }
 
   const handleSuccess = () => {
-    setIsActionsOpen(false);
     setForceRender(c => c + 1);
   }
 
@@ -53,41 +58,39 @@ export function WeightRecordCard() {
   const Icon = <Weight className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = (
-    <Popover open={isActionsOpen} onOpenChange={setIsActionsOpen}>
-        <PopoverTrigger asChild>
+    <DropdownMenu>
+        <DropdownMenuTrigger asChild>
             <Button size="icon" variant="ghost" className="h-8 w-8">
                 <Settings className="h-4 w-4" />
             </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-64" align="end">
-            <div className="space-y-4">
-                <AddWeightRecordDialog onSuccess={handleSuccess}>
-                    <Button variant="outline" className="w-full">Add New Record</Button>
-                </AddWeightRecordDialog>
-                <Button variant="outline" className="w-full" onClick={() => editHeightDialogRef.current?.open()}>
-                    <Edit className="mr-2 h-4 w-4"/>
-                    Edit Height
-                </Button>
-                <Separator />
-                <div className="space-y-2">
-                    <Label>Unit System</Label>
-                    <div className="flex items-center justify-center space-x-2 py-2">
-                        <Label htmlFor="unit-switch-weight" className="text-xs">kg</Label>
-                        <Switch
-                            id="unit-switch-weight"
-                            checked={isImperial}
-                            onCheckedChange={(checked) => setProfile({...profile, unitSystem: checked ? 'imperial' : 'metric'})}
-                        />
-                        <Label htmlFor="unit-switch-weight" className="text-xs">lbs</Label>
-                    </div>
-                </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-64" align="end">
+            <AddWeightRecordDialog onSuccess={handleSuccess}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    Add New Record
+                </DropdownMenuItem>
+            </AddWeightRecordDialog>
+            <DropdownMenuItem onSelect={() => editHeightDialogRef.current?.open()}>
+                <Edit className="mr-2 h-4 w-4"/>
+                Edit Height
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Unit System</DropdownMenuLabel>
+            <div className="flex items-center justify-center space-x-2 py-2">
+                <Label htmlFor="unit-switch-weight" className="text-xs">kg</Label>
+                <Switch
+                    id="unit-switch-weight"
+                    checked={isImperial}
+                    onCheckedChange={(checked) => setProfile({...profile, unitSystem: checked ? 'imperial' : 'metric'})}
+                />
+                <Label htmlFor="unit-switch-weight" className="text-xs">lbs</Label>
             </div>
-        </PopoverContent>
-    </Popover>
+        </DropdownMenuContent>
+    </DropdownMenu>
   );
 
   const RecordsList = (
-     <ScrollArea className="h-full max-h-[100px] pr-3 w-full">
+     <ScrollArea className="h-full max-h-[100px] w-full">
         {sortedWeights.length > 0 ? (
             <ul className="space-y-1 mt-2">
             {sortedWeights.map((weight) => {
@@ -124,9 +127,9 @@ export function WeightRecordCard() {
   );
 
   const StatusDisplay = (
-    <div className="flex flex-col items-center justify-center flex-1 gap-2 text-sm text-muted-foreground text-center">
+    <div className="flex flex-col items-center justify-center flex-1 gap-2 text-sm text-muted-foreground text-center h-full">
         <span>Height: <span className="font-bold text-foreground">{heightDisplay}</span></span>
-        {bmiStatus && (
+        {bmiStatus ? (
             <div className="flex flex-col items-center gap-1">
                 <span>Current BMI: <span className="font-bold text-foreground">{profile.bmi?.toFixed(1)}</span></span>
                 <Popover>
@@ -147,7 +150,7 @@ export function WeightRecordCard() {
                     </PopoverContent>
                 </Popover>
             </div>
-        )}
+        ) : <p>No status</p>}
     </div>
   );
 

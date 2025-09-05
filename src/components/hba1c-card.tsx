@@ -8,11 +8,16 @@ import { Trash2, Droplet, Settings } from 'lucide-react';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Badge } from './ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { ScrollArea } from './ui/scroll-area';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { AddRecordDialog } from './add-record-dialog';
 import { Hba1cChart } from './hba1c-chart';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Hba1cCardProps {
   isReadOnly?: boolean;
@@ -20,7 +25,6 @@ interface Hba1cCardProps {
 
 export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
   const { hba1cRecords, removeHba1cRecord } = useApp();
-  const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
@@ -34,30 +38,31 @@ export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
     return { text: 'Diabetes', variant: 'destructive' as const };
   }
   
-  const latestRecord = sortedRecords[sortedRecords.length - 1];
+  const latestRecord = sortedRecords[0];
   const currentStatus = latestRecord ? getStatus(latestRecord.value) : null;
 
   const Title = 'HbA1c (%)';
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = !isReadOnly ? (
-    <Popover open={isActionsOpen} onOpenChange={setIsActionsOpen}>
-        <PopoverTrigger asChild>
+    <AddRecordDialog>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
               <Button size="icon" variant="ghost" className="h-8 w-8">
                   <Settings className="h-4 w-4" />
               </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-64" align="end">
-            <AddRecordDialog onSuccess={() => setIsActionsOpen(false)}>
-                <Button variant="outline" className="w-full">Add New Record</Button>
-            </AddRecordDialog>
-        </PopoverContent>
-    </Popover>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-64" align="end">
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                Add New Record
+            </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </AddRecordDialog>
   ) : null;
 
   const RecordsList = (
-    <ScrollArea className="h-[140px] pr-3">
-      
+    <ScrollArea className="h-full max-h-[100px] w-full">
         <ul className="space-y-1 mt-2">
           {sortedRecords.slice().reverse().map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
@@ -82,15 +87,15 @@ export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
   );
 
   const StatusDisplay = (
-    <div className="text-center text-xs text-muted-foreground">
-      {currentStatus && (
+    <div className="text-center text-xs text-muted-foreground flex items-center justify-center h-full">
+      {currentStatus ? (
         <div className="flex flex-col items-center gap-1">
             <span>Current Status:</span>
             <Badge variant={currentStatus.variant} className={currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
             {currentStatus.text}
             </Badge>
         </div>
-      )}
+      ): <p>No status</p>}
     </div>
   );
 

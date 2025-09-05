@@ -11,12 +11,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { ThyroidChart } from './thyroid-chart';
 import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 
 export function ThyroidCard() {
   const { thyroidRecords, removeThyroidRecord } = useApp();
-  const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const formatDate = useDateFormatter();
   const [, setForceRender] = React.useState(0);
 
@@ -32,7 +36,6 @@ export function ThyroidCard() {
   };
   
   const handleSuccess = () => {
-    setIsActionsOpen(false);
     setForceRender(c => c + 1);
   }
 
@@ -43,22 +46,24 @@ export function ThyroidCard() {
   const Icon = <Activity className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = (
-    <Popover open={isActionsOpen} onOpenChange={setIsActionsOpen}>
-      <PopoverTrigger asChild>
-        <Button size="icon" variant="ghost" className="h-8 w-8">
-          <Settings className="h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-64" align="end">
-        <AddThyroidRecordDialog onSuccess={handleSuccess}>
-          <Button variant="outline" className="w-full">Add New Record</Button>
-        </AddThyroidRecordDialog>
-      </PopoverContent>
-    </Popover>
+    <AddThyroidRecordDialog onSuccess={handleSuccess}>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button size="icon" variant="ghost" className="h-8 w-8">
+                    <Settings className="h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64" align="end">
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    Add New Record
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    </AddThyroidRecordDialog>
   );
 
   const RecordsList = (
-    <ScrollArea className="h-[140px] pr-3">
+    <ScrollArea className="h-full max-h-[100px] w-full">
         <ul className="space-y-1 mt-2">
           {sortedRecords.map((record) => (
             <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
@@ -83,15 +88,15 @@ export function ThyroidCard() {
   );
 
   const StatusDisplay = (
-    <div className="text-center text-xs text-muted-foreground">
-      {currentStatus && (
+    <div className="text-center text-xs text-muted-foreground flex items-center justify-center h-full">
+      {currentStatus ? (
         <div className="flex flex-col items-center gap-1">
           <span>Current TSH Status:</span>
           <Badge variant={currentStatus.variant} className={currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
             {currentStatus.text}
           </Badge>
         </div>
-      )}
+      ) : <p>No status</p>}
     </div>
   );
 
