@@ -26,6 +26,7 @@ import { ReportCard } from '@/components/report-card';
 import { ThyroidCard } from '@/components/thyroid-card';
 import { RenalCard } from '@/components/renal-card';
 import { BiomarkersCard } from '@/components/biomarkers-card';
+import { ProfileCard } from '@/components/profile-card';
 
 
 export default function PatientDashboard() {
