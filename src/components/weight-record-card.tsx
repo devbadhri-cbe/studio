@@ -18,6 +18,7 @@ import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import type { EditHeightDialogHandles } from './edit-height-dialog';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
+import { Card, CardContent } from './ui/card';
 
 export function WeightRecordCard() {
   const { weightRecords, removeWeightRecord, profile, setProfile } = useApp();
@@ -43,7 +44,7 @@ export function WeightRecordCard() {
     }
   }
 
-  const Title = `Weight Records (${weightUnit})`;
+  const Title = `Weight & BMI (${weightUnit})`;
   const Icon = <Weight className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = (
@@ -146,6 +147,28 @@ export function WeightRecordCard() {
   );
 
   const Chart = <WeightChart />;
+
+  if (sortedWeights.length === 0) {
+      return (
+        <Card className="w-full flex flex-col h-full">
+            <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                    <div className='flex items-center gap-3 flex-1'>
+                        {Icon}
+                        <h3 className="font-medium">{Title}</h3>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                        {Actions}
+                    </div>
+                </div>
+                <div className="flex-1 flex flex-col items-center justify-center gap-4">
+                    <p className="text-sm text-muted-foreground">No weight records yet.</p>
+                    {StatusDisplay}
+                </div>
+            </CardContent>
+        </Card>
+      )
+  }
 
   return (
     <BiomarkerCardTemplate
