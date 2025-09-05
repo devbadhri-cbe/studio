@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { ArrowLeft, Stethoscope, DropletIcon } from 'lucide-react';
+import { ArrowLeft, Stethoscope, DropletIcon, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -21,13 +21,15 @@ import { ReminderCard } from '@/components/reminder-card';
 import { ReportCard } from '@/components/report-card';
 import { ProfileCard } from '@/components/profile-card';
 import { cn } from '@/lib/utils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 
 export default function PatientDashboard() {
   const { isClient, isDoctorLoggedIn, profile } = useApp();
   const router = useRouter();
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
-  const [activeView, setActiveView] = React.useState<'diseasePanels' | 'biomarkerCards'>('diseasePanels');
+  const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(true);
+  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
   
@@ -74,27 +76,38 @@ export default function PatientDashboard() {
             
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button
-                    variant={activeView === 'diseasePanels' ? 'default' : 'outline'}
-                    className={cn("w-full py-6 text-base", activeView === 'diseasePanels' && "shadow-lg")}
-                    onClick={() => setActiveView('diseasePanels')}
-                >
-                    <Stethoscope className="mr-2 h-5 w-5" />
-                    Disease Panels
-                </Button>
-                 <Button
-                    variant={activeView === 'biomarkerCards' ? 'default' : 'outline'}
-                    className={cn("w-full py-6 text-base", activeView === 'biomarkerCards' && "shadow-lg")}
-                    onClick={() => setActiveView('biomarkerCards')}
-                >
-                    <DropletIcon className="mr-2 h-5 w-5" />
-                    Biomarker Cards
-                </Button>
+             <div className="space-y-4">
+                <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
+                    <CollapsibleTrigger asChild>
+                        <Button
+                            variant={isDiseasePanelOpen ? 'default' : 'outline'}
+                            className={cn("w-full py-6 text-base", isDiseasePanelOpen && "shadow-lg")}
+                        >
+                            <Stethoscope className="mr-2 h-5 w-5" />
+                            Disease Panels
+                            <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isDiseasePanelOpen && "rotate-180")} />
+                        </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-4">
+                        <DiseasePanel />
+                    </CollapsibleContent>
+                </Collapsible>
+                 <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
+                    <CollapsibleTrigger asChild>
+                         <Button
+                            variant={isBiomarkersOpen ? 'default' : 'outline'}
+                            className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
+                        >
+                            <DropletIcon className="mr-2 h-5 w-5" />
+                            Biomarker Cards
+                            <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
+                        </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-4">
+                        <BiomarkersPanel />
+                    </CollapsibleContent>
+                </Collapsible>
             </div>
-
-            {activeView === 'diseasePanels' && <DiseasePanel />}
-            {activeView === 'biomarkerCards' && <BiomarkersPanel />}
 
             <div className="space-y-6" id="tour-step-1">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
