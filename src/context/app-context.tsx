@@ -50,6 +50,7 @@ interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
   addMedicalCondition: (condition: Partial<Omit<MedicalCondition, 'id' | 'status'>> & {condition: string, date: string}, isPatientAdding: boolean) => void;
+  updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
   approveMedicalCondition: (conditionId: string, suggestionId?: string) => void;
   dismissSuggestion: (conditionId: string, suggestionId?: string) => void;
@@ -309,37 +310,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         status: 'pending_review'
     };
 
-    let dashboardRecommended = false;
-
-    // Always check for dashboard recommendations for both patient and doctor
-    try {
-        const { recommendedDashboard } = await getDashboardRecommendations({ conditionName: newCondition.condition, icdCode: newCondition.icdCode });
-        if (recommendedDashboard !== 'none' && !profile.enabledDashboards?.includes(recommendedDashboard)) {
-            const newSuggestion: DashboardSuggestion = {
-                id: `sugg-${Date.now()}`,
-                conditionId: newCondition.id,
-                conditionName: newCondition.condition,
-                suggestedDashboard: recommendedDashboard,
-                status: 'pending',
-            };
-            const updatedSuggestions = [...dashboardSuggestions, newSuggestion];
-            setDashboardSuggestions(updatedSuggestions);
-            updatePatientData(profile.id, { dashboardSuggestions: updatedSuggestions });
-            dashboardRecommended = true;
-        }
-    } catch (error) {
-        console.error("Failed to get dashboard suggestion:", error);
-    }
-    
-    // If no dashboard was recommended, check for individual biomarkers
-    if (!dashboardRecommended && condition.requiredBiomarkers) {
-        newCondition.requiredBiomarkers = condition.requiredBiomarkers;
-    }
-
     const updatedConditions = [...profile.presentMedicalConditions, newCondition];
     setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
     updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
 };
+
+  const updateMedicalCondition = (condition: MedicalCondition) => {
+    const updatedConditions = profile.presentMedicalConditions.map(c => c.id === condition.id ? condition : c);
+    setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
+    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
+  };
   
   const removeMedicalCondition = (id: string) => {
     const updatedConditions = profile.presentMedicalConditions.filter(c => c.id !== id);
@@ -798,6 +778,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     profile,
     setProfile,
     addMedicalCondition,
+    updateMedicalCondition,
     removeMedicalCondition,
     approveMedicalCondition,
     dismissSuggestion,

@@ -39,9 +39,8 @@ interface MedicalConditionsCardProps {
     isSuggestionsVisible: boolean;
 }
 
-function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave: (data: {condition: string, date: string, icdCode?: string, requiredBiomarkers?: string[]}) => Promise<void>, onCancel: () => void, existingConditions: MedicalCondition[] }) {
+function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition: string, date: string}) => void, onCancel: () => void }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useToast();
   const inputRef = React.useRef<HTMLInputElement>(null);
   
   React.useEffect(() => {
@@ -57,51 +56,12 @@ function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave
   
   const handleSubmit = async (data: z.infer<typeof ConditionSchema>) => {
     setIsSubmitting(true);
-    let icdCodeString: string | undefined;
-    let biomarkers: string[] | undefined;
-
-    try {
-      const { icdCode, description } = await suggestIcdCode({ condition: data.condition });
-      icdCodeString = `${icdCode}: ${description}`;
-
-      const isDuplicate = existingConditions.some(c => c.icdCode?.startsWith(icdCode));
-      if (isDuplicate) {
-        toast({
-            variant: 'destructive',
-            title: 'Duplicate Condition',
-            description: `This condition (or a similar one with ICD-11 code ${icdCode}) already exists.`,
-        });
-        setIsSubmitting(false);
-        onCancel();
-        return;
-      }
-      
-      const { recommendedDashboard } = await getDashboardRecommendations({ conditionName: data.condition, icdCode });
-      if (recommendedDashboard === 'none') {
-          const biomarkerResult = await getBiomarkersForCondition({ conditionName: data.condition });
-          biomarkers = biomarkerResult.biomarkers;
-      }
-
-    } catch (error) {
-       console.error('Failed to get AI suggestions', error);
-      toast({
-        variant: 'destructive',
-        title: 'Suggestion Error',
-        description: 'Could not get AI suggestions. The condition will be added for manual review.',
-      });
-    } finally {
-       const saveData: { condition: string, date: string, icdCode?: string, requiredBiomarkers?: string[] } = { 
-            ...data, 
-            date: data.date.toISOString(), 
-            icdCode: icdCodeString 
-       };
-       if (biomarkers) {
-           saveData.requiredBiomarkers = biomarkers;
-       }
-       await onSave(saveData);
-       setIsSubmitting(false);
-       onCancel();
-    }
+    await onSave({
+        ...data,
+        date: data.date.toISOString(),
+    });
+    setIsSubmitting(false);
+    onCancel();
   }
 
   return (
@@ -145,13 +105,14 @@ const statusConfig = {
 
 
 export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisible }: MedicalConditionsCardProps) {
-  const { profile, addMedicalCondition, removeMedicalCondition, isDoctorLoggedIn } = useApp();
+  const { profile, addMedicalCondition, removeMedicalCondition, isDoctorLoggedIn, updateMedicalCondition } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
+  const { toast } = useToast();
 
   const formatDate = useDateFormatter();
   
-  const handleSaveCondition = async (data: { condition: string, date: string, icdCode?: string, requiredBiomarkers?: string[]}) => {
+  const handleSaveCondition = async (data: { condition: string, date: string}) => {
     addMedicalCondition(data, !isDoctorLoggedIn);
     setIsAddingCondition(false);
   };
@@ -175,6 +136,24 @@ export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisibl
       setActiveSynopsis({ type, id });
     }
   };
+
+  const handleSuggestIcdCode = async (condition: MedicalCondition) => {
+    try {
+        const { icdCode, description } = await suggestIcdCode({ condition: condition.condition });
+        const updatedCondition = { ...condition, icdCode: `${icdCode}: ${description}` };
+        updateMedicalCondition(updatedCondition);
+         toast({
+            title: 'ICD-11 Code Suggested',
+            description: `Code ${icdCode} has been added to ${condition.condition}.`,
+        });
+    } catch(e) {
+        toast({
+            variant: 'destructive',
+            title: 'Suggestion Failed',
+            description: 'Could not get an ICD-11 code suggestion at this time.',
+        });
+    }
+  }
 
   return (
     <Card className="shadow-xl">
@@ -214,7 +193,7 @@ export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisibl
                         )}
                     </div>
                 </div>
-                {isAddingCondition && <MedicalConditionForm onSave={handleSaveCondition} onCancel={() => setIsAddingCondition(false)} existingConditions={profile.presentMedicalConditions} />}
+                {isAddingCondition && <MedicalConditionForm onSave={handleSaveCondition} onCancel={() => setIsAddingCondition(false)} />}
                 {profile.presentMedicalConditions.length > 0 ? (
                     <ul className="space-y-1 mt-2">
                         {profile.presentMedicalConditions.map((condition) => {
@@ -232,7 +211,13 @@ export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisibl
                                                 <TooltipContent>{statusInfo.text}</TooltipContent>
                                             </Tooltip>
                                         </div>
-                                        {condition.icdCode && <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>}
+                                        {condition.icdCode ? (
+                                             <p className='text-xs text-muted-foreground'>ICD-11: {condition.icdCode}</p>
+                                        ) : (
+                                            isDoctorLoggedIn && (
+                                                <Button size="xs" variant="link" className="p-0 h-auto text-xs" onClick={() => handleSuggestIcdCode(condition)}>Get ICD-11 Suggestion</Button>
+                                            )
+                                        )}
                                         <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
                                         {condition.requiredBiomarkers && condition.requiredBiomarkers.length > 0 && (
                                             <div className="text-xs text-muted-foreground mt-1">
