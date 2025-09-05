@@ -30,6 +30,11 @@ export function PatientDashboard() {
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
   
+  const hasEnabledBiomarkers = React.useMemo(() => {
+    if (!profile.enabledBiomarkers) return false;
+    return Object.values(profile.enabledBiomarkers).some(panel => panel.length > 0);
+  }, [profile.enabledBiomarkers]);
+  
   if (!isClient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
@@ -65,38 +70,40 @@ export function PatientDashboard() {
             
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
-             <div className="space-y-4">
-                <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
-                    <CollapsibleTrigger asChild>
-                        <Button
-                            variant={isDiseasePanelOpen ? 'default' : 'outline'}
-                            className={cn("w-full py-6 text-base", isDiseasePanelOpen && "shadow-lg")}
-                        >
-                            <Stethoscope className="mr-2 h-5 w-5" />
-                            Disease Panels
-                            <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isDiseasePanelOpen && "rotate-180")} />
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="mt-4">
-                        <DiseasePanel />
-                    </CollapsibleContent>
-                </Collapsible>
-                 <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
-                    <CollapsibleTrigger asChild>
-                         <Button
-                            variant={isBiomarkersOpen ? 'default' : 'outline'}
-                            className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
-                        >
-                            <DropletIcon className="mr-2 h-5 w-5" />
-                            Biomarker Cards
-                            <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="mt-4">
-                        <BiomarkersPanel />
-                    </CollapsibleContent>
-                </Collapsible>
-            </div>
+             {(isDoctorLoggedIn || hasEnabledBiomarkers) && (
+                <div className="space-y-4">
+                    <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
+                        <CollapsibleTrigger asChild>
+                            <Button
+                                variant={isDiseasePanelOpen ? 'default' : 'outline'}
+                                className={cn("w-full py-6 text-base", isDiseasePanelOpen && "shadow-lg")}
+                            >
+                                <Stethoscope className="mr-2 h-5 w-5" />
+                                Disease Panels
+                                <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isDiseasePanelOpen && "rotate-180")} />
+                            </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-4">
+                            <DiseasePanel />
+                        </CollapsibleContent>
+                    </Collapsible>
+                    <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
+                        <CollapsibleTrigger asChild>
+                            <Button
+                                variant={isBiomarkersOpen ? 'default' : 'outline'}
+                                className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
+                            >
+                                <DropletIcon className="mr-2 h-5 w-5" />
+                                Biomarker Cards
+                                <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
+                            </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-4">
+                            <BiomarkersPanel />
+                        </CollapsibleContent>
+                    </Collapsible>
+                </div>
+             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-1 flex flex-col gap-6">
