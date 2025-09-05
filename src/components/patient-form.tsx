@@ -130,24 +130,9 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                             <FormLabel>Gender</FormLabel>
                             <FormControl>
                                 <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 h-10">
-                                    <FormItem className="flex items-center space-x-2 space-y-0">
-                                        <FormControl>
-                                            <RadioGroupItem value="male" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">Male</FormLabel>
-                                    </FormItem>
-                                    <FormItem className="flex items-center space-x-2 space-y-0">
-                                        <FormControl>
-                                            <RadioGroupItem value="female" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">Female</FormLabel>
-                                    </FormItem>
-                                    <FormItem className="flex items-center space-x-2 space-y-0">
-                                        <FormControl>
-                                            <RadioGroupItem value="other" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">Other</FormLabel>
-                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem>
+                                    <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem>
+                                    <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem>
                                 </RadioGroup>
                             </FormControl>
                             <FormMessage />
