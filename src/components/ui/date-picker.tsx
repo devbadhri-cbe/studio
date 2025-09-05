@@ -60,7 +60,7 @@ export function DatePicker({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen} modal={true}>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
@@ -76,8 +76,13 @@ export function DatePicker({
       <PopoverContent
         className="w-auto p-0"
         onInteractOutside={(e) => {
-          // This prevents the popover from closing when interacting with the month/year select dropdowns
-          e.preventDefault();
+          if (
+            e.target instanceof HTMLElement &&
+            (e.target.closest('[data-radix-select-content]') ||
+             e.target.closest('[data-radix-select-trigger]'))
+          ) {
+            e.preventDefault();
+          }
         }}
         >
         <Calendar
