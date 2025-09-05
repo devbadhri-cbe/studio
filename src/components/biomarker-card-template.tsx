@@ -60,7 +60,7 @@ export function BiomarkerCardTemplate({
               <Separator />
 
               {/* Bottom Section: Chart */}
-              <div className="flex-1 pt-4 flex flex-col min-h-0">
+              <div className="pt-4 h-[250px] w-full">
                   {chart}
               </div>
           </div>
