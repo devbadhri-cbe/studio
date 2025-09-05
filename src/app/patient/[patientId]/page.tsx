@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/app-context';
 import { getPatient } from '@/lib/firestore';
 import type { Patient } from '@/lib/types';
@@ -10,11 +10,18 @@ import PatientDashboard from '../dashboard/page';
 
 export default function PatientPage() {
   const params = useParams();
-  const { setPatientData, isClient } = useApp();
+  const searchParams = useSearchParams();
+  const { setPatientData, isClient, setIsDoctorLoggedIn } = useApp();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  
+  const isDoctorViewing = searchParams.get('viewer') === 'doctor';
 
   React.useEffect(() => {
+    // If the link is from the doctor, the app context should already be set.
+    // If it's a direct load, this effect will handle it.
+    setIsDoctorLoggedIn(isDoctorViewing);
+
     const loadPatientData = async () => {
       const patientId = params.patientId as string;
       if (!patientId) {
@@ -42,7 +49,7 @@ export default function PatientPage() {
         loadPatientData();
     }
     
-  }, [params.patientId, setPatientData, isClient]);
+  }, [params.patientId, setPatientData, isClient, setIsDoctorLoggedIn, isDoctorViewing]);
 
   if (isLoading || !isClient) {
     return (
