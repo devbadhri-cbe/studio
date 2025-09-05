@@ -94,7 +94,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 border p-4 rounded-md items-start">
-                 <div className="md:col-span-2 p-2">
+                 <div className="md:col-span-2">
                     <FormLabel>Date of Birth</FormLabel>
                     <FormField
                         control={form.control}
@@ -112,7 +112,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         )}
                     />
                  </div>
-                 <div className="p-2">
+                 <div>
                      <FormLabel>Age</FormLabel>
                      <FormField
                         control={form.control}
@@ -126,12 +126,12 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         )}
                      />
                  </div>
-                <div className="md:col-span-2 p-2">
+                <div className="md:col-span-2">
                     <FormField
                         control={form.control}
                         name="gender"
                         render={({ field }) => (
-                            <FormItem className="flex-1">
+                            <FormItem>
                                 <FormLabel>Gender</FormLabel>
                                 <FormControl>
                                     <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 h-10 w-full">
