@@ -113,7 +113,6 @@ export function DatePicker({
     <div className="flex flex-col gap-2">
        {label && <Label>{label}</Label>}
       <div className="flex items-center gap-2 border border-red-500 rounded-md px-3 h-10 w-fit">
-         <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
          <Input 
             placeholder="DD"
             value={day}
