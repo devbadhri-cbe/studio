@@ -25,8 +25,9 @@ export function DoctorReviewCard() {
   const { profile, dashboardSuggestions, approveMedicalCondition, dismissSuggestion } = useApp();
 
   const pendingConditions = (profile.presentMedicalConditions || []).filter(c => c.status === 'pending_review');
+  const hasPendingItems = pendingConditions.length > 0 || (dashboardSuggestions || []).some(s => s.status === 'pending');
   
-  if (pendingConditions.length === 0) return null;
+  if (!hasPendingItems) return null;
 
   return (
     <Card className="border-yellow-500 bg-yellow-500/5">

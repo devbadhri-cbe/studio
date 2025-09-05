@@ -7,7 +7,7 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { getDashboardRecommendations } from '@/ai/flows/get-dashboard-recommendations';
+import { suggestNewBiomarkers } from '@/ai/flows/suggest-new-biomarkers';
 
 const getDashboardName = (key: string) => {
     switch (key) {
@@ -51,7 +51,7 @@ export function BiomarkerSuggestionCard() {
     try {
         // Use the primary condition for the suggestion
         const primaryCondition = verifiedConditions[0];
-        const result = await getDashboardRecommendations({ 
+        const result = await suggestNewBiomarkers({ 
             conditionName: primaryCondition.condition,
             icdCode: primaryCondition.icdCode,
         });
@@ -106,16 +106,6 @@ export function BiomarkerSuggestionCard() {
     }
   }
 
-  if (verifiedConditions.length === 0) {
-      return (
-          <Card className="border-blue-500 bg-blue-500/5">
-              <CardContent className="p-4">
-                 <p className="text-sm text-center text-blue-700">No verified conditions to generate suggestions from. Please verify a condition first.</p>
-              </CardContent>
-          </Card>
-      )
-  }
-
   return (
     <Card className="border-blue-500 bg-blue-500/5">
       <CardHeader className="flex-row items-start justify-between">
@@ -130,10 +120,14 @@ export function BiomarkerSuggestionCard() {
         </div>
       </CardHeader>
        <CardContent className="flex flex-col gap-4">
-         <Button onClick={fetchSuggestions} disabled={isLoading}>
+         <Button onClick={fetchSuggestions} disabled={isLoading || verifiedConditions.length === 0}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
             Get Suggestion
          </Button>
+        
+        {verifiedConditions.length === 0 && (
+             <p className="text-sm text-center text-blue-700">No verified conditions to generate suggestions from. Please verify a condition first.</p>
+        )}
 
         {suggestion && (
             <div className="flex flex-wrap gap-2">
