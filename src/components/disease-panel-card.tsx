@@ -118,7 +118,7 @@ export function DiseasePanelCard({
                     <DropdownMenuSeparator />
                     {addRecordActions.map(({ label, action }) => (
                         <DropdownMenuItem key={label} onSelect={action}>
-                            <PlusCircle className="mr-2 h-4 w-4" />
+                           <PlusCircle className="mr-2 h-4 w-4" />
                             {label}
                         </DropdownMenuItem>
                     ))}
@@ -135,7 +135,7 @@ export function DiseasePanelCard({
                     </DropdownMenuItem>
                     
                     {isManagingBiomarkers && (
-                        <div className="px-2 py-1">
+                        <div className="px-2 py-1 space-y-2">
                             <div className="relative mb-1">
                                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -160,14 +160,14 @@ export function DiseasePanelCard({
                                     </DropdownMenuItem>
                                 ))}
                             </ScrollArea>
+                             <DropdownMenuSeparator />
+                            <DropdownMenuItem onSelect={() => setIsCreateDialogOpen(true)}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Create New Biomarker
+                            </DropdownMenuItem>
                         </div>
                     )}
                     
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={() => setIsCreateDialogOpen(true)}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Create New Biomarker
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                      <DropdownMenuLabel>Display Settings</DropdownMenuLabel>
                      <div className="grid gap-2 px-2 py-1">
