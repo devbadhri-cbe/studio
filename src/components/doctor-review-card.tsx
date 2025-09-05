@@ -12,12 +12,11 @@ import { Separator } from './ui/separator';
 const getDashboardName = (key: string) => {
     switch (key) {
       case 'diabetes': return 'Diabetes Panel';
-      case 'hba1c': return 'HbA1c Dashboard';
-      case 'lipids': return 'Lipid Dashboard';
-      case 'vitaminD': return 'Vitamin D Dashboard';
-      case 'thyroid': return 'Thyroid Dashboard';
-      case 'hypertension': return 'Hypertension Dashboard';
-      case 'renal': return 'Renal Dashboard';
+      case 'lipids': return 'Lipid Panel';
+      case 'hypertension': return 'Hypertension Panel';
+      case 'thyroid': return 'Thyroid Panel';
+      case 'vitaminD': return 'Vitamin D Panel';
+      case 'renal': return 'Renal Panel';
       default: return 'Dashboard';
     }
 }
@@ -61,11 +60,9 @@ export function DoctorReviewCard() {
                         <div className="text-sm text-muted-foreground mt-1">
                             <div className="flex items-center gap-2">
                                 <Code className="h-4 w-4 text-destructive" />
-                                <span className="font-medium">Suggested new biomarkers to track:</span>
+                                <span className="font-medium">Suggested new biomarkers:</span>
                             </div>
-                            <ul className="list-disc pl-8">
-                                {condition.requiredBiomarkers.map(b => <li key={b}>{b}</li>)}
-                            </ul>
+                             <p className="pl-5">{condition.requiredBiomarkers.join(', ')}</p>
                         </div>
                     )
                   )}

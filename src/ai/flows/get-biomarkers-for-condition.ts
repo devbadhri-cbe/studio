@@ -2,9 +2,9 @@
 'use server';
 
 /**
- * @fileOverview Identifies key biomarkers for monitoring a given medical condition.
+ * @fileOverview Identifies a key monitoring dashboard for a given medical condition.
  *
- * - getBiomarkersForCondition - A function that returns a list of biomarkers.
+ * - getBiomarkersForCondition - A function that returns a recommended dashboard.
  * - BiomarkersForConditionInput - The input type for the getBiomarkersForCondition function.
  * - BiomarkersForConditionOutput - The return type for the getBiomarkersForCondition function.
  */
@@ -18,7 +18,7 @@ const BiomarkersForConditionInputSchema = z.object({
 export type BiomarkersForConditionInput = z.infer<typeof BiomarkersForConditionInputSchema>;
 
 const BiomarkersForConditionOutputSchema = z.object({
-  biomarkers: z.array(z.string()).describe('A list of up to 3 key biomarkers used to monitor the specified medical condition, including their common units, e.g., ["Fasting Blood Glucose (mg/dL)", "Post-prandial Blood Glucose (mg/dL)","Serum Creatinine (mg/dL)"]'),
+  recommendedDashboard: z.enum(['diabetes', 'lipids', 'hypertension', 'thyroid', 'vitaminD', 'renal', 'none']).describe('The key of the recommended dashboard or "none".'),
 });
 export type BiomarkersForConditionOutput = z.infer<typeof BiomarkersForConditionOutputSchema>;
 
@@ -31,16 +31,19 @@ const prompt = ai.definePrompt({
   name: 'biomarkersForConditionPrompt',
   input: {schema: BiomarkersForConditionInputSchema},
   output: {schema: BiomarkersForConditionOutputSchema},
-  prompt: `You are a medical expert system. For the given medical condition, identify up to three of the most critical biomarkers used for monitoring its progression and management.
-
-For each biomarker, include its common unit of measurement in parentheses.
+  prompt: `You are a medical expert system. Based on the provided medical condition, recommend the single most relevant monitoring dashboard from the available options.
 
 Condition: {{{conditionName}}}
 
-Example Output for "Type 2 Diabetes": ["Fasting Blood Glucose (mg/dL)", "HbA1c (%)"]
-Example Output for "Hypothyroidism": ["TSH (µIU/mL)", "Free T4 (ng/dL)"]
+Available Dashboards and their primary focus:
+- 'diabetes': Monitors biomarkers related to diabetes like HbA1c, glucose, weight, and anemia.
+- 'lipids': Monitors LDL, HDL, Triglycerides for cholesterol management.
+- 'hypertension': Monitors blood pressure.
+- 'thyroid': Monitors TSH, T3, T4 for thyroid function.
+- 'vitaminD': Monitors Vitamin D levels.
+- 'renal': Monitors eGFR and UACR for kidney function.
 
-Return only the list of biomarkers.
+Analyze the condition and choose the most appropriate dashboard key. For "Type 2 Diabetes", recommend "diabetes". For "Hypercholesterolemia", recommend "lipids". For "Chronic Kidney Disease", recommend "renal". For "High Blood Pressure", recommend "hypertension". If no specific dashboard is a good fit, recommend "none".
 `,
 });
 
