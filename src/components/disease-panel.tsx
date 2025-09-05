@@ -3,31 +3,18 @@
 
 import { DiabetesCard } from './diabetes-card';
 import { HypertensionCard } from './hypertension-card';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import * as React from 'react';
-
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card } from './ui/card';
 
 export function DiseasePanel() {
     return (
-        <Carousel
-            opts={{
-                align: "start",
-            }}
-            orientation="vertical"
-            className="w-full"
-        >
-            <CarouselContent className="-mt-1 h-[550px]">
-                <CarouselItem className="pt-1 md:basis-1/2">
-                   <div className="p-1">
-                        <DiabetesCard />
-                    </div>
-                </CarouselItem>
-                <CarouselItem className="pt-1 md:basis-1/2">
-                   <div className="p-1">
-                        <HypertensionCard />
-                    </div>
-                </CarouselItem>
-            </CarouselContent>
-        </Carousel>
+        <Card>
+            <ScrollArea className="h-[550px] p-6">
+                <div className="grid grid-cols-1 gap-6">
+                    <DiabetesCard />
+                    <HypertensionCard />
+                </div>
+            </ScrollArea>
+        </Card>
     );
 }
