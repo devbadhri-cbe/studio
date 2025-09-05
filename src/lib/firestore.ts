@@ -89,7 +89,7 @@ const processPatientDoc = (doc: any): Patient => {
   const lastAlbumin = nutritionRecords.length > 0 ? [...nutritionRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
 
   const latestWeight = weightRecords.length > 0 ? [...weightRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
-  const bmi = calculateBmi(latestWeight?.value, data.height);
+  const bmi = (latestWeight && data.height) ? calculateBmi(latestWeight?.value, data.height) : null;
 
   const dobTimestamp = data.dob && data.dob.seconds ? new Timestamp(data.dob.seconds, data.dob.nanoseconds).toDate() : new Date(data.dob);
   const lastLoginTimestamp = data.lastLogin && data.lastLogin.seconds ? new Timestamp(data.lastLogin.seconds, data.lastLogin.nanoseconds).toDate() : (data.lastLogin ? new Date(data.lastLogin) : null);
@@ -217,3 +217,4 @@ export async function deletePatient(id: string): Promise<void> {
 }
 
 // Doctor specific functions are removed for single-doctor model
+
