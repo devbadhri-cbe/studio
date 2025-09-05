@@ -94,6 +94,11 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     }
   }
 
+  const handleDropdownSelect = (e: Event, callback: () => void) => {
+    e.preventDefault();
+    callback();
+  }
+
   return (
     <Card 
         className="w-full flex flex-col cursor-pointer transition-all group md:hover:border-primary/50 shadow-md active:shadow-xl active:scale-[0.98] md:hover:shadow-lg" 
@@ -141,11 +146,11 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={() => onView(patient)}>
+                <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onView(patient))}>
                     <Eye className="mr-2 h-4 w-4" />
                     View Dashboard
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => onEdit(patient)}>
+                <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onEdit(patient))}>
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit Patient
                 </DropdownMenuItem>
@@ -157,21 +162,21 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </SharePatientAccessDialog>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Contact Patient</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={() => handleContact('whatsapp')} disabled={!patient.phone}>
+                <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('whatsapp'))} disabled={!patient.phone}>
                     <WhatsAppIcon className="mr-2 h-4 w-4" />
                     WhatsApp
                 </DropdownMenuItem>
-                 <DropdownMenuItem onSelect={() => handleContact('sms')} disabled={!patient.phone}>
+                 <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('sms'))} disabled={!patient.phone}>
                     <MessageSquare className="mr-2 h-4 w-4" />
                     SMS / iMessage
                 </DropdownMenuItem>
-                 <DropdownMenuItem onSelect={() => handleContact('email')} disabled={!patient.email}>
+                 <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('email'))} disabled={!patient.email}>
                     <Mail className="mr-2 h-4 w-4" />
                     Email
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
-                    onSelect={() => onDelete(patient)}
+                    onSelect={(e) => handleDropdownSelect(e, () => onDelete(patient))}
                     className="text-destructive focus:text-destructive focus:bg-destructive/10"
                 >
                     <Trash2 className="mr-2 h-4 w-4" />
