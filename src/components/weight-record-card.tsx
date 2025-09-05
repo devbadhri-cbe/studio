@@ -152,7 +152,11 @@ export function WeightRecordCard() {
     </div>
   );
 
-  const Chart = <WeightChart />;
+  const Chart = (
+    <div className="flex-1 pt-4 flex flex-col min-h-0">
+        <WeightChart />
+    </div>
+  );
 
   return (
     <BiomarkerCardTemplate
