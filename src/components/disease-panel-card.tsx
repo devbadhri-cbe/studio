@@ -37,6 +37,9 @@ interface DiseasePanelCardProps {
   enabledBiomarkers: BiomarkerKey[];
 }
 
+type OpenSection = 'newRecord' | 'manageBiomarkers' | 'displaySettings' | null;
+
+
 export function DiseasePanelCard({ 
     title, 
     icon, 
@@ -49,9 +52,12 @@ export function DiseasePanelCard({
     const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState('');
     const [dialogTriggers, setDialogTriggers] = React.useState<Record<string, React.RefObject<HTMLButtonElement>>>({});
-    const [isManagingBiomarkers, setIsManagingBiomarkers] = React.useState(false);
-    const [isNewRecordOpen, setIsNewRecordOpen] = React.useState(false);
-    const [isDisplaySettingsOpen, setIsDisplaySettingsOpen] = React.useState(false);
+    const [openSection, setOpenSection] = React.useState<OpenSection>(null);
+
+    const isNewRecordOpen = openSection === 'newRecord';
+    const isManagingBiomarkers = openSection === 'manageBiomarkers';
+    const isDisplaySettingsOpen = openSection === 'displaySettings';
+    
 
     const enabledForPanel = profile.enabledBiomarkers?.[panelKey] || [];
 
@@ -116,10 +122,10 @@ export function DiseasePanelCard({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-80" align="end" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenuItem
+                     <DropdownMenuItem
                         onSelect={(e) => {
                             e.preventDefault();
-                            setIsNewRecordOpen(!isNewRecordOpen);
+                            setOpenSection(prev => prev === 'newRecord' ? null : 'newRecord');
                         }}
                         className="flex justify-between items-center"
                     >
@@ -140,7 +146,7 @@ export function DiseasePanelCard({
                      <DropdownMenuItem
                         onSelect={(e) => {
                             e.preventDefault();
-                            setIsManagingBiomarkers(!isManagingBiomarkers);
+                            setOpenSection(prev => prev === 'manageBiomarkers' ? null : 'manageBiomarkers');
                         }}
                         className="flex justify-between items-center"
                     >
@@ -186,7 +192,7 @@ export function DiseasePanelCard({
                      <DropdownMenuItem
                         onSelect={(e) => {
                             e.preventDefault();
-                            setIsDisplaySettingsOpen(!isDisplaySettingsOpen);
+                            setOpenSection(prev => prev === 'displaySettings' ? null : 'displaySettings');
                         }}
                         className="flex justify-between items-center"
                     >
