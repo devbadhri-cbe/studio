@@ -3,7 +3,6 @@
 
 import { DiabetesCard } from './diabetes-card';
 import { HypertensionCard } from './hypertension-card';
-import { Card, CardContent } from './ui/card';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import * as React from 'react';
 
