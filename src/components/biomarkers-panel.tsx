@@ -1,9 +1,6 @@
 
 'use client';
 
-import { DropletIcon } from 'lucide-react';
-import { Button } from './ui/button';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
 import { WeightRecordCard } from './weight-record-card';
 import { BloodPressureCard } from './blood-pressure-card';
 import { DiabetesCard } from './diabetes-card';
@@ -11,8 +8,6 @@ import { LipidCard } from './lipid-card';
 import { VitaminDCard } from './vitamin-d-card';
 import { ThyroidCard } from './thyroid-card';
 import { RenalCard } from './renal-card';
-import { ScrollArea } from './ui/scroll-area';
-import { Separator } from './ui/separator';
 import { Card, CardContent } from './ui/card';
 
 export function BiomarkersPanel() {
