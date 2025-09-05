@@ -14,29 +14,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useApp } from '@/context/app-context';
-import { BloodPressureCard } from './blood-pressure-card';
 import { DiseasePanelCard } from './disease-panel-card';
+import { availableBiomarkerCards, BiomarkerKey } from '@/lib/biomarker-cards';
 
 
 const HYPERTENSION_PANEL_KEY = 'hypertension';
-
-const availableBiomarkers = {
-  bloodPressure: {
-    label: 'Blood Pressure Card',
-    component: <BloodPressureCard key="bloodPressure" isReadOnly />,
-  },
-  // Add other potential hypertension-related cards here
-};
-
-type BiomarkerKey = keyof typeof availableBiomarkers;
 
 export function HypertensionCard() {
   const { profile, isDoctorLoggedIn, toggleDiseaseBiomarker } = useApp();
   const enabledBiomarkers = profile.enabledBiomarkers?.[HYPERTENSION_PANEL_KEY] || [];
 
-  const visibleCards = (Object.keys(availableBiomarkers) as BiomarkerKey[])
+  const visibleCards = (Object.keys(availableBiomarkerCards) as BiomarkerKey[])
     .filter(key => enabledBiomarkers.includes(key))
-    .map(key => availableBiomarkers[key].component);
+    .map(key => availableBiomarkerCards[key].component);
 
   const icon = <Heart className="h-5 w-5 shrink-0 text-muted-foreground" />;
   
@@ -48,15 +38,15 @@ export function HypertensionCard() {
             </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64" align="end">
-            <DropdownMenuLabel>Panel Components</DropdownMenuLabel>
+            <DropdownMenuLabel>Enable Biomarker Cards</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {(Object.keys(availableBiomarkers) as BiomarkerKey[]).map(key => (
+            {(Object.keys(availableBiomarkerCards) as BiomarkerKey[]).map(key => (
               <DropdownMenuCheckboxItem
                 key={key}
                 checked={enabledBiomarkers.includes(key)}
                 onCheckedChange={() => toggleDiseaseBiomarker(HYPERTENSION_PANEL_KEY, key)}
               >
-                {availableBiomarkers[key].label}
+                {availableBiomarkerCards[key].label}
               </DropdownMenuCheckboxItem>
             ))}
         </DropdownMenuContent>

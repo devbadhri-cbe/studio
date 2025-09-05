@@ -14,37 +14,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useApp } from '@/context/app-context';
-import { Hba1cCard } from './hba1c-card';
-import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
-import { HemoglobinCard } from './hemoglobin-card';
 import { DiseasePanelCard } from './disease-panel-card';
+import { availableBiomarkerCards, BiomarkerKey } from '@/lib/biomarker-cards';
 
 const DIABETES_PANEL_KEY = 'diabetes';
-
-const availableBiomarkers = {
-  hba1c: {
-    label: 'HbA1c Card',
-    component: <Hba1cCard key="hba1c" isReadOnly />,
-  },
-  glucose: {
-    label: 'Fasting Blood Glucose Card',
-    component: <FastingBloodGlucoseCard key="fbg" isReadOnly />,
-  },
-  hemoglobin: {
-    label: 'Hemoglobin (Anemia) Card',
-    component: <HemoglobinCard key="hemoglobin" isReadOnly />,
-  },
-};
-
-type BiomarkerKey = keyof typeof availableBiomarkers;
 
 export function DiabetesCard() {
   const { profile, isDoctorLoggedIn, toggleDiseaseBiomarker } = useApp();
   const enabledBiomarkers = profile.enabledBiomarkers?.[DIABETES_PANEL_KEY] || [];
 
-  const visibleCards = (Object.keys(availableBiomarkers) as BiomarkerKey[])
+  const visibleCards = (Object.keys(availableBiomarkerCards) as BiomarkerKey[])
     .filter(key => enabledBiomarkers.includes(key))
-    .map(key => availableBiomarkers[key].component);
+    .map(key => availableBiomarkerCards[key].component);
   
   const icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
   
@@ -56,15 +37,15 @@ export function DiabetesCard() {
             </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64" align="end">
-            <DropdownMenuLabel>Panel Components</DropdownMenuLabel>
+            <DropdownMenuLabel>Enable Biomarker Cards</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {(Object.keys(availableBiomarkers) as BiomarkerKey[]).map(key => (
+            {(Object.keys(availableBiomarkerCards) as BiomarkerKey[]).map(key => (
               <DropdownMenuCheckboxItem
                 key={key}
                 checked={enabledBiomarkers.includes(key)}
                 onCheckedChange={() => toggleDiseaseBiomarker(DIABETES_PANEL_KEY, key)}
               >
-                {availableBiomarkers[key].label}
+                {availableBiomarkerCards[key].label}
               </DropdownMenuCheckboxItem>
             ))}
         </DropdownMenuContent>
