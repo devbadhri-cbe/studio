@@ -41,7 +41,6 @@ const getPatientStatus = (patientData: Partial<Patient>): 'On Track' | 'Needs Re
 
 
 const processPatientDoc = (doc: any): Patient => {
-  console.log("processPatientDoc: Starting processing for doc id:", doc.id);
   let data = doc.data();
 
   data = JSON.parse(JSON.stringify(data));
@@ -118,7 +117,6 @@ const processPatientDoc = (doc: any): Patient => {
 
   const status = getPatientStatus(patientData);
   
-  console.log("processPatientDoc: Finished processing. Final data:", patientData);
   return {
     ...patientData,
     status,
@@ -141,21 +139,17 @@ export async function getPatients(): Promise<Patient[]> {
 }
 
 export async function getPatient(id: string): Promise<Patient | null> {
-  console.log(`getPatient: Fetching document for id: ${id}`);
   const docRef = doc(db, PATIENTS_COLLECTION, id);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
-    console.log("getPatient: Document found.");
     try {
       const patient = processPatientDoc(docSnap);
-      console.log("getPatient: Document processed successfully.");
       return patient;
     } catch (e) {
       console.error("getPatient: Error processing document:", e);
       return null;
     }
   }
-  console.log("getPatient: No such document!");
   return null;
 }
 

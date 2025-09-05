@@ -1,17 +1,21 @@
-
 'use client';
 
 import * as React from 'react';
-import PatientLoginPage from './patient/login/page';
+import { useRouter } from 'next/navigation';
 
+// The root of the app should redirect to the doctor's dashboard.
+// The patient-specific pages are accessed via a direct link.
 export default function AppRootPage() {
-  const [isClient, setIsClient] = React.useState(false);
+  const router = useRouter();
 
   React.useEffect(() => {
-    setIsClient(true);
-  }, []);
+    router.replace('/doctor/dashboard');
+  }, [router]);
 
-  // To prevent hydration errors, we only render the client-side
-  // login page after the initial mount.
-  return isClient ? <PatientLoginPage /> : null;
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <p className="ml-4">Redirecting...</p>
+    </div>
+  );
 }
