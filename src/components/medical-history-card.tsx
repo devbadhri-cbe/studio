@@ -283,10 +283,10 @@ export function MedicalHistoryCard() {
                                 {med.name.toLowerCase() === 'nil' ? (
                                         <span className="font-semibold text-foreground">Nil - No medication</span>
                                 ) : (
-                                    <>
-                                        <span className="font-semibold text-foreground">{med.name}</span>
-                                        <span className='block'>({med.dosage}, {med.frequency})</span>
-                                    </>
+                                    <p className="text-foreground">
+                                        <span className="font-semibold">{med.name}</span>
+                                        <span className="text-muted-foreground text-xs ml-2">({med.dosage}, {med.frequency})</span>
+                                    </p>
                                 )}
                                 </div>
                                     <div className="flex items-center shrink-0">

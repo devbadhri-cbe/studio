@@ -101,26 +101,24 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
               </Button>
             )
           )}
-          <p className="text-xs text-muted-foreground">Diagnosed: {formatDate(condition.date)}</p>
+          <p className="text-xs text-muted-foreground">{formatDate(condition.date)}</p>
         </div>
         <div className="flex items-center shrink-0">
-          {isDoctorLoggedIn && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-6 w-6 shrink-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemoveCondition(condition.id);
-              }}
-            >
-              <Trash2 className="h-4 w-4 text-destructive" />
-            </Button>
-          )}
           <Button
             size="icon"
             variant="ghost"
-            className="h-6 w-6 shrink-0"
+            className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemoveCondition(condition.id);
+            }}
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100"
             onClick={() => handleSynopsisToggle(condition.id)}
           >
             <Info className="h-4 w-4 text-blue-500" />
