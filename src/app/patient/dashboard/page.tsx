@@ -95,14 +95,6 @@ export default function PatientDashboard() {
         <main className="flex-1 p-4 md:pt-10 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
-             {isDoctorLoggedIn && (
-                <BiomarkerSuggestionToggleCard 
-                    onToggle={() => setShowBiomarkerSuggestions(s => !s)} 
-                    isSuggestionsVisible={showBiomarkerSuggestions} 
-                />
-             )}
-             {isDoctorLoggedIn && showBiomarkerSuggestions && <BiomarkerSuggestionCard />}
-
 
             <div className="space-y-6" id="tour-step-1">
               <PatientHeader />
@@ -112,6 +104,13 @@ export default function PatientDashboard() {
                 </div>
                  <div className="lg:col-span-2 flex flex-col gap-6">
                     <MedicalConditionsCard />
+                    {isDoctorLoggedIn && (
+                        <BiomarkerSuggestionToggleCard 
+                            onToggle={() => setShowBiomarkerSuggestions(s => !s)} 
+                            isSuggestionsVisible={showBiomarkerSuggestions} 
+                        />
+                    )}
+                    {isDoctorLoggedIn && showBiomarkerSuggestions && <BiomarkerSuggestionCard />}
                     <MedicationCard />
                 </div>
               </div>
