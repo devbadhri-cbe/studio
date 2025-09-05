@@ -27,6 +27,7 @@ export function WeightRecordCard() {
   const isImperial = profile.unitSystem === 'imperial';
   const weightUnit = isImperial ? 'lbs' : 'kg';
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
+  const [, setForceRender] = React.useState(0);
 
   const sortedWeights = React.useMemo(() => {
     return [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -44,6 +45,11 @@ export function WeightRecordCard() {
     }
   }
 
+  const handleSuccess = () => {
+    setIsActionsOpen(false);
+    setForceRender(c => c + 1);
+  }
+
   const Title = `Weight & BMI (${weightUnit})`;
   const Icon = <Weight className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
@@ -56,7 +62,7 @@ export function WeightRecordCard() {
         </PopoverTrigger>
         <PopoverContent className="w-64" align="end">
             <div className="space-y-4">
-                <AddWeightRecordDialog onSuccess={() => setIsActionsOpen(false)}>
+                <AddWeightRecordDialog onSuccess={handleSuccess}>
                     <Button variant="outline" className="w-full">Add New Record</Button>
                 </AddWeightRecordDialog>
                 <Button variant="outline" className="w-full" onClick={() => editHeightDialogRef.current?.open()}>
@@ -178,6 +184,7 @@ export function WeightRecordCard() {
         recordsList={RecordsList}
         statusDisplay={StatusDisplay}
         chart={Chart}
+        hasRecords={sortedWeights.length > 0}
     />
   );
 }
