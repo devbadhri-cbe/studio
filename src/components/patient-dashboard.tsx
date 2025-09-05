@@ -12,8 +12,6 @@ import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
 import { DoctorReviewCard } from '@/components/doctor-review-card';
 import { TitleBar } from '@/components/title-bar';
-import { EditHeightDialog, type EditHeightDialogHandles } from '@/components/edit-height-dialog';
-import { OnboardingTour } from '@/components/onboarding-tour';
 import { DiseasePanel } from '@/components/disease-panel';
 import { BiomarkersPanel } from '@/components/biomarkers-panel';
 import { InsightsCard } from '@/components/insights-card';
@@ -27,20 +25,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 export function PatientDashboard() {
   const { isClient, isDoctorLoggedIn, profile } = useApp();
   const router = useRouter();
-  const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(true);
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
   
-  React.useEffect(() => {
-    // Pass the ref to the weight card component instance
-    const weightCardElement = document.getElementById('weight-record-card');
-    if (weightCardElement) {
-        (weightCardElement as any).editHeightDialogRef = editHeightDialogRef;
-    }
-  }, []);
-
   if (!isClient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
@@ -140,8 +129,6 @@ export function PatientDashboard() {
           </div>
         </main>
       </div>
-      <EditHeightDialog ref={editHeightDialogRef} />
-      {isClient && !isDoctorLoggedIn && <OnboardingTour />}
     </TooltipProvider>
   );
 }
