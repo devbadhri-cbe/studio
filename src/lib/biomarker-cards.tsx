@@ -26,15 +26,15 @@ export const availableBiomarkerCards = {
   },
   thyroid: {
     label: 'Thyroid',
-    component: <ThyroidCard key="thyroid" />,
+    component: <ThyroidCard />,
   },
   vitaminD: {
     label: 'Vitamin D',
-    component: <VitaminDCard key="vitaminD" />,
+    component: <VitaminDCard />,
   },
   weight: {
     label: 'Weight & BMI',
-    component: <WeightRecordCard key="weight" />,
+    component: <WeightRecordCard />,
   },
 };
 

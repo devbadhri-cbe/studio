@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useApp } from '@/context/app-context';
 import { DiseasePanelCard } from './disease-panel-card';
-import { availableBiomarkerCards, BiomarkerKey } from '@/lib/biomarker-cards';
+import { availableBiomarkerCards, BiomarkerKey } from '@/lib/biomarker-cards.tsx';
 
 const DIABETES_PANEL_KEY = 'diabetes';
 
