@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Input } from "./input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
+import { Label } from "./label"
 
 interface DatePickerProps {
   value?: Date;
@@ -16,6 +17,7 @@ interface DatePickerProps {
   placeholder?: string;
   fromYear?: number;
   toYear?: number;
+  label?: string;
 }
 
 const months = [
@@ -36,9 +38,9 @@ const months = [
 export function DatePicker({
   value,
   onChange,
-  placeholder = "Pick a date",
   fromYear = new Date().getFullYear() - 100,
   toYear = new Date().getFullYear(),
+  label,
 }: DatePickerProps) {
   const isMobile = useIsMobile();
 
@@ -104,7 +106,8 @@ export function DatePicker({
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex items-center gap-2 border border-red-500 p-2 rounded-md">
+    <div className="flex flex-col gap-2 border border-red-500 p-2 rounded-md">
+       {label && <Label>{label}</Label>}
       <div className="flex items-center gap-2 border border-input rounded-md px-3 h-10 w-full">
          <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
          <Input 
