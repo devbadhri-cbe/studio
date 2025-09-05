@@ -7,26 +7,20 @@ import { Settings, Heart } from 'lucide-react';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { useApp } from '@/context/app-context';
 import { DiseasePanelCard } from './disease-panel-card';
-import { availableBiomarkerCards, BiomarkerKey } from '@/lib/biomarker-cards.tsx';
+import { BloodPressureCard } from './blood-pressure-card';
+import { AddBloodPressureRecordDialog } from './add-blood-pressure-record-dialog';
 
-
-const HYPERTENSION_PANEL_KEY = 'hypertension';
 
 export function HypertensionCard() {
-  const { profile, isDoctorLoggedIn, toggleDiseaseBiomarker } = useApp();
-  const enabledBiomarkers = profile.enabledBiomarkers?.[HYPERTENSION_PANEL_KEY] || [];
-
-  const visibleCards = (Object.keys(availableBiomarkerCards) as BiomarkerKey[])
-    .filter(key => enabledBiomarkers.includes(key))
-    .map(key => availableBiomarkerCards[key].component);
+  const { isDoctorLoggedIn } = useApp();
 
   const icon = <Heart className="h-5 w-5 shrink-0 text-muted-foreground" />;
   
@@ -38,31 +32,20 @@ export function HypertensionCard() {
             </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64" align="end">
-            <DropdownMenuLabel>Enable Biomarker Cards</DropdownMenuLabel>
+            <DropdownMenuLabel>Add New Record</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {(Object.keys(availableBiomarkerCards) as BiomarkerKey[]).map(key => (
-              <DropdownMenuCheckboxItem
-                key={key}
-                checked={enabledBiomarkers.includes(key)}
-                onCheckedChange={() => toggleDiseaseBiomarker(HYPERTENSION_PANEL_KEY, key)}
-              >
-                {availableBiomarkerCards[key].label}
-              </DropdownMenuCheckboxItem>
-            ))}
+            <AddBloodPressureRecordDialog>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    Add Blood Pressure Record
+                </DropdownMenuItem>
+            </AddBloodPressureRecordDialog>
         </DropdownMenuContent>
     </DropdownMenu>
   ) : null;
 
   return (
     <DiseasePanelCard title="Hypertension Panel" icon={icon} actions={Actions}>
-       {visibleCards.length > 0 ? (
-           visibleCards
-        ) : (
-            <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
-                <p className="text-center text-xs text-muted-foreground">No biomarker cards selected for this panel.</p>
-                {isDoctorLoggedIn && <p className="text-center text-xs text-muted-foreground mt-1">Click the <Settings className="inline-block h-3 w-3" /> icon to add cards.</p>}
-            </div>
-        )}
+       <BloodPressureCard isReadOnly />
     </DiseasePanelCard>
   );
 }

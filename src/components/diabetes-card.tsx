@@ -7,25 +7,23 @@ import { Settings, Droplet } from 'lucide-react';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { useApp } from '@/context/app-context';
 import { DiseasePanelCard } from './disease-panel-card';
-import { availableBiomarkerCards, BiomarkerKey } from '@/lib/biomarker-cards.tsx';
-
-const DIABETES_PANEL_KEY = 'diabetes';
+import { Hba1cCard } from './hba1c-card';
+import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
+import { HemoglobinCard } from './hemoglobin-card';
+import { AddRecordDialog } from './add-record-dialog';
+import { AddFastingBloodGlucoseRecordDialog } from './add-fasting-blood-glucose-record-dialog';
+import { AddHemoglobinRecordDialog } from './add-hemoglobin-record-dialog';
 
 export function DiabetesCard() {
-  const { profile, isDoctorLoggedIn, toggleDiseaseBiomarker } = useApp();
-  const enabledBiomarkers = profile.enabledBiomarkers?.[DIABETES_PANEL_KEY] || [];
-
-  const visibleCards = (Object.keys(availableBiomarkerCards) as BiomarkerKey[])
-    .filter(key => enabledBiomarkers.includes(key))
-    .map(key => availableBiomarkerCards[key].component);
+  const { isDoctorLoggedIn } = useApp();
   
   const icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
   
@@ -37,31 +35,32 @@ export function DiabetesCard() {
             </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64" align="end">
-            <DropdownMenuLabel>Enable Biomarker Cards</DropdownMenuLabel>
+            <DropdownMenuLabel>Add New Record</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {(Object.keys(availableBiomarkerCards) as BiomarkerKey[]).map(key => (
-              <DropdownMenuCheckboxItem
-                key={key}
-                checked={enabledBiomarkers.includes(key)}
-                onCheckedChange={() => toggleDiseaseBiomarker(DIABETES_PANEL_KEY, key)}
-              >
-                {availableBiomarkerCards[key].label}
-              </DropdownMenuCheckboxItem>
-            ))}
+              <AddRecordDialog>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      Add HbA1c Record
+                  </DropdownMenuItem>
+              </AddRecordDialog>
+              <AddFastingBloodGlucoseRecordDialog>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      Add Fasting Glucose Record
+                  </DropdownMenuItem>
+              </AddFastingBloodGlucoseRecordDialog>
+               <AddHemoglobinRecordDialog>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                     Add Hemoglobin Record
+                  </DropdownMenuItem>
+              </AddHemoglobinRecordDialog>
         </DropdownMenuContent>
     </DropdownMenu>
   ) : null;
 
   return (
     <DiseasePanelCard title="Diabetes Panel" icon={icon} actions={Actions}>
-        {visibleCards.length > 0 ? (
-           visibleCards
-        ) : (
-            <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
-                <p className="text-center text-xs text-muted-foreground">No biomarker cards selected for this panel.</p>
-                {isDoctorLoggedIn && <p className="text-center text-xs text-muted-foreground mt-1">Click the <Settings className="inline-block h-3 w-3" /> icon to add cards.</p>}
-            </div>
-        )}
+        <Hba1cCard isReadOnly />
+        <FastingBloodGlucoseCard isReadOnly />
+        <HemoglobinCard isReadOnly />
     </DiseasePanelCard>
   );
 }
