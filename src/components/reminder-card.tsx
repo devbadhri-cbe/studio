@@ -10,7 +10,7 @@ import { calculateAge } from '@/lib/utils';
 import { Separator } from './ui/separator';
 
 export function ReminderCard() {
-  const { fastingBloodGlucoseRecords, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, renalRecords, profile } = useApp();
+  const { fastingBloodGlucoseRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, renalRecords, profile } = useApp();
 
   const hasMedicalConditions = profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0;
   const age = calculateAge(profile.dob);
@@ -55,44 +55,6 @@ export function ReminderCard() {
        fastingBloodGlucoseContent = {
         icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
         title: 'Fasting Glucose On Track',
-        description: `Next test is around ${format(nextTestDate, 'MMM yyyy')}.`,
-        color: 'bg-green-500/10',
-      };
-    }
-  }
-
-  // Lipid Logic
-  const sortedLipidRecords = [...lipidRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const lastLipidRecord = sortedLipidRecords[0];
-  let lipidContent;
-
-  if (!lastLipidRecord) {
-    lipidContent = {
-      icon: <Heart className="h-5 w-5 text-yellow-500" />,
-      title: 'Time for your first lipid panel!',
-      description: 'Add a record to start tracking.',
-      color: 'bg-yellow-500/10',
-    };
-  } else {
-    const lastTestDate = new Date(lastLipidRecord.date);
-    let retestYears = 5;
-    if (hasMedicalConditions) retestYears = 1;
-    else if (age && age > 40) retestYears = 2;
-    
-    const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
-    const nextTestDate = addYears(lastTestDate, retestYears);
-
-    if (yearsSinceLastTest >= retestYears) {
-      lipidContent = {
-        icon: <Heart className="h-5 w-5 text-destructive" />,
-        title: 'Lipid Panel Due',
-        description: `Last test was ${formatDistanceToNow(lastTestDate)} ago. Retesting is recommended.`,
-        color: 'bg-destructive/10',
-      };
-    } else {
-      lipidContent = {
-        icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
-        title: 'Lipids On Track',
         description: `Next test is around ${format(nextTestDate, 'MMM yyyy')}.`,
         color: 'bg-green-500/10',
       };
@@ -300,16 +262,6 @@ export function ReminderCard() {
           <div>
             <p className="font-semibold">{fastingBloodGlucoseContent.title}</p>
             <p className="text-sm text-muted-foreground">{fastingBloodGlucoseContent.description}</p>
-          </div>
-        </div>
-        <Separator />
-        <div className="flex items-center gap-4">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${lipidContent.color}`}>
-            {lipidContent.icon}
-          </div>
-          <div>
-            <p className="font-semibold">{lipidContent.title}</p>
-            <p className="text-sm text-muted-foreground">{lipidContent.description}</p>
           </div>
         </div>
         <Separator />

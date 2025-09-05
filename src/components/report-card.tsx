@@ -3,7 +3,6 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LdlChart } from './ldl-chart';
 import { VitaminDChart } from './vitamin-d-chart';
 import { Separator } from './ui/separator';
 import { useApp } from '@/context/app-context';
@@ -18,18 +17,16 @@ import { FastingBloodGlucoseChart } from './fasting-blood-glucose-chart';
 
 
 export function ReportCard() {
-  const { fastingBloodGlucoseRecords, lipidRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, weightRecords, getDisplayLipidValue, getDisplayVitaminDValue, getDisplayGlucoseValue, biomarkerUnit, profile } = useApp();
+  const { fastingBloodGlucoseRecords, vitaminDRecords, thyroidRecords, bloodPressureRecords, weightRecords, getDisplayVitaminDValue, getDisplayGlucoseValue, biomarkerUnit, profile } = useApp();
   const formatDate = useDateFormatter();
 
   const latestFastingBloodGlucose = [...fastingBloodGlucoseRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
-  const latestLipid = [...lipidRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestVitaminD = [...vitaminDRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestThyroid = [...(thyroidRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestBloodPressure = [...(bloodPressureRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const latestWeight = [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
   const isImperial = profile.unitSystem === 'imperial';
-  const lipidUnit = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
   const vitDUnit = biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL';
   const glucoseUnit = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
   const weightUnit = isImperial ? 'lbs' : 'kg';
@@ -62,18 +59,6 @@ export function ReportCard() {
                   <CardContent>
                     <div className="text-2xl font-bold">{getDisplayGlucoseValue(latestFastingBloodGlucose.value)} <span className="text-base font-normal text-muted-foreground">{glucoseUnit}</span></div>
                     <p className="text-xs text-muted-foreground">on {formatDate(latestFastingBloodGlucose.date)}</p>
-                  </CardContent>
-                </Card>
-            )}
-            {lipidRecords.length > 0 && (
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">LDL Cholesterol</CardTitle>
-                    <Heart className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                     <div className="text-2xl font-bold">{getDisplayLipidValue(latestLipid.ldl, 'ldl')} <span className="text-base font-normal text-muted-foreground">{lipidUnit}</span></div>
-                     <p className="text-xs text-muted-foreground">on {formatDate(latestLipid.date)}</p>
                   </CardContent>
                 </Card>
             )}
@@ -182,16 +167,6 @@ export function ReportCard() {
           </>
         )}
         
-        {lipidRecords && lipidRecords.length > 0 && (
-          <>
-            <Separator />
-            <section>
-              <CardTitle className="text-lg mb-4">LDL Cholesterol Trend</CardTitle>
-              <LdlChart />
-            </section>
-          </>
-        )}
-
         {vitaminDRecords && vitaminDRecords.length > 0 && (
           <>
             <Separator />

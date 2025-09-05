@@ -67,16 +67,6 @@ export interface FastingBloodGlucoseRecord {
   medication?: string;
 }
 
-export interface LipidRecord {
-  id:string;
-  date: Date | string;
-  ldl: number;
-  hdl: number;
-  triglycerides: number;
-  total: number;
-  medication?: string;
-}
-
 export interface VitaminDRecord {
   id: string;
   date: Date | string;
@@ -169,10 +159,6 @@ export interface Patient {
       value: number;
       date: string;
   } | null;
-  lastLipid: {
-    ldl: number;
-    date: string;
-  } | null;
   lastVitaminD?: {
     value: number;
     date: string;
@@ -204,7 +190,6 @@ export interface Patient {
   // Add full record history to the patient object
   hba1cRecords: Hba1cRecord[];
   fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
-  lipidRecords: LipidRecord[];
   vitaminDRecords: VitaminDRecord[];
   thyroidRecords: ThyroidRecord[];
   renalRecords: RenalRecord[];

@@ -7,7 +7,6 @@ import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { useApp } from '@/context/app-context';
 import { ArrowLeft, Stethoscope, DropletIcon } from 'lucide-react';
-import { LipidCard } from '@/components/lipid-card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { VitaminDCard } from '@/components/vitamin-d-card';
@@ -85,32 +84,28 @@ export default function PatientDashboard() {
             
             {isDoctorLoggedIn && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="grid gap-4">
-                  <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
-                      <CollapsibleTrigger asChild>
-                          <Button variant="outline" className="w-full">
-                              <Stethoscope className="mr-2 h-4 w-4" />
-                              Disease Panels
-                          </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                          <DiseasePanel />
-                      </CollapsibleContent>
-                  </Collapsible>
-                </div>
-                <div className="grid gap-4">
-                   <Collapsible open={isBiomarkersPanelOpen} onOpenChange={setIsBiomarkersPanelOpen}>
-                      <CollapsibleTrigger asChild>
-                           <Button variant="outline" className="w-full">
-                              <DropletIcon className="mr-2 h-4 w-4" />
-                              Biomarker cards
-                          </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                          <BiomarkersPanel />
-                      </CollapsibleContent>
-                  </Collapsible>
-                </div>
+                <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
+                  <CollapsibleTrigger asChild>
+                      <Button variant="outline" className="w-full">
+                          <Stethoscope className="mr-2 h-4 w-4" />
+                          Disease Panels
+                      </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                      <DiseasePanel />
+                  </CollapsibleContent>
+                </Collapsible>
+                <Collapsible open={isBiomarkersPanelOpen} onOpenChange={setIsBiomarkersPanelOpen}>
+                  <CollapsibleTrigger asChild>
+                       <Button variant="outline" className="w-full">
+                          <DropletIcon className="mr-2 h-4 w-4" />
+                          Biomarker cards
+                      </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                      <BiomarkersPanel />
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
             )}
             
@@ -149,7 +144,6 @@ export default function PatientDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
                  {showBiomarkersCard && <BiomarkersCard />}
-                 {profile.enabledDashboards?.includes('lipids') && <LipidCard />}
                  {profile.enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
                  {profile.enabledDashboards?.includes('thyroid') && <ThyroidCard />}
                  {profile.enabledDashboards?.includes('renal') && <RenalCard />}
