@@ -204,6 +204,13 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
         }
     });
 
+    // Remove undefined fields to prevent Firestore errors
+    Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) {
+            delete updateData[key];
+        }
+    });
+
     await updateDoc(docRef, updateData);
     const updatedPatient = await getPatient(id);
     if (!updatedPatient) throw new Error("Failed to update and retrieve patient.");
@@ -216,6 +223,7 @@ export async function deletePatient(id: string): Promise<void> {
 }
 
 // Doctor specific functions are removed for single-doctor model
+
 
 
 
