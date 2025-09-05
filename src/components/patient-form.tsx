@@ -110,7 +110,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         </FormItem>
                     )}
                  />
-                 <div className="p-2">
+                 <div className="border border-blue-500 p-2">
                      <FormField
                         control={form.control}
                         name="age"
@@ -124,7 +124,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         )}
                      />
                  </div>
-                <div className="md:col-span-2 p-2">
+                <div className="md:col-span-2 p-2 border border-blue-500">
                     <FormField
                         control={form.control}
                         name="gender"
