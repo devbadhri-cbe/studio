@@ -14,10 +14,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
 import { useApp } from '@/context/app-context';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Hba1cCard } from './hba1c-card';
 import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
 import { HemoglobinCard } from './hemoglobin-card';
+import { DiseasePanelCard } from './disease-panel-card';
 
 type Checked = DropdownMenuCheckboxItemProps["checked"]
 
@@ -32,61 +32,55 @@ export function DiabetesCard() {
       showFastingBloodGlucose && <FastingBloodGlucoseCard key="fbg" />,
       showHemoglobin && <HemoglobinCard key="hemoglobin" />,
   ].filter(Boolean);
+  
+  const icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   return (
-    <Card className="h-full shadow-xl border-2 border-green-500">
-        <CardHeader>
-             <div className="flex items-center justify-between border-2 border-red-500">
-                <div className='flex items-center gap-3 flex-1'>
-                    <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />
-                    <CardTitle className="text-base font-semibold">Diabetes Panel</CardTitle>
-                </div>
-                {isDoctorLoggedIn && (
-                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button size="icon" variant="ghost" className="h-8 w-8">
-                                <Settings className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-64" align="end">
-                            <DropdownMenuLabel>Panel Components</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuCheckboxItem
-                            checked={showHbA1c}
-                            onCheckedChange={setShowHbA1c}
-                            >
-                            HbA1c Card
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem
-                            checked={showFastingBloodGlucose}
-                            onCheckedChange={setShowFastingBloodGlucose}
-                            >
-                            Fasting Blood Glucose Card
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem
-                            checked={showHemoglobin}
-                            onCheckedChange={setShowHemoglobin}
-                            >
-                            Hemoglobin (Anemia) Card
-                            </DropdownMenuCheckboxItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
-             </div>
-        </CardHeader>
-        <CardContent className="p-4 pt-0 space-y-4">
-             
-             {visibleCards.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {visibleCards}
-                </div>
-             ) : (
-                <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
-                    <p className="text-center text-xs text-muted-foreground">No biomarker cards selected for this panel.</p>
-                    {isDoctorLoggedIn && <p className="text-center text-xs text-muted-foreground mt-1">Click the <Settings className="inline-block h-3 w-3" /> icon to add cards.</p>}
-                </div>
-             )}
-        </CardContent>
-    </Card>
+    <DiseasePanelCard title="Diabetes Panel" icon={icon}>
+        <div className="space-y-4">
+            {isDoctorLoggedIn && (
+                    <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 absolute top-2 right-2">
+                            <Settings className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-64" align="end">
+                        <DropdownMenuLabel>Panel Components</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuCheckboxItem
+                        checked={showHbA1c}
+                        onCheckedChange={setShowHbA1c}
+                        >
+                        HbA1c Card
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem
+                        checked={showFastingBloodGlucose}
+                        onCheckedChange={setShowFastingBloodGlucose}
+                        >
+                        Fasting Blood Glucose Card
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem
+                        checked={showHemoglobin}
+                        onCheckedChange={setShowHemoglobin}
+                        >
+                        Hemoglobin (Anemia) Card
+                        </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )}
+            
+            {visibleCards.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {visibleCards}
+            </div>
+            ) : (
+            <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50">
+                <p className="text-center text-xs text-muted-foreground">No biomarker cards selected for this panel.</p>
+                {isDoctorLoggedIn && <p className="text-center text-xs text-muted-foreground mt-1">Click the <Settings className="inline-block h-3 w-3" /> icon to add cards.</p>}
+            </div>
+            )}
+        </div>
+    </DiseasePanelCard>
   );
 }
