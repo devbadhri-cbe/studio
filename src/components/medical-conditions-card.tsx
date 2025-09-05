@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle, AlertTriangle, Edit, Code } from 'lucide-react';
+import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle, AlertTriangle, Edit, Code, Lightbulb } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,6 +33,11 @@ type ActiveSynopsis = {
     type: 'condition';
     id: string;
 } | null;
+
+interface MedicalConditionsCardProps {
+    onToggleSuggestions: () => void;
+    isSuggestionsVisible: boolean;
+}
 
 function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave: (data: {condition: string, date: string, icdCode?: string, requiredBiomarkers?: string[]}) => Promise<void>, onCancel: () => void, existingConditions: MedicalCondition[] }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -139,7 +144,7 @@ const statusConfig = {
 };
 
 
-export function MedicalConditionsCard() {
+export function MedicalConditionsCard({ onToggleSuggestions, isSuggestionsVisible }: MedicalConditionsCardProps) {
   const { profile, addMedicalCondition, removeMedicalCondition, isDoctorLoggedIn } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
@@ -182,6 +187,19 @@ export function MedicalConditionsCard() {
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                         {!isAddingCondition && (
+                            <>
+                            {isDoctorLoggedIn && (
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button size="icon" variant="outline" className="h-8 w-8" onClick={onToggleSuggestions}>
+                                            <Lightbulb className={cn("h-4 w-4", isSuggestionsVisible ? "text-blue-500" : "")} />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>AI Biomarker Suggestions</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            )}
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setIsAddingCondition(true)}>
@@ -192,6 +210,7 @@ export function MedicalConditionsCard() {
                                     <p>Add Condition</p>
                                 </TooltipContent>
                             </Tooltip>
+                            </>
                         )}
                     </div>
                 </div>

@@ -32,7 +32,6 @@ import { OnboardingTour } from '@/components/onboarding-tour';
 import { DiabetesCard } from '@/components/diabetes-card';
 import { BiomarkersCard } from '@/components/biomarkers-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
-import { BiomarkerSuggestionToggleCard } from '@/components/biomarker-suggestion-toggle-card';
 
 
 export default function PatientDashboard() {
@@ -103,13 +102,10 @@ export default function PatientDashboard() {
                     <ProfileCard />
                 </div>
                  <div className="lg:col-span-2 flex flex-col gap-6">
-                    <MedicalConditionsCard />
-                    {isDoctorLoggedIn && (
-                        <BiomarkerSuggestionToggleCard 
-                            onToggle={() => setShowBiomarkerSuggestions(s => !s)} 
-                            isSuggestionsVisible={showBiomarkerSuggestions} 
-                        />
-                    )}
+                    <MedicalConditionsCard 
+                        onToggleSuggestions={() => setShowBiomarkerSuggestions(s => !s)} 
+                        isSuggestionsVisible={showBiomarkerSuggestions} 
+                    />
                     {isDoctorLoggedIn && showBiomarkerSuggestions && <BiomarkerSuggestionCard />}
                     <MedicationCard />
                 </div>
