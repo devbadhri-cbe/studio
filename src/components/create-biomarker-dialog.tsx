@@ -25,6 +25,8 @@ const FormSchema = z.object({
   name: z.string().min(2, { message: 'Biomarker or condition name is required.' }),
 });
 
+const availableDashboards = ['diabetes', 'lipids', 'hypertension', 'thyroid', 'vitaminD', 'renal'];
+
 interface CreateBiomarkerDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -49,10 +51,10 @@ export function CreateBiomarkerDialog({ open, onOpenChange }: CreateBiomarkerDia
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
     try {
-      const { recommendedDashboard } = await getDashboardRecommendations({ conditionName: data.name });
-
-      if (recommendedDashboard !== 'none') {
-        const result = enableDashboard(recommendedDashboard);
+      const conditionNameLower = data.name.toLowerCase();
+      
+      if (availableDashboards.includes(conditionNameLower)) {
+        const result = enableDashboard(conditionNameLower);
         if (result.alreadyExists) {
             toast({
                 variant: 'default',
@@ -67,7 +69,7 @@ export function CreateBiomarkerDialog({ open, onOpenChange }: CreateBiomarkerDia
         }
       } else {
         const existingBiomarker = customBiomarkers.find(
-          (b) => b.name.toLowerCase() === data.name.toLowerCase()
+          (b) => b.name.toLowerCase() === conditionNameLower
         );
 
         if (existingBiomarker) {
