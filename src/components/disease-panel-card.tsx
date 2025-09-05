@@ -16,7 +16,7 @@ export function DiseasePanelCard({ title, icon, children, className }: DiseasePa
     <Card className={cn("h-full shadow-xl", className)}>
         <CardHeader className="py-4">
              <div className="flex items-center justify-between">
-                <div className='flex items-center gap-3 flex-1'>
+                <div className='flex items-center gap-3 flex-1 border-2 border-blue-500'>
                     {icon}
                     <CardTitle className="text-base font-semibold">{title}</CardTitle>
                 </div>
