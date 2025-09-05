@@ -128,6 +128,7 @@ export function MedicalHistoryCard() {
         const standardized = await standardizeMedication(data);
         addMedication({
             name: standardized.name,
+            brandName: standardized.brandName,
             dosage: standardized.dosage,
             frequency: standardized.frequency,
         });
@@ -283,10 +284,15 @@ export function MedicalHistoryCard() {
                                 {med.name.toLowerCase() === 'nil' ? (
                                         <span className="font-semibold text-foreground">Nil - No medication</span>
                                 ) : (
-                                    <p className="text-foreground">
-                                        <span className="font-semibold">{med.name}</span>
-                                        <span className="text-muted-foreground text-xs ml-2">({med.dosage}, {med.frequency})</span>
-                                    </p>
+                                    <div>
+                                        {med.brandName && med.brandName.toLowerCase() !== med.name.toLowerCase() && (
+                                            <p className="font-semibold text-foreground">{med.brandName}</p>
+                                        )}
+                                        <p className={cn("text-foreground", med.brandName && "text-muted-foreground text-xs")}>
+                                            <span className="font-semibold">{med.name}</span>
+                                            <span className="text-muted-foreground text-xs ml-2">({med.dosage}, {med.frequency})</span>
+                                        </p>
+                                    </div>
                                 )}
                                 </div>
                                     <div className="flex items-center shrink-0">

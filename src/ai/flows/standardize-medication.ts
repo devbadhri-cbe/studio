@@ -20,7 +20,8 @@ const StandardizeMedicationInputSchema = z.object({
 export type StandardizeMedicationInput = z.infer<typeof StandardizeMedicationInputSchema>;
 
 const StandardizeMedicationOutputSchema = z.object({
-  name: z.string().describe('The corrected and properly capitalized medication name.'),
+  name: z.string().describe('The corrected and properly capitalized generic medication name.'),
+  brandName: z.string().optional().describe('The original brand name if it is different from the generic name.'),
   dosage: z.string().describe('The standardized dosage (e.g., "10 mg").'),
   frequency: z.string().describe('The standardized frequency (e.g., "Once daily", "Twice daily").'),
 });
@@ -44,8 +45,9 @@ User Input:
 
 Instructions:
 1.  **Medication Name:** Identify the pharmacological (generic) name of the medication. If the user enters a brand name (e.g., Lipitor), convert it to its generic name (e.g., Atorvastatin). Correct any spelling errors and ensure the final generic name is properly capitalized.
-2.  **Dosage:** Standardize the dosage format. Ensure there is a space between the number and the unit (e.g., "10mg" becomes "10 mg").
-3.  **Frequency:** Standardize the frequency description. Convert numerical or shorthand inputs into a clear, human-readable format.
+2.  **Brand Name:** If the user-entered medication name is a brand name and is different from the generic name you identified, return the original user input in the 'brandName' field. Otherwise, leave it blank.
+3.  **Dosage:** Standardize the dosage format. Ensure there is a space between the number and the unit (e.g., "10mg" becomes "10 mg").
+4.  **Frequency:** Standardize the frequency description. Convert numerical or shorthand inputs into a clear, human-readable format.
     - "1" or "daily" should become "Once daily".
     - "2" or "twice a day" should become "Twice daily".
     - "BD" or "BID" should become "Twice daily".
@@ -69,4 +71,3 @@ const standardizeMedicationFlow = ai.defineFlow(
     return output!;
   }
 );
-
