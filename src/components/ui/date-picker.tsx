@@ -61,13 +61,14 @@ export function DatePicker({
   }, [value]);
 
   const handleDateChange = (newDay: string, newMonth: string, newYear: string) => {
-    setDay(newDay);
-    setMonth(newMonth);
-    setYear(newYear);
-
     const dayInt = parseInt(newDay, 10);
     const monthInt = parseInt(newMonth, 10);
     const yearInt = parseInt(newYear, 10);
+
+    // Update local state immediately for responsiveness
+    setDay(newDay);
+    setMonth(newMonth);
+    setYear(newYear);
 
     if (dayInt > 0 && monthInt > 0 && newYear.length === 4) {
       const dateStr = `${newYear}-${newMonth}-${newDay}`;
@@ -91,15 +92,18 @@ export function DatePicker({
     };
     
     return (
-        <Input
-            type="date"
-            value={value && isValid(value) ? format(value, 'yyyy-MM-dd') : ''}
-            onChange={handleMobileDateChange}
-            className={cn(
-                "w-full justify-start text-left font-normal h-10",
-                !value && "text-muted-foreground"
-            )}
-        />
+        <div className="flex flex-col gap-2">
+            {label && <Label>{label}</Label>}
+            <Input
+                type="date"
+                value={value && isValid(value) ? format(value, 'yyyy-MM-dd') : ''}
+                onChange={handleMobileDateChange}
+                className={cn(
+                    "w-full justify-start text-left font-normal h-10",
+                    !value && "text-muted-foreground"
+                )}
+            />
+        </div>
     )
   }
 
@@ -108,7 +112,7 @@ export function DatePicker({
   return (
     <div className="flex flex-col gap-2">
        {label && <Label>{label}</Label>}
-      <div className="flex items-center gap-2 border border-red-500 rounded-md px-3 h-10 w-full">
+      <div className="flex items-center gap-2 border border-input rounded-md px-3 h-10 w-full">
          <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
          <Input 
             placeholder="DD"
