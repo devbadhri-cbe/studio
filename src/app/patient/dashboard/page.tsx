@@ -93,6 +93,9 @@ export default function PatientDashboard() {
                               Disease Panels
                           </Button>
                       </CollapsibleTrigger>
+                      <CollapsibleContent>
+                          {isDiseasePanelOpen && <DiseasePanel />}
+                      </CollapsibleContent>
                   </Collapsible>
                   <Collapsible open={isBiomarkersPanelOpen} onOpenChange={(isOpen) => { setIsBiomarkersPanelOpen(isOpen); if (isOpen) setIsDiseasePanelOpen(false); }}>
                       <CollapsibleTrigger asChild>
@@ -101,13 +104,11 @@ export default function PatientDashboard() {
                               Biomarker cards
                           </Button>
                       </CollapsibleTrigger>
+                      <CollapsibleContent>
+                          {isBiomarkersPanelOpen && <BiomarkersPanel />}
+                      </CollapsibleContent>
                   </Collapsible>
                 </div>
-
-                <CollapsibleContent>
-                    {isDiseasePanelOpen && <DiseasePanel />}
-                    {isBiomarkersPanelOpen && <BiomarkersPanel />}
-                </CollapsibleContent>
               </>
             )}
             
