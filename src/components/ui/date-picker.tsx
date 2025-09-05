@@ -111,7 +111,7 @@ export function DatePicker({
   return (
     <div className="flex flex-col gap-2">
        {label && <Label>{label}</Label>}
-      <div className="flex items-center gap-2 border border-red-500 rounded-md h-10 w-fit">
+      <div className="flex items-center border border-red-500 rounded-md h-10 w-fit">
          <Input 
             placeholder="DD"
             value={day}
@@ -121,7 +121,7 @@ export function DatePicker({
          />
          <span className="text-muted-foreground">/</span>
         <Select value={month} onValueChange={(newMonth) => handleDateChange(day, newMonth, year)}>
-          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-24 focus-visible:ring-0 bg-transparent">
+          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-24 focus-visible:ring-0 bg-transparent" icon={null}>
             <SelectValue placeholder="Month" />
           </SelectTrigger>
           <SelectContent>
@@ -134,7 +134,7 @@ export function DatePicker({
         </Select>
         <span className="text-muted-foreground">/</span>
          <Select value={year} onValueChange={(newYear) => handleDateChange(day, month, newYear)}>
-          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-20 focus-visible:ring-0 bg-transparent">
+          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-20 focus-visible:ring-0 bg-transparent" icon={null}>
             <SelectValue placeholder="Year" />
           </SelectTrigger>
           <SelectContent>
