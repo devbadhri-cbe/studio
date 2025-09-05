@@ -44,6 +44,8 @@ export default function PatientDashboard() {
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
   const [biomarkerSuggestions, setBiomarkerSuggestions] = React.useState<string[]>([]);
 
+  console.log("PatientDashboard: Component rendering. Profile data:", profile);
+
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review') || dashboardSuggestions.some(s => s.status === 'pending'));
   
   React.useEffect(() => {

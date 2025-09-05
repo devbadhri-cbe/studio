@@ -18,24 +18,33 @@ export default function PatientDashboardPage() {
     const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
-        if (!patientId || !isClient) return;
+        console.log("PatientDashboardPage: useEffect triggered.");
+        if (!patientId || !isClient) {
+            console.log("PatientDashboardPage: Aborting effect - patientId or isClient is falsy.", { patientId, isClient });
+            return;
+        }
 
         const loadData = async () => {
+            console.log(`PatientDashboardPage: Starting data load for patientId: ${patientId}`);
             setIsLoading(true);
             setError(null);
             try {
                 const patient = await getPatient(patientId);
+                 console.log("PatientDashboardPage: getPatient call completed. Patient data:", patient);
                 if (patient) {
                     setPatientData(patient);
+                    console.log("PatientDashboardPage: Patient data set in context.");
                 } else {
                     setError(`No patient found with ID ${patientId}. Please check the link.`);
                     localStorage.removeItem('patient_id');
+                    console.error(`PatientDashboardPage: No patient found for ID: ${patientId}`);
                 }
             } catch (e) {
-                console.error("Failed to load patient data:", e);
+                console.error("PatientDashboardPage: Error in loadData:", e);
                 setError('Could not load patient dashboard. Please try again or contact your doctor.');
                 localStorage.removeItem('patient_id');
             } finally {
+                console.log("PatientDashboardPage: loadData finished.");
                 setIsLoading(false);
             }
         };
@@ -62,5 +71,6 @@ export default function PatientDashboardPage() {
         );
     }
     
+    console.log("PatientDashboardPage: Rendering PatientDashboard component.");
     return <PatientDashboard />;
 }
