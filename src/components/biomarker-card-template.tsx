@@ -32,15 +32,8 @@ export function BiomarkerCardTemplate({
   statusVariant = 'default',
 }: BiomarkerCardTemplateProps) {
 
-  const borderClass = {
-    'destructive': 'border-destructive',
-    'secondary': 'border-yellow-500',
-    'outline': 'border-green-500',
-    'default': 'border-transparent',
-  }[statusVariant];
-
   return (
-    <Card className={cn("w-full flex flex-col h-full shadow-xl border-primary", className)}>
+    <Card className={cn("w-full flex flex-col h-full shadow-xl", className)}>
       <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
         {/* 1. Heading with action button */}
         <div className="flex items-center justify-between">
@@ -56,7 +49,7 @@ export function BiomarkerCardTemplate({
         {hasRecords ? (
           <div className="flex-1 flex flex-col min-h-0">
               {/* Top Section: Records & Status */}
-              <div className={cn("flex-1 flex flex-col gap-4 min-h-0 border-2 rounded-lg p-2", borderClass)}>
+              <div className="flex-1 flex flex-col gap-4 min-h-0 border-2 border-destructive rounded-lg p-2">
                   <div className="flex-1 w-full flex items-center justify-center">
                       {recordsList}
                   </div>
