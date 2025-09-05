@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -7,7 +6,7 @@ import { Heart } from 'lucide-react';
 import { useApp } from '@/context/app-context';
 import { DiseasePanelCard } from './disease-panel-card';
 import { AddBloodPressureRecordDialog } from './add-blood-pressure-record-dialog';
-import { availableBiomarkerCards, BiomarkerKey } from '@/lib/biomarker-cards';
+import { type BiomarkerKey } from '@/lib/biomarker-cards';
 import { AddWeightRecordDialog } from './add-weight-record-dialog';
 
 
@@ -39,6 +38,7 @@ export function HypertensionCard() {
             }
         }))}
         panelKey={HYPERTENSION_PANEL_KEY}
+        allPanelBiomarkers={allHypertensionBiomarkers}
         enabledBiomarkers={enabledBiomarkers}
     >
        {/* Hidden dialog triggers */}
@@ -49,11 +49,6 @@ export function HypertensionCard() {
                 })}
             </div>
         ))}
-        
-        {enabledBiomarkers.map(key => {
-            const cardInfo = availableBiomarkerCards[key];
-            return cardInfo ? cardInfo.component : null;
-        })}
     </DiseasePanelCard>
   );
 }

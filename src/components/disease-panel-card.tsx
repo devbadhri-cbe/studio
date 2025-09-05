@@ -26,11 +26,12 @@ import { useApp } from '@/context/app-context';
 interface DiseasePanelCardProps {
   title: string;
   icon: React.ReactNode;
-  children: React.ReactNode;
+  children: React.ReactNode; // For hidden dialogs
   className?: string;
   isDoctorLoggedIn: boolean;
   addRecordActions: { label: string; action: () => void }[];
   panelKey: string;
+  allPanelBiomarkers: BiomarkerKey[];
   enabledBiomarkers: BiomarkerKey[];
 }
 
@@ -42,11 +43,10 @@ export function DiseasePanelCard({
     isDoctorLoggedIn, 
     addRecordActions,
     panelKey,
+    allPanelBiomarkers,
     enabledBiomarkers
 }: DiseasePanelCardProps) {
     const { toggleDiseaseBiomarker } = useApp();
-    const allBiomarkerKeys = Object.keys(availableBiomarkerCards) as BiomarkerKey[];
-
 
     const Actions = isDoctorLoggedIn ? (
         <>
@@ -72,7 +72,7 @@ export function DiseasePanelCard({
                         </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
                              <DropdownMenuSubContent>
-                                {allBiomarkerKeys.map((key) => {
+                                {allPanelBiomarkers.map((key) => {
                                     const isChecked = enabledBiomarkers.includes(key);
                                     return (
                                         <DropdownMenuCheckboxItem
@@ -97,6 +97,7 @@ export function DiseasePanelCard({
 
     return (
         <Card className={cn("h-full shadow-xl flex flex-col", className)}>
+            {children}
             <div className="flex flex-col flex-1 p-4 space-y-4">
                 <div className="flex items-center justify-between">
                     <div className='flex items-center gap-3 flex-1'>
@@ -107,7 +108,10 @@ export function DiseasePanelCard({
                 </div>
                 <CardContent className="p-0 flex-1 flex flex-col">
                     <InteractivePanelGrid>
-                        {children}
+                        {enabledBiomarkers.map(key => {
+                            const cardInfo = availableBiomarkerCards[key];
+                            return cardInfo ? cardInfo.component : null;
+                        })}
                     </InteractivePanelGrid>
                 </CardContent>
             </div>
