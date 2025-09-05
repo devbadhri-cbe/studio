@@ -132,55 +132,53 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </p>
              </div>
           </div>
-          <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
-               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem onSelect={() => onView(patient)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Dashboard
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <span className="sr-only">Open menu</span>
+                    <MoreHorizontal className="h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem onSelect={() => onView(patient)}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => onEdit(patient)}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit Patient
+                </DropdownMenuItem>
+                 <SharePatientAccessDialog patient={patient}>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                       <Share2 className="mr-2 h-4 w-4" />
+                        Share Patient Access
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => onEdit(patient)}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Edit Patient
-                    </DropdownMenuItem>
-                     <SharePatientAccessDialog patient={patient}>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                           <Share2 className="mr-2 h-4 w-4" />
-                            Share Patient Access
-                        </DropdownMenuItem>
-                    </SharePatientAccessDialog>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel>Contact Patient</DropdownMenuLabel>
-                    <DropdownMenuItem onSelect={() => handleContact('whatsapp')} disabled={!patient.phone}>
-                        <WhatsAppIcon className="mr-2 h-4 w-4" />
-                        WhatsApp
-                    </DropdownMenuItem>
-                     <DropdownMenuItem onSelect={() => handleContact('sms')} disabled={!patient.phone}>
-                        <MessageSquare className="mr-2 h-4 w-4" />
-                        SMS / iMessage
-                    </DropdownMenuItem>
-                     <DropdownMenuItem onSelect={() => handleContact('email')} disabled={!patient.email}>
-                        <Mail className="mr-2 h-4 w-4" />
-                        Email
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                        onSelect={() => onDelete(patient)}
-                        className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Patient
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                </SharePatientAccessDialog>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Contact Patient</DropdownMenuLabel>
+                <DropdownMenuItem onSelect={() => handleContact('whatsapp')} disabled={!patient.phone}>
+                    <WhatsAppIcon className="mr-2 h-4 w-4" />
+                    WhatsApp
+                </DropdownMenuItem>
+                 <DropdownMenuItem onSelect={() => handleContact('sms')} disabled={!patient.phone}>
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    SMS / iMessage
+                </DropdownMenuItem>
+                 <DropdownMenuItem onSelect={() => handleContact('email')} disabled={!patient.email}>
+                    <Mail className="mr-2 h-4 w-4" />
+                    Email
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                    onSelect={() => onDelete(patient)}
+                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Patient
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
         </div>
       </CardHeader>
       
@@ -227,7 +225,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         </div>
       </CardContent>
 
-      <div className="p-4 pt-0 mt-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="p-4 pt-0 mt-auto">
          <Tooltip>
             <TooltipTrigger asChild>
                 <Badge variant={statusVariant} className={`w-full justify-center cursor-help ${statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
