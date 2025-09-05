@@ -10,6 +10,7 @@ import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
+import { BiomarkerKey } from '@/lib/biomarker-cards';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, customBiomarkers: [] };
 
@@ -89,7 +90,7 @@ interface AppContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   dashboardSuggestions: [];
-  toggleDiseaseBiomarker: (panelKey: string, biomarkerKey: string) => void;
+  toggleDiseaseBiomarker: (panelKey: string, biomarkerKey: BiomarkerKey) => void;
   customBiomarkers: CustomBiomarker[];
   addCustomBiomarker: (name: string) => Promise<void>;
   removeCustomBiomarker: (id: string) => void;
@@ -429,7 +430,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { customBiomarkers: updatedBiomarkers });
   };
   
-  const toggleDiseaseBiomarker = (panelKey: string, biomarkerKey: string) => {
+  const toggleDiseaseBiomarker = (panelKey: string, biomarkerKey: BiomarkerKey) => {
     const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
     const panelBiomarkers = currentEnabled[panelKey] || [];
     

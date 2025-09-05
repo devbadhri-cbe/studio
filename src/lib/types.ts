@@ -1,6 +1,7 @@
 
 
 import { Timestamp } from "firebase/firestore";
+import { BiomarkerKey } from "./biomarker-cards";
 
 export type UnitSystem = 'metric' | 'imperial';
 
@@ -48,7 +49,7 @@ export interface UserProfile {
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
   bmi?: number;
-  enabledBiomarkers?: { [key: string]: string[] };
+  enabledBiomarkers?: { [key: string]: BiomarkerKey[] };
   doctorName?: string;
   customBiomarkers?: CustomBiomarker[];
 }
@@ -151,7 +152,7 @@ export interface Patient {
   bloodPressureRecords: BloodPressureRecord[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
-  enabledBiomarkers: { [key: string]: string[] };
+  enabledBiomarkers: { [key: string]: BiomarkerKey[] };
   doctorName?: string;
   customBiomarkers?: CustomBiomarker[];
 }
