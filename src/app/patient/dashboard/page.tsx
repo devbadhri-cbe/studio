@@ -81,55 +81,55 @@ export default function PatientDashboard() {
             
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
-                  <CollapsibleTrigger asChild>
-                      <Button variant="outline" className="w-full">
-                          <Stethoscope className="mr-2 h-4 w-4" />
-                          Disease Panels
-                      </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                      <DiseasePanel />
-                  </CollapsibleContent>
-              </Collapsible>
-              <Collapsible open={isBiomarkersPanelOpen} onOpenChange={setIsBiomarkersPanelOpen}>
-                  <CollapsibleTrigger asChild>
-                      <Button variant="outline" className="w-full">
-                          <DropletIcon className="mr-2 h-4 w-4" />
-                          Biomarker Cards
-                      </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                      <BiomarkersPanel />
-                  </CollapsibleContent>
-              </Collapsible>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Collapsible open={isBiomarkersPanelOpen} onOpenChange={setIsBiomarkersPanelOpen}>
+                    <CollapsibleTrigger asChild>
+                        <Button variant="outline" className="w-full">
+                            <DropletIcon className="mr-2 h-4 w-4" />
+                            Biomarker Cards
+                        </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <BiomarkersPanel />
+                    </CollapsibleContent>
+                </Collapsible>
+                <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
+                    <CollapsibleTrigger asChild>
+                        <Button variant="outline" className="w-full">
+                            <Stethoscope className="mr-2 h-4 w-4" />
+                            Disease Panels
+                        </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <DiseasePanel />
+                    </CollapsibleContent>
+                </Collapsible>
             </div>
-            
+
             <div className="space-y-6" id="tour-step-1">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1 flex flex-col gap-6">
-                    <ProfileCard />
-                </div>
                  <div className="lg:col-span-2 flex flex-col gap-6">
                     <MedicalHistoryCard />
+                </div>
+                <div className="lg:col-span-1 flex flex-col gap-6">
+                    <ProfileCard />
                 </div>
               </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <WeightRecordCard />
                 <BloodPressureCard />
+                <WeightRecordCard />
             </div>
 
             <Separator />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start" id="tour-step-3">
-                <div className="lg:col-span-1 flex flex-col gap-6">
-                    <ReminderCard />
-                </div>
                 <div className="lg:col-span-2 flex flex-col gap-6">
                     <InsightsCard />
+                </div>
+                <div className="lg:col-span-1 flex flex-col gap-6">
+                    <ReminderCard />
                 </div>
             </div>
             
@@ -137,8 +137,8 @@ export default function PatientDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
                  {showBiomarkersCard && <BiomarkersCard />}
-                 {profile.enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
                  {profile.enabledDashboards?.includes('thyroid') && <ThyroidCard />}
+                 {profile.enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
             </div>
 
             <Separator />

@@ -11,10 +11,10 @@ export function BiomarkersPanel() {
     return (
         <Card>
             <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <WeightRecordCard />
                 <BloodPressureCard />
-                <VitaminDCard />
                 <ThyroidCard />
+                <VitaminDCard />
+                <WeightRecordCard />
             </CardContent>
         </Card>
     )
