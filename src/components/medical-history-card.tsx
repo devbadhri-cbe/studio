@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Pill, PlusCircle, Trash2, Loader2, ShieldAlert, Info, XCircle } from 'lucide-react';
+import { Stethoscope, PlusCircle, Loader2, Pill, ShieldAlert, Info, XCircle, Trash2 } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,14 @@ import { Input } from './ui/input';
 import { DrugInteractionViewer } from './drug-interaction-viewer';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
+import { DatePicker } from './ui/date-picker';
+import { DiseaseCard } from './disease-card';
+import { Separator } from './ui/separator';
+
+const ConditionSchema = z.object({
+  condition: z.string().min(2, 'Condition name is required.'),
+  date: z.date({ required_error: 'A valid date is required.' }),
+});
 
 const MedicationSchema = z.object({
   medicationName: z.string().min(2, 'Medication name is required.'),
@@ -24,12 +32,71 @@ const MedicationSchema = z.object({
 });
 
 type ActiveSynopsis = {
-    type: 'medication';
+    type: 'medication' | 'condition';
     id: string;
 } | null;
 
+function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition: string, date: string}) => void, onCancel: () => void }) {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  
+  React.useEffect(() => {
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  }, []);
+
+  const form = useForm<z.infer<typeof ConditionSchema>>({
+    resolver: zodResolver(ConditionSchema),
+    defaultValues: { condition: '', date: new Date() },
+  });
+  
+  const handleSubmit = async (data: z.infer<typeof ConditionSchema>) => {
+    setIsSubmitting(true);
+    await onSave({
+        ...data,
+        date: data.date.toISOString(),
+    });
+    setIsSubmitting(false);
+    onCancel();
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-2">
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormControl>
+                <DatePicker
+                  placeholder="Date of Diagnosis"
+                  value={field.value}
+                  onChange={field.onChange}
+                  fromYear={new Date().getFullYear() - 50}
+                  toYear={new Date().getFullYear()}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormControl><Input ref={inputRef} placeholder="Condition Name" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+        <div className="flex justify-end gap-2">
+          <Button type="button" size="sm" variant="ghost" className="flex-1" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
+          <Button type="submit" size="sm" className="flex-1" disabled={isSubmitting}>
+             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
+
 export function MedicalHistoryCard() {
-  const { profile, addMedication, removeMedication, setMedicationNil } = useApp();
+  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, setMedicationNil, isDoctorLoggedIn } = useApp();
+  const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
@@ -40,14 +107,20 @@ export function MedicalHistoryCard() {
 
   const medicationForm = useForm<z.infer<typeof MedicationSchema>>({
     resolver: zodResolver(MedicationSchema),
-    defaultValues: {
-      medicationName: '',
-      dosage: '',
-      frequency: '',
-    },
+    defaultValues: { medicationName: '', dosage: '', frequency: '' },
   });
 
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
+
+  const handleSaveCondition = async (data: { condition: string, date: string}) => {
+    addMedicalCondition(data, !isDoctorLoggedIn);
+    setIsAddingCondition(false);
+  };
+  
+  const handleReviseCondition = (id: string) => {
+      removeMedicalCondition(id);
+      setIsAddingCondition(true);
+  }
 
   const handleSaveMedication = async (data: z.infer<typeof MedicationSchema>) => {
     setIsSubmitting(true);
@@ -99,8 +172,50 @@ export function MedicalHistoryCard() {
   };
   
   return (
-    <Card>
+    <Card className="shadow-xl">
         <CardContent className="space-y-4 text-sm p-4">
+            <div>
+                <div className="flex items-center justify-between mb-2">
+                    <div className='flex items-center gap-3 flex-1'>
+                        <Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />
+                        <h3 className="font-medium">Present Medical Conditions</h3>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                        {!isAddingCondition && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setIsAddingCondition(true)}>
+                                        <PlusCircle className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Add Condition</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
+                    </div>
+                </div>
+                {isAddingCondition && <MedicalConditionForm onSave={handleSaveCondition} onCancel={() => setIsAddingCondition(false)} />}
+                {profile.presentMedicalConditions.length > 0 ? (
+                    <ul className="space-y-1 mt-2">
+                        {profile.presentMedicalConditions.map((condition) => {
+                            if (!condition || !condition.id) return null;
+                            return (
+                                <DiseaseCard 
+                                    key={condition.id}
+                                    condition={condition}
+                                    onRevise={handleReviseCondition}
+                                />
+                            )
+                        })}
+                    </ul>
+                ) : (
+                    !isAddingCondition && <p className="text-xs text-muted-foreground pl-8">No conditions recorded.</p>
+                )}
+            </div>
+
+            <Separator />
+
             <div>
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3 flex-1">

@@ -16,8 +16,7 @@ import { ThyroidCard } from '@/components/thyroid-card';
 import { HypertensionCard } from '@/components/hypertension-card';
 import { RenalCard } from '@/components/renal-card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { MedicalConditionsCard } from '@/components/medical-conditions-card';
-import { MedicationCard } from '@/components/medication-card';
+import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
 import { UploadRecordDialog } from '@/components/upload-record-dialog';
@@ -99,8 +98,7 @@ export default function PatientDashboard() {
                     <ProfileCard />
                 </div>
                  <div className="lg:col-span-2 flex flex-col gap-6">
-                    <MedicalConditionsCard />
-                    <MedicationCard />
+                    <MedicalHistoryCard />
                 </div>
               </div>
             </div>
@@ -109,7 +107,8 @@ export default function PatientDashboard() {
                 <WeightRecordCard />
                 <BloodPressureCard />
             </div>
-             <DiabetesCard />
+            
+            {profile.enabledDashboards?.includes('diabetes') && <DiabetesCard />}
 
             <Separator />
 
