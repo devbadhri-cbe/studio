@@ -30,7 +30,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
-    const { setPatientData, setIsDoctorLoggedIn } = useApp();
+    const { setPatientData, setIsDoctorLoggedIn, isClient } = useApp();
     const [patients, setPatients] = React.useState<Patient[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
@@ -59,13 +59,15 @@ export default function DoctorDashboardPage() {
 
     React.useEffect(() => {
         setIsDoctorLoggedIn(true);
-        fetchPatients();
-    }, [fetchPatients, setIsDoctorLoggedIn]);
+        if (isClient) {
+            fetchPatients();
+        }
+    }, [fetchPatients, setIsDoctorLoggedIn, isClient]);
     
     // Re-fetch data when the page is focused
     React.useEffect(() => {
         const handleFocus = () => {
-            if (!isFormOpen) {
+            if (!isFormOpen && isClient) {
                 fetchPatients();
             }
         };
@@ -73,7 +75,7 @@ export default function DoctorDashboardPage() {
         return () => {
             window.removeEventListener('focus', handleFocus);
         };
-    }, [fetchPatients, isFormOpen]);
+    }, [fetchPatients, isFormOpen, isClient]);
 
 
     const viewPatientDashboard = (patient: Patient) => {
