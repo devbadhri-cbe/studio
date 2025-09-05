@@ -18,8 +18,6 @@ export default function PatientPage() {
   const isDoctorViewing = searchParams.get('viewer') === 'doctor';
 
   React.useEffect(() => {
-    // If the link is from the doctor, the app context should already be set.
-    // If it's a direct load, this effect will handle it.
     setIsDoctorLoggedIn(isDoctorViewing);
 
     const loadPatientData = async () => {

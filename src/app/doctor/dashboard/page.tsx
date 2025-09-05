@@ -77,9 +77,8 @@ export default function DoctorDashboardPage() {
 
 
     const viewPatientDashboard = (patient: Patient) => {
-        setIsDoctorLoggedIn(true); // Ensure doctor state is set before navigating
         setPatientData(patient);
-        router.push(`/patient/${patient.id}`);
+        router.push(`/patient/${patient.id}?viewer=doctor`);
     }
     
     const removePatient = async (patientId: string) => {
