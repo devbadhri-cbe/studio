@@ -93,7 +93,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 </FormItem>
             )}
 
-             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 border p-4 rounded-md">
                  <FormField
                     control={form.control}
                     name="dob"
@@ -116,12 +116,12 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                     control={form.control}
                     name="age"
                     render={({ field }) => (
-                        <FormItem>
+                         <FormItem>
                             <FormLabel>Age</FormLabel>
                             <FormControl>
                                 <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
                             </FormControl>
-                        </FormItem>
+                         </FormItem>
                     )}
                  />
                  <FormField
