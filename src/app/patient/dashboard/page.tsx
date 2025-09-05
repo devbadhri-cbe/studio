@@ -201,7 +201,7 @@ export default function PatientDashboard() {
         </main>
       </div>
       <EditHeightDialog ref={editHeightDialogRef} />
-      {!isDoctorLoggedIn && <OnboardingTour />}
+      {isClient && !isDoctorLoggedIn && <OnboardingTour />}
     </TooltipProvider>
   );
 }
