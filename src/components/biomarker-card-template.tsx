@@ -13,6 +13,8 @@ interface BiomarkerCardTemplateProps {
   statusDisplay: React.ReactNode;
   chart: React.ReactNode;
   className?: string;
+  hasRecords: boolean;
+  noRecordsMessage?: string;
 }
 
 export function BiomarkerCardTemplate({
@@ -22,7 +24,9 @@ export function BiomarkerCardTemplate({
   recordsList,
   statusDisplay,
   chart,
-  className
+  className,
+  hasRecords,
+  noRecordsMessage = "No records yet."
 }: BiomarkerCardTemplateProps) {
   return (
     <Card className={cn("w-full flex flex-col h-full", className)}>
@@ -38,22 +42,28 @@ export function BiomarkerCardTemplate({
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col min-h-0">
-            {/* Top Half: Records & Status */}
-            <div className="flex-1 flex flex-col md:flex-row min-h-0">
-                <div className="flex-1 p-2 flex items-center justify-center">
-                    {recordsList}
-                </div>
-                <div className="flex-1 p-2 flex items-center justify-center">
-                    {statusDisplay}
-                </div>
-            </div>
-            
-            {/* Bottom Half: Chart */}
-            <div className="flex-1 p-2 flex flex-col min-h-0">
-                {chart}
-            </div>
-        </div>
+        {hasRecords ? (
+          <div className="flex-1 flex flex-col min-h-0">
+              {/* Top Half: Records & Status */}
+              <div className="flex-1 flex flex-col md:flex-row min-h-0">
+                  <div className="flex-1 p-2 flex items-center justify-center">
+                      {recordsList}
+                  </div>
+                  <div className="flex-1 p-2 flex items-center justify-center">
+                      {statusDisplay}
+                  </div>
+              </div>
+              
+              {/* Bottom Half: Chart */}
+              <div className="flex-1 p-2 flex flex-col min-h-0">
+                  {chart}
+              </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4">
+              <p className="text-sm">{noRecordsMessage}</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

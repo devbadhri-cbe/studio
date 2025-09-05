@@ -72,7 +72,6 @@ export function FastingBloodGlucoseCard() {
 
   const RecordsList = (
     <ScrollArea className="h-[140px] pr-3">
-      {sortedRecords.length > 0 ? (
         <ul className="space-y-1 mt-2">
           {sortedRecords.map((record) => {
             const status = getStatus(record.value);
@@ -103,11 +102,6 @@ export function FastingBloodGlucoseCard() {
             );
           })}
         </ul>
-      ) : (
-        <div className="flex h-full items-center justify-center">
-          <p className="text-xs text-muted-foreground text-center">No records.</p>
-        </div>
-      )}
     </ScrollArea>
   );
 
@@ -138,6 +132,7 @@ export function FastingBloodGlucoseCard() {
       recordsList={RecordsList}
       statusDisplay={StatusDisplay}
       chart={Chart}
+      hasRecords={fastingBloodGlucoseRecords.length > 0}
     />
   );
 }

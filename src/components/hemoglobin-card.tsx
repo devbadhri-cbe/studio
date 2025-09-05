@@ -80,7 +80,6 @@ export function HemoglobinCard() {
 
   const RecordsList = (
     <ScrollArea className="h-[140px] pr-3">
-      {sortedRecords.length > 0 ? (
         <ul className="space-y-1 mt-2">
           {sortedRecords.map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
@@ -101,11 +100,6 @@ export function HemoglobinCard() {
               </li>
             ))}
         </ul>
-      ) : (
-        <div className="flex h-full items-center justify-center">
-          <p className="text-xs text-muted-foreground text-center">No records.</p>
-        </div>
-      )}
     </ScrollArea>
   );
 
@@ -136,6 +130,7 @@ export function HemoglobinCard() {
       recordsList={RecordsList}
       statusDisplay={StatusDisplay}
       chart={Chart}
+      hasRecords={hemoglobinRecords.length > 0}
     />
   );
 }
