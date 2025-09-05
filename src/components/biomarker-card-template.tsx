@@ -32,6 +32,19 @@ export function BiomarkerCardTemplate({
   statusVariant = 'default',
 }: BiomarkerCardTemplateProps) {
 
+  const getBorderColorClass = () => {
+    switch (statusVariant) {
+        case 'destructive':
+            return 'border-destructive';
+        case 'secondary':
+            return 'border-yellow-500';
+        case 'outline':
+            return 'border-green-500';
+        default:
+            return 'border-transparent';
+    }
+  }
+
   return (
     <Card className={cn("w-full flex flex-col h-full shadow-xl", className)}>
       <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
@@ -49,7 +62,7 @@ export function BiomarkerCardTemplate({
         {hasRecords ? (
           <div className="flex-1 flex flex-col min-h-0">
               {/* Top Section: Records & Status */}
-              <div className="flex-1 flex flex-col gap-4 min-h-0 border-2 border-destructive rounded-lg p-2">
+              <div className={cn("flex-1 flex flex-col gap-4 min-h-0 border-2 rounded-lg p-2", getBorderColorClass())}>
                   <div className="flex-1 w-full flex items-center justify-center">
                       {recordsList}
                   </div>
