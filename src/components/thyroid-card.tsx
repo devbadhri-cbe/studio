@@ -83,15 +83,13 @@ export function ThyroidCard() {
   );
 
   const StatusDisplay = (
-    <div className="flex flex-col items-center justify-center flex-1">
+    <div className="text-center text-xs text-muted-foreground">
       {currentStatus && (
-        <div className="text-center text-xs text-muted-foreground">
-          <div className="flex flex-col items-center gap-1">
-            <span>Current TSH Status:</span>
-            <Badge variant={currentStatus.variant} className={currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
-              {currentStatus.text}
-            </Badge>
-          </div>
+        <div className="flex flex-col items-center gap-1">
+          <span>Current TSH Status:</span>
+          <Badge variant={currentStatus.variant} className={currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
+            {currentStatus.text}
+          </Badge>
         </div>
       )}
     </div>
