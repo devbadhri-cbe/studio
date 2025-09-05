@@ -53,13 +53,13 @@ export default function PatientDashboard() {
     }
   }, []);
 
+  const verifiedConditionsString = JSON.stringify(profile.presentMedicalConditions.filter(c => c.status === 'verified').map(c => c.condition));
+
   React.useEffect(() => {
     const fetchSuggestions = async () => {
-        const conditions = profile.presentMedicalConditions
-          .filter(c => c.status === 'verified')
-          .map(c => c.condition);
+        const verifiedConditions = JSON.parse(verifiedConditionsString);
 
-        if (conditions.length === 0) {
+        if (verifiedConditions.length === 0) {
             setBiomarkerSuggestions([]);
             return;
         };
@@ -70,7 +70,7 @@ export default function PatientDashboard() {
         ];
         
         try {
-            const result = await suggestNewBiomarkers({ conditions, currentBiomarkers });
+            const result = await suggestNewBiomarkers({ conditions: verifiedConditions, currentBiomarkers });
             setBiomarkerSuggestions(result.suggestions);
         } catch(error) {
             console.error("Failed to fetch biomarker suggestions", error);
@@ -81,7 +81,7 @@ export default function PatientDashboard() {
     if (isDoctorLoggedIn) {
         fetchSuggestions();
     }
-  }, [isDoctorLoggedIn, profile.presentMedicalConditions, enabledDashboards, customBiomarkers]);
+  }, [isDoctorLoggedIn, verifiedConditionsString, enabledDashboards, customBiomarkers]);
 
 
   if (!isClient) {
