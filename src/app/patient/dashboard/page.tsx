@@ -109,7 +109,7 @@ export default function PatientDashboard() {
                 </Collapsible>
             </div>
 
-            <div className="space-y-6" id="tour-step-1">
+            <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1 flex flex-col gap-6">
                     <ProfileCard />
@@ -122,7 +122,7 @@ export default function PatientDashboard() {
             
             <Separator />
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start" id="tour-step-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
                 <div className="lg:col-span-2 flex flex-col gap-6">
                     <InsightsCard />
                 </div>
@@ -133,7 +133,7 @@ export default function PatientDashboard() {
             
             <Separator />
             
-            <div className="printable-area" id="tour-step-5">
+            <div className="printable-area">
                 <ReportCard />
             </div>
             
