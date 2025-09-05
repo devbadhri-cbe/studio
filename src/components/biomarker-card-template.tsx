@@ -30,7 +30,7 @@ export function BiomarkerCardTemplate({
   noRecordsMessage = "No records yet."
 }: BiomarkerCardTemplateProps) {
   return (
-    <Card className={cn("w-full flex flex-col h-full shadow-xl", className)}>
+    <Card className={cn("w-full flex flex-col h-full shadow-xl border-primary", className)}>
       <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
         {/* 1. Heading with action button */}
         <div className="flex items-center justify-between">
