@@ -8,9 +8,9 @@ import { Heart } from 'lucide-react';
 
 export function HypertensionCard() {
   return (
-    <Card className="h-full shadow-xl border-2 border-green-500">
+    <Card className="h-full shadow-xl">
         <CardHeader>
-             <div className="flex items-center justify-between border-2 border-blue-500">
+             <div className="flex items-center justify-between">
                 <div className='flex items-center gap-3 flex-1'>
                     <Heart className="h-5 w-5 shrink-0 text-muted-foreground" />
                     <CardTitle className="text-base font-semibold">Hypertension Panel</CardTitle>
