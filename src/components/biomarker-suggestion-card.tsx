@@ -13,26 +13,26 @@ export function BiomarkerSuggestionCard() {
   const { addCustomBiomarker, customBiomarkers, profile, enabledDashboards } = useApp();
   const { toast } = useToast();
   const [isAdding, setIsAdding] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [suggestions, setSuggestions] = React.useState<string[]>([]);
   
   React.useEffect(() => {
     const fetchSuggestions = async () => {
-        setIsLoading(true);
         const verifiedConditions = profile.presentMedicalConditions
             .filter(c => c.status === 'verified')
             .map(c => c.condition);
 
         if (verifiedConditions.length === 0) {
-            setSuggestions([]);
             toast({
                 variant: 'default',
                 title: 'No Verified Conditions',
-                description: `There are no verified medical conditions for this patient to generate suggestions.`,
+                description: `There are no verified medical conditions to generate suggestions from. Please approve a condition first.`,
             });
-            setIsLoading(false);
+            setSuggestions([]);
             return;
         };
+
+        setIsLoading(true);
 
         const currentBiomarkers = [
         ...(enabledDashboards || []).map(d => d.replace(/([A-Z])/g, ' $1').trim()),
@@ -131,7 +131,7 @@ export function BiomarkerSuggestionCard() {
                 </Button>
             ))
         ) : (
-            <p className="text-sm text-muted-foreground">No new suggestions at this time.</p>
+            <p className="text-sm text-muted-foreground">No new suggestions available at this time.</p>
         )}
     </CardContent>
     </Card>
