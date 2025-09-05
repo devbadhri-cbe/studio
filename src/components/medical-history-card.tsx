@@ -102,7 +102,6 @@ export function MedicalHistoryCard() {
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [animateShield, setAnimateShield] = React.useState(false);
 
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -135,10 +134,6 @@ export function MedicalHistoryCard() {
         });
         medicationForm.reset();
         setIsAddingMedication(false);
-        if (profile.medication.length >= 1) { 
-            setAnimateShield(true);
-            setTimeout(() => setAnimateShield(false), 2000);
-        }
     } catch (error) {
         console.error("Failed to standardize or add medication", error);
     } finally {
@@ -329,21 +324,10 @@ export function MedicalHistoryCard() {
                 )}
                 {profile.medication.length > 1 && !isMedicationNil && (
                     <div className="pt-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full"
-                            onClick={() => setShowInteraction(s => !s)}
-                        >
-                            <ShieldAlert className={cn('mr-2 h-4 w-4', animateShield && 'animate-spin')} />
-                            {showInteraction ? 'Hide Interactions' : 'Check Drug Interactions'}
-                        </Button>
-                        {showInteraction && (
-                            <DrugInteractionViewer
-                                medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                                onClose={() => setShowInteraction(false)}
-                            />
-                        )}
+                         <DrugInteractionViewer
+                            medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
+                            onClose={() => setShowInteraction(false)}
+                        />
                     </div>
                 )}
             </div>

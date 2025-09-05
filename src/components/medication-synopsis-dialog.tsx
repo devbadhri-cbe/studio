@@ -65,10 +65,6 @@ export function MedicationSynopsisDialog({ medicationName, onClose }: Medication
       setIsLoading(false);
     }
   }, [medicationName, toast, onClose]);
-  
-  React.useEffect(() => {
-    handleFetchSynopsis();
-  }, [handleFetchSynopsis]);
 
   const handleTranslate = async () => {
     if (!result || !targetLanguage) return;
@@ -101,6 +97,11 @@ export function MedicationSynopsisDialog({ medicationName, onClose }: Medication
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <p>Loading synopsis...</p>
                 </div>
+            )}
+            {!result && !isLoading && (
+                <Button onClick={handleFetchSynopsis} className="w-full">
+                    Load Synopsis for {medicationName}
+                </Button>
             )}
              {result && (
                 <div className="space-y-4">

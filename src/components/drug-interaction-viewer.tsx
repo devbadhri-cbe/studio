@@ -74,10 +74,6 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
     }
   }, [medications, toast, onClose]);
 
-  React.useEffect(() => {
-    handleInteractionCheck();
-  }, [handleInteractionCheck]);
-
   const handleTranslate = async () => {
     if (!result || !targetLanguage) return;
 
@@ -109,6 +105,11 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p>Analyzing interactions...</p>
           </div>
+        )}
+        {!result && !isLoading && (
+            <Button onClick={handleInteractionCheck} className="w-full">
+                Analyze Interactions
+            </Button>
         )}
         {result && (
             <div className="space-y-4">
