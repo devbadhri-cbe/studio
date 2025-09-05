@@ -80,23 +80,23 @@ export default function PatientDashboard() {
         <main className="flex-1 p-4 md:pt-10 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              
-            <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
-              <PatientHeader>
-                {isDoctorLoggedIn && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <CollapsibleTrigger asChild>
-                        <Button variant="outline" className="w-full">
-                          <Stethoscope className="mr-2 h-4 w-4" />
-                          Disease Panels
-                        </Button>
-                      </CollapsibleTrigger>
-                      <BiomarkersPanel />
-                    </div>
-                )}
-              </PatientHeader>
-              <CollapsibleContent className="pt-6">
-                <DiseasePanel />
-              </CollapsibleContent>
+            <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen} className="space-y-6">
+                <PatientHeader>
+                    {isDoctorLoggedIn && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <CollapsibleTrigger asChild>
+                                <Button variant="outline" className="w-full">
+                                <Stethoscope className="mr-2 h-4 w-4" />
+                                    Disease Panels
+                                </Button>
+                            </CollapsibleTrigger>
+                            <BiomarkersPanel />
+                        </div>
+                    )}
+                </PatientHeader>
+                <CollapsibleContent>
+                    <DiseasePanel />
+                </CollapsibleContent>
             </Collapsible>
 
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
