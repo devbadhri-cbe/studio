@@ -46,12 +46,10 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
 
   React.useEffect(() => {
     if (open && typeof window !== 'undefined') {
-       const hostname = window.location.hostname;
-       const protocol = window.location.protocol;
-       const port = '3000';
-       const host = `${hostname}:${port}`;
-       setDashboardLink(`${protocol}//${host}/patient/${patient.id}`);
-       setLoginPageLink(`${protocol}//${host}/`);
+       const origin = window.location.origin;
+       const publicUrl = origin.includes('://6000-') ? origin.replace('://6000-', '://9000-') : origin;
+       setDashboardLink(`${publicUrl}/patient/${patient.id}`);
+       setLoginPageLink(`${publicUrl}/`);
     }
   }, [open, patient.id]);
 
