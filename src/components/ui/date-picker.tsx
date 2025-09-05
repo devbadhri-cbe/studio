@@ -3,7 +3,6 @@
 
 import * as React from "react"
 import { format, isValid, parse } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -117,12 +116,12 @@ export function DatePicker({
             placeholder="DD"
             value={day}
             onChange={(e) => handleDateChange(e.target.value, month, year)}
-            className="w-10 border-0 p-0 shadow-none focus-visible:ring-0 text-center"
+            className="w-10 border-0 p-0 shadow-none focus-visible:ring-0 text-center bg-transparent"
             maxLength={2}
          />
          <span className="text-muted-foreground">/</span>
         <Select value={month} onValueChange={(newMonth) => handleDateChange(day, newMonth, year)}>
-          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-24 focus-visible:ring-0">
+          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-24 focus-visible:ring-0 bg-transparent">
             <SelectValue placeholder="Month" />
           </SelectTrigger>
           <SelectContent>
@@ -135,7 +134,7 @@ export function DatePicker({
         </Select>
         <span className="text-muted-foreground">/</span>
          <Select value={year} onValueChange={(newYear) => handleDateChange(day, month, newYear)}>
-          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-20 focus-visible:ring-0">
+          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-20 focus-visible:ring-0 bg-transparent">
             <SelectValue placeholder="Year" />
           </SelectTrigger>
           <SelectContent>
