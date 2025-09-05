@@ -1,8 +1,7 @@
 
-
 'use client';
 
-import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle, AlertTriangle, Edit, Code, Pill, ChevronDown } from 'lucide-react';
+import { Stethoscope, PlusCircle, Trash2, Loader2, Info, CheckCircle, AlertTriangle, Edit, Code } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,11 +33,6 @@ type ActiveSynopsis = {
     type: 'condition';
     id: string;
 } | null;
-
-interface MedicalConditionsCardProps {
-    onToggleMedication: () => void;
-    isMedicationVisible: boolean;
-}
 
 function MedicalConditionForm({ onSave, onCancel, existingConditions }: { onSave: (data: {condition: string, date: string, icdCode?: string, requiredBiomarkers?: string[]}) => Promise<void>, onCancel: () => void, existingConditions: MedicalCondition[] }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -145,7 +139,7 @@ const statusConfig = {
 };
 
 
-export function MedicalConditionsCard({ onToggleMedication, isMedicationVisible }: MedicalConditionsCardProps) {
+export function MedicalConditionsCard() {
   const { profile, addMedicalCondition, removeMedicalCondition, isDoctorLoggedIn } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
@@ -272,12 +266,6 @@ export function MedicalConditionsCard({ onToggleMedication, isMedicationVisible 
                     !isAddingCondition && <p className="text-xs text-muted-foreground pl-8">No conditions recorded.</p>
                 )}
             </div>
-
-            <Button variant="ghost" className="w-full justify-start p-2 h-auto text-left" onClick={onToggleMedication}>
-                <Pill className="h-5 w-5 shrink-0 text-muted-foreground mr-3" />
-                <span className="font-medium flex-1">Current Medication</span>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", isMedicationVisible && "rotate-180")} />
-            </Button>
         </CardContent>
     </Card>
   );

@@ -32,6 +32,7 @@ import { OnboardingTour } from '@/components/onboarding-tour';
 import { DiabetesCard } from '@/components/diabetes-card';
 import { BiomarkersCard } from '@/components/biomarkers-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
+import { BiomarkerSuggestionToggleCard } from '@/components/biomarker-suggestion-toggle-card';
 
 
 export default function PatientDashboard() {
@@ -39,7 +40,7 @@ export default function PatientDashboard() {
   const router = useRouter();
   const [extractedData, setExtractedData] = React.useState<LabResultUploadOutput | null>(null);
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
-  const [showMedication, setShowMedication] = React.useState(false);
+  const [showBiomarkerSuggestions, setShowBiomarkerSuggestions] = React.useState(false);
 
 
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review') || dashboardSuggestions.some(s => s.status === 'pending'));
@@ -94,7 +95,14 @@ export default function PatientDashboard() {
         <main className="flex-1 p-4 md:pt-10 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
-             {isDoctorLoggedIn && <BiomarkerSuggestionCard />}
+             {isDoctorLoggedIn && (
+                <BiomarkerSuggestionToggleCard 
+                    onToggle={() => setShowBiomarkerSuggestions(s => !s)} 
+                    isSuggestionsVisible={showBiomarkerSuggestions} 
+                />
+             )}
+             {isDoctorLoggedIn && showBiomarkerSuggestions && <BiomarkerSuggestionCard />}
+
 
             <div className="space-y-6" id="tour-step-1">
               <PatientHeader />
@@ -103,8 +111,8 @@ export default function PatientDashboard() {
                     <ProfileCard />
                 </div>
                  <div className="lg:col-span-2 flex flex-col gap-6">
-                    <MedicalConditionsCard onToggleMedication={() => setShowMedication(s => !s)} isMedicationVisible={showMedication} />
-                    {showMedication && <MedicationCard />}
+                    <MedicalConditionsCard />
+                    <MedicationCard />
                 </div>
               </div>
             </div>

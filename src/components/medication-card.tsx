@@ -2,7 +2,7 @@
 
 'use client';
 
-import { PlusCircle, Trash2, Loader2, ShieldAlert, Info, XCircle } from 'lucide-react';
+import { Pill, PlusCircle, Trash2, Loader2, ShieldAlert, Info, XCircle } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -103,7 +103,11 @@ export function MedicationCard() {
     <Card className="shadow-xl">
         <CardContent className="space-y-4 text-sm p-4">
             <div>
-                 <div className="flex items-center justify-end mb-2">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3 flex-1">
+                        <Pill className="h-5 w-5 shrink-0 text-muted-foreground" />
+                        <h3 className="font-medium">Current Medication</h3>
+                    </div>
                     <div className="flex items-center gap-1 shrink-0">
                         {!isAddingMedication && (
                             <>
