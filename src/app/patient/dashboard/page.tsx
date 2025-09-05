@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import * as React from 'react';
@@ -175,14 +173,14 @@ export default function PatientDashboard() {
 
             {/* DIAGNOSTIC STEP: All biomarker cards are temporarily disabled to isolate the crashing component. */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
-                 <WeightRecordCard />
-                 {/* {enabledDashboards?.includes('diabetes') && <DiabetesCard />}
-                 {showBiomarkersCard && <BiomarkersCard />}
-                 {enabledDashboards?.includes('lipids') && <LipidCard />}
-                 {enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
-                 {enabledDashboards?.includes('thyroid') && <ThyroidCard />}
-                 {enabledDashboards?.includes('hypertension') && <HypertensionCard />}
-                 {enabledDashboards?.includes('renal') && <RenalCard />} */}
+                 {/* <WeightRecordCard /> */}
+                 {/* {enabledDashboards?.includes('diabetes') && <DiabetesCard />} */}
+                 {/* {showBiomarkersCard && <BiomarkersCard />} */}
+                 {/* {enabledDashboards?.includes('lipids') && <LipidCard />} */}
+                 {/* {enabledDashboards?.includes('vitaminD') && <VitaminDCard />} */}
+                 {/* {enabledDashboards?.includes('thyroid') && <ThyroidCard />} */}
+                 {/* {enabledDashboards?.includes('hypertension') && <HypertensionCard />} */}
+                 {/* {enabledDashboards?.includes('renal') && <RenalCard />} */}
             </div>
 
             <Separator />
@@ -199,4 +197,3 @@ export default function PatientDashboard() {
     </TooltipProvider>
   );
 }
-
