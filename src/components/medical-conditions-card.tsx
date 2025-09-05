@@ -48,7 +48,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
     defaultValues: { condition: '', date: new Date() },
   });
   
-  const handleSubmit = async (data: z.infer<typeof ConditionSchema>>) => {
+  const handleSubmit = async (data: z.infer<typeof ConditionSchema>) => {
     setIsSubmitting(true);
     await onSave({
         ...data,
@@ -56,7 +56,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
     });
     setIsSubmitting(false);
     onCancel();
-  }
+  };
 
   return (
     <Form {...form}>
