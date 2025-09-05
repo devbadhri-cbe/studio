@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +21,7 @@ import { BloodPressureCard } from './blood-pressure-card';
 
 export function RenalCard() {
   return (
-    <Card className="h-full">
+    <Card className="h-full shadow-xl">
       <CardHeader className="flex flex-row items-start">
         <div className="grid gap-2">
           <CardTitle>CKD Monitoring Dashboard</CardTitle>

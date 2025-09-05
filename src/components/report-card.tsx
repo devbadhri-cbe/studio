@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,7 +35,7 @@ export function ReportCard() {
   const weightUnit = isImperial ? 'lbs' : 'kg';
 
   return (
-    <Card className="h-full">
+    <Card className="h-full shadow-xl">
       <CardHeader className="flex flex-row items-start justify-between">
         <div className="grid gap-2">
           <CardTitle>Comprehensive Health Report</CardTitle>

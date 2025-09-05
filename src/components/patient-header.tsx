@@ -25,7 +25,7 @@ export function PatientHeader() {
   const doctorName = profile.doctorName || 'your doctor';
 
   return (
-    <Card>
+    <Card className="shadow-xl">
       <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
         <div className="flex flex-col items-center md:items-start flex-1 gap-4 w-full">
             <div className="text-center md:text-left">
