@@ -32,6 +32,7 @@ import { WeightRecordCard } from '@/components/weight-record-card';
 import { OnboardingTour } from '@/components/onboarding-tour';
 import { DiabetesCard } from '@/components/diabetes-card';
 import { BiomarkersCard } from '@/components/biomarkers-card';
+import { BloodPressureCard } from '@/components/blood-pressure-card';
 
 
 export default function PatientDashboard() {
@@ -174,12 +175,12 @@ export default function PatientDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
                  <WeightRecordCard />
+                 <BloodPressureCard />
                  {enabledDashboards?.includes('diabetes') && <DiabetesCard />}
                  {showBiomarkersCard && <BiomarkersCard />}
                  {enabledDashboards?.includes('lipids') && <LipidCard />}
                  {enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
                  {enabledDashboards?.includes('thyroid') && <ThyroidCard />}
-                 {enabledDashboards?.includes('hypertension') && <HypertensionCard />}
                  {enabledDashboards?.includes('renal') && <RenalCard />}
             </div>
 
