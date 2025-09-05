@@ -2,18 +2,18 @@
 
 'use client';
 
-import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type RenalRecord, UnitSystem, type ElectrolyteRecord, type MineralBoneDiseaseRecord, type HemoglobinRecord, type NutritionRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord } from '@/lib/types';
+import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
-import { toMmolL, toNgDl, toNmolL, toGDL, toGL } from '@/lib/unit-conversions';
-import { calculateBmi, calculateEgfr } from '@/lib/utils';
+import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
+import { calculateBmi } from '@/lib/utils';
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['vitaminD', 'thyroid', 'hypertension', 'renal'], customBiomarkers: [] };
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledDashboards: ['vitaminD', 'thyroid', 'hypertension'], customBiomarkers: [] };
 
-type DashboardView = 'vitaminD' | 'thyroid' | 'hypertension' | 'renal' | 'report' | 'none';
+type DashboardView = 'vitaminD' | 'thyroid' | 'hypertension' | 'report' | 'none';
 type Theme = 'dark' | 'light' | 'system';
 
 interface BatchRecords {
@@ -22,11 +22,7 @@ interface BatchRecords {
     vitaminD?: Omit<VitaminDRecord, 'id' | 'medication'> & { units?: 'ng/mL' | 'nmol/L' };
     thyroid?: Omit<ThyroidRecord, 'id' | 'medication'>;
     bloodPressure?: Omit<BloodPressureRecord, 'id' | 'medication'>;
-    renal?: Omit<RenalRecord, 'id' | 'medication'>;
-    electrolytes?: Omit<ElectrolyteRecord, 'id' | 'medication'>;
-    mineralBone?: Omit<MineralBoneDiseaseRecord, 'id' | 'medication'>;
     hemoglobin?: number;
-    albumin?: number;
 }
 
 type BiomarkerUnitSystem = 'conventional' | 'si';
@@ -64,21 +60,9 @@ interface AppContextType {
   thyroidRecords: ThyroidRecord[];
   addThyroidRecord: (record: Omit<ThyroidRecord, 'id' | 'medication'>) => void;
   removeThyroidRecord: (id: string) => void;
-  renalRecords: RenalRecord[];
-  addRenalRecord: (record: Omit<RenalRecord, 'id' | 'medication'>) => void;
-  removeRenalRecord: (id: string) => void;
-  electrolyteRecords: ElectrolyteRecord[];
-  addElectrolyteRecord: (record: Omit<ElectrolyteRecord, 'id' | 'medication'>) => void;
-  removeElectrolyteRecord: (id: string) => void;
-  mineralBoneDiseaseRecords: MineralBoneDiseaseRecord[];
-  addMineralBoneDiseaseRecord: (record: Omit<MineralBoneDiseaseRecord, 'id' | 'medication'>) => void;
-  removeMineralBoneDiseaseRecord: (id: string) => void;
   hemoglobinRecords: HemoglobinRecord[];
   addHemoglobinRecord: (record: Omit<HemoglobinRecord, 'id' | 'medication'>) => void;
   removeHemoglobinRecord: (id: string) => void;
-  nutritionRecords: NutritionRecord[];
-  addNutritionRecord: (record: Omit<NutritionRecord, 'id' | 'medication'>) => void;
-  removeNutritionRecord: (id: string) => void;
   weightRecords: WeightRecord[];
   addWeightRecord: (record: Omit<WeightRecord, 'id'>) => void;
   removeWeightRecord: (id: string) => void;
@@ -119,11 +103,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [fastingBloodGlucoseRecords, setFastingBloodGlucoseRecordsState] = React.useState<FastingBloodGlucoseRecord[]>([]);
   const [vitaminDRecords, setVitaminDRecordsState] = React.useState<VitaminDRecord[]>([]);
   const [thyroidRecords, setThyroidRecordsState] = React.useState<ThyroidRecord[]>([]);
-  const [renalRecords, setRenalRecordsState] = React.useState<RenalRecord[]>([]);
-  const [electrolyteRecords, setElectrolyteRecordsState] = React.useState<ElectrolyteRecord[]>([]);
-  const [mineralBoneDiseaseRecords, setMineralBoneDiseaseRecordsState] = React.useState<MineralBoneDiseaseRecord[]>([]);
   const [hemoglobinRecords, setHemoglobinRecordsState] = React.useState<HemoglobinRecord[]>([]);
-  const [nutritionRecords, setNutritionRecordsState] = React.useState<NutritionRecord[]>([]);
   const [weightRecords, setWeightRecordsState] = React.useState<WeightRecord[]>([]);
   const [bloodPressureRecords, setBloodPressureRecordsState] = React.useState<BloodPressureRecord[]>([]);
   const [tips, setTipsState] = React.useState<string[]>([]);
@@ -224,7 +204,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       unitSystem: patient.unitSystem || countries.find(c => c.code === patient.country)?.unitSystem || 'metric',
       medication: Array.isArray(patient.medication) ? patient.medication : [],
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
-      enabledDashboards: Array.isArray(patient.enabledDashboards) ? patient.enabledDashboards : ['vitaminD', 'thyroid', 'hypertension', 'renal'],
+      enabledDashboards: Array.isArray(patient.enabledDashboards) ? patient.enabledDashboards : ['vitaminD', 'thyroid', 'hypertension'],
       bmi: patient.bmi,
       doctorName: patient.doctorName,
       customBiomarkers: patient.customBiomarkers || [],
@@ -234,11 +214,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setFastingBloodGlucoseRecordsState(patient.fastingBloodGlucoseRecords || []);
     setVitaminDRecordsState(patient.vitaminDRecords || []);
     setThyroidRecordsState(patient.thyroidRecords || []);
-    setRenalRecordsState(patient.renalRecords || []);
-    setElectrolyteRecordsState(patient.electrolyteRecords || []);
-    setMineralBoneDiseaseRecordsState(patient.mineralBoneDiseaseRecords || []);
     setHemoglobinRecordsState(patient.hemoglobinRecords || []);
-    setNutritionRecordsState(patient.nutritionRecords || []);
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
     setCustomBiomarkersState(patient.customBiomarkers || []);
@@ -387,47 +363,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { thyroidRecords: updatedRecords });
   };
   
-  const addRenalRecord = (record: Omit<RenalRecord, 'id' | 'medication' | 'eGFR'>) => {
-     const age = calculateAge(profile.dob);
-     const eGFR = age ? calculateEgfr(record.serumCreatinine, record.serumCreatinineUnits, age, profile.gender) : undefined;
-    const newRecord = { ...record, eGFR, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...renalRecords, newRecord];
-    setRenalRecordsState(updatedRecords);
-    updatePatientData(profile.id, { renalRecords: updatedRecords });
-  };
-
-  const removeRenalRecord = (id: string) => {
-    const updatedRecords = renalRecords.filter(r => r.id !== id);
-    setRenalRecordsState(updatedRecords);
-    updatePatientData(profile.id, { renalRecords: updatedRecords });
-  };
-  
-  const addElectrolyteRecord = (record: Omit<ElectrolyteRecord, 'id' | 'medication'>) => {
-    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...electrolyteRecords, newRecord];
-    setElectrolyteRecordsState(updatedRecords);
-    updatePatientData(profile.id, { electrolyteRecords: updatedRecords });
-  };
-
-  const removeElectrolyteRecord = (id: string) => {
-    const updatedRecords = electrolyteRecords.filter(r => r.id !== id);
-    setElectrolyteRecordsState(updatedRecords);
-    updatePatientData(profile.id, { electrolyteRecords: updatedRecords });
-  };
-  
-  const addMineralBoneDiseaseRecord = (record: Omit<MineralBoneDiseaseRecord, 'id' | 'medication'>) => {
-    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...mineralBoneDiseaseRecords, newRecord];
-    setMineralBoneDiseaseRecordsState(updatedRecords);
-    updatePatientData(profile.id, { mineralBoneDiseaseRecords: updatedRecords });
-  };
-
-  const removeMineralBoneDiseaseRecord = (id: string) => {
-    const updatedRecords = mineralBoneDiseaseRecords.filter(r => r.id !== id);
-    setMineralBoneDiseaseRecordsState(updatedRecords);
-    updatePatientData(profile.id, { mineralBoneDiseaseRecords: updatedRecords });
-  };
-
   const addHemoglobinRecord = (record: Omit<HemoglobinRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     const updatedRecords = [...hemoglobinRecords, newRecord];
@@ -441,19 +376,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { hemoglobinRecords: updatedRecords });
   };
   
-  const addNutritionRecord = (record: Omit<NutritionRecord, 'id' | 'medication'>) => {
-    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...nutritionRecords, newRecord];
-    setNutritionRecordsState(updatedRecords);
-    updatePatientData(profile.id, { nutritionRecords: updatedRecords });
-  };
-
-  const removeNutritionRecord = (id: string) => {
-    const updatedRecords = nutritionRecords.filter(r => r.id !== id);
-    setNutritionRecordsState(updatedRecords);
-    updatePatientData(profile.id, { nutritionRecords: updatedRecords });
-  };
-
   const addWeightRecord = (record: Omit<WeightRecord, 'id'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     const updatedRecords = [...weightRecords, newRecord];
@@ -512,8 +434,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         hba1c: 'HbA1c',
         vitaminD: 'Vitamin D',
         thyroid: 'Thyroid',
-        hypertension: 'Hypertension',
-        renal: 'Renal'
+        hypertension: 'Hypertension'
       };
       return names[key] || 'Unknown';
   };
@@ -532,7 +453,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
     const updates: Partial<Patient> = {};
-    const date = batch.hba1c?.date || batch.fastingBloodGlucose?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date || batch.renal?.date;
+    const date = batch.hba1c?.date || batch.fastingBloodGlucose?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date;
 
     const result: AddBatchRecordsResult = { added: [], duplicates: [] };
 
@@ -603,16 +524,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       } else { result.duplicates.push('Blood Pressure'); }
     }
     
-    if (batch.renal && batch.renal.egfr && batch.renal.uacr) {
-       const dateExists = renalRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
-       if (!dateExists) {
-        const newRecord: RenalRecord = { ...batch.renal, id: `renal-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        updates.renalRecords = [...renalRecords, newRecord];
-        setRenalRecordsState(updates.renalRecords);
-        result.added.push('Renal Panel');
-      } else { result.duplicates.push('Renal Panel'); }
-    }
-
     if (batch.hemoglobin) {
        const dateExists = hemoglobinRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
        if (!dateExists) {
@@ -621,40 +532,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setHemoglobinRecordsState(updates.hemoglobinRecords);
         result.added.push('Hemoglobin');
       } else { result.duplicates.push('Hemoglobin'); }
-    }
-    
-    if (batch.albumin) {
-        const dateExists = nutritionRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
-        if (!dateExists) {
-         const newRecord: NutritionRecord = { albumin: batch.albumin, id: `nutrition-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-         updates.nutritionRecords = [...nutritionRecords, newRecord];
-         setNutritionRecordsState(updates.nutritionRecords);
-         result.added.push('Nutrition (Albumin)');
-       } else { result.duplicates.push('Nutrition (Albumin)'); }
-    }
-
-    if (batch.electrolytes) {
-        const dateExists = electrolyteRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
-        if (!dateExists) {
-            const newRecord: ElectrolyteRecord = { ...batch.electrolytes, id: `electrolytes-${Date.now()}`, date: newRecordDate.toISOString(), medication: newMedication };
-            updates.electrolyteRecords = [...electrolyteRecords, newRecord];
-            setElectrolyteRecordsState(updates.electrolyteRecords);
-            result.added.push('Electrolytes');
-        } else {
-            result.duplicates.push('Electrolytes');
-        }
-    }
-    
-    if (batch.mineralBone) {
-        const dateExists = mineralBoneDiseaseRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
-        if (!dateExists) {
-            const newRecord: MineralBoneDiseaseRecord = { ...batch.mineralBone, id: `mineralbone-${Date.now()}`, date: newRecordDate.toISOString(), medication: newMedication };
-            updates.mineralBoneDiseaseRecords = [...mineralBoneDiseaseRecords, newRecord];
-            setMineralBoneDiseaseRecordsState(updates.mineralBoneDiseaseRecords);
-            result.added.push('Mineral/Bone');
-        } else {
-            result.duplicates.push('Mineral/Bone');
-        }
     }
     
     if (Object.keys(updates).length > 0) {
@@ -695,21 +572,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     thyroidRecords,
     addThyroidRecord,
     removeThyroidRecord,
-    renalRecords,
-    addRenalRecord,
-    removeRenalRecord,
-    electrolyteRecords,
-    addElectrolyteRecord,
-    removeElectrolyteRecord,
-    mineralBoneDiseaseRecords,
-    addMineralBoneDiseaseRecord,
-    removeMineralBoneDiseaseRecord,
     hemoglobinRecords,
     addHemoglobinRecord,
     removeHemoglobinRecord,
-    nutritionRecords,
-    addNutritionRecord,
-    removeNutritionRecord,
     weightRecords,
     addWeightRecord,
     removeWeightRecord,

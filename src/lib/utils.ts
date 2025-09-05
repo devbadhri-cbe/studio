@@ -23,33 +23,6 @@ export function calculateAge(dob: string): number | null {
   }
 }
 
-/**
- * Calculates eGFR using the CKD-EPI 2021 equation.
- * @param creatinine Serum creatinine value.
- * @param unit Unit of the creatinine value ('mg/dL' or 'umol/L').
- * @param age Patient's age in years.
- * @param gender Patient's gender ('male' or 'female').
- * @returns The calculated eGFR value.
- */
-export function calculateEgfr(creatinine: number, unit: 'mg/dL' | 'umol/L', age: number, gender: 'male' | 'female'): number {
-    if (gender === 'other') return 0; // Or handle as per clinical guidelines for 'other'
-
-    // Convert creatinine to mg/dL if it's in µmol/L
-    const scr = unit === 'umol/L' ? creatinine / 88.4 : creatinine;
-
-    const k = gender === 'female' ? 0.7 : 0.9;
-    const alpha = gender === 'female' ? -0.241 : -0.302;
-    const sexFactor = gender === 'female' ? 1.012 : 1;
-
-    const minTerm = Math.min(scr / k, 1);
-    const maxTerm = Math.max(scr / k, 1);
-
-    const egfr = 142 * Math.pow(minTerm, alpha) * Math.pow(maxTerm, -1.200) * Math.pow(0.9938, age) * sexFactor;
-
-    return Math.round(egfr);
-}
-
-
 export function calculateBmi(weight: number | undefined, height: number | undefined): number | null {
   if (!weight || !height || height === 0) return null;
   try {

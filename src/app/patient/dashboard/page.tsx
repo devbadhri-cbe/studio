@@ -24,7 +24,6 @@ import { ReminderCard } from '@/components/reminder-card';
 import { VitaminDCard } from '@/components/vitamin-d-card';
 import { ReportCard } from '@/components/report-card';
 import { ThyroidCard } from '@/components/thyroid-card';
-import { RenalCard } from '@/components/renal-card';
 import { BiomarkersCard } from '@/components/biomarkers-card';
 import { ProfileCard } from '@/components/profile-card';
 
@@ -84,26 +83,26 @@ export default function PatientDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
-                <CollapsibleTrigger asChild>
-                    <Button variant="outline" className="w-full">
-                        <Stethoscope className="mr-2 h-4 w-4" />
-                        Disease Panels
-                    </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                    <DiseasePanel />
-                </CollapsibleContent>
+                  <CollapsibleTrigger asChild>
+                      <Button variant="outline" className="w-full">
+                          <Stethoscope className="mr-2 h-4 w-4" />
+                          Disease Panels
+                      </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                      <DiseasePanel />
+                  </CollapsibleContent>
               </Collapsible>
               <Collapsible open={isBiomarkersPanelOpen} onOpenChange={setIsBiomarkersPanelOpen}>
-                <CollapsibleTrigger asChild>
-                     <Button variant="outline" className="w-full">
-                        <DropletIcon className="mr-2 h-4 w-4" />
-                        Biomarker Cards
-                    </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                    <BiomarkersPanel />
-                </CollapsibleContent>
+                  <CollapsibleTrigger asChild>
+                      <Button variant="outline" className="w-full">
+                          <DropletIcon className="mr-2 h-4 w-4" />
+                          Biomarker Cards
+                      </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                      <BiomarkersPanel />
+                  </CollapsibleContent>
               </Collapsible>
             </div>
             
@@ -140,7 +139,6 @@ export default function PatientDashboard() {
                  {showBiomarkersCard && <BiomarkersCard />}
                  {profile.enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
                  {profile.enabledDashboards?.includes('thyroid') && <ThyroidCard />}
-                 {profile.enabledDashboards?.includes('renal') && <RenalCard />}
             </div>
 
             <Separator />
