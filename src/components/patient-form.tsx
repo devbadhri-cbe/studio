@@ -93,7 +93,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 </FormItem>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 border p-4 rounded-md items-end">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 border p-4 rounded-md items-start">
                  <FormField
                     control={form.control}
                     name="dob"
@@ -129,7 +129,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         <FormItem className="md:col-span-2">
                             <FormLabel>Gender</FormLabel>
                             <FormControl>
-                                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 h-10 pt-2">
+                                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 h-10">
                                     <FormItem className="flex items-center space-x-2 space-y-0">
                                         <FormControl>
                                             <RadioGroupItem value="male" />
