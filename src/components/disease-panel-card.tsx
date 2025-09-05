@@ -11,20 +11,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-  DropdownMenuSubContent,
-  DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Settings, PlusCircle } from 'lucide-react';
+import { Settings, PlusCircle, Pencil } from 'lucide-react';
 import { availableBiomarkerCards, type BiomarkerKey } from '@/lib/biomarker-cards';
 import { useApp } from '@/context/app-context';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { dateFormats } from '@/lib/countries';
 import type { UnitSystem } from '@/lib/types';
+import { ManagePanelBiomarkersDialog } from './manage-panel-biomarkers-dialog';
 
 
 interface DiseasePanelCardProps {
@@ -50,7 +46,8 @@ export function DiseasePanelCard({
     allPanelBiomarkers,
     enabledBiomarkers
 }: DiseasePanelCardProps) {
-    const { profile, setProfile, biomarkerUnit, setBiomarkerUnit, toggleDiseaseBiomarker } = useApp();
+    const { profile, setProfile, biomarkerUnit, setBiomarkerUnit } = useApp();
+    const [isManageBiomarkersOpen, setIsManageBiomarkersOpen] = React.useState(false);
 
     const Actions = isDoctorLoggedIn ? (
         <>
@@ -65,35 +62,15 @@ export function DiseasePanelCard({
                     <DropdownMenuSeparator />
                     {addRecordActions.map(({ label, action }) => (
                         <DropdownMenuItem key={label} onSelect={action}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
                             {label}
                         </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Add/Remove Biomarkers
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                             <DropdownMenuSubContent>
-                                {allPanelBiomarkers.map((key) => {
-                                    const isChecked = enabledBiomarkers.includes(key);
-                                    return (
-                                        <DropdownMenuCheckboxItem
-                                            key={key}
-                                            checked={isChecked}
-                                            onSelect={(e) => {
-                                                e.preventDefault();
-                                                toggleDiseaseBiomarker(panelKey, key);
-                                            }}
-                                        >
-                                            {availableBiomarkerCards[key].label}
-                                        </DropdownMenuCheckboxItem>
-                                    );
-                                })}
-                            </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                    </DropdownMenuSub>
+                    <DropdownMenuItem onSelect={() => setIsManageBiomarkersOpen(true)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Manage Biomarkers
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                      <DropdownMenuLabel>Display Settings</DropdownMenuLabel>
                      <div className="grid gap-2 px-2 py-1">
@@ -146,6 +123,12 @@ export function DiseasePanelCard({
                     </div>
                 </DropdownMenuContent>
             </DropdownMenu>
+            <ManagePanelBiomarkersDialog 
+                open={isManageBiomarkersOpen}
+                onOpenChange={setIsManageBiomarkersOpen}
+                panelKey={panelKey}
+                panelName={title}
+            />
         </>
     ) : null;
 
@@ -164,7 +147,7 @@ export function DiseasePanelCard({
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
                         {enabledBiomarkers.map(key => {
                             const cardInfo = availableBiomarkerCards[key];
-                            return cardInfo ? cardInfo.component : null;
+                            return cardInfo ? React.cloneElement(cardInfo.component, { key }) : null;
                         })}
                     </div>
                 </CardContent>

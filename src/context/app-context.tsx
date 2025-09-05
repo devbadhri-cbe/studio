@@ -92,7 +92,7 @@ interface AppContextType {
   dashboardSuggestions: [];
   toggleDiseaseBiomarker: (panelKey: string, biomarkerKey: BiomarkerKey) => void;
   customBiomarkers: CustomBiomarker[];
-  addCustomBiomarker: (name: string) => Promise<void>;
+  addCustomBiomarker: (name: string) => Promise<string>;
   removeCustomBiomarker: (id: string) => void;
 }
 
@@ -414,7 +414,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { bloodPressureRecords: updatedRecords });
   };
   
-  const addCustomBiomarker = async (name: string): Promise<void> => {
+  const addCustomBiomarker = async (name: string): Promise<string> => {
     const newBiomarker: CustomBiomarker = {
       id: `custom-${Date.now()}`,
       name,
@@ -422,6 +422,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const updatedBiomarkers = [...(profile.customBiomarkers || []), newBiomarker];
     setCustomBiomarkersState(updatedBiomarkers);
     await updatePatientData(profile.id, { customBiomarkers: updatedBiomarkers });
+    return newBiomarker.id;
   };
 
   const removeCustomBiomarker = (id: string) => {
