@@ -29,12 +29,14 @@ import { BiomarkersCard } from '@/components/biomarkers-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
 import { DiseasePanel } from '@/components/disease-panel';
 import { BiomarkersPanel } from '@/components/biomarkers-panel';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 
 export default function PatientDashboard() {
   const { isClient, isDoctorLoggedIn, profile, dashboardSuggestions } = useApp();
   const router = useRouter();
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
+  const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(false);
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
   const showBiomarkersCard = (profile.enabledDashboards?.includes('hba1c') || profile.enabledDashboards?.includes('glucose') || profile.enabledDashboards?.includes('anemia')) && !profile.enabledDashboards?.includes('diabetes');
@@ -77,10 +79,29 @@ export default function PatientDashboard() {
 
         <main className="flex-1 p-4 md:pt-10 md:p-6">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
-             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
+             
+            <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
+              <PatientHeader>
+                {isDoctorLoggedIn && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <CollapsibleTrigger asChild>
+                        <Button variant="outline" className="w-full">
+                          <Stethoscope className="mr-2 h-4 w-4" />
+                          Disease Panel
+                        </Button>
+                      </CollapsibleTrigger>
+                      <BiomarkersPanel />
+                    </div>
+                )}
+              </PatientHeader>
+              <CollapsibleContent className="pt-6">
+                <DiseasePanel />
+              </CollapsibleContent>
+            </Collapsible>
+
+            {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
             <div className="space-y-6" id="tour-step-1">
-              <PatientHeader />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1 flex flex-col gap-6">
                     <ProfileCard />
