@@ -109,6 +109,7 @@ export default function PatientDashboard() {
                 <WeightRecordCard />
                 <BloodPressureCard />
             </div>
+             {profile.enabledDashboards?.includes('diabetes') && <DiabetesCard />}
 
             <Separator />
 
@@ -141,7 +142,6 @@ export default function PatientDashboard() {
             <Separator />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-step-4">
-                 {profile.enabledDashboards?.includes('diabetes') && <DiabetesCard />}
                  {showBiomarkersCard && <BiomarkersCard />}
                  {profile.enabledDashboards?.includes('lipids') && <LipidCard />}
                  {profile.enabledDashboards?.includes('vitaminD') && <VitaminDCard />}
