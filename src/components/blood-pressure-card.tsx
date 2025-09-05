@@ -58,7 +58,7 @@ export function BloodPressureCard() {
   );
 
   const RecordsList = (
-    <ScrollArea className="h-[140px] pr-3">
+    <ScrollArea className="h-full max-h-[100px] pr-3 w-full">
         <ul className="space-y-1 mt-2">
           {sortedRecords.slice(0, 5).map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">

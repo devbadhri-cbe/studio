@@ -4,6 +4,7 @@
 import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { Separator } from './ui/separator';
 
 interface BiomarkerCardTemplateProps {
   title: string;
@@ -44,18 +45,22 @@ export function BiomarkerCardTemplate({
 
         {hasRecords ? (
           <div className="flex-1 flex flex-col min-h-0">
-              {/* Top Half: Records & Status */}
-              <div className="flex-1 flex flex-col md:flex-row min-h-0">
+              {/* Top Section: Records & Status */}
+              <div className="flex flex-col md:flex-row gap-4 h-[120px]">
                   <div className="flex-1 p-2 flex items-center justify-center">
                       {recordsList}
                   </div>
+                  <Separator orientation="vertical" className="h-auto hidden md:block" />
+                  <Separator orientation="horizontal" className="w-full md:hidden" />
                   <div className="flex-1 p-2 flex items-center justify-center">
                       {statusDisplay}
                   </div>
               </div>
               
-              {/* Bottom Half: Chart */}
-              <div className="flex-1 p-2 flex flex-col min-h-0">
+              <Separator />
+
+              {/* Bottom Section: Chart */}
+              <div className="flex-1 pt-4 flex flex-col min-h-0">
                   {chart}
               </div>
           </div>
