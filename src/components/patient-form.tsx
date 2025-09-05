@@ -93,12 +93,12 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 </FormItem>
             )}
 
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                  <FormField
                     control={form.control}
                     name="dob"
                     render={({ field }) => (
-                        <FormItem className="flex flex-col">
+                        <FormItem className="flex flex-col md:col-span-2">
                             <FormLabel>Date of Birth</FormLabel>
                             <FormControl>
                                 <DatePicker
@@ -112,17 +112,23 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         </FormItem>
                     )}
                  />
-                 <FormItem>
-                    <FormLabel>Age</FormLabel>
-                    <FormControl>
-                        <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
-                    </FormControl>
-                </FormItem>
+                 <FormField
+                    control={form.control}
+                    name="age"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Age</FormLabel>
+                            <FormControl>
+                                <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                 />
                  <FormField
                     control={form.control}
                     name="gender"
                     render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="md:col-span-2">
                             <FormLabel>Gender</FormLabel>
                             <FormControl>
                                 <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 h-10 pt-2">
