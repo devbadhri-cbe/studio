@@ -87,7 +87,7 @@ export default function PatientDashboard() {
                       <CollapsibleTrigger asChild>
                         <Button variant="outline" className="w-full">
                           <Stethoscope className="mr-2 h-4 w-4" />
-                          Disease Panel
+                          Disease Panels
                         </Button>
                       </CollapsibleTrigger>
                       <BiomarkersPanel />
