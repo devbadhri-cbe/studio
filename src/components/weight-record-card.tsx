@@ -18,7 +18,6 @@ import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import type { EditHeightDialogHandles } from './edit-height-dialog';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
-import { Card, CardContent } from './ui/card';
 
 export function WeightRecordCard() {
   const { weightRecords, removeWeightRecord, profile, setProfile } = useApp();
@@ -152,11 +151,7 @@ export function WeightRecordCard() {
     </div>
   );
 
-  const Chart = (
-    <div className="flex-1 pt-4 flex flex-col min-h-0">
-        <WeightChart />
-    </div>
-  );
+  const Chart = <WeightChart />;
 
   return (
     <BiomarkerCardTemplate

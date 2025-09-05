@@ -18,7 +18,7 @@ export function BloodPressureChart() {
 
   if (latestRecords.length < 5 && sortedRecords.length >= 5) {
       latestRecords = sortedRecords.slice(sortedRecords.length - 5);
-  } else if (sortedRecords.length < 5) {
+  } else if (latestRecords.length < 5) {
       latestRecords = sortedRecords;
   }
   
@@ -37,7 +37,7 @@ export function BloodPressureChart() {
   }
 
   return (
-    <div className="h-[300px] w-full">
+    <div className="flex-1 pt-4 flex flex-col min-h-0">
       <ResponsiveContainer width="100%" height="100%">
         {bloodPressureRecords && bloodPressureRecords.length > 0 ? (
           <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 20 }}>
