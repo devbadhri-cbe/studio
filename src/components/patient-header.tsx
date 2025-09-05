@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import { DiseasePanel } from './disease-panel';
+import { BiomarkersPanel } from './biomarkers-panel';
 
 export function PatientHeader() {
   const { profile, isDoctorLoggedIn } = useApp();
@@ -35,6 +37,12 @@ export function PatientHeader() {
                 <p className="text-sm text-muted-foreground">Your health overview. Consult {doctorName} before making any decisions.</p>
             </div>
         </div>
+         {isDoctorLoggedIn && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <DiseasePanel />
+                <BiomarkersPanel />
+            </div>
+        )}
       </CardContent>
     </Card>
   );

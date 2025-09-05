@@ -81,12 +81,6 @@ export default function PatientDashboard() {
 
             <div className="space-y-6" id="tour-step-1">
               <PatientHeader />
-                {isDoctorLoggedIn && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <DiseasePanel />
-                        <BiomarkersPanel />
-                    </div>
-                )}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1 flex flex-col gap-6">
                     <ProfileCard />
