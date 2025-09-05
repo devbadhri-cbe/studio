@@ -44,9 +44,9 @@ export function DatePicker({
 }: DatePickerProps) {
   const isMobile = useIsMobile();
 
-  const [day, setDay] = React.useState<string>(value && isValid(value) ? format(value, 'dd') : '');
-  const [month, setMonth] = React.useState<string>(value && isValid(value) ? format(value, 'MM') : '');
-  const [year, setYear] = React.useState<string>(value && isValid(value) ? format(value, 'yyyy') : '');
+  const [day, setDay] = React.useState<string>('');
+  const [month, setMonth] = React.useState<string>('');
+  const [year, setYear] = React.useState<string>('');
 
   React.useEffect(() => {
     if (value && isValid(value)) {
@@ -106,7 +106,7 @@ export function DatePicker({
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex flex-col gap-2 border border-red-500 p-2 rounded-md">
+    <div className="flex flex-col gap-2">
        {label && <Label>{label}</Label>}
       <div className="flex items-center gap-2 border border-input rounded-md px-3 h-10 w-full">
          <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
