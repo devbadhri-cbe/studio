@@ -63,7 +63,7 @@ export function CreateBiomarkerDialog({ open, onOpenChange, onSuccess }: CreateB
            const newBiomarkerId = await addCustomBiomarker(data.name);
             toast({
                 title: 'Biomarker Created',
-                description: `The "${data.name}" card has been created. You can now add it to a panel.`,
+                description: `The "${data.name}" card has been created.`,
             });
             onSuccess(newBiomarkerId);
             onOpenChange(false);
@@ -117,3 +117,4 @@ export function CreateBiomarkerDialog({ open, onOpenChange, onSuccess }: CreateB
     </Dialog>
   );
 }
+

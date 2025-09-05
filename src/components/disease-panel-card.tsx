@@ -13,14 +13,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Settings, PlusCircle, Pencil } from 'lucide-react';
+import { Settings, PlusCircle, Pencil, Search } from 'lucide-react';
 import { availableBiomarkerCards, type BiomarkerKey } from '@/lib/biomarker-cards';
 import { useApp } from '@/context/app-context';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { dateFormats } from '@/lib/countries';
 import type { UnitSystem } from '@/lib/types';
-import { ManagePanelBiomarkersDialog } from './manage-panel-biomarkers-dialog';
+import { Input } from './ui/input';
+import { Checkbox } from './ui/checkbox';
+import { CreateBiomarkerDialog } from './create-biomarker-dialog';
+import { ScrollArea } from './ui/scroll-area';
 
 
 interface DiseasePanelCardProps {
@@ -43,11 +46,37 @@ export function DiseasePanelCard({
     isDoctorLoggedIn, 
     addRecordActions,
     panelKey,
-    allPanelBiomarkers,
-    enabledBiomarkers
 }: DiseasePanelCardProps) {
-    const { profile, setProfile, biomarkerUnit, setBiomarkerUnit } = useApp();
-    const [isManageBiomarkersOpen, setIsManageBiomarkersOpen] = React.useState(false);
+    const { profile, setProfile, biomarkerUnit, setBiomarkerUnit, toggleDiseaseBiomarker, customBiomarkers } = useApp();
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
+    const [searchQuery, setSearchQuery] = React.useState('');
+
+    const enabledForPanel = profile.enabledBiomarkers?.[panelKey] || [];
+
+    const allAvailableBiomarkers = React.useMemo(() => {
+        const standard = Object.entries(availableBiomarkerCards).map(([key, value]) => ({ key, label: value.label, isCustom: false }));
+        const custom = (customBiomarkers || []).map(b => ({ key: b.id, label: b.name, isCustom: true }));
+        return [...standard, ...custom];
+    }, [customBiomarkers]);
+
+    const sortedAndFilteredBiomarkers = React.useMemo(() => {
+        const lowercasedQuery = searchQuery.toLowerCase();
+
+        const filtered = allAvailableBiomarkers.filter(b => 
+            b.label.toLowerCase().includes(lowercasedQuery)
+        );
+
+        return filtered.sort((a, b) => {
+            const aIsEnabled = enabledForPanel.includes(a.key);
+            const bIsEnabled = enabledForPanel.includes(b.key);
+
+            if (aIsEnabled && !bIsEnabled) return -1;
+            if (!aIsEnabled && bIsEnabled) return 1;
+            
+            return a.label.localeCompare(b.label);
+        });
+    }, [allAvailableBiomarkers, enabledForPanel, searchQuery]);
+
 
     const Actions = isDoctorLoggedIn ? (
         <>
@@ -57,7 +86,7 @@ export function DiseasePanelCard({
                         <Settings className="h-4 w-4" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64" align="end" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuContent className="w-80" align="end" onClick={(e) => e.stopPropagation()}>
                     <DropdownMenuLabel>Add New Record</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {addRecordActions.map(({ label, action }) => (
@@ -67,9 +96,37 @@ export function DiseasePanelCard({
                         </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={() => setIsManageBiomarkersOpen(true)}>
+                    <DropdownMenuLabel>Manage Panel Biomarkers</DropdownMenuLabel>
+                    <div className="px-2">
+                        <div className="relative">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search biomarkers..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full rounded-lg bg-background pl-8 h-9"
+                            />
+                        </div>
+                    </div>
+                    <ScrollArea className="h-48">
+                         {sortedAndFilteredBiomarkers.map(({ key, label }) => (
+                            <DropdownMenuItem key={key} onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                                <Checkbox
+                                    id={`check-${panelKey}-${key}`}
+                                    checked={enabledForPanel.includes(key)}
+                                    onCheckedChange={() => toggleDiseaseBiomarker(panelKey, key as BiomarkerKey)}
+                                    className="mr-2"
+                                />
+                                <Label htmlFor={`check-${panelKey}-${key}`} className="font-normal cursor-pointer flex-1">
+                                    {label}
+                                </Label>
+                            </DropdownMenuItem>
+                        ))}
+                    </ScrollArea>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => setIsCreateDialogOpen(true)}>
                         <Pencil className="mr-2 h-4 w-4" />
-                        Manage Biomarkers
+                        Create New Biomarker
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                      <DropdownMenuLabel>Display Settings</DropdownMenuLabel>
@@ -123,11 +180,10 @@ export function DiseasePanelCard({
                     </div>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <ManagePanelBiomarkersDialog 
-                open={isManageBiomarkersOpen}
-                onOpenChange={setIsManageBiomarkersOpen}
-                panelKey={panelKey}
-                panelName={title}
+            <CreateBiomarkerDialog 
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+                onSuccess={(newId) => toggleDiseaseBiomarker(panelKey, newId as BiomarkerKey)}
             />
         </>
     ) : null;
@@ -145,9 +201,13 @@ export function DiseasePanelCard({
                 </div>
                 <CardContent className="p-0 flex-1 flex flex-col">
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
-                        {enabledBiomarkers.map(key => {
-                            const cardInfo = availableBiomarkerCards[key];
-                            return cardInfo ? React.cloneElement(cardInfo.component, { key }) : null;
+                        {enabledForPanel.map(key => {
+                            const cardInfo = allAvailableBiomarkers.find(b => b.key === key);
+                            if (cardInfo && !cardInfo.isCustom) {
+                                return React.cloneElement(availableBiomarkerCards[key as BiomarkerKey].component, { key });
+                            }
+                            // Note: Rendering for custom biomarkers would go here if they have a visual component
+                            return null;
                         })}
                     </div>
                 </CardContent>
@@ -155,3 +215,4 @@ export function DiseasePanelCard({
         </Card>
     );
 }
+
