@@ -71,7 +71,7 @@ export function DiabetesCard() {
             )}
             
             {visibleCards.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-2 border-red-500">
                 {visibleCards}
             </div>
             ) : (
