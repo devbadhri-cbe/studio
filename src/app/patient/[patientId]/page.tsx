@@ -6,7 +6,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/app-context';
 import { getPatient } from '@/lib/firestore';
 import type { Patient } from '@/lib/types';
-import PatientDashboard from '../dashboard/page';
+import { PatientDashboard } from '@/components/patient-dashboard';
 
 export default function PatientPage() {
   const params = useParams();
