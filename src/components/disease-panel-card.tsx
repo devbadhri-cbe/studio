@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Settings, PlusCircle, Pencil, Search } from 'lucide-react';
+import { Settings, PlusCircle, Pencil, Search, ChevronDown } from 'lucide-react';
 import { availableBiomarkerCards, type BiomarkerKey } from '@/lib/biomarker-cards';
 import { useApp } from '@/context/app-context';
 import { Label } from './ui/label';
@@ -49,6 +49,7 @@ export function DiseasePanelCard({
     const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState('');
     const [dialogTriggers, setDialogTriggers] = React.useState<Record<string, React.RefObject<HTMLButtonElement>>>({});
+    const [isManagingBiomarkers, setIsManagingBiomarkers] = React.useState(false);
 
     const enabledForPanel = profile.enabledBiomarkers?.[panelKey] || [];
 
@@ -63,7 +64,7 @@ export function DiseasePanelCard({
             .map(key => availableBiomarkerCards[key as BiomarkerKey])
             .filter(Boolean) // Filter out undefined/null entries
             .map(cardInfo => ({
-                label: cardInfo.addRecordLabel,
+                label: `New ${cardInfo.label} Record`,
                 dialog: cardInfo.addRecordDialog,
                 action: () => {
                     dialogTriggers[cardInfo.addRecordLabel]?.current?.click();
@@ -122,33 +123,46 @@ export function DiseasePanelCard({
                         </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuLabel>Manage Panel Biomarkers</DropdownMenuLabel>
-                    <div className="px-2">
-                        <div className="relative">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search biomarkers..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full rounded-lg bg-background pl-8 h-9"
-                            />
-                        </div>
-                    </div>
-                    <ScrollArea className="h-48">
-                         {sortedAndFilteredBiomarkers.map(({ key, label }) => (
-                            <DropdownMenuItem key={key} onSelect={(e) => e.preventDefault()} className="cursor-pointer">
-                                <Checkbox
-                                    id={`check-${panelKey}-${key}`}
-                                    checked={enabledForPanel.includes(key)}
-                                    onCheckedChange={() => toggleDiseaseBiomarker(panelKey, key as BiomarkerKey)}
-                                    className="mr-2"
+                     <DropdownMenuItem
+                        onSelect={(e) => {
+                            e.preventDefault();
+                            setIsManagingBiomarkers(!isManagingBiomarkers);
+                        }}
+                        className="flex justify-between items-center"
+                    >
+                        <span className="font-semibold">Manage Panel Biomarkers</span>
+                        <ChevronDown className={cn("h-4 w-4 transition-transform", isManagingBiomarkers && "rotate-180")} />
+                    </DropdownMenuItem>
+                    
+                    {isManagingBiomarkers && (
+                        <div className="px-2 py-1">
+                            <div className="relative mb-1">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search biomarkers..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full rounded-lg bg-background pl-8 h-9"
                                 />
-                                <Label htmlFor={`check-${panelKey}-${key}`} className="font-normal cursor-pointer flex-1">
-                                    {label}
-                                </Label>
-                            </DropdownMenuItem>
-                        ))}
-                    </ScrollArea>
+                            </div>
+                            <ScrollArea className="h-48">
+                                {sortedAndFilteredBiomarkers.map(({ key, label }) => (
+                                    <DropdownMenuItem key={key} onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                                        <Checkbox
+                                            id={`check-${panelKey}-${key}`}
+                                            checked={enabledForPanel.includes(key)}
+                                            onCheckedChange={() => toggleDiseaseBiomarker(panelKey, key as BiomarkerKey)}
+                                            className="mr-2"
+                                        />
+                                        <Label htmlFor={`check-${panelKey}-${key}`} className="font-normal cursor-pointer flex-1">
+                                            {label}
+                                        </Label>
+                                    </DropdownMenuItem>
+                                ))}
+                            </ScrollArea>
+                        </div>
+                    )}
+                    
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onSelect={() => setIsCreateDialogOpen(true)}>
                         <Pencil className="mr-2 h-4 w-4" />
