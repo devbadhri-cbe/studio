@@ -41,7 +41,7 @@ interface EnableDashboardResult {
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
-  addMedicalCondition: (condition: Omit<MedicalCondition, 'id' | 'status'>) => void;
+  addMedicalCondition: (condition: Omit<MedicalCondition, 'id'>) => void;
   updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
   approveMedicalCondition: (conditionId: string) => void;
@@ -247,13 +247,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updatePatientData(newProfile.id, { ...newProfile });
   }
   
-  const addMedicalCondition = (condition: Omit<MedicalCondition, 'id' | 'status'>) => {
+  const addMedicalCondition = (condition: Omit<MedicalCondition, 'id'>) => {
     const newCondition: MedicalCondition = {
+      ...condition,
       id: Date.now().toString(),
-      date: condition.date,
-      condition: condition.condition,
       icdCode: condition.icdCode || '',
-      status: isDoctorLoggedIn ? 'verified' : 'pending_review',
     };
 
     const updatedConditions = [...profile.presentMedicalConditions, newCondition];

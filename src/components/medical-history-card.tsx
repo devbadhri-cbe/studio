@@ -114,10 +114,12 @@ export function MedicalHistoryCard() {
     
     try {
       const result = await getIcdCode({ conditionName: data.condition });
+      const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
       addMedicalCondition({
         condition: data.condition,
         date: data.date.toISOString(),
         icdCode: result.icdCode,
+        status: status,
       });
     } catch (error) {
       console.error('Failed to get ICD code', error);
@@ -127,10 +129,12 @@ export function MedicalHistoryCard() {
         description: 'Could not get ICD code suggestion. The condition has been saved without it.',
       });
       // Save without the code if AI fails
+      const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
       addMedicalCondition({
         condition: data.condition,
         date: data.date.toISOString(),
         icdCode: '',
+        status: status,
       });
     }
   };
