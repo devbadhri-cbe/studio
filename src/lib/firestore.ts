@@ -151,10 +151,7 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         triglyceridesRecords: [],
         presentMedicalConditions: [],
         medication: [],
-        enabledBiomarkers: {
-          diabetes: ['hba1c', 'glucose'],
-          hypertension: ['bloodPressure']
-        },
+        enabledBiomarkers: {},
         createdAt: serverTimestamp(),
         customBiomarkerRecords: {},
     }
