@@ -4,16 +4,18 @@
 import * as React from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/app-context';
-import { getPatient } from '@/lib/firestore';
+import { getPatient, updatePatient } from '@/lib/firestore';
 import { PatientDashboard } from '@/components/patient-dashboard';
 import { processPatientData } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PatientPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const { setPatientData, isClient, setIsDoctorLoggedIn } = useApp();
+  const { setPatientData, isClient, setIsDoctorLoggedIn, profile } = useApp();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const { toast } = useToast();
   
   const isDoctorViewing = searchParams.get('viewer') === 'doctor';
 
@@ -33,6 +35,12 @@ export default function PatientPage() {
         if (rawPatientData) {
           const patientData = processPatientData(rawPatientData);
           setPatientData(patientData);
+          
+          if (isDoctorViewing) {
+            // Update lastLogin timestamp once when doctor views the page
+            await updatePatient(patientId, { lastLogin: new Date().toISOString() });
+          }
+
         } else {
           setError(`No patient found with ID: ${patientId}`);
         }
