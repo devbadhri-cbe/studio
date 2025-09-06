@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { Patient } from '@/lib/types';
@@ -244,3 +243,5 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     </Card>
   );
 }
+
+    
