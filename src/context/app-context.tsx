@@ -250,14 +250,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   
   const addMedicalCondition = async (condition: { condition: string; date: string }) => {
     const tempId = `temp-${Date.now()}`;
-    const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
-
     const tempCondition: MedicalCondition = {
       ...condition,
       id: tempId,
       icdCode: 'loading...',
-      status: status,
+      status: 'pending_review',
     };
+    
     setProfileState(p => ({
       ...p,
       presentMedicalConditions: [...p.presentMedicalConditions, tempCondition],
@@ -265,24 +264,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const result = await getIcdCode({ conditionName: condition.condition });
+      const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
+
       const newCondition: MedicalCondition = {
         ...condition,
         id: Date.now().toString(),
-        icdCode: result.icdCode,
+        icdCode: result.icdCode || '',
         status: status,
       };
       
-      let finalConditions: MedicalCondition[] = [];
       setProfileState(p => {
-        finalConditions = p.presentMedicalConditions.map(c =>
+        const finalConditions = p.presentMedicalConditions.map(c =>
           c.id === tempId ? newCondition : c
         );
+        updatePatientData(p.id, { presentMedicalConditions: finalConditions });
         return {
           ...p,
           presentMedicalConditions: finalConditions,
         };
       });
-      await updatePatientData(profile.id, { presentMedicalConditions: finalConditions });
 
     } catch (error) {
       console.error('Failed to get ICD code', error);
@@ -291,23 +291,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         title: 'AI Error',
         description: 'Could not get ICD code suggestion. The condition has been saved without it.',
       });
+      const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
       const newCondition: MedicalCondition = {
         ...condition,
         id: Date.now().toString(),
         icdCode: '',
         status: status,
       };
-      let finalConditions: MedicalCondition[] = [];
        setProfileState(p => {
-        finalConditions = p.presentMedicalConditions.map(c =>
+        const finalConditions = p.presentMedicalConditions.map(c =>
           c.id === tempId ? newCondition : c
         );
+        updatePatientData(p.id, { presentMedicalConditions: finalConditions });
         return {
           ...p,
           presentMedicalConditions: finalConditions,
         };
       });
-      await updatePatientData(profile.id, { presentMedicalConditions: finalConditions });
     }
   };
 

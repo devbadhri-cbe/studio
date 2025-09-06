@@ -31,6 +31,10 @@ const MedicationSchema = z.object({
   frequency: z.string().min(1, 'Frequency is required.'),
 });
 
+function capitalizeFirstLetter(string: string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof ConditionSchema>) => Promise<void>, onCancel: () => void }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -48,7 +52,10 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: z.infer<typ
   
   const handleSubmit = async (data: z.infer<typeof ConditionSchema>) => {
     setIsSubmitting(true);
-    await onSave(data);
+    await onSave({
+        ...data,
+        condition: capitalizeFirstLetter(data.condition),
+    });
     setIsSubmitting(false);
   };
 
