@@ -8,6 +8,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const GetHealthInsightsInputSchema = z.object({
@@ -42,6 +43,7 @@ const prompt = ai.definePrompt({
   name: 'getHealthInsightsPrompt',
   input: {schema: GetHealthInsightsInputSchema},
   output: {schema: GetHealthInsightsOutputSchema},
+  model: googleAI.model('gemini-1.5-flash-latest'),
   prompt: `You are a health assistant AI. Your role is to provide safe, helpful, and personalized health tips to a user based on their latest health data.
 
 IMPORTANT: Do not provide medical advice, diagnosis, or treatment plans. Do not suggest specific medications or dosages. Always encourage the user to consult their doctor before making any health decisions. Frame your tips as general wellness suggestions.
