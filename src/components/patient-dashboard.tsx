@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { ArrowLeft, Stethoscope, DropletIcon, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Stethoscope, DropletIcon, ChevronDown, Shapes } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -95,6 +95,24 @@ export function PatientDashboard() {
                         <DiseasePanel />
                     </CollapsibleContent>
                 </Collapsible>
+                
+                {isDoctorLoggedIn && (
+                    <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen} className="col-span-full">
+                        <CollapsibleTrigger asChild>
+                            <Button
+                                variant={isBiomarkersOpen ? 'default' : 'outline'}
+                                className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
+                            >
+                                <Shapes className="mr-2 h-5 w-5" />
+                                Other Biomarkers
+                                <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
+                            </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-4">
+                            <BiomarkersPanel />
+                        </CollapsibleContent>
+                    </Collapsible>
+                )}
             </div>
 
             
