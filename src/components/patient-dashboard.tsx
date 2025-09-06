@@ -104,7 +104,7 @@ export function PatientDashboard() {
                                 className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
                             >
                                 <Shapes className="mr-2 h-5 w-5" />
-                                Other Biomarkers
+                                Biomarker Cards
                                 <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
                             </Button>
                         </CollapsibleTrigger>
