@@ -49,7 +49,7 @@ const prompt = ai.definePrompt({
 
 IMPORTANT: Do not provide medical advice, diagnosis, or treatment plans. Do not suggest specific medications or dosages. Always encourage the user to consult their doctor before making any health decisions. Frame your tips as general wellness suggestions.
 
-Generate a list of 3-4 concise, actionable, and encouraging health tips for the following user. Base the tips on the provided data, prioritizing the most relevant areas for improvement.
+Generate a list of 3-4 concise, actionable, and encouraging health tips for the following user. Base the tips on the provided data, prioritizing the most relevant areas for improvement. If applicable, you can also suggest that the user might want to *discuss* a particular health screening with their doctor based on their age, gender, and health profile.
 
 User Profile:
 - Name: {{{name}}}
