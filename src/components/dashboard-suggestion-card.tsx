@@ -9,29 +9,62 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Separator } from './ui/separator';
 import { Badge } from './ui/badge';
 import { toast } from '@/hooks/use-toast';
+import type { DashboardSuggestion, Patient } from '@/lib/types';
+import { BiomarkerKey } from '@/lib/biomarker-cards';
+
 
 export function DashboardSuggestionCard() {
-  const { profile, setProfile } = useApp();
+  const { profile, setProfile, toggleDiseaseBiomarker } = useApp();
 
   const pendingSuggestions = (profile.dashboardSuggestions || []).filter(s => s.status === 'pending');
   if (pendingSuggestions.length === 0) return null;
-
-  const handleDismiss = (suggestionId: string) => {
-    // This is a placeholder for Phase 2. For now, it just removes the suggestion from view.
-    const newSuggestions = profile.dashboardSuggestions?.map(s => 
-        s.id === suggestionId ? { ...s, status: 'dismissed' } : s
+  
+  const setSuggestionStatus = (suggestionId: string, status: 'dismissed' | 'completed') => {
+      const newSuggestions = profile.dashboardSuggestions?.map(s => 
+        s.id === suggestionId ? { ...s, status } : s
     ) || [];
     setProfile({ ...profile, dashboardSuggestions: newSuggestions });
+  }
+
+  const handleDismiss = (suggestionId: string) => {
+    setSuggestionStatus(suggestionId, 'dismissed');
     toast({ title: 'Suggestion Dismissed' });
   };
   
-  const handleEnable = (suggestionId: string) => {
-    // This is a placeholder for Phase 2.
-    toast({
-        variant: 'destructive',
-        title: 'Feature Not Implemented',
-        description: 'Automated panel creation will be available in a future update.'
-    });
+  const handleEnable = (suggestion: DashboardSuggestion) => {
+    // This is the implementation for Phase 1. It only handles existing panels.
+    const panelMap: {[key: string]: string} = {
+        "Diabetes Panel": "diabetes",
+        "Hypertension Panel": "hypertension",
+    };
+    
+    const panelKey = panelMap[suggestion.panelName];
+
+    if (panelKey && !suggestion.isNewPanel) {
+        // Enable all suggested biomarkers for this existing panel
+        suggestion.biomarkers.forEach(biomarkerName => {
+            // Find the biomarker key from the name
+            // This is a simplification; a real app might need a more robust mapping.
+            const biomarkerKey = Object.entries(profile.enabledBiomarkers || {}).find(([key, value]) => {
+                return (value as unknown as {label: string}).label === biomarkerName;
+            })?.[0] as BiomarkerKey | undefined;
+
+            if(biomarkerKey) {
+                 toggleDiseaseBiomarker(panelKey, biomarkerKey);
+            }
+        });
+        setSuggestionStatus(suggestion.id, 'completed');
+        toast({
+            title: `${suggestion.panelName} Enabled`,
+            description: `Enabled ${suggestion.biomarkers.length} biomarkers.`
+        });
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'Feature Not Implemented',
+            description: 'Automated creation of new panels will be available in a future update.'
+        });
+    }
   }
 
   return (
@@ -71,7 +104,7 @@ export function DashboardSuggestionCard() {
                     <X className="h-4 w-4 mr-2" />
                     Dismiss
                   </Button>
-                  <Button size="sm" onClick={() => handleEnable(suggestion.id)}>
+                  <Button size="sm" onClick={() => handleEnable(suggestion)}>
                     <Check className="h-4 w-4 mr-2" />
                     Enable
                   </Button>

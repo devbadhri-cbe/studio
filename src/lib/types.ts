@@ -41,7 +41,7 @@ export interface DashboardSuggestion {
   panelName: string;
   isNewPanel: boolean;
   biomarkers: string[];
-  status: 'pending' | 'dismissed';
+  status: 'pending' | 'dismissed' | 'completed';
 }
 
 
