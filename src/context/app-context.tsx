@@ -242,7 +242,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setLdlRecordsState(patient.ldlRecords || []);
     setHdlRecordsState(patient.hdlRecords || []);
     setTriglyceridesRecordsState(patient.triglyceridesRecords || []);
-    setTips([]); 
+    setTipsState([]); 
     setDashboardViewState('report');
     setBiomarkerUnitState(countries.find(c => c.code === patient.country)?.biomarkerUnit || 'conventional');
     setHasUnsavedChanges(false);
