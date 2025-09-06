@@ -2,7 +2,7 @@
 'use client';
 
 import { useApp } from '@/context/app-context';
-import { Lightbulb, Check, X, Pencil } from 'lucide-react';
+import { Lightbulb, Check, X } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -11,6 +11,7 @@ import { Badge } from './ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import type { DashboardSuggestion } from '@/lib/types';
 import { availableBiomarkerCards, BiomarkerKey } from '@/lib/biomarker-cards';
+import { Alert, AlertTitle, AlertDescription } from './ui/alert';
 
 
 export function DashboardSuggestionCard() {
@@ -37,15 +38,15 @@ export function DashboardSuggestionCard() {
   };
   
   const handleEnable = (suggestion: DashboardSuggestion) => {
-    const missing = suggestion.biomarkers.filter(
+    const missingBiomarkers = suggestion.biomarkers.filter(
         b => !allKnownBiomarkerLabels.includes(b.toLowerCase())
     );
 
-    if (missing.length > 0) {
+    if (missingBiomarkers.length > 0) {
         toast({
           variant: 'destructive',
-          title: 'Missing Biomarkers',
-          description: `The following biomarker cards need to be created by the developer first: ${missing.join(', ')}`
+          title: 'Missing Biomarker Cards',
+          description: `The following biomarker cards need to be implemented by a developer first: ${missingBiomarkers.join(', ')}`
         })
         return;
     }
@@ -70,6 +71,12 @@ export function DashboardSuggestionCard() {
     setSuggestionStatus(suggestion.id, 'completed');
   }
   
+  const checkMissingBiomarkers = (suggestion: DashboardSuggestion) => {
+      return suggestion.biomarkers.filter(
+          b => !allKnownBiomarkerLabels.includes(b.toLowerCase())
+      );
+  }
+
   return (
     <>
     <Card className="border-blue-500 bg-blue-500/5">
@@ -86,6 +93,8 @@ export function DashboardSuggestionCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         {pendingSuggestions.map((suggestion, index) => {
+          const missingBiomarkers = checkMissingBiomarkers(suggestion);
+
           return (
             <React.Fragment key={suggestion.id}>
               {index > 0 && <Separator />}
@@ -102,13 +111,23 @@ export function DashboardSuggestionCard() {
                       ))}
                     </div>
                   </div>
+
+                  {missingBiomarkers.length > 0 && (
+                      <Alert variant="destructive" className="mt-4">
+                          <AlertTitle>Action Required: Missing Cards</AlertTitle>
+                          <AlertDescription>
+                              The following biomarker cards must be added by a developer before this panel can be enabled: {missingBiomarkers.join(', ')}.
+                          </AlertDescription>
+                      </Alert>
+                  )}
+
                 </div>
                 <div className="flex gap-2 shrink-0 self-end sm:self-center">
                   <Button size="sm" variant="outline" onClick={() => handleDismiss(suggestion.id)}>
                     <X className="h-4 w-4 mr-2" />
                     Dismiss
                   </Button>
-                  <Button size="sm" onClick={() => handleEnable(suggestion)}>
+                  <Button size="sm" onClick={() => handleEnable(suggestion)} disabled={missingBiomarkers.length > 0}>
                     <Check className="h-4 w-4 mr-2" />
                     Enable
                   </Button>
