@@ -32,12 +32,7 @@ const MedicationSchema = z.object({
   frequency: z.string().min(1, 'Frequency is required.'),
 });
 
-type ActiveSynopsis = {
-    type: 'medication' | 'condition';
-    id: string;
-} | null;
-
-function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition: string, date: string}) => Promise<void>, onCancel: () => void }) {
+function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof ConditionSchema>) => Promise<void>, onCancel: () => void }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   
@@ -54,11 +49,7 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
   
   const handleSubmit = async (data: z.infer<typeof ConditionSchema>) => {
     setIsSubmitting(true);
-    await onSave({
-        ...data,
-        date: data.date.toISOString(),
-    });
-    // Do not reset form here, parent component will handle it by unmounting
+    await onSave(data);
     setIsSubmitting(false);
   };
 
@@ -95,6 +86,11 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
   );
 }
 
+type ActiveSynopsis = {
+    type: 'medication' | 'condition';
+    id: string;
+} | null;
+
 export function MedicalHistoryCard() {
   const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, setMedicationNil, isDoctorLoggedIn } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
@@ -102,7 +98,6 @@ export function MedicalHistoryCard() {
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isLoadingIcd, setIsLoadingIcd] = React.useState<string | null>(null);
   const { toast } = useToast();
 
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
@@ -114,18 +109,16 @@ export function MedicalHistoryCard() {
 
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
-  const handleSaveCondition = async (data: { condition: string; date: string }) => {
-    const tempId = `temp-${Date.now()}`;
+  const handleSaveCondition = async (data: z.infer<typeof ConditionSchema>) => {
     setIsAddingCondition(false);
-    setIsLoadingIcd(tempId);
-    
-    // Immediately add condition to UI with loading state
-    addMedicalCondition({ ...data, id: tempId, status: 'pending_review', icdCode: '' });
     
     try {
       const result = await getIcdCode({ conditionName: data.condition });
-      // Update the condition with the real ICD code
-      addMedicalCondition({ ...data, id: tempId, status: 'pending_review', icdCode: result.icdCode }, true);
+      addMedicalCondition({
+        condition: data.condition,
+        date: data.date.toISOString(),
+        icdCode: result.icdCode,
+      });
     } catch (error) {
       console.error('Failed to get ICD code', error);
       toast({
@@ -133,10 +126,12 @@ export function MedicalHistoryCard() {
         title: 'AI Error',
         description: 'Could not get ICD code suggestion. The condition has been saved without it.',
       });
-      // Still update, but without the code, removing the temp entry
-      addMedicalCondition({ ...data, id: tempId, status: 'pending_review', icdCode: '' }, true);
-    } finally {
-      setIsLoadingIcd(null);
+      // Save without the code if AI fails
+      addMedicalCondition({
+        condition: data.condition,
+        date: data.date.toISOString(),
+        icdCode: '',
+      });
     }
   };
   
@@ -226,7 +221,6 @@ export function MedicalHistoryCard() {
                                     key={condition.id}
                                     condition={condition}
                                     onRevise={handleReviseCondition}
-                                    isLoading={isLoadingIcd === condition.id}
                                 />
                             )
                         })}

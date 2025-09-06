@@ -41,7 +41,7 @@ interface EnableDashboardResult {
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
-  addMedicalCondition: (condition: Omit<MedicalCondition, 'id' | 'status'> & { id?: string; status?: MedicalCondition['status'] }, replaceTemp?: boolean) => void;
+  addMedicalCondition: (condition: Omit<MedicalCondition, 'id' | 'status'>) => void;
   updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
   approveMedicalCondition: (conditionId: string) => void;
@@ -247,25 +247,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updatePatientData(newProfile.id, { ...newProfile });
   }
   
-  const addMedicalCondition = (condition: Omit<MedicalCondition, 'id' | 'status'> & { id?: string; status?: MedicalCondition['status'] }, replaceTemp: boolean = false) => {
+  const addMedicalCondition = (condition: Omit<MedicalCondition, 'id' | 'status'>) => {
     const newCondition: MedicalCondition = {
-        id: condition.id || Date.now().toString(),
-        date: condition.date,
-        condition: condition.condition,
-        icdCode: condition.icdCode || '',
-        status: condition.status || (isDoctorLoggedIn ? 'verified' : 'pending_review'),
+      id: Date.now().toString(),
+      date: condition.date,
+      condition: condition.condition,
+      icdCode: condition.icdCode || '', // Ensure icdCode is not undefined
+      status: isDoctorLoggedIn ? 'verified' : 'pending_review',
     };
 
-    let updatedConditions;
-    if (replaceTemp && condition.id) {
-        // If replacing, map and replace the temp entry
-        updatedConditions = profile.presentMedicalConditions.map(c => 
-            c.id === condition.id ? { ...c, ...newCondition, id: c.id.startsWith('temp-') ? Date.now().toString() : c.id } : c
-        );
-    } else {
-        // If not replacing (or no ID), just add it
-        updatedConditions = [...profile.presentMedicalConditions, newCondition];
-    }
+    const updatedConditions = [...profile.presentMedicalConditions, newCondition];
     
     setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
     updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
