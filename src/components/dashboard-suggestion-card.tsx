@@ -8,13 +8,14 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Separator } from './ui/separator';
 import { Badge } from './ui/badge';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import type { DashboardSuggestion } from '@/lib/types';
 import { BiomarkerKey } from '@/lib/biomarker-cards';
 
 
 export function DashboardSuggestionCard() {
   const { profile, setProfile, toggleDiseaseBiomarker } = useApp();
+  const { toast } = useToast();
 
   const pendingSuggestions = (profile.dashboardSuggestions || []).filter(s => s.status === 'pending');
   if (pendingSuggestions.length === 0) return null;
@@ -32,42 +33,24 @@ export function DashboardSuggestionCard() {
   };
   
   const handleEnable = (suggestion: DashboardSuggestion) => {
-    const panelMap: { [key: string]: string } = {
-        'Diabetes Panel': 'diabetes',
-        'Hypertension Panel': 'hypertension',
-        'Lipids Panel': 'lipids',
+    const panelMap: { [key: string]: { panelKey: string, biomarkers: BiomarkerKey[] } } = {
+        'Diabetes Panel': { panelKey: 'diabetes', biomarkers: ['hba1c', 'glucose'] },
+        'Hypertension Panel': { panelKey: 'hypertension', biomarkers: ['bloodPressure', 'weight'] },
+        'Lipids Panel': { panelKey: 'lipids', biomarkers: ['lipidProfile'] },
     };
     
-    const panelKey = panelMap[suggestion.panelName];
+    const panelInfo = panelMap[suggestion.panelName];
 
-    if (panelKey) {
-        let biomarkerKeysToEnable: BiomarkerKey[] = [];
+    if (panelInfo) {
+        panelInfo.biomarkers.forEach(biomarkerKey => {
+            toggleDiseaseBiomarker(panelInfo.panelKey, biomarkerKey);
+        });
         
-        // This is where we map AI suggestions to our system's biomarker keys
-        if (panelKey === 'lipids') {
-            // For now, any suggestion for a lipid-related panel enables the main 'lipidProfile' biomarker.
-            biomarkerKeysToEnable = ['lipidProfile'];
-        } else {
-            // Future logic for other panels can go here
-        }
-
-        if (biomarkerKeysToEnable.length > 0) {
-            biomarkerKeysToEnable.forEach(biomarkerKey => {
-                toggleDiseaseBiomarker(panelKey, biomarkerKey);
-            });
-            
-            toast({
-                title: `${suggestion.panelName} Enabled`,
-                description: 'The panel has been added to the dashboard.',
-            });
-            setSuggestionStatus(suggestion.id, 'completed');
-        } else {
-             toast({
-                variant: 'destructive',
-                title: 'No Matching Biomarkers',
-                description: `Could not find biomarkers to enable for "${suggestion.panelName}".`,
-            });
-        }
+        toast({
+            title: `${suggestion.panelName} Enabled`,
+            description: 'The panel has been added to the dashboard.',
+        });
+        setSuggestionStatus(suggestion.id, 'completed');
     } else {
         toast({
             variant: 'destructive',
