@@ -28,9 +28,10 @@ interface CreateBiomarkerDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSuccess: (newBiomarkerId: string) => void;
+    initialValue?: string;
 }
 
-export function CreateBiomarkerDialog({ open, onOpenChange, onSuccess }: CreateBiomarkerDialogProps) {
+export function CreateBiomarkerDialog({ open, onOpenChange, onSuccess, initialValue }: CreateBiomarkerDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addCustomBiomarker, customBiomarkers } = useApp();
   const { toast } = useToast();
@@ -42,9 +43,9 @@ export function CreateBiomarkerDialog({ open, onOpenChange, onSuccess }: CreateB
 
   React.useEffect(() => {
     if (open) {
-      form.reset({ name: '' });
+      form.reset({ name: initialValue || '' });
     }
-  }, [open, form]);
+  }, [open, initialValue, form]);
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
@@ -117,4 +118,3 @@ export function CreateBiomarkerDialog({ open, onOpenChange, onSuccess }: CreateB
     </Dialog>
   );
 }
-
