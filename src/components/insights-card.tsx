@@ -9,27 +9,62 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription } from './ui/alert';
 import { cn } from '@/lib/utils';
+import { getHealthInsights } from '@/ai/flows/get-health-insights-flow';
+import { calculateAge } from '@/lib/utils';
 
 export function InsightsCard() {
-  const { tips, setTips } = useApp();
+  const { profile, hba1cRecords, bloodPressureRecords, vitaminDRecords, thyroidRecords, tips, setTips } = useApp();
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
 
   const handleGetInsights = async () => {
     setIsLoading(true);
-    // Placeholder for AI insights
-    setTimeout(() => {
-        const newTips = [
-            "AI-powered insights are temporarily disabled.",
-            "Please consult your doctor for personalized health advice based on your records."
-        ];
-        setTips(newTips);
-        setIsLoading(false);
+
+    try {
+      const latestHba1c = [...hba1cRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+      const latestBloodPressure = [...bloodPressureRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+      const latestVitaminD = [...vitaminDRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+      const latestThyroid = [...thyroidRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+
+      const input = {
+          name: profile.name,
+          age: calculateAge(profile.dob) || 0,
+          gender: profile.gender,
+          medication: profile.medication.map(m => m.name),
+          presentMedicalConditions: profile.presentMedicalConditions.map(c => c.condition),
+          latestHba1c: latestHba1c?.value,
+          latestBloodPressure: latestBloodPressure ? { systolic: latestBloodPressure.systolic, diastolic: latestBloodPressure.diastolic } : undefined,
+          latestVitaminD: latestVitaminD?.value,
+          latestThyroid: latestThyroid ? { tsh: latestThyroid.tsh } : undefined,
+          bmi: profile.bmi,
+      };
+
+      const result = await getHealthInsights(input);
+      
+      if (result.insights && result.insights.length > 0) {
+        setTips(result.insights);
         toast({
-          title: 'Feature Disabled',
-          description: 'Personalized AI insights are currently unavailable.',
+          title: 'Insights Generated',
+          description: 'New health tips have been created for you.',
         });
-    }, 1000);
+      } else {
+         toast({
+          variant: 'destructive',
+          title: 'No Insights Found',
+          description: 'The AI could not generate insights based on the current data.',
+        });
+      }
+
+    } catch (error) {
+      console.error("Failed to get insights:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Error Generating Insights',
+        description: 'An unexpected error occurred. Please try again later.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return (
