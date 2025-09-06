@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -10,15 +9,13 @@ import { type BiomarkerKey } from '@/lib/biomarker-cards';
 
 
 const HYPERTENSION_PANEL_KEY = 'hypertension';
-const allHypertensionBiomarkers: BiomarkerKey[] = ['weight'];
+const allHypertensionBiomarkers: BiomarkerKey[] = ['weight', 'bloodPressure'];
 
 export function HypertensionCard() {
-  const { isDoctorLoggedIn, profile } = useApp();
+  const { isDoctorLoggedIn } = useApp();
 
   const icon = <Heart className="h-5 w-5 shrink-0 text-muted-foreground" />;
   
-  const enabledBiomarkers = profile.enabledBiomarkers?.[HYPERTENSION_PANEL_KEY] || allHypertensionBiomarkers;
-
   return (
     <DiseasePanelCard 
         title="Hypertension Panel" 
@@ -26,7 +23,6 @@ export function HypertensionCard() {
         isDoctorLoggedIn={isDoctorLoggedIn}
         panelKey={HYPERTENSION_PANEL_KEY}
         allPanelBiomarkers={allHypertensionBiomarkers}
-        enabledBiomarkers={enabledBiomarkers}
     >
        <></>
     </DiseasePanelCard>

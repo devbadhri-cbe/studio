@@ -34,7 +34,6 @@ interface DiseasePanelCardProps {
   isDoctorLoggedIn: boolean;
   panelKey: string;
   allPanelBiomarkers: BiomarkerKey[];
-  enabledBiomarkers: BiomarkerKey[];
 }
 
 type OpenSection = 'newRecord' | 'manageBiomarkers' | 'displaySettings' | null;
@@ -47,6 +46,7 @@ export function DiseasePanelCard({
     className, 
     isDoctorLoggedIn, 
     panelKey,
+    allPanelBiomarkers,
 }: DiseasePanelCardProps) {
     const { profile, setProfile, biomarkerUnit, setBiomarkerUnit, toggleDiseaseBiomarker, customBiomarkers } = useApp();
     const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
@@ -282,9 +282,9 @@ export function DiseasePanelCard({
                         {enabledForPanel.map(key => {
                             const cardInfo = allAvailableBiomarkers.find(b => b.key === key);
                             if (cardInfo && !cardInfo.isCustom && availableBiomarkerCards[key as BiomarkerKey]) {
-                                return React.cloneElement(availableBiomarkerCards[key as BiomarkerKey].component, { key });
+                                const cardToRender = key === 'bloodPressure' || key === 'weight' ? null : availableBiomarkerCards[key as BiomarkerKey].component;
+                                return cardToRender ? React.cloneElement(cardToRender, { key }) : null;
                             }
-                            // Note: Rendering for custom biomarkers would go here if they have a visual component
                             return null;
                         })}
                     </div>

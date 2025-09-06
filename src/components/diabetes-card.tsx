@@ -11,12 +11,10 @@ const DIABETES_PANEL_KEY = 'diabetes';
 const allDiabetesBiomarkers: BiomarkerKey[] = ['hba1c', 'glucose', 'hemoglobin'];
 
 export function DiabetesCard() {
-  const { isDoctorLoggedIn, profile } = useApp();
+  const { isDoctorLoggedIn } = useApp();
   
   const icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
   
-  const enabledBiomarkers = profile.enabledBiomarkers?.[DIABETES_PANEL_KEY] || allDiabetesBiomarkers;
-
   return (
     <DiseasePanelCard 
         title="Diabetes Panel" 
@@ -24,7 +22,6 @@ export function DiabetesCard() {
         isDoctorLoggedIn={isDoctorLoggedIn}
         panelKey={DIABETES_PANEL_KEY}
         allPanelBiomarkers={allDiabetesBiomarkers}
-        enabledBiomarkers={enabledBiomarkers}
     >
        <></>
     </DiseasePanelCard>
