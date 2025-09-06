@@ -3,59 +3,58 @@
 
 import { useApp } from '@/context/app-context';
 import { availableBiomarkerCards, type BiomarkerKey } from '@/lib/biomarker-cards';
-import { BloodPressureCard } from './blood-pressure-card';
 import { Card, CardContent } from './ui/card';
-import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
-import { Hba1cCard } from './hba1c-card';
-import { HemoglobinCard } from './hemoglobin-card';
-import { ThyroidCard } from './thyroid-card';
-import { VitaminDCard } from './vitamin-d-card';
-import { WeightRecordCard } from './weight-record-card';
 import * as React from 'react';
+import { InteractivePanelGrid } from './interactive-panel-grid';
 
 export function BiomarkersPanel() {
     const { isDoctorLoggedIn, profile } = useApp();
 
     const enabledForPatient: BiomarkerKey[] = React.useMemo(() => {
-        if (!profile.enabledBiomarkers) return ['weight'];
-        
-        // Start with 'weight' as the default card.
-        const defaultBiomarkers: BiomarkerKey[] = ['weight'];
+        // Start with 'weight' as the default card for patients.
+        const defaultBiomarkers: BiomarkerKey[] = isDoctorLoggedIn ? [] : ['weight'];
         
         // Add all other biomarkers enabled by the doctor.
-        const allEnabled = Object.values(profile.enabledBiomarkers).flat();
+        const allEnabled = Object.values(profile.enabledBiomarkers || {}).flat();
         
-        // Combine and return unique keys, ensuring 'weight' is always present.
-        return [...new Set([...defaultBiomarkers, ...allEnabled])];
-    }, [profile.enabledBiomarkers]);
+        // Combine and return unique keys.
+        const allKeys = [...defaultBiomarkers, ...allEnabled];
+        return [...new Set(allKeys)];
+
+    }, [profile.enabledBiomarkers, isDoctorLoggedIn]);
+
+    const allCards = Object.entries(availableBiomarkerCards).map(([key, value]) => ({
+        key,
+        component: React.cloneElement(value.component, { key, isReadOnly: !isDoctorLoggedIn }),
+    }));
     
     if (isDoctorLoggedIn) {
         return (
             <Card>
-                <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <Hba1cCard />
-                    <FastingBloodGlucoseCard />
-                    <HemoglobinCard />
-                    <BloodPressureCard />
-                    <ThyroidCard />
-                    <VitaminDCard />
-                    <WeightRecordCard />
+                <CardContent className="p-4">
+                     <InteractivePanelGrid>
+                        {allCards.map(cardInfo => cardInfo.component)}
+                    </InteractivePanelGrid>
                 </CardContent>
             </Card>
         )
     }
     
+    const cardsToShow = enabledForPatient
+        .map(key => allCards.find(c => c.key === key)?.component)
+        .filter(Boolean);
+
     return (
          <Card>
-            <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {enabledForPatient.length > 0 ? (
-                    enabledForPatient.map(key => {
-                        const cardInfo = availableBiomarkerCards[key];
-                        return cardInfo ? React.cloneElement(cardInfo.component, { key }) : null;
-                    })
+            <CardContent className="p-4">
+                {cardsToShow.length > 0 ? (
+                    <InteractivePanelGrid>
+                        {cardsToShow}
+                    </InteractivePanelGrid>
                 ) : (
                     <div className="col-span-full text-center text-muted-foreground py-12">
                         <p>No biomarker cards have been enabled by your doctor yet.</p>
+                        <p className='text-xs'>(The Weight & BMI card will appear once the patient adds a record.)</p>
                     </div>
                 )}
             </CardContent>

@@ -29,11 +29,11 @@ interface FastingBloodGlucoseCardProps {
 }
 
 export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGlucoseCardProps) {
-  const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord, getDisplayGlucoseValue, biomarkerUnit, setBiomarkerUnit } = useApp();
+  const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord, getDisplayGlucoseValue, biomarkerUnit, setBiomarkerUnit, isDoctorLoggedIn } = useApp();
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
-    return [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
+    return [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(a.date as string).getTime())
   }, [fastingBloodGlucoseRecords]);
   
   const getStatus = (value: number) => {
@@ -50,7 +50,7 @@ export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGluc
   const Title = `Fasting Blood Glucose (${unitLabel})`;
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
-  const Actions = !isReadOnly ? (
+  const Actions = isDoctorLoggedIn ? (
     <DropdownMenu>
         <DropdownMenuTrigger asChild>
               <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -90,14 +90,16 @@ export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGluc
                       <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
                     </p>
                     <div className="flex items-center shrink-0">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeFastingBloodGlucoseRecord(record.id)}>
-                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete record</TooltipContent>
-                      </Tooltip>
+                      {isDoctorLoggedIn && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                            <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeFastingBloodGlucoseRecord(record.id)}>
+                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                            </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete record</TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
                   </li>
                 </TooltipTrigger>

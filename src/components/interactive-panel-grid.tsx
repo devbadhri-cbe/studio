@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Button } from './ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useApp } from '@/context/app-context';
 
 interface InteractivePanelGridProps {
     children: React.ReactNode;
@@ -12,25 +13,26 @@ interface InteractivePanelGridProps {
 
 export function InteractivePanelGrid({ children }: InteractivePanelGridProps) {
     const [expandedIndex, setExpandedIndex] = React.useState<number | null>(null);
+    const { isDoctorLoggedIn } = useApp();
     
     const validChildren = React.Children.toArray(children).filter(React.isValidElement);
 
     React.useEffect(() => {
         // If there's only one card, default to expanded view
-        if (validChildren.length === 1) {
+        if (validChildren.length === 1 && !isDoctorLoggedIn) {
             setExpandedIndex(0);
         } else {
             setExpandedIndex(null);
         }
-    }, [validChildren.length]);
+    }, [validChildren.length, isDoctorLoggedIn]);
     
     const handleCardClick = (index: number) => {
         setExpandedIndex(index);
     };
 
     const handleBackClick = () => {
-        // Don't go back to grid if there's only one item
-        if (validChildren.length > 1) {
+        // Don't go back to grid if there's only one item unless it's the doctor viewing
+        if (validChildren.length > 1 || isDoctorLoggedIn) {
             setExpandedIndex(null);
         }
     };
@@ -45,7 +47,7 @@ export function InteractivePanelGrid({ children }: InteractivePanelGridProps) {
     if (expandedIndex !== null) {
         return (
             <div className="flex-1 flex flex-col h-full">
-                {validChildren.length > 1 && (
+                {(validChildren.length > 1 || isDoctorLoggedIn) && (
                      <div className="mb-2">
                         <Button variant="ghost" size="sm" onClick={handleBackClick}>
                             <ArrowLeft className="mr-2 h-4 w-4" />
