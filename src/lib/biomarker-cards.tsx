@@ -75,12 +75,6 @@ export const availableBiomarkerCards = {
     addRecordLabel: 'New Total Cholesterol Record',
     addRecordDialog: <AddTotalCholesterolRecordDialog />,
   },
-  ldl: {
-    label: 'LDL Cholesterol',
-    component: <LdlCard />,
-    addRecordLabel: 'New LDL Record',
-    addRecordDialog: <AddLdlRecordDialog />,
-  },
   hdl: {
     label: 'HDL Cholesterol',
     component: <HdlCard />,
