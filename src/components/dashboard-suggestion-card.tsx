@@ -38,7 +38,8 @@ export function DashboardSuggestionCard() {
   };
   
   const handleEnable = (suggestion: DashboardSuggestion) => {
-    const missingBiomarkers = suggestion.biomarkers.filter(
+    const biomarkers = suggestion.biomarkers || [];
+    const missingBiomarkers = biomarkers.filter(
         b => !allKnownBiomarkerLabels.includes(b.toLowerCase())
     );
 
@@ -72,7 +73,8 @@ export function DashboardSuggestionCard() {
   }
   
   const checkMissingBiomarkers = (suggestion: DashboardSuggestion) => {
-      return suggestion.biomarkers.filter(
+      const biomarkers = suggestion.biomarkers || [];
+      return biomarkers.filter(
           b => !allKnownBiomarkerLabels.includes(b.toLowerCase())
       );
   }
@@ -94,6 +96,7 @@ export function DashboardSuggestionCard() {
       <CardContent className="space-y-4">
         {pendingSuggestions.map((suggestion, index) => {
           const missingBiomarkers = checkMissingBiomarkers(suggestion);
+          const biomarkersToDisplay = suggestion.biomarkers || [];
 
           return (
             <React.Fragment key={suggestion.id}>
@@ -106,7 +109,7 @@ export function DashboardSuggestionCard() {
                   <div className="flex flex-col items-start gap-2">
                     <p className="text-xs text-muted-foreground">Suggested biomarkers for monitoring:</p>
                     <div className="flex flex-wrap gap-2">
-                      {suggestion.biomarkers.map((biomarker) => (
+                      {biomarkersToDisplay.map((biomarker) => (
                         <Badge key={biomarker} variant="secondary">{biomarker}</Badge>
                       ))}
                     </div>
