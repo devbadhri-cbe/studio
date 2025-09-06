@@ -17,113 +17,44 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Patient } from './types';
-import { calculateAge, calculateBmi } from './utils';
 
 const PATIENTS_COLLECTION = 'patients';
 
-const getPatientStatus = (patientData: Partial<Patient>): 'On Track' | 'Needs Review' | 'Urgent' => {
-  const lastBP = patientData.bloodPressureRecords && patientData.bloodPressureRecords.length > 0 
-    ? [...patientData.bloodPressureRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0] 
-    : null;
-    
-  const needsReview = patientData.presentMedicalConditions?.some(c => c.status === 'pending_review');
-
-  if (lastBP && (lastBP.systolic >= 140 || lastBP.diastolic >= 90)) return 'Urgent';
-  if (needsReview) return 'Needs Review';
-  
-  return 'On Track';
-};
-
-
-const processPatientDoc = (doc: any): Patient => {
-  let data = doc.data();
-
-  data = JSON.parse(JSON.stringify(data));
-
-  const sanitizeRecords = (records: any[]) => {
-    if (!Array.isArray(records)) return [];
-    return records.map(r => {
-      if (r && r.date) {
-        const dateObj = r.date.seconds ? new Timestamp(r.date.seconds, r.date.nanoseconds).toDate() : new Date(r.date);
-        r.date = !isNaN(dateObj.getTime()) ? dateObj.toISOString() : new Date(0).toISOString();
-      }
-      return r;
-    });
+const convertTimestamps = (data: any): any => {
+  const convertedData = { ...data };
+  for (const key in convertedData) {
+    if (convertedData[key] instanceof Timestamp) {
+      convertedData[key] = convertedData[key].toDate().toISOString();
+    } else if (Array.isArray(convertedData[key])) {
+       convertedData[key] = convertedData[key].map(item => {
+         if (item && item.date && item.date instanceof Timestamp) {
+            return { ...item, date: item.date.toDate().toISOString() };
+         }
+         return item;
+       });
+    } else if (convertedData[key] && typeof convertedData[key] === 'object' && !(convertedData[key] instanceof Date)) {
+       if (convertedData[key].seconds !== undefined && convertedData[key].nanoseconds !== undefined) {
+          const ts = new Timestamp(convertedData[key].seconds, convertedData[key].nanoseconds);
+          convertedData[key] = ts.toDate().toISOString();
+       }
+    }
   }
-
-  const hba1cRecords = sanitizeRecords(data.hba1cRecords || []);
-  const fastingBloodGlucoseRecords = sanitizeRecords(data.fastingBloodGlucoseRecords || []);
-  const vitaminDRecords = sanitizeRecords(data.vitaminDRecords || []);
-  const thyroidRecords = sanitizeRecords(data.thyroidRecords || []);
-  const weightRecords = sanitizeRecords(data.weightRecords || []);
-  const bloodPressureRecords = sanitizeRecords(data.bloodPressureRecords || []);
-  const hemoglobinRecords = sanitizeRecords(data.hemoglobinRecords || []);
-  const totalCholesterolRecords = sanitizeRecords(data.totalCholesterolRecords || []);
-  const ldlRecords = sanitizeRecords(data.ldlRecords || []);
-  const hdlRecords = sanitizeRecords(data.hdlRecords || []);
-  const triglyceridesRecords = sanitizeRecords(data.triglyceridesRecords || []);
-  const presentMedicalConditions = sanitizeRecords(data.presentMedicalConditions || []);
-
-  const lastHba1c = hba1cRecords.length > 0 ? [...hba1cRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
-  const lastVitaminD = vitaminDRecords.length > 0 ? [...vitaminDRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
-  const lastThyroid = thyroidRecords.length > 0 ? [...thyroidRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
-  const lastBloodPressure = bloodPressureRecords.length > 0 ? [...bloodPressureRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
-  const lastHemoglobin = hemoglobinRecords.length > 0 ? [...hemoglobinRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
-
-  const latestWeight = weightRecords.length > 0 ? [...weightRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
-  const bmi = (latestWeight && data.height) ? calculateBmi(latestWeight?.value, data.height) : null;
-
-  const dobTimestamp = data.dob && data.dob.seconds ? new Timestamp(data.dob.seconds, data.dob.nanoseconds).toDate() : new Date(data.dob);
-  const lastLoginTimestamp = data.lastLogin && data.lastLogin.seconds ? new Timestamp(data.lastLogin.seconds, data.lastLogin.nanoseconds).toDate() : (data.lastLogin ? new Date(data.lastLogin) : null);
-
-  const patientData: Partial<Patient> = {
-    ...data,
-    id: doc.id,
-    dob: !isNaN(dobTimestamp.getTime()) ? dobTimestamp.toISOString() : new Date(0).toISOString(),
-    lastLogin: lastLoginTimestamp && !isNaN(lastLoginTimestamp.getTime()) ? lastLoginTimestamp.toISOString() : undefined,
-    hba1cRecords,
-    fastingBloodGlucoseRecords,
-    vitaminDRecords,
-    thyroidRecords,
-    weightRecords,
-    bloodPressureRecords,
-    presentMedicalConditions,
-    hemoglobinRecords,
-    totalCholesterolRecords,
-    ldlRecords,
-    hdlRecords,
-    triglyceridesRecords,
-    bmi,
-    enabledBiomarkers: data.enabledBiomarkers || {},
-  };
-
-  const status = getPatientStatus(patientData);
-  
-  return {
-    ...patientData,
-    status,
-    lastHba1c: lastHba1c ? { value: lastHba1c.value, date: lastHba1c.date } : null,
-    lastVitaminD: lastVitaminD ? { value: lastVitaminD.value, date: lastVitaminD.date } : null,
-    lastThyroid: lastThyroid ? { tsh: lastThyroid.tsh, date: lastThyroid.date } : null,
-    lastBloodPressure: lastBloodPressure ? { systolic: lastBloodPressure.systolic, diastolic: lastBloodPressure.diastolic, date: lastBloodPressure.date } : null,
-    lastHemoglobin: lastHemoglobin ? { value: lastHemoglobin.hemoglobin, date: lastHemoglobin.date } : null,
-  } as Patient;
+  return convertedData;
 };
 
 
-export async function getPatients(): Promise<Patient[]> {
+export async function getPatients(): Promise<any[]> {
   const q = query(collection(db, PATIENTS_COLLECTION));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(processPatientDoc);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...convertTimestamps(doc.data()) }));
 }
 
-export async function getPatient(id: string): Promise<Patient | null> {
+export async function getPatient(id: string): Promise<any | null> {
   const docRef = doc(db, PATIENTS_COLLECTION, id);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
     try {
-      const patient = processPatientDoc(docSnap);
-      return patient;
+      return { id: docSnap.id, ...convertTimestamps(docSnap.data()) };
     } catch (e) {
       console.error("getPatient: Error processing document:", e);
       return null;
@@ -183,5 +114,3 @@ export async function deletePatient(id: string): Promise<void> {
   const docRef = doc(db, PATIENTS_COLLECTION, id);
   await deleteDoc(docRef);
 }
-
-// Doctor specific functions are removed for single-doctor model

@@ -26,6 +26,7 @@ import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { useApp } from '@/context/app-context';
 import { TitleBar } from '@/components/title-bar';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { processPatientData } from '@/lib/utils';
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
@@ -43,7 +44,8 @@ export default function DoctorDashboardPage() {
     const fetchPatients = React.useCallback(async () => {
         setIsLoading(true);
         try {
-            const fetchedPatients = await getPatients();
+            const rawPatientsData = await getPatients();
+            const fetchedPatients = rawPatientsData.map(processPatientData);
             setPatients(fetchedPatients);
         } catch (error) {
             console.error("Failed to fetch patients from Firestore", error);
@@ -102,7 +104,8 @@ export default function DoctorDashboardPage() {
 
         try {
             if (editingPatient) {
-                const updatedPatient = await updatePatient(editingPatient.id, patientData);
+                const updatedPatientData = await updatePatient(editingPatient.id, patientData);
+                const updatedPatient = processPatientData(updatedPatientData);
                 toast({
                     title: 'Patient Updated',
                     description: `${updatedPatient.name}'s details have been updated.`,
