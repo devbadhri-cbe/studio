@@ -207,9 +207,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return value;
   }
   
-  const setIsDoctorLoggedIn = (isLoggedIn: boolean) => {
+  const setIsDoctorLoggedIn = useCallback((isLoggedIn: boolean) => {
     setIsDoctorLoggedInState(isLoggedIn);
-  }
+  }, []);
   
   const setPatientData = useCallback((patient: Patient) => {
     const patientProfile: UserProfile = {
