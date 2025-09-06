@@ -19,6 +19,7 @@ export type GetIcdCodeInput = z.infer<typeof GetIcdCodeInputSchema>;
 
 const GetIcdCodeOutputSchema = z.object({
   icdCode: z.string().describe('The corresponding ICD-11 code for the condition.'),
+  standardizedName: z.string().describe('The corrected and standardized medical name for the condition.'),
 });
 export type GetIcdCodeOutput = z.infer<typeof GetIcdCodeOutputSchema>;
 
@@ -32,11 +33,11 @@ const prompt = ai.definePrompt({
     input: {schema: GetIcdCodeInputSchema},
     output: {schema: GetIcdCodeOutputSchema},
     model: googleAI.model('gemini-1.5-flash-latest'),
-    prompt: `You are a medical coding expert. Your task is to provide the most accurate ICD-11 code for the given medical condition.
+    prompt: `You are a medical coding expert. Your task is to provide the most accurate ICD-11 code for the given medical condition. You must also correct any spelling mistakes or grammatical errors in the provided condition name and return the standardized medical term for it.
 
 Condition: {{{conditionName}}}
 
-Provide only the ICD-11 code.`,
+Return the ICD-11 code and the standardized, corrected name.`,
 });
 
 const getIcdCodeFlow = ai.defineFlow(

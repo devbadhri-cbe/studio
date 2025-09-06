@@ -251,15 +251,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addMedicalCondition = async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
     try {
       const result = await getIcdCode({ conditionName: condition.condition });
+      
       const newCondition: MedicalCondition = {
         id: `cond-${Date.now()}`,
-        condition: condition.condition,
+        condition: result.standardizedName || condition.condition,
         date: condition.date,
         icdCode: result.icdCode || '',
         status: isDoctorLoggedIn ? 'verified' : 'pending_review'
       };
 
-      const newProfileState = {
+      const newProfileState: UserProfile = {
         ...profile,
         presentMedicalConditions: [...profile.presentMedicalConditions, newCondition]
       };
@@ -279,22 +280,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateMedicalCondition = (condition: MedicalCondition) => {
     const updatedConditions = profile.presentMedicalConditions.map(c => c.id === condition.id ? condition : c);
-    setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
-    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
+    const newProfileState = { ...profile, presentMedicalConditions: updatedConditions };
+    setProfileState(newProfileState);
+    updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
   };
   
   const removeMedicalCondition = (id: string) => {
     const updatedConditions = profile.presentMedicalConditions.filter(c => c.id !== id);
-    setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
-    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
+    const newProfileState = { ...profile, presentMedicalConditions: updatedConditions };
+    setProfileState(newProfileState);
+    updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
   };
   
   const approveMedicalCondition = (conditionId: string) => {
     const updatedConditions = profile.presentMedicalConditions.map(c => 
       c.id === conditionId ? { ...c, status: 'verified' as const } : c
     );
-    setProfileState(p => ({...p, presentMedicalConditions: updatedConditions }));
-    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
+    const newProfileState = {...profile, presentMedicalConditions: updatedConditions };
+    setProfileState(newProfileState);
+    updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
   };
   
   const dismissSuggestion = (conditionId: string) => {
@@ -302,27 +306,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       c.id === conditionId ? { ...c, status: 'needs_revision' as const } : c
     );
     
-    setProfileState(p => ({...p, presentMedicalConditions: updatedConditions }));
-    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
+    const newProfileState = {...profile, presentMedicalConditions: updatedConditions };
+    setProfileState(newProfileState);
+    updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
   };
 
    const addMedication = (medication: Omit<Medication, 'id'>) => {
     const newMedication = { ...medication, id: Date.now().toString() };
     const updatedMedication = [...profile.medication.filter(m => m.name.toLowerCase() !== 'nil'), newMedication];
-    setProfileState(p => ({ ...p, medication: updatedMedication }));
-    updatePatientData(profile.id, { medication: updatedMedication });
+    const newProfileState = { ...profile, medication: updatedMedication };
+    setProfileState(newProfileState);
+    updatePatientData(profile.id, { medication: newProfileState.medication });
   };
 
   const removeMedication = (id: string) => {
     const updatedMedication = profile.medication.filter(m => m.id !== id);
-    setProfileState(p => ({ ...p, medication: updatedMedication }));
-    updatePatientData(profile.id, { medication: updatedMedication });
+    const newProfileState = { ...profile, medication: updatedMedication };
+    setProfileState(newProfileState);
+    updatePatientData(profile.id, { medication: newProfileState.medication });
   };
 
   const setMedicationNil = () => {
       const nilMedication = [{ id: 'nil', name: 'Nil', dosage: '', frequency: '' }];
-      setProfileState(p => ({...p, medication: nilMedication}));
-      updatePatientData(profile.id, { medication: nilMedication });
+      const newProfileState = {...profile, medication: nilMedication};
+      setProfileState(newProfileState);
+      updatePatientData(profile.id, { medication: newProfileState.medication });
   }
 
   const addHba1cRecord = (record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
@@ -433,15 +441,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       name,
     };
     const updatedBiomarkers = [...(profile.customBiomarkers || []), newBiomarker];
-    setCustomBiomarkersState(updatedBiomarkers);
-    await updatePatientData(profile.id, { customBiomarkers: updatedBiomarkers });
+    const newProfileState = {...profile, customBiomarkers: updatedBiomarkers};
+    setProfileState(newProfileState);
+    await updatePatientData(profile.id, { customBiomarkers: newProfileState.customBiomarkers });
     return newBiomarker.id;
   };
 
   const removeCustomBiomarker = (id: string) => {
     const updatedBiomarkers = (profile.customBiomarkers || []).filter(b => b.id !== id);
-    setCustomBiomarkersState(updatedBiomarkers);
-    updatePatientData(profile.id, { customBiomarkers: updatedBiomarkers });
+    const newProfileState = {...profile, customBiomarkers: updatedBiomarkers};
+    setProfileState(newProfileState);
+    updatePatientData(profile.id, { customBiomarkers: newProfileState.customBiomarkers });
   };
   
   const toggleDiseaseBiomarker = (panelKey: string, biomarkerKey: BiomarkerKey) => {
@@ -457,8 +467,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       [panelKey]: newPanelBiomarkers
     };
     
-    setProfileState(p => ({ ...p, enabledBiomarkers: updatedEnabledBiomarkers }));
-    updatePatientData(profile.id, { enabledBiomarkers: updatedEnabledBiomarkers });
+    const newProfileState = { ...profile, enabledBiomarkers: updatedEnabledBiomarkers };
+    setProfileState(newProfileState);
+    updatePatientData(profile.id, { enabledBiomarkers: newProfileState.enabledBiomarkers });
   };
 
   const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
