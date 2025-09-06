@@ -167,7 +167,6 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
     
     const updateData: {[key: string]: any} = { ...updates };
     
-    // Remove undefined fields to prevent Firestore errors
     Object.keys(updateData).forEach(key => {
         if (updateData[key] === undefined) {
             delete updateData[key];
