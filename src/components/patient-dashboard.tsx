@@ -83,21 +83,23 @@ export function PatientDashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen} className="col-span-1">
-                    <CollapsibleTrigger asChild>
-                        <Button
-                            variant={isDiseasePanelOpen ? 'default' : 'outline'}
-                            className={cn("w-full py-6 text-base", isDiseasePanelOpen && "shadow-lg")}
-                        >
-                            <Stethoscope className="mr-2 h-5 w-5" />
-                            Disease Panels
-                            <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isDiseasePanelOpen && "rotate-180")} />
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="mt-4">
-                        <DiseasePanel />
-                    </CollapsibleContent>
-                </Collapsible>
+                {isDoctorLoggedIn && (
+                    <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen} className="col-span-1">
+                        <CollapsibleTrigger asChild>
+                            <Button
+                                variant={isDiseasePanelOpen ? 'default' : 'outline'}
+                                className={cn("w-full py-6 text-base", isDiseasePanelOpen && "shadow-lg")}
+                            >
+                                <Stethoscope className="mr-2 h-5 w-5" />
+                                Disease Panels
+                                <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isDiseasePanelOpen && "rotate-180")} />
+                            </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-4">
+                            <DiseasePanel />
+                        </CollapsibleContent>
+                    </Collapsible>
+                )}
                 
                 {isDoctorLoggedIn && (
                     <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen} className="col-span-1">
