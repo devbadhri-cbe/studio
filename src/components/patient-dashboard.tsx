@@ -28,7 +28,7 @@ export function PatientDashboard() {
   const { isClient, isDoctorLoggedIn, profile } = useApp();
   const router = useRouter();
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(true);
-  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
+  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
   const hasPendingSuggestions = profile.dashboardSuggestions?.some(s => s.status === 'pending');
