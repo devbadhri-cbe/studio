@@ -14,21 +14,24 @@ interface ConditionSynopsisProps {
 }
 
 export function ConditionSynopsisDialog({ conditionName, onClose }: ConditionSynopsisProps) {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [result, setResult] = React.useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleFetchSynopsis = React.useCallback(async () => {
-    if (!conditionName) return;
+  React.useEffect(() => {
+    const handleFetchSynopsis = async () => {
+        if (!conditionName) return;
 
-    setIsLoading(true);
-    setResult(null);
-    // Placeholder for fetching synopsis - can be re-implemented later
-    setTimeout(() => {
-        setResult(`Synopsis for ${conditionName} would be shown here.`);
-        setIsLoading(false);
-    }, 1000);
-  }, [conditionName, toast, onClose]);
+        setIsLoading(true);
+        setResult(null);
+        // Placeholder for fetching synopsis - can be re-implemented later
+        setTimeout(() => {
+            setResult(`Synopsis for ${conditionName} would be shown here.`);
+            setIsLoading(false);
+        }, 1000);
+    };
+    handleFetchSynopsis();
+  }, [conditionName]);
 
   return (
     <Card className="mt-2 bg-muted/30">
@@ -39,12 +42,7 @@ export function ConditionSynopsisDialog({ conditionName, onClose }: ConditionSyn
                     <p>Loading synopsis...</p>
                 </div>
             )}
-            {!result && !isLoading && (
-                <Button onClick={handleFetchSynopsis} className="w-full">
-                    Load Synopsis for {conditionName}
-                </Button>
-            )}
-             {result && (
+             {result && !isLoading && (
                 <div className="space-y-4">
                     <Alert>
                     <BookOpen className="h-4 w-4" />

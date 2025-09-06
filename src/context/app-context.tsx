@@ -252,7 +252,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: Date.now().toString(),
       date: condition.date,
       condition: condition.condition,
-      icdCode: condition.icdCode || '', // Ensure icdCode is not undefined
+      icdCode: condition.icdCode || '',
       status: isDoctorLoggedIn ? 'verified' : 'pending_review',
     };
 
