@@ -7,6 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, BookOpen, XCircle } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
+import { useApp } from '@/context/app-context';
+import { getConditionSynopsis } from '@/ai/flows/get-condition-synopsis-flow';
 
 interface ConditionSynopsisProps {
   conditionName: string;
@@ -17,21 +19,34 @@ export function ConditionSynopsisDialog({ conditionName, onClose }: ConditionSyn
   const [isLoading, setIsLoading] = React.useState(true);
   const [result, setResult] = React.useState<string | null>(null);
   const { toast } = useToast();
+  const { isDoctorLoggedIn } = useApp();
 
   React.useEffect(() => {
-    const handleFetchSynopsis = async () => {
+    const fetchSynopsis = async () => {
         if (!conditionName) return;
 
         setIsLoading(true);
         setResult(null);
-        // Placeholder for fetching synopsis - can be re-implemented later
-        setTimeout(() => {
-            setResult(`Synopsis for ${conditionName} would be shown here.`);
+        
+        try {
+            const audience = isDoctorLoggedIn ? 'doctor' : 'patient';
+            const response = await getConditionSynopsis({ conditionName, audience });
+            setResult(response.synopsis);
+        } catch (error) {
+            console.error('Failed to get synopsis:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not load the synopsis for this condition.',
+            });
+            setResult('Failed to load synopsis. Please try again later.');
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
-    handleFetchSynopsis();
-  }, [conditionName]);
+    
+    fetchSynopsis();
+  }, [conditionName, isDoctorLoggedIn, toast]);
 
   return (
     <Card className="mt-2 bg-muted/30">
