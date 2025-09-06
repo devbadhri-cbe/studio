@@ -100,43 +100,112 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
 
   return (
     <Card 
-        className="w-full flex flex-col cursor-pointer transition-all group md:hover:border-primary/50 shadow-md active:shadow-xl active:scale-[0.98] md:hover:shadow-lg" 
-        onClick={() => onView(patient)}
+        className="w-full flex flex-col transition-all group md:hover:border-primary/50 shadow-md md:hover:shadow-lg"
     >
-      <CardHeader className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 flex items-center gap-3 min-w-0">
-             <Avatar>
-                <AvatarFallback>
-                    <User className="h-5 w-5" />
-                </AvatarFallback>
-             </Avatar>
-             <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                    <CardTitle className="text-lg truncate">{patient.name}</CardTitle>
-                    {isDoctorLoggedIn && needsReview && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <div className="relative">
-                                    <Bell className="h-4 w-4 text-destructive" />
-                                    <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
-                                    </span>
-                                </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Needs doctor's review</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    )}
+      <button 
+        onClick={() => onView(patient)}
+        className="w-full h-full flex flex-col p-0 text-left bg-transparent border-0 cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+      >
+        <CardHeader className="p-4 w-full">
+            <div className="flex items-start justify-between">
+            <div className="flex-1 flex items-center gap-3 min-w-0">
+                <Avatar>
+                    <AvatarFallback>
+                        <User className="h-5 w-5" />
+                    </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                        <CardTitle className="text-lg truncate">{patient.name}</CardTitle>
+                        {isDoctorLoggedIn && needsReview && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="relative">
+                                        <Bell className="h-4 w-4 text-destructive" />
+                                        <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+                                        </span>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Needs doctor's review</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">
+                        {age ? `${age} years` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
+                    </p>
                 </div>
-                <p className="text-xs text-muted-foreground truncate">
-                    {age ? `${age} years` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
-                </p>
-             </div>
-          </div>
-          <DropdownMenu>
+            </div>
+            {/* The dropdown menu is outside the button flow */}
+            </div>
+        </CardHeader>
+        
+        <CardContent className="p-4 pt-0 space-y-3 text-sm flex-1">
+            <div className="space-y-1.5 text-muted-foreground text-xs">
+                <div className="flex items-center gap-2">
+                    <Clock className="h-3 w-3 shrink-0" />
+                    <span className="truncate">
+                        Last seen: {patient.lastLogin ? formatDistanceToNow(new Date(patient.lastLogin), { addSuffix: true }) : 'Never'}
+                    </span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Phone className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{formattedPhone}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Mail className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{patient.email || 'N/A'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Globe className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{countryName}</span>
+                </div>
+            </div>
+
+            <Separator />
+
+            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
+                    <Droplet className="h-4 w-4 mb-1 text-primary" />
+                    <span className="font-semibold">{patient.fastingBloodGlucoseRecords && patient.fastingBloodGlucoseRecords.length > 0 ? `${[...patient.fastingBloodGlucoseRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].value}` : 'N/A'}</span>
+                    <span className="text-muted-foreground text-[10px]">Glucose</span>
+                </div>
+                <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
+                    <Zap className="h-4 w-4 mb-1 text-primary" />
+                    <span className="font-semibold">{patient.lastBloodPressure ? `${patient.lastBloodPressure.systolic}/${patient.lastBloodPressure.diastolic}` : 'N/A'}</span>
+                    <span className="text-muted-foreground text-[10px]">BP</span>
+                </div>
+                <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
+                    <Sun className="h-4 w-4 mb-1 text-primary" />
+                    <span className="font-semibold">{patient.lastVitaminD ? `${patient.lastVitaminD.value}` : 'N/A'}</span>
+                    <span className="text-muted-foreground text-[10px]">Vit D</span>
+                </div>
+            </div>
+        </CardContent>
+
+        <div className="p-4 pt-0 mt-auto">
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Badge variant={statusVariant} className={`w-full justify-center cursor-help ${statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
+                        {patient.status}
+                    </Badge>
+                </TooltipTrigger>
+                <TooltipContent align="center" side="bottom" className="max-w-[250px] text-xs">
+                    <div className="font-bold text-base mb-1">{patient.status}</div>
+                    <div className="text-left">
+                        <p>{statusDescriptions[patient.status]}</p>
+                    </div>
+                </TooltipContent>
+            </Tooltip>
+        </div>
+      </button>
+
+      {/* Dropdown positioned absolutely to not interfere with the button */}
+      <div className="absolute top-2 right-2">
+        <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
                     <span className="sr-only">Open menu</span>
@@ -149,9 +218,9 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit Patient
                 </DropdownMenuItem>
-                 <SharePatientAccessDialog patient={patient}>
+                <SharePatientAccessDialog patient={patient}>
                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                       <Share2 className="mr-2 h-4 w-4" />
+                        <Share2 className="mr-2 h-4 w-4" />
                         Share Patient Access
                     </DropdownMenuItem>
                 </SharePatientAccessDialog>
@@ -161,11 +230,11 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                     <WhatsAppIcon className="mr-2 h-4 w-4" />
                     WhatsApp
                 </DropdownMenuItem>
-                 <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('sms'))} disabled={!patient.phone}>
+                <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('sms'))} disabled={!patient.phone}>
                     <MessageSquare className="mr-2 h-4 w-4" />
                     SMS / iMessage
                 </DropdownMenuItem>
-                 <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('email'))} disabled={!patient.email}>
+                <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('email'))} disabled={!patient.email}>
                     <Mail className="mr-2 h-4 w-4" />
                     Email
                 </DropdownMenuItem>
@@ -179,66 +248,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="p-4 pt-0 space-y-3 text-sm flex-1">
-        <div className="space-y-1.5 text-muted-foreground text-xs">
-             <div className="flex items-center gap-2">
-                <Clock className="h-3 w-3 shrink-0" />
-                <span className="truncate">
-                    Last seen: {patient.lastLogin ? formatDistanceToNow(new Date(patient.lastLogin), { addSuffix: true }) : 'Never'}
-                </span>
-            </div>
-            <div className="flex items-center gap-2">
-                <Phone className="h-3 w-3 shrink-0" />
-                <span className="truncate">{formattedPhone}</span>
-            </div>
-             <div className="flex items-center gap-2">
-                <Mail className="h-3 w-3 shrink-0" />
-                <span className="truncate">{patient.email || 'N/A'}</span>
-            </div>
-             <div className="flex items-center gap-2">
-                <Globe className="h-3 w-3 shrink-0" />
-                <span className="truncate">{countryName}</span>
-            </div>
-        </div>
-
-        <Separator />
-
-        <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
-                <Droplet className="h-4 w-4 mb-1 text-primary" />
-                <span className="font-semibold">{patient.fastingBloodGlucoseRecords && patient.fastingBloodGlucoseRecords.length > 0 ? `${[...patient.fastingBloodGlucoseRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].value}` : 'N/A'}</span>
-                <span className="text-muted-foreground text-[10px]">Glucose</span>
-            </div>
-            <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
-                <Zap className="h-4 w-4 mb-1 text-primary" />
-                 <span className="font-semibold">{patient.lastBloodPressure ? `${patient.lastBloodPressure.systolic}/${patient.lastBloodPressure.diastolic}` : 'N/A'}</span>
-                <span className="text-muted-foreground text-[10px]">BP</span>
-            </div>
-            <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
-                <Sun className="h-4 w-4 mb-1 text-primary" />
-                <span className="font-semibold">{patient.lastVitaminD ? `${patient.lastVitaminD.value}` : 'N/A'}</span>
-                <span className="text-muted-foreground text-[10px]">Vit D</span>
-            </div>
-        </div>
-      </CardContent>
-
-      <div className="p-4 pt-0 mt-auto">
-         <Tooltip>
-            <TooltipTrigger asChild>
-                <Badge variant={statusVariant} className={`w-full justify-center cursor-help ${statusVariant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
-                    {patient.status}
-                </Badge>
-            </TooltipTrigger>
-            <TooltipContent align="center" side="bottom" className="max-w-[250px] text-xs">
-                <div className="font-bold text-base mb-1">{patient.status}</div>
-                <div className="text-left">
-                    <p>{statusDescriptions[patient.status]}</p>
-                </div>
-            </TooltipContent>
-        </Tooltip>
       </div>
     </Card>
   );
