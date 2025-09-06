@@ -42,31 +42,32 @@ export default function DoctorDashboardPage() {
     const [isFormOpen, setIsFormOpen] = React.useState(false);
     const [editingPatient, setEditingPatient] = React.useState<Patient | null>(null);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [lastVisible, setLastVisible] = React.useState<any | null>(null);
-    const [firstVisible, setFirstVisible] = React.useState<any | null>(null);
+    const [page, setPage] = React.useState(1);
+    const [pageCursors, setPageCursors] = React.useState<(any | null)[]>([null]);
     const [totalPatients, setTotalPatients] = React.useState(0);
-    const [currentPage, setCurrentPage] = React.useState(1);
-    
+
     const totalPages = Math.ceil(totalPatients / PAGE_SIZE);
 
-    const fetchPatients = React.useCallback(async (direction: 'next' | 'prev' | 'initial' = 'initial') => {
+    const fetchPatients = React.useCallback(async (pageIndex: number) => {
         setIsLoading(true);
         try {
-            const { patients: rawPatientsData, lastVisible: newLastVisible } = await getPatientsPaginated(
-                direction === 'next' ? lastVisible : null,
-                PAGE_SIZE
-            );
+            const lastVisible = pageCursors[pageIndex -1] || null;
+            const { patients: rawPatientsData, lastVisible: newLastVisible } = await getPatientsPaginated(lastVisible, PAGE_SIZE);
             const fetchedPatients = rawPatientsData.map(processPatientData);
-            setPatients(fetchedPatients);
-            setLastVisible(newLastVisible);
             
-            if (direction === 'initial') {
+            setPatients(fetchedPatients);
+            
+            if (newLastVisible) {
+                const newCursors = [...pageCursors];
+                newCursors[pageIndex] = newLastVisible;
+                setPageCursors(newCursors);
+            }
+
+            if (pageIndex === 1) {
                 const count = await getPatientsCount();
                 setTotalPatients(count);
-                setCurrentPage(1);
-            } else if (direction === 'next') {
-                setCurrentPage(prev => prev + 1);
             }
+            setPage(pageIndex);
 
         } catch (error) {
             console.error("Failed to fetch patients from Firestore", error);
@@ -78,12 +79,12 @@ export default function DoctorDashboardPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast, lastVisible]);
+    }, [toast, pageCursors]);
     
     React.useEffect(() => {
         setIsDoctorLoggedIn(true);
         if (isClient) {
-            fetchPatients('initial');
+            fetchPatients(1);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isClient, setIsDoctorLoggedIn]);
@@ -104,6 +105,8 @@ export default function DoctorDashboardPage() {
                 title: 'Patient Deleted',
                 description: 'The patient has been removed from the list.'
             });
+            // Refetch current page to fill the gap
+            fetchPatients(page);
         } catch (error) {
              console.error("Failed to delete patient:", error);
              toast({
@@ -140,7 +143,9 @@ export default function DoctorDashboardPage() {
                     description: `${newPatient.name} has been successfully added.`,
                 });
             }
-            await fetchPatients('initial');
+            // Reset to first page to see the new/updated patient
+            setPageCursors([null]);
+            await fetchPatients(1);
             closeForm();
         } catch (error) {
             console.error("Failed to save patient", error);
@@ -237,7 +242,7 @@ export default function DoctorDashboardPage() {
                         <CardHeader className="flex flex-col md:flex-row md:items-center gap-4">
                             <div className="grid gap-2 flex-1">
                                 <CardTitle>Patient List</CardTitle>
-                                <CardDescription>A list of all patients currently under your care. Showing page {currentPage} of {totalPages}.</CardDescription>
+                                <CardDescription>A list of all patients currently under your care. Showing page {page} of {totalPages}.</CardDescription>
                             </div>
                             <div className="flex flex-col sm:flex-row items-center gap-2">
                                 <div className="relative w-full sm:w-auto">
@@ -281,18 +286,28 @@ export default function DoctorDashboardPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => fetchPatients('initial')}
-                                    disabled={currentPage === 1 || isLoading}
+                                    onClick={() => fetchPatients(1)}
+                                    disabled={page === 1 || isLoading}
                                 >
                                     First
                                 </Button>
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => fetchPatients('next')}
-                                    disabled={currentPage >= totalPages || isLoading}
+                                    onClick={() => fetchPatients(page - 1)}
+                                    disabled={page === 1 || isLoading}
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                    Prev
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => fetchPatients(page + 1)}
+                                    disabled={page >= totalPages || isLoading}
                                 >
                                     Next
+                                    <ChevronRight className="h-4 w-4" />
                                 </Button>
                             </div>
 
@@ -326,3 +341,5 @@ export default function DoctorDashboardPage() {
     </TooltipProvider>
   );
 }
+
+    
