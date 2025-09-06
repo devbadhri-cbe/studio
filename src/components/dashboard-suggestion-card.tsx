@@ -9,8 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Separator } from './ui/separator';
 import { Badge } from './ui/badge';
 import { toast } from '@/hooks/use-toast';
-import type { DashboardSuggestion, Patient } from '@/lib/types';
-import { BiomarkerKey } from '@/lib/biomarker-cards';
+import type { DashboardSuggestion } from '@/lib/types';
+import { BiomarkerKey, availableBiomarkerCards } from '@/lib/biomarker-cards';
 
 
 export function DashboardSuggestionCard() {
@@ -32,7 +32,6 @@ export function DashboardSuggestionCard() {
   };
   
   const handleEnable = (suggestion: DashboardSuggestion) => {
-    // This is the implementation for Phase 1. It only handles existing panels.
     const panelMap: {[key: string]: string} = {
         "Diabetes Panel": "diabetes",
         "Hypertension Panel": "hypertension",
@@ -42,21 +41,24 @@ export function DashboardSuggestionCard() {
 
     if (panelKey && !suggestion.isNewPanel) {
         // Enable all suggested biomarkers for this existing panel
+        let enabledCount = 0;
         suggestion.biomarkers.forEach(biomarkerName => {
-            // Find the biomarker key from the name
-            // This is a simplification; a real app might need a more robust mapping.
-            const biomarkerKey = Object.entries(profile.enabledBiomarkers || {}).find(([key, value]) => {
-                return (value as unknown as {label: string}).label === biomarkerName;
-            })?.[0] as BiomarkerKey | undefined;
-
+            const biomarkerKey = Object.entries(availableBiomarkerCards).find(
+                ([key, value]) => value.label === biomarkerName || key === biomarkerName.toLowerCase().replace(/\s/g, '')
+            )?.[0] as BiomarkerKey | undefined;
+            
             if(biomarkerKey) {
                  toggleDiseaseBiomarker(panelKey, biomarkerKey);
+                 enabledCount++;
+            } else {
+                console.warn(`Could not find a matching biomarker key for name: "${biomarkerName}"`);
             }
         });
+
         setSuggestionStatus(suggestion.id, 'completed');
         toast({
             title: `${suggestion.panelName} Enabled`,
-            description: `Enabled ${suggestion.biomarkers.length} biomarkers.`
+            description: `Enabled ${enabledCount} biomarkers.`
         });
     } else {
         toast({
