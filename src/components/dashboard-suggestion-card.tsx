@@ -63,11 +63,11 @@ export function DashboardSuggestionCard() {
         setSuggestionStatus(suggestion.id, 'completed');
         toast({
             title: `${suggestion.panelName} Enabled`,
-            description: `Enabled ${enabledCount} biomarkers.`
+            description: `Enabled ${enabledCount} biomarkers for this panel.`
         });
     } else {
-        // This case is for when the AI suggests a completely new panel that isn't in our panelMap.
-        // We can add a "Create Panel" flow here in the future.
+        // This is for future use when we want to handle the creation of new panels dynamically.
+        // For now, it does nothing if the panel is not in our collection.
     }
   }
 
