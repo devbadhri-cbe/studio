@@ -1,6 +1,5 @@
 
 
-
 'use client';
 
 import {
@@ -59,11 +58,12 @@ const processPatientDoc = (doc: any): Patient => {
   const weightRecords = sanitizeRecords(data.weightRecords || []);
   const bloodPressureRecords = sanitizeRecords(data.bloodPressureRecords || []);
   const hemoglobinRecords = sanitizeRecords(data.hemoglobinRecords || []);
-  const lipidRecords = sanitizeRecords(data.lipidRecords || []);
+  const totalCholesterolRecords = sanitizeRecords(data.totalCholesterolRecords || []);
+  const ldlRecords = sanitizeRecords(data.ldlRecords || []);
+  const hdlRecords = sanitizeRecords(data.hdlRecords || []);
+  const triglyceridesRecords = sanitizeRecords(data.triglyceridesRecords || []);
   const presentMedicalConditions = sanitizeRecords(data.presentMedicalConditions || []);
 
-
-  
   const lastHba1c = hba1cRecords.length > 0 ? [...hba1cRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastVitaminD = vitaminDRecords.length > 0 ? [...vitaminDRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastThyroid = thyroidRecords.length > 0 ? [...thyroidRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
@@ -89,7 +89,10 @@ const processPatientDoc = (doc: any): Patient => {
     bloodPressureRecords,
     presentMedicalConditions,
     hemoglobinRecords,
-    lipidRecords,
+    totalCholesterolRecords,
+    ldlRecords,
+    hdlRecords,
+    triglyceridesRecords,
     bmi,
     enabledBiomarkers: data.enabledBiomarkers || {},
     customBiomarkerRecords: data.customBiomarkerRecords || {},
@@ -130,7 +133,7 @@ export async function getPatient(id: string): Promise<Patient | null> {
   return null;
 }
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorName' | 'lipidRecords' | 'customBiomarkerRecords'>): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorName' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'customBiomarkerRecords'>): Promise<Patient> {
     const docData = {
         ...patientData,
         doctorName: 'Dr. Badhrinathan N',
@@ -142,7 +145,10 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         hemoglobinRecords: [],
         weightRecords: [],
         bloodPressureRecords: [],
-        lipidRecords: [],
+        totalCholesterolRecords: [],
+        ldlRecords: [],
+        hdlRecords: [],
+        triglyceridesRecords: [],
         presentMedicalConditions: [],
         medication: [],
         enabledBiomarkers: {
@@ -171,7 +177,7 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
     if (updates.lastLogin && typeof updates.lastLogin === 'string') {
         updateData.lastLogin = new Date(updates.lastLogin);
     }
-    ['hba1cRecords', 'fastingBloodGlucoseRecords', 'vitaminDRecords', 'thyroidRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'hemoglobinRecords', 'lipidRecords'].forEach(key => {
+    ['hba1cRecords', 'fastingBloodGlucoseRecords', 'vitaminDRecords', 'thyroidRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'hemoglobinRecords', 'totalCholesterolRecords', 'ldlRecords', 'hdlRecords', 'triglyceridesRecords'].forEach(key => {
         if (updateData[key] && Array.isArray(updateData[key])) {
             updateData[key] = updateData[key].map((item: any) => ({
                 ...item,

@@ -118,16 +118,33 @@ export interface HemoglobinRecord {
   medication?: string;
 }
 
-export interface LipidRecord {
+export interface TotalCholesterolRecord {
   id: string;
   date: Date | string;
-  totalCholesterol: number;
-  ldl: number;
-  hdl: number;
-  triglycerides: number;
+  value: number; // in mg/dL
   medication?: string;
 }
 
+export interface LdlRecord {
+  id: string;
+  date: Date | string;
+  value: number; // in mg/dL
+  medication?: string;
+}
+
+export interface HdlRecord {
+  id: string;
+  date: Date | string;
+  value: number; // in mg/dL
+  medication?: string;
+}
+
+export interface TriglyceridesRecord {
+  id: string;
+  date: Date | string;
+  value: number; // in mg/dL
+  medication?: string;
+}
 
 export interface CustomBiomarker {
     id: string;
@@ -179,7 +196,10 @@ export interface Patient {
   hemoglobinRecords: HemoglobinRecord[];
   weightRecords: WeightRecord[];
   bloodPressureRecords: BloodPressureRecord[];
-  lipidRecords: LipidRecord[];
+  totalCholesterolRecords: TotalCholesterolRecord[];
+  ldlRecords: LdlRecord[];
+  hdlRecords: HdlRecord[];
+  triglyceridesRecords: TriglyceridesRecord[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
   enabledBiomarkers: { [key: string]: (BiomarkerKey | string)[] };

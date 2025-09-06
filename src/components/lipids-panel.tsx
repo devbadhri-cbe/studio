@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -8,10 +7,14 @@ import { useApp } from '@/context/app-context';
 import { DiseasePanelCard } from './disease-panel-card';
 import { type BiomarkerKey } from '@/lib/biomarker-cards';
 import { InteractivePanelGrid } from './interactive-panel-grid';
-import { CustomBiomarkerCard } from './custom-biomarker-card';
+import { TotalCholesterolCard } from './total-cholesterol-card';
+import { LdlCard } from './ldl-card';
+import { HdlCard } from './hdl-card';
+import { TriglyceridesCard } from './triglycerides-card';
 
 
 const LIPIDS_PANEL_KEY = 'lipids';
+const allLipidsBiomarkers: BiomarkerKey[] = ['totalCholesterol', 'ldl', 'hdl', 'triglycerides'];
 
 export function LipidsPanel() {
   const { isDoctorLoggedIn, profile } = useApp();
@@ -19,16 +22,13 @@ export function LipidsPanel() {
   const icon = <Flame className="h-5 w-5 shrink-0 text-muted-foreground" />;
   
   const enabledForPanel = profile.enabledBiomarkers?.[LIPIDS_PANEL_KEY] || [];
-  
-  const allCustomBiomarkers = profile.customBiomarkers || [];
 
-  const cardsToShow = enabledForPanel.map(biomarkerId => {
-      const biomarker = allCustomBiomarkers.find(b => b.id === biomarkerId);
-      if (biomarker) {
-        return <CustomBiomarkerCard key={biomarker.id} biomarker={biomarker} isReadOnly={!isDoctorLoggedIn} />
-      }
-      return null;
-  }).filter(Boolean);
+  const cardsToShow = [
+    enabledForPanel.includes('totalCholesterol') && <TotalCholesterolCard key="totalCholesterol" isReadOnly={!isDoctorLoggedIn} />,
+    enabledForPanel.includes('ldl') && <LdlCard key="ldl" isReadOnly={!isDoctorLoggedIn} />,
+    enabledForPanel.includes('hdl') && <HdlCard key="hdl" isReadOnly={!isDoctorLoggedIn} />,
+    enabledForPanel.includes('triglycerides') && <TriglyceridesCard key="triglycerides" isReadOnly={!isDoctorLoggedIn} />
+  ].filter(Boolean);
 
 
   return (
@@ -37,7 +37,7 @@ export function LipidsPanel() {
         icon={icon}
         isDoctorLoggedIn={isDoctorLoggedIn}
         panelKey={LIPIDS_PANEL_KEY}
-        allPanelBiomarkers={allCustomBiomarkers.map(b => b.id as BiomarkerKey)}
+        allPanelBiomarkers={allLipidsBiomarkers}
     >
       {cardsToShow.length > 0 ? (
         <InteractivePanelGrid>

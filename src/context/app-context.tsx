@@ -1,9 +1,8 @@
 
 
-
 'use client';
 
-import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord, DashboardSuggestion, LipidRecord, CustomBiomarkerRecord } from '@/lib/types';
+import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, CustomBiomarkerRecord } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -73,9 +72,18 @@ interface AppContextType {
   bloodPressureRecords: BloodPressureRecord[];
   addBloodPressureRecord: (record: Omit<BloodPressureRecord, 'id' | 'medication'>) => void;
   removeBloodPressureRecord: (id: string) => void;
-  lipidRecords: LipidRecord[];
-  addLipidRecord: (record: Omit<LipidRecord, 'id' | 'medication'>) => void;
-  removeLipidRecord: (id: string) => void;
+  totalCholesterolRecords: TotalCholesterolRecord[];
+  addTotalCholesterolRecord: (record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => void;
+  removeTotalCholesterolRecord: (id: string) => void;
+  ldlRecords: LdlRecord[];
+  addLdlRecord: (record: Omit<LdlRecord, 'id' | 'medication'>) => void;
+  removeLdlRecord: (id: string) => void;
+  hdlRecords: HdlRecord[];
+  addHdlRecord: (record: Omit<HdlRecord, 'id' | 'medication'>) => void;
+  removeHdlRecord: (id: string) => void;
+  triglyceridesRecords: TriglyceridesRecord[];
+  addTriglyceridesRecord: (record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => void;
+  removeTriglyceridesRecord: (id: string) => void;
   addBatchRecords: (records: BatchRecords) => Promise<AddBatchRecordsResult>;
   tips: string[];
   setTips: (tips: string[]) => void;
@@ -115,7 +123,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [hemoglobinRecords, setHemoglobinRecordsState] = React.useState<HemoglobinRecord[]>([]);
   const [weightRecords, setWeightRecordsState] = React.useState<WeightRecord[]>([]);
   const [bloodPressureRecords, setBloodPressureRecordsState] = React.useState<BloodPressureRecord[]>([]);
-  const [lipidRecords, setLipidRecordsState] = React.useState<LipidRecord[]>([]);
+  const [totalCholesterolRecords, setTotalCholesterolRecordsState] = React.useState<TotalCholesterolRecord[]>([]);
+  const [ldlRecords, setLdlRecordsState] = React.useState<LdlRecord[]>([]);
+  const [hdlRecords, setHdlRecordsState] = React.useState<HdlRecord[]>([]);
+  const [triglyceridesRecords, setTriglyceridesRecordsState] = React.useState<TriglyceridesRecord[]>([]);
   const [tips, setTipsState] = React.useState<string[]>([]);
   const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('report');
   const [isClient, setIsClient] = React.useState(false);
@@ -229,7 +240,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setHemoglobinRecordsState(patient.hemoglobinRecords || []);
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
-    setLipidRecordsState(patient.lipidRecords || []);
+    setTotalCholesterolRecordsState(patient.totalCholesterolRecords || []);
+    setLdlRecordsState(patient.ldlRecords || []);
+    setHdlRecordsState(patient.hdlRecords || []);
+    setTriglyceridesRecordsState(patient.triglyceridesRecords || []);
     setCustomBiomarkersState(patient.customBiomarkers || []);
     setTips([]); 
     setDashboardViewState('report');
@@ -491,19 +505,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { bloodPressureRecords: updatedRecords });
   };
 
-  const addLipidRecord = (record: Omit<LipidRecord, 'id' | 'medication'>) => {
+  const addTotalCholesterolRecord = (record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...lipidRecords, newRecord];
-    setLipidRecordsState(updatedRecords);
-    updatePatientData(profile.id, { lipidRecords: updatedRecords });
+    const updatedRecords = [...totalCholesterolRecords, newRecord];
+    setTotalCholesterolRecordsState(updatedRecords);
+    updatePatientData(profile.id, { totalCholesterolRecords: updatedRecords });
   };
 
-  const removeLipidRecord = (id: string) => {
-    const updatedRecords = lipidRecords.filter(r => r.id !== id);
-    setLipidRecordsState(updatedRecords);
-    updatePatientData(profile.id, { lipidRecords: updatedRecords });
+  const removeTotalCholesterolRecord = (id: string) => {
+    const updatedRecords = totalCholesterolRecords.filter(r => r.id !== id);
+    setTotalCholesterolRecordsState(updatedRecords);
+    updatePatientData(profile.id, { totalCholesterolRecords: updatedRecords });
   };
-  
+
+  const addLdlRecord = (record: Omit<LdlRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    const updatedRecords = [...ldlRecords, newRecord];
+    setLdlRecordsState(updatedRecords);
+    updatePatientData(profile.id, { ldlRecords: updatedRecords });
+  };
+
+  const removeLdlRecord = (id: string) => {
+    const updatedRecords = ldlRecords.filter(r => r.id !== id);
+    setLdlRecordsState(updatedRecords);
+    updatePatientData(profile.id, { ldlRecords: updatedRecords });
+  };
+
+  const addHdlRecord = (record: Omit<HdlRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    const updatedRecords = [...hdlRecords, newRecord];
+    setHdlRecordsState(updatedRecords);
+    updatePatientData(profile.id, { hdlRecords: updatedRecords });
+  };
+
+  const removeHdlRecord = (id: string) => {
+    const updatedRecords = hdlRecords.filter(r => r.id !== id);
+    setHdlRecordsState(updatedRecords);
+    updatePatientData(profile.id, { hdlRecords: updatedRecords });
+  };
+
+  const addTriglyceridesRecord = (record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    const updatedRecords = [...triglyceridesRecords, newRecord];
+    setTriglyceridesRecordsState(updatedRecords);
+    updatePatientData(profile.id, { triglyceridesRecords: updatedRecords });
+  };
+
+  const removeTriglyceridesRecord = (id: string) => {
+    const updatedRecords = triglyceridesRecords.filter(r => r.id !== id);
+    setTriglyceridesRecordsState(updatedRecords);
+    updatePatientData(profile.id, { triglyceridesRecords: updatedRecords });
+  };
+
   const addCustomBiomarker = async (name: string): Promise<string> => {
     const newBiomarker: CustomBiomarker = {
       id: `custom-${Date.now()}`,
@@ -695,9 +748,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     bloodPressureRecords,
     addBloodPressureRecord,
     removeBloodPressureRecord,
-    lipidRecords,
-    addLipidRecord,
-    removeLipidRecord,
+    totalCholesterolRecords,
+    addTotalCholesterolRecord,
+    removeTotalCholesterolRecord,
+    ldlRecords,
+    addLdlRecord,
+    removeLdlRecord,
+    hdlRecords,
+    addHdlRecord,
+    removeHdlRecord,
+    triglyceridesRecords,
+    addTriglyceridesRecord,
+    removeTriglyceridesRecord,
     addBatchRecords,
     tips,
     setTips,
