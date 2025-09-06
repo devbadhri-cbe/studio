@@ -28,13 +28,18 @@ export async function getConditionSynopsis(input: GetConditionSynopsisInput): Pr
     return getConditionSynopsisFlow(input);
 }
 
+// Define a new input schema for the prompt that includes our boolean flag.
+const PromptInputSchema = GetConditionSynopsisInputSchema.extend({
+    isPatient: z.boolean(),
+});
+
 const prompt = ai.definePrompt({
     name: 'getConditionSynopsisPrompt',
-    input: {schema: GetConditionSynopsisInputSchema},
+    input: {schema: PromptInputSchema},
     output: {schema: GetConditionSynopsisOutputSchema},
     model: googleAI.model('gemini-1.5-flash-latest'),
     prompt: `
-      {{#if (eq audience "patient")}}
+      {{#if isPatient}}
       You are a compassionate health educator. Your task is to explain a medical condition to a patient in simple, clear, and reassuring language. Avoid overly technical jargon. Focus on the key aspects of the condition, what it means for them, and general lifestyle advice. Do not provide medical advice or suggest specific treatments.
 
       Condition: {{{conditionName}}}
@@ -61,7 +66,10 @@ const getConditionSynopsisFlow = ai.defineFlow(
         outputSchema: GetConditionSynopsisOutputSchema,
     },
     async (input) => {
-        const {output} = await prompt(input);
+        // Determine the boolean flag and pass it to the prompt.
+        const isPatient = input.audience === 'patient';
+        const {output} = await prompt({ ...input, isPatient });
         return output!;
     }
 );
+
