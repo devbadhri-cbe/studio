@@ -58,9 +58,11 @@ export default function DoctorDashboardPage() {
             setPatients(fetchedPatients);
             
             if (newLastVisible) {
-                const newCursors = [...pageCursors];
-                newCursors[pageIndex] = newLastVisible;
-                setPageCursors(newCursors);
+                setPageCursors(prev => {
+                    const newCursors = [...prev];
+                    newCursors[pageIndex] = newLastVisible;
+                    return newCursors;
+                });
             }
 
             if (pageIndex === 1) {
@@ -341,5 +343,7 @@ export default function DoctorDashboardPage() {
     </TooltipProvider>
   );
 }
+
+    
 
     
