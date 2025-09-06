@@ -37,7 +37,7 @@ interface DiseasePanelCardProps {
   allPanelBiomarkers: (BiomarkerKey | string)[];
 }
 
-type OpenSection = 'newRecord' | 'manageBiomarkers' | 'displaySettings' | null;
+type OpenSection = 'newRecord' | 'manageBiomarkers' | 'displaySettings' | 'managePanels' | null;
 
 
 export function DiseasePanelCard({ 
@@ -57,6 +57,7 @@ export function DiseasePanelCard({
     const isNewRecordOpen = openSection === 'newRecord';
     const isManagingBiomarkers = openSection === 'manageBiomarkers';
     const isDisplaySettingsOpen = openSection === 'displaySettings';
+    const isManagingPanels = openSection === 'managePanels';
     
     const isPanelEnabled = Object.keys(profile.enabledBiomarkers || {}).includes(panelKey);
     const enabledForPanel = profile.enabledBiomarkers?.[panelKey] || [];
@@ -126,7 +127,7 @@ export function DiseasePanelCard({
                     <p>Enable/Disable this panel for the patient</p>
                 </TooltipContent>
             </Tooltip>
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={() => setOpenSection(null)}>
                 <DropdownMenuTrigger asChild>
                     <Button size="icon" variant="ghost" className="h-8 w-8">
                         <Settings className="h-4 w-4" />
