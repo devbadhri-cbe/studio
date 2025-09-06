@@ -126,6 +126,7 @@ export const processPatientData = (data: any): Patient => {
   const hdlRecords = data.hdlRecords || [];
   const triglyceridesRecords = data.triglyceridesRecords || [];
   const presentMedicalConditions = data.presentMedicalConditions || [];
+  const enabledBiomarkers = data.enabledBiomarkers || {};
 
   const lastHba1c = hba1cRecords.length > 0 ? [...hba1cRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
   const lastVitaminD = vitaminDRecords.length > 0 ? [...vitaminDRecords].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
@@ -151,6 +152,7 @@ export const processPatientData = (data: any): Patient => {
     hdlRecords,
     triglyceridesRecords,
     bmi,
+    enabledBiomarkers,
   };
 
   const status = getPatientStatus(patientData);
