@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -9,8 +10,7 @@ import { type BiomarkerKey } from '@/lib/biomarker-cards';
 
 
 const LIPIDS_PANEL_KEY = 'lipids';
-// For now, no specific biomarker cards are created for lipids, so this is empty.
-const allLipidsBiomarkers: BiomarkerKey[] = []; 
+const allLipidsBiomarkers: BiomarkerKey[] = ['lipidProfile']; 
 
 export function LipidsPanel() {
   const { isDoctorLoggedIn } = useApp();

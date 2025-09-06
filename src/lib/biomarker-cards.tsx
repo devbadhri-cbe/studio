@@ -59,9 +59,9 @@ export const availableBiomarkerCards = {
     addRecordLabel: 'New Weight Record',
     addRecordDialog: <AddWeightRecordDialog />,
   },
-  lipids: {
-    label: 'Lipid Panel',
-    component: <div />, // The panel itself is handled by DiseasePanel, not as a standalone card
+  lipidProfile: {
+    label: 'Lipid Profile',
+    component: <div />, // This is a placeholder, the LipidsPanel component will render it.
     addRecordLabel: 'New Lipid Record',
     addRecordDialog: <></>, // No dialog yet
   },
