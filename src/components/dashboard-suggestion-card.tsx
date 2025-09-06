@@ -15,7 +15,7 @@ import { CreateBiomarkerDialog } from './create-biomarker-dialog';
 
 
 export function DashboardSuggestionCard() {
-  const { profile, setProfile, toggleDiseaseBiomarker, customBiomarkers, addCustomBiomarker } = useApp();
+  const { profile, setProfile, toggleDiseaseBiomarker, customBiomarkers } = useApp();
   const { toast } = useToast();
   const [processingSuggestion, setProcessingSuggestion] = React.useState<DashboardSuggestion | null>(null);
   const [missingBiomarkers, setMissingBiomarkers] = React.useState<string[]>([]);
@@ -45,6 +45,17 @@ export function DashboardSuggestionCard() {
   };
   
   const handleEnable = (suggestion: DashboardSuggestion) => {
+    // This is a temporary direct mapping for the Lipids Panel case.
+    if (suggestion.panelName === 'Lipids Panel') {
+        toggleDiseaseBiomarker('lipids', 'lipidProfile');
+        toast({
+            title: 'Lipids Panel Enabled',
+            description: 'The Lipid Profile card has been added to the dashboard.',
+        });
+        setSuggestionStatus(suggestion.id, 'completed');
+        return;
+    }
+    
     // Step 1: Check for missing biomarkers
     const missing = suggestion.biomarkers.filter(
         b => !allKnownBiomarkerLabels.includes(b.toLowerCase())
@@ -60,6 +71,7 @@ export function DashboardSuggestionCard() {
     const panelMap: { [key: string]: { panelKey: string, biomarkers: BiomarkerKey[] } } = {
         'Diabetes Panel': { panelKey: 'diabetes', biomarkers: ['hba1c', 'glucose'] },
         'Hypertension Panel': { panelKey: 'hypertension', biomarkers: ['bloodPressure', 'weight'] },
+        // This is a more dynamic approach for the future
         'Lipids Panel': { panelKey: 'lipids', biomarkers: ['lipidProfile'] },
     };
     
