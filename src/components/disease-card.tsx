@@ -12,6 +12,7 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
 
 interface DiseaseCardProps {
   condition: MedicalCondition;
@@ -52,11 +53,23 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
 
   const handleSuggestIcdCode = async (condition: MedicalCondition) => {
     setIsSuggesting(condition.id);
-    toast({
-        title: 'Feature Disabled',
-        description: 'AI-powered ICD-11 code suggestions are temporarily disabled.',
-    });
-    setIsSuggesting(null);
+    try {
+      const result = await getIcdCode({ conditionName: condition.condition });
+      updateMedicalCondition({ ...condition, icdCode: result.icdCode });
+      toast({
+        title: 'ICD-11 Code Updated',
+        description: `Suggested code for ${condition.condition} is ${result.icdCode}.`,
+      });
+    } catch (error) {
+      console.error('Failed to get ICD code suggestion', error);
+      toast({
+        variant: 'destructive',
+        title: 'AI Error',
+        description: 'Could not fetch ICD-11 code suggestion.',
+      });
+    } finally {
+      setIsSuggesting(null);
+    }
   };
 
   return (

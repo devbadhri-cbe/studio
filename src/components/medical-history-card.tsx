@@ -35,7 +35,7 @@ type ActiveSynopsis = {
     id: string;
 } | null;
 
-function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition: string, date: string}) => void, onCancel: () => void }) {
+function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition: string, date: string}) => Promise<void>, onCancel: () => void }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   
@@ -111,7 +111,7 @@ export function MedicalHistoryCard() {
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
   const handleSaveCondition = async (data: { condition: string, date: string}) => {
-    addMedicalCondition(data, !isDoctorLoggedIn);
+    await addMedicalCondition(data, !isDoctorLoggedIn);
     setIsAddingCondition(false);
   };
   
