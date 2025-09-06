@@ -44,9 +44,12 @@ export function DashboardSuggestionCard() {
         // Enable all suggested biomarkers for this existing panel
         let enabledCount = 0;
         suggestion.biomarkers.forEach(biomarkerName => {
-            const biomarkerKey = Object.entries(availableBiomarkerCards).find(
+            // Find biomarker key by checking label or key, robustly.
+            const biomarkerEntry = Object.entries(availableBiomarkerCards).find(
                 ([key, value]) => value.label.toLowerCase().includes(biomarkerName.toLowerCase()) || key.toLowerCase().includes(biomarkerName.toLowerCase())
-            )?.[0] as BiomarkerKey | undefined;
+            );
+
+            const biomarkerKey = biomarkerEntry ? biomarkerEntry[0] as BiomarkerKey : undefined;
             
             if(biomarkerKey) {
                  toggleDiseaseBiomarker(panelKey, biomarkerKey);
