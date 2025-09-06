@@ -282,8 +282,8 @@ export function MedicalHistoryCard() {
                     <ul className="space-y-1 mt-2">
                         {profile.medication.map((med) => (
                             <React.Fragment key={med.id}>
-                                <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md cursor-pointer" onClick={() => med.name.toLowerCase() !== 'nil' && handleSynopsisToggle('medication', med.id)}>
-                                <div className="flex-1">
+                                <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                                <div className="flex-1 cursor-pointer" onClick={() => med.name.toLowerCase() !== 'nil' && handleSynopsisToggle('medication', med.id)}>
                                 {med.name.toLowerCase() === 'nil' ? (
                                         <span className="font-semibold text-foreground">Nil - No medication</span>
                                 ) : (
@@ -300,17 +300,17 @@ export function MedicalHistoryCard() {
                                 </div>
                                     <div className="flex items-center shrink-0">
                                         {med.name.toLowerCase() !== 'nil' ? (
-                                            <>
-                                                <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
-                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                            <div className="flex items-center gap-2">
+                                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleSynopsisToggle('medication', med.id); }}>
+                                                    <Info className="h-5 w-5 text-blue-500" />
                                                 </Button>
-                                                <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100">
-                                                    <Info className="h-4 w-4 text-blue-500" />
+                                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
+                                                    <Trash2 className="h-5 w-5 text-destructive" />
                                                 </Button>
-                                            </>
+                                            </div>
                                         ) : (
-                                            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
-                                                <XCircle className="h-4 w-4 text-muted-foreground" />
+                                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
+                                                <XCircle className="h-5 w-5 text-muted-foreground" />
                                             </Button>
                                         )}
                                     </div>
