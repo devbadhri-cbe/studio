@@ -19,14 +19,14 @@ export function DiseasePanel() {
 
     const panelsToShow = React.useMemo(() => {
         if (isDoctorLoggedIn) {
-            return availablePanels.map(p => p.component);
+            return availablePanels.map(p => React.cloneElement(p.component, { key: p.key }));
         }
 
         const enabledPanelKeys = Object.keys(profile.enabledBiomarkers || {});
         
         return availablePanels
             .filter(panel => enabledPanelKeys.includes(panel.key) && (profile.enabledBiomarkers?.[panel.key]?.length ?? 0) > 0)
-            .map(panel => panel.component);
+            .map(panel => React.cloneElement(panel.component, { key: panel.key }));
 
     }, [isDoctorLoggedIn, profile.enabledBiomarkers]);
 
@@ -44,7 +44,7 @@ export function DiseasePanel() {
         return (
              <Card>
                 <CardContent className="p-6 grid grid-cols-1 gap-6">
-                    {availablePanels.map(p => p.component)}
+                    {panelsToShow}
                 </CardContent>
             </Card>
         )
