@@ -14,12 +14,13 @@ export function LipidChart() {
   
   const chartData = sortedRecords.slice(-10).map((r) => ({
     date: r.date,
+    totalCholesterol: r.totalCholesterol,
     ldl: r.ldl,
     hdl: r.hdl,
     triglycerides: r.triglycerides,
   }));
 
-  const yAxisMax = 250;
+  const yAxisMax = Math.max(...chartData.map(d => d.totalCholesterol), 250);
   const yAxisTicks = Array.from({ length: Math.floor(yAxisMax / 50) }, (_, i) => (i + 1) * 50);
   
   const formatShortDate = (tickItem: string) => {
@@ -52,6 +53,7 @@ export function LipidChart() {
               cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
               content={({ active, payload, label }) => {
                 if (active && payload && payload.length) {
+                  const total = payload.find(p => p.dataKey === 'totalCholesterol')?.value;
                   const ldl = payload.find(p => p.dataKey === 'ldl')?.value;
                   const hdl = payload.find(p => p.dataKey === 'hdl')?.value;
                   const trig = payload.find(p => p.dataKey === 'triglycerides')?.value;
@@ -60,6 +62,10 @@ export function LipidChart() {
                     <div className="rounded-lg border bg-background p-2 shadow-sm text-xs">
                       <div className="font-bold text-foreground mb-1">{formatDate(label)}</div>
                       <div className="grid grid-cols-1 gap-1">
+                        <div className="flex justify-between">
+                            <span style={{ color: 'hsl(var(--chart-5))' }}>Total:</span>
+                            <span className="font-bold">{total}</span>
+                        </div>
                         <div className="flex justify-between">
                             <span style={{ color: 'hsl(var(--chart-1))' }}>LDL:</span>
                             <span className="font-bold">{ldl}</span>
@@ -83,6 +89,7 @@ export function LipidChart() {
              <ReferenceLine y={150} stroke="hsl(var(--chart-3))" strokeDasharray="3 3" />
              <ReferenceLine y={40} stroke="hsl(var(--chart-2))" strokeDasharray="3 3" />
             
+            <Line type="monotone" dataKey='totalCholesterol' stroke="hsl(var(--chart-5))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--chart-5))' }} activeDot={{ r: 6 }} name="Total"/>
             <Line type="monotone" dataKey='ldl' stroke="hsl(var(--chart-1))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--chart-1))' }} activeDot={{ r: 6 }} name="LDL"/>
             <Line type="monotone" dataKey='hdl' stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--chart-2))' }} activeDot={{ r: 6 }} name="HDL"/>
             <Line type="monotone" dataKey='triglycerides' stroke="hsl(var(--chart-3))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--chart-3))' }} activeDot={{ r: 6 }} name="Triglycerides"/>

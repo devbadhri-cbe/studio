@@ -73,7 +73,7 @@ export function LipidCard({ isReadOnly = false }: LipidCardProps) {
           {sortedRecords.map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                   <p className="flex-1">
-                      <span className="font-semibold text-foreground">LDL: {record.ldl}</span>
+                      <span className="font-semibold text-foreground">TC: {record.totalCholesterol}</span>
                       <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
                   </p>
                   <div className="flex items-center shrink-0">

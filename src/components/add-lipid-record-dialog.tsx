@@ -27,6 +27,7 @@ import { Loader2 } from 'lucide-react';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
+  totalCholesterol: z.coerce.number().min(1, 'Value is required.'),
   ldl: z.coerce.number().min(1, 'Value is required.'),
   hdl: z.coerce.number().min(1, 'Value is required.'),
   triglycerides: z.coerce.number().min(1, 'Value is required.'),
@@ -48,6 +49,7 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
     resolver: zodResolver(FormSchema),
     defaultValues: {
       date: new Date(),
+      totalCholesterol: '' as any,
       ldl: '' as any,
       hdl: '' as any,
       triglycerides: '' as any,
@@ -58,6 +60,7 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
     if (open) {
       form.reset({
         date: new Date(),
+        totalCholesterol: '' as any,
         ldl: '' as any,
         hdl: '' as any,
         triglycerides: '' as any,
@@ -86,6 +89,7 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
     
     addLipidRecord({
       date: newDate.toISOString(),
+      totalCholesterol: data.totalCholesterol,
       ldl: data.ldl,
       hdl: data.hdl,
       triglycerides: data.triglycerides,
@@ -118,7 +122,7 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
         <DialogTrigger asChild>
           {triggerButton}
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Add New Lipid Panel Record</DialogTitle>
             <DialogDescription>Enter the details of your new lipid panel result here.</DialogDescription>
@@ -143,7 +147,33 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
                   </FormItem>
                 )}
               />
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="totalCholesterol"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Total Cholesterol (mg/dL)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g., 200" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="triglycerides"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Triglycerides (mg/dL)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g., 150" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="ldl"
@@ -165,19 +195,6 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
                       <FormLabel>HDL (mg/dL)</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="e.g., 50" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="triglycerides"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Triglycerides (mg/dL)</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.1" placeholder="e.g., 150" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
