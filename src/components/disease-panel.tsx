@@ -25,7 +25,7 @@ export function DiseasePanel() {
         const enabledPanelKeys = Object.keys(profile.enabledBiomarkers || {});
         
         return availablePanels
-            .filter(panel => enabledPanelKeys.includes(panel.key))
+            .filter(panel => enabledPanelKeys.includes(panel.key) && (profile.enabledBiomarkers?.[panel.key]?.length ?? 0) > 0)
             .map(panel => panel.component);
 
     }, [isDoctorLoggedIn, profile.enabledBiomarkers]);
