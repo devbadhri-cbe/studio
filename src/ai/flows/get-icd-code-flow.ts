@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to get the ICD-11 code for a medical condition.
@@ -8,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const GetIcdCodeInputSchema = z.object({
@@ -29,6 +31,7 @@ const prompt = ai.definePrompt({
     name: 'getIcdCodePrompt',
     input: {schema: GetIcdCodeInputSchema},
     output: {schema: GetIcdCodeOutputSchema},
+    model: googleAI.model('gemini-1.5-flash-latest'),
     prompt: `You are a medical coding expert. Your task is to provide the most accurate ICD-11 code for the given medical condition.
 
 Condition: {{{conditionName}}}
