@@ -32,43 +32,12 @@ export function DashboardSuggestionCard() {
   };
   
   const handleEnable = (suggestion: DashboardSuggestion) => {
-    // This map connects the AI's string suggestion to our system's panel keys.
-    const panelMap: {[key: string]: string} = {
-        "Diabetes Panel": "diabetes",
-        "Hypertension Panel": "hypertension",
-        "Lipids Panel": "lipids",
-    };
-    
-    const panelKey = panelMap[suggestion.panelName];
-
-    if (panelKey) {
-        // Enable all suggested biomarkers for this existing panel
-        let enabledCount = 0;
-        suggestion.biomarkers.forEach(biomarkerName => {
-            // Find biomarker key by checking label or key, robustly.
-            const biomarkerEntry = Object.entries(availableBiomarkerCards).find(
-                ([key, value]) => value.label.toLowerCase().includes(biomarkerName.toLowerCase()) || key.toLowerCase().includes(biomarkerName.toLowerCase())
-            );
-
-            const biomarkerKey = biomarkerEntry ? biomarkerEntry[0] as BiomarkerKey : undefined;
-            
-            if(biomarkerKey) {
-                 toggleDiseaseBiomarker(panelKey, biomarkerKey);
-                 enabledCount++;
-            } else {
-                console.warn(`Could not find a matching biomarker key for name: "${biomarkerName}"`);
-            }
-        });
-
-        setSuggestionStatus(suggestion.id, 'completed');
-        toast({
-            title: `${suggestion.panelName} Enabled`,
-            description: `Enabled ${enabledCount} biomarkers for this panel.`
-        });
-    } else {
-        // This is for future use when we want to handle the creation of new panels dynamically.
-        // For now, it does nothing if the panel is not in our collection.
-    }
+    // This function is a placeholder for now as per our plan.
+    // In the next phase, we will implement the logic to enable the panel.
+    toast({
+        title: 'Pending Implementation',
+        description: 'Enabling panels from suggestions will be implemented next.',
+    });
   }
 
   return (
