@@ -106,6 +106,9 @@ interface AppContextType {
   dashboardSuggestions: DashboardSuggestion[];
   toggleDiseaseBiomarker: (panelKey: string, biomarkerKey: BiomarkerKey | string) => void;
   toggleDiseasePanel: (panelKey: DiseasePanelKey) => void;
+  hasUnsavedChanges: boolean;
+  saveChanges: () => Promise<void>;
+  isSaving: boolean;
 }
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -129,6 +132,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
   const [biomarkerUnit, setBiomarkerUnitState] = React.useState<BiomarkerUnitSystem>('conventional');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
   
   React.useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
@@ -240,17 +245,46 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTips([]); 
     setDashboardViewState('report');
     setBiomarkerUnitState(countries.find(c => c.code === patient.country)?.biomarkerUnit || 'conventional');
+    setHasUnsavedChanges(false);
   }, []);
-  
-  const updatePatientData = async (patientId: string, updates: Partial<Patient>) => {
-      if (!patientId) return;
-      try {
-          await updatePatient(patientId, updates);
-      } catch (e) {
-          console.error("Failed to update patient data in Firestore", e);
-      }
-  }
 
+  const saveChanges = async () => {
+    if (!profile.id || !hasUnsavedChanges) return;
+
+    setIsSaving(true);
+    try {
+      const updates: Partial<Patient> = {
+        ...profile,
+        hba1cRecords,
+        fastingBloodGlucoseRecords,
+        vitaminDRecords,
+        thyroidRecords,
+        hemoglobinRecords,
+        weightRecords,
+        bloodPressureRecords,
+        totalCholesterolRecords,
+        ldlRecords,
+        hdlRecords,
+        triglyceridesRecords,
+      };
+      await updatePatient(profile.id, updates);
+      setHasUnsavedChanges(false);
+      toast({
+        title: "Success!",
+        description: "Your changes have been saved."
+      });
+    } catch(e) {
+      console.error("Failed to save changes", e);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not save your changes. Please try again."
+      })
+    } finally {
+      setIsSaving(false);
+    }
+  }
+  
   const getMedicationForRecord = (medication: Medication[]): string => {
     if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
     try {
@@ -262,7 +296,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setProfile = (newProfile: UserProfile) => {
       setProfileState(newProfile);
-      updatePatientData(newProfile.id, { ...newProfile });
+      setHasUnsavedChanges(true);
   }
   
   const addMedicalCondition = async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
@@ -283,7 +317,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       };
       
       setProfileState(newProfileState);
-      await updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
+      setHasUnsavedChanges(true);
       
       // If a doctor added the condition, also generate suggestions
       if (isDoctorLoggedIn) {
@@ -305,14 +339,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const updatedConditions = profile.presentMedicalConditions.map(c => c.id === condition.id ? condition : c);
     const newProfileState = { ...profile, presentMedicalConditions: updatedConditions };
     setProfileState(newProfileState);
-    updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
+    setHasUnsavedChanges(true);
   };
   
   const removeMedicalCondition = (id: string) => {
     const updatedConditions = profile.presentMedicalConditions.filter(c => c.id !== id);
     const newProfileState = { ...profile, presentMedicalConditions: updatedConditions };
     setProfileState(newProfileState);
-    updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
+    setHasUnsavedChanges(true);
   };
   
   const approveMedicalCondition = async (conditionId: string) => {
@@ -347,14 +381,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const currentSuggestions = profile.dashboardSuggestions || [];
         const newProfileState = {...profile, presentMedicalConditions: updatedConditions, dashboardSuggestions: [...currentSuggestions, newSuggestion] };
         setProfileState(newProfileState);
-        await updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: newProfileState.dashboardSuggestions });
-
+        setHasUnsavedChanges(true);
     } catch (error) {
         console.error("Failed to get monitoring suggestion:", error);
-        // Even if suggestion fails, still approve the condition
         const newProfileState = {...profile, presentMedicalConditions: updatedConditions };
         setProfileState(newProfileState);
-        await updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
+        setHasUnsavedChanges(true);
         toast({
             variant: "destructive",
             title: "Suggestion Failed",
@@ -370,7 +402,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     
     const newProfileState = {...profile, presentMedicalConditions: updatedConditions };
     setProfileState(newProfileState);
-    updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
+    setHasUnsavedChanges(true);
   };
 
    const addMedication = (medication: Omit<Medication, 'id'>) => {
@@ -378,86 +410,81 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const updatedMedication = [...profile.medication.filter(m => m.name.toLowerCase() !== 'nil'), newMedication];
     const newProfileState = { ...profile, medication: updatedMedication };
     setProfileState(newProfileState);
-    updatePatientData(profile.id, { medication: newProfileState.medication });
+    setHasUnsavedChanges(true);
   };
 
   const removeMedication = (id: string) => {
     const updatedMedication = profile.medication.filter(m => m.id !== id);
     const newProfileState = { ...profile, medication: updatedMedication };
     setProfileState(newProfileState);
-    updatePatientData(profile.id, { medication: newProfileState.medication });
+    setHasUnsavedChanges(true);
   };
 
   const setMedicationNil = () => {
       const nilMedication = [{ id: 'nil', name: 'Nil', dosage: '', frequency: '' }];
       const newProfileState = {...profile, medication: nilMedication};
       setProfileState(newProfileState);
-      updatePatientData(profile.id, { medication: newProfileState.medication });
+      setHasUnsavedChanges(true);
   }
 
   const addHba1cRecord = (record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...hba1cRecords, newRecord];
-    setHba1cRecordsState(updatedRecords);
-    updatePatientData(profile.id, { hba1cRecords: updatedRecords });
+    setHba1cRecordsState([...hba1cRecords, newRecord]);
+    setHasUnsavedChanges(true);
   };
 
   const removeHba1cRecord = (id: string) => {
     const updatedRecords = hba1cRecords.filter(r => r.id !== id);
     setHba1cRecordsState(updatedRecords);
-    updatePatientData(profile.id, { hba1cRecords: updatedRecords });
+    setHasUnsavedChanges(true);
   };
   
   const addFastingBloodGlucoseRecord = (record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...fastingBloodGlucoseRecords, newRecord];
-    setFastingBloodGlucoseRecordsState(updatedRecords);
-    updatePatientData(profile.id, { fastingBloodGlucoseRecords: updatedRecords });
+    setFastingBloodGlucoseRecordsState([...fastingBloodGlucoseRecords, newRecord]);
+    setHasUnsavedChanges(true);
   };
 
   const removeFastingBloodGlucoseRecord = (id: string) => {
     const updatedRecords = fastingBloodGlucoseRecords.filter(r => r.id !== id);
     setFastingBloodGlucoseRecordsState(updatedRecords);
-    updatePatientData(profile.id, { fastingBloodGlucoseRecords: updatedRecords });
+    setHasUnsavedChanges(true);
   };
 
   const addVitaminDRecord = (record: Omit<VitaminDRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...vitaminDRecords, newRecord];
-    setVitaminDRecordsState(updatedRecords);
-    updatePatientData(profile.id, { vitaminDRecords: updatedRecords });
+    setVitaminDRecordsState([...vitaminDRecords, newRecord]);
+    setHasUnsavedChanges(true);
   };
 
   const removeVitaminDRecord = (id: string) => {
     const updatedRecords = vitaminDRecords.filter(r => r.id !== id);
     setVitaminDRecordsState(updatedRecords);
-    updatePatientData(profile.id, { vitaminDRecords: updatedRecords });
+    setHasUnsavedChanges(true);
   };
 
   const addThyroidRecord = (record: Omit<ThyroidRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...thyroidRecords, newRecord];
-    setThyroidRecordsState(updatedRecords);
-    updatePatientData(profile.id, { thyroidRecords: updatedRecords });
+    setThyroidRecordsState([...thyroidRecords, newRecord]);
+    setHasUnsavedChanges(true);
   };
 
   const removeThyroidRecord = (id: string) => {
     const updatedRecords = thyroidRecords.filter(r => r.id !== id);
     setThyroidRecordsState(updatedRecords);
-    updatePatientData(profile.id, { thyroidRecords: updatedRecords });
+    setHasUnsavedChanges(true);
   };
   
   const addHemoglobinRecord = (record: Omit<HemoglobinRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...hemoglobinRecords, newRecord];
-    setHemoglobinRecordsState(updatedRecords);
-    updatePatientData(profile.id, { hemoglobinRecords: updatedRecords });
+    setHemoglobinRecordsState([...hemoglobinRecords, newRecord]);
+    setHasUnsavedChanges(true);
   };
 
   const removeHemoglobinRecord = (id: string) => {
     const updatedRecords = hemoglobinRecords.filter(r => r.id !== id);
     setHemoglobinRecordsState(updatedRecords);
-    updatePatientData(profile.id, { hemoglobinRecords: updatedRecords });
+    setHasUnsavedChanges(true);
   };
   
   const addWeightRecord = (record: Omit<WeightRecord, 'id'>) => {
@@ -468,8 +495,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const newBmi = calculateBmi(newRecord.value, profile.height);
     const updatedProfile = { ...profile, bmi: newBmi || profile.bmi };
     setProfileState(updatedProfile);
-
-    updatePatientData(profile.id, { weightRecords: updatedRecords, bmi: updatedProfile.bmi });
+    setHasUnsavedChanges(true);
   };
 
   const removeWeightRecord = (id: string) => {
@@ -480,73 +506,67 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const newBmi = calculateBmi(lastWeight?.value, profile.height);
     const updatedProfile = { ...profile, bmi: newBmi };
     setProfileState(updatedProfile);
-
-    updatePatientData(profile.id, { weightRecords: updatedRecords, bmi: updatedProfile.bmi });
+    setHasUnsavedChanges(true);
   };
   
   const addBloodPressureRecord = (record: Omit<BloodPressureRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...bloodPressureRecords, newRecord];
-    setBloodPressureRecordsState(updatedRecords);
-    updatePatientData(profile.id, { bloodPressureRecords: updatedRecords });
+    setBloodPressureRecordsState([...bloodPressureRecords, newRecord]);
+    setHasUnsavedChanges(true);
   };
 
   const removeBloodPressureRecord = (id: string) => {
     const updatedRecords = bloodPressureRecords.filter(r => r.id !== id);
     setBloodPressureRecordsState(updatedRecords);
-    updatePatientData(profile.id, { bloodPressureRecords: updatedRecords });
+    setHasUnsavedChanges(true);
   };
 
   const addTotalCholesterolRecord = (record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...totalCholesterolRecords, newRecord];
-    setTotalCholesterolRecordsState(updatedRecords);
-    updatePatientData(profile.id, { totalCholesterolRecords: updatedRecords });
+    setTotalCholesterolRecordsState([...totalCholesterolRecords, newRecord]);
+    setHasUnsavedChanges(true);
   };
 
   const removeTotalCholesterolRecord = (id: string) => {
     const updatedRecords = totalCholesterolRecords.filter(r => r.id !== id);
     setTotalCholesterolRecordsState(updatedRecords);
-    updatePatientData(profile.id, { totalCholesterolRecords: updatedRecords });
+    setHasUnsavedChanges(true);
   };
 
   const addLdlRecord = (record: Omit<LdlRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...ldlRecords, newRecord];
-    setLdlRecordsState(updatedRecords);
-    updatePatientData(profile.id, { ldlRecords: updatedRecords });
+    setLdlRecordsState([...ldlRecords, newRecord]);
+    setHasUnsavedChanges(true);
   };
 
   const removeLdlRecord = (id: string) => {
     const updatedRecords = ldlRecords.filter(r => r.id !== id);
     setLdlRecordsState(updatedRecords);
-    updatePatientData(profile.id, { ldlRecords: updatedRecords });
+    setHasUnsavedChanges(true);
   };
 
   const addHdlRecord = (record: Omit<HdlRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...hdlRecords, newRecord];
-    setHdlRecordsState(updatedRecords);
-    updatePatientData(profile.id, { hdlRecords: updatedRecords });
+    setHdlRecordsState([...hdlRecords, newRecord]);
+    setHasUnsavedChanges(true);
   };
 
   const removeHdlRecord = (id: string) => {
     const updatedRecords = hdlRecords.filter(r => r.id !== id);
     setHdlRecordsState(updatedRecords);
-    updatePatientData(profile.id, { hdlRecords: updatedRecords });
+    setHasUnsavedChanges(true);
   };
 
   const addTriglyceridesRecord = (record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...triglyceridesRecords, newRecord];
-    setTriglyceridesRecordsState(updatedRecords);
-    updatePatientData(profile.id, { triglyceridesRecords: updatedRecords });
+    setTriglyceridesRecordsState([...triglyceridesRecords, newRecord]);
+    setHasUnsavedChanges(true);
   };
 
   const removeTriglyceridesRecord = (id: string) => {
     const updatedRecords = triglyceridesRecords.filter(r => r.id !== id);
     setTriglyceridesRecordsState(updatedRecords);
-    updatePatientData(profile.id, { triglyceridesRecords: updatedRecords });
+    setHasUnsavedChanges(true);
   };
   
   const toggleDiseaseBiomarker = (panelKey: string, biomarkerKey: BiomarkerKey | string) => {
@@ -564,7 +584,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     
     const newProfileState = { ...profile, enabledBiomarkers: updatedEnabledBiomarkers };
     setProfileState(newProfileState);
-    updatePatientData(profile.id, { enabledBiomarkers: newProfileState.enabledBiomarkers });
+    setHasUnsavedChanges(true);
   };
 
   const toggleDiseasePanel = (panelKey: DiseasePanelKey) => {
@@ -581,8 +601,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     
     const newProfileState = { ...profile, enabledBiomarkers: updatedEnabledBiomarkers };
     setProfileState(newProfileState);
-    updatePatientData(profile.id, { enabledBiomarkers: newProfileState.enabledBiomarkers });
-
+    setHasUnsavedChanges(true);
     toast({
         title: isEnabled ? `Panel Disabled` : `Panel Enabled`,
         description: `The ${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel has been ${isEnabled ? 'disabled' : 'enabled'} for this patient.`
@@ -591,7 +610,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
-    const updates: Partial<Patient> = {};
     const date = batch.hba1c?.date || batch.fastingBloodGlucose?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date;
 
     const result: AddBatchRecordsResult = { added: [], duplicates: [] };
@@ -611,8 +629,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const dateExists = hba1cRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
       if (!dateExists) {
         const newRecord: Hba1cRecord = { ...batch.hba1c, id: `hba1c-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        updates.hba1cRecords = [...hba1cRecords, newRecord];
-        setHba1cRecordsState(updates.hba1cRecords);
+        setHba1cRecordsState(prev => [...prev, newRecord]);
         result.added.push('HbA1c');
       } else { result.duplicates.push('HbA1c'); }
     }
@@ -621,8 +638,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const dateExists = fastingBloodGlucoseRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
       if (!dateExists) {
         const newRecord: FastingBloodGlucoseRecord = { ...batch.fastingBloodGlucose, id: `fbg-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        updates.fastingBloodGlucoseRecords = [...fastingBloodGlucoseRecords, newRecord];
-        setFastingBloodGlucoseRecordsState(updates.fastingBloodGlucoseRecords);
+        setFastingBloodGlucoseRecordsState(prev => [...prev, newRecord]);
         result.added.push('Fasting Blood Glucose');
       } else { result.duplicates.push('Fasting Blood Glucose'); }
     }
@@ -637,8 +653,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       if (!dateExists) {
         const newRecord: VitaminDRecord = { ...vitDRecordForDb, value: vitDRecordForDb.value, id: `vitd-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        updates.vitaminDRecords = [...vitaminDRecords, newRecord];
-        setVitaminDRecordsState(updates.vitaminDRecords);
+        setVitaminDRecordsState(prev => [...prev, newRecord]);
         result.added.push('Vitamin D');
       } else if(dateExists) { result.duplicates.push('Vitamin D'); }
     }
@@ -647,8 +662,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const dateExists = thyroidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
       if (!dateExists) {
         const newRecord: ThyroidRecord = { ...batch.thyroid, id: `thyroid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        updates.thyroidRecords = [...thyroidRecords, newRecord];
-        setThyroidRecordsState(updates.thyroidRecords);
+        setThyroidRecordsState(prev => [...prev, newRecord]);
         result.added.push('Thyroid Panel');
       } else { result.duplicates.push('Thyroid Panel'); }
     }
@@ -657,8 +671,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
        const dateExists = bloodPressureRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
        if (!dateExists) {
         const newRecord: BloodPressureRecord = { ...batch.bloodPressure, id: `bp-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        updates.bloodPressureRecords = [...bloodPressureRecords, newRecord];
-        setBloodPressureRecordsState(updates.bloodPressureRecords);
+        setBloodPressureRecordsState(prev => [...prev, newRecord]);
         result.added.push('Blood Pressure');
       } else { result.duplicates.push('Blood Pressure'); }
     }
@@ -667,14 +680,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
        const dateExists = hemoglobinRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
        if (!dateExists) {
         const newRecord: HemoglobinRecord = { hemoglobin: batch.hemoglobin, id: `anemia-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        updates.hemoglobinRecords = [...hemoglobinRecords, newRecord];
-        setHemoglobinRecordsState(updates.hemoglobinRecords);
+        setHemoglobinRecordsState(prev => [...prev, newRecord]);
         result.added.push('Hemoglobin');
       } else { result.duplicates.push('Hemoglobin'); }
     }
     
-    if (Object.keys(updates).length > 0) {
-        await updatePatientData(profile.id, updates);
+    if (result.added.length > 0) {
+        setHasUnsavedChanges(true);
     }
     
     return result;
@@ -754,6 +766,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     dashboardSuggestions: profile.dashboardSuggestions || [],
     toggleDiseaseBiomarker,
     toggleDiseasePanel,
+    hasUnsavedChanges,
+    saveChanges,
+    isSaving,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

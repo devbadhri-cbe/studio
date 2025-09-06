@@ -62,7 +62,7 @@ export default function DoctorDashboardPage() {
         if (isClient) {
             fetchPatients();
         }
-    }, [fetchPatients, setIsDoctorLoggedIn, isClient]);
+    }, [isClient, fetchPatients, setIsDoctorLoggedIn]);
     
 
     const viewPatientDashboard = (patient: Patient) => {
