@@ -3,22 +3,26 @@
 'use client';
 
 import { useApp } from '@/context/app-context';
-import { DiabetesCard } from './diabetes-card';
-import { HypertensionCard } from './hypertension-card';
 import { Card, CardContent } from './ui/card';
 import * as React from 'react';
-import { LipidsPanel } from './lipids-panel';
 import { availableDiseasePanels } from '@/lib/biomarker-cards';
 
 export function DiseasePanel() {
     const { isDoctorLoggedIn, profile } = useApp();
 
     const panelsToShow = React.useMemo(() => {
-        if (isDoctorLoggedIn) {
-            return availableDiseasePanels.map(p => React.cloneElement(p.component, { key: p.key }));
-        }
-
         const enabledPanelKeys = Object.keys(profile.enabledBiomarkers || {});
+
+        if (isDoctorLoggedIn) {
+            const sortedPanels = [...availableDiseasePanels].sort((a, b) => {
+                const aIsEnabled = enabledPanelKeys.includes(a.key);
+                const bIsEnabled = enabledPanelKeys.includes(b.key);
+                if (aIsEnabled && !bIsEnabled) return -1;
+                if (!aIsEnabled && bIsEnabled) return 1;
+                return a.label.localeCompare(b.label);
+            });
+            return sortedPanels.map(p => React.cloneElement(p.component, { key: p.key }));
+        }
         
         return availableDiseasePanels
             .filter(panel => enabledPanelKeys.includes(panel.key))
@@ -34,16 +38,6 @@ export function DiseasePanel() {
                 </CardContent>
             </Card>
         );
-    }
-
-    if (isDoctorLoggedIn) {
-        return (
-             <Card>
-                <CardContent className="p-6 grid grid-cols-1 gap-6">
-                    {panelsToShow}
-                </CardContent>
-            </Card>
-        )
     }
 
     return (
