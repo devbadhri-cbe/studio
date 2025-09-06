@@ -5,6 +5,7 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Card, CardContent } from './ui/card';
+import { UploadRecordDialog } from './upload-record-dialog';
 
 interface PatientHeaderProps {
     children?: React.ReactNode;
@@ -29,6 +30,9 @@ export function PatientHeader({ children }: PatientHeaderProps) {
                 </h1>
                 <p className="text-sm text-muted-foreground">Your health overview. Consult {doctorName} before making any decisions.</p>
             </div>
+        </div>
+         <div className="flex items-center gap-2">
+            <UploadRecordDialog />
         </div>
       </CardContent>
     </Card>

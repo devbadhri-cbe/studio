@@ -19,10 +19,10 @@ const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'ot
 type DashboardView = 'vitaminD' | 'thyroid' | 'hypertension' | 'report' | 'none';
 type Theme = 'dark' | 'light' | 'system';
 
-interface BatchRecords {
+export interface BatchRecords {
     hba1c?: Omit<Hba1cRecord, 'id' | 'medication'>;
     fastingBloodGlucose?: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>;
-    vitaminD?: Omit<VitaminDRecord, 'id' | 'medication'> & { units?: 'ng/mL' | 'nmol/L' };
+    vitaminD?: Omit<VitaminDRecord, 'id' | 'medication'> & { units?: string };
     thyroid?: Omit<ThyroidRecord, 'id' | 'medication'>;
     bloodPressure?: Omit<BloodPressureRecord, 'id' | 'medication'>;
     hemoglobin?: number;
@@ -631,7 +631,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const dateExists = vitaminDRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime());
       
       let vitDRecordForDb = { ...batch.vitaminD };
-      if(batch.vitaminD.units && batch.vitaminD.units !== 'ng/mL') {
+      if(batch.vitaminD.units && batch.vitaminD.units.toLowerCase().includes('nmol')) {
         vitDRecordForDb.value = toNgDl(batch.vitaminD.value);
       }
 
