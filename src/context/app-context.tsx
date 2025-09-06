@@ -273,7 +273,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         date: validDate,
         id: Date.now().toString(), 
         status: isDoctorLoggedIn ? 'verified' : 'pending_review',
-        icdCode: icdCode || condition.icdCode
+        icdCode: icdCode || condition.icdCode || '',
     };
 
     const updatedConditions = [...profile.presentMedicalConditions, newCondition];
