@@ -7,6 +7,8 @@ import { useApp } from '@/context/app-context';
 import { DiseasePanelCard } from './disease-panel-card';
 import { type BiomarkerKey } from '@/lib/biomarker-cards';
 import { InteractivePanelGrid } from './interactive-panel-grid';
+import { WeightRecordCard } from './weight-record-card';
+import { BloodPressureCard } from './blood-pressure-card';
 
 
 const HYPERTENSION_PANEL_KEY = 'hypertension';
@@ -27,8 +29,8 @@ export function HypertensionCard() {
         allPanelBiomarkers={allHypertensionBiomarkers}
     >
        <InteractivePanelGrid>
-          {enabledForPanel.includes('weight') && <WeightRecordCard />}
-          {enabledForPanel.includes('bloodPressure') && <BloodPressureCard />}
+          {enabledForPanel.includes('weight') && <WeightRecordCard key="weight" />}
+          {enabledForPanel.includes('bloodPressure') && <BloodPressureCard key="bloodPressure" />}
        </InteractivePanelGrid>
     </DiseasePanelCard>
   );

@@ -29,9 +29,9 @@ export function DiabetesCard() {
         allPanelBiomarkers={allDiabetesBiomarkers}
     >
        <InteractivePanelGrid>
-          {enabledForPanel.includes('hba1c') && <Hba1cCard />}
-          {enabledForPanel.includes('glucose') && <FastingBloodGlucoseCard />}
-          {enabledForPanel.includes('hemoglobin') && <HemoglobinCard />}
+          {enabledForPanel.includes('hba1c') && <Hba1cCard key="hba1c" />}
+          {enabledForPanel.includes('glucose') && <FastingBloodGlucoseCard key="glucose" />}
+          {enabledForPanel.includes('hemoglobin') && <HemoglobinCard key="hemoglobin" />}
        </InteractivePanelGrid>
     </DiseasePanelCard>
   );
