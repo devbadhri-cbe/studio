@@ -11,17 +11,14 @@ export function BiomarkersPanel() {
     const { isDoctorLoggedIn, profile } = useApp();
 
     const enabledForPatient: BiomarkerKey[] = React.useMemo(() => {
-        // Start with 'weight' as the default card for patients.
-        const defaultBiomarkers: BiomarkerKey[] = isDoctorLoggedIn ? [] : ['weight'];
-        
         // Add all other biomarkers enabled by the doctor.
         const allEnabled = Object.values(profile.enabledBiomarkers || {}).flat();
         
         // Combine and return unique keys.
-        const allKeys = [...defaultBiomarkers, ...allEnabled];
+        const allKeys = [...allEnabled];
         return [...new Set(allKeys)];
 
-    }, [profile.enabledBiomarkers, isDoctorLoggedIn]);
+    }, [profile.enabledBiomarkers]);
 
     const allCards = Object.entries(availableBiomarkerCards).map(([key, value]) => ({
         key,
@@ -54,7 +51,6 @@ export function BiomarkersPanel() {
                 ) : (
                     <div className="col-span-full text-center text-muted-foreground py-12">
                         <p>No biomarker cards have been enabled by your doctor yet.</p>
-                        <p className='text-xs'>(The Weight & BMI card will appear once the patient adds a record.)</p>
                     </div>
                 )}
             </CardContent>

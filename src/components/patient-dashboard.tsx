@@ -20,6 +20,7 @@ import { ReportCard } from '@/components/report-card';
 import { ProfileCard } from '@/components/profile-card';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { WeightRecordCard } from './weight-record-card';
 
 
 export function PatientDashboard() {
@@ -65,6 +66,18 @@ export function PatientDashboard() {
             
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
 
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1 flex flex-col gap-6">
+                    <ProfileCard />
+                </div>
+                <div className="lg:col-span-1 flex flex-col gap-6">
+                    <WeightRecordCard />
+                </div>
+                <div className="lg:col-span-1 flex flex-col gap-6">
+                     <MedicalHistoryCard />
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen} className="col-span-1">
                     <CollapsibleTrigger asChild>
@@ -99,14 +112,6 @@ export function PatientDashboard() {
                 </Collapsible>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-1 flex flex-col gap-6">
-                  <ProfileCard />
-              </div>
-              <div className="lg:col-span-2 flex flex-col gap-6">
-                  <MedicalHistoryCard />
-              </div>
-            </div>
             
             <Separator />
 
@@ -131,4 +136,3 @@ export function PatientDashboard() {
     </TooltipProvider>
   );
 }
-
