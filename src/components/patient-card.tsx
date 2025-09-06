@@ -243,5 +243,3 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     </Card>
   );
 }
-
-    
