@@ -14,7 +14,7 @@ import { AddBloodPressureRecordDialog } from '@/components/add-blood-pressure-re
 import { AddThyroidRecordDialog } from '@/components/add-thyroid-record-dialog';
 import { AddVitaminDRecordDialog } from '@/components/add-vitamin-d-record-dialog';
 import { AddWeightRecordDialog } from '@/components/add-weight-record-dialog';
-import { LipidCard } from '@/components/lipid-card';
+import { LipidsPanel } from '@/components/lipids-panel';
 
 export const availableBiomarkerCards = {
   hba1c: {
@@ -61,7 +61,7 @@ export const availableBiomarkerCards = {
   },
   lipids: {
     label: 'Lipid Panel',
-    component: <LipidCard />,
+    component: <div />, // The panel itself is handled by DiseasePanel, not as a standalone card
     addRecordLabel: 'New Lipid Record',
     addRecordDialog: <></>, // No dialog yet
   },

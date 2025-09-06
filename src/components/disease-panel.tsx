@@ -6,10 +6,12 @@ import { DiabetesCard } from './diabetes-card';
 import { HypertensionCard } from './hypertension-card';
 import { Card, CardContent } from './ui/card';
 import * as React from 'react';
+import { LipidsPanel } from './lipids-panel';
 
 const availablePanels = [
     { key: 'diabetes', component: <DiabetesCard /> },
     { key: 'hypertension', component: <HypertensionCard /> },
+    { key: 'lipids', component: <LipidsPanel /> },
 ];
 
 export function DiseasePanel() {
