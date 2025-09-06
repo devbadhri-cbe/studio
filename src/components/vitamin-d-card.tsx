@@ -23,7 +23,11 @@ import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 
-export function VitaminDCard() {
+interface VitaminDCardProps {
+    isReadOnly?: boolean;
+}
+
+export function VitaminDCard({ isReadOnly = false }: VitaminDCardProps) {
   const { vitaminDRecords, removeVitaminDRecord, getDisplayVitaminDValue, biomarkerUnit, setBiomarkerUnit } = useApp();
   const formatDate = useDateFormatter();
    const [, setForceRender] = React.useState(0);
@@ -50,7 +54,7 @@ export function VitaminDCard() {
   const Title = `Vitamin D (${unitLabel})`;
   const Icon = <Sun className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
-  const Actions = (
+  const Actions = !isReadOnly ? (
      <DropdownMenu>
         <DropdownMenuTrigger asChild>
             <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -76,7 +80,7 @@ export function VitaminDCard() {
             </div>
         </DropdownMenuContent>
     </DropdownMenu>
-  );
+  ) : null;
 
   const RecordsList = (
     <ScrollArea className="h-full max-h-[100px] w-full">
@@ -88,14 +92,16 @@ export function VitaminDCard() {
                 <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
               </p>
               <div className="flex items-center shrink-0">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeVitaminDRecord(record.id)}>
-                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Delete record</TooltipContent>
-                </Tooltip>
+                {!isReadOnly && (
+                    <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeVitaminDRecord(record.id)}>
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete record</TooltipContent>
+                    </Tooltip>
+                )}
               </div>
             </li>
           ))}

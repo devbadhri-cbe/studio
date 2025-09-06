@@ -72,10 +72,10 @@ export function PatientDashboard() {
                     <ProfileCard />
                 </div>
                  <div className="lg:col-span-1 flex flex-col gap-6">
-                     <WeightRecordCard />
+                     <WeightRecordCard isReadOnly={!isDoctorLoggedIn} />
                 </div>
                 <div className="lg:col-span-1 flex flex-col gap-6">
-                     <BloodPressureCard />
+                     <BloodPressureCard isReadOnly={!isDoctorLoggedIn} />
                 </div>
                 <div className="lg:col-span-1 flex flex-col gap-6">
                      <MedicalHistoryCard />

@@ -26,7 +26,11 @@ import type { EditHeightDialogHandles } from './edit-height-dialog';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
-export function WeightRecordCard() {
+interface WeightRecordCardProps {
+    isReadOnly?: boolean;
+}
+
+export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) {
   const { weightRecords, removeWeightRecord, profile, setProfile } = useApp();
   const formatDate = useDateFormatter();
   const isImperial = profile.unitSystem === 'imperial';
@@ -57,7 +61,7 @@ export function WeightRecordCard() {
   const Title = `Weight & BMI (${weightUnit})`;
   const Icon = <Weight className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
-  const Actions = (
+  const Actions = !isReadOnly ? (
     <DropdownMenu>
         <DropdownMenuTrigger asChild>
             <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -87,7 +91,7 @@ export function WeightRecordCard() {
             </div>
         </DropdownMenuContent>
     </DropdownMenu>
-  );
+  ) : null;
 
   const RecordsList = (
      <ScrollArea className="h-full max-h-[100px] w-full">
@@ -105,14 +109,16 @@ export function WeightRecordCard() {
                     <span className="text-xs text-muted-foreground"> on {formatDate(weight.date)}</span>
                     </p>
                     <div className="flex items-center shrink-0">
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeWeightRecord(weight.id)}>
-                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete record</TooltipContent>
-                    </Tooltip>
+                    {!isReadOnly && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                            <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeWeightRecord(weight.id)}>
+                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                            </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete record</TooltipContent>
+                        </Tooltip>
+                    )}
                     </div>
                 </li>
                 );

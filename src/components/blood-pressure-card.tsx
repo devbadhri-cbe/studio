@@ -49,7 +49,7 @@ export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps
   const Title = 'Blood Pressure';
   const Icon = <Heart className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
-  const Actions = isDoctorLoggedIn ? (
+  const Actions = !isReadOnly ? (
      <AddBloodPressureRecordDialog onSuccess={handleSuccess}>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -76,7 +76,7 @@ export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps
                       <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
                   </p>
                   <div className="flex items-center shrink-0">
-                  {isDoctorLoggedIn && (
+                  {!isReadOnly && (
                     <Tooltip>
                         <TooltipTrigger asChild>
                         <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeBloodPressureRecord(record.id)}>

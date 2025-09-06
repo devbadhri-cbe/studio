@@ -24,7 +24,7 @@ interface Hba1cCardProps {
 }
 
 export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
-  const { hba1cRecords, removeHba1cRecord, isDoctorLoggedIn } = useApp();
+  const { hba1cRecords, removeHba1cRecord } = useApp();
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
@@ -44,7 +44,7 @@ export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
   const Title = 'HbA1c (%)';
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
-  const Actions = isDoctorLoggedIn ? (
+  const Actions = !isReadOnly ? (
     <AddRecordDialog>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -71,7 +71,7 @@ export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
                       <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
                   </p>
                   <div className="flex items-center shrink-0">
-                  {isDoctorLoggedIn && (
+                  {!isReadOnly && (
                     <Tooltip>
                         <TooltipTrigger asChild>
                         <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeHba1cRecord(record.id)}>

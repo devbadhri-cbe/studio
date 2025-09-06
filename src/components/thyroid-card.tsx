@@ -19,7 +19,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 
-export function ThyroidCard() {
+interface ThyroidCardProps {
+  isReadOnly?: boolean;
+}
+
+export function ThyroidCard({ isReadOnly = false }: ThyroidCardProps) {
   const { thyroidRecords, removeThyroidRecord } = useApp();
   const formatDate = useDateFormatter();
   const [, setForceRender] = React.useState(0);
@@ -45,7 +49,7 @@ export function ThyroidCard() {
   const Title = 'Thyroid (TSH)';
   const Icon = <Activity className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
-  const Actions = (
+  const Actions = !isReadOnly ? (
     <AddThyroidRecordDialog onSuccess={handleSuccess}>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -60,7 +64,7 @@ export function ThyroidCard() {
             </DropdownMenuContent>
         </DropdownMenu>
     </AddThyroidRecordDialog>
-  );
+  ) : null;
 
   const RecordsList = (
     <ScrollArea className="h-full max-h-[100px] w-full">
@@ -72,14 +76,16 @@ export function ThyroidCard() {
                 <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
               </p>
               <div className="flex items-center shrink-0">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeThyroidRecord(record.id)}>
-                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Delete record</TooltipContent>
-                </Tooltip>
+                {!isReadOnly && (
+                    <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeThyroidRecord(record.id)}>
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete record</TooltipContent>
+                    </Tooltip>
+                )}
               </div>
             </li>
           ))}

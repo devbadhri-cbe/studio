@@ -29,7 +29,7 @@ interface HemoglobinCardProps {
 }
 
 export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
-  const { hemoglobinRecords, removeHemoglobinRecord, profile, biomarkerUnit, setBiomarkerUnit, getDisplayHemoglobinValue, isDoctorLoggedIn } = useApp();
+  const { hemoglobinRecords, removeHemoglobinRecord, profile, biomarkerUnit, setBiomarkerUnit, getDisplayHemoglobinValue } = useApp();
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
@@ -58,7 +58,7 @@ export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
   const Title = `Hemoglobin (${unitLabel})`;
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
-  const Actions = isDoctorLoggedIn ? (
+  const Actions = !isReadOnly ? (
     <DropdownMenu>
         <DropdownMenuTrigger asChild>
               <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -94,7 +94,7 @@ export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
                       <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
                   </p>
                   <div className="flex items-center shrink-0">
-                  {isDoctorLoggedIn && (
+                  {!isReadOnly && (
                     <Tooltip>
                         <TooltipTrigger asChild>
                         <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeHemoglobinRecord(record.id)}>
