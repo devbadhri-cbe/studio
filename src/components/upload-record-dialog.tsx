@@ -34,21 +34,27 @@ export function UploadRecordDialog() {
   const { toast } = useToast();
   const { profile, addBatchRecords } = useApp();
 
+  const stopCameraStream = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+  };
+
   const resetState = () => {
     setStep('initial');
     setErrorMessage('');
     setIsCapturing(false);
     setIsLoading(false);
     setExtractedData(null);
+    stopCameraStream();
   };
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
     if (!isOpen) {
       resetState();
-      // Stop camera stream
-      const stream = videoRef.current?.srcObject as MediaStream;
-      stream?.getTracks().forEach(track => track.stop());
     }
   };
 
@@ -292,7 +298,10 @@ export function UploadRecordDialog() {
                     <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted playsInline></video>
                     <canvas ref={canvasRef} className="hidden"></canvas>
                     <div className="flex justify-between">
-                         <Button variant="ghost" onClick={() => setIsCapturing(false)}>Cancel</Button>
+                         <Button variant="ghost" onClick={() => {
+                             setIsCapturing(false);
+                             stopCameraStream();
+                         }}>Cancel</Button>
                         <Button onClick={captureImage}>Capture Image</Button>
                     </div>
                 </div>
