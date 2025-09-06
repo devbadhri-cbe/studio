@@ -146,10 +146,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onView(patient))}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Dashboard
-                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onEdit(patient))}>
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit Patient
