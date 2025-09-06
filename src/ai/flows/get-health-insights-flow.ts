@@ -15,6 +15,7 @@ const GetHealthInsightsInputSchema = z.object({
   name: z.string().describe("The patient's name."),
   age: z.number().describe("The patient's age."),
   gender: z.enum(['male', 'female', 'other']).describe("The patient's gender."),
+  country: z.string().describe("The patient's country of residence."),
   medication: z.array(z.string()).describe("A list of the patient's current medications."),
   presentMedicalConditions: z.array(z.string()).describe("A list of the patient's present medical conditions."),
   latestHba1c: z.number().optional().describe("The patient's latest HbA1c value (%)."),
@@ -54,6 +55,7 @@ User Profile:
 - Name: {{{name}}}
 - Age: {{{age}}}
 - Gender: {{{gender}}}
+- Country: {{{country}}}
 - Medical Conditions: {{#if presentMedicalConditions}}{{#each presentMedicalConditions}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{else}}None listed{{/if}}
 - Current Medications: {{#if medication}}{{#each medication}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{else}}None listed{{/if}}
 

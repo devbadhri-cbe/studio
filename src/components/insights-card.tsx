@@ -32,6 +32,7 @@ export function InsightsCard() {
           name: profile.name,
           age: calculateAge(profile.dob) || 0,
           gender: profile.gender,
+          country: profile.country,
           medication: profile.medication.map(m => m.name),
           presentMedicalConditions: profile.presentMedicalConditions.map(c => c.condition),
           latestHba1c: latestHba1c?.value,
@@ -84,7 +85,7 @@ export function InsightsCard() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className={cn("space-y-4", (isLoading || localTips.length === 0) && "pt-0")}>
+      <CardContent className="space-y-4">
         {localTips.length > 0 && !isLoading && (
           <Alert className="bg-muted/50">
             <AlertDescription className="space-y-4">
