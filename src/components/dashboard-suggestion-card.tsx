@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useApp } from '@/context/app-context';
@@ -32,6 +31,7 @@ export function DashboardSuggestionCard() {
   };
   
   const handleEnable = (suggestion: DashboardSuggestion) => {
+    // Map panel names from AI suggestions to system keys
     const panelMap: { [key: string]: string } = {
         'Diabetes Panel': 'diabetes',
         'Hypertension Panel': 'hypertension',
@@ -42,19 +42,26 @@ export function DashboardSuggestionCard() {
 
     if (panelKey) {
         // Find the system keys for the suggested biomarker names
-        const biomarkerKeysToEnable = suggestion.biomarkers.map(name => {
-            return Object.entries(availableBiomarkerCards).find(([key, value]) => value.label === name || key === name.toLowerCase())?.[0];
-        }).filter(Boolean) as BiomarkerKey[];
+        // This is a placeholder for now, as Lipid biomarkers aren't defined as cards yet
+        const biomarkerKeysToEnable: BiomarkerKey[] = [];
 
         // Enable each biomarker for the panel
         biomarkerKeysToEnable.forEach(biomarkerKey => {
             // The context function handles checking if it's already enabled
             toggleDiseaseBiomarker(panelKey, biomarkerKey);
         });
+
+        // For now, we will just enable the panel itself, even without biomarkers
+        // We ensure the panel key exists in the enabledBiomarkers object
+        const currentEnabled = profile.enabledBiomarkers || {};
+        if (!currentEnabled[panelKey]) {
+            currentEnabled[panelKey] = [];
+        }
+        setProfile({ ...profile, enabledBiomarkers: currentEnabled });
         
         toast({
             title: `${suggestion.panelName} Enabled`,
-            description: 'The recommended biomarkers have been added to the panel.',
+            description: 'The panel has been added to the dashboard.',
         });
         setSuggestionStatus(suggestion.id, 'completed');
     } else {
