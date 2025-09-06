@@ -64,19 +64,6 @@ export default function DoctorDashboardPage() {
         }
     }, [fetchPatients, setIsDoctorLoggedIn, isClient]);
     
-    // Re-fetch data when the page is focused
-    React.useEffect(() => {
-        const handleFocus = () => {
-            if (!isFormOpen && isClient) {
-                fetchPatients();
-            }
-        };
-        window.addEventListener('focus', handleFocus);
-        return () => {
-            window.removeEventListener('focus', handleFocus);
-        };
-    }, [fetchPatients, isFormOpen, isClient]);
-
 
     const viewPatientDashboard = (patient: Patient) => {
         setPatientData(patient);
