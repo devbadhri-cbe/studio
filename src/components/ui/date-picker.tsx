@@ -20,18 +20,18 @@ interface DatePickerProps {
 }
 
 const months = [
-    { value: '0', label: 'January' },
-    { value: '1', label: 'February' },
-    { value: '2', label: 'March' },
-    { value: '3', label: 'April' },
+    { value: '0', label: 'Jan' },
+    { value: '1', label: 'Feb' },
+    { value: '2', label: 'Mar' },
+    { value: '3', label: 'Apr' },
     { value: '4', label: 'May' },
-    { value: '5', label: 'June' },
-    { value: '6', label: 'July' },
-    { value: '7', label: 'August' },
-    { value: '8', label: 'September' },
-    { value: '9', label: 'October' },
-    { value: '10', label: 'November' },
-    { value: '11', label: 'December' },
+    { value: '5', label: 'Jun' },
+    { value: '6', label: 'Jul' },
+    { value: '7', label: 'Aug' },
+    { value: '8', label: 'Sep' },
+    { value: '9', label: 'Oct' },
+    { value: '10', label: 'Nov' },
+    { value: '11', label: 'Dec' },
 ];
 
 const days = Array.from({ length: 31 }, (_, i) => ({ value: (i + 1).toString(), label: (i + 1).toString() }));
@@ -120,7 +120,7 @@ export function DatePicker({
 
   return (
     <div className="flex items-center rounded-md border border-input h-10 w-full px-1.5 space-x-1">
-      <div className="flex-1">
+      <div className="w-full">
         <Select value={day} onValueChange={handleDayChange}>
           <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
             <SelectValue placeholder="Day" />
@@ -137,7 +137,7 @@ export function DatePicker({
 
       <span className="text-muted-foreground">/</span>
 
-      <div className="flex-[1.5]">
+      <div className="w-full">
         <Select value={month} onValueChange={handleMonthChange}>
             <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
             <SelectValue placeholder="Month" />
@@ -154,7 +154,7 @@ export function DatePicker({
 
       <span className="text-muted-foreground">/</span>
       
-      <div className="flex-1">
+      <div className="w-full">
         <Select value={year} onValueChange={handleYearChange}>
             <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
             <SelectValue placeholder="Year" />
