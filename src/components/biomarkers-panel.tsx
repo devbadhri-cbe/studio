@@ -18,12 +18,18 @@ export function BiomarkersPanel() {
     
     const standardCards = Object.entries(availableBiomarkerCards).map(([key, value]) => ({
         key,
+        label: value.label.toLowerCase(),
         component: React.cloneElement(value.component, { key, isReadOnly: !isDoctorLoggedIn }),
     }));
     
-    const customCards = (profile.customBiomarkers || []).map(biomarker => ({
-        key: biomarker.id,
-        component: <CustomBiomarkerCard key={biomarker.id} biomarker={biomarker} isReadOnly={!isDoctorLoggedIn} />,
+    const standardCardLabels = new Set(standardCards.map(c => c.label));
+
+    const customCards = (profile.customBiomarkers || [])
+        .filter(biomarker => !standardCardLabels.has(biomarker.name.toLowerCase()))
+        .map(biomarker => ({
+            key: biomarker.id,
+            label: biomarker.name.toLowerCase(),
+            component: <CustomBiomarkerCard key={biomarker.id} biomarker={biomarker} isReadOnly={!isDoctorLoggedIn} />,
     }));
 
     const allCards = [...standardCards, ...customCards];
