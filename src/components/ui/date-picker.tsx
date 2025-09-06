@@ -42,23 +42,24 @@ export function DatePicker({
 }: DatePickerProps) {
   const isMobile = useIsMobile();
 
-  const [day, setDay] = React.useState<string>(value && isValid(value) ? format(value, 'dd') : '');
-  const [month, setMonth] = React.useState<string>(value && isValid(value) ? String(value.getMonth()) : '');
-  const [year, setYear] = React.useState<string>(value && isValid(value) ? format(value, 'yyyy') : '');
+  const [day, setDay] = React.useState<string>('');
+  const [month, setMonth] = React.useState<string>('');
+  const [year, setYear] = React.useState<string>('');
 
   React.useEffect(() => {
     if (value && isValid(value)) {
       setDay(format(value, 'dd'));
       setMonth(String(value.getMonth()));
       setYear(format(value, 'yyyy'));
-    } else if (value === undefined) { // Handle external clearing
-        setDay('');
-        setMonth('');
-        setYear('');
+    } else {
+        const today = new Date();
+        setDay(format(today, 'dd'));
+        setMonth(String(today.getMonth()));
+        setYear(format(today, 'yyyy'));
     }
   }, [value]);
   
-  const updateDate = (newDay: string, newMonth: string, newYear: string) => {
+  const handleDateChange = (newDay: string, newMonth: string, newYear: string) => {
      if (newDay && newMonth && newYear && newYear.length === 4) {
       const dayInt = parseInt(newDay, 10);
       const monthInt = parseInt(newMonth, 10);
@@ -79,17 +80,17 @@ export function DatePicker({
   const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDay = e.target.value;
     setDay(newDay);
-    updateDate(newDay, month, year);
+    handleDateChange(newDay, month, year);
   }
   
   const handleMonthChange = (newMonth: string) => {
     setMonth(newMonth);
-    updateDate(day, newMonth, year);
+    handleDateChange(day, newMonth, year);
   }
 
   const handleYearChange = (newYear: string) => {
     setYear(newYear);
-    updateDate(day, month, newYear);
+    handleDateChange(day, month, newYear);
   }
 
   if (isMobile) {
