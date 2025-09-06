@@ -11,6 +11,7 @@ import { countries } from '@/lib/countries';
 import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
 import { BiomarkerKey } from '@/lib/biomarker-cards';
+import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, customBiomarkers: [] };
 
@@ -41,7 +42,7 @@ interface EnableDashboardResult {
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
-  addMedicalCondition: (condition: Omit<MedicalCondition, 'id'>) => void;
+  addMedicalCondition: (condition: { condition: string; date: string }) => Promise<void>;
   updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
   approveMedicalCondition: (conditionId: string) => void;
@@ -247,18 +248,72 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updatePatientData(newProfile.id, { ...newProfile });
   }
   
-  const addMedicalCondition = (condition: Omit<MedicalCondition, 'id'>) => {
-    const newCondition: MedicalCondition = {
-      ...condition,
-      id: Date.now().toString(),
-      icdCode: condition.icdCode || '',
-    };
+  const addMedicalCondition = async (condition: { condition: string; date: string }) => {
+    const tempId = `temp-${Date.now()}`;
+    const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
 
-    const updatedConditions = [...profile.presentMedicalConditions, newCondition];
-    
-    setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
-    updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
-};
+    // Add a temporary condition to the UI immediately for responsiveness
+    const tempCondition: MedicalCondition = {
+      ...condition,
+      id: tempId,
+      icdCode: 'loading...',
+      status: status,
+    };
+    setProfileState(p => ({
+      ...p,
+      presentMedicalConditions: [...p.presentMedicalConditions, tempCondition],
+    }));
+
+    try {
+      const result = await getIcdCode({ conditionName: condition.condition });
+      const newCondition: MedicalCondition = {
+        ...condition,
+        id: Date.now().toString(),
+        icdCode: result.icdCode,
+        status: status,
+      };
+
+      const finalConditions = [
+        ...profile.presentMedicalConditions,
+        newCondition,
+      ];
+      
+      // Replace temp condition with final one
+      setProfileState(p => ({
+        ...p,
+        presentMedicalConditions: p.presentMedicalConditions.map(c =>
+          c.id === tempId ? newCondition : c
+        ),
+      }));
+      await updatePatientData(profile.id, { presentMedicalConditions: finalConditions });
+
+    } catch (error) {
+      console.error('Failed to get ICD code', error);
+      toast({
+        variant: 'destructive',
+        title: 'AI Error',
+        description: 'Could not get ICD code suggestion. The condition has been saved without it.',
+      });
+      // Save without the code if AI fails, but still replace the temp entry
+      const newCondition: MedicalCondition = {
+        ...condition,
+        id: Date.now().toString(),
+        icdCode: '',
+        status: status,
+      };
+      const finalConditions = [
+        ...profile.presentMedicalConditions,
+        newCondition,
+      ];
+      setProfileState(p => ({
+        ...p,
+        presentMedicalConditions: p.presentMedicalConditions.map(c =>
+          c.id === tempId ? newCondition : c
+        ),
+      }));
+      await updatePatientData(profile.id, { presentMedicalConditions: finalConditions });
+    }
+  };
 
   const updateMedicalCondition = (condition: MedicalCondition) => {
     const updatedConditions = profile.presentMedicalConditions.map(c => c.id === condition.id ? condition : c);

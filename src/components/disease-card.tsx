@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { MedicalCondition } from '@/lib/types';
@@ -30,6 +31,7 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
 
   const statusInfo = statusConfig[condition.status] || statusConfig.pending_review;
   const Icon = statusInfo.icon;
+  const isIcdLoading = condition.icdCode === 'loading...';
 
   const handleSynopsisToggle = (id: string) => {
     if (activeSynopsis === id) {
@@ -59,8 +61,15 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
             <TooltipContent>{statusInfo.text}</TooltipContent>
             </Tooltip>
           </div>
-          {condition.icdCode && (
-            <p className="text-xs text-muted-foreground">ICD-11: {condition.icdCode}</p>
+          {isIcdLoading ? (
+             <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <span>Getting ICD-11 code...</span>
+             </div>
+          ) : (
+            condition.icdCode && (
+                <p className="text-xs text-muted-foreground">ICD-11: {condition.icdCode}</p>
+            )
           )}
           <p className="text-xs text-muted-foreground">{formatDate(condition.date)}</p>
         </div>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, ShieldAlert, Info, XCircle, Trash2 } from 'lucide-react';
@@ -18,8 +19,6 @@ import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
 import { DatePicker } from './ui/date-picker';
 import { DiseaseCard } from './disease-card';
 import { Separator } from './ui/separator';
-import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
-import { useToast } from '@/hooks/use-toast';
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
@@ -92,13 +91,12 @@ type ActiveSynopsis = {
 } | null;
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, setMedicationNil, isDoctorLoggedIn } = useApp();
+  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, setMedicationNil } = useApp();
   const [isAddingCondition, setIsAddingCondition] = React.useState(false);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useToast();
 
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -110,33 +108,11 @@ export function MedicalHistoryCard() {
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
   const handleSaveCondition = async (data: z.infer<typeof ConditionSchema>) => {
+    await addMedicalCondition({
+      condition: data.condition,
+      date: data.date.toISOString(),
+    });
     setIsAddingCondition(false);
-    
-    try {
-      const result = await getIcdCode({ conditionName: data.condition });
-      const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
-      addMedicalCondition({
-        condition: data.condition,
-        date: data.date.toISOString(),
-        icdCode: result.icdCode,
-        status: status,
-      });
-    } catch (error) {
-      console.error('Failed to get ICD code', error);
-      toast({
-        variant: 'destructive',
-        title: 'AI Error',
-        description: 'Could not get ICD code suggestion. The condition has been saved without it.',
-      });
-      // Save without the code if AI fails
-      const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
-      addMedicalCondition({
-        condition: data.condition,
-        date: data.date.toISOString(),
-        icdCode: '',
-        status: status,
-      });
-    }
   };
   
   const handleReviseCondition = (id: string) => {
