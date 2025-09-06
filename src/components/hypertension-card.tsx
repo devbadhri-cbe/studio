@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -9,7 +10,7 @@ import { type BiomarkerKey } from '@/lib/biomarker-cards';
 
 
 const HYPERTENSION_PANEL_KEY = 'hypertension';
-const allHypertensionBiomarkers: BiomarkerKey[] = ['bloodPressure', 'weight'];
+const allHypertensionBiomarkers: BiomarkerKey[] = ['weight'];
 
 export function HypertensionCard() {
   const { isDoctorLoggedIn, profile } = useApp();

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -21,6 +22,7 @@ import { ProfileCard } from '@/components/profile-card';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { WeightRecordCard } from './weight-record-card';
+import { BloodPressureCard } from './blood-pressure-card';
 
 
 export function PatientDashboard() {
@@ -71,7 +73,7 @@ export function PatientDashboard() {
                     <ProfileCard />
                 </div>
                 <div className="lg:col-span-1 flex flex-col gap-6">
-                    <WeightRecordCard />
+                     <BloodPressureCard />
                 </div>
                 <div className="lg:col-span-1 flex flex-col gap-6">
                      <MedicalHistoryCard />
