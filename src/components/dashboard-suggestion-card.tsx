@@ -32,12 +32,38 @@ export function DashboardSuggestionCard() {
   };
   
   const handleEnable = (suggestion: DashboardSuggestion) => {
-    // This function is a placeholder for now as per our plan.
-    // In the next phase, we will implement the logic to enable the panel.
-    toast({
-        title: 'Pending Implementation',
-        description: 'Enabling panels from suggestions will be implemented next.',
-    });
+    const panelMap: { [key: string]: string } = {
+        'Diabetes Panel': 'diabetes',
+        'Hypertension Panel': 'hypertension',
+        'Lipids Panel': 'lipids'
+    };
+    
+    const panelKey = panelMap[suggestion.panelName];
+
+    if (panelKey) {
+        // Find the system keys for the suggested biomarker names
+        const biomarkerKeysToEnable = suggestion.biomarkers.map(name => {
+            return Object.entries(availableBiomarkerCards).find(([key, value]) => value.label === name || key === name.toLowerCase())?.[0];
+        }).filter(Boolean) as BiomarkerKey[];
+
+        // Enable each biomarker for the panel
+        biomarkerKeysToEnable.forEach(biomarkerKey => {
+            // The context function handles checking if it's already enabled
+            toggleDiseaseBiomarker(panelKey, biomarkerKey);
+        });
+        
+        toast({
+            title: `${suggestion.panelName} Enabled`,
+            description: 'The recommended biomarkers have been added to the panel.',
+        });
+        setSuggestionStatus(suggestion.id, 'completed');
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'Panel Not Found',
+            description: `The suggested "${suggestion.panelName}" is not yet available for automated creation.`,
+        });
+    }
   }
 
   return (
