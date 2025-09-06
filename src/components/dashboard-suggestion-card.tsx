@@ -65,6 +65,9 @@ export function DashboardSuggestionCard() {
             title: `${suggestion.panelName} Enabled`,
             description: `Enabled ${enabledCount} biomarkers.`
         });
+    } else {
+        // This case is for when the AI suggests a completely new panel that isn't in our panelMap.
+        // We can add a "Create Panel" flow here in the future.
     }
   }
 
