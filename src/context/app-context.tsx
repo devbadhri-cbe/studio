@@ -570,7 +570,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const toggleDiseasePanel = (panelKey: DiseasePanelKey) => {
     const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
     
-    // If panel exists, remove it. Otherwise, add it with an empty array.
     const isEnabled = currentEnabled.hasOwnProperty(panelKey);
     const updatedEnabledBiomarkers = { ...currentEnabled };
 
