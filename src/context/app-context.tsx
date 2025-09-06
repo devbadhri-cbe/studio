@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, CustomBiomarkerRecord } from '@/lib/types';
+import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -14,7 +14,7 @@ import { BiomarkerKey, DiseasePanelKey } from '@/lib/biomarker-cards';
 import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
 import { suggestMonitoringPlan } from '@/ai/flows/suggest-monitoring-plan-flow';
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, customBiomarkers: [], dashboardSuggestions: [] };
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
 
 type DashboardView = 'vitaminD' | 'thyroid' | 'hypertension' | 'report' | 'none';
 type Theme = 'dark' | 'light' | 'system';
@@ -106,11 +106,6 @@ interface AppContextType {
   dashboardSuggestions: DashboardSuggestion[];
   toggleDiseaseBiomarker: (panelKey: string, biomarkerKey: BiomarkerKey | string) => void;
   toggleDiseasePanel: (panelKey: DiseasePanelKey) => void;
-  customBiomarkers: CustomBiomarker[];
-  addCustomBiomarker: (name: string) => Promise<string>;
-  removeCustomBiomarker: (id: string) => void;
-  addCustomBiomarkerRecord: (biomarkerId: string, record: Omit<CustomBiomarkerRecord, 'id'>) => void;
-  removeCustomBiomarkerRecord: (biomarkerId: string, recordId: string) => void;
 }
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -134,7 +129,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
   const [biomarkerUnit, setBiomarkerUnitState] = React.useState<BiomarkerUnitSystem>('conventional');
-  const [customBiomarkers, setCustomBiomarkersState] = React.useState<CustomBiomarker[]>([]);
   
   React.useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
@@ -229,9 +223,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       enabledBiomarkers: patient.enabledBiomarkers || {},
       bmi: patient.bmi,
       doctorName: patient.doctorName,
-      customBiomarkers: patient.customBiomarkers || [],
       dashboardSuggestions: patient.dashboardSuggestions || [],
-      customBiomarkerRecords: patient.customBiomarkerRecords || {},
     };
     setProfileState(patientProfile);
     setHba1cRecordsState(patient.hba1cRecords || []);
@@ -245,7 +237,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setLdlRecordsState(patient.ldlRecords || []);
     setHdlRecordsState(patient.hdlRecords || []);
     setTriglyceridesRecordsState(patient.triglyceridesRecords || []);
-    setCustomBiomarkersState(patient.customBiomarkers || []);
     setTips([]); 
     setDashboardViewState('report');
     setBiomarkerUnitState(countries.find(c => c.code === patient.country)?.biomarkerUnit || 'conventional');
@@ -557,48 +548,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTriglyceridesRecordsState(updatedRecords);
     updatePatientData(profile.id, { triglyceridesRecords: updatedRecords });
   };
-
-  const addCustomBiomarker = async (name: string): Promise<string> => {
-    const newBiomarker: CustomBiomarker = {
-      id: `custom-${Date.now()}`,
-      name,
-    };
-    const updatedBiomarkers = [...(profile.customBiomarkers || []), newBiomarker];
-    const newProfileState = {...profile, customBiomarkers: updatedBiomarkers};
-    setProfileState(newProfileState);
-    await updatePatientData(profile.id, { customBiomarkers: newProfileState.customBiomarkers });
-    return newBiomarker.id;
-  };
-
-  const removeCustomBiomarker = (id: string) => {
-    const updatedBiomarkers = (profile.customBiomarkers || []).filter(b => b.id !== id);
-    const newProfileState = {...profile, customBiomarkers: updatedBiomarkers};
-    setProfileState(newProfileState);
-    updatePatientData(profile.id, { customBiomarkers: newProfileState.customBiomarkers });
-  };
-
-  const addCustomBiomarkerRecord = (biomarkerId: string, record: Omit<CustomBiomarkerRecord, 'id'>) => {
-    const newRecord = { ...record, id: `rec-${Date.now()}` };
-    const currentRecords = profile.customBiomarkerRecords || {};
-    const biomarkerRecords = currentRecords[biomarkerId] || [];
-    const updatedRecords = [...biomarkerRecords, newRecord];
-    const newCustomRecords = { ...currentRecords, [biomarkerId]: updatedRecords };
-    
-    const newProfileState = { ...profile, customBiomarkerRecords: newCustomRecords };
-    setProfileState(newProfileState);
-    updatePatientData(profile.id, { customBiomarkerRecords: newProfileState.customBiomarkerRecords });
-  };
-
-  const removeCustomBiomarkerRecord = (biomarkerId: string, recordId: string) => {
-    const currentRecords = profile.customBiomarkerRecords || {};
-    const biomarkerRecords = currentRecords[biomarkerId] || [];
-    const updatedRecords = biomarkerRecords.filter(r => r.id !== recordId);
-    const newCustomRecords = { ...currentRecords, [biomarkerId]: updatedRecords };
-
-    const newProfileState = { ...profile, customBiomarkerRecords: newCustomRecords };
-    setProfileState(newProfileState);
-    updatePatientData(profile.id, { customBiomarkerRecords: newProfileState.customBiomarkerRecords });
-  };
   
   const toggleDiseaseBiomarker = (panelKey: string, biomarkerKey: BiomarkerKey | string) => {
     const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
@@ -811,11 +760,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     dashboardSuggestions: profile.dashboardSuggestions || [],
     toggleDiseaseBiomarker,
     toggleDiseasePanel,
-    customBiomarkers,
-    addCustomBiomarker,
-    removeCustomBiomarker,
-    addCustomBiomarkerRecord,
-    removeCustomBiomarkerRecord,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

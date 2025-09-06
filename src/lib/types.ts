@@ -44,13 +44,6 @@ export interface DashboardSuggestion {
   status: 'pending' | 'dismissed' | 'completed';
 }
 
-export interface CustomBiomarkerRecord {
-  id: string;
-  date: Date | string;
-  value: number;
-  unit?: string;
-}
-
 export interface UserProfile {
   id: string; // Add patient ID to profile for easier lookup
   name: string;
@@ -67,9 +60,7 @@ export interface UserProfile {
   bmi?: number;
   enabledBiomarkers?: { [key: string]: (BiomarkerKey | string)[] };
   doctorName?: string;
-  customBiomarkers?: CustomBiomarker[];
   dashboardSuggestions?: DashboardSuggestion[];
-  customBiomarkerRecords?: { [biomarkerId: string]: CustomBiomarkerRecord[] };
 }
 
 export interface Hba1cRecord {
@@ -146,12 +137,6 @@ export interface TriglyceridesRecord {
   medication?: string;
 }
 
-export interface CustomBiomarker {
-    id: string;
-    name: string;
-}
-
-
 export interface Patient {
   id: string;
   name: string;
@@ -204,7 +189,5 @@ export interface Patient {
   presentMedicalConditions: MedicalCondition[];
   enabledBiomarkers: { [key in DiseasePanelKey]?: (BiomarkerKey | string)[] };
   doctorName?: string;
-  customBiomarkers?: CustomBiomarker[];
   dashboardSuggestions?: DashboardSuggestion[];
-  customBiomarkerRecords?: { [biomarkerId: string]: CustomBiomarkerRecord[] };
 }

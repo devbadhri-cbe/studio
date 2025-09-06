@@ -6,7 +6,6 @@ import { availableBiomarkerCards, type BiomarkerKey } from '@/lib/biomarker-card
 import { Card, CardContent } from './ui/card';
 import * as React from 'react';
 import { InteractivePanelGrid } from './interactive-panel-grid';
-import { CustomBiomarkerCard } from './custom-biomarker-card';
 
 export function BiomarkersPanel() {
     const { isDoctorLoggedIn, profile } = useApp();
@@ -16,23 +15,11 @@ export function BiomarkersPanel() {
         return [...new Set(allEnabled)];
     }, [profile.enabledBiomarkers]);
     
-    const standardCards = Object.entries(availableBiomarkerCards).map(([key, value]) => ({
+    const allCards = Object.entries(availableBiomarkerCards).map(([key, value]) => ({
         key,
         label: value.label.toLowerCase(),
         component: React.cloneElement(value.component, { key, isReadOnly: !isDoctorLoggedIn }),
     }));
-    
-    const standardCardLabels = new Set(standardCards.map(c => c.label));
-
-    const customCards = (profile.customBiomarkers || [])
-        .filter(biomarker => !standardCardLabels.has(biomarker.name.toLowerCase()))
-        .map(biomarker => ({
-            key: biomarker.id,
-            label: biomarker.name.toLowerCase(),
-            component: <CustomBiomarkerCard key={biomarker.id} biomarker={biomarker} isReadOnly={!isDoctorLoggedIn} />,
-    }));
-
-    const allCards = [...standardCards, ...customCards];
 
     if (isDoctorLoggedIn) {
         return (
