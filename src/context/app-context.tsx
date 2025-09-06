@@ -12,7 +12,6 @@ import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conver
 import { calculateBmi } from '@/lib/utils';
 import { BiomarkerKey, DiseasePanelKey } from '@/lib/biomarker-cards';
 import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
-import { suggestMonitoringPlan } from '@/ai/flows/suggest-monitoring-plan-flow';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
 
@@ -350,49 +349,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
   
   const approveMedicalCondition = async (conditionId: string) => {
-    let approvedCondition: MedicalCondition | undefined;
     const updatedConditions = profile.presentMedicalConditions.map(c => {
         if (c.id === conditionId) {
-            approvedCondition = { ...c, status: 'verified' as const };
-            return approvedCondition;
+            return { ...c, status: 'verified' as const };
         }
         return c;
     });
 
-    if (!approvedCondition) return;
-
-    // Suggest a monitoring plan
-    try {
-        const existingPanels = Object.keys(profile.enabledBiomarkers || {});
-        const suggestionResult = await suggestMonitoringPlan({ 
-            conditionName: approvedCondition.condition,
-            existingPanels,
-        });
-
-        const newSuggestion: DashboardSuggestion = {
-            id: `sug-${Date.now()}`,
-            basedOnCondition: approvedCondition.condition,
-            panelName: suggestionResult.panelName,
-            isNewPanel: suggestionResult.isNewPanel,
-            biomarkers: suggestionResult.biomarkers,
-            status: 'pending'
-        };
-
-        const currentSuggestions = profile.dashboardSuggestions || [];
-        const newProfileState = {...profile, presentMedicalConditions: updatedConditions, dashboardSuggestions: [...currentSuggestions, newSuggestion] };
-        setProfileState(newProfileState);
-        setHasUnsavedChanges(true);
-    } catch (error) {
-        console.error("Failed to get monitoring suggestion:", error);
-        const newProfileState = {...profile, presentMedicalConditions: updatedConditions };
-        setProfileState(newProfileState);
-        setHasUnsavedChanges(true);
-        toast({
-            variant: "destructive",
-            title: "Suggestion Failed",
-            description: "Could not get an AI suggestion, but the condition has been approved."
-        });
-    }
+    const newProfileState = {...profile, presentMedicalConditions: updatedConditions };
+    setProfileState(newProfileState);
+    setHasUnsavedChanges(true);
   };
   
   const dismissSuggestion = (conditionId: string) => {
