@@ -40,7 +40,7 @@ export function DashboardSuggestionCard() {
     
     const panelKey = panelMap[suggestion.panelName];
 
-    if (panelKey) {
+    if (panelKey && profile.enabledBiomarkers?.[panelKey]) {
         // Enable all suggested biomarkers for this existing panel
         let enabledCount = 0;
         suggestion.biomarkers.forEach(biomarkerName => {
