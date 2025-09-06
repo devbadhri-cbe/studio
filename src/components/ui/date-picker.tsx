@@ -126,12 +126,12 @@ export function DatePicker({
             placeholder="DD"
             value={day}
             onChange={handleDayChange}
-            className="w-10 border-0 p-0 shadow-none focus-visible:ring-0 text-center bg-transparent"
+            className="w-12 border-0 p-0 shadow-none focus-visible:ring-0 text-center bg-transparent"
             maxLength={2}
          />
          <span className="text-muted-foreground">/</span>
         <Select value={month} onValueChange={handleMonthChange}>
-          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-24 focus-visible:ring-0 bg-transparent" icon={null}>
+          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[100px] focus-visible:ring-0 bg-transparent">
             <SelectValue placeholder="Month" />
           </SelectTrigger>
           <SelectContent>
@@ -144,7 +144,7 @@ export function DatePicker({
         </Select>
         <span className="text-muted-foreground">/</span>
          <Select value={year} onValueChange={handleYearChange}>
-          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-20 focus-visible:ring-0 bg-transparent" icon={null}>
+          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[70px] focus-visible:ring-0 bg-transparent">
             <SelectValue placeholder="Year" />
           </SelectTrigger>
           <SelectContent>
