@@ -23,7 +23,6 @@ export function UploadRecordDialog() {
   const [open, setOpen] = React.useState(false);
   const [step, setStep] = React.useState<Step>('initial');
   const [errorMessage, setErrorMessage] = React.useState('');
-  const [hasCameraPermission, setHasCameraPermission] = React.useState<boolean | null>(null);
   const [isCapturing, setIsCapturing] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [extractedData, setExtractedData] = React.useState<ExtractLabResultsOutput | null>(null);
@@ -34,22 +33,22 @@ export function UploadRecordDialog() {
   const { toast } = useToast();
   const { profile, addBatchRecords } = useApp();
 
-  const stopCameraStream = () => {
+  const stopCameraStream = React.useCallback(() => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
-  };
+  }, []);
 
-  const resetState = () => {
+  const resetState = React.useCallback(() => {
     setStep('initial');
     setErrorMessage('');
     setIsCapturing(false);
     setIsLoading(false);
     setExtractedData(null);
     stopCameraStream();
-  };
+  }, [stopCameraStream]);
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
@@ -94,14 +93,12 @@ export function UploadRecordDialog() {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      setHasCameraPermission(true);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
       setIsCapturing(true);
     } catch (error) {
       console.error('Error accessing camera:', error);
-      setHasCameraPermission(false);
       setErrorMessage('Could not access the camera. Please check your browser permissions.');
       setStep('error');
     }
