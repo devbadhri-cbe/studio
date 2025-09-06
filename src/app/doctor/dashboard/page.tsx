@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Search, UserPlus } from 'lucide-react';
+import { Search, UserPlus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Patient } from '@/lib/types';
 import {
@@ -20,13 +20,16 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
-import { addPatient, deletePatient, getPatients, updatePatient } from '@/lib/firestore';
+import { addPatient, deletePatient, getPatientsPaginated, getPatientsCount } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { useApp } from '@/context/app-context';
 import { TitleBar } from '@/components/title-bar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { processPatientData } from '@/lib/utils';
+import { updatePatient } from '@/lib/firestore';
+
+const PAGE_SIZE = 8;
 
 export default function DoctorDashboardPage() {
     const router = useRouter();
@@ -39,14 +42,32 @@ export default function DoctorDashboardPage() {
     const [isFormOpen, setIsFormOpen] = React.useState(false);
     const [editingPatient, setEditingPatient] = React.useState<Patient | null>(null);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [lastVisible, setLastVisible] = React.useState<any | null>(null);
+    const [firstVisible, setFirstVisible] = React.useState<any | null>(null);
+    const [totalPatients, setTotalPatients] = React.useState(0);
+    const [currentPage, setCurrentPage] = React.useState(1);
+    
+    const totalPages = Math.ceil(totalPatients / PAGE_SIZE);
 
-
-    const fetchPatients = React.useCallback(async () => {
+    const fetchPatients = React.useCallback(async (direction: 'next' | 'prev' | 'initial' = 'initial') => {
         setIsLoading(true);
         try {
-            const rawPatientsData = await getPatients();
+            const { patients: rawPatientsData, lastVisible: newLastVisible } = await getPatientsPaginated(
+                direction === 'next' ? lastVisible : null,
+                PAGE_SIZE
+            );
             const fetchedPatients = rawPatientsData.map(processPatientData);
             setPatients(fetchedPatients);
+            setLastVisible(newLastVisible);
+            
+            if (direction === 'initial') {
+                const count = await getPatientsCount();
+                setTotalPatients(count);
+                setCurrentPage(1);
+            } else if (direction === 'next') {
+                setCurrentPage(prev => prev + 1);
+            }
+
         } catch (error) {
             console.error("Failed to fetch patients from Firestore", error);
             toast({
@@ -57,14 +78,15 @@ export default function DoctorDashboardPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast]);
-
+    }, [toast, lastVisible]);
+    
     React.useEffect(() => {
         setIsDoctorLoggedIn(true);
         if (isClient) {
-            fetchPatients();
+            fetchPatients('initial');
         }
-    }, [isClient, fetchPatients, setIsDoctorLoggedIn]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isClient, setIsDoctorLoggedIn]);
     
 
     const viewPatientDashboard = (patient: Patient) => {
@@ -77,6 +99,7 @@ export default function DoctorDashboardPage() {
             await deletePatient(patientId);
             setPatients(patients.filter(p => p.id !== patientId));
             setPatientToDelete(null);
+            setTotalPatients(prev => prev - 1);
             toast({
                 title: 'Patient Deleted',
                 description: 'The patient has been removed from the list.'
@@ -117,7 +140,7 @@ export default function DoctorDashboardPage() {
                     description: `${newPatient.name} has been successfully added.`,
                 });
             }
-            await fetchPatients();
+            await fetchPatients('initial');
             closeForm();
         } catch (error) {
             console.error("Failed to save patient", error);
@@ -214,14 +237,14 @@ export default function DoctorDashboardPage() {
                         <CardHeader className="flex flex-col md:flex-row md:items-center gap-4">
                             <div className="grid gap-2 flex-1">
                                 <CardTitle>Patient List</CardTitle>
-                                <CardDescription>A list of all patients currently under your care.</CardDescription>
+                                <CardDescription>A list of all patients currently under your care. Showing page {currentPage} of {totalPages}.</CardDescription>
                             </div>
                             <div className="flex flex-col sm:flex-row items-center gap-2">
                                 <div className="relative w-full sm:w-auto">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         type="search"
-                                        placeholder="Search by name, email, or phone..."
+                                        placeholder="Search current page..."
                                         className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -232,7 +255,7 @@ export default function DoctorDashboardPage() {
                         <CardContent>
                             {isLoading ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                    {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-[300px] w-full" />)}
+                                    {[...Array(PAGE_SIZE)].map((_, i) => <Skeleton key={i} className="h-[300px] w-full" />)}
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -250,9 +273,29 @@ export default function DoctorDashboardPage() {
                             {(!isLoading && filteredAndSortedPatients.length === 0) && (
                                 <div className="text-center text-muted-foreground py-12">
                                     <p>No patients found.</p>
-                                    {searchQuery && <p className="text-sm">Try adjusting your search query.</p>}
+                                    {searchQuery ? <p className="text-sm">Try adjusting your search query on the current page.</p> : <p className="text-sm">Add a new patient to get started.</p>}
                                 </div>
                             )}
+
+                            <div className="flex items-center justify-end space-x-2 pt-4">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => fetchPatients('initial')}
+                                    disabled={currentPage === 1 || isLoading}
+                                >
+                                    First
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => fetchPatients('next')}
+                                    disabled={currentPage >= totalPages || isLoading}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+
                         </CardContent>
                     </Card>
                     </>

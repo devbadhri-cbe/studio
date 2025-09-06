@@ -14,6 +14,9 @@ import {
   orderBy,
   serverTimestamp,
   Timestamp,
+  limit,
+  startAfter,
+  getCountFromServer,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Patient } from './types';
@@ -48,6 +51,44 @@ export async function getPatients(): Promise<any[]> {
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...convertTimestamps(doc.data()) }));
 }
+
+export async function getPatientsPaginated(
+  lastVisible: any | null,
+  pageSize: number
+): Promise<{ patients: Patient[]; lastVisible: any | null }> {
+  let q;
+  if (lastVisible) {
+    q = query(
+      collection(db, PATIENTS_COLLECTION),
+      orderBy('name'),
+      startAfter(lastVisible),
+      limit(pageSize)
+    );
+  } else {
+    q = query(
+      collection(db, PATIENTS_COLLECTION),
+      orderBy('name'),
+      limit(pageSize)
+    );
+  }
+
+  const documentSnapshots = await getDocs(q);
+  const patients = documentSnapshots.docs.map(doc => ({
+    id: doc.id,
+    ...convertTimestamps(doc.data()),
+  })) as Patient[];
+
+  const newLastVisible =
+    documentSnapshots.docs[documentSnapshots.docs.length - 1];
+
+  return { patients, lastVisible: newLastVisible || null };
+}
+
+export async function getPatientsCount(): Promise<number> {
+  const snapshot = await getCountFromServer(collection(db, PATIENTS_COLLECTION));
+  return snapshot.data().count;
+}
+
 
 export async function getPatient(id: string): Promise<any | null> {
   const docRef = doc(db, PATIENTS_COLLECTION, id);
