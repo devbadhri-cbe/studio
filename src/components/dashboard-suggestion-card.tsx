@@ -100,7 +100,7 @@ export function DashboardSuggestionCard() {
     // Re-check after creating a new biomarker
     if (processingSuggestion) {
       // Temporarily add new biomarker to check against
-      const newBiomarker = profile.customBiomarkers?.find(b => b.id === newId);
+      const newBiomarker = customBiomarkers?.find(b => b.id === newId);
       if (newBiomarker) {
         const updatedMissing = missingBiomarkers.filter(b => b.toLowerCase() !== newBiomarker.name.toLowerCase());
         setMissingBiomarkers(updatedMissing);
