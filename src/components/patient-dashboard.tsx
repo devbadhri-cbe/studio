@@ -30,6 +30,8 @@ export function PatientDashboard() {
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
   
+  // This check is removed to always show the biomarker panel for patients.
+  // The logic to show specific cards is now fully handled within BiomarkersPanel.
   const hasEnabledBiomarkers = React.useMemo(() => {
     if (!profile.enabledBiomarkers) return false;
     return Object.values(profile.enabledBiomarkers).some(panel => panel.length > 0);
