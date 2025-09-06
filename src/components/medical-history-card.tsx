@@ -2,7 +2,7 @@
 
 'use client';
 
-import { Stethoscope, PlusCircle, Loader2, Pill, ShieldAlert, Info, XCircle, Trash2 } from 'lucide-react';
+import { Stethoscope, PlusCircle, Loader2, Pill, ShieldAlert, Info, XCircle, Trash2, Edit, AlertTriangle } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -341,3 +341,5 @@ export function MedicalHistoryCard() {
     </Card>
   );
 }
+
+    
