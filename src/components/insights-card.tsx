@@ -98,8 +98,14 @@ export function InsightsCard() {
           </Alert>
         )}
         
+        {isLoading && (
+            <div className="flex justify-center items-center py-6">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        )}
+
         {!isLoading && tips.length === 0 && (
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-sm text-muted-foreground py-6">
                 <p>Click the button to generate personalized health tips.</p>
             </div>
         )}
