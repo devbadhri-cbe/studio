@@ -79,6 +79,49 @@ export function DashboardSuggestionCard() {
       );
   }
 
+  const suggestionElements = pendingSuggestions.map((suggestion) => {
+    const missingBiomarkers = checkMissingBiomarkers(suggestion);
+    const biomarkersToDisplay = suggestion.biomarkers || [];
+
+    return (
+      <div key={suggestion.id} className="flex flex-col sm:flex-row sm:items-start gap-4 p-3 rounded-md bg-background">
+        <div className="flex-1 space-y-2">
+          <p className="text-sm">
+            Based on the diagnosis of <span className="font-semibold">{suggestion.basedOnCondition}</span>, the AI recommends enabling the <span className="font-semibold">{suggestion.panelName}</span>.
+          </p>
+          <div className="flex flex-col items-start gap-2">
+            <p className="text-xs text-muted-foreground">Suggested biomarkers for monitoring:</p>
+            <div className="flex flex-wrap gap-2">
+              {biomarkersToDisplay.map((biomarker) => (
+                <Badge key={biomarker} variant="secondary">{biomarker}</Badge>
+              ))}
+            </div>
+          </div>
+
+          {missingBiomarkers.length > 0 && (
+              <Alert variant="destructive" className="mt-4">
+                  <AlertTitle>Action Required: Missing Cards</AlertTitle>
+                  <AlertDescription>
+                      The following biomarker cards must be added by a developer before this panel can be enabled: {missingBiomarkers.join(', ')}.
+                  </AlertDescription>
+              </Alert>
+          )}
+
+        </div>
+        <div className="flex gap-2 shrink-0 self-end sm:self-center">
+          <Button size="sm" variant="outline" onClick={() => handleDismiss(suggestion.id)}>
+            <X className="h-4 w-4 mr-2" />
+            Dismiss
+          </Button>
+          <Button size="sm" onClick={() => handleEnable(suggestion)} disabled={missingBiomarkers.length > 0}>
+            <Check className="h-4 w-4 mr-2" />
+            Enable
+          </Button>
+        </div>
+      </div>
+    );
+  });
+
   return (
     <>
     <Card className="border-blue-500 bg-blue-500/5">
@@ -94,51 +137,13 @@ export function DashboardSuggestionCard() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {pendingSuggestions.map((suggestion, index) => {
-          const missingBiomarkers = checkMissingBiomarkers(suggestion);
-          const biomarkersToDisplay = suggestion.biomarkers || [];
-
-          return (
-            <React.Fragment key={suggestion.id}>
-              {index > 0 && <Separator />}
-              <div className="flex flex-col sm:flex-row sm:items-start gap-4 p-3 rounded-md bg-background">
-                <div className="flex-1 space-y-2">
-                  <p className="text-sm">
-                    Based on the diagnosis of <span className="font-semibold">{suggestion.basedOnCondition}</span>, the AI recommends enabling the <span className="font-semibold">{suggestion.panelName}</span>.
-                  </p>
-                  <div className="flex flex-col items-start gap-2">
-                    <p className="text-xs text-muted-foreground">Suggested biomarkers for monitoring:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {biomarkersToDisplay.map((biomarker) => (
-                        <Badge key={biomarker} variant="secondary">{biomarker}</Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  {missingBiomarkers.length > 0 && (
-                      <Alert variant="destructive" className="mt-4">
-                          <AlertTitle>Action Required: Missing Cards</AlertTitle>
-                          <AlertDescription>
-                              The following biomarker cards must be added by a developer before this panel can be enabled: {missingBiomarkers.join(', ')}.
-                          </AlertDescription>
-                      </Alert>
-                  )}
-
-                </div>
-                <div className="flex gap-2 shrink-0 self-end sm:self-center">
-                  <Button size="sm" variant="outline" onClick={() => handleDismiss(suggestion.id)}>
-                    <X className="h-4 w-4 mr-2" />
-                    Dismiss
-                  </Button>
-                  <Button size="sm" onClick={() => handleEnable(suggestion)} disabled={missingBiomarkers.length > 0}>
-                    <Check className="h-4 w-4 mr-2" />
-                    Enable
-                  </Button>
-                </div>
-              </div>
-            </React.Fragment>
-          )
-        })}
+        {suggestionElements.reduce((acc, curr, index) => {
+            if (index > 0) {
+                acc.push(<Separator key={`sep-${index}`} />);
+            }
+            acc.push(curr);
+            return acc;
+        }, [] as React.ReactNode[])}
       </CardContent>
     </Card>
     </>
