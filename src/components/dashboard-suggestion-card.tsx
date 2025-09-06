@@ -56,39 +56,44 @@ export function DashboardSuggestionCard() {
     }
     
     // Step 2: If no biomarkers are missing, enable the panel
-    const panelMap: { [key: string]: { panelKey: string, biomarkers: BiomarkerKey[] } } = {
+    const panelMap: { [key: string]: { panelKey: string, biomarkers: (BiomarkerKey | string)[] } } = {
         'Diabetes Panel': { panelKey: 'diabetes', biomarkers: ['hba1c', 'glucose'] },
         'Hypertension Panel': { panelKey: 'hypertension', biomarkers: ['bloodPressure', 'weight'] },
-        'Lipids Panel': { panelKey: 'lipids', biomarkers: ['lipidProfile'] },
+        'Lipids Panel': { panelKey: 'lipids', biomarkers: [] },
     };
-    
-    const panelInfo = panelMap[suggestion.panelName];
 
-    if (panelInfo) {
-        panelInfo.biomarkers.forEach(biomarkerKey => {
-            toggleDiseaseBiomarker(panelInfo.panelKey, biomarkerKey);
-        });
-        
-        toast({
-            title: `${suggestion.panelName} Enabled`,
-            description: 'The panel has been added to the dashboard.',
-        });
-        setSuggestionStatus(suggestion.id, 'completed');
-    } else {
-        // Fallback for custom/new panels
-         suggestion.biomarkers.forEach(b => {
-            const biomarker = [...Object.values(availableBiomarkerCards), ...(customBiomarkers || [])].find(known => known.label.toLowerCase() === b.toLowerCase() || (known as any).name?.toLowerCase() === b.toLowerCase());
-            if (biomarker) {
-                // This part needs a more robust logic to assign to a panel
-                // For now, let's assume a generic panel or handle it case-by-case
+    if (suggestion.panelName === 'Lipids Panel') {
+        const allBiomarkerObjects = [
+            ...Object.entries(availableBiomarkerCards).map(([key, val]) => ({ id: key, name: val.label })),
+            ...(customBiomarkers || [])
+        ];
+
+        suggestion.biomarkers.forEach(biomarkerName => {
+            const biomarker = allBiomarkerObjects.find(b => b.name.toLowerCase() === biomarkerName.toLowerCase());
+            if (biomarker && !profile.enabledBiomarkers?.['lipids']?.includes(biomarker.id)) {
+                 toggleDiseaseBiomarker('lipids', biomarker.id);
             }
         });
         toast({
-            title: 'Panel Enabled',
-            description: `${suggestion.panelName} biomarkers are now available.`,
+            title: 'Lipid Biomarkers Enabled',
+            description: 'The suggested lipid biomarkers have been added to the Lipids Panel.',
         });
-        setSuggestionStatus(suggestion.id, 'completed');
+
+    } else {
+        const panelInfo = panelMap[suggestion.panelName];
+        if (panelInfo) {
+            panelInfo.biomarkers.forEach(biomarkerKey => {
+                toggleDiseaseBiomarker(panelInfo.panelKey, biomarkerKey);
+            });
+            
+            toast({
+                title: `${suggestion.panelName} Enabled`,
+                description: 'The panel has been added to the dashboard.',
+            });
+        }
     }
+
+    setSuggestionStatus(suggestion.id, 'completed');
   }
   
   const handleCreateBiomarkerSuccess = (newId: string) => {
@@ -110,7 +115,6 @@ export function DashboardSuggestionCard() {
       }
     }
   }
-
 
   return (
     <>

@@ -1,8 +1,9 @@
 
 
+
 'use client';
 
-import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord, DashboardSuggestion, LipidRecord } from '@/lib/types';
+import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord, DashboardSuggestion, LipidRecord, CustomBiomarkerRecord } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -95,10 +96,12 @@ interface AppContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   dashboardSuggestions: DashboardSuggestion[];
-  toggleDiseaseBiomarker: (panelKey: string, biomarkerKey: BiomarkerKey) => void;
+  toggleDiseaseBiomarker: (panelKey: string, biomarkerKey: BiomarkerKey | string) => void;
   customBiomarkers: CustomBiomarker[];
   addCustomBiomarker: (name: string) => Promise<string>;
   removeCustomBiomarker: (id: string) => void;
+  addCustomBiomarkerRecord: (biomarkerId: string, record: Omit<CustomBiomarkerRecord, 'id'>) => void;
+  removeCustomBiomarkerRecord: (biomarkerId: string, recordId: string) => void;
 }
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -216,6 +219,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       doctorName: patient.doctorName,
       customBiomarkers: patient.customBiomarkers || [],
       dashboardSuggestions: patient.dashboardSuggestions || [],
+      customBiomarkerRecords: patient.customBiomarkerRecords || {},
     };
     setProfileState(patientProfile);
     setHba1cRecordsState(patient.hba1cRecords || []);
@@ -518,8 +522,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setProfileState(newProfileState);
     updatePatientData(profile.id, { customBiomarkers: newProfileState.customBiomarkers });
   };
+
+  const addCustomBiomarkerRecord = (biomarkerId: string, record: Omit<CustomBiomarkerRecord, 'id'>) => {
+    const newRecord = { ...record, id: `rec-${Date.now()}` };
+    const currentRecords = profile.customBiomarkerRecords || {};
+    const biomarkerRecords = currentRecords[biomarkerId] || [];
+    const updatedRecords = [...biomarkerRecords, newRecord];
+    const newCustomRecords = { ...currentRecords, [biomarkerId]: updatedRecords };
+    
+    const newProfileState = { ...profile, customBiomarkerRecords: newCustomRecords };
+    setProfileState(newProfileState);
+    updatePatientData(profile.id, { customBiomarkerRecords: newProfileState.customBiomarkerRecords });
+  };
+
+  const removeCustomBiomarkerRecord = (biomarkerId: string, recordId: string) => {
+    const currentRecords = profile.customBiomarkerRecords || {};
+    const biomarkerRecords = currentRecords[biomarkerId] || [];
+    const updatedRecords = biomarkerRecords.filter(r => r.id !== recordId);
+    const newCustomRecords = { ...currentRecords, [biomarkerId]: updatedRecords };
+
+    const newProfileState = { ...profile, customBiomarkerRecords: newCustomRecords };
+    setProfileState(newProfileState);
+    updatePatientData(profile.id, { customBiomarkerRecords: newProfileState.customBiomarkerRecords });
+  };
   
-  const toggleDiseaseBiomarker = (panelKey: string, biomarkerKey: BiomarkerKey) => {
+  const toggleDiseaseBiomarker = (panelKey: string, biomarkerKey: BiomarkerKey | string) => {
     const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
     const panelBiomarkers = currentEnabled[panelKey] || [];
     
@@ -695,6 +722,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     customBiomarkers,
     addCustomBiomarker,
     removeCustomBiomarker,
+    addCustomBiomarkerRecord,
+    removeCustomBiomarkerRecord,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

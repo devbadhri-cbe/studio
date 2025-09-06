@@ -1,5 +1,6 @@
 
 
+
 'use client';
 
 import {
@@ -91,6 +92,7 @@ const processPatientDoc = (doc: any): Patient => {
     lipidRecords,
     bmi,
     enabledBiomarkers: data.enabledBiomarkers || {},
+    customBiomarkerRecords: data.customBiomarkerRecords || {},
   };
 
   const status = getPatientStatus(patientData);
@@ -128,7 +130,7 @@ export async function getPatient(id: string): Promise<Patient | null> {
   return null;
 }
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorName' | 'lipidRecords'>): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorName' | 'lipidRecords' | 'customBiomarkerRecords'>): Promise<Patient> {
     const docData = {
         ...patientData,
         doctorName: 'Dr. Badhrinathan N',
@@ -148,6 +150,7 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
           hypertension: ['bloodPressure']
         },
         createdAt: serverTimestamp(),
+        customBiomarkerRecords: {},
     }
   const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), docData);
   
@@ -176,6 +179,18 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
             }));
         }
     });
+
+    // Handle customBiomarkerRecords separately
+    if (updates.customBiomarkerRecords) {
+        const sanitizedCustomRecords: {[key: string]: any} = {};
+        for (const biomarkerId in updates.customBiomarkerRecords) {
+            sanitizedCustomRecords[biomarkerId] = (updates.customBiomarkerRecords[biomarkerId] || []).map((item: any) => ({
+                ...item,
+                date: item.date && typeof item.date === 'string' ? new Date(item.date) : (item.date || new Date())
+            }));
+        }
+        updateData.customBiomarkerRecords = sanitizedCustomRecords;
+    }
 
     // Remove undefined fields to prevent Firestore errors
     Object.keys(updateData).forEach(key => {

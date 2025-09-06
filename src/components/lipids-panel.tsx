@@ -7,12 +7,11 @@ import { Flame } from 'lucide-react';
 import { useApp } from '@/context/app-context';
 import { DiseasePanelCard } from './disease-panel-card';
 import { type BiomarkerKey } from '@/lib/biomarker-cards';
-import { LipidCard } from './lipid-card';
 import { InteractivePanelGrid } from './interactive-panel-grid';
+import { CustomBiomarkerCard } from './custom-biomarker-card';
 
 
 const LIPIDS_PANEL_KEY = 'lipids';
-const allLipidsBiomarkers: BiomarkerKey[] = ['lipidProfile']; 
 
 export function LipidsPanel() {
   const { isDoctorLoggedIn, profile } = useApp();
@@ -21,17 +20,34 @@ export function LipidsPanel() {
   
   const enabledForPanel = profile.enabledBiomarkers?.[LIPIDS_PANEL_KEY] || [];
   
+  const allCustomBiomarkers = profile.customBiomarkers || [];
+
+  const cardsToShow = enabledForPanel.map(biomarkerId => {
+      const biomarker = allCustomBiomarkers.find(b => b.id === biomarkerId);
+      if (biomarker) {
+        return <CustomBiomarkerCard key={biomarker.id} biomarker={biomarker} isReadOnly={!isDoctorLoggedIn} />
+      }
+      return null;
+  }).filter(Boolean);
+
+
   return (
     <DiseasePanelCard 
         title="Lipids Panel" 
         icon={icon}
         isDoctorLoggedIn={isDoctorLoggedIn}
         panelKey={LIPIDS_PANEL_KEY}
-        allPanelBiomarkers={allLipidsBiomarkers}
+        allPanelBiomarkers={allCustomBiomarkers.map(b => b.id as BiomarkerKey)}
     >
+      {cardsToShow.length > 0 ? (
         <InteractivePanelGrid>
-            {enabledForPanel.includes('lipidProfile') && <LipidCard key="lipidProfile" />}
+            {cardsToShow}
         </InteractivePanelGrid>
+      ) : (
+        <div className="flex h-full items-center justify-center">
+            <p className="text-sm text-muted-foreground text-center">No lipid biomarkers enabled. <br/> Add a condition like 'Hyperlipidemia' to get started.</p>
+        </div>
+      )}
     </DiseasePanelCard>
   );
 }

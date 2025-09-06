@@ -6,25 +6,28 @@ import { availableBiomarkerCards, type BiomarkerKey } from '@/lib/biomarker-card
 import { Card, CardContent } from './ui/card';
 import * as React from 'react';
 import { InteractivePanelGrid } from './interactive-panel-grid';
+import { CustomBiomarkerCard } from './custom-biomarker-card';
 
 export function BiomarkersPanel() {
     const { isDoctorLoggedIn, profile } = useApp();
 
-    const enabledForPatient: BiomarkerKey[] = React.useMemo(() => {
-        // Add all other biomarkers enabled by the doctor.
+    const enabledForPatient: (BiomarkerKey | string)[] = React.useMemo(() => {
         const allEnabled = Object.values(profile.enabledBiomarkers || {}).flat();
-        
-        // Combine and return unique keys.
-        const allKeys = [...allEnabled];
-        return [...new Set(allKeys)];
-
+        return [...new Set(allEnabled)];
     }, [profile.enabledBiomarkers]);
-
-    const allCards = Object.entries(availableBiomarkerCards).map(([key, value]) => ({
+    
+    const standardCards = Object.entries(availableBiomarkerCards).map(([key, value]) => ({
         key,
         component: React.cloneElement(value.component, { key, isReadOnly: !isDoctorLoggedIn }),
     }));
     
+    const customCards = (profile.customBiomarkers || []).map(biomarker => ({
+        key: biomarker.id,
+        component: <CustomBiomarkerCard key={biomarker.id} biomarker={biomarker} isReadOnly={!isDoctorLoggedIn} />,
+    }));
+
+    const allCards = [...standardCards, ...customCards];
+
     if (isDoctorLoggedIn) {
         return (
             <Card>

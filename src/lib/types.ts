@@ -1,4 +1,5 @@
 
+
 import { Timestamp } from "firebase/firestore";
 import { BiomarkerKey } from "./biomarker-cards";
 
@@ -43,6 +44,12 @@ export interface DashboardSuggestion {
   status: 'pending' | 'dismissed' | 'completed';
 }
 
+export interface CustomBiomarkerRecord {
+  id: string;
+  date: Date | string;
+  value: number;
+  unit?: string;
+}
 
 export interface UserProfile {
   id: string; // Add patient ID to profile for easier lookup
@@ -58,10 +65,11 @@ export interface UserProfile {
   presentMedicalConditions: MedicalCondition[];
   medication: Medication[];
   bmi?: number;
-  enabledBiomarkers?: { [key: string]: BiomarkerKey[] };
+  enabledBiomarkers?: { [key: string]: (BiomarkerKey | string)[] };
   doctorName?: string;
   customBiomarkers?: CustomBiomarker[];
   dashboardSuggestions?: DashboardSuggestion[];
+  customBiomarkerRecords?: { [biomarkerId: string]: CustomBiomarkerRecord[] };
 }
 
 export interface Hba1cRecord {
@@ -174,8 +182,9 @@ export interface Patient {
   lipidRecords: LipidRecord[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
-  enabledBiomarkers: { [key: string]: BiomarkerKey[] };
+  enabledBiomarkers: { [key: string]: (BiomarkerKey | string)[] };
   doctorName?: string;
   customBiomarkers?: CustomBiomarker[];
   dashboardSuggestions?: DashboardSuggestion[];
+  customBiomarkerRecords?: { [biomarkerId: string]: CustomBiomarkerRecord[] };
 }
