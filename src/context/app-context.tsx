@@ -457,21 +457,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     const updatedRecords = [...weightRecords, newRecord];
     setWeightRecordsState(updatedRecords);
-
-    const newBmi = calculateBmi(newRecord.value, profile.height);
-    const updatedProfile = { ...profile, bmi: newBmi || profile.bmi };
-    setProfileState(updatedProfile);
+    // The BMI calculation is now handled by the backend on save.
+    // We update it on the profile for immediate UI feedback.
+    setProfile({
+        ...profile,
+        bmi: calculateBmi(newRecord.value, profile.height) || profile.bmi,
+    });
     setHasUnsavedChanges(true);
   };
 
   const removeWeightRecord = (id: string) => {
     const updatedRecords = weightRecords.filter(r => r.id !== id);
     setWeightRecordsState(updatedRecords);
-
-    const lastWeight = [...updatedRecords].sort((a,b) => new Date(a.date as string).getTime() - new Date(a.date as string).getTime())[0];
-    const newBmi = calculateBmi(lastWeight?.value, profile.height);
-    const updatedProfile = { ...profile, bmi: newBmi };
-    setProfileState(updatedProfile);
     setHasUnsavedChanges(true);
   };
   

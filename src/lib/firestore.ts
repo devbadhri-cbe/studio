@@ -20,6 +20,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Patient } from './types';
+import { calculateBmi } from './utils';
 
 const PATIENTS_COLLECTION = 'patients';
 
@@ -44,6 +45,39 @@ const convertTimestamps = (data: any): any => {
   }
   return convertedData;
 };
+
+// --- Helper function to calculate patient status and latest records ---
+const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
+    const summary: Partial<Patient> = {};
+
+    const getLatestRecord = <T extends { date: string | Date }>(records?: T[]): T | null => {
+        if (!records || records.length === 0) return null;
+        return [...records].sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+    };
+
+    const latestWeight = getLatestRecord(patientData.weightRecords);
+    summary.bmi = calculateBmi(latestWeight?.value, patientData.height);
+    
+    summary.lastHba1c = getLatestRecord(patientData.hba1cRecords) || null;
+    summary.lastVitaminD = getLatestRecord(patientData.vitaminDRecords) || null;
+    summary.lastThyroid = getLatestRecord(patientData.thyroidRecords) || null;
+    summary.lastBloodPressure = getLatestRecord(patientData.bloodPressureRecords) || null;
+    summary.lastHemoglobin = getLatestRecord(patientData.hemoglobinRecords) || null;
+
+    // Status Calculation Logic
+    const lastBP = summary.lastBloodPressure;
+    const needsReview = patientData.presentMedicalConditions?.some(c => c.status === 'pending_review');
+
+    if (lastBP && (lastBP.systolic >= 140 || lastBP.diastolic >= 90)) {
+        summary.status = 'Urgent';
+    } else if (needsReview) {
+        summary.status = 'Needs Review';
+    } else {
+        summary.status = 'On Track';
+    }
+
+    return summary;
+}
 
 
 export async function getPatients(): Promise<any[]> {
@@ -124,20 +158,30 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         medication: [],
         enabledBiomarkers: {},
         createdAt: serverTimestamp(),
+        // Initialize summary fields
+        bmi: null,
+        lastHba1c: null,
+        lastVitaminD: null,
+        lastThyroid: null,
+        lastBloodPressure: null,
+        lastHemoglobin: null,
+        status: 'On Track' as const,
     }
   const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), docData);
   
    return {
     ...docData,
     id: docRef.id,
-    status: 'On Track',
   } as Patient;
 }
 
 export async function updatePatient(id: string, updates: Partial<Patient>): Promise<Patient> {
     const docRef = doc(db, PATIENTS_COLLECTION, id);
     
-    const updateData: {[key: string]: any} = { ...updates };
+    // Recalculate summary fields if relevant data has changed
+    const summaryUpdates = getPatientSummary(updates);
+
+    const updateData: {[key: string]: any} = { ...updates, ...summaryUpdates };
     
     Object.keys(updateData).forEach(key => {
         if (updateData[key] === undefined) {
