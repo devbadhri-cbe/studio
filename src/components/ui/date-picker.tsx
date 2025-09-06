@@ -119,8 +119,8 @@ export function DatePicker({
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex items-center rounded-md border border-input h-10 w-full px-1.5 space-x-1">
-      <div className="w-full">
+    <div className="flex items-center rounded-md border border-input h-10 w-fit px-1.5 space-x-1">
+      <div className="w-20">
         <Select value={day} onValueChange={handleDayChange}>
           <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
             <SelectValue placeholder="Day" />
@@ -137,7 +137,7 @@ export function DatePicker({
 
       <span className="text-muted-foreground">/</span>
 
-      <div className="w-full">
+      <div className="w-24">
         <Select value={month} onValueChange={handleMonthChange}>
             <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
             <SelectValue placeholder="Month" />
@@ -154,7 +154,7 @@ export function DatePicker({
 
       <span className="text-muted-foreground">/</span>
       
-      <div className="w-full">
+      <div className="w-28">
         <Select value={year} onValueChange={handleYearChange}>
             <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
             <SelectValue placeholder="Year" />
@@ -171,3 +171,4 @@ export function DatePicker({
     </div>
   );
 }
+
