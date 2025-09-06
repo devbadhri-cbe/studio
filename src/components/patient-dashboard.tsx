@@ -30,6 +30,7 @@ export function PatientDashboard() {
   const router = useRouter();
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(true);
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
+  const [diseasePanelSearchQuery, setDiseasePanelSearchQuery] = React.useState('');
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
@@ -84,18 +85,31 @@ export function PatientDashboard() {
             
             <div className="flex flex-col sm:flex-row gap-4">
                 <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen} className="flex-1">
-                    <CollapsibleTrigger asChild>
-                        <Button
-                            variant={isDiseasePanelOpen ? 'default' : 'outline'}
-                            className={cn("w-full py-6 text-base", isDiseasePanelOpen && "shadow-lg")}
-                        >
-                            <Stethoscope className="mr-2 h-5 w-5" />
-                            Disease Panels
-                            <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isDiseasePanelOpen && "rotate-180")} />
-                        </Button>
-                    </CollapsibleTrigger>
+                     <div className="flex gap-2">
+                        <CollapsibleTrigger asChild>
+                            <Button
+                                variant={isDiseasePanelOpen ? 'default' : 'outline'}
+                                className={cn("w-full py-6 text-base", isDiseasePanelOpen && "shadow-lg")}
+                            >
+                                <Stethoscope className="mr-2 h-5 w-5" />
+                                Disease Panels
+                                <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isDiseasePanelOpen && "rotate-180")} />
+                            </Button>
+                        </CollapsibleTrigger>
+                        {isDiseasePanelOpen && isDoctorLoggedIn && (
+                            <div className="relative">
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search panels..."
+                                    value={diseasePanelSearchQuery}
+                                    onChange={(e) => setDiseasePanelSearchQuery(e.target.value)}
+                                    className="pl-8 h-full"
+                                />
+                            </div>
+                        )}
+                    </div>
                     <CollapsibleContent className="mt-4">
-                        <DiseasePanel />
+                        <DiseasePanel searchQuery={diseasePanelSearchQuery} />
                     </CollapsibleContent>
                 </Collapsible>
                 
