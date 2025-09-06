@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to generate personalized health insights for a patient.
@@ -28,6 +29,12 @@ const GetHealthInsightsInputSchema = z.object({
       tsh: z.number(),
   }).optional().describe("The patient's latest TSH value (μIU/mL)."),
   bmi: z.number().optional().describe("The patient's Body Mass Index (BMI)."),
+  latestGlucose: z.number().optional().describe("The patient's latest Fasting Blood Glucose value (mg/dL)."),
+  latestHemoglobin: z.number().optional().describe("The patient's latest Hemoglobin value (g/dL)."),
+  latestTotalCholesterol: z.number().optional().describe("The patient's latest Total Cholesterol value (mg/dL)."),
+  latestLdl: z.number().optional().describe("The patient's latest LDL Cholesterol value (mg/dL)."),
+  latestHdl: z.number().optional().describe("The patient's latest HDL Cholesterol value (mg/dL)."),
+  latestTriglycerides: z.number().optional().describe("The patient's latest Triglycerides value (mg/dL)."),
 });
 export type GetHealthInsightsInput = z.infer<typeof GetHealthInsightsInputSchema>;
 
@@ -62,9 +69,15 @@ User Profile:
 Latest Health Metrics:
 {{#if bmi}}- Body Mass Index (BMI): {{{bmi}}}{{/if}}
 {{#if latestHba1c}}- HbA1c: {{{latestHba1c}}}%{{/if}}
+{{#if latestGlucose}}- Fasting Glucose: {{{latestGlucose}}} mg/dL{{/if}}
 {{#if latestBloodPressure}}- Blood Pressure: {{{latestBloodPressure.systolic}}}/{{{latestBloodPressure.diastolic}}} mmHg{{/if}}
 {{#if latestVitaminD}}- Vitamin D: {{{latestVitaminD}}} ng/mL{{/if}}
 {{#if latestThyroid}}- TSH: {{{latestThyroid.tsh}}} μIU/mL{{/if}}
+{{#if latestHemoglobin}}- Hemoglobin: {{{latestHemoglobin}}} g/dL{{/if}}
+{{#if latestTotalCholesterol}}- Total Cholesterol: {{{latestTotalCholesterol}}} mg/dL{{/if}}
+{{#if latestLdl}}- LDL Cholesterol: {{{latestLdl}}} mg/dL{{/if}}
+{{#if latestHdl}}- HDL Cholesterol: {{{latestHdl}}} mg/dL{{/if}}
+{{#if latestTriglycerides}}- Triglycerides: {{{latestTriglycerides}}} mg/dL{{/if}}
 
 Generate the tips and return them in the 'insights' array.`,
 });

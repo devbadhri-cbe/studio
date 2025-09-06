@@ -13,7 +13,7 @@ import { getHealthInsights } from '@/ai/flows/get-health-insights-flow';
 import { calculateAge } from '@/lib/utils';
 
 export function InsightsCard() {
-  const { profile, hba1cRecords, bloodPressureRecords, vitaminDRecords, thyroidRecords } = useApp();
+  const { profile, hba1cRecords, bloodPressureRecords, vitaminDRecords, thyroidRecords, fastingBloodGlucoseRecords, hemoglobinRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords } = useApp();
   const [isLoading, setIsLoading] = React.useState(false);
   const [localTips, setLocalTips] = React.useState<string[]>([]);
   const { toast } = useToast();
@@ -23,10 +23,20 @@ export function InsightsCard() {
     setLocalTips([]);
 
     try {
-      const latestHba1c = [...hba1cRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
-      const latestBloodPressure = [...bloodPressureRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
-      const latestVitaminD = [...vitaminDRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
-      const latestThyroid = [...thyroidRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+      const getLatestRecord = <T extends { date: string | Date }>(records: T[]) => 
+        [...(records || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+
+      const latestHba1c = getLatestRecord(hba1cRecords);
+      const latestBloodPressure = getLatestRecord(bloodPressureRecords);
+      const latestVitaminD = getLatestRecord(vitaminDRecords);
+      const latestThyroid = getLatestRecord(thyroidRecords);
+      const latestGlucose = getLatestRecord(fastingBloodGlucoseRecords);
+      const latestHemoglobin = getLatestRecord(hemoglobinRecords);
+      const latestTotalCholesterol = getLatestRecord(totalCholesterolRecords);
+      const latestLdl = getLatestRecord(ldlRecords);
+      const latestHdl = getLatestRecord(hdlRecords);
+      const latestTriglycerides = getLatestRecord(triglyceridesRecords);
+
 
       const input = {
           name: profile.name,
@@ -35,11 +45,17 @@ export function InsightsCard() {
           country: profile.country,
           medication: profile.medication.map(m => m.name),
           presentMedicalConditions: profile.presentMedicalConditions.map(c => c.condition),
+          bmi: profile.bmi,
           latestHba1c: latestHba1c?.value,
           latestBloodPressure: latestBloodPressure ? { systolic: latestBloodPressure.systolic, diastolic: latestBloodPressure.diastolic } : undefined,
           latestVitaminD: latestVitaminD?.value,
           latestThyroid: latestThyroid ? { tsh: latestThyroid.tsh } : undefined,
-          bmi: profile.bmi,
+          latestGlucose: latestGlucose?.value,
+          latestHemoglobin: latestHemoglobin?.hemoglobin,
+          latestTotalCholesterol: latestTotalCholesterol?.value,
+          latestLdl: latestLdl?.value,
+          latestHdl: latestHdl?.value,
+          latestTriglycerides: latestTriglycerides?.value,
       };
 
       const result = await getHealthInsights(input);
