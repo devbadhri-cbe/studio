@@ -46,8 +46,8 @@ export function DashboardSuggestionCard() {
     if (missingBiomarkers.length > 0) {
         toast({
           variant: 'destructive',
-          title: 'Missing Biomarker Cards',
-          description: `The following biomarker cards need to be implemented by a developer first: ${missingBiomarkers.join(', ')}`
+          title: 'Action Required: Missing Cards',
+          description: `The following biomarker cards must be added by a developer before this panel can be enabled: ${missingBiomarkers.join(', ')}.`,
         })
         return;
     }
@@ -99,7 +99,7 @@ export function DashboardSuggestionCard() {
           const biomarkersToDisplay = suggestion.biomarkers || [];
 
           return (
-            <div key={suggestion.id}>
+            <React.Fragment key={suggestion.id}>
               {index > 0 && <Separator />}
               <div className="flex flex-col sm:flex-row sm:items-start gap-4 p-3 rounded-md bg-background">
                 <div className="flex-1 space-y-2">
@@ -136,7 +136,7 @@ export function DashboardSuggestionCard() {
                   </Button>
                 </div>
               </div>
-            </div>
+            </React.Fragment>
           )
         })}
       </CardContent>
