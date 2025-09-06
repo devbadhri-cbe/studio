@@ -35,6 +35,7 @@ export function DashboardSuggestionCard() {
     const panelMap: {[key: string]: string} = {
         "Diabetes Panel": "diabetes",
         "Hypertension Panel": "hypertension",
+        "Lipids Panel": "lipids",
     };
     
     const panelKey = panelMap[suggestion.panelName];
@@ -44,7 +45,7 @@ export function DashboardSuggestionCard() {
         let enabledCount = 0;
         suggestion.biomarkers.forEach(biomarkerName => {
             const biomarkerKey = Object.entries(availableBiomarkerCards).find(
-                ([key, value]) => value.label === biomarkerName || key === biomarkerName.toLowerCase().replace(/\s/g, '')
+                ([key, value]) => value.label.toLowerCase().includes(biomarkerName.toLowerCase()) || key.toLowerCase().includes(biomarkerName.toLowerCase())
             )?.[0] as BiomarkerKey | undefined;
             
             if(biomarkerKey) {
@@ -64,7 +65,7 @@ export function DashboardSuggestionCard() {
         toast({
             variant: 'destructive',
             title: 'Feature Not Implemented',
-            description: 'Automated creation of new panels will be available in a future update.'
+            description: 'Automated creation of new panels will be available in a future update.',
         });
     }
   }

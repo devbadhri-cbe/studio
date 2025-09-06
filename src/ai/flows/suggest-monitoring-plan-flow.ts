@@ -14,7 +14,7 @@ import {z} from 'genkit';
 
 const SuggestMonitoringPlanInputSchema = z.object({
   conditionName: z.string().describe('The name of the medical condition.'),
-  existingPanels: z.array(z.string()).describe('A list of existing disease panel keys (e.g., "diabetes", "hypertension").'),
+  existingPanels: z.array(z.string()).describe('A list of existing disease panel keys (e.g., "diabetes", "hypertension", "lipids").'),
 });
 export type SuggestMonitoringPlanInput = z.infer<typeof SuggestMonitoringPlanInputSchema>;
 
@@ -46,9 +46,10 @@ Analyze the provided condition:
 Condition: {{{conditionName}}}
 
 1.  First, determine if one of the existing panels is a suitable fit for monitoring this condition.
-    - If "hypertension" is a good fit, set panelName to "Hypertension Panel" and isNewPanel to false.
-    - If "diabetes" is a good fit, set panelName to "Diabetes Panel" and isNewPanel to false.
-    - If neither existing panel is a perfect fit, devise a suitable name for a NEW panel (e.g., for "Chronic Kidney Disease", a good name would be "Kidney Health Panel"). Set isNewPanel to true.
+    - If a condition is related to high blood sugar, recommend the "Diabetes Panel". Set panelName to "Diabetes Panel" and isNewPanel to false.
+    - If a condition is related to high blood pressure, recommend the "Hypertension Panel". Set panelName to "Hypertension Panel" and isNewPanel to false.
+    - If a condition is related to high cholesterol or triglycerides, recommend the "Lipids Panel". Set panelName to "Lipids Panel" and isNewPanel to false.
+    - If none of the existing panels are a perfect fit, devise a suitable name for a NEW panel (e.g., for "Chronic Kidney Disease", a good name would be "Kidney Health Panel"). Set isNewPanel to true.
 
 2.  Second, identify a list of 2 to 4 of the MOST IMPORTANT biomarkers for *monitoring* the progression of this disease in a primary care setting. Do not list every possible test, only the most essential ones for ongoing tracking.
 
