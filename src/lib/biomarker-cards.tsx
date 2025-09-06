@@ -1,4 +1,5 @@
 
+
 import { Hba1cCard } from '@/components/hba1c-card';
 import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
 import { HemoglobinCard } from '@/components/hemoglobin-card';
@@ -74,6 +75,12 @@ export const availableBiomarkerCards = {
     component: <TotalCholesterolCard />,
     addRecordLabel: 'New Total Cholesterol Record',
     addRecordDialog: <AddTotalCholesterolRecordDialog />,
+  },
+  ldl: {
+    label: 'LDL Cholesterol',
+    component: <LdlCard />,
+    addRecordLabel: 'New LDL Record',
+    addRecordDialog: <AddLdlRecordDialog />,
   },
   hdl: {
     label: 'HDL Cholesterol',
