@@ -60,12 +60,6 @@ export const availableBiomarkerCards = {
     addRecordLabel: 'New Weight Record',
     addRecordDialog: <AddWeightRecordDialog />,
   },
-  lipidProfile: {
-    label: 'Lipid Profile',
-    component: <LipidCard />,
-    addRecordLabel: 'New Lipid Record',
-    addRecordDialog: <AddLipidRecordDialog />,
-  },
 };
 
 export type BiomarkerKey = keyof typeof availableBiomarkerCards;
