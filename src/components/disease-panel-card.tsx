@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -64,10 +65,15 @@ export function DiseasePanelCard({
     const enabledPanels = Object.keys(profile.enabledBiomarkers || {}).filter(key => (profile.enabledBiomarkers?.[key] || []).length > 0);
 
     const allAvailableBiomarkers = React.useMemo(() => {
-        const standard = Object.entries(availableBiomarkerCards).map(([key, value]) => ({ key, label: value.label, isCustom: false }));
-        const custom = (customBiomarkers || []).map(b => ({ key: b.id, label: b.name, isCustom: true }));
+        const custom = (profile.customBiomarkers || []).map(b => ({ key: b.id, label: b.name, isCustom: true }));
+        const customLabels = new Set(custom.map(c => c.label.toLowerCase()));
+        
+        const standard = Object.entries(availableBiomarkerCards)
+            .filter(([key, value]) => !customLabels.has(value.label.toLowerCase()))
+            .map(([key, value]) => ({ key, label: value.label, isCustom: false }));
+
         return [...standard, ...custom];
-    }, [customBiomarkers]);
+    }, [profile.customBiomarkers]);
     
     const addRecordActions = React.useMemo(() => {
         return enabledForPanel
@@ -318,3 +324,4 @@ export function DiseasePanelCard({
         </Card>
     );
 }
+
