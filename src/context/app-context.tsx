@@ -251,23 +251,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addMedicalCondition = async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
     try {
       const result = await getIcdCode({ conditionName: condition.condition });
-      const icdCode = result.icdCode || '';
-      const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
-
       const newCondition: MedicalCondition = {
         id: `cond-${Date.now()}`,
         condition: condition.condition,
         date: condition.date,
-        icdCode: icdCode,
-        status: status
+        icdCode: result.icdCode || '',
+        status: isDoctorLoggedIn ? 'verified' : 'pending_review'
       };
 
-      setProfileState(p => {
-        const updatedConditions = [...p.presentMedicalConditions, newCondition];
-        const newProfile = { ...p, presentMedicalConditions: updatedConditions };
-        updatePatientData(p.id, { presentMedicalConditions: updatedConditions });
-        return newProfile;
-      });
+      const newProfileState = {
+        ...profile,
+        presentMedicalConditions: [...profile.presentMedicalConditions, newCondition]
+      };
+      
+      setProfileState(newProfileState);
+      await updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
 
     } catch (error) {
         console.error("Failed to save condition", error);
