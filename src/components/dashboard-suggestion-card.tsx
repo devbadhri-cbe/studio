@@ -65,13 +65,6 @@ export function DashboardSuggestionCard() {
             title: `${suggestion.panelName} Enabled`,
             description: `Enabled ${enabledCount} biomarkers.`
         });
-    } else {
-        // This is the fallback for a truly new, un-creatable panel.
-        toast({
-            variant: 'destructive',
-            title: 'Feature Not Implemented',
-            description: 'Automated creation of new panels will be available in a future update.',
-        });
     }
   }
 
