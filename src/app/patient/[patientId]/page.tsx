@@ -32,11 +32,6 @@ export default function PatientPage() {
         const patientData = await getPatient(patientId);
         if (patientData) {
           setPatientData(patientData);
-          // Update lastLogin timestamp
-          const now = new Date().toISOString();
-          await updatePatient(patientId, { lastLogin: now });
-          // Also update the local state to reflect the change immediately
-          setPatientData({ ...patientData, lastLogin: now });
         } else {
           setError(`No patient found with ID: ${patientId}`);
         }
