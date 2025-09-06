@@ -252,7 +252,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const tempId = `temp-${Date.now()}`;
     const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
 
-    // Add a temporary condition to the UI immediately for responsiveness
     const tempCondition: MedicalCondition = {
       ...condition,
       id: tempId,
@@ -272,19 +271,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         icdCode: result.icdCode,
         status: status,
       };
-
-      const finalConditions = [
-        ...profile.presentMedicalConditions,
-        newCondition,
-      ];
       
-      // Replace temp condition with final one
-      setProfileState(p => ({
-        ...p,
-        presentMedicalConditions: p.presentMedicalConditions.map(c =>
+      let finalConditions: MedicalCondition[] = [];
+      setProfileState(p => {
+        finalConditions = p.presentMedicalConditions.map(c =>
           c.id === tempId ? newCondition : c
-        ),
-      }));
+        );
+        return {
+          ...p,
+          presentMedicalConditions: finalConditions,
+        };
+      });
       await updatePatientData(profile.id, { presentMedicalConditions: finalConditions });
 
     } catch (error) {
@@ -294,23 +291,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         title: 'AI Error',
         description: 'Could not get ICD code suggestion. The condition has been saved without it.',
       });
-      // Save without the code if AI fails, but still replace the temp entry
       const newCondition: MedicalCondition = {
         ...condition,
         id: Date.now().toString(),
         icdCode: '',
         status: status,
       };
-      const finalConditions = [
-        ...profile.presentMedicalConditions,
-        newCondition,
-      ];
-      setProfileState(p => ({
-        ...p,
-        presentMedicalConditions: p.presentMedicalConditions.map(c =>
+      let finalConditions: MedicalCondition[] = [];
+       setProfileState(p => {
+        finalConditions = p.presentMedicalConditions.map(c =>
           c.id === tempId ? newCondition : c
-        ),
-      }));
+        );
+        return {
+          ...p,
+          presentMedicalConditions: finalConditions,
+        };
+      });
       await updatePatientData(profile.id, { presentMedicalConditions: finalConditions });
     }
   };
