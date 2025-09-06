@@ -22,11 +22,19 @@ export function BiomarkersPanel() {
     }));
 
     if (isDoctorLoggedIn) {
+        const sortedCards = [...allCards].sort((a, b) => {
+            const aIsEnabled = enabledForPatient.includes(a.key);
+            const bIsEnabled = enabledForPatient.includes(b.key);
+            if (aIsEnabled && !bIsEnabled) return -1;
+            if (!aIsEnabled && bIsEnabled) return 1;
+            return a.label.localeCompare(b.label);
+        });
+
         return (
             <Card>
                 <CardContent className="p-4">
                      <InteractivePanelGrid>
-                        {allCards.map(cardInfo => cardInfo.component)}
+                        {sortedCards.map(cardInfo => cardInfo.component)}
                     </InteractivePanelGrid>
                 </CardContent>
             </Card>
