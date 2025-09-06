@@ -29,11 +29,21 @@ export interface Medication {
 }
 
 export interface WeightRecord {
-  id: string;
+  id:string;
   date: Date | string;
   value: number; // in kg
   medication?: string;
 }
+
+export interface DashboardSuggestion {
+  id: string;
+  basedOnCondition: string;
+  panelName: string;
+  isNewPanel: boolean;
+  biomarkers: string[];
+  status: 'pending' | 'dismissed';
+}
+
 
 export interface UserProfile {
   id: string; // Add patient ID to profile for easier lookup
@@ -52,6 +62,7 @@ export interface UserProfile {
   enabledBiomarkers?: { [key: string]: BiomarkerKey[] };
   doctorName?: string;
   customBiomarkers?: CustomBiomarker[];
+  dashboardSuggestions?: DashboardSuggestion[];
 }
 
 export interface Hba1cRecord {
@@ -155,4 +166,5 @@ export interface Patient {
   enabledBiomarkers: { [key: string]: BiomarkerKey[] };
   doctorName?: string;
   customBiomarkers?: CustomBiomarker[];
+  dashboardSuggestions?: DashboardSuggestion[];
 }

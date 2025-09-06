@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord } from '@/lib/types';
+import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord, DashboardSuggestion } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -12,8 +12,9 @@ import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conver
 import { calculateBmi } from '@/lib/utils';
 import { BiomarkerKey } from '@/lib/biomarker-cards';
 import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
+import { suggestMonitoringPlan } from '@/ai/flows/suggest-monitoring-plan-flow';
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, customBiomarkers: [] };
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, customBiomarkers: [], dashboardSuggestions: [] };
 
 type DashboardView = 'vitaminD' | 'thyroid' | 'hypertension' | 'report' | 'none';
 type Theme = 'dark' | 'light' | 'system';
@@ -90,7 +91,7 @@ interface AppContextType {
   getDbHemoglobinValue: (value: number) => number;
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  dashboardSuggestions: [];
+  dashboardSuggestions: DashboardSuggestion[];
   toggleDiseaseBiomarker: (panelKey: string, biomarkerKey: BiomarkerKey) => void;
   customBiomarkers: CustomBiomarker[];
   addCustomBiomarker: (name: string) => Promise<string>;
@@ -210,6 +211,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       bmi: patient.bmi,
       doctorName: patient.doctorName,
       customBiomarkers: patient.customBiomarkers || [],
+      dashboardSuggestions: patient.dashboardSuggestions || [],
     };
     setProfileState(patientProfile);
     setHba1cRecordsState(patient.hba1cRecords || []);
@@ -267,6 +269,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       
       setProfileState(newProfileState);
       await updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
+      
+      // If a doctor added the condition, also generate suggestions
+      if (isDoctorLoggedIn) {
+          approveMedicalCondition(newCondition.id);
+      }
+
 
     } catch (error) {
         console.error("Failed to save condition", error);
@@ -292,13 +300,52 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
   };
   
-  const approveMedicalCondition = (conditionId: string) => {
-    const updatedConditions = profile.presentMedicalConditions.map(c => 
-      c.id === conditionId ? { ...c, status: 'verified' as const } : c
-    );
-    const newProfileState = {...profile, presentMedicalConditions: updatedConditions };
-    setProfileState(newProfileState);
-    updatePatientData(profile.id, { presentMedicalConditions: newProfileState.presentMedicalConditions });
+  const approveMedicalCondition = async (conditionId: string) => {
+    let approvedCondition: MedicalCondition | undefined;
+    const updatedConditions = profile.presentMedicalConditions.map(c => {
+        if (c.id === conditionId) {
+            approvedCondition = { ...c, status: 'verified' as const };
+            return approvedCondition;
+        }
+        return c;
+    });
+
+    if (!approvedCondition) return;
+
+    // Suggest a monitoring plan
+    try {
+        const existingPanels = Object.keys(profile.enabledBiomarkers || {});
+        const suggestionResult = await suggestMonitoringPlan({ 
+            conditionName: approvedCondition.condition,
+            existingPanels,
+        });
+
+        const newSuggestion: DashboardSuggestion = {
+            id: `sug-${Date.now()}`,
+            basedOnCondition: approvedCondition.condition,
+            panelName: suggestionResult.panelName,
+            isNewPanel: suggestionResult.isNewPanel,
+            biomarkers: suggestionResult.biomarkers,
+            status: 'pending'
+        };
+
+        const currentSuggestions = profile.dashboardSuggestions || [];
+        const newProfileState = {...profile, presentMedicalConditions: updatedConditions, dashboardSuggestions: [...currentSuggestions, newSuggestion] };
+        setProfileState(newProfileState);
+        await updatePatientData(profile.id, { presentMedicalConditions: updatedConditions, dashboardSuggestions: newProfileState.dashboardSuggestions });
+
+    } catch (error) {
+        console.error("Failed to get monitoring suggestion:", error);
+        // Even if suggestion fails, still approve the condition
+        const newProfileState = {...profile, presentMedicalConditions: updatedConditions };
+        setProfileState(newProfileState);
+        await updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
+        toast({
+            variant: "destructive",
+            title: "Suggestion Failed",
+            description: "Could not get an AI suggestion, but the condition has been approved."
+        });
+    }
   };
   
   const dismissSuggestion = (conditionId: string) => {
@@ -622,7 +669,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     getDbHemoglobinValue,
     theme,
     setTheme: setThemeState,
-    dashboardSuggestions: [],
+    dashboardSuggestions: profile.dashboardSuggestions || [],
     toggleDiseaseBiomarker,
     customBiomarkers,
     addCustomBiomarker,

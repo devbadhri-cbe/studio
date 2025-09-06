@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { WeightRecordCard } from './weight-record-card';
 import { BloodPressureCard } from './blood-pressure-card';
+import { DashboardSuggestionCard } from './dashboard-suggestion-card';
 
 
 export function PatientDashboard() {
@@ -31,6 +32,7 @@ export function PatientDashboard() {
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
+  const hasPendingSuggestions = profile.dashboardSuggestions?.some(s => s.status === 'pending');
   
   if (!isClient) {
     return (
@@ -66,6 +68,7 @@ export function PatientDashboard() {
             <PatientHeader />
             
             {isDoctorLoggedIn && hasPendingReview && <DoctorReviewCard />}
+            {isDoctorLoggedIn && hasPendingSuggestions && <DashboardSuggestionCard />}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-1 flex flex-col gap-6">
