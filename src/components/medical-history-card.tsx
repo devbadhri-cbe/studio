@@ -19,8 +19,6 @@ import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
 import { DatePicker } from './ui/date-picker';
 import { DiseaseCard } from './disease-card';
 import { Separator } from './ui/separator';
-import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
-import { useToast } from '@/hooks/use-toast';
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
@@ -107,7 +105,6 @@ export function MedicalHistoryCard() {
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useToast();
 
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -119,27 +116,11 @@ export function MedicalHistoryCard() {
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
   const handleSaveCondition = async (data: z.infer<typeof ConditionSchema>) => {
-      try {
-        const result = await getIcdCode({ conditionName: data.condition });
-        const icdCode = result.icdCode || '';
-        const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
-
-        await addMedicalCondition({
-            condition: data.condition,
-            date: data.date.toISOString(),
-            icdCode: icdCode,
-            status: status
-        });
-
-        setIsAddingCondition(false);
-    } catch (error) {
-        console.error("Failed to save condition", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not save medical condition. Please try again."
-        });
-    }
+    await addMedicalCondition({
+      condition: data.condition,
+      date: data.date.toISOString(),
+    });
+    setIsAddingCondition(false);
   };
   
   const handleReviseCondition = (id: string) => {

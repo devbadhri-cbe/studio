@@ -11,6 +11,7 @@ import { countries } from '@/lib/countries';
 import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
 import { BiomarkerKey } from '@/lib/biomarker-cards';
+import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, customBiomarkers: [] };
 
@@ -41,7 +42,7 @@ interface EnableDashboardResult {
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
-  addMedicalCondition: (condition: Omit<MedicalCondition, 'id'>) => Promise<void>;
+  addMedicalCondition: (condition: Pick<MedicalCondition, 'condition' | 'date'>) => Promise<void>;
   updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
   approveMedicalCondition: (conditionId: string) => void;
@@ -247,19 +248,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updatePatientData(newProfile.id, { ...newProfile });
   }
   
-  const addMedicalCondition = async (condition: Omit<MedicalCondition, 'id'>) => {
-    const newCondition: MedicalCondition = {
-      ...condition,
-      id: Date.now().toString(),
-    };
+  const addMedicalCondition = async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
+    try {
+      const result = await getIcdCode({ conditionName: condition.condition });
+      const icdCode = result.icdCode || '';
+      const status = isDoctorLoggedIn ? 'verified' : 'pending_review';
 
-    const updatedConditions = [...profile.presentMedicalConditions, newCondition];
-    
-    setProfileState(p => {
-        const newP = { ...p, presentMedicalConditions: updatedConditions };
+      const newCondition: MedicalCondition = {
+        id: `cond-${Date.now()}`,
+        condition: condition.condition,
+        date: condition.date,
+        icdCode: icdCode,
+        status: status
+      };
+
+      setProfileState(p => {
+        const updatedConditions = [...p.presentMedicalConditions, newCondition];
+        const newProfile = { ...p, presentMedicalConditions: updatedConditions };
         updatePatientData(p.id, { presentMedicalConditions: updatedConditions });
-        return newP;
-    });
+        return newProfile;
+      });
+
+    } catch (error) {
+        console.error("Failed to save condition", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not save medical condition. Please try again."
+        });
+    }
   };
 
   const updateMedicalCondition = (condition: MedicalCondition) => {
