@@ -585,7 +585,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     toast({
         title: isEnabled ? `Panel Disabled` : `Panel Enabled`,
-        description: `The ${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel has been ${isEnabled ? 'disabled' : 'enabled'}. You can now add biomarkers to it.`
+        description: `The ${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel has been ${isEnabled ? 'disabled' : 'enabled'} for this patient.`
     });
   }
 
