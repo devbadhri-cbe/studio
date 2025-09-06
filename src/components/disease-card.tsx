@@ -73,25 +73,25 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
           )}
           <p className="text-xs text-muted-foreground">{formatDate(condition.date)}</p>
         </div>
-        <div className="flex items-center shrink-0">
+        <div className="flex items-center shrink-0 gap-2">
           <Button
             size="icon"
             variant="ghost"
-            className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100"
+            className="h-8 w-8 shrink-0"
             onClick={(e) => {
               e.stopPropagation();
               handleRemoveCondition(condition.id);
             }}
           >
-            <Trash2 className="h-4 w-4 text-destructive" />
+            <Trash2 className="h-5 w-5 text-destructive" />
           </Button>
           <Button
             size="icon"
             variant="ghost"
-            className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100"
+            className="h-8 w-8 shrink-0"
             onClick={() => handleSynopsisToggle(condition.id)}
           >
-            <Info className="h-4 w-4 text-blue-500" />
+            <Info className="h-5 w-5 text-blue-500" />
           </Button>
         </div>
       </li>
