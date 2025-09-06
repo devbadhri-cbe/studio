@@ -72,10 +72,10 @@ export function PatientDashboard() {
                     <ProfileCard />
                 </div>
                  <div className="lg:col-span-1 flex flex-col gap-6">
-                     <WeightRecordCard isReadOnly={!isDoctorLoggedIn} />
+                     <WeightRecordCard />
                 </div>
                 <div className="lg:col-span-1 flex flex-col gap-6">
-                     <BloodPressureCard isReadOnly={!isDoctorLoggedIn} />
+                     <BloodPressureCard />
                 </div>
                 <div className="lg:col-span-1 flex flex-col gap-6">
                      <MedicalHistoryCard />
@@ -98,22 +98,24 @@ export function PatientDashboard() {
                         <DiseasePanel />
                     </CollapsibleContent>
                 </Collapsible>
-
-                <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen} className="col-span-1">
-                    <CollapsibleTrigger asChild>
-                        <Button
-                            variant={isBiomarkersOpen ? 'default' : 'outline'}
-                            className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
-                        >
-                            <DropletIcon className="mr-2 h-5 w-5" />
-                            Biomarker Cards
-                            <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="mt-4">
-                        <BiomarkersPanel />
-                    </CollapsibleContent>
-                </Collapsible>
+                
+                {isDoctorLoggedIn && (
+                    <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen} className="col-span-1">
+                        <CollapsibleTrigger asChild>
+                            <Button
+                                variant={isBiomarkersOpen ? 'default' : 'outline'}
+                                className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
+                            >
+                                <DropletIcon className="mr-2 h-5 w-5" />
+                                Biomarker Cards
+                                <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
+                            </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-4">
+                            <BiomarkersPanel />
+                        </CollapsibleContent>
+                    </Collapsible>
+                )}
             </div>
 
             
