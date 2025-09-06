@@ -10,6 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const ExtractLabResultsInputSchema = z.object({
@@ -42,6 +43,7 @@ const prompt = ai.definePrompt({
   name: 'extractLabResultsPrompt',
   input: {schema: ExtractLabResultsInputSchema},
   output: {schema: ExtractLabResultsOutputSchema},
+  model: googleAI.model('gemini-1.5-flash-latest'),
   prompt: `You are an expert at analyzing medical lab reports.
 Your task is to meticulously extract the following information from the provided document image:
 1. The patient's full name.
