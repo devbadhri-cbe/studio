@@ -34,6 +34,8 @@ const months = [
     { value: '11', label: 'December' },
 ];
 
+const days = Array.from({ length: 31 }, (_, i) => ({ value: (i + 1).toString(), label: (i + 1).toString() }));
+
 export function DatePicker({
   value,
   onChange,
@@ -42,29 +44,24 @@ export function DatePicker({
 }: DatePickerProps) {
   const isMobile = useIsMobile();
 
-  const [day, setDay] = React.useState<string>('');
-  const [month, setMonth] = React.useState<string>('');
-  const [year, setYear] = React.useState<string>('');
+  const [day, setDay] = React.useState<string>(() => value ? format(value, 'd') : '');
+  const [month, setMonth] = React.useState<string>(() => value ? String(value.getMonth()) : '');
+  const [year, setYear] = React.useState<string>(() => value ? format(value, 'yyyy') : '');
 
   React.useEffect(() => {
     if (value && isValid(value)) {
-      setDay(format(value, 'dd'));
+      setDay(format(value, 'd'));
       setMonth(String(value.getMonth()));
       setYear(format(value, 'yyyy'));
-    } else {
-        const today = new Date();
-        setDay(format(today, 'dd'));
-        setMonth(String(today.getMonth()));
-        setYear(format(today, 'yyyy'));
     }
   }, [value]);
-  
+
   const handleDateChange = (newDay: string, newMonth: string, newYear: string) => {
-     if (newDay && newMonth && newYear && newYear.length === 4) {
+    if (newDay && newMonth && newYear && newYear.length === 4) {
       const dayInt = parseInt(newDay, 10);
       const monthInt = parseInt(newMonth, 10);
       const yearInt = parseInt(newYear, 10);
-      
+
       const newDate = new Date(yearInt, monthInt, dayInt);
 
       if (isValid(newDate) && newDate.getFullYear() === yearInt && newDate.getMonth() === monthInt && newDate.getDate() === dayInt) {
@@ -75,23 +72,22 @@ export function DatePicker({
     } else {
       onChange(undefined);
     }
-  }
-  
-  const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDay = e.target.value;
+  };
+
+  const handleDayChange = (newDay: string) => {
     setDay(newDay);
     handleDateChange(newDay, month, year);
-  }
-  
+  };
+
   const handleMonthChange = (newMonth: string) => {
     setMonth(newMonth);
     handleDateChange(day, newMonth, year);
-  }
+  };
 
   const handleYearChange = (newYear: string) => {
     setYear(newYear);
     handleDateChange(day, month, newYear);
-  }
+  };
 
   if (isMobile) {
     const handleMobileDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,40 +115,49 @@ export function DatePicker({
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex items-center rounded-md border border-input h-10 w-full px-3">
-        <Input 
-        placeholder="DD"
-        value={day}
-        onChange={handleDayChange}
-        className="w-12 border-0 p-0 shadow-none focus-visible:ring-0 text-center bg-transparent"
-        maxLength={2}
-        />
-        <span className="text-muted-foreground">/</span>
-        <Select value={month} onValueChange={handleMonthChange}>
+    <div className="flex items-center rounded-md border border-input h-10 w-full px-1.5 space-x-1">
+      <Select value={day} onValueChange={handleDayChange}>
+        <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[50px] focus-visible:ring-0 bg-transparent justify-center">
+          <SelectValue placeholder="Day" />
+        </SelectTrigger>
+        <SelectContent>
+          {days.map(d => (
+            <SelectItem key={d.value} value={d.value}>
+              {d.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <span className="text-muted-foreground">/</span>
+
+      <Select value={month} onValueChange={handleMonthChange}>
         <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[100px] focus-visible:ring-0 bg-transparent justify-center">
-            <SelectValue placeholder="Month" />
+          <SelectValue placeholder="Month" />
         </SelectTrigger>
         <SelectContent>
-            {months.map(m => (
+          {months.map(m => (
             <SelectItem key={m.value} value={String(m.value)}>
-                {m.label}
+              {m.label}
             </SelectItem>
-            ))}
+          ))}
         </SelectContent>
-        </Select>
-        <span className="text-muted-foreground">/</span>
-        <Select value={year} onValueChange={handleYearChange}>
+      </Select>
+
+      <span className="text-muted-foreground">/</span>
+      
+      <Select value={year} onValueChange={handleYearChange}>
         <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[70px] focus-visible:ring-0 bg-transparent justify-center">
-            <SelectValue placeholder="Year" />
+          <SelectValue placeholder="Year" />
         </SelectTrigger>
         <SelectContent>
-            {years.map(y => (
+          {years.map(y => (
             <SelectItem key={y} value={y.toString()}>
-                {y}
+              {y}
             </SelectItem>
-            ))}
+          ))}
         </SelectContent>
-        </Select>
+      </Select>
     </div>
   );
 }
