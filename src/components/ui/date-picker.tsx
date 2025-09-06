@@ -103,59 +103,55 @@ export function DatePicker({
     };
     
     return (
-        <div>
-            <Input
-                type="date"
-                value={value && isValid(value) ? format(value, 'yyyy-MM-dd') : ''}
-                onChange={handleMobileDateChange}
-                className={cn(
-                    "w-full justify-start text-left font-normal h-10",
-                    !value && "text-muted-foreground"
-                )}
-            />
-        </div>
+        <Input
+            type="date"
+            value={value && isValid(value) ? format(value, 'yyyy-MM-dd') : ''}
+            onChange={handleMobileDateChange}
+            className={cn(
+                "w-full justify-start text-left font-normal h-10",
+                !value && "text-muted-foreground"
+            )}
+        />
     )
   }
 
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div>
-      <div className="flex items-center rounded-md h-10 w-fit">
-         <Input 
-            placeholder="DD"
-            value={day}
-            onChange={handleDayChange}
-            className="w-12 border-0 p-0 shadow-none focus-visible:ring-0 text-center bg-transparent"
-            maxLength={2}
-         />
-         <span className="text-muted-foreground">/</span>
+    <div className="flex items-center rounded-md border border-input h-10 w-full px-3">
+        <Input 
+        placeholder="DD"
+        value={day}
+        onChange={handleDayChange}
+        className="w-12 border-0 p-0 shadow-none focus-visible:ring-0 text-center bg-transparent"
+        maxLength={2}
+        />
+        <span className="text-muted-foreground">/</span>
         <Select value={month} onValueChange={handleMonthChange}>
-          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[100px] focus-visible:ring-0 bg-transparent">
+        <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[100px] focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Month" />
-          </SelectTrigger>
-          <SelectContent>
+        </SelectTrigger>
+        <SelectContent>
             {months.map(m => (
-              <SelectItem key={m.value} value={String(m.value)}>
+            <SelectItem key={m.value} value={String(m.value)}>
                 {m.label}
-              </SelectItem>
+            </SelectItem>
             ))}
-          </SelectContent>
+        </SelectContent>
         </Select>
         <span className="text-muted-foreground">/</span>
-         <Select value={year} onValueChange={handleYearChange}>
-          <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[70px] focus-visible:ring-0 bg-transparent">
+        <Select value={year} onValueChange={handleYearChange}>
+        <SelectTrigger className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[70px] focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Year" />
-          </SelectTrigger>
-          <SelectContent>
+        </SelectTrigger>
+        <SelectContent>
             {years.map(y => (
-              <SelectItem key={y} value={y.toString()}>
+            <SelectItem key={y} value={y.toString()}>
                 {y}
-              </SelectItem>
+            </SelectItem>
             ))}
-          </SelectContent>
+        </SelectContent>
         </Select>
-      </div>
     </div>
   );
 }

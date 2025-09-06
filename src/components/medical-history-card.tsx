@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Form, FormControl, FormField, FormItem, FormMessage } from './ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
 import { DrugInteractionViewer } from './drug-interaction-viewer';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
@@ -62,15 +62,15 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-2">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-4">
         <FormField
           control={form.control}
           name="date"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
+            <FormItem>
+              <FormLabel>Date of Diagnosis</FormLabel>
               <FormControl>
                 <DatePicker
-                  placeholder="Date of Diagnosis"
                   value={field.value}
                   onChange={field.onChange}
                   fromYear={new Date().getFullYear() - 50}
@@ -81,10 +81,10 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
             </FormItem>
           )}
         />
-        <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormControl><Input ref={inputRef} placeholder="Condition Name" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+        <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormLabel>Condition Name</FormLabel><FormControl><Input ref={inputRef} placeholder="e.g., Type 2 Diabetes" {...field} /></FormControl><FormMessage /></FormItem> )}/>
         <div className="flex justify-end gap-2">
-          <Button type="button" size="sm" variant="ghost" className="flex-1" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
-          <Button type="submit" size="sm" className="flex-1" disabled={isSubmitting}>
+          <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
+          <Button type="submit" size="sm" disabled={isSubmitting}>
              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
           </Button>
         </div>
