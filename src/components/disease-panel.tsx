@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useApp } from '@/context/app-context';
@@ -17,7 +18,7 @@ export function DiseasePanel() {
             return availableDiseasePanels.map(p => React.cloneElement(p.component, { key: p.key }));
         }
 
-        const enabledPanelKeys = Object.keys(profile.enabledBiomarkers || {}).filter(key => (profile.enabledBiomarkers?.[key] || []).length > 0);
+        const enabledPanelKeys = Object.keys(profile.enabledBiomarkers || {});
         
         return availableDiseasePanels
             .filter(panel => enabledPanelKeys.includes(panel.key))

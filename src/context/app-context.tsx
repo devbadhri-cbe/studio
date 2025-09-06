@@ -568,30 +568,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleDiseasePanel = (panelKey: DiseasePanelKey) => {
-    const panelMap: Record<DiseasePanelKey, (BiomarkerKey | string)[]> = {
-        diabetes: ['hba1c', 'glucose'],
-        hypertension: ['bloodPressure', 'weight'],
-        lipids: ['totalCholesterol', 'ldl', 'hdl', 'triglycerides'],
-    };
-
     const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
-    const panelBiomarkers = currentEnabled[panelKey] || [];
-    const allPanelBiomarkers = panelMap[panelKey];
+    
+    // If panel exists, remove it. Otherwise, add it with an empty array.
+    const isEnabled = currentEnabled.hasOwnProperty(panelKey);
+    const updatedEnabledBiomarkers = { ...currentEnabled };
 
-    // If any biomarker from the panel is enabled, disable all of them. Otherwise, enable all of them.
-    const newPanelBiomarkers = panelBiomarkers.length > 0 ? [] : allPanelBiomarkers;
-
-    const updatedEnabledBiomarkers = {
-        ...currentEnabled,
-        [panelKey]: newPanelBiomarkers
-    };
+    if (isEnabled) {
+        delete updatedEnabledBiomarkers[panelKey];
+    } else {
+        updatedEnabledBiomarkers[panelKey] = [];
+    }
     
     const newProfileState = { ...profile, enabledBiomarkers: updatedEnabledBiomarkers };
     setProfileState(newProfileState);
     updatePatientData(profile.id, { enabledBiomarkers: newProfileState.enabledBiomarkers });
 
     toast({
-        title: panelBiomarkers.length > 0 ? `${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel Disabled` : `${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel Enabled`,
+        title: isEnabled ? `Panel Disabled` : `Panel Enabled`,
+        description: `The ${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel has been ${isEnabled ? 'disabled' : 'enabled'}. You can now add biomarkers to it.`
     });
   }
 

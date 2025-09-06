@@ -58,9 +58,8 @@ export function DiseasePanelCard({
     const isDisplaySettingsOpen = openSection === 'displaySettings';
     const isManagingPanels = openSection === 'managePanels';
     
-
+    const enabledPanels = Object.keys(profile.enabledBiomarkers || {});
     const enabledForPanel = profile.enabledBiomarkers?.[panelKey] || [];
-    const enabledPanels = Object.keys(profile.enabledBiomarkers || {}).filter(key => (profile.enabledBiomarkers?.[key] || []).length > 0);
 
     const allAvailableBiomarkers = React.useMemo(() => {
         return Object.entries(availableBiomarkerCards)
@@ -158,16 +157,13 @@ export function DiseasePanelCard({
                         <div className="px-2 py-1 space-y-2">
                              <ScrollArea className="h-48">
                                 {availableDiseasePanels.map(({ key, label }) => (
-                                    <DropdownMenuItem key={key} onSelect={(e) => e.preventDefault()} className="cursor-pointer">
-                                        <Checkbox
-                                            id={`check-panel-${key}`}
-                                            checked={enabledPanels.includes(key)}
-                                            onCheckedChange={() => toggleDiseasePanel(key)}
-                                            className="mr-2"
-                                        />
-                                        <Label htmlFor={`check-panel-${key}`} className="font-normal cursor-pointer flex-1">
+                                    <DropdownMenuItem key={key} onSelect={(e) => { e.preventDefault(); toggleDiseasePanel(key); }}>
+                                        <div className="w-4 mr-2">
+                                            {enabledPanels.includes(key) && <Check className="h-4 w-4" />}
+                                        </div>
+                                        <span className="font-normal flex-1">
                                             {label}
-                                        </Label>
+                                        </span>
                                     </DropdownMenuItem>
                                 ))}
                             </ScrollArea>
