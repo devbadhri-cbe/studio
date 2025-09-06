@@ -27,35 +27,38 @@ interface MedicationSynopsisProps {
 }
 
 export function MedicationSynopsisDialog({ medicationName, onClose }: MedicationSynopsisProps) {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [isTranslating, setIsTranslating] = React.useState(false);
   const [originalSynopsis, setOriginalSynopsis] = React.useState<string | null>(null);
   const [translatedSynopsis, setTranslatedSynopsis] = React.useState<string | null>(null);
   const [selectedLanguage, setSelectedLanguage] = React.useState('en');
   const { toast } = useToast();
 
-  const handleFetchSynopsis = React.useCallback(async () => {
-    if (!medicationName) return;
+  React.useEffect(() => {
+    const handleFetchSynopsis = async () => {
+        if (!medicationName) return;
 
-    setIsLoading(true);
-    setOriginalSynopsis(null);
-    setTranslatedSynopsis(null);
-    setSelectedLanguage('en');
+        setIsLoading(true);
+        setOriginalSynopsis(null);
+        setTranslatedSynopsis(null);
+        setSelectedLanguage('en');
 
-    try {
-      const response = await getMedicationSynopsis({ medicationName });
-      setOriginalSynopsis(response.synopsis);
-    } catch (error) {
-      console.error("Failed to fetch medication synopsis:", error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not load the synopsis for this medication.',
-      });
-      setOriginalSynopsis('Failed to load synopsis. Please try again later.');
-    } finally {
-      setIsLoading(false);
-    }
+        try {
+        const response = await getMedicationSynopsis({ medicationName });
+        setOriginalSynopsis(response.synopsis);
+        } catch (error) {
+        console.error("Failed to fetch medication synopsis:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not load the synopsis for this medication.',
+        });
+        setOriginalSynopsis('Failed to load synopsis. Please try again later.');
+        } finally {
+        setIsLoading(false);
+        }
+    };
+    handleFetchSynopsis();
   }, [medicationName, toast]);
 
   const handleTranslate = async (languageCode: string) => {
@@ -100,11 +103,6 @@ export function MedicationSynopsisDialog({ medicationName, onClose }: Medication
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <p>{isTranslating ? 'Translating...' : 'Loading synopsis...'}</p>
                 </div>
-            )}
-            {!synopsisToDisplay && !isLoading && !isTranslating && (
-                <Button onClick={handleFetchSynopsis} className="w-full">
-                    Load Synopsis for {medicationName}
-                </Button>
             )}
              {synopsisToDisplay && !isLoading && !isTranslating && (
                 <div className="space-y-4">
