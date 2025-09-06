@@ -11,7 +11,6 @@ import { countries } from '@/lib/countries';
 import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
 import { BiomarkerKey } from '@/lib/biomarker-cards';
-import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, customBiomarkers: [] };
 
@@ -42,7 +41,7 @@ interface EnableDashboardResult {
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
-  addMedicalCondition: (condition: Partial<Omit<MedicalCondition, 'id' | 'status'>> & {condition: string, date: string}, isPatientAdding: boolean) => Promise<void>;
+  addMedicalCondition: (condition: Omit<MedicalCondition, 'id' | 'status'> & { id?: string; status?: MedicalCondition['status'] }, replaceTemp?: boolean) => void;
   updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
   approveMedicalCondition: (conditionId: string) => void;
@@ -248,35 +247,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updatePatientData(newProfile.id, { ...newProfile });
   }
   
-  const addMedicalCondition = async (condition: Partial<Omit<MedicalCondition, 'id' | 'status'>> & {condition: string, date: string}, isPatientAdding: boolean) => {
-    const validDate = condition.date && isValid(parseISO(condition.date)) 
-        ? condition.date 
-        : new Date().toISOString();
-
-    let icdCode = '';
-    if (isPatientAdding) {
-        try {
-            const result = await getIcdCode({ conditionName: condition.condition });
-            icdCode = result.icdCode;
-        } catch (error) {
-            console.error("Failed to get ICD code", error);
-            toast({
-                variant: 'destructive',
-                title: 'AI Error',
-                description: 'Could not get ICD code suggestion.'
-            })
-        }
-    }
-
-    let newCondition: MedicalCondition = { 
-        ...condition,
-        date: validDate,
-        id: Date.now().toString(), 
-        status: isDoctorLoggedIn ? 'verified' : 'pending_review',
-        icdCode: icdCode || condition.icdCode || '',
+  const addMedicalCondition = (condition: Omit<MedicalCondition, 'id' | 'status'> & { id?: string; status?: MedicalCondition['status'] }, replaceTemp: boolean = false) => {
+    const newCondition: MedicalCondition = {
+        id: condition.id || Date.now().toString(),
+        date: condition.date,
+        condition: condition.condition,
+        icdCode: condition.icdCode || '',
+        status: condition.status || (isDoctorLoggedIn ? 'verified' : 'pending_review'),
     };
 
-    const updatedConditions = [...profile.presentMedicalConditions, newCondition];
+    let updatedConditions;
+    if (replaceTemp && condition.id) {
+        // If replacing, map and replace the temp entry
+        updatedConditions = profile.presentMedicalConditions.map(c => 
+            c.id === condition.id ? { ...c, ...newCondition, id: c.id.startsWith('temp-') ? Date.now().toString() : c.id } : c
+        );
+    } else {
+        // If not replacing (or no ID), just add it
+        updatedConditions = [...profile.presentMedicalConditions, newCondition];
+    }
+    
     setProfileState(p => ({ ...p, presentMedicalConditions: updatedConditions }));
     updatePatientData(profile.id, { presentMedicalConditions: updatedConditions });
 };

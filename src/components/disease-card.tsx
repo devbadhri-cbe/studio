@@ -11,12 +11,11 @@ import { Loader2, Info, Trash2, CheckCircle, AlertTriangle, Edit } from 'lucide-
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
-import { useToast } from '@/hooks/use-toast';
-import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
 
 interface DiseaseCardProps {
   condition: MedicalCondition;
   onRevise: (id: string) => void;
+  isLoading?: boolean;
 }
 
 const statusConfig = {
@@ -25,16 +24,13 @@ const statusConfig = {
   needs_revision: { icon: AlertTriangle, text: 'Doctor requested revision', color: 'text-destructive' },
 };
 
-export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
+export function DiseaseCard({ condition, onRevise, isLoading = false }: DiseaseCardProps) {
   const [activeSynopsis, setActiveSynopsis] = React.useState<string | null>(null);
-  const [isSuggesting, setIsSuggesting] = React.useState<string | null>(null);
-  const { isDoctorLoggedIn, removeMedicalCondition, updateMedicalCondition } = useApp();
-  const { toast } = useToast();
+  const { isDoctorLoggedIn, removeMedicalCondition } = useApp();
   const formatDate = useDateFormatter();
 
   const statusInfo = statusConfig[condition.status] || statusConfig.pending_review;
   const Icon = statusInfo.icon;
-  const isLoadingSuggestion = isSuggesting === condition.id;
 
   const handleSynopsisToggle = (id: string) => {
     if (activeSynopsis === id) {
@@ -51,55 +47,25 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
     }
   };
 
-  const handleSuggestIcdCode = async (condition: MedicalCondition) => {
-    setIsSuggesting(condition.id);
-    try {
-      const result = await getIcdCode({ conditionName: condition.condition });
-      updateMedicalCondition({ ...condition, icdCode: result.icdCode });
-      toast({
-        title: 'ICD-11 Code Updated',
-        description: `Suggested code for ${condition.condition} is ${result.icdCode}.`,
-      });
-    } catch (error) {
-      console.error('Failed to get ICD code suggestion', error);
-      toast({
-        variant: 'destructive',
-        title: 'AI Error',
-        description: 'Could not fetch ICD-11 code suggestion.',
-      });
-    } finally {
-      setIsSuggesting(null);
-    }
-  };
-
   return (
     <>
       <li className="group flex items-start gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <p className="font-semibold text-foreground">{condition.condition}</p>
-            <Tooltip>
-              <TooltipTrigger>
-                <Icon className={cn('h-3.5 w-3.5', statusInfo.color)} />
-              </TooltipTrigger>
-              <TooltipContent>{statusInfo.text}</TooltipContent>
-            </Tooltip>
+             {isLoading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+                <Tooltip>
+                <TooltipTrigger>
+                    <Icon className={cn('h-3.5 w-3.5', statusInfo.color)} />
+                </TooltipTrigger>
+                <TooltipContent>{statusInfo.text}</TooltipContent>
+                </Tooltip>
+            )}
           </div>
-          {condition.icdCode ? (
+          {condition.icdCode && (
             <p className="text-xs text-muted-foreground">ICD-11: {condition.icdCode}</p>
-          ) : (
-            isDoctorLoggedIn && (
-              <Button
-                size="xs"
-                variant="link"
-                className="p-0 h-auto text-xs"
-                onClick={() => handleSuggestIcdCode(condition)}
-                disabled={isLoadingSuggestion}
-              >
-                {isLoadingSuggestion && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-                Get ICD-11 Suggestion
-              </Button>
-            )
           )}
           <p className="text-xs text-muted-foreground">{formatDate(condition.date)}</p>
         </div>

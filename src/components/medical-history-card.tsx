@@ -18,6 +18,8 @@ import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
 import { DatePicker } from './ui/date-picker';
 import { DiseaseCard } from './disease-card';
 import { Separator } from './ui/separator';
+import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
+import { useToast } from '@/hooks/use-toast';
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
@@ -56,8 +58,8 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: {condition:
         ...data,
         date: data.date.toISOString(),
     });
+    // Do not reset form here, parent component will handle it by unmounting
     setIsSubmitting(false);
-    onCancel();
   };
 
   return (
@@ -100,6 +102,8 @@ export function MedicalHistoryCard() {
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isLoadingIcd, setIsLoadingIcd] = React.useState<string | null>(null);
+  const { toast } = useToast();
 
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -110,9 +114,30 @@ export function MedicalHistoryCard() {
 
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
-  const handleSaveCondition = async (data: { condition: string, date: string}) => {
-    await addMedicalCondition(data, !isDoctorLoggedIn);
+  const handleSaveCondition = async (data: { condition: string; date: string }) => {
+    const tempId = `temp-${Date.now()}`;
     setIsAddingCondition(false);
+    setIsLoadingIcd(tempId);
+    
+    // Immediately add condition to UI with loading state
+    addMedicalCondition({ ...data, id: tempId, status: 'pending_review', icdCode: '' });
+    
+    try {
+      const result = await getIcdCode({ conditionName: data.condition });
+      // Update the condition with the real ICD code
+      addMedicalCondition({ ...data, id: tempId, status: 'pending_review', icdCode: result.icdCode }, true);
+    } catch (error) {
+      console.error('Failed to get ICD code', error);
+      toast({
+        variant: 'destructive',
+        title: 'AI Error',
+        description: 'Could not get ICD code suggestion. The condition has been saved without it.',
+      });
+      // Still update, but without the code, removing the temp entry
+      addMedicalCondition({ ...data, id: tempId, status: 'pending_review', icdCode: '' }, true);
+    } finally {
+      setIsLoadingIcd(null);
+    }
   };
   
   const handleReviseCondition = (id: string) => {
@@ -201,6 +226,7 @@ export function MedicalHistoryCard() {
                                     key={condition.id}
                                     condition={condition}
                                     onRevise={handleReviseCondition}
+                                    isLoading={isLoadingIcd === condition.id}
                                 />
                             )
                         })}
