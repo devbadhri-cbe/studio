@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { ArrowLeft, Stethoscope, DropletIcon, ChevronDown, Shapes } from 'lucide-react';
+import { ArrowLeft, Stethoscope, DropletIcon, ChevronDown, Shapes, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -22,6 +22,7 @@ import { ProfileCard } from '@/components/profile-card';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DashboardSuggestionCard } from './dashboard-suggestion-card';
+import { Input } from './ui/input';
 
 
 export function PatientDashboard() {
@@ -29,6 +30,7 @@ export function PatientDashboard() {
   const router = useRouter();
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(true);
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
+  const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
   const hasPendingSuggestions = profile.dashboardSuggestions?.some(s => s.status === 'pending');
@@ -99,18 +101,31 @@ export function PatientDashboard() {
                 
                 {isDoctorLoggedIn && (
                     <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen} className="flex-1">
-                        <CollapsibleTrigger asChild>
-                            <Button
-                                variant={isBiomarkersOpen ? 'default' : 'outline'}
-                                className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
-                            >
-                                <Shapes className="mr-2 h-5 w-5" />
-                                Biomarker Cards
-                                <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
-                            </Button>
-                        </CollapsibleTrigger>
+                        <div className="flex gap-2">
+                            <CollapsibleTrigger asChild>
+                                <Button
+                                    variant={isBiomarkersOpen ? 'default' : 'outline'}
+                                    className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
+                                >
+                                    <Shapes className="mr-2 h-5 w-5" />
+                                    Biomarker Cards
+                                    <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
+                                </Button>
+                            </CollapsibleTrigger>
+                             {isBiomarkersOpen && (
+                                <div className="relative">
+                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Search biomarkers..."
+                                        value={biomarkerSearchQuery}
+                                        onChange={(e) => setBiomarkerSearchQuery(e.target.value)}
+                                        className="pl-8 h-full"
+                                    />
+                                </div>
+                            )}
+                        </div>
                         <CollapsibleContent className="mt-4">
-                            <BiomarkersPanel />
+                            <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
                         </CollapsibleContent>
                     </Collapsible>
                 )}
