@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function PatientPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const { setPatientData, isClient, setIsDoctorLoggedIn, profile } = useApp();
+  const { setPatientData, isClient, setIsDoctorLoggedIn } = useApp();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
