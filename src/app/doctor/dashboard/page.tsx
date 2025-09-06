@@ -89,7 +89,7 @@ export default function DoctorDashboardPage() {
             fetchPatients(1);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isClient, setIsDoctorLoggedIn]);
+    }, [isClient, setIsDoctorLoggedIn, fetchPatients]);
     
 
     const viewPatientDashboard = (patient: Patient) => {
