@@ -53,6 +53,10 @@ export function DatePicker({
       setDay(format(value, 'd'));
       setMonth(String(value.getMonth()));
       setYear(format(value, 'yyyy'));
+    } else {
+        setDay('');
+        setMonth('');
+        setYear('');
     }
   }, [value]);
 
@@ -116,48 +120,54 @@ export function DatePicker({
 
   return (
     <div className="flex items-center rounded-md border border-input h-10 w-full px-1.5 space-x-1">
-      <Select value={day} onValueChange={handleDayChange}>
-        <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[50px] focus-visible:ring-0 bg-transparent justify-center">
-          <SelectValue placeholder="Day" />
-        </SelectTrigger>
-        <SelectContent>
-          {days.map(d => (
-            <SelectItem key={d.value} value={d.value}>
-              {d.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex-1">
+        <Select value={day} onValueChange={handleDayChange}>
+          <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
+            <SelectValue placeholder="Day" />
+          </SelectTrigger>
+          <SelectContent>
+            {days.map(d => (
+              <SelectItem key={d.value} value={d.value}>
+                {d.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       <span className="text-muted-foreground">/</span>
 
-      <Select value={month} onValueChange={handleMonthChange}>
-        <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[100px] focus-visible:ring-0 bg-transparent justify-center">
-          <SelectValue placeholder="Month" />
-        </SelectTrigger>
-        <SelectContent>
-          {months.map(m => (
-            <SelectItem key={m.value} value={String(m.value)}>
-              {m.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex-[1.5]">
+        <Select value={month} onValueChange={handleMonthChange}>
+            <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
+            <SelectValue placeholder="Month" />
+            </SelectTrigger>
+            <SelectContent>
+            {months.map(m => (
+                <SelectItem key={m.value} value={String(m.value)}>
+                {m.label}
+                </SelectItem>
+            ))}
+            </SelectContent>
+        </Select>
+       </div>
 
       <span className="text-muted-foreground">/</span>
       
-      <Select value={year} onValueChange={handleYearChange}>
-        <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-auto min-w-[70px] focus-visible:ring-0 bg-transparent justify-center">
-          <SelectValue placeholder="Year" />
-        </SelectTrigger>
-        <SelectContent>
-          {years.map(y => (
-            <SelectItem key={y} value={y.toString()}>
-              {y}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex-1">
+        <Select value={year} onValueChange={handleYearChange}>
+            <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
+            <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent>
+            {years.map(y => (
+                <SelectItem key={y} value={y.toString()}>
+                {y}
+                </SelectItem>
+            ))}
+            </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 }
