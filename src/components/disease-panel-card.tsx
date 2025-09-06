@@ -13,8 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Settings, Pencil, Search, ChevronDown } from 'lucide-react';
-import { availableBiomarkerCards, type BiomarkerKey } from '@/lib/biomarker-cards';
+import { Settings, Pencil, Search, ChevronDown, Check } from 'lucide-react';
+import { availableBiomarkerCards, type BiomarkerKey, availableDiseasePanels } from '@/lib/biomarker-cards';
 import { useApp } from '@/context/app-context';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -33,10 +33,10 @@ interface DiseasePanelCardProps {
   className?: string;
   isDoctorLoggedIn: boolean;
   panelKey: string;
-  allPanelBiomarkers: BiomarkerKey[];
+  allPanelBiomarkers: (BiomarkerKey | string)[];
 }
 
-type OpenSection = 'newRecord' | 'manageBiomarkers' | 'displaySettings' | null;
+type OpenSection = 'newRecord' | 'manageBiomarkers' | 'displaySettings' | 'managePanels' | null;
 
 
 export function DiseasePanelCard({ 
@@ -48,7 +48,7 @@ export function DiseasePanelCard({
     panelKey,
     allPanelBiomarkers,
 }: DiseasePanelCardProps) {
-    const { profile, setProfile, biomarkerUnit, setBiomarkerUnit, toggleDiseaseBiomarker, customBiomarkers } = useApp();
+    const { profile, setProfile, biomarkerUnit, setBiomarkerUnit, toggleDiseaseBiomarker, customBiomarkers, toggleDiseasePanel } = useApp();
     const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState('');
     const [dialogTriggers, setDialogTriggers] = React.useState<Record<string, React.RefObject<HTMLButtonElement>>>({});
@@ -57,9 +57,11 @@ export function DiseasePanelCard({
     const isNewRecordOpen = openSection === 'newRecord';
     const isManagingBiomarkers = openSection === 'manageBiomarkers';
     const isDisplaySettingsOpen = openSection === 'displaySettings';
+    const isManagingPanels = openSection === 'managePanels';
     
 
     const enabledForPanel = profile.enabledBiomarkers?.[panelKey] || [];
+    const enabledPanels = Object.keys(profile.enabledBiomarkers || {}).filter(key => (profile.enabledBiomarkers?.[key] || []).length > 0);
 
     const allAvailableBiomarkers = React.useMemo(() => {
         const standard = Object.entries(availableBiomarkerCards).map(([key, value]) => ({ key, label: value.label, isCustom: false }));
@@ -142,6 +144,38 @@ export function DiseasePanelCard({
                             )) : <p className="text-xs text-muted-foreground px-2">No biomarkers enabled.</p>}
                          </div>
                     )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        onSelect={(e) => {
+                            e.preventDefault();
+                            setOpenSection(prev => prev === 'managePanels' ? null : 'managePanels');
+                        }}
+                        className="flex justify-between items-center"
+                    >
+                        <span className="font-semibold">Manage Disease Panels</span>
+                         <ChevronDown className={cn("h-4 w-4 transition-transform", isManagingPanels && "rotate-180")} />
+                    </DropdownMenuItem>
+
+                    {isManagingPanels && (
+                        <div className="px-2 py-1 space-y-2">
+                             <ScrollArea className="h-48">
+                                {availableDiseasePanels.map(({ key, label }) => (
+                                    <DropdownMenuItem key={key} onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                                        <Checkbox
+                                            id={`check-panel-${key}`}
+                                            checked={enabledPanels.includes(key)}
+                                            onCheckedChange={() => toggleDiseasePanel(key)}
+                                            className="mr-2"
+                                        />
+                                        <Label htmlFor={`check-panel-${key}`} className="font-normal cursor-pointer flex-1">
+                                            {label}
+                                        </Label>
+                                    </DropdownMenuItem>
+                                ))}
+                            </ScrollArea>
+                        </div>
+                    )}
+
                     <DropdownMenuSeparator />
                      <DropdownMenuItem
                         onSelect={(e) => {

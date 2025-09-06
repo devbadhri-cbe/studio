@@ -10,7 +10,7 @@ import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
-import { BiomarkerKey } from '@/lib/biomarker-cards';
+import { BiomarkerKey, DiseasePanelKey } from '@/lib/biomarker-cards';
 import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
 import { suggestMonitoringPlan } from '@/ai/flows/suggest-monitoring-plan-flow';
 
@@ -105,6 +105,7 @@ interface AppContextType {
   setTheme: (theme: Theme) => void;
   dashboardSuggestions: DashboardSuggestion[];
   toggleDiseaseBiomarker: (panelKey: string, biomarkerKey: BiomarkerKey | string) => void;
+  toggleDiseasePanel: (panelKey: DiseasePanelKey) => void;
   customBiomarkers: CustomBiomarker[];
   addCustomBiomarker: (name: string) => Promise<string>;
   removeCustomBiomarker: (id: string) => void;
@@ -617,6 +618,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updatePatientData(profile.id, { enabledBiomarkers: newProfileState.enabledBiomarkers });
   };
 
+  const toggleDiseasePanel = (panelKey: DiseasePanelKey) => {
+    const panelMap: Record<DiseasePanelKey, (BiomarkerKey | string)[]> = {
+        diabetes: ['hba1c', 'glucose'],
+        hypertension: ['bloodPressure', 'weight'],
+        lipids: ['totalCholesterol', 'ldl', 'hdl', 'triglycerides'],
+    };
+
+    const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
+    const panelBiomarkers = currentEnabled[panelKey] || [];
+    const allPanelBiomarkers = panelMap[panelKey];
+
+    // If any biomarker from the panel is enabled, disable all of them. Otherwise, enable all of them.
+    const newPanelBiomarkers = panelBiomarkers.length > 0 ? [] : allPanelBiomarkers;
+
+    const updatedEnabledBiomarkers = {
+        ...currentEnabled,
+        [panelKey]: newPanelBiomarkers
+    };
+    
+    const newProfileState = { ...profile, enabledBiomarkers: updatedEnabledBiomarkers };
+    setProfileState(newProfileState);
+    updatePatientData(profile.id, { enabledBiomarkers: newProfileState.enabledBiomarkers });
+
+    toast({
+        title: panelBiomarkers.length > 0 ? `${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel Disabled` : `${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel Enabled`,
+    });
+  }
+
   const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
     const updates: Partial<Patient> = {};
@@ -781,6 +810,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTheme: setThemeState,
     dashboardSuggestions: profile.dashboardSuggestions || [],
     toggleDiseaseBiomarker,
+    toggleDiseasePanel,
     customBiomarkers,
     addCustomBiomarker,
     removeCustomBiomarker,

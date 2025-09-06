@@ -1,5 +1,4 @@
 
-
 import { Hba1cCard } from '@/components/hba1c-card';
 import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
 import { HemoglobinCard } from '@/components/hemoglobin-card';
@@ -22,6 +21,9 @@ import { HdlCard } from '@/components/hdl-card';
 import { AddHdlRecordDialog } from '@/components/add-hdl-record-dialog';
 import { TriglyceridesCard } from '@/components/triglycerides-card';
 import { AddTriglyceridesRecordDialog } from '@/components/add-triglycerides-record-dialog';
+import { DiabetesCard } from '@/components/diabetes-card';
+import { HypertensionCard } from '@/components/hypertension-card';
+import { LipidsPanel } from '@/components/lipids-panel';
 
 
 export const availableBiomarkerCards = {
@@ -94,3 +96,11 @@ export const availableBiomarkerCards = {
 };
 
 export type BiomarkerKey = keyof typeof availableBiomarkerCards;
+
+export const availableDiseasePanels = [
+    { key: 'diabetes', label: 'Diabetes Panel', component: <DiabetesCard /> },
+    { key: 'hypertension', label: 'Hypertension Panel', component: <HypertensionCard /> },
+    { key: 'lipids', label: 'Lipids Panel', component: <LipidsPanel /> },
+];
+
+export type DiseasePanelKey = 'diabetes' | 'hypertension' | 'lipids';

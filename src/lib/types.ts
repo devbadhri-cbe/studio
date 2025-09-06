@@ -1,7 +1,7 @@
 
 
 import { Timestamp } from "firebase/firestore";
-import { BiomarkerKey } from "./biomarker-cards";
+import { BiomarkerKey, DiseasePanelKey } from "./biomarker-cards";
 
 export type UnitSystem = 'metric' | 'imperial';
 
@@ -202,7 +202,7 @@ export interface Patient {
   triglyceridesRecords: TriglyceridesRecord[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
-  enabledBiomarkers: { [key: string]: (BiomarkerKey | string)[] };
+  enabledBiomarkers: { [key in DiseasePanelKey]?: (BiomarkerKey | string)[] };
   doctorName?: string;
   customBiomarkers?: CustomBiomarker[];
   dashboardSuggestions?: DashboardSuggestion[];
