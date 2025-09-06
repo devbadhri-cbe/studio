@@ -29,7 +29,7 @@ import { ScrollArea } from './ui/scroll-area';
 interface DiseasePanelCardProps {
   title: string;
   icon: React.ReactNode;
-  children: React.ReactNode; // For hidden dialogs
+  children: React.ReactNode; 
   className?: string;
   isDoctorLoggedIn: boolean;
   panelKey: string;
@@ -70,7 +70,7 @@ export function DiseasePanelCard({
     const addRecordActions = React.useMemo(() => {
         return enabledForPanel
             .map(key => availableBiomarkerCards[key as BiomarkerKey])
-            .filter(Boolean) // Filter out undefined/null entries
+            .filter(Boolean) 
             .map(cardInfo => ({
                 label: `New ${cardInfo.label} Record`,
                 dialog: cardInfo.addRecordDialog,
@@ -135,11 +135,11 @@ export function DiseasePanelCard({
                     
                     {isNewRecordOpen && (
                          <div className="px-2 py-1 space-y-1">
-                            {addRecordActions.map(({ label, action }) => (
+                            {addRecordActions.length > 0 ? addRecordActions.map(({ label, action }) => (
                                 <DropdownMenuItem key={label} onSelect={action}>
                                     {label}
                                 </DropdownMenuItem>
-                            ))}
+                            )) : <p className="text-xs text-muted-foreground px-2">No biomarkers enabled.</p>}
                          </div>
                     )}
                     <DropdownMenuSeparator />
@@ -278,16 +278,7 @@ export function DiseasePanelCard({
                     {isDoctorLoggedIn && <div className="flex items-center gap-1 shrink-0">{Actions}</div>}
                 </div>
                 <CardContent className="p-0 flex-1 flex flex-col">
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
-                        {enabledForPanel.map(key => {
-                            const cardInfo = allAvailableBiomarkers.find(b => b.key === key);
-                            if (cardInfo && !cardInfo.isCustom && availableBiomarkerCards[key as BiomarkerKey]) {
-                                const cardToRender = key === 'bloodPressure' || key === 'weight' ? null : availableBiomarkerCards[key as BiomarkerKey].component;
-                                return cardToRender ? React.cloneElement(cardToRender, { key }) : null;
-                            }
-                            return null;
-                        })}
-                    </div>
+                    {children}
                 </CardContent>
             </div>
         </Card>

@@ -40,16 +40,20 @@ export function DiseasePanel() {
         );
     }
 
+    if (isDoctorLoggedIn) {
+        return (
+             <Card>
+                <CardContent className="p-6 grid grid-cols-1 gap-6">
+                    {availablePanels.map(p => p.component)}
+                </CardContent>
+            </Card>
+        )
+    }
+
     return (
         <Card>
-            <CardContent className="p-6">
-                <div className="grid grid-cols-1 gap-6">
-                    {panelsToShow.map((PanelComponent, index) => (
-                        <React.Fragment key={index}>
-                            {PanelComponent}
-                        </React.Fragment>
-                    ))}
-                </div>
+            <CardContent className="p-6 grid grid-cols-1 gap-6">
+                {panelsToShow}
             </CardContent>
         </Card>
     );

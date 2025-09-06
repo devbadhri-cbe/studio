@@ -32,6 +32,7 @@ export function DashboardSuggestionCard() {
   };
   
   const handleEnable = (suggestion: DashboardSuggestion) => {
+    // This map connects the AI's string suggestion to our system's panel keys.
     const panelMap: {[key: string]: string} = {
         "Diabetes Panel": "diabetes",
         "Hypertension Panel": "hypertension",
@@ -40,7 +41,7 @@ export function DashboardSuggestionCard() {
     
     const panelKey = panelMap[suggestion.panelName];
 
-    if (panelKey && profile.enabledBiomarkers?.[panelKey]) {
+    if (panelKey) {
         // Enable all suggested biomarkers for this existing panel
         let enabledCount = 0;
         suggestion.biomarkers.forEach(biomarkerName => {
@@ -65,6 +66,7 @@ export function DashboardSuggestionCard() {
             description: `Enabled ${enabledCount} biomarkers.`
         });
     } else {
+        // This is the fallback for a truly new, un-creatable panel.
         toast({
             variant: 'destructive',
             title: 'Feature Not Implemented',

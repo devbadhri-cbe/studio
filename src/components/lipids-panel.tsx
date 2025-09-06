@@ -9,7 +9,8 @@ import { type BiomarkerKey } from '@/lib/biomarker-cards';
 
 
 const LIPIDS_PANEL_KEY = 'lipids';
-const allLipidsBiomarkers: BiomarkerKey[] = []; // Placeholder for now
+// For now, no specific biomarker cards are created for lipids, so this is empty.
+const allLipidsBiomarkers: BiomarkerKey[] = []; 
 
 export function LipidsPanel() {
   const { isDoctorLoggedIn } = useApp();
