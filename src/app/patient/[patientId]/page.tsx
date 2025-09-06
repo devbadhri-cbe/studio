@@ -4,14 +4,14 @@
 import * as React from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/app-context';
-import { getPatient } from '@/lib/firestore';
+import { getPatient, updatePatient } from '@/lib/firestore';
 import type { Patient } from '@/lib/types';
 import { PatientDashboard } from '@/components/patient-dashboard';
 
 export default function PatientPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const { setPatientData, isClient, setIsDoctorLoggedIn } = useApp();
+  const { setPatientData, isClient, setIsDoctorLoggedIn, profile } = useApp();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   
@@ -32,6 +32,11 @@ export default function PatientPage() {
         const patientData = await getPatient(patientId);
         if (patientData) {
           setPatientData(patientData);
+          // Update lastLogin timestamp
+          const now = new Date().toISOString();
+          await updatePatient(patientId, { lastLogin: now });
+          // Also update the local state to reflect the change immediately
+          setPatientData({ ...patientData, lastLogin: now });
         } else {
           setError(`No patient found with ID: ${patientId}`);
         }
