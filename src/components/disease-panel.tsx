@@ -26,7 +26,7 @@ export function DiseasePanel() {
         
         return availablePanels
             .filter(panel => enabledPanelKeys.includes(panel.key) && (profile.enabledBiomarkers?.[panel.key]?.length ?? 0) > 0)
-            .map(panel => React.cloneElement(panel.component, { key: p.key }));
+            .map(panel => React.cloneElement(panel.component, { key: panel.key }));
 
     }, [isDoctorLoggedIn, profile.enabledBiomarkers]);
 
