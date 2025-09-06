@@ -3,7 +3,7 @@
 'use client';
 
 import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord } from '@/lib/types';
-import * as React from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
@@ -111,31 +111,31 @@ interface AppContextType {
   isSaving: boolean;
 }
 
-const AppContext = React.createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [profile, setProfileState] = React.useState<UserProfile>(initialProfile);
-  const [hba1cRecords, setHba1cRecordsState] = React.useState<Hba1cRecord[]>([]);
-  const [fastingBloodGlucoseRecords, setFastingBloodGlucoseRecordsState] = React.useState<FastingBloodGlucoseRecord[]>([]);
-  const [vitaminDRecords, setVitaminDRecordsState] = React.useState<VitaminDRecord[]>([]);
-  const [thyroidRecords, setThyroidRecordsState] = React.useState<ThyroidRecord[]>([]);
-  const [hemoglobinRecords, setHemoglobinRecordsState] = React.useState<HemoglobinRecord[]>([]);
-  const [weightRecords, setWeightRecordsState] = React.useState<WeightRecord[]>([]);
-  const [bloodPressureRecords, setBloodPressureRecordsState] = React.useState<BloodPressureRecord[]>([]);
-  const [totalCholesterolRecords, setTotalCholesterolRecordsState] = React.useState<TotalCholesterolRecord[]>([]);
-  const [ldlRecords, setLdlRecordsState] = React.useState<LdlRecord[]>([]);
-  const [hdlRecords, setHdlRecordsState] = React.useState<HdlRecord[]>([]);
-  const [triglyceridesRecords, setTriglyceridesRecordsState] = React.useState<TriglyceridesRecord[]>([]);
-  const [tips, setTipsState] = React.useState<string[]>([]);
-  const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('report');
-  const [isClient, setIsClient] = React.useState(false);
-  const [isDoctorLoggedIn, setIsDoctorLoggedInState] = React.useState(false);
-  const [theme, setThemeState] = React.useState<Theme>('system');
-  const [biomarkerUnit, setBiomarkerUnitState] = React.useState<BiomarkerUnitSystem>('conventional');
-  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
-  const [isSaving, setIsSaving] = React.useState(false);
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [profile, setProfileState] = useState<UserProfile>(initialProfile);
+  const [hba1cRecords, setHba1cRecordsState] = useState<Hba1cRecord[]>([]);
+  const [fastingBloodGlucoseRecords, setFastingBloodGlucoseRecordsState] = useState<FastingBloodGlucoseRecord[]>([]);
+  const [vitaminDRecords, setVitaminDRecordsState] = useState<VitaminDRecord[]>([]);
+  const [thyroidRecords, setThyroidRecordsState] = useState<ThyroidRecord[]>([]);
+  const [hemoglobinRecords, setHemoglobinRecordsState] = useState<HemoglobinRecord[]>([]);
+  const [weightRecords, setWeightRecordsState] = useState<WeightRecord[]>([]);
+  const [bloodPressureRecords, setBloodPressureRecordsState] = useState<BloodPressureRecord[]>([]);
+  const [totalCholesterolRecords, setTotalCholesterolRecordsState] = useState<TotalCholesterolRecord[]>([]);
+  const [ldlRecords, setLdlRecordsState] = useState<LdlRecord[]>([]);
+  const [hdlRecords, setHdlRecordsState] = useState<HdlRecord[]>([]);
+  const [triglyceridesRecords, setTriglyceridesRecordsState] = useState<TriglyceridesRecord[]>([]);
+  const [tips, setTipsState] = useState<string[]>([]);
+  const [dashboardView, setDashboardViewState] = useState<DashboardView>('report');
+  const [isClient, setIsClient] = useState(false);
+  const [isDoctorLoggedIn, setIsDoctorLoggedInState] = useState(false);
+  const [theme, setThemeState] = useState<Theme>('system');
+  const [biomarkerUnit, setBiomarkerUnitState] = useState<BiomarkerUnitSystem>('conventional');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
-  React.useEffect(() => {
+  useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
     if (storedTheme) {
       setThemeState(storedTheme);
@@ -145,7 +145,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsClient(true);
   }, [profile.country]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
 
@@ -211,7 +211,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsDoctorLoggedInState(isLoggedIn);
   }
   
-  const setPatientData = React.useCallback((patient: Patient) => {
+  const setPatientData = useCallback((patient: Patient) => {
     const patientProfile: UserProfile = {
       id: patient.id,
       name: patient.name,
@@ -775,7 +775,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useApp() {
-  const context = React.useContext(AppContext);
+  const context = useContext(AppContext);
   if (context === undefined) {
     throw new Error('useApp must be used within an AppProvider');
   }
