@@ -166,21 +166,7 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
     const docRef = doc(db, PATIENTS_COLLECTION, id);
     
     const updateData: {[key: string]: any} = { ...updates };
-    if (updates.dob && typeof updates.dob === 'string') {
-        updateData.dob = new Date(updates.dob);
-    }
-    if (updates.lastLogin && typeof updates.lastLogin === 'string') {
-        updateData.lastLogin = new Date(updates.lastLogin);
-    }
-    ['hba1cRecords', 'fastingBloodGlucoseRecords', 'vitaminDRecords', 'thyroidRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'hemoglobinRecords', 'totalCholesterolRecords', 'ldlRecords', 'hdlRecords', 'triglyceridesRecords'].forEach(key => {
-        if (updateData[key] && Array.isArray(updateData[key])) {
-            updateData[key] = updateData[key].map((item: any) => ({
-                ...item,
-                date: item.date && typeof item.date === 'string' ? new Date(item.date) : (item.date || new Date())
-            }));
-        }
-    });
-
+    
     // Remove undefined fields to prevent Firestore errors
     Object.keys(updateData).forEach(key => {
         if (updateData[key] === undefined) {
