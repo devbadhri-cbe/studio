@@ -8,19 +8,36 @@ import * as React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription } from './ui/alert';
-import { cn } from '@/lib/utils';
 import { getHealthInsights } from '@/ai/flows/get-health-insights-flow';
 import { calculateAge } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { translateText } from '@/ai/flows/translate-text-flow';
+import { Separator } from './ui/separator';
+
+const supportedLanguages = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'fr', name: 'French' },
+    { code: 'de', name: 'German' },
+    { code: 'hi', name: 'Hindi' },
+    { code: 'ta', name: 'Tamil' },
+    { code: 'zh', name: 'Chinese' },
+];
 
 export function InsightsCard() {
   const { profile, hba1cRecords, bloodPressureRecords, vitaminDRecords, thyroidRecords, fastingBloodGlucoseRecords, hemoglobinRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords } = useApp();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isTranslating, setIsTranslating] = React.useState(false);
   const [localTips, setLocalTips] = React.useState<string[]>([]);
+  const [translatedTips, setTranslatedTips] = React.useState<string[] | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = React.useState('en');
   const { toast } = useToast();
 
   const handleGetInsights = async () => {
     setIsLoading(true);
     setLocalTips([]);
+    setTranslatedTips(null);
+    setSelectedLanguage('en');
 
     try {
       const getLatestRecord = <T extends { date: string | Date }>(records: T[]) => 
@@ -86,6 +103,40 @@ export function InsightsCard() {
     }
   };
   
+  const handleTranslate = async (languageCode: string) => {
+    if (languageCode === 'en') {
+        setTranslatedTips(null);
+        setSelectedLanguage('en');
+        return;
+    }
+    
+    setIsTranslating(true);
+    setSelectedLanguage(languageCode);
+
+    try {
+        const languageName = supportedLanguages.find(l => l.code === languageCode)?.name || languageCode;
+        const response = await translateText({ texts: localTips, targetLanguage: languageName });
+        setTranslatedTips(response.translatedTexts);
+        toast({
+            title: 'Translation Complete',
+            description: `Insights have been translated to ${languageName}.`,
+        });
+    } catch (error) {
+        console.error("Translation failed:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Translation Error',
+            description: 'Could not translate the insights. Please try again.',
+        });
+        setTranslatedTips(null);
+        setSelectedLanguage('en');
+    } finally {
+        setIsTranslating(false);
+    }
+  };
+
+  const tipsToDisplay = translatedTips || localTips;
+
   return (
     <Card className="h-full shadow-xl">
       <CardHeader>
@@ -102,11 +153,18 @@ export function InsightsCard() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {localTips.length > 0 && !isLoading && (
+        {(isLoading || isTranslating) && (
+            <div className="flex justify-center items-center py-6">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="ml-2">{isTranslating ? 'Translating...' : 'Generating...'}</p>
+            </div>
+        )}
+
+        {!isLoading && !isTranslating && tipsToDisplay.length > 0 && (
           <Alert className="bg-muted/50">
             <AlertDescription className="space-y-4">
               <ul className="space-y-3">
-                {localTips.map((tip, index) => (
+                {tipsToDisplay.map((tip, index) => (
                   <li key={index} className="flex items-start gap-3">
                     <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
                     <p className="text-sm text-muted-foreground">{tip}</p>
@@ -117,28 +175,41 @@ export function InsightsCard() {
           </Alert>
         )}
         
-        {isLoading && (
-            <div className="flex justify-center items-center py-6">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        )}
-
-        {!isLoading && localTips.length === 0 && (
+        {!isLoading && tipsToDisplay.length === 0 && (
             <div className="text-center text-sm text-muted-foreground py-6">
                 <p>Click the button to generate personalized health tips.</p>
             </div>
         )}
-
-        <Button onClick={handleGetInsights} disabled={isLoading} className="w-full" size="sm">
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            'Generate New Insights'
-          )}
-        </Button>
+        
+        <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={handleGetInsights} disabled={isLoading || isTranslating} className="w-full flex-1" size="sm">
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                'Generate New Insights'
+              )}
+            </Button>
+            {localTips.length > 0 && (
+                <div className="flex items-center gap-2">
+                    <Separator orientation="vertical" className="h-full hidden sm:block"/>
+                     <Select value={selectedLanguage} onValueChange={handleTranslate} disabled={isTranslating}>
+                        <SelectTrigger className="w-full sm:w-[150px] h-9">
+                            <SelectValue placeholder="Translate..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {supportedLanguages.map((lang) => (
+                                <SelectItem key={lang.code} value={lang.code}>
+                                    {lang.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
+        </div>
       </CardContent>
     </Card>
   );
