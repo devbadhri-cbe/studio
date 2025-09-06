@@ -157,7 +157,7 @@ export function DiseasePanelCard({
                         <div className="px-2 py-1 space-y-2">
                              <ScrollArea className="h-48">
                                 {availableDiseasePanels.map(({ key, label }) => (
-                                    <DropdownMenuItem key={key} onSelect={(e) => { e.preventDefault(); toggleDiseasePanel(key); }}>
+                                    <DropdownMenuItem key={key} onSelect={(e) => { e.preventDefault(); toggleDiseasePanel(key as DiseasePanelKey); }}>
                                         <div className="w-4 mr-2">
                                             {enabledPanels.includes(key) && <Check className="h-4 w-4" />}
                                         </div>
