@@ -13,12 +13,14 @@ import { getHealthInsights } from '@/ai/flows/get-health-insights-flow';
 import { calculateAge } from '@/lib/utils';
 
 export function InsightsCard() {
-  const { profile, hba1cRecords, bloodPressureRecords, vitaminDRecords, thyroidRecords, tips, setTips } = useApp();
+  const { profile, hba1cRecords, bloodPressureRecords, vitaminDRecords, thyroidRecords } = useApp();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [localTips, setLocalTips] = React.useState<string[]>([]);
   const { toast } = useToast();
 
   const handleGetInsights = async () => {
     setIsLoading(true);
+    setLocalTips([]);
 
     try {
       const latestHba1c = [...hba1cRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
@@ -42,7 +44,7 @@ export function InsightsCard() {
       const result = await getHealthInsights(input);
       
       if (result.insights && result.insights.length > 0) {
-        setTips(result.insights);
+        setLocalTips(result.insights);
         toast({
           title: 'Insights Generated',
           description: 'New health tips have been created for you.',
@@ -82,12 +84,12 @@ export function InsightsCard() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className={cn("space-y-4", (isLoading || tips.length === 0) && "pt-0")}>
-        {tips.length > 0 && (
+      <CardContent className={cn("space-y-4", (isLoading || localTips.length === 0) && "pt-0")}>
+        {localTips.length > 0 && !isLoading && (
           <Alert className="bg-muted/50">
             <AlertDescription className="space-y-4">
               <ul className="space-y-3">
-                {tips.map((tip, index) => (
+                {localTips.map((tip, index) => (
                   <li key={index} className="flex items-start gap-3">
                     <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
                     <p className="text-sm text-muted-foreground">{tip}</p>
@@ -104,7 +106,7 @@ export function InsightsCard() {
             </div>
         )}
 
-        {!isLoading && tips.length === 0 && (
+        {!isLoading && localTips.length === 0 && (
             <div className="text-center text-sm text-muted-foreground py-6">
                 <p>Click the button to generate personalized health tips.</p>
             </div>
