@@ -58,6 +58,7 @@ const processPatientDoc = (doc: any): Patient => {
   const weightRecords = sanitizeRecords(data.weightRecords || []);
   const bloodPressureRecords = sanitizeRecords(data.bloodPressureRecords || []);
   const hemoglobinRecords = sanitizeRecords(data.hemoglobinRecords || []);
+  const lipidRecords = sanitizeRecords(data.lipidRecords || []);
   const presentMedicalConditions = sanitizeRecords(data.presentMedicalConditions || []);
 
 
@@ -87,6 +88,7 @@ const processPatientDoc = (doc: any): Patient => {
     bloodPressureRecords,
     presentMedicalConditions,
     hemoglobinRecords,
+    lipidRecords,
     bmi,
     enabledBiomarkers: data.enabledBiomarkers || {},
   };
@@ -126,7 +128,7 @@ export async function getPatient(id: string): Promise<Patient | null> {
   return null;
 }
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorName'>): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorName' | 'lipidRecords'>): Promise<Patient> {
     const docData = {
         ...patientData,
         doctorName: 'Dr. Badhrinathan N',
@@ -138,6 +140,7 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         hemoglobinRecords: [],
         weightRecords: [],
         bloodPressureRecords: [],
+        lipidRecords: [],
         presentMedicalConditions: [],
         medication: [],
         enabledBiomarkers: {
@@ -165,7 +168,7 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
     if (updates.lastLogin && typeof updates.lastLogin === 'string') {
         updateData.lastLogin = new Date(updates.lastLogin);
     }
-    ['hba1cRecords', 'fastingBloodGlucoseRecords', 'vitaminDRecords', 'thyroidRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'hemoglobinRecords'].forEach(key => {
+    ['hba1cRecords', 'fastingBloodGlucoseRecords', 'vitaminDRecords', 'thyroidRecords', 'weightRecords', 'bloodPressureRecords', 'presentMedicalConditions', 'hemoglobinRecords', 'lipidRecords'].forEach(key => {
         if (updateData[key] && Array.isArray(updateData[key])) {
             updateData[key] = updateData[key].map((item: any) => ({
                 ...item,

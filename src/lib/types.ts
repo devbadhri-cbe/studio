@@ -1,5 +1,4 @@
 
-
 import { Timestamp } from "firebase/firestore";
 import { BiomarkerKey } from "./biomarker-cards";
 
@@ -111,6 +110,17 @@ export interface HemoglobinRecord {
   medication?: string;
 }
 
+export interface LipidRecord {
+  id: string;
+  date: Date | string;
+  totalCholesterol: number;
+  ldl: number;
+  hdl: number;
+  triglycerides: number;
+  medication?: string;
+}
+
+
 export interface CustomBiomarker {
     id: string;
     name: string;
@@ -161,6 +171,7 @@ export interface Patient {
   hemoglobinRecords: HemoglobinRecord[];
   weightRecords: WeightRecord[];
   bloodPressureRecords: BloodPressureRecord[];
+  lipidRecords: LipidRecord[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
   enabledBiomarkers: { [key: string]: BiomarkerKey[] };

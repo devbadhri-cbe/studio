@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord, DashboardSuggestion } from '@/lib/types';
+import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, CustomBiomarker, type Hba1cRecord, DashboardSuggestion, LipidRecord } from '@/lib/types';
 import * as React from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -72,6 +72,9 @@ interface AppContextType {
   bloodPressureRecords: BloodPressureRecord[];
   addBloodPressureRecord: (record: Omit<BloodPressureRecord, 'id' | 'medication'>) => void;
   removeBloodPressureRecord: (id: string) => void;
+  lipidRecords: LipidRecord[];
+  addLipidRecord: (record: Omit<LipidRecord, 'id' | 'medication'>) => void;
+  removeLipidRecord: (id: string) => void;
   addBatchRecords: (records: BatchRecords) => Promise<AddBatchRecordsResult>;
   tips: string[];
   setTips: (tips: string[]) => void;
@@ -109,6 +112,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [hemoglobinRecords, setHemoglobinRecordsState] = React.useState<HemoglobinRecord[]>([]);
   const [weightRecords, setWeightRecordsState] = React.useState<WeightRecord[]>([]);
   const [bloodPressureRecords, setBloodPressureRecordsState] = React.useState<BloodPressureRecord[]>([]);
+  const [lipidRecords, setLipidRecordsState] = React.useState<LipidRecord[]>([]);
   const [tips, setTipsState] = React.useState<string[]>([]);
   const [dashboardView, setDashboardViewState] = React.useState<DashboardView>('report');
   const [isClient, setIsClient] = React.useState(false);
@@ -221,6 +225,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setHemoglobinRecordsState(patient.hemoglobinRecords || []);
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
+    setLipidRecordsState(patient.lipidRecords || []);
     setCustomBiomarkersState(patient.customBiomarkers || []);
     setTips([]); 
     setDashboardViewState('report');
@@ -481,6 +486,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setBloodPressureRecordsState(updatedRecords);
     updatePatientData(profile.id, { bloodPressureRecords: updatedRecords });
   };
+
+  const addLipidRecord = (record: Omit<LipidRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    const updatedRecords = [...lipidRecords, newRecord];
+    setLipidRecordsState(updatedRecords);
+    updatePatientData(profile.id, { lipidRecords: updatedRecords });
+  };
+
+  const removeLipidRecord = (id: string) => {
+    const updatedRecords = lipidRecords.filter(r => r.id !== id);
+    setLipidRecordsState(updatedRecords);
+    updatePatientData(profile.id, { lipidRecords: updatedRecords });
+  };
   
   const addCustomBiomarker = async (name: string): Promise<string> => {
     const newBiomarker: CustomBiomarker = {
@@ -650,6 +668,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     bloodPressureRecords,
     addBloodPressureRecord,
     removeBloodPressureRecord,
+    lipidRecords,
+    addLipidRecord,
+    removeLipidRecord,
     addBatchRecords,
     tips,
     setTips,
