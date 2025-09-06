@@ -99,7 +99,7 @@ export function DashboardSuggestionCard() {
           const biomarkersToDisplay = suggestion.biomarkers || [];
 
           return (
-            <React.Fragment key={suggestion.id}>
+            <div key={suggestion.id}>
               {index > 0 && <Separator />}
               <div className="flex flex-col sm:flex-row sm:items-start gap-4 p-3 rounded-md bg-background">
                 <div className="flex-1 space-y-2">
@@ -136,7 +136,7 @@ export function DashboardSuggestionCard() {
                   </Button>
                 </div>
               </div>
-            </React.Fragment>
+            </div>
           )
         })}
       </CardContent>
