@@ -100,7 +100,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
 
   return (
     <Card 
-        className="w-full flex flex-col transition-all group md:hover:border-primary/50 shadow-md md:hover:shadow-lg"
+        className="w-full flex flex-col transition-all group md:hover:border-primary/50 shadow-md md:hover:shadow-lg relative"
     >
       <button 
         onClick={() => onView(patient)}
