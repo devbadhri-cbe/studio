@@ -156,22 +156,15 @@ export function MedicalHistoryCard() {
     setIsSubmitting(true);
     try {
         const details = await getMedicationDetails({ medicationName: data.medicationName });
-        if (details.chemicalName) {
-            addMedication({
-                name: details.chemicalName,
-                brandName: details.brandName,
-                dosage: data.dosage,
-                frequency: data.frequency,
-            });
-        } else {
-            // Fallback if AI returns empty but doesn't error
-            addMedication({
-                name: data.medicationName,
-                brandName: data.medicationName,
-                dosage: data.dosage,
-                frequency: data.frequency,
-            });
-        }
+        const chemicalName = details.chemicalName || data.medicationName;
+
+        addMedication({
+            name: chemicalName,
+            brandName: details.brandName || data.medicationName,
+            dosage: data.dosage,
+            frequency: data.frequency,
+        });
+
         medicationForm.reset();
         medicationNameInputRef.current?.focus();
     } catch (e) {
@@ -214,6 +207,11 @@ export function MedicalHistoryCard() {
     }
   };
   
+  const formatMedicationDetails = (med: Medication) => {
+    const details = [med.dosage, med.frequency].filter(Boolean).join(', ');
+    return details ? `(${details})` : '';
+  }
+
   return (
     <Card className="shadow-xl">
         <CardContent className="space-y-4 text-sm p-4">
@@ -332,7 +330,7 @@ export function MedicalHistoryCard() {
                                         )}
                                         <p className={cn("text-foreground", med.brandName && "text-muted-foreground text-xs")}>
                                             <span className="font-semibold">{med.name}</span>
-                                            <span className="text-muted-foreground text-xs ml-2">({med.dosage}, {med.frequency})</span>
+                                            <span className="text-muted-foreground text-xs ml-2">{formatMedicationDetails(med)}</span>
                                         </p>
                                     </div>
                                 )}
