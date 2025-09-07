@@ -152,8 +152,8 @@ export function InsightsCard() {
           </div>
         </div>
       </CardHeader>
-      <Separator />
-      <CardContent className="flex-1 flex flex-col p-6">
+      <CardContent className="flex-1 flex flex-col p-6 pt-0">
+        <Separator className="mb-6" />
         {(isLoading || isTranslating) && (
             <div className="flex justify-center items-center flex-1">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -205,7 +205,7 @@ export function InsightsCard() {
         )}
         
         {!isLoading && !isTranslating && tipsToDisplay.length === 0 && (
-            <div>
+            <div className="pt-0">
                 <div className="flex flex-col items-center justify-center text-center gap-4">
                     <p className="text-sm text-muted-foreground">Click the button to generate personalized health tips.</p>
                     <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
