@@ -34,7 +34,6 @@ export function PatientDashboard() {
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   
   const hasPendingReview = (profile.presentMedicalConditions.some(c => c.status === 'pending_review'));
-  const hasPendingSuggestions = profile.dashboardSuggestions?.some(s => s.status === 'pending');
   
   if (!isClient) {
     return (
