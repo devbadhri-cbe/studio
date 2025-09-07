@@ -75,13 +75,13 @@ export function Hba1cChart() {
                   }}
                 />
                 <ReferenceArea y1={0} y2={5.6} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
-                   <Label value="Healthy" position="insideTopLeft" fill="hsl(var(--accent))" fontSize={10} />
+                   <Label value="Healthy" position="insideTopRight" fill="hsl(var(--accent))" fontSize={10} />
                 </ReferenceArea>
                 <ReferenceArea y1={5.7} y2={6.4} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
-                   <Label value="Prediabetes" position="insideTopLeft" fill="hsl(var(--chart-3))" fontSize={10} />
+                   <Label value="Prediabetes" position="insideTopRight" fill="hsl(var(--chart-3))" fontSize={10} />
                 </ReferenceArea>
                 <ReferenceArea y1={6.5} y2={yAxisMax} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
-                  <Label value="Diabetes" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
+                  <Label value="Diabetes" position="insideTopRight" fill="hsl(var(--destructive))" fontSize={10} />
                 </ReferenceArea>
 
                 <Line type="monotone" dataKey="hba1c" stroke="hsl(var(--primary))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--primary))" />} activeDot={{ r: 6 }} />

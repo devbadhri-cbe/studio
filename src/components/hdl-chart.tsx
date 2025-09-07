@@ -84,13 +84,13 @@ export function HdlChart() {
                 }}
               />
                 <ReferenceArea y1={0} y2={lowLevel - 0.1} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
-                   <Label value="Low" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
+                   <Label value="Low" position="insideTopRight" fill="hsl(var(--destructive))" fontSize={10} />
                 </ReferenceArea>
                 <ReferenceArea y1={lowLevel} y2={60} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
-                   <Label value="Normal" position="insideTopLeft" fill="hsl(var(--chart-3))" fontSize={10} />
+                   <Label value="Normal" position="insideTopRight" fill="hsl(var(--chart-3))" fontSize={10} />
                 </ReferenceArea>
                 <ReferenceArea y1={60.1} y2={yAxisDomain[1]} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
-                  <Label value="Optimal" position="insideTopLeft" fill="hsl(var(--accent))" fontSize={10} />
+                  <Label value="Optimal" position="insideTopRight" fill="hsl(var(--accent))" fontSize={10} />
                 </ReferenceArea>
                  <ReferenceLine y={lowLevel} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
 

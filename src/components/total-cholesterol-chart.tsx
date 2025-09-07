@@ -81,13 +81,13 @@ export function TotalCholesterolChart() {
                 }}
               />
                 <ReferenceArea y1={0} y2={199} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
-                   <Label value="Desirable" position="insideTopLeft" fill="hsl(var(--accent))" fontSize={10} />
+                   <Label value="Desirable" position="insideTopRight" fill="hsl(var(--accent))" fontSize={10} />
                 </ReferenceArea>
                 <ReferenceArea y1={200} y2={239} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
-                   <Label value="Borderline High" position="insideTopLeft" fill="hsl(var(--chart-3))" fontSize={10} />
+                   <Label value="Borderline High" position="insideTopRight" fill="hsl(var(--chart-3))" fontSize={10} />
                 </ReferenceArea>
                 <ReferenceArea y1={240} y2={yAxisDomain[1]} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
-                  <Label value="High" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
+                  <Label value="High" position="insideTopRight" fill="hsl(var(--destructive))" fontSize={10} />
                 </ReferenceArea>
 
               <Line type="monotone" dataKey="value" name="Total Cholesterol" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--chart-1))" />} activeDot={{ r: 6 }} />

@@ -12,7 +12,7 @@ export function FastingBloodGlucoseChart() {
   const formatDate = useDateFormatter();
   const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
-  const sortedRecords = [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
+  const sortedRecords = [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(a.date as string).getTime());
   
   const latestRecords = sortedRecords.slice(-5);
   
@@ -86,13 +86,13 @@ export function FastingBloodGlucoseChart() {
                 }}
               />
                 <ReferenceArea y1={0} y2={normalRangeMax} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
-                   <Label value="Normal" position="insideTopLeft" fill="hsl(var(--accent))" fontSize={10} />
+                   <Label value="Normal" position="insideTopRight" fill="hsl(var(--accent))" fontSize={10} />
                 </ReferenceArea>
                 <ReferenceArea y1={prediabetesRangeMin} y2={prediabetesRangeMax} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
-                   <Label value="Prediabetes" position="insideTopLeft" fill="hsl(var(--chart-3))" fontSize={10} />
+                   <Label value="Prediabetes" position="insideTopRight" fill="hsl(var(--chart-3))" fontSize={10} />
                 </ReferenceArea>
                 <ReferenceArea y1={diabetesRangeMin} y2={yAxisDomain[1]} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
-                  <Label value="Diabetes" position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={10} />
+                  <Label value="Diabetes" position="insideTopRight" fill="hsl(var(--destructive))" fontSize={10} />
                 </ReferenceArea>
 
               <Line type="monotone" dataKey="value" name="Glucose" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={<Dot r={4} fill="hsl(var(--chart-1))" />} activeDot={{ r: 6 }} />
