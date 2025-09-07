@@ -22,6 +22,7 @@ import { ProfileCard } from '@/components/profile-card';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from './ui/input';
+import { UnsavedChangesBar } from './unsaved-changes-bar';
 
 
 export function PatientDashboard() {
@@ -63,7 +64,7 @@ export function PatientDashboard() {
             )}
          </TitleBar>
 
-        <main className="flex-1 p-4 md:pt-10 md:p-6">
+        <main className="flex-1 p-4 md:pt-10 md:p-6 pb-24">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              
             <PatientHeader />
@@ -163,6 +164,7 @@ export function PatientDashboard() {
             
           </div>
         </main>
+        <UnsavedChangesBar />
       </div>
     </TooltipProvider>
   );

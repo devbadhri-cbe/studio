@@ -14,7 +14,7 @@ interface PatientHeaderProps {
 }
 
 export function PatientHeader({ children }: PatientHeaderProps) {
-  const { profile, isDoctorLoggedIn, hasUnsavedChanges, saveChanges, isSaving } = useApp();
+  const { profile, isDoctorLoggedIn } = useApp();
   
   const pageTitle = isDoctorLoggedIn
     ? `${profile.name}'s Dashboard`
@@ -34,12 +34,6 @@ export function PatientHeader({ children }: PatientHeaderProps) {
             </div>
         </div>
          <div className="flex items-center gap-2">
-            {hasUnsavedChanges && (
-              <Button onClick={saveChanges} disabled={isSaving} size="sm">
-                <Save className="mr-2 h-4 w-4" />
-                {isSaving ? 'Saving...' : 'Save Changes'}
-              </Button>
-            )}
             <UploadRecordDialog />
         </div>
       </CardContent>
