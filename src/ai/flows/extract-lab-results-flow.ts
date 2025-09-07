@@ -1,5 +1,4 @@
 
-
 'use server';
 /**
  * @fileOverview An AI flow to extract structured data from a lab report document.
@@ -19,6 +18,7 @@ const ExtractLabResultsInputSchema = z.object({
     .describe(
       "A photo of a lab report, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
+  requiredBiomarkers: z.array(z.string()).describe('A list of specific biomarker names to look for in the document.'),
 });
 export type ExtractLabResultsInput = z.infer<typeof ExtractLabResultsInputSchema>;
 
@@ -48,16 +48,12 @@ const prompt = ai.definePrompt({
 Your task is to meticulously extract the following information from the provided document image:
 1. The patient's full name.
 2. The date the lab tests were performed. Please format this as YYYY-MM-DD.
-3. A list of all available biomarker results. For each result, provide the biomarker name, its numerical value, and its unit of measurement.
+3. A list of biomarker results for ONLY the following required biomarkers:
+   {{#each requiredBiomarkers}}
+   - {{{this}}}
+   {{/each}}
 
-Known Biomarkers to look for:
-- HbA1c (in %)
-- Fasting Blood Glucose (in mg/dL or mmol/L)
-- Vitamin D (in ng/mL or nmol/L)
-- TSH (in μIU/mL)
-- T3 (in pg/mL)
-- T4 (in ng/dL)
-- Hemoglobin (in g/dL or g/L)
+If a biomarker from the required list is not present in the document, do not include it in your response. For each result you find, provide the biomarker name, its numerical value, and its unit of measurement.
 
 If you cannot find a piece of information, leave it out of the response. Be as accurate as possible.
 

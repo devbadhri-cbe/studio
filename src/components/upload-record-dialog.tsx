@@ -15,6 +15,7 @@ import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import { parseISO, isValid } from 'date-fns';
 import { Label } from './ui/label';
+import { availableBiomarkerCards } from '@/lib/biomarker-cards';
 
 type Step = 'initial' | 'confirmName' | 'editResults' | 'loading' | 'error';
 type ExtractedResult = ExtractLabResultsOutput['results'][0];
@@ -77,7 +78,15 @@ export function UploadRecordDialog() {
     reader.onloadend = async () => {
       const base64data = reader.result as string;
       try {
-        const result = await extractLabResults({ photoDataUri: base64data });
+        const enabledBiomarkers = Object.entries(availableBiomarkerCards)
+            .filter(([key]) => Object.values(profile.enabledBiomarkers || {}).flat().includes(key))
+            .map(([, value]) => value.label);
+        
+        const result = await extractLabResults({ 
+            photoDataUri: base64data,
+            requiredBiomarkers: enabledBiomarkers.length > 0 ? enabledBiomarkers : Object.values(availableBiomarkerCards).map(b => b.label),
+        });
+        
         setExtractedData(result);
         setStep('confirmName');
       } catch (error) {
@@ -139,30 +148,31 @@ export function UploadRecordDialog() {
         const value = Number(res.value);
         if(isNaN(value)) return;
         
-        switch(res.biomarker.toLowerCase()) {
+        // Match extracted biomarker name (which can be varied) to our internal keys
+        const biomarkerKey = Object.keys(availableBiomarkerCards).find(key => 
+            availableBiomarkerCards[key as keyof typeof availableBiomarkerCards].label.toLowerCase() === res.biomarker.toLowerCase()
+        );
+
+        switch(biomarkerKey) {
             case 'hba1c':
                 recordsToBatch.hba1c = { date, value };
                 break;
-            case 'fasting blood glucose':
+            case 'glucose':
                 recordsToBatch.fastingBloodGlucose = { date, value };
                 break;
-            case 'vitamin d':
+            case 'vitaminD':
                 recordsToBatch.vitaminD = { date, value, units: res.unit };
                 break;
-            case 'tsh':
-                 if (!recordsToBatch.thyroid) recordsToBatch.thyroid = { date };
+            case 'thyroid': // Assuming TSH, T3, T4 are handled together if needed
+                 if (!recordsToBatch.thyroid) recordsToBatch.thyroid = { date, t3: 0, t4: 0 }; // default other values
                  recordsToBatch.thyroid.tsh = value;
                  break;
-            case 't3':
-                 if (!recordsToBatch.thyroid) recordsToBatch.thyroid = { date };
-                 recordsToBatch.thyroid.t3 = value;
-                 break;
-            case 't4':
-                 if (!recordsToBatch.thyroid) recordsToBatch.thyroid = { date };
-                 recordsToBatch.thyroid.t4 = value;
-                 break;
+            // T3 and T4 would need separate logic or be part of a single thyroid panel extraction
             case 'hemoglobin':
-                recordsToBatch.hemoglobin = value;
+                recordsToBatch.hemoglobin = { date, hemoglobin: value };
+                break;
+            case 'bloodPressure':
+                // Blood pressure needs special handling as it has two values
                 break;
         }
     });
@@ -174,9 +184,13 @@ export function UploadRecordDialog() {
             description += `Added: ${result.added.join(', ')}. `;
         }
         if (result.duplicates.length > 0) {
-            description += `Skipped duplicates: ${result.duplicates.join(', ')}.`;
+            description += `Skipped as already present: ${result.duplicates.join(', ')}.`;
         }
-        toast({ title: 'Records Processed', description });
+        if (description) {
+            toast({ title: 'Records Processed', description });
+        } else {
+            toast({ title: 'No New Records Added', description: 'All extracted records were already present.' });
+        }
         handleOpenChange(false);
     } catch (e) {
          toast({ variant: 'destructive', title: 'Error', description: 'Could not save the records.' });
