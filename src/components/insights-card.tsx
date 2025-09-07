@@ -138,7 +138,7 @@ export function InsightsCard() {
   const tipsToDisplay = translatedTips || localTips;
 
   return (
-    <Card className="h-full shadow-xl">
+    <Card className="h-full shadow-xl flex flex-col">
       <CardHeader>
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -153,47 +153,29 @@ export function InsightsCard() {
         </div>
       </CardHeader>
       <Separator />
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col">
         {(isLoading || isTranslating) && (
-            <div className="flex justify-center items-center py-6">
+            <div className="flex justify-center items-center flex-1">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 <p className="ml-2">{isTranslating ? 'Translating...' : 'Generating...'}</p>
             </div>
         )}
 
         {!isLoading && !isTranslating && tipsToDisplay.length > 0 && (
-          <Alert className="bg-muted/50 mt-6">
-            <AlertDescription>
-              <ul className="space-y-3">
-                {tipsToDisplay.map((tip, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                    <p className="text-sm text-muted-foreground">{tip}</p>
-                  </li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {!isLoading && !isTranslating && tipsToDisplay.length === 0 && (
-            <div className="flex flex-col items-center justify-center min-h-[150px]">
-                <p className="text-center text-sm text-muted-foreground mb-4">Click the button to generate personalized health tips.</p>
-                <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
-                    {isLoading ? (
-                        <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating...
-                        </>
-                    ) : (
-                        'Generate New Insights'
-                    )}
-                </Button>
-            </div>
-        )}
-        
-         {!isLoading && !isTranslating && tipsToDisplay.length > 0 && (
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-6">
+          <div className="flex-1 flex flex-col justify-between">
+            <Alert className="bg-muted/50 mt-6">
+                <AlertDescription>
+                <ul className="space-y-3">
+                    {tipsToDisplay.map((tip, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                        <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                        <p className="text-sm text-muted-foreground">{tip}</p>
+                    </li>
+                    ))}
+                </ul>
+                </AlertDescription>
+            </Alert>
+             <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-6">
                 <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
                 {isLoading ? (
                     <>
@@ -218,6 +200,25 @@ export function InsightsCard() {
                         </SelectContent>
                     </Select>
                 )}
+            </div>
+          </div>
+        )}
+        
+        {!isLoading && !isTranslating && tipsToDisplay.length === 0 && (
+            <div className="flex flex-1 items-center justify-center">
+                <div className="flex flex-col items-center justify-center text-center gap-4">
+                    <p className="text-sm text-muted-foreground">Click the button to generate personalized health tips.</p>
+                    <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
+                        {isLoading ? (
+                            <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Generating...
+                            </>
+                        ) : (
+                            'Generate New Insights'
+                        )}
+                    </Button>
+                </div>
             </div>
         )}
       </CardContent>
