@@ -124,46 +124,95 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         className="w-full h-full flex flex-col p-0 text-left bg-transparent border-0 cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
       >
         <CardHeader className="p-4 w-full">
-            <div className="flex items-start justify-between">
-            <div className="flex-1 flex items-center gap-3 min-w-0">
-                <Avatar>
-                    <AvatarFallback>
-                        {getInitials(patient.name)}
-                    </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0 relative">
-                    <div className="flex items-center gap-2">
-                        <CardTitle 
-                            ref={nameRef}
-                            className="text-lg whitespace-nowrap overflow-hidden" 
-                            style={isNameOverflowing ? {
-                                maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
-                                WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
-                            } : {}}
-                        >{patient.name}</CardTitle>
-                        {isDoctorLoggedIn && needsReview && (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <div className="relative">
-                                        <Bell className="h-4 w-4 text-destructive" />
-                                        <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
-                                        </span>
-                                    </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Needs doctor's review</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        )}
+            <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 flex items-center gap-3 min-w-0">
+                    <Avatar>
+                        <AvatarFallback>
+                            {getInitials(patient.name)}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                            <CardTitle 
+                                ref={nameRef}
+                                className="text-lg whitespace-nowrap overflow-hidden" 
+                                style={isNameOverflowing ? {
+                                    maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
+                                    WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
+                                } : {}}
+                            >{patient.name}</CardTitle>
+                            {isDoctorLoggedIn && needsReview && (
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="relative">
+                                            <Bell className="h-4 w-4 text-destructive" />
+                                            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+                                            </span>
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Needs doctor's review</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            )}
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">
+                            {age ? `${age} years` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
+                        </p>
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">
-                        {age ? `${age} years` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
-                    </p>
                 </div>
-            </div>
-            {/* The dropdown menu is outside the button flow */}
+                {/* Action button now has its own container */}
+                <div className="shrink-0">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onView(patient))}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Dashboard
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onEdit(patient))}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Edit Patient
+                            </DropdownMenuItem>
+                            <SharePatientAccessDialog patient={patient}>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Share2 className="mr-2 h-4 w-4" />
+                                    Share Patient Access
+                                </DropdownMenuItem>
+                            </SharePatientAccessDialog>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel>Contact Patient</DropdownMenuLabel>
+                            <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('whatsapp'))} disabled={!patient.phone}>
+                                <WhatsAppIcon className="mr-2 h-4 w-4" />
+                                WhatsApp
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('sms'))} disabled={!patient.phone}>
+                                <MessageSquare className="mr-2 h-4 w-4" />
+                                SMS / iMessage
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('email'))} disabled={!patient.email}>
+                                <Mail className="mr-2 h-4 w-4" />
+                                Email
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                                onSelect={(e) => handleDropdownSelect(e, () => onDelete(patient))}
+                                className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Patient
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
         </CardHeader>
         
@@ -225,56 +274,8 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         </div>
       </button>
 
-      {/* Dropdown positioned absolutely to not interfere with the button */}
-      <div className="absolute top-2 right-2">
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onView(patient))}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onEdit(patient))}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit Patient
-                </DropdownMenuItem>
-                <SharePatientAccessDialog patient={patient}>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <Share2 className="mr-2 h-4 w-4" />
-                        Share Patient Access
-                    </DropdownMenuItem>
-                </SharePatientAccessDialog>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Contact Patient</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('whatsapp'))} disabled={!patient.phone}>
-                    <WhatsAppIcon className="mr-2 h-4 w-4" />
-                    WhatsApp
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('sms'))} disabled={!patient.phone}>
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    SMS / iMessage
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('email'))} disabled={!patient.email}>
-                    <Mail className="mr-2 h-4 w-4" />
-                    Email
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                    onSelect={(e) => handleDropdownSelect(e, () => onDelete(patient))}
-                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Patient
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
     </Card>
   );
 }
+
+    
