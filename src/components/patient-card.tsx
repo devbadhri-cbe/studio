@@ -97,6 +97,14 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     e.preventDefault();
     callback();
   }
+  
+  const getInitials = (name: string) => {
+    const names = name.split(' ');
+    if (names.length > 1) {
+        return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
 
   return (
     <Card 
@@ -111,7 +119,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
             <div className="flex-1 flex items-center gap-3 min-w-0">
                 <Avatar>
                     <AvatarFallback>
-                        <User className="h-5 w-5" />
+                        {getInitials(patient.name)}
                     </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
