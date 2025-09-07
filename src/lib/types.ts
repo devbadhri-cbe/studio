@@ -136,6 +136,18 @@ export interface TriglyceridesRecord {
   medication?: string;
 }
 
+export interface CustomBiomarker {
+    id: string;
+    name: string;
+    description?: string;
+    records: {
+        id: string;
+        date: string;
+        value: number;
+        unit?: string;
+    }[];
+}
+
 export interface Patient {
   id: string;
   name: string;
@@ -184,9 +196,25 @@ export interface Patient {
   ldlRecords: LdlRecord[];
   hdlRecords: HdlRecord[];
   triglyceridesRecords: TriglyceridesRecord[];
+  customBiomarkers?: CustomBiomarker[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
   enabledBiomarkers: { [key: string]: string[] };
   doctorName?: string;
   dashboardSuggestions?: DashboardSuggestion[];
 }
+
+export type BiomarkerKey = 
+  | 'hba1c' 
+  | 'glucose' 
+  | 'hemoglobin' 
+  | 'bloodPressure' 
+  | 'thyroid' 
+  | 'vitaminD' 
+  | 'weight' 
+  | 'totalCholesterol' 
+  | 'ldl' 
+  | 'hdl' 
+  | 'triglycerides';
+
+export type DiseasePanelKey = 'diabetes' | 'hypertension' | 'lipids';

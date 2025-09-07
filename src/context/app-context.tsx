@@ -2,7 +2,7 @@
 
 'use client';
 
-import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord } from '@/lib/types';
+import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, type CustomBiomarker, BiomarkerKey, DiseasePanelKey } from '@/lib/types';
 import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -10,7 +10,6 @@ import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
-import { BiomarkerKey, DiseasePanelKey } from '@/lib/biomarker-cards';
 import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
@@ -83,6 +82,11 @@ interface AppContextType {
   triglyceridesRecords: TriglyceridesRecord[];
   addTriglyceridesRecord: (record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => void;
   removeTriglyceridesRecord: (id: string) => void;
+  customBiomarkers: CustomBiomarker[];
+  addCustomBiomarker: (name: string, description?: string) => void;
+  removeCustomBiomarker: (id: string) => void;
+  addCustomBiomarkerRecord: (biomarkerId: string, record: Omit<CustomBiomarker['records'][0], 'id'>) => void;
+  removeCustomBiomarkerRecord: (biomarkerId: string, recordId: string) => void;
   addBatchRecords: (records: BatchRecords) => Promise<AddBatchRecordsResult>;
   tips: string[];
   setTips: (tips: string[]) => void;
@@ -125,6 +129,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ldlRecords, setLdlRecordsState] = useState<LdlRecord[]>([]);
   const [hdlRecords, setHdlRecordsState] = useState<HdlRecord[]>([]);
   const [triglyceridesRecords, setTriglyceridesRecordsState] = useState<TriglyceridesRecord[]>([]);
+  const [customBiomarkers, setCustomBiomarkersState] = useState<CustomBiomarker[]>([]);
   const [tips, setTipsState] = useState<string[]>([]);
   const [dashboardView, setDashboardViewState] = useState<DashboardView>('report');
   const [isClient, setIsClient] = useState(false);
@@ -241,6 +246,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLdlRecordsState(patient.ldlRecords || []);
     setHdlRecordsState(patient.hdlRecords || []);
     setTriglyceridesRecordsState(patient.triglyceridesRecords || []);
+    setCustomBiomarkersState(patient.customBiomarkers || []);
     setTipsState([]); 
     setDashboardViewState('report');
     setBiomarkerUnitState(countries.find(c => c.code === patient.country)?.biomarkerUnit || 'conventional');
@@ -265,6 +271,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ldlRecords,
         hdlRecords,
         triglyceridesRecords,
+        customBiomarkers,
       };
       await updatePatient(profile.id, updates);
       setHasUnsavedChanges(false);
@@ -318,7 +325,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setProfileState(newProfileState);
       setHasUnsavedChanges(true);
       
-      // If a doctor added the condition, also generate suggestions
       if (isDoctorLoggedIn) {
           approveMedicalCondition(newCondition.id);
       }
@@ -534,6 +540,47 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setHasUnsavedChanges(true);
   };
   
+  const addCustomBiomarker = (name: string, description?: string) => {
+    const newBiomarker: CustomBiomarker = {
+      id: `custom-${Date.now()}`,
+      name,
+      description,
+      records: [],
+    };
+    setCustomBiomarkersState([...customBiomarkers, newBiomarker]);
+    setHasUnsavedChanges(true);
+  };
+
+  const removeCustomBiomarker = (id: string) => {
+    const updatedBiomarkers = customBiomarkers.filter(b => b.id !== id);
+    setCustomBiomarkersState(updatedBiomarkers);
+    setHasUnsavedChanges(true);
+  };
+  
+  const addCustomBiomarkerRecord = (biomarkerId: string, record: Omit<CustomBiomarker['records'][0], 'id'>) => {
+    const updatedBiomarkers = customBiomarkers.map(b => {
+      if (b.id === biomarkerId) {
+        const newRecord = { ...record, id: `record-${Date.now()}` };
+        return { ...b, records: [...b.records, newRecord] };
+      }
+      return b;
+    });
+    setCustomBiomarkersState(updatedBiomarkers);
+    setHasUnsavedChanges(true);
+  };
+  
+  const removeCustomBiomarkerRecord = (biomarkerId: string, recordId: string) => {
+    const updatedBiomarkers = customBiomarkers.map(b => {
+      if (b.id === biomarkerId) {
+        const updatedRecords = b.records.filter(r => r.id !== recordId);
+        return { ...b, records: updatedRecords };
+      }
+      return b;
+    });
+    setCustomBiomarkersState(updatedBiomarkers);
+    setHasUnsavedChanges(true);
+  };
+
   const toggleDiseaseBiomarker = (panelKey: string, biomarkerKey: BiomarkerKey | string) => {
     const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
     const panelBiomarkers = currentEnabled[panelKey] || [];
@@ -709,6 +756,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     triglyceridesRecords,
     addTriglyceridesRecord,
     removeTriglyceridesRecord,
+    customBiomarkers,
+    addCustomBiomarker,
+    removeCustomBiomarker,
+    addCustomBiomarkerRecord,
+    removeCustomBiomarkerRecord,
     addBatchRecords,
     tips,
     setTips,
