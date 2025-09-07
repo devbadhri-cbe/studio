@@ -28,8 +28,8 @@ export function UnsavedChangesBar() {
             size="sm"
             className="text-destructive-foreground bg-primary hover:bg-primary/90"
           >
-            <Save className="mr-2 h-4 w-4 text-red-500" />
-            <span className="text-red-500 font-bold">
+            <Save className="mr-2 h-4 w-4" />
+            <span className="font-bold">
                 {isSaving ? 'Saving...' : 'Save Changes'}
             </span>
           </Button>
