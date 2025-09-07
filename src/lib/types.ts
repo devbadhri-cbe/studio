@@ -183,6 +183,10 @@ export interface Patient {
     value: number;
     date: string;
   } | null;
+  lastFastingBloodGlucose?: {
+      value: number;
+      date: string;
+  } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
   // Add full record history to the patient object
   hba1cRecords: Hba1cRecord[];

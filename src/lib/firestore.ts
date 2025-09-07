@@ -58,6 +58,7 @@ const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
     summary.lastThyroid = getLatestRecord(patientData.thyroidRecords) || null;
     summary.lastBloodPressure = getLatestRecord(patientData.bloodPressureRecords) || null;
     summary.lastHemoglobin = getLatestRecord(patientData.hemoglobinRecords) || null;
+    summary.lastFastingBloodGlucose = getLatestRecord(patientData.fastingBloodGlucoseRecords) || null;
 
     // Status Calculation Logic
     const lastBP = summary.lastBloodPressure;
@@ -154,6 +155,7 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         lastThyroid: null,
         lastBloodPressure: null,
         lastHemoglobin: null,
+        lastFastingBloodGlucose: null,
         status: 'On Track' as const,
     }
   const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), docData);
