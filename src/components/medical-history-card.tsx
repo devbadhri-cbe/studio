@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, ShieldAlert, Info, XCircle, Trash2, Edit, AlertTriangle } from 'lucide-react';
@@ -19,16 +18,12 @@ import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
 import { DatePicker } from './ui/date-picker';
 import { DiseaseCard } from './disease-card';
 import { Separator } from './ui/separator';
+import type { MedicalCondition } from '@/lib/types';
+import { parseISO } from 'date-fns';
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
   date: z.date({ required_error: 'A valid date is required.' }),
-});
-
-const MedicationSchema = z.object({
-  medicationName: z.string().min(2, 'Medication name is required.'),
-  dosage: z.string().min(1, 'Dosage is required.'),
-  frequency: z.string().min(1, 'Frequency is required.'),
 });
 
 function capitalizeFirstLetter(string: string) {
@@ -36,7 +31,15 @@ function capitalizeFirstLetter(string: string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: z.infer<typeof ConditionSchema>) => Promise<void>, onCancel: () => void }) {
+function MedicalConditionForm({ 
+    onSave, 
+    onCancel,
+    initialData,
+}: { 
+    onSave: (data: z.infer<typeof ConditionSchema>) => Promise<void>, 
+    onCancel: () => void,
+    initialData?: MedicalCondition,
+}) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   
@@ -48,7 +51,10 @@ function MedicalConditionForm({ onSave, onCancel }: { onSave: (data: z.infer<typ
 
   const form = useForm<z.infer<typeof ConditionSchema>>({
     resolver: zodResolver(ConditionSchema),
-    defaultValues: { condition: '', date: new Date() },
+    defaultValues: { 
+        condition: initialData?.condition || '', 
+        date: initialData?.date ? parseISO(initialData.date) : new Date() 
+    },
   });
   
   const handleSubmit = async (data: z.infer<typeof ConditionSchema>) => {
@@ -99,8 +105,8 @@ type ActiveSynopsis = {
 } | null;
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, setMedicationNil, isDoctorLoggedIn } = useApp();
-  const [isAddingCondition, setIsAddingCondition] = React.useState(false);
+  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, setMedicationNil, isDoctorLoggedIn, updateMedicalCondition } = useApp();
+  const [editingCondition, setEditingCondition] = React.useState<MedicalCondition | null>(null);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
@@ -116,16 +122,29 @@ export function MedicalHistoryCard() {
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
   const handleSaveCondition = async (data: z.infer<typeof ConditionSchema>) => {
-    await addMedicalCondition({
-      condition: data.condition,
-      date: data.date.toISOString(),
-    });
-    setIsAddingCondition(false);
+    if (editingCondition) {
+        // We are updating an existing condition
+        await updateMedicalCondition({
+            ...editingCondition,
+            condition: data.condition,
+            date: data.date.toISOString(),
+            status: isDoctorLoggedIn ? 'verified' : 'pending_review',
+        });
+    } else {
+        // We are adding a new condition
+        await addMedicalCondition({
+          condition: data.condition,
+          date: data.date.toISOString(),
+        });
+    }
+    setEditingCondition(null);
   };
   
   const handleReviseCondition = (id: string) => {
-      removeMedicalCondition(id);
-      setIsAddingCondition(true);
+      const conditionToEdit = profile.presentMedicalConditions.find(c => c.id === id);
+      if (conditionToEdit) {
+          setEditingCondition(conditionToEdit);
+      }
   }
 
   const handleSaveMedication = async (data: z.infer<typeof MedicationSchema>) => {
@@ -185,10 +204,10 @@ export function MedicalHistoryCard() {
                         <h3 className="font-medium">Present Medical Conditions</h3>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                        {!isAddingCondition && (
+                        {!editingCondition && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setIsAddingCondition(true)}>
+                                    <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setEditingCondition({} as MedicalCondition)}>
                                         <PlusCircle className="h-4 w-4" />
                                     </Button>
                                 </TooltipTrigger>
@@ -199,7 +218,7 @@ export function MedicalHistoryCard() {
                         )}
                     </div>
                 </div>
-                {isAddingCondition && <MedicalConditionForm onSave={handleSaveCondition} onCancel={() => setIsAddingCondition(false)} />}
+                {editingCondition && <MedicalConditionForm onSave={handleSaveCondition} onCancel={() => setEditingCondition(null)} initialData={editingCondition.id ? editingCondition : undefined} />}
                 {profile.presentMedicalConditions.length > 0 ? (
                     <ul className="space-y-1 mt-2">
                         {profile.presentMedicalConditions.map((condition) => {
@@ -214,7 +233,7 @@ export function MedicalHistoryCard() {
                         })}
                     </ul>
                 ) : (
-                    !isAddingCondition && <p className="text-xs text-muted-foreground pl-8">No conditions recorded.</p>
+                    !editingCondition && <p className="text-xs text-muted-foreground pl-8">No conditions recorded.</p>
                 )}
             </div>
 
@@ -327,7 +346,7 @@ export function MedicalHistoryCard() {
                         ))}
                     </ul>
                 ) : (
-                    !isAddingMedication && <p className="text-xs text-muted-foreground pl-8">No medication recorded.</p>
+                    !isAddingMedication && !editingCondition && <p className="text-xs text-muted-foreground pl-8">No medication recorded.</p>
                 )}
                 {profile.medication.length > 1 && !isMedicationNil && (
                     <div className="pt-2">
@@ -342,3 +361,5 @@ export function MedicalHistoryCard() {
     </Card>
   );
 }
+
+    
