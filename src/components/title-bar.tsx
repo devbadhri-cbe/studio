@@ -22,13 +22,13 @@ export function TitleBar({ children }: TitleBarProps) {
                 <div className="flex-1 flex justify-center">
                     <div className="flex flex-col items-center">
                         <div className="flex items-center justify-center gap-2">
-                            <Logo className="h-14 w-14 text-primary md:h-10 md:w-10" />
-                            <div className="flex flex-col text-2xl md:text-4xl font-bold font-headline text-center md:text-left md:flex-row md:gap-2">
-                                <span>Health</span>
-                                <span>Guardian</span>
+                            <Logo className="h-14 w-14 text-primary md:h-10 md:w-10 animate-fade-in-scale" style={{ animationDelay: '200ms', animationFillMode: 'both' }} />
+                            <div className="flex flex-col text-2xl md:text-4xl font-bold font-headline text-center md:flex-row md:gap-2">
+                                <span className="animate-fade-in-down" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>Health</span>
+                                <span className="animate-fade-in-down" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>Guardian</span>
                             </div>
                         </div>
-                        <div className="text-center text-xs text-muted-foreground my-1">
+                        <div className="text-center text-xs text-muted-foreground my-2">
                             by
                         </div>
                         <div className="text-center text-sm text-muted-foreground">
