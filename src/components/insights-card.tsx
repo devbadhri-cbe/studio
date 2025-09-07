@@ -176,13 +176,13 @@ export function InsightsCard() {
           </Alert>
         )}
         
-        {!isLoading && tipsToDisplay.length === 0 && (
+        {!isLoading && !isTranslating && tipsToDisplay.length === 0 && (
             <div className="text-center text-sm text-muted-foreground py-6">
                 <p>Click the button to generate personalized health tips.</p>
             </div>
         )}
         
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row justify-center gap-2">
             <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
               {isLoading ? (
                 <>
