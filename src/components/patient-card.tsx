@@ -62,9 +62,17 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const country = countries.find(c => c.code === patient.country);
   const countryName = country?.name || patient.country;
   const formattedPhone = formatDisplayPhoneNumber(patient.phone, patient.country);
+  const nameRef = React.useRef<HTMLHeadingElement>(null);
+  const [isNameOverflowing, setIsNameOverflowing] = React.useState(false);
 
   const needsReview = patient.presentMedicalConditions?.some(c => c.status === 'pending_review') || patient.dashboardSuggestions?.some(s => s.status === 'pending');
   
+  React.useEffect(() => {
+    if (nameRef.current) {
+        setIsNameOverflowing(nameRef.current.scrollWidth > nameRef.current.clientWidth);
+    }
+  }, [patient.name]);
+
   const handleContact = (method: 'whatsapp' | 'sms' | 'email') => {
     const doctorName = patient.doctorName || "your doctor";
     switch (method) {
@@ -125,10 +133,14 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </Avatar>
                 <div className="flex-1 min-w-0 relative">
                     <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg whitespace-nowrap overflow-hidden" style={{
-                            maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
-                            WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
-                        }}>{patient.name}</CardTitle>
+                        <CardTitle 
+                            ref={nameRef}
+                            className="text-lg whitespace-nowrap overflow-hidden" 
+                            style={isNameOverflowing ? {
+                                maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
+                                WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
+                            } : {}}
+                        >{patient.name}</CardTitle>
                         {isDoctorLoggedIn && needsReview && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -266,7 +278,3 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     </Card>
   );
 }
-
-    
-
-    
