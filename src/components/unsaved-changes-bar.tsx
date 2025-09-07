@@ -22,9 +22,16 @@ export function UnsavedChangesBar() {
              <Info className="h-5 w-5 text-primary" />
             <p className="text-sm font-medium">You have unsaved changes.</p>
           </div>
-          <Button onClick={saveChanges} disabled={isSaving} size="sm" variant="destructive">
-            <Save className="mr-2 h-4 w-4" />
-            {isSaving ? 'Saving...' : 'Save Changes'}
+          <Button
+            onClick={saveChanges}
+            disabled={isSaving}
+            size="sm"
+            className="text-destructive-foreground bg-primary hover:bg-primary/90"
+          >
+            <Save className="mr-2 h-4 w-4 text-red-500" />
+            <span className="text-red-500 font-bold">
+                {isSaving ? 'Saving...' : 'Save Changes'}
+            </span>
           </Button>
         </div>
       </div>
