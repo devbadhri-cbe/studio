@@ -119,8 +119,15 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     <Card 
         className="relative w-full flex flex-col transition-all group md:hover:border-primary/50 shadow-md md:hover:shadow-lg"
     >
-      <button 
+      <div 
+        role="button"
         onClick={() => onView(patient)}
+        onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                onView(patient);
+            }
+        }}
+        tabIndex={0}
         className="w-full h-full flex flex-col p-0 text-left bg-transparent border-0 cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
       >
         <CardHeader className="p-4 w-full">
@@ -135,7 +142,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                         <div className="flex items-center gap-2">
                             <CardTitle 
                                 ref={nameRef}
-                                className="text-lg whitespace-nowrap overflow-hidden" 
+                                className={cn("text-lg whitespace-nowrap", isNameOverflowing && "overflow-hidden")} 
                                 style={isNameOverflowing ? {
                                     maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
                                     WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
@@ -272,7 +279,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </TooltipContent>
             </Tooltip>
         </div>
-      </button>
+      </div>
 
     </Card>
   );
