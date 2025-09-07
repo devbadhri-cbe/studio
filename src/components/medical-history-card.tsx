@@ -156,12 +156,22 @@ export function MedicalHistoryCard() {
     setIsSubmitting(true);
     try {
         const details = await getMedicationDetails({ medicationName: data.medicationName });
-        addMedication({
-            name: details.chemicalName,
-            brandName: details.brandName,
-            dosage: data.dosage,
-            frequency: data.frequency,
-        });
+        if (details.chemicalName) {
+            addMedication({
+                name: details.chemicalName,
+                brandName: details.brandName,
+                dosage: data.dosage,
+                frequency: data.frequency,
+            });
+        } else {
+            // Fallback if AI returns empty but doesn't error
+            addMedication({
+                name: data.medicationName,
+                brandName: data.medicationName,
+                dosage: data.dosage,
+                frequency: data.frequency,
+            });
+        }
         medicationForm.reset();
         medicationNameInputRef.current?.focus();
     } catch (e) {
