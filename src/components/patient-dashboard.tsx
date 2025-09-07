@@ -17,7 +17,6 @@ import { DiseasePanel } from '@/components/disease-panel';
 import { BiomarkersPanel } from '@/components/biomarkers-panel';
 import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
-import { ReportCard } from '@/components/report-card';
 import { ProfileCard } from '@/components/profile-card';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -143,13 +142,6 @@ export function PatientDashboard() {
                     <ReminderCard />
                 </div>
             </div>
-            
-            <Separator />
-            
-            <div className="printable-area">
-                <ReportCard />
-            </div>
-            
           </div>
         </main>
         <UnsavedChangesBar />
