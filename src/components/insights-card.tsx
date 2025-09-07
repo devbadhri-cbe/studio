@@ -163,7 +163,7 @@ export function InsightsCard() {
 
         {!isLoading && !isTranslating && tipsToDisplay.length > 0 && (
           <div className="flex-1 flex flex-col justify-between">
-            <Alert className="bg-muted/50 mt-6">
+            <Alert className="bg-muted/50">
                 <AlertDescription>
                 <ul className="space-y-3">
                     {tipsToDisplay.map((tip, index) => (

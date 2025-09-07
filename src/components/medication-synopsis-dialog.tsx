@@ -4,12 +4,13 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, BookOpen, XCircle } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
+import { Alert, AlertDescription } from './ui/alert';
+import { Loader2, BookOpen, XCircle, Pill } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { getMedicationSynopsis } from '@/ai/flows/get-medication-synopsis-flow';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { translateText } from '@/ai/flows/translate-text-flow';
+import { Separator } from './ui/separator';
 
 const supportedLanguages = [
     { code: 'en', name: 'English' },
@@ -96,8 +97,22 @@ export function MedicationSynopsisDialog({ medicationName, onClose }: Medication
   const synopsisToDisplay = translatedSynopsis || originalSynopsis;
 
   return (
-    <Card className="mt-2 bg-muted/30">
-        <CardContent className="p-4 space-y-4">
+    <Card className="mt-2 shadow-none border-0 bg-transparent">
+        <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Pill className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Medication Information</CardTitle>
+                <CardDescription>
+                  AI-generated summary for {medicationName}
+                </CardDescription>
+              </div>
+            </div>
+        </CardHeader>
+        <CardContent className="space-y-4 pt-0">
+             <Separator className="mb-6"/>
              {(isLoading || isTranslating) && (
                 <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -106,35 +121,33 @@ export function MedicationSynopsisDialog({ medicationName, onClose }: Medication
             )}
              {synopsisToDisplay && !isLoading && !isTranslating && (
                 <div className="space-y-4">
-                    <Alert>
-                        <BookOpen className="h-4 w-4" />
-                        <AlertTitle className="font-semibold flex justify-between items-center">
-                           <span>Medication Information</span>
-                            {originalSynopsis && (
-                                <Select value={selectedLanguage} onValueChange={handleTranslate} disabled={isTranslating}>
-                                    <SelectTrigger className="w-[120px] h-7 text-xs">
-                                        <SelectValue placeholder="Translate..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {supportedLanguages.map((lang) => (
-                                            <SelectItem key={lang.code} value={lang.code} className="text-xs">
-                                                {lang.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                           )}
-                        </AlertTitle>
-                        <AlertDescription className="whitespace-pre-wrap leading-relaxed text-xs pt-2">
+                    <Alert className="bg-muted/50">
+                        <AlertDescription className="whitespace-pre-wrap leading-relaxed">
                             {synopsisToDisplay}
                         </AlertDescription>
                     </Alert>
                 </div>
             )}
-            <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={onClose}>
-                <XCircle className="mr-2 h-4 w-4" />
-                Close
-            </Button>
+            <div className="flex justify-between items-center gap-2 pt-4">
+                <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onClose}>
+                    <XCircle className="mr-2 h-4 w-4" />
+                    Close
+                </Button>
+                {originalSynopsis && (
+                    <Select value={selectedLanguage} onValueChange={handleTranslate} disabled={isTranslating}>
+                        <SelectTrigger className="w-[150px] h-9 text-sm">
+                            <SelectValue placeholder="Translate..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {supportedLanguages.map((lang) => (
+                                <SelectItem key={lang.code} value={lang.code} className="text-sm">
+                                    {lang.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+            </div>
         </CardContent>
     </Card>
   );
