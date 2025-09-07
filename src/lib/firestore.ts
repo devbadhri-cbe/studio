@@ -20,7 +20,6 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Patient } from './types';
-import { calculateBmi } from './utils';
 
 const PATIENTS_COLLECTION = 'patients';
 
@@ -55,9 +54,6 @@ const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
         return [...records].sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
     };
 
-    const latestWeight = getLatestRecord(patientData.weightRecords);
-    summary.bmi = calculateBmi(latestWeight?.value, patientData.height);
-    
     summary.lastHba1c = getLatestRecord(patientData.hba1cRecords) || null;
     summary.lastVitaminD = getLatestRecord(patientData.vitaminDRecords) || null;
     summary.lastThyroid = getLatestRecord(patientData.thyroidRecords) || null;
