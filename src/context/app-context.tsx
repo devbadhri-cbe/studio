@@ -2,6 +2,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, type CustomBiomarker, BiomarkerKey, DiseasePanelKey } from '@/lib/types';
 import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
 import { updatePatient } from '@/lib/firestore';
@@ -42,6 +43,14 @@ interface EnableDashboardResult {
   name: string;
 }
 
+interface LipidRecordData {
+    date: string | Date;
+    totalCholesterol: number;
+    ldl: number;
+    hdl: number;
+    triglycerides: number;
+}
+
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
@@ -74,18 +83,9 @@ interface AppContextType {
   bloodPressureRecords: BloodPressureRecord[];
   addBloodPressureRecord: (record: Omit<BloodPressureRecord, 'id' | 'medication'>) => void;
   removeBloodPressureRecord: (id: string) => void;
-  totalCholesterolRecords: TotalCholesterolRecord[];
-  addTotalCholesterolRecord: (record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => void;
-  removeTotalCholesterolRecord: (id: string) => void;
-  ldlRecords: LdlRecord[];
-  addLdlRecord: (record: Omit<LdlRecord, 'id' | 'medication'>) => void;
-  removeLdlRecord: (id: string) => void;
-  hdlRecords: HdlRecord[];
-  addHdlRecord: (record: Omit<HdlRecord, 'id' | 'medication'>) => void;
-  removeHdlRecord: (id: string) => void;
-  triglyceridesRecords: TriglyceridesRecord[];
-  addTriglyceridesRecord: (record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => void;
-  removeTriglyceridesRecord: (id: string) => void;
+  lipidRecords: (TotalCholesterolRecord & {ldl: number, hdl: number, triglycerides: number})[];
+  addLipidRecord: (data: LipidRecordData) => void;
+  removeLipidRecord: (id: string) => void;
   customBiomarkers: CustomBiomarker[];
   addCustomBiomarker: (name: string, description?: string) => void;
   removeCustomBiomarker: (id: string) => void;
@@ -320,10 +320,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setProfile = useCallback((newProfile: UserProfile) => {
-      const newBmi = calculateBmi(profile.bmi, newProfile.height);
+      const newBmi = calculateBmi(newProfile.bmi, newProfile.height);
       setProfileState({...newProfile, bmi: newBmi});
       setHasUnsavedChanges(true);
-  }, [profile.bmi]);
+  }, []);
   
   const addMedicalCondition = useCallback(async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
       const tempId = `cond-${Date.now()}`;
@@ -529,9 +529,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [profile.medication, profile.height, getMedicationForRecord]);
 
   const removeWeightRecord = useCallback((id: string) => {
-    setWeightRecordsState(prev => prev.filter(r => r.id !== id));
+    const updatedRecords = weightRecords.filter(r => r.id !== id);
+    setWeightRecordsState(updatedRecords);
+
+    const newLatestRecord = [...updatedRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+    const newBmi = calculateBmi(newLatestRecord?.value, profile.height);
+    setProfileState(prev => ({ ...prev, bmi: newBmi || prev.bmi }));
+    
     setHasUnsavedChanges(true);
-  }, []);
+  }, [weightRecords, profile.height]);
   
   const addBloodPressureRecord = useCallback((record: Omit<BloodPressureRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
@@ -544,50 +550,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setHasUnsavedChanges(true);
   }, []);
 
-  const addTotalCholesterolRecord = useCallback((record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => {
-    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setTotalCholesterolRecordsState(prev => [...prev, newRecord]);
+  const addLipidRecord = useCallback((data: LipidRecordData) => {
+    const recordMedication = getMedicationForRecord(profile.medication);
+    const recordDate = new Date(data.date).toISOString();
+    const recordId = Date.now().toString();
+
+    setTotalCholesterolRecordsState(prev => [...prev, {id: `tc-${recordId}`, date: recordDate, value: data.totalCholesterol, medication: recordMedication}]);
+    setLdlRecordsState(prev => [...prev, {id: `ldl-${recordId}`, date: recordDate, value: data.ldl, medication: recordMedication}]);
+    setHdlRecordsState(prev => [...prev, {id: `hdl-${recordId}`, date: recordDate, value: data.hdl, medication: recordMedication}]);
+    setTriglyceridesRecordsState(prev => [...prev, {id: `trig-${recordId}`, date: recordDate, value: data.triglycerides, medication: recordMedication}]);
+
     setHasUnsavedChanges(true);
   }, [profile.medication, getMedicationForRecord]);
 
-  const removeTotalCholesterolRecord = useCallback((id: string) => {
-    setTotalCholesterolRecordsState(prev => prev.filter(r => r.id !== id));
+  const removeLipidRecord = useCallback((id: string) => {
+    const baseId = id.split('-').slice(1).join('-');
+    setTotalCholesterolRecordsState(prev => prev.filter(r => !r.id.endsWith(baseId)));
+    setLdlRecordsState(prev => prev.filter(r => !r.id.endsWith(baseId)));
+    setHdlRecordsState(prev => prev.filter(r => !r.id.endsWith(baseId)));
+    setTriglyceridesRecordsState(prev => prev.filter(r => !r.id.endsWith(baseId)));
     setHasUnsavedChanges(true);
   }, []);
 
-  const addLdlRecord = useCallback((record: Omit<LdlRecord, 'id' | 'medication'>) => {
-    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setLdlRecordsState(prev => [...prev, newRecord]);
-    setHasUnsavedChanges(true);
-  }, [profile.medication, getMedicationForRecord]);
-
-  const removeLdlRecord = useCallback((id: string) => {
-    setLdlRecordsState(prev => prev.filter(r => r.id !== id));
-    setHasUnsavedChanges(true);
-  }, []);
-
-  const addHdlRecord = useCallback((record: Omit<HdlRecord, 'id' | 'medication'>) => {
-    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setHdlRecordsState(prev => [...prev, newRecord]);
-    setHasUnsavedChanges(true);
-  }, [profile.medication, getMedicationForRecord]);
-
-  const removeHdlRecord = useCallback((id: string) => {
-    setHdlRecordsState(prev => prev.filter(r => r.id !== id));
-    setHasUnsavedChanges(true);
-  }, []);
-
-  const addTriglyceridesRecord = useCallback((record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => {
-    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setTriglyceridesRecordsState(prev => [...prev, newRecord]);
-    setHasUnsavedChanges(true);
-  }, [profile.medication, getMedicationForRecord]);
-
-  const removeTriglyceridesRecord = useCallback((id: string) => {
-    setTriglyceridesRecordsState(prev => prev.filter(r => r.id !== id));
-    setHasUnsavedChanges(true);
-  }, []);
-  
   const addCustomBiomarker = useCallback((name: string, description?: string) => {
     const newBiomarker: CustomBiomarker = {
       id: `custom-${Date.now()}`,
@@ -820,6 +804,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setTheme = useCallback((theme: Theme) => {
     setThemeState(theme);
   }, []);
+  
+  const lipidRecords = React.useMemo(() => {
+    const combined = totalCholesterolRecords.map(tc => {
+        const ldl = ldlRecords.find(r => r.date === tc.date);
+        const hdl = hdlRecords.find(r => r.date === tc.date);
+        const trig = triglyceridesRecords.find(r => r.date === tc.date);
+        return {
+            ...tc,
+            ldl: ldl?.value || 0,
+            hdl: hdl?.value || 0,
+            triglycerides: trig?.value || 0,
+        }
+    });
+    return combined;
+  }, [totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
+
 
   const value: AppContextType = {
     profile,
@@ -853,18 +853,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     bloodPressureRecords,
     addBloodPressureRecord,
     removeBloodPressureRecord,
-    totalCholesterolRecords,
-    addTotalCholesterolRecord,
-    removeTotalCholesterolRecord,
-    ldlRecords,
-    addLdlRecord,
-    removeLdlRecord,
-    hdlRecords,
-    addHdlRecord,
-    removeHdlRecord,
-    triglyceridesRecords,
-    addTriglyceridesRecord,
-    removeTriglyceridesRecord,
+    lipidRecords,
+    addLipidRecord,
+    removeLipidRecord,
     customBiomarkers,
     addCustomBiomarker,
     removeCustomBiomarker,

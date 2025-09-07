@@ -136,6 +136,8 @@ export interface TriglyceridesRecord {
   medication?: string;
 }
 
+export type LipidRecord = TotalCholesterolRecord & { ldl: number; hdl: number; triglycerides: number; };
+
 export interface CustomBiomarker {
     id: string;
     name: string;

@@ -7,10 +7,7 @@ import { useApp } from '@/context/app-context';
 import { DiseasePanelCard } from './disease-panel-card';
 import { type BiomarkerKey } from '@/lib/biomarker-cards';
 import { InteractivePanelGrid } from './interactive-panel-grid';
-import { TotalCholesterolCard } from './total-cholesterol-card';
-import { LdlCard } from './ldl-card';
-import { HdlCard } from './hdl-card';
-import { TriglyceridesCard } from './triglycerides-card';
+import { LipidCard } from './lipid-card';
 
 
 const LIPIDS_PANEL_KEY = 'lipids';
@@ -24,10 +21,7 @@ export function LipidsPanel() {
   const enabledForPanel = profile.enabledBiomarkers?.[LIPIDS_PANEL_KEY] || [];
 
   const cardsToShow = [
-    enabledForPanel.includes('totalCholesterol') && <TotalCholesterolCard key="totalCholesterol" isReadOnly={!isDoctorLoggedIn} />,
-    enabledForPanel.includes('ldl') && <LdlCard key="ldl" isReadOnly={!isDoctorLoggedIn} />,
-    enabledForPanel.includes('hdl') && <HdlCard key="hdl" isReadOnly={!isDoctorLoggedIn} />,
-    enabledForPanel.includes('triglycerides') && <TriglyceridesCard key="triglycerides" isReadOnly={!isDoctorLoggedIn} />
+    (enabledForPanel.includes('totalCholesterol') || enabledForPanel.includes('ldl') || enabledForPanel.includes('hdl') || enabledForPanel.includes('triglycerides')) && <LipidCard key="lipids" isReadOnly={!isDoctorLoggedIn} />,
   ].filter(Boolean);
 
 
