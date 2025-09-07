@@ -20,14 +20,13 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
-import { getPatients } from '@/lib/firestore';
+import { getPatients, deletePatient, addPatient, updatePatient } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { useApp } from '@/context/app-context';
 import { TitleBar } from '@/components/title-bar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { processPatientData } from '@/lib/utils';
-import { updatePatient } from '@/lib/firestore';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const PAGE_SIZE = 8;
@@ -60,7 +59,8 @@ export default function DoctorDashboardPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     
     React.useEffect(() => {
         setIsDoctorLoggedIn(true);
@@ -68,7 +68,7 @@ export default function DoctorDashboardPage() {
             fetchPatients();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isClient, setIsDoctorLoggedIn]);
+    }, [isClient, setIsDoctorLoggedIn, fetchPatients]);
     
 
     const viewPatientDashboard = (patient: Patient) => {
