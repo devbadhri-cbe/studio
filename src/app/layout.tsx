@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   title: 'Health Guardian',
   description: 'Track and manage your health metrics with AI-powered insights.',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-icon.png',
+  },
 };
 
 export default function RootLayout({
