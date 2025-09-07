@@ -32,7 +32,7 @@ export function TitleBar({ children }: TitleBarProps) {
                             by
                         </div>
                         <div className="text-center text-sm text-muted-foreground">
-                            <p className="font-semibold text-lg text-foreground">Dr. Badhrinathan N</p>
+                            <p className="font-semibold text-lg text-foreground whitespace-nowrap">Dr. Badhrinathan N</p>
                             <a href={`mailto:drbadhri@gmail.com`} className="flex items-center justify-center gap-1.5 hover:text-primary">
                                 <Mail className="h-3 w-3" />
                                 drbadhri@gmail.com
