@@ -152,6 +152,7 @@ export function InsightsCard() {
           </div>
         </div>
       </CardHeader>
+      <Separator />
       <CardContent>
         {(isLoading || isTranslating) && (
             <div className="flex justify-center items-center py-6">
@@ -161,7 +162,7 @@ export function InsightsCard() {
         )}
 
         {!isLoading && !isTranslating && tipsToDisplay.length > 0 && (
-          <Alert className="bg-muted/50">
+          <Alert className="bg-muted/50 mt-6">
             <AlertDescription className="space-y-4">
               <ul className="space-y-3">
                 {tipsToDisplay.map((tip, index) => (
@@ -177,26 +178,24 @@ export function InsightsCard() {
         
         {!isLoading && !isTranslating && tipsToDisplay.length === 0 && (
             <div className="flex h-full items-center justify-center min-h-[150px]">
-                <div className="space-y-4">
+                <div className="flex flex-col items-center justify-center gap-4">
                     <p className="text-center text-sm text-muted-foreground">Click the button to generate personalized health tips.</p>
-                    <div className="flex justify-center">
-                        <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
-                            {isLoading ? (
-                                <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Generating...
-                                </>
-                            ) : (
-                                'Generate New Insights'
-                            )}
-                        </Button>
-                    </div>
+                    <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
+                        {isLoading ? (
+                            <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Generating...
+                            </>
+                        ) : (
+                            'Generate New Insights'
+                        )}
+                    </Button>
                 </div>
             </div>
         )}
         
          {!isLoading && !isTranslating && tipsToDisplay.length > 0 && (
-            <div className="flex flex-col sm:flex-row justify-center gap-2">
+            <div className="flex flex-col sm:flex-row justify-center gap-2 mt-6">
                 <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
                 {isLoading ? (
                     <>
