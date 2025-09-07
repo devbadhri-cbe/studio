@@ -272,21 +272,24 @@ export function UploadRecordDialog() {
           const { testDate, results } = extractedData;
         return (
             <div className="space-y-4">
-                 <div className="space-y-1">
-                    <Label>Patient Name</Label>
-                    <Input value={extractedData.patientName} readOnly disabled/>
-                </div>
-                 <ScrollArea className="h-64">
-                    <div className="space-y-4 p-1">
-                         <div className="space-y-1">
-                            <Label>Test Date</Label>
-                            <DatePicker 
-                                value={testDate && isValid(parseISO(testDate)) ? parseISO(testDate) : new Date()}
-                                onChange={(date) => setExtractedData({...extractedData, testDate: date?.toISOString() || ''})}
-                            />
+                 <ScrollArea className="h-72">
+                    <div className="space-y-4 p-2 border rounded-lg">
+                         <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <Label>Patient Name</Label>
+                                <Input value={extractedData.patientName} readOnly disabled/>
+                            </div>
+                             <div className="space-y-1">
+                                <Label>Test Date</Label>
+                                <DatePicker 
+                                    value={testDate && isValid(parseISO(testDate)) ? parseISO(testDate) : new Date()}
+                                    onChange={(date) => setExtractedData({...extractedData, testDate: date?.toISOString() || ''})}
+                                />
+                            </div>
                         </div>
+
                         {results.length > 0 ? results.map((res, index) => (
-                             <div key={index} className="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
+                             <div key={index} className="grid grid-cols-[1fr_100px_100px] gap-2 items-center">
                                 <Input 
                                     aria-label="Biomarker Name"
                                     value={res.biomarker} 
@@ -294,12 +297,12 @@ export function UploadRecordDialog() {
                                 <Input 
                                     aria-label="Biomarker Value"
                                     type="number"
-                                    className="w-24"
+                                    className="w-full"
                                     value={res.value} 
                                     onChange={(e) => handleEditResult(index, 'value', e.target.value)} />
                                 <Input 
                                     aria-label="Biomarker Unit"
-                                    className="w-24"
+                                    className="w-full"
                                     value={res.unit} 
                                     onChange={(e) => handleEditResult(index, 'unit', e.target.value)} />
                             </div>
