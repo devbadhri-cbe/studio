@@ -213,6 +213,16 @@ export function UploadRecordDialog() {
   
   const handleSaveChanges = async () => {
     if (!extractedData) return;
+    
+    if (!extractedData.testDate || !isValid(parseISO(extractedData.testDate))) {
+        toast({
+            variant: 'destructive',
+            title: 'Invalid Date',
+            description: 'Please provide a valid test date before saving.',
+        });
+        return;
+    }
+
     setIsLoading(true);
 
     const recordsToBatch: BatchRecords = {};
@@ -343,6 +353,7 @@ export function UploadRecordDialog() {
       case 'editResults':
           if (!extractedData) return null;
           const { testDate, results } = extractedData;
+          const isDateValid = testDate && isValid(parseISO(testDate));
         return (
             <div className="space-y-4">
                  <div className="space-y-4 p-4 border rounded-lg">
@@ -356,7 +367,7 @@ export function UploadRecordDialog() {
                                 <div className="space-y-1">
                                     <Label>Test Date</Label>
                                     <DatePicker 
-                                        value={testDate && isValid(parseISO(testDate)) ? parseISO(testDate) : new Date()}
+                                        value={isDateValid ? parseISO(testDate) : undefined}
                                         onChange={(date) => setExtractedData({...extractedData, testDate: date?.toISOString() || ''})}
                                     />
                                 </div>
@@ -392,7 +403,7 @@ export function UploadRecordDialog() {
                      <Button variant="ghost" onClick={() => setStep('confirmName')}>
                         <ArrowLeft className="mr-2 h-4 w-4" /> Back
                      </Button>
-                    <Button onClick={handleSaveChanges} disabled={isLoading || results.length === 0}>
+                    <Button onClick={handleSaveChanges} disabled={isLoading || results.length === 0 || !isDateValid}>
                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />}
                        Enter
                     </Button>
