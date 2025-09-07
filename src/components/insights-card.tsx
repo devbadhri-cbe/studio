@@ -140,8 +140,8 @@ export function InsightsCard() {
   return (
     <Card className="h-full shadow-xl">
       <CardHeader>
-        <div className="flex items-center gap-3 border-2 border-red-500">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 border-2 border-blue-500">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
             <Lightbulb className="h-6 w-6 text-primary" />
           </div>
           <div>
@@ -152,9 +152,9 @@ export function InsightsCard() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         {(isLoading || isTranslating) && (
-            <div className="flex justify-center items-center py-6 border-2 border-green-500">
+            <div className="flex justify-center items-center py-6">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 <p className="ml-2">{isTranslating ? 'Translating...' : 'Generating...'}</p>
             </div>
@@ -165,7 +165,7 @@ export function InsightsCard() {
             <AlertDescription className="space-y-4">
               <ul className="space-y-3">
                 {tipsToDisplay.map((tip, index) => (
-                  <li key={index} className="flex items-start gap-3 border-2 border-yellow-500">
+                  <li key={index} className="flex items-start gap-3">
                     <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
                     <p className="text-sm text-muted-foreground">{tip}</p>
                   </li>
@@ -176,10 +176,10 @@ export function InsightsCard() {
         )}
         
         {!isLoading && !isTranslating && tipsToDisplay.length === 0 && (
-            <div className="flex h-full items-center justify-center min-h-[150px] border-2 border-red-500">
+            <div className="flex h-full items-center justify-center min-h-[150px]">
                 <div className="space-y-4">
                     <p className="text-center text-sm text-muted-foreground">Click the button to generate personalized health tips.</p>
-                    <div className="flex justify-center border-2 border-purple-500">
+                    <div className="flex justify-center">
                         <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
                             {isLoading ? (
                                 <>
@@ -196,7 +196,7 @@ export function InsightsCard() {
         )}
         
          {!isLoading && !isTranslating && tipsToDisplay.length > 0 && (
-            <div className="flex flex-col sm:flex-row justify-center gap-2 border-2 border-pink-500">
+            <div className="flex flex-col sm:flex-row justify-center gap-2">
                 <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
                 {isLoading ? (
                     <>
@@ -208,7 +208,7 @@ export function InsightsCard() {
                 )}
                 </Button>
                 {localTips.length > 0 && (
-                    <div className="flex items-center gap-2 border-2 border-indigo-500">
+                    <div className="flex items-center gap-2">
                         <Separator orientation="vertical" className="h-full hidden sm:block"/>
                         <Select value={selectedLanguage} onValueChange={handleTranslate} disabled={isTranslating}>
                             <SelectTrigger className="w-full sm:w-[150px] h-9">
