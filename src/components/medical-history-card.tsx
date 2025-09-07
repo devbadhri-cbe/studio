@@ -132,7 +132,7 @@ export function MedicalHistoryCard() {
     if (editingCondition && editingCondition.id) {
         // We are updating an existing condition
         await updateMedicalCondition({
-            ...editingCondition, // Preserves the original ID
+            ...editingCondition,
             condition: data.condition,
             date: data.date.toISOString(),
             status: isDoctorLoggedIn ? 'verified' : 'pending_review',
@@ -156,7 +156,6 @@ export function MedicalHistoryCard() {
 
   const handleSaveMedication = async (data: z.infer<typeof MedicationSchema>) => {
     setIsSubmitting(true);
-    // AI standardization is removed. Direct entry.
     const standardized = {
         name: data.medicationName,
         dosage: data.dosage,
@@ -170,8 +169,8 @@ export function MedicalHistoryCard() {
         frequency: standardized.frequency,
     });
     medicationForm.reset();
-    setIsAddingMedication(false);
     setIsSubmitting(false);
+    medicationNameInputRef.current?.focus();
   };
   
   React.useEffect(() => {
@@ -296,7 +295,7 @@ export function MedicalHistoryCard() {
                                 <FormField control={medicationForm.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
                             </div>
                             <div className="flex justify-end gap-2">
-                                <Button type="button" size="sm" variant="ghost" onClick={() => setIsAddingMedication(false)}>Cancel</Button>
+                                <Button type="button" size="sm" variant="ghost" onClick={() => setIsAddingMedication(false)}>Close</Button>
                                 <Button type="submit" size="sm" disabled={isSubmitting}>
                                     {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
                                 </Button>
