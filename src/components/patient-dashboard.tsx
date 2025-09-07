@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from './ui/input';
 import { UnsavedChangesBar } from './unsaved-changes-bar';
+import { DashboardSectionToggle } from './dashboard-section-toggle';
 
 
 export function PatientDashboard() {
@@ -82,18 +83,12 @@ export function PatientDashboard() {
             <Separator />
             
             <div className="flex flex-col gap-4">
-                <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen} className="flex-1">
-                     <div className="flex gap-2">
-                        <CollapsibleTrigger asChild>
-                            <Button
-                                variant={isDiseasePanelOpen ? 'default' : 'outline'}
-                                className={cn("w-full py-6 text-base", isDiseasePanelOpen && "shadow-lg")}
-                            >
-                                <Stethoscope className="mr-2 h-5 w-5" />
-                                Disease Panels
-                                <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isDiseasePanelOpen && "rotate-180")} />
-                            </Button>
-                        </CollapsibleTrigger>
+                <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
+                    <DashboardSectionToggle
+                        title="Disease Panels"
+                        icon={<Stethoscope className="h-5 w-5" />}
+                        isOpen={isDiseasePanelOpen}
+                    >
                         {isDiseasePanelOpen && isDoctorLoggedIn && (
                             <div className="relative">
                                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -105,26 +100,20 @@ export function PatientDashboard() {
                                 />
                             </div>
                         )}
-                    </div>
+                    </DashboardSectionToggle>
                     <CollapsibleContent className="mt-4">
                         <DiseasePanel searchQuery={diseasePanelSearchQuery} />
                     </CollapsibleContent>
                 </Collapsible>
                 
                 {isDoctorLoggedIn && (
-                    <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen} className="flex-1">
-                        <div className="flex gap-2">
-                            <CollapsibleTrigger asChild>
-                                <Button
-                                    variant={isBiomarkersOpen ? 'default' : 'outline'}
-                                    className={cn("w-full py-6 text-base", isBiomarkersOpen && "shadow-lg")}
-                                >
-                                    <Shapes className="mr-2 h-5 w-5" />
-                                    Biomarker Cards
-                                    <ChevronDown className={cn("ml-auto h-5 w-5 transition-transform", isBiomarkersOpen && "rotate-180")} />
-                                </Button>
-                            </CollapsibleTrigger>
-                             {isBiomarkersOpen && (
+                    <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
+                        <DashboardSectionToggle
+                            title="Biomarker Cards"
+                            icon={<Shapes className="h-5 w-5" />}
+                            isOpen={isBiomarkersOpen}
+                        >
+                            {isBiomarkersOpen && (
                                 <div className="relative">
                                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
@@ -135,7 +124,7 @@ export function PatientDashboard() {
                                     />
                                 </div>
                             )}
-                        </div>
+                        </DashboardSectionToggle>
                         <CollapsibleContent className="mt-4">
                             <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
                         </CollapsibleContent>
