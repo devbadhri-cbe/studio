@@ -177,40 +177,52 @@ export function InsightsCard() {
         )}
         
         {!isLoading && !isTranslating && tipsToDisplay.length === 0 && (
-            <div className="text-center text-sm text-muted-foreground py-6">
+            <div className="text-center text-sm text-muted-foreground py-6 space-y-4">
                 <p>Click the button to generate personalized health tips.</p>
+                 <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
+                    {isLoading ? (
+                        <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                        </>
+                    ) : (
+                        'Generate New Insights'
+                    )}
+                </Button>
             </div>
         )}
         
-        <div className="flex flex-col sm:flex-row justify-center gap-2">
-            <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                'Generate New Insights'
-              )}
-            </Button>
-            {localTips.length > 0 && (
-                <div className="flex items-center gap-2">
-                    <Separator orientation="vertical" className="h-full hidden sm:block"/>
-                     <Select value={selectedLanguage} onValueChange={handleTranslate} disabled={isTranslating}>
-                        <SelectTrigger className="w-full sm:w-[150px] h-9">
-                            <SelectValue placeholder="Translate..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {supportedLanguages.map((lang) => (
-                                <SelectItem key={lang.code} value={lang.code}>
-                                    {lang.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            )}
-        </div>
+         {!isLoading && !isTranslating && tipsToDisplay.length > 0 && (
+            <div className="flex flex-col sm:flex-row justify-center gap-2">
+                <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
+                {isLoading ? (
+                    <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                    </>
+                ) : (
+                    'Generate New Insights'
+                )}
+                </Button>
+                {localTips.length > 0 && (
+                    <div className="flex items-center gap-2">
+                        <Separator orientation="vertical" className="h-full hidden sm:block"/>
+                        <Select value={selectedLanguage} onValueChange={handleTranslate} disabled={isTranslating}>
+                            <SelectTrigger className="w-full sm:w-[150px] h-9">
+                                <SelectValue placeholder="Translate..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {supportedLanguages.map((lang) => (
+                                    <SelectItem key={lang.code} value={lang.code}>
+                                        {lang.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                )}
+            </div>
+        )}
       </CardContent>
     </Card>
   );
