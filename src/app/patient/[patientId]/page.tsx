@@ -56,7 +56,7 @@ export default function PatientPage() {
         loadPatientData();
     }
     
-  }, [params.patientId, isClient, isDoctorViewing, setPatientData, setIsDoctorLoggedIn]);
+  }, [params.patientId, isClient, isDoctorViewing]);
 
   if (isLoading || !isClient) {
     return (
