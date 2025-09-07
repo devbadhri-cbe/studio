@@ -61,7 +61,7 @@ export function DiseasePanel({ searchQuery = '' }: DiseasePanelProps) {
 
     return (
         <Card>
-            <CardContent className="p-6 grid grid-cols-1 gap-6 border-2 border-purple-500">
+            <CardContent className="p-6 grid grid-cols-1 gap-6">
                 {panelsToShow}
             </CardContent>
         </Card>

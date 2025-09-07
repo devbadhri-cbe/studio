@@ -263,7 +263,7 @@ export function DiseasePanelCard({
     ) : null;
 
     return (
-        <Card className={cn("h-full shadow-xl flex flex-col border-2 border-blue-500", className)}>
+        <Card className={cn("h-full shadow-xl flex flex-col", className)}>
              {Object.entries(availableBiomarkerCards).map(([key, cardInfo]) => (
                 <div key={key} style={{ display: 'none' }}>
                     {React.cloneElement(cardInfo.addRecordDialog, {
