@@ -3,7 +3,7 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, Camera, FileUp, Check, ArrowLeft, VenetianMask, User } from 'lucide-react';
+import { Loader2, UploadCloud, Camera, FileUp, Check, ArrowLeft, User } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
@@ -16,6 +16,9 @@ import { ScrollArea } from './ui/scroll-area';
 import { parseISO, isValid } from 'date-fns';
 import { Label } from './ui/label';
 import { availableBiomarkerCards } from '@/lib/biomarker-cards';
+import { BiomarkerKey } from '@/lib/types';
+import type { BatchRecords } from '@/context/app-context';
+
 
 type Step = 'initial' | 'confirmName' | 'editResults' | 'loading' | 'error';
 type ExtractedResult = ExtractLabResultsOutput['results'][0];
@@ -78,13 +81,12 @@ export function UploadRecordDialog() {
     reader.onloadend = async () => {
       const base64data = reader.result as string;
       try {
-        const enabledBiomarkers = Object.entries(availableBiomarkerCards)
-            .filter(([key]) => Object.values(profile.enabledBiomarkers || {}).flat().includes(key))
-            .map(([, value]) => value.label);
-        
+        const enabledBiomarkers = Object.values(profile.enabledBiomarkers || {}).flat();
+        const requiredBiomarkers = enabledBiomarkers.length > 0 ? enabledBiomarkers.map(key => availableBiomarkerCards[key as BiomarkerKey]?.label).filter(Boolean) : Object.values(availableBiomarkerCards).map(b => b.label);
+
         const result = await extractLabResults({ 
             photoDataUri: base64data,
-            requiredBiomarkers: enabledBiomarkers.length > 0 ? enabledBiomarkers : Object.values(availableBiomarkerCards).map(b => b.label),
+            requiredBiomarkers,
         });
         
         setExtractedData(result);
@@ -140,20 +142,26 @@ export function UploadRecordDialog() {
   const handleSaveChanges = async () => {
     if (!extractedData) return;
     setIsLoading(true);
-    
-    const recordsToBatch: any = {};
+
+    const recordsToBatch: BatchRecords = {};
     const date = extractedData.testDate;
+
+    // Helper to find biomarker key from its label
+    const findKeyByLabel = (label: string): BiomarkerKey | undefined => {
+        return Object.keys(availableBiomarkerCards).find(key => 
+            availableBiomarkerCards[key as BiomarkerKey].label.toLowerCase() === label.toLowerCase()
+        ) as BiomarkerKey | undefined;
+    };
 
     extractedData.results.forEach(res => {
         const value = Number(res.value);
-        if(isNaN(value)) return;
-        
-        // Match extracted biomarker name (which can be varied) to our internal keys
-        const biomarkerKey = Object.keys(availableBiomarkerCards).find(key => 
-            availableBiomarkerCards[key as keyof typeof availableBiomarkerCards].label.toLowerCase() === res.biomarker.toLowerCase()
-        );
+        if (isNaN(value)) return;
 
-        switch(biomarkerKey) {
+        const biomarkerKey = findKeyByLabel(res.biomarker);
+
+        if (!biomarkerKey) return;
+
+        switch (biomarkerKey) {
             case 'hba1c':
                 recordsToBatch.hba1c = { date, value };
                 break;
@@ -163,20 +171,34 @@ export function UploadRecordDialog() {
             case 'vitaminD':
                 recordsToBatch.vitaminD = { date, value, units: res.unit };
                 break;
-            case 'thyroid': // Assuming TSH, T3, T4 are handled together if needed
-                 if (!recordsToBatch.thyroid) recordsToBatch.thyroid = { date, t3: 0, t4: 0 }; // default other values
-                 recordsToBatch.thyroid.tsh = value;
-                 break;
-            // T3 and T4 would need separate logic or be part of a single thyroid panel extraction
             case 'hemoglobin':
                 recordsToBatch.hemoglobin = { date, hemoglobin: value };
                 break;
-            case 'bloodPressure':
-                // Blood pressure needs special handling as it has two values
+            case 'totalCholesterol':
+                if (!recordsToBatch.lipidPanel) recordsToBatch.lipidPanel = { date };
+                recordsToBatch.lipidPanel.totalCholesterol = value;
+                break;
+            case 'ldl':
+                if (!recordsToBatch.lipidPanel) recordsToBatch.lipidPanel = { date };
+                recordsToBatch.lipidPanel.ldl = value;
+                break;
+            case 'hdl':
+                if (!recordsToBatch.lipidPanel) recordsToBatch.lipidPanel = { date };
+                recordsToBatch.lipidPanel.hdl = value;
+                break;
+            case 'triglycerides':
+                if (!recordsToBatch.lipidPanel) recordsToBatch.lipidPanel = { date };
+                recordsToBatch.lipidPanel.triglycerides = value;
+                break;
+            case 'thyroid': // Special handling for TSH, assuming T3/T4 come with it.
+                if (!recordsToBatch.thyroid) recordsToBatch.thyroid = { date };
+                // This assumes 'Thyroid' label corresponds to TSH from the AI.
+                // A more robust solution might need separate labels like "TSH", "Free T3", etc.
+                recordsToBatch.thyroid.tsh = value;
                 break;
         }
     });
-    
+
     try {
         const result = await addBatchRecords(recordsToBatch);
         let description = '';
@@ -189,7 +211,7 @@ export function UploadRecordDialog() {
         if (description) {
             toast({ title: 'Records Processed', description });
         } else {
-            toast({ title: 'No New Records Added', description: 'All extracted records were already present.' });
+            toast({ title: 'No New Records Added', description: 'All extracted records were already present or could not be mapped.' });
         }
         handleOpenChange(false);
     } catch (e) {
@@ -197,7 +219,8 @@ export function UploadRecordDialog() {
     } finally {
         setIsLoading(false);
     }
-  }
+}
+
 
   const renderContent = () => {
     switch (step) {
@@ -265,20 +288,24 @@ export function UploadRecordDialog() {
                  </div>
                  <ScrollArea className="h-64 border rounded-md p-2">
                     <div className="space-y-4 p-2">
-                        {results.map((res, index) => (
+                        {results.length > 0 ? results.map((res, index) => (
                             <div key={index} className="grid grid-cols-3 gap-2 items-center">
                                 <Input value={res.biomarker} onChange={(e) => handleEditResult(index, 'biomarker', e.target.value)} />
                                 <Input type="number" value={res.value} onChange={(e) => handleEditResult(index, 'value', e.target.value)} />
                                 <Input value={res.unit} onChange={(e) => handleEditResult(index, 'unit', e.target.value)} />
                             </div>
-                        ))}
+                        )) : (
+                          <div className="flex items-center justify-center h-full text-muted-foreground">
+                            <p>No relevant biomarkers were found on the document.</p>
+                          </div>
+                        )}
                     </div>
                  </ScrollArea>
                   <div className="flex justify-between gap-2">
                      <Button variant="ghost" onClick={() => setStep('confirmName')}>
                         <ArrowLeft className="mr-2 h-4 w-4" /> Back
                      </Button>
-                    <Button onClick={handleSaveChanges} disabled={isLoading}>
+                    <Button onClick={handleSaveChanges} disabled={isLoading || results.length === 0}>
                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />}
                        Save Changes
                     </Button>

@@ -21,10 +21,12 @@ export interface BatchRecords {
     hba1c?: Omit<Hba1cRecord, 'id' | 'medication'>;
     fastingBloodGlucose?: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>;
     vitaminD?: Omit<VitaminDRecord, 'id' | 'medication'> & { units?: string };
-    thyroid?: Omit<ThyroidRecord, 'id' | 'medication'>;
+    thyroid?: Partial<Omit<ThyroidRecord, 'id' | 'medication'>>;
     bloodPressure?: Omit<BloodPressureRecord, 'id' | 'medication'>;
     hemoglobin?: Omit<HemoglobinRecord, 'id' | 'medication' | 'date'> & { date: string };
+    lipidPanel?: Partial<Omit<TotalCholesterolRecord & LdlRecord & HdlRecord & TriglyceridesRecord, 'id' | 'medication'>>;
 }
+
 
 type BiomarkerUnitSystem = 'conventional' | 'si';
 
@@ -301,7 +303,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   const setProfile = (newProfile: UserProfile) => {
-      setProfileState(newProfile);
+      const newBmi = calculateBmi(profile.bmi, newProfile.height);
+      setProfileState({...newProfile, bmi: newBmi});
       setHasUnsavedChanges(true);
   }
   
@@ -466,7 +469,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     const newBmi = calculateBmi(newRecord.value, profile.height);
     if(newBmi) {
-        setProfile({
+        setProfileState({
             ...profile,
             bmi: newBmi,
         });
@@ -622,7 +625,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
-    const date = batch.hba1c?.date || batch.fastingBloodGlucose?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date || batch.hemoglobin?.date;
+    const date = batch.hba1c?.date || batch.fastingBloodGlucose?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date || batch.hemoglobin?.date || batch.lipidPanel?.date;
 
     const result: AddBatchRecordsResult = { added: [], duplicates: [] };
 
@@ -672,7 +675,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (batch.thyroid && batch.thyroid.tsh) {
         const dateExists = thyroidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.tsh === batch.thyroid?.tsh);
         if (!dateExists) {
-            const newRecord: ThyroidRecord = { ...batch.thyroid, id: `thyroid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+            const newRecord: ThyroidRecord = { tsh: 0, t3: 0, t4: 0, ...batch.thyroid, id: `thyroid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
             setThyroidRecordsState(prev => [...prev, newRecord]);
             result.added.push('Thyroid Panel');
         } else { result.duplicates.push('Thyroid Panel'); }
@@ -694,6 +697,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setHemoglobinRecordsState(prev => [...prev, newRecord]);
         result.added.push('Hemoglobin');
       } else { result.duplicates.push('Hemoglobin'); }
+    }
+    
+    if (batch.lipidPanel && batch.lipidPanel.totalCholesterol) {
+       const dateExists = totalCholesterolRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.totalCholesterol);
+       if (!dateExists) {
+        const newRecord: TotalCholesterolRecord = { value: batch.lipidPanel.totalCholesterol, id: `tc-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+        setTotalCholesterolRecordsState(prev => [...prev, newRecord]);
+        result.added.push('Total Cholesterol');
+      } else { result.duplicates.push('Total Cholesterol'); }
+    }
+
+    if (batch.lipidPanel && batch.lipidPanel.ldl) {
+        const dateExists = ldlRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.ldl);
+        if (!dateExists) {
+            const newRecord: LdlRecord = { value: batch.lipidPanel.ldl, id: `ldl-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+            setLdlRecordsState(prev => [...prev, newRecord]);
+            result.added.push('LDL');
+        } else { result.duplicates.push('LDL'); }
+    }
+    if (batch.lipidPanel && batch.lipidPanel.hdl) {
+        const dateExists = hdlRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.hdl);
+        if (!dateExists) {
+            const newRecord: HdlRecord = { value: batch.lipidPanel.hdl, id: `hdl-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+            setHdlRecordsState(prev => [...prev, newRecord]);
+            result.added.push('HDL');
+        } else { result.duplicates.push('HDL'); }
+    }
+    if (batch.lipidPanel && batch.lipidPanel.triglycerides) {
+        const dateExists = triglyceridesRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.triglycerides);
+        if (!dateExists) {
+            const newRecord: TriglyceridesRecord = { value: batch.lipidPanel.triglycerides, id: `trig-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
+            setTriglyceridesRecordsState(prev => [...prev, newRecord]);
+            result.added.push('Triglycerides');
+        } else { result.duplicates.push('Triglycerides'); }
     }
     
     if (result.added.length > 0) {
