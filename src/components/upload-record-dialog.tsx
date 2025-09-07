@@ -148,9 +148,14 @@ export function UploadRecordDialog() {
 
     // Helper to find biomarker key from its label
     const findKeyByLabel = (label: string): BiomarkerKey | undefined => {
-        return Object.keys(availableBiomarkerCards).find(key => 
-            availableBiomarkerCards[key as BiomarkerKey].label.toLowerCase() === label.toLowerCase()
-        ) as BiomarkerKey | undefined;
+        return Object.keys(availableBiomarkerCards).find(key => {
+            const cardInfo = availableBiomarkerCards[key as BiomarkerKey];
+            const lowercasedLabel = cardInfo.label.toLowerCase();
+            const lowercasedInput = label.toLowerCase();
+            
+            // Check for exact match or if label contains the key (e.g., "LDL Cholesterol" contains "ldl")
+            return lowercasedLabel === lowercasedInput || lowercasedLabel.includes(lowercasedInput);
+        }) as BiomarkerKey | undefined;
     };
 
     extractedData.results.forEach(res => {
@@ -158,44 +163,41 @@ export function UploadRecordDialog() {
         if (isNaN(value)) return;
 
         const biomarkerKey = findKeyByLabel(res.biomarker);
-
         if (!biomarkerKey) return;
-
-        switch (biomarkerKey) {
-            case 'hba1c':
-                recordsToBatch.hba1c = { date, value };
-                break;
-            case 'glucose':
-                recordsToBatch.fastingBloodGlucose = { date, value };
-                break;
-            case 'vitaminD':
-                recordsToBatch.vitaminD = { date, value, units: res.unit };
-                break;
-            case 'hemoglobin':
-                recordsToBatch.hemoglobin = { date, hemoglobin: value };
-                break;
-            case 'totalCholesterol':
-                if (!recordsToBatch.lipidPanel) recordsToBatch.lipidPanel = { date };
-                recordsToBatch.lipidPanel.totalCholesterol = value;
-                break;
-            case 'ldl':
-                if (!recordsToBatch.lipidPanel) recordsToBatch.lipidPanel = { date };
-                recordsToBatch.lipidPanel.ldl = value;
-                break;
-            case 'hdl':
-                if (!recordsToBatch.lipidPanel) recordsToBatch.lipidPanel = { date };
-                recordsToBatch.lipidPanel.hdl = value;
-                break;
-            case 'triglycerides':
-                if (!recordsToBatch.lipidPanel) recordsToBatch.lipidPanel = { date };
-                recordsToBatch.lipidPanel.triglycerides = value;
-                break;
-            case 'thyroid': // Special handling for TSH, assuming T3/T4 come with it.
-                if (!recordsToBatch.thyroid) recordsToBatch.thyroid = { date };
-                // This assumes 'Thyroid' label corresponds to TSH from the AI.
-                // A more robust solution might need separate labels like "TSH", "Free T3", etc.
-                recordsToBatch.thyroid.tsh = value;
-                break;
+        
+        const isLipid = ['totalCholesterol', 'ldl', 'hdl', 'triglycerides'].includes(biomarkerKey);
+        
+        if (isLipid) {
+            if (!recordsToBatch.lipidPanel) recordsToBatch.lipidPanel = { date };
+             if(biomarkerKey === 'totalCholesterol') recordsToBatch.lipidPanel.totalCholesterol = value;
+             if(biomarkerKey === 'ldl') recordsToBatch.lipidPanel.ldl = value;
+             if(biomarkerKey === 'hdl') recordsToBatch.lipidPanel.hdl = value;
+             if(biomarkerKey === 'triglycerides') recordsToBatch.lipidPanel.triglycerides = value;
+        } else if (biomarkerKey === 'thyroid') {
+             if (!recordsToBatch.thyroid) recordsToBatch.thyroid = { date };
+             // This assumes TSH is the primary value for a general 'Thyroid' biomarker.
+             // For more complex reports, specific labels like "TSH", "Free T4" would be needed.
+             recordsToBatch.thyroid.tsh = value;
+        } else {
+            switch (biomarkerKey) {
+                case 'hba1c':
+                    recordsToBatch.hba1c = { date, value };
+                    break;
+                case 'glucose':
+                    recordsToBatch.fastingBloodGlucose = { date, value };
+                    break;
+                case 'vitaminD':
+                    recordsToBatch.vitaminD = { date, value, units: res.unit };
+                    break;
+                case 'hemoglobin':
+                    recordsToBatch.hemoglobin = { date, hemoglobin: value };
+                    break;
+                case 'bloodPressure':
+                    // Blood pressure might need special handling if systolic/diastolic are separate
+                    // This simplified example assumes a single value which might not be correct.
+                    // A better AI prompt would return systolic and diastolic separately.
+                    break;
+            }
         }
     });
 
@@ -307,7 +309,7 @@ export function UploadRecordDialog() {
                      </Button>
                     <Button onClick={handleSaveChanges} disabled={isLoading || results.length === 0}>
                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />}
-                       Save Changes
+                       Enter
                     </Button>
                 </div>
             </div>
