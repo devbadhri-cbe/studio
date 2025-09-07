@@ -142,7 +142,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                         <div className="flex items-center gap-2">
                             <CardTitle 
                                 ref={nameRef}
-                                className={cn("text-lg whitespace-nowrap", isNameOverflowing && "overflow-hidden")} 
+                                className={cn("text-lg whitespace-nowrap overflow-hidden", isNameOverflowing && "pr-4")} 
                                 style={isNameOverflowing ? {
                                     maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
                                     WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
