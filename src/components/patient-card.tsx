@@ -125,7 +125,10 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </Avatar>
                 <div className="flex-1 min-w-0 relative">
                     <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg whitespace-nowrap">{patient.name}</CardTitle>
+                        <CardTitle className="text-lg whitespace-nowrap overflow-hidden" style={{
+                            maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
+                            WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
+                        }}>{patient.name}</CardTitle>
                         {isDoctorLoggedIn && needsReview && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -146,7 +149,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                     <p className="text-xs text-muted-foreground truncate">
                         {age ? `${age} years` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
                     </p>
-                     <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-card to-transparent pointer-events-none" />
                 </div>
             </div>
             {/* The dropdown menu is outside the button flow */}
@@ -264,5 +266,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     </Card>
   );
 }
+
+    
 
     
