@@ -146,17 +146,17 @@ export function UploadRecordDialog() {
     const recordsToBatch: BatchRecords = {};
     const date = extractedData.testDate;
 
-    // Helper to find biomarker key from its label
     const findKeyByLabel = (label: string): BiomarkerKey | undefined => {
         return Object.keys(availableBiomarkerCards).find(key => {
             const cardInfo = availableBiomarkerCards[key as BiomarkerKey];
             const lowercasedLabel = cardInfo.label.toLowerCase();
             const lowercasedInput = label.toLowerCase();
-            
-            // Check for exact match or if label contains the key (e.g., "LDL Cholesterol" contains "ldl")
             return lowercasedLabel === lowercasedInput || lowercasedLabel.includes(lowercasedInput);
         }) as BiomarkerKey | undefined;
     };
+    
+    const lipidPanelData: any = { date };
+    let hasLipidData = false;
 
     extractedData.results.forEach(res => {
         const value = Number(res.value);
@@ -165,41 +165,45 @@ export function UploadRecordDialog() {
         const biomarkerKey = findKeyByLabel(res.biomarker);
         if (!biomarkerKey) return;
         
-        const isLipid = ['totalCholesterol', 'ldl', 'hdl', 'triglycerides'].includes(biomarkerKey);
-        
-        if (isLipid) {
-            if (!recordsToBatch.lipidPanel) recordsToBatch.lipidPanel = { date };
-             if(biomarkerKey === 'totalCholesterol') recordsToBatch.lipidPanel.totalCholesterol = value;
-             if(biomarkerKey === 'ldl') recordsToBatch.lipidPanel.ldl = value;
-             if(biomarkerKey === 'hdl') recordsToBatch.lipidPanel.hdl = value;
-             if(biomarkerKey === 'triglycerides') recordsToBatch.lipidPanel.triglycerides = value;
-        } else if (biomarkerKey === 'thyroid') {
-             if (!recordsToBatch.thyroid) recordsToBatch.thyroid = { date };
-             // This assumes TSH is the primary value for a general 'Thyroid' biomarker.
-             // For more complex reports, specific labels like "TSH", "Free T4" would be needed.
-             recordsToBatch.thyroid.tsh = value;
-        } else {
-            switch (biomarkerKey) {
-                case 'hba1c':
-                    recordsToBatch.hba1c = { date, value };
-                    break;
-                case 'glucose':
-                    recordsToBatch.fastingBloodGlucose = { date, value };
-                    break;
-                case 'vitaminD':
-                    recordsToBatch.vitaminD = { date, value, units: res.unit };
-                    break;
-                case 'hemoglobin':
-                    recordsToBatch.hemoglobin = { date, hemoglobin: value };
-                    break;
-                case 'bloodPressure':
-                    // Blood pressure might need special handling if systolic/diastolic are separate
-                    // This simplified example assumes a single value which might not be correct.
-                    // A better AI prompt would return systolic and diastolic separately.
-                    break;
-            }
+        switch (biomarkerKey) {
+            case 'totalCholesterol':
+                lipidPanelData.totalCholesterol = value;
+                hasLipidData = true;
+                break;
+            case 'ldl':
+                lipidPanelData.ldl = value;
+                hasLipidData = true;
+                break;
+            case 'hdl':
+                lipidPanelData.hdl = value;
+                hasLipidData = true;
+                break;
+            case 'triglycerides':
+                lipidPanelData.triglycerides = value;
+                hasLipidData = true;
+                break;
+            case 'hba1c':
+                recordsToBatch.hba1c = { date, value };
+                break;
+            case 'glucose':
+                recordsToBatch.fastingBloodGlucose = { date, value };
+                break;
+            case 'vitaminD':
+                recordsToBatch.vitaminD = { date, value, units: res.unit };
+                break;
+            case 'thyroid':
+                recordsToBatch.thyroid = { ...recordsToBatch.thyroid, date, tsh: value };
+                break;
+            case 'hemoglobin':
+                recordsToBatch.hemoglobin = { date, hemoglobin: value };
+                break;
+            // bloodPressure and weight are typically not on lab reports, but we can add cases if needed
         }
     });
+
+    if (hasLipidData) {
+        recordsToBatch.lipidPanel = lipidPanelData;
+    }
 
     try {
         const result = await addBatchRecords(recordsToBatch);
@@ -208,7 +212,7 @@ export function UploadRecordDialog() {
             description += `Added: ${result.added.join(', ')}. `;
         }
         if (result.duplicates.length > 0) {
-            description += `Skipped as already present: ${result.duplicates.join(', ')}.`;
+            description += `Skipped duplicates: ${result.duplicates.join(', ')}.`;
         }
         if (description) {
             toast({ title: 'Records Processed', description });
@@ -291,10 +295,22 @@ export function UploadRecordDialog() {
                  <ScrollArea className="h-64 border rounded-md p-2">
                     <div className="space-y-4 p-2">
                         {results.length > 0 ? results.map((res, index) => (
-                            <div key={index} className="grid grid-cols-3 gap-2 items-center">
-                                <Input value={res.biomarker} onChange={(e) => handleEditResult(index, 'biomarker', e.target.value)} />
-                                <Input type="number" value={res.value} onChange={(e) => handleEditResult(index, 'value', e.target.value)} />
-                                <Input value={res.unit} onChange={(e) => handleEditResult(index, 'unit', e.target.value)} />
+                            <div key={index} className="space-y-2">
+                                <Input 
+                                    aria-label="Biomarker Name"
+                                    value={res.biomarker} 
+                                    onChange={(e) => handleEditResult(index, 'biomarker', e.target.value)} />
+                                <div className="grid grid-cols-2 gap-2">
+                                     <Input 
+                                        aria-label="Biomarker Value"
+                                        type="number" 
+                                        value={res.value} 
+                                        onChange={(e) => handleEditResult(index, 'value', e.target.value)} />
+                                    <Input 
+                                        aria-label="Biomarker Unit"
+                                        value={res.unit} 
+                                        onChange={(e) => handleEditResult(index, 'unit', e.target.value)} />
+                                </div>
                             </div>
                         )) : (
                           <div className="flex items-center justify-center h-full text-muted-foreground">
