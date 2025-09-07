@@ -163,7 +163,7 @@ export function InsightsCard() {
 
         {!isLoading && !isTranslating && tipsToDisplay.length > 0 && (
           <Alert className="bg-muted/50 mt-6">
-            <AlertDescription className="space-y-4">
+            <AlertDescription>
               <ul className="space-y-3">
                 {tipsToDisplay.map((tip, index) => (
                   <li key={index} className="flex items-start gap-3">
@@ -177,20 +177,18 @@ export function InsightsCard() {
         )}
         
         {!isLoading && !isTranslating && tipsToDisplay.length === 0 && (
-            <div className="flex h-full items-center justify-center min-h-[150px]">
-                <div className="flex flex-col items-center justify-center gap-4">
-                    <p className="text-center text-sm text-muted-foreground">Click the button to generate personalized health tips.</p>
-                    <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
-                        {isLoading ? (
-                            <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Generating...
-                            </>
-                        ) : (
-                            'Generate New Insights'
-                        )}
-                    </Button>
-                </div>
+            <div className="flex flex-col items-center justify-center min-h-[150px]">
+                <p className="text-center text-sm text-muted-foreground mb-4">Click the button to generate personalized health tips.</p>
+                <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
+                    {isLoading ? (
+                        <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                        </>
+                    ) : (
+                        'Generate New Insights'
+                    )}
+                </Button>
             </div>
         )}
         
