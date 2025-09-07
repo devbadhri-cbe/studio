@@ -22,7 +22,7 @@ export interface MedicalCondition {
 export interface Medication {
   id: string;
   name: string;
-  brandName?: string;
+  brandName: string;
   dosage: string;
   frequency: string;
 }

@@ -11,6 +11,7 @@ import { countries } from '@/lib/countries';
 import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
 import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
+import { getMedicationDetails } from '@/ai/flows/get-medication-details-flow';
 import { availableDiseasePanels } from '@/lib/biomarker-cards';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
@@ -449,7 +450,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setMedicationNil = useCallback(() => {
-      const nilMedication = [{ id: 'nil', name: 'Nil', dosage: '', frequency: '' }];
+      const nilMedication = [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }];
       setProfileState(prevProfile => ({ ...prevProfile, medication: nilMedication }));
       setHasUnsavedChanges(true);
   }, []);

@@ -21,6 +21,7 @@ import { DiseaseCard } from './disease-card';
 import { Separator } from './ui/separator';
 import type { MedicalCondition, Medication } from '@/lib/types';
 import { parseISO } from 'date-fns';
+import { getMedicationDetails } from '@/ai/flows/get-medication-details-flow';
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
@@ -153,21 +154,27 @@ export function MedicalHistoryCard() {
 
   const handleSaveMedication = async (data: z.infer<typeof MedicationSchema>) => {
     setIsSubmitting(true);
-    const standardized = {
-        name: data.medicationName,
-        dosage: data.dosage,
-        frequency: data.frequency,
-        brandName: data.medicationName,
-    };
-    addMedication({
-        name: standardized.name,
-        brandName: standardized.brandName,
-        dosage: standardized.dosage,
-        frequency: standardized.frequency,
-    });
-    medicationForm.reset();
-    setIsSubmitting(false);
-    medicationNameInputRef.current?.focus();
+    try {
+        const details = await getMedicationDetails({ medicationName: data.medicationName });
+        addMedication({
+            name: details.chemicalName,
+            brandName: details.brandName,
+            dosage: data.dosage,
+            frequency: data.frequency,
+        });
+        medicationForm.reset();
+        medicationNameInputRef.current?.focus();
+    } catch (e) {
+        // Fallback for when AI fails - just add what the user typed.
+        addMedication({
+            name: data.medicationName,
+            brandName: data.medicationName,
+            dosage: data.dosage,
+            frequency: data.frequency,
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
   
   React.useEffect(() => {
