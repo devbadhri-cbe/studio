@@ -346,19 +346,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         } else if (conditionLower.includes('lipid') || conditionLower.includes('cholesterol')) {
             associatedPanel = 'lipids';
         }
-
+        
+        const panelAlreadyExists = associatedPanel ? !!profile.enabledBiomarkers?.[associatedPanel] : true;
+        
         let newEnabledBiomarkers = profile.enabledBiomarkers || {};
-        let panelWasAdded = false;
 
-        if (associatedPanel && isDoctorLoggedIn) {
-            const panelAlreadyExists = !!profile.enabledBiomarkers?.[associatedPanel];
-            if (!panelAlreadyExists) {
-                newEnabledBiomarkers = {
-                    ...newEnabledBiomarkers,
-                    [associatedPanel]: []
-                };
-                panelWasAdded = true;
-            }
+        if (associatedPanel && isDoctorLoggedIn && !panelAlreadyExists) {
+            newEnabledBiomarkers = {
+                ...newEnabledBiomarkers,
+                [associatedPanel]: []
+            };
         }
 
         const newProfileState: UserProfile = {
@@ -367,16 +364,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
             enabledBiomarkers: newEnabledBiomarkers,
         };
         
-        // If a doctor adds a condition, save it immediately.
         if (isDoctorLoggedIn) {
             await updatePatient(profile.id, {
                 presentMedicalConditions: newProfileState.presentMedicalConditions,
                 enabledBiomarkers: newProfileState.enabledBiomarkers,
             });
-            // Update local state after successful save
             setProfileState(newProfileState);
             
-            if (panelWasAdded && associatedPanel) {
+            if (associatedPanel && !panelAlreadyExists) {
                 const panelInfo = availableDiseasePanels.find(p => p.key === associatedPanel);
                 toast({
                     title: 'Panel Enabled',
@@ -385,7 +380,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
             }
 
         } else {
-            // For patients, just update local state and let them save later.
             setProfileState(newProfileState);
             setHasUnsavedChanges(true);
         }
@@ -643,10 +637,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const toggleDiseasePanel = useCallback((panelKey: DiseasePanelKey) => {
     const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
-    const isEnabled = currentEnabled.hasOwnProperty(panelKey);
+    const isCurrentlyEnabled = currentEnabled.hasOwnProperty(panelKey);
     const updatedEnabledBiomarkers = { ...currentEnabled };
 
-    if (isEnabled) {
+    if (isCurrentlyEnabled) {
       delete updatedEnabledBiomarkers[panelKey];
     } else {
       updatedEnabledBiomarkers[panelKey] = [];
@@ -656,13 +650,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...prevProfile,
       enabledBiomarkers: updatedEnabledBiomarkers,
     }));
-
+    setHasUnsavedChanges(true);
+    
+    // Show toast *after* state update
+    const panelInfo = availableDiseasePanels.find(p => p.key === panelKey);
+    const panelName = panelInfo?.label || (panelKey.charAt(0).toUpperCase() + panelKey.slice(1) + ' Panel');
+    
     toast({
-        title: isEnabled ? `Panel Disabled` : `Panel Enabled`,
-        description: `The ${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel has been ${isEnabled ? 'disabled' : 'enabled'} for this patient.`
+        title: isCurrentlyEnabled ? `Panel Disabled` : `Panel Enabled`,
+        description: `The ${panelName} has been ${isCurrentlyEnabled ? 'disabled' : 'enabled'} for this patient.`
     });
 
-    setHasUnsavedChanges(true);
   }, [profile.enabledBiomarkers]);
 
   const addBatchRecords = useCallback(async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
@@ -733,7 +731,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     setBloodPressureRecordsState(prev => {
         if (batch.bloodPressure && batch.bloodPressure.systolic && batch.bloodPressure.diastolic) {
-           const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.systolic === batch.bloodPressure?.systolic);
+           const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.systolic === batch.bloodPressure?.systolic && r.diastolic === batch.bloodPressure?.diastolic);
            if (!dateExists) {
             result.added.push('Blood Pressure');
             return [...prev, { ...batch.bloodPressure, id: `bp-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
