@@ -15,7 +15,7 @@ import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 
 interface DiseaseCardProps {
   condition: MedicalCondition;
-  onRevise: (id: string) => void;
+  onRevise: (condition: MedicalCondition) => void;
 }
 
 const statusConfig = {
@@ -101,7 +101,7 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
             <AlertTriangle className="h-4 w-4 !text-destructive" />
             <AlertDescription>
               Your doctor has requested a revision. Please update the condition name.
-              <Button size="xs" className="ml-2" onClick={() => onRevise(condition.id)}>
+              <Button size="xs" className="ml-2" onClick={() => onRevise(condition)}>
                 <Edit className="mr-1 h-3 w-3" />
                 Revise & Resubmit
               </Button>

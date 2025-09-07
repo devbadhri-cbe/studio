@@ -147,11 +147,8 @@ export function MedicalHistoryCard() {
     setEditingCondition(null);
   };
   
-  const handleReviseCondition = (id: string) => {
-      const conditionToEdit = profile.presentMedicalConditions.find(c => c.id === id);
-      if (conditionToEdit) {
-          setEditingCondition(conditionToEdit);
-      }
+  const handleReviseCondition = (conditionToEdit: MedicalCondition) => {
+      setEditingCondition(conditionToEdit);
   }
 
   const handleSaveMedication = async (data: z.infer<typeof MedicationSchema>) => {
