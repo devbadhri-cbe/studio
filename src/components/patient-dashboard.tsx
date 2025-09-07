@@ -28,7 +28,7 @@ import { UnsavedChangesBar } from './unsaved-changes-bar';
 export function PatientDashboard() {
   const { isClient, isDoctorLoggedIn, profile } = useApp();
   const router = useRouter();
-  const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(true);
+  const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(isDoctorLoggedIn);
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
   const [diseasePanelSearchQuery, setDiseasePanelSearchQuery] = React.useState('');
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
