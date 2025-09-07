@@ -81,7 +81,7 @@ export function PatientDashboard() {
             
             <Separator />
             
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col gap-4">
                 <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen} className="flex-1">
                      <div className="flex gap-2">
                         <CollapsibleTrigger asChild>
