@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Search, UserPlus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, UserPlus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Patient } from '@/lib/types';
 import {
@@ -20,7 +20,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
-import { addPatient, deletePatient, getPatientsPaginated } from '@/lib/firestore';
+import { getPatients } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { useApp } from '@/context/app-context';
@@ -28,6 +28,7 @@ import { TitleBar } from '@/components/title-bar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { processPatientData } from '@/lib/utils';
 import { updatePatient } from '@/lib/firestore';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const PAGE_SIZE = 8;
 
@@ -42,35 +43,13 @@ export default function DoctorDashboardPage() {
     const [isFormOpen, setIsFormOpen] = React.useState(false);
     const [editingPatient, setEditingPatient] = React.useState<Patient | null>(null);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [page, setPage] = React.useState(1);
-    const [pageCursors, setPageCursors] = React.useState<(any | null)[]>([null]);
-    const [hasNextPage, setHasNextPage] = React.useState(true);
 
-    const fetchPatients = React.useCallback(async (pageIndex: number) => {
+    const fetchPatients = React.useCallback(async () => {
         setIsLoading(true);
         try {
-            // Determine the cursor for the requested page.
-            // pageIndex is 1-based, so we need to get the cursor for the previous page.
-            const lastVisible = pageIndex > 1 ? pageCursors[pageIndex - 1] : null;
-
-            const { patients: rawPatientsData, lastVisible: newLastVisible } = await getPatientsPaginated(lastVisible, PAGE_SIZE);
+            const rawPatientsData = await getPatients();
             const fetchedPatients = rawPatientsData.map(processPatientData);
-            
             setPatients(fetchedPatients);
-            
-            // If a new lastVisible document is returned, store it for the next page.
-            if (newLastVisible) {
-                setPageCursors(prev => {
-                    const newCursors = [...prev];
-                    newCursors[pageIndex] = newLastVisible;
-                    return newCursors;
-                });
-            }
-
-            // Determine if there is a next page.
-            setHasNextPage(fetchedPatients.length === PAGE_SIZE);
-            setPage(pageIndex);
-
         } catch (error) {
             console.error("Failed to fetch patients from Firestore", error);
             toast({
@@ -81,12 +60,12 @@ export default function DoctorDashboardPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast, pageCursors]);
+    }, [toast]);
     
     React.useEffect(() => {
         setIsDoctorLoggedIn(true);
         if (isClient) {
-            fetchPatients(1);
+            fetchPatients();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isClient, setIsDoctorLoggedIn]);
@@ -106,8 +85,8 @@ export default function DoctorDashboardPage() {
                 title: 'Patient Deleted',
                 description: 'The patient has been removed from the list.'
             });
-            // Refetch current page to fill the gap
-            fetchPatients(page);
+            // Refetch patients to ensure list is up to date
+            fetchPatients();
         } catch (error) {
              console.error("Failed to delete patient:", error);
              toast({
@@ -144,9 +123,7 @@ export default function DoctorDashboardPage() {
                     description: `${newPatient.name} has been successfully added.`,
                 });
             }
-            // Reset to first page to see the new/updated patient
-            setPageCursors([null]);
-            await fetchPatients(1);
+            await fetchPatients();
             closeForm();
         } catch (error) {
             console.error("Failed to save patient", error);
@@ -243,14 +220,14 @@ export default function DoctorDashboardPage() {
                         <CardHeader className="flex flex-col md:flex-row md:items-center gap-4">
                             <div className="grid gap-2 flex-1">
                                 <CardTitle>Patient List</CardTitle>
-                                <CardDescription>A list of all patients currently under your care. Displaying page {page}.</CardDescription>
+                                <CardDescription>A scrollable list of all patients currently under your care.</CardDescription>
                             </div>
                             <div className="flex flex-col sm:flex-row items-center gap-2">
                                 <div className="relative w-full sm:w-auto">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         type="search"
-                                        placeholder="Search current page..."
+                                        placeholder="Search all patients..."
                                         className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -259,51 +236,31 @@ export default function DoctorDashboardPage() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            {isLoading ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                    {[...Array(PAGE_SIZE)].map((_, i) => <Skeleton key={i} className="h-[300px] w-full" />)}
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                    {filteredAndSortedPatients.map((patient) => (
-                                        <PatientCard
-                                            key={patient.id}
-                                            patient={patient}
-                                            onView={viewPatientDashboard}
-                                            onDelete={setPatientToDelete}
-                                            onEdit={openFormToEdit}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                            {(!isLoading && filteredAndSortedPatients.length === 0) && (
-                                <div className="text-center text-muted-foreground py-12">
-                                    <p>No patients found.</p>
-                                    {searchQuery ? <p className="text-sm">Try adjusting your search query on the current page.</p> : <p className="text-sm">Add a new patient to get started.</p>}
-                                </div>
-                            )}
-
-                            <div className="flex items-center justify-end space-x-2 pt-4">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => fetchPatients(page - 1)}
-                                    disabled={page === 1 || isLoading}
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                    Previous
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => fetchPatients(page + 1)}
-                                    disabled={!hasNextPage || isLoading}
-                                >
-                                    Next
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-
+                            <ScrollArea className="h-[calc(100vh-350px)]">
+                                {isLoading ? (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pr-4">
+                                        {[...Array(PAGE_SIZE)].map((_, i) => <Skeleton key={i} className="h-[300px] w-full" />)}
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pr-4">
+                                        {filteredAndSortedPatients.map((patient) => (
+                                            <PatientCard
+                                                key={patient.id}
+                                                patient={patient}
+                                                onView={viewPatientDashboard}
+                                                onDelete={setPatientToDelete}
+                                                onEdit={openFormToEdit}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                                {(!isLoading && filteredAndSortedPatients.length === 0) && (
+                                    <div className="text-center text-muted-foreground py-12">
+                                        <p>No patients found.</p>
+                                        {searchQuery ? <p className="text-sm">Try adjusting your search query.</p> : <p className="text-sm">Add a new patient to get started.</p>}
+                                    </div>
+                                )}
+                            </ScrollArea>
                         </CardContent>
                     </Card>
                     </>
