@@ -176,8 +176,8 @@ export function InsightsCard() {
         )}
         
         {!isLoading && !isTranslating && tipsToDisplay.length === 0 && (
-            <div className="flex items-center justify-center text-center text-sm text-muted-foreground min-h-[150px]">
-                <div className="space-y-4">
+            <div className="flex items-center justify-center text-center text-sm text-muted-foreground min-h-[150px] border border-red-500">
+                <div className="space-y-4 border border-blue-500">
                     <p>Click the button to generate personalized health tips.</p>
                     <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
                         {isLoading ? (
@@ -228,7 +228,3 @@ export function InsightsCard() {
     </Card>
   );
 }
-
-    
-
-    
