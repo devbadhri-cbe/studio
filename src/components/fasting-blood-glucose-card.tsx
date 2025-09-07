@@ -33,7 +33,7 @@ export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGluc
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
-    return [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(a.date as string).getTime())
+    return [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
   }, [fastingBloodGlucoseRecords]);
   
   const getStatus = (value: number) => {
