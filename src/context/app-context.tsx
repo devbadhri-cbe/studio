@@ -130,7 +130,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [bloodPressureRecords, setBloodPressureRecordsState] = useState<BloodPressureRecord[]>([]);
   const [totalCholesterolRecords, setTotalCholesterolRecordsState] = useState<TotalCholesterolRecord[]>([]);
   const [ldlRecords, setLdlRecordsState] = useState<LdlRecord[]>([]);
-  const [hdlRecords, setHdlRecordsState] = useState<LdlRecord[]>([]);
+  const [hdlRecords, setHdlRecordsState] = useState<HdlRecord[]>([]);
   const [triglyceridesRecords, setTriglyceridesRecordsState] = useState<TriglyceridesRecord[]>([]);
   const [customBiomarkers, setCustomBiomarkersState] = useState<CustomBiomarker[]>([]);
   const [tips, setTipsState] = useState<string[]>([]);
@@ -350,12 +350,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         let newEnabledBiomarkers = profile.enabledBiomarkers || {};
         let panelWasAdded = false;
 
-        if (associatedPanel && isDoctorLoggedIn && !profile.enabledBiomarkers?.[associatedPanel]) {
-            newEnabledBiomarkers = {
-                ...newEnabledBiomarkers,
-                [associatedPanel]: []
-            };
-            panelWasAdded = true;
+        if (associatedPanel && isDoctorLoggedIn) {
+            const panelAlreadyExists = !!profile.enabledBiomarkers?.[associatedPanel];
+            if (!panelAlreadyExists) {
+                newEnabledBiomarkers = {
+                    ...newEnabledBiomarkers,
+                    [associatedPanel]: []
+                };
+                panelWasAdded = true;
+            }
         }
 
         const newProfileState: UserProfile = {
@@ -639,26 +642,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleDiseasePanel = useCallback((panelKey: DiseasePanelKey) => {
-    setProfileState(prevProfile => {
-        const currentEnabled = { ...(prevProfile.enabledBiomarkers || {}) };
-        const isEnabled = currentEnabled.hasOwnProperty(panelKey);
-        const updatedEnabledBiomarkers = { ...currentEnabled };
+    const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
+    const isEnabled = currentEnabled.hasOwnProperty(panelKey);
+    const updatedEnabledBiomarkers = { ...currentEnabled };
 
-        if (isEnabled) {
-            delete updatedEnabledBiomarkers[panelKey];
-        } else {
-            updatedEnabledBiomarkers[panelKey] = [];
-        }
-        
-        toast({
-            title: isEnabled ? `Panel Disabled` : `Panel Enabled`,
-            description: `The ${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel has been ${isEnabled ? 'disabled' : 'enabled'} for this patient.`
-        });
+    if (isEnabled) {
+      delete updatedEnabledBiomarkers[panelKey];
+    } else {
+      updatedEnabledBiomarkers[panelKey] = [];
+    }
 
-        return { ...prevProfile, enabledBiomarkers: updatedEnabledBiomarkers };
+    setProfileState(prevProfile => ({
+      ...prevProfile,
+      enabledBiomarkers: updatedEnabledBiomarkers,
+    }));
+
+    toast({
+        title: isEnabled ? `Panel Disabled` : `Panel Enabled`,
+        description: `The ${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel has been ${isEnabled ? 'disabled' : 'enabled'} for this patient.`
     });
+
     setHasUnsavedChanges(true);
-  }, []);
+  }, [profile.enabledBiomarkers]);
 
   const addBatchRecords = useCallback(async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
@@ -896,6 +901,8 @@ export function useApp() {
   }
   return context;
 }
+
+    
 
     
 
