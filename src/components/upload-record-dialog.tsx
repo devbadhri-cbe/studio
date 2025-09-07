@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
@@ -151,43 +150,53 @@ export function UploadRecordDialog() {
         return Object.keys(availableBiomarkerCards).find(key => {
             const cardInfo = availableBiomarkerCards[key as BiomarkerKey];
             if (!cardInfo) return false;
-            const lowercasedLabel = cardInfo.label.toLowerCase().trim();
+            
+            // Normalize label by removing parenthetical parts for matching
             const mainLabel = cardInfo.label.split('(')[0].trim().toLowerCase();
-            return lowercasedLabel === lowercasedInput || mainLabel === lowercasedInput || lowercasedLabel.includes(lowercasedInput);
+            const fullLabel = cardInfo.label.toLowerCase().trim();
+
+            return fullLabel === lowercasedInput || mainLabel === lowercasedInput;
         }) as BiomarkerKey | undefined;
     };
     
     const lipidPanelData: any = { date };
     let hasLipidData = false;
+    const thyroidPanelData: any = { date };
+    let hasThyroidData = false;
 
     extractedData.results.forEach(res => {
         const value = Number(res.value);
         if (isNaN(value)) return;
 
         const biomarkerKey = findKeyByLabel(res.biomarker);
-        
         if (!biomarkerKey) return;
         
+        // This mapping ensures the correct record type is created
         const keyHandlers: Record<BiomarkerKey, () => void> = {
-            totalCholesterol: () => { lipidPanelData.totalCholesterol = value; hasLipidData = true; },
-            ldl: () => { lipidPanelData.ldl = value; hasLipidData = true; },
-            hdl: () => { lipidPanelData.hdl = value; hasLipidData = true; },
-            triglycerides: () => { lipidPanelData.triglycerides = value; hasLipidData = true; },
-            hba1c: () => { recordsToBatch.hba1c = { date, value }; },
-            glucose: () => { recordsToBatch.fastingBloodGlucose = { date, value }; },
-            vitaminD: () => { recordsToBatch.vitaminD = { date, value, units: res.unit }; },
-            thyroid: () => { recordsToBatch.thyroid = { ...recordsToBatch.thyroid, date, tsh: value }; },
-            hemoglobin: () => { recordsToBatch.hemoglobin = { date, hemoglobin: value }; },
-            bloodPressure: () => { /* Not typically from lab reports */ },
-            weight: () => { /* Not typically from lab reports */ },
+            'totalCholesterol': () => { lipidPanelData.totalCholesterol = value; hasLipidData = true; },
+            'ldl': () => { lipidPanelData.ldl = value; hasLipidData = true; },
+            'hdl': () => { lipidPanelData.hdl = value; hasLipidData = true; },
+            'triglycerides': () => { lipidPanelData.triglycerides = value; hasLipidData = true; },
+            'hba1c': () => { recordsToBatch.hba1c = { date, value }; },
+            'glucose': () => { recordsToBatch.fastingBloodGlucose = { date, value }; },
+            'vitaminD': () => { recordsToBatch.vitaminD = { date, value, units: res.unit }; },
+            'thyroid': () => { 
+                const lowerBiomarker = res.biomarker.toLowerCase();
+                if (lowerBiomarker.includes('tsh')) thyroidPanelData.tsh = value;
+                if (lowerBiomarker.includes('t3')) thyroidPanelData.t3 = value;
+                if (lowerBiomarker.includes('t4')) thyroidPanelData.t4 = value;
+                hasThyroidData = true;
+            },
+            'hemoglobin': () => { recordsToBatch.hemoglobin = { date, hemoglobin: value }; },
+            'bloodPressure': () => { /* Not typically from lab reports */ },
+            'weight': () => { /* Not typically from lab reports */ },
         };
         
         keyHandlers[biomarkerKey]?.();
     });
 
-    if (hasLipidData && Object.keys(lipidPanelData).length > 1) {
-        recordsToBatch.lipidPanel = lipidPanelData;
-    }
+    if (hasLipidData) recordsToBatch.lipidPanel = lipidPanelData;
+    if (hasThyroidData) recordsToBatch.thyroid = thyroidPanelData;
 
     try {
         const result = await addBatchRecords(recordsToBatch);
@@ -267,8 +276,8 @@ export function UploadRecordDialog() {
                     <Label>Patient Name</Label>
                     <Input value={extractedData.patientName} readOnly disabled/>
                 </div>
-                 <ScrollArea className="h-64 border rounded-md p-2">
-                    <div className="space-y-4 p-2">
+                 <ScrollArea className="h-64">
+                    <div className="space-y-4 p-1">
                          <div className="space-y-1">
                             <Label>Test Date</Label>
                             <DatePicker 
@@ -277,21 +286,20 @@ export function UploadRecordDialog() {
                             />
                         </div>
                         {results.length > 0 ? results.map((res, index) => (
-                             <div key={index} className="grid grid-cols-5 gap-2 items-center">
+                             <div key={index} className="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
                                 <Input 
                                     aria-label="Biomarker Name"
-                                    className="col-span-3"
                                     value={res.biomarker} 
                                     onChange={(e) => handleEditResult(index, 'biomarker', e.target.value)} />
                                 <Input 
                                     aria-label="Biomarker Value"
-                                    type="number" 
-                                    className="col-span-1"
+                                    type="number"
+                                    className="w-24"
                                     value={res.value} 
                                     onChange={(e) => handleEditResult(index, 'value', e.target.value)} />
                                 <Input 
                                     aria-label="Biomarker Unit"
-                                    className="col-span-1"
+                                    className="w-24"
                                     value={res.unit} 
                                     onChange={(e) => handleEditResult(index, 'unit', e.target.value)} />
                             </div>
@@ -351,3 +359,4 @@ export function UploadRecordDialog() {
   );
 }
 
+    
