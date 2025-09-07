@@ -152,7 +152,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         </CardHeader>
         
         <CardContent className="p-4 pt-0 space-y-3 text-sm flex-1">
-            <div className="space-y-1.5 text-muted-foreground text-xs">
+            <div className="space-y-1.5 text-muted-foreground text-xs p-2 border rounded-md">
                 <div className="flex items-center gap-2">
                     <Clock className="h-3 w-3 shrink-0" />
                     <span className="truncate">
@@ -173,9 +173,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </div>
             </div>
 
-            <Separator />
-
-            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="grid grid-cols-3 gap-2 text-center text-xs p-1 border rounded-md">
                 <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
                     <Droplet className="h-4 w-4 mb-1 text-primary" />
                     <span className="font-semibold">{patient.fastingBloodGlucoseRecords && patient.fastingBloodGlucoseRecords.length > 0 ? `${[...patient.fastingBloodGlucoseRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].value}` : 'N/A'}</span>
