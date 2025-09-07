@@ -130,7 +130,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [bloodPressureRecords, setBloodPressureRecordsState] = useState<BloodPressureRecord[]>([]);
   const [totalCholesterolRecords, setTotalCholesterolRecordsState] = useState<TotalCholesterolRecord[]>([]);
   const [ldlRecords, setLdlRecordsState] = useState<LdlRecord[]>([]);
-  const [hdlRecords, setHdlRecordsState] = useState<HdlRecord[]>([]);
+  const [hdlRecords, setHdlRecordsState] = useState<LdlRecord[]>([]);
   const [triglyceridesRecords, setTriglyceridesRecordsState] = useState<TriglyceridesRecord[]>([]);
   const [customBiomarkers, setCustomBiomarkersState] = useState<CustomBiomarker[]>([]);
   const [tips, setTipsState] = useState<string[]>([]);
@@ -347,22 +347,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
             associatedPanel = 'lipids';
         }
 
-        const newProfileState = {
-            ...profile,
-            presentMedicalConditions: [...profile.presentMedicalConditions, newCondition],
-        };
+        let newEnabledBiomarkers = profile.enabledBiomarkers || {};
+        let panelWasAdded = false;
 
         if (associatedPanel && isDoctorLoggedIn && !profile.enabledBiomarkers?.[associatedPanel]) {
-            newProfileState.enabledBiomarkers = {
-                ...(profile.enabledBiomarkers || {}),
+            newEnabledBiomarkers = {
+                ...newEnabledBiomarkers,
                 [associatedPanel]: []
             };
-            const panelInfo = availableDiseasePanels.find(p => p.key === associatedPanel);
-            toast({
-                title: 'Panel Enabled',
-                description: `The ${panelInfo?.label || 'related panel'} has been automatically enabled.`
-            });
+            panelWasAdded = true;
         }
+
+        const newProfileState: UserProfile = {
+            ...profile,
+            presentMedicalConditions: [...profile.presentMedicalConditions, newCondition],
+            enabledBiomarkers: newEnabledBiomarkers,
+        };
         
         // If a doctor adds a condition, save it immediately.
         if (isDoctorLoggedIn) {
@@ -372,6 +372,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
             });
             // Update local state after successful save
             setProfileState(newProfileState);
+            
+            if (panelWasAdded && associatedPanel) {
+                const panelInfo = availableDiseasePanels.find(p => p.key === associatedPanel);
+                toast({
+                    title: 'Panel Enabled',
+                    description: `The ${panelInfo?.label || 'related panel'} has been automatically enabled.`
+                });
+            }
+
         } else {
             // For patients, just update local state and let them save later.
             setProfileState(newProfileState);
@@ -887,5 +896,7 @@ export function useApp() {
   }
   return context;
 }
+
+    
 
     
