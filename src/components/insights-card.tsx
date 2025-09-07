@@ -176,18 +176,20 @@ export function InsightsCard() {
         )}
         
         {!isLoading && !isTranslating && tipsToDisplay.length === 0 && (
-            <div className="text-center text-sm text-muted-foreground py-6 space-y-4">
-                <p>Click the button to generate personalized health tips.</p>
-                 <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
-                    {isLoading ? (
-                        <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating...
-                        </>
-                    ) : (
-                        'Generate New Insights'
-                    )}
-                </Button>
+            <div className="flex items-center justify-center text-center text-sm text-muted-foreground min-h-[150px]">
+                <div className="space-y-4">
+                    <p>Click the button to generate personalized health tips.</p>
+                    <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
+                        {isLoading ? (
+                            <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Generating...
+                            </>
+                        ) : (
+                            'Generate New Insights'
+                        )}
+                    </Button>
+                </div>
             </div>
         )}
         
@@ -226,5 +228,7 @@ export function InsightsCard() {
     </Card>
   );
 }
+
+    
 
     
