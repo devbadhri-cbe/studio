@@ -166,9 +166,16 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
 
 export async function updatePatient(id: string, updates: Partial<Patient>): Promise<Patient> {
     const docRef = doc(db, PATIENTS_COLLECTION, id);
+
+    // Fetch the existing document to ensure the summary is based on the full data.
+    const currentPatientData = await getPatient(id);
+    if (!currentPatientData) throw new Error("Patient not found for update.");
+
+    // Merge the updates into the existing data to get a complete picture.
+    const mergedData = { ...currentPatientData, ...updates };
     
-    // Recalculate summary fields if relevant data has changed
-    const summaryUpdates = getPatientSummary(updates);
+    // Recalculate summary fields based on the complete, merged data.
+    const summaryUpdates = getPatientSummary(mergedData);
 
     const updateData: {[key: string]: any} = { ...updates, ...summaryUpdates };
     
