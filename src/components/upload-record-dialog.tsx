@@ -147,11 +147,12 @@ export function UploadRecordDialog() {
     const date = extractedData.testDate;
 
     const findKeyByLabel = (label: string): BiomarkerKey | undefined => {
+        const lowercasedInput = label.toLowerCase().trim();
         return Object.keys(availableBiomarkerCards).find(key => {
             const cardInfo = availableBiomarkerCards[key as BiomarkerKey];
-            const lowercasedLabel = cardInfo.label.toLowerCase();
-            const lowercasedInput = label.toLowerCase();
-            return lowercasedLabel === lowercasedInput || lowercasedLabel.includes(lowercasedInput);
+            const lowercasedLabel = cardInfo.label.toLowerCase().trim();
+            const alternateNames = cardInfo.label.split('(')[0].trim().toLowerCase();
+            return lowercasedLabel === lowercasedInput || alternateNames === lowercasedInput || lowercasedLabel.includes(lowercasedInput);
         }) as BiomarkerKey | undefined;
     };
     
@@ -163,42 +164,24 @@ export function UploadRecordDialog() {
         if (isNaN(value)) return;
 
         const biomarkerKey = findKeyByLabel(res.biomarker);
+        
         if (!biomarkerKey) return;
         
-        switch (biomarkerKey) {
-            case 'totalCholesterol':
-                lipidPanelData.totalCholesterol = value;
-                hasLipidData = true;
-                break;
-            case 'ldl':
-                lipidPanelData.ldl = value;
-                hasLipidData = true;
-                break;
-            case 'hdl':
-                lipidPanelData.hdl = value;
-                hasLipidData = true;
-                break;
-            case 'triglycerides':
-                lipidPanelData.triglycerides = value;
-                hasLipidData = true;
-                break;
-            case 'hba1c':
-                recordsToBatch.hba1c = { date, value };
-                break;
-            case 'glucose':
-                recordsToBatch.fastingBloodGlucose = { date, value };
-                break;
-            case 'vitaminD':
-                recordsToBatch.vitaminD = { date, value, units: res.unit };
-                break;
-            case 'thyroid':
-                recordsToBatch.thyroid = { ...recordsToBatch.thyroid, date, tsh: value };
-                break;
-            case 'hemoglobin':
-                recordsToBatch.hemoglobin = { date, hemoglobin: value };
-                break;
-            // bloodPressure and weight are typically not on lab reports, but we can add cases if needed
-        }
+        const keyHandlers = {
+            totalCholesterol: () => { lipidPanelData.totalCholesterol = value; hasLipidData = true; },
+            ldl: () => { lipidPanelData.ldl = value; hasLipidData = true; },
+            hdl: () => { lipidPanelData.hdl = value; hasLipidData = true; },
+            triglycerides: () => { lipidPanelData.triglycerides = value; hasLipidData = true; },
+            hba1c: () => { recordsToBatch.hba1c = { date, value }; },
+            glucose: () => { recordsToBatch.fastingBloodGlucose = { date, value }; },
+            vitaminD: () => { recordsToBatch.vitaminD = { date, value, units: res.unit }; },
+            thyroid: () => { recordsToBatch.thyroid = { ...recordsToBatch.thyroid, date, tsh: value }; },
+            hemoglobin: () => { recordsToBatch.hemoglobin = { date, hemoglobin: value }; },
+            bloodPressure: () => { /* Not typically from lab reports */ },
+            weight: () => { /* Not typically from lab reports */ },
+        };
+        
+        keyHandlers[biomarkerKey]?.();
     });
 
     if (hasLipidData) {
@@ -293,24 +276,25 @@ export function UploadRecordDialog() {
                     </div>
                  </div>
                  <ScrollArea className="h-64 border rounded-md p-2">
-                    <div className="space-y-4 p-2">
+                    <div className="space-y-2 p-2">
                         {results.length > 0 ? results.map((res, index) => (
-                            <div key={index} className="space-y-2">
+                             <div key={index} className="grid grid-cols-6 gap-2 items-center">
                                 <Input 
                                     aria-label="Biomarker Name"
+                                    className="col-span-3"
                                     value={res.biomarker} 
                                     onChange={(e) => handleEditResult(index, 'biomarker', e.target.value)} />
-                                <div className="grid grid-cols-2 gap-2">
-                                     <Input 
-                                        aria-label="Biomarker Value"
-                                        type="number" 
-                                        value={res.value} 
-                                        onChange={(e) => handleEditResult(index, 'value', e.target.value)} />
-                                    <Input 
-                                        aria-label="Biomarker Unit"
-                                        value={res.unit} 
-                                        onChange={(e) => handleEditResult(index, 'unit', e.target.value)} />
-                                </div>
+                                <Input 
+                                    aria-label="Biomarker Value"
+                                    type="number" 
+                                    className="col-span-2"
+                                    value={res.value} 
+                                    onChange={(e) => handleEditResult(index, 'value', e.target.value)} />
+                                <Input 
+                                    aria-label="Biomarker Unit"
+                                    className="col-span-1"
+                                    value={res.unit} 
+                                    onChange={(e) => handleEditResult(index, 'unit', e.target.value)} />
                             </div>
                         )) : (
                           <div className="flex items-center justify-center h-full text-muted-foreground">
