@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, ShieldAlert, Info, XCircle, Trash2, Edit, AlertTriangle } from 'lucide-react';
@@ -18,12 +19,18 @@ import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
 import { DatePicker } from './ui/date-picker';
 import { DiseaseCard } from './disease-card';
 import { Separator } from './ui/separator';
-import type { MedicalCondition } from '@/lib/types';
+import type { MedicalCondition, Medication } from '@/lib/types';
 import { parseISO } from 'date-fns';
 
 const ConditionSchema = z.object({
   condition: z.string().min(2, 'Condition name is required.'),
   date: z.date({ required_error: 'A valid date is required.' }),
+});
+
+const MedicationSchema = z.object({
+  medicationName: z.string().min(2, 'Medication name is required.'),
+  dosage: z.string(),
+  frequency: z.string(),
 });
 
 function capitalizeFirstLetter(string: string) {
@@ -122,7 +129,7 @@ export function MedicalHistoryCard() {
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
   const handleSaveCondition = async (data: z.infer<typeof ConditionSchema>) => {
-    if (editingCondition) {
+    if (editingCondition && editingCondition.id) {
         // We are updating an existing condition
         await updateMedicalCondition({
             ...editingCondition,
@@ -361,5 +368,3 @@ export function MedicalHistoryCard() {
     </Card>
   );
 }
-
-    

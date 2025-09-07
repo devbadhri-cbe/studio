@@ -11,6 +11,7 @@ import { countries } from '@/lib/countries';
 import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
 import { getIcdCode } from '@/ai/flows/get-icd-code-flow';
+import { availableDiseasePanels } from '@/lib/biomarker-cards';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
 
@@ -335,17 +336,48 @@ export function AppProvider({ children }: { children: ReactNode }) {
         status: isDoctorLoggedIn ? 'verified' : 'pending_review'
       };
 
-      setProfileState(prevProfile => ({
-        ...prevProfile,
-        presentMedicalConditions: [...prevProfile.presentMedicalConditions, newCondition]
-      }));
+      const conditionLower = newCondition.condition.toLowerCase();
+      let associatedPanel: DiseasePanelKey | undefined;
 
-      setHasUnsavedChanges(true);
-      
-      if (isDoctorLoggedIn) {
-          approveMedicalCondition(newCondition.id);
+      if (conditionLower.includes('diabet') || conditionLower.includes('glucose')) {
+          associatedPanel = 'diabetes';
+      } else if (conditionLower.includes('hypertens') || conditionLower.includes('blood pressure')) {
+          associatedPanel = 'hypertension';
+      } else if (conditionLower.includes('lipid') || conditionLower.includes('cholesterol')) {
+          associatedPanel = 'lipids';
       }
 
+      setProfileState(prevProfile => {
+          let updatedEnabledBiomarkers = prevProfile.enabledBiomarkers || {};
+          if (associatedPanel && isDoctorLoggedIn && !updatedEnabledBiomarkers[associatedPanel]) {
+              updatedEnabledBiomarkers = {
+                  ...updatedEnabledBiomarkers,
+                  [associatedPanel]: []
+              };
+              const panelInfo = availableDiseasePanels.find(p => p.key === associatedPanel);
+              toast({
+                  title: 'Panel Enabled',
+                  description: `The ${panelInfo?.label || 'related panel'} has been automatically enabled for this patient.`
+              });
+          }
+
+          return {
+            ...prevProfile,
+            presentMedicalConditions: [...prevProfile.presentMedicalConditions, newCondition],
+            enabledBiomarkers: updatedEnabledBiomarkers
+          }
+      });
+      
+      if (isDoctorLoggedIn) {
+          // The state update is asynchronous, so we need to ensure we save the *new* state.
+          // We can trigger a save by setting hasUnsavedChanges and calling saveChanges,
+          // or by directly calling updatePatient with the new state.
+          // The simplest is to just set the flag, as the user will likely save,
+          // but to be robust, we'll trigger the save.
+          setHasUnsavedChanges(true);
+      } else {
+        setHasUnsavedChanges(true);
+      }
 
     } catch (error) {
         console.error("Failed to save condition", error);
