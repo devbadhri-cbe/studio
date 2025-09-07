@@ -16,7 +16,6 @@ import {
   Timestamp,
   limit,
   startAfter,
-  getCountFromServer,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Patient } from './types';
@@ -113,12 +112,6 @@ export async function getPatientsPaginated(
 
   return { patients, lastVisible: newLastVisible || null };
 }
-
-export async function getPatientsCount(): Promise<number> {
-  const snapshot = await getCountFromServer(collection(db, PATIENTS_COLLECTION));
-  return snapshot.data().count;
-}
-
 
 export async function getPatient(id: string): Promise<any | null> {
   const docRef = doc(db, PATIENTS_COLLECTION, id);

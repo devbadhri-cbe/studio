@@ -20,7 +20,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
-import { addPatient, deletePatient, getPatientsPaginated, getPatientsCount } from '@/lib/firestore';
+import { addPatient, deletePatient, getPatientsPaginated } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { useApp } from '@/context/app-context';
@@ -44,19 +44,21 @@ export default function DoctorDashboardPage() {
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [page, setPage] = React.useState(1);
     const [pageCursors, setPageCursors] = React.useState<(any | null)[]>([null]);
-    const [totalPatients, setTotalPatients] = React.useState(0);
-
-    const totalPages = Math.ceil(totalPatients / PAGE_SIZE);
+    const [hasNextPage, setHasNextPage] = React.useState(true);
 
     const fetchPatients = React.useCallback(async (pageIndex: number) => {
         setIsLoading(true);
         try {
-            const lastVisible = pageCursors[pageIndex -1] || null;
+            // Determine the cursor for the requested page.
+            // pageIndex is 1-based, so we need to get the cursor for the previous page.
+            const lastVisible = pageIndex > 1 ? pageCursors[pageIndex - 1] : null;
+
             const { patients: rawPatientsData, lastVisible: newLastVisible } = await getPatientsPaginated(lastVisible, PAGE_SIZE);
             const fetchedPatients = rawPatientsData.map(processPatientData);
             
             setPatients(fetchedPatients);
             
+            // If a new lastVisible document is returned, store it for the next page.
             if (newLastVisible) {
                 setPageCursors(prev => {
                     const newCursors = [...prev];
@@ -65,10 +67,8 @@ export default function DoctorDashboardPage() {
                 });
             }
 
-            if (pageIndex === 1) {
-                const count = await getPatientsCount();
-                setTotalPatients(count);
-            }
+            // Determine if there is a next page.
+            setHasNextPage(fetchedPatients.length === PAGE_SIZE);
             setPage(pageIndex);
 
         } catch (error) {
@@ -89,7 +89,7 @@ export default function DoctorDashboardPage() {
             fetchPatients(1);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isClient, setIsDoctorLoggedIn, fetchPatients]);
+    }, [isClient, setIsDoctorLoggedIn]);
     
 
     const viewPatientDashboard = (patient: Patient) => {
@@ -102,7 +102,6 @@ export default function DoctorDashboardPage() {
             await deletePatient(patientId);
             setPatients(patients.filter(p => p.id !== patientId));
             setPatientToDelete(null);
-            setTotalPatients(prev => prev - 1);
             toast({
                 title: 'Patient Deleted',
                 description: 'The patient has been removed from the list.'
@@ -244,7 +243,7 @@ export default function DoctorDashboardPage() {
                         <CardHeader className="flex flex-col md:flex-row md:items-center gap-4">
                             <div className="grid gap-2 flex-1">
                                 <CardTitle>Patient List</CardTitle>
-                                <CardDescription>A list of all patients currently under your care. Showing page {page} of {totalPages}.</CardDescription>
+                                <CardDescription>A list of all patients currently under your care. Displaying page {page}.</CardDescription>
                             </div>
                             <div className="flex flex-col sm:flex-row items-center gap-2">
                                 <div className="relative w-full sm:w-auto">
@@ -288,25 +287,17 @@ export default function DoctorDashboardPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => fetchPatients(1)}
-                                    disabled={page === 1 || isLoading}
-                                >
-                                    First
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
                                     onClick={() => fetchPatients(page - 1)}
                                     disabled={page === 1 || isLoading}
                                 >
                                     <ChevronLeft className="h-4 w-4" />
-                                    Prev
+                                    Previous
                                 </Button>
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => fetchPatients(page + 1)}
-                                    disabled={page >= totalPages || isLoading}
+                                    disabled={!hasNextPage || isLoading}
                                 >
                                     Next
                                     <ChevronRight className="h-4 w-4" />
@@ -343,7 +334,3 @@ export default function DoctorDashboardPage() {
     </TooltipProvider>
   );
 }
-
-    
-
-    
