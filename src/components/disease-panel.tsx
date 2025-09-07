@@ -6,14 +6,12 @@ import { useApp } from '@/context/app-context';
 import { Card, CardContent } from './ui/card';
 import * as React from 'react';
 import { availableDiseasePanels } from '@/lib/biomarker-cards';
-import { cn } from '@/lib/utils';
 
 interface DiseasePanelProps {
     searchQuery?: string;
-    isBiomarkersOpen?: boolean;
 }
 
-export function DiseasePanel({ searchQuery = '', isBiomarkersOpen }: DiseasePanelProps) {
+export function DiseasePanel({ searchQuery = '' }: DiseasePanelProps) {
     const { isDoctorLoggedIn, profile } = useApp();
 
     const panelsToShow = React.useMemo(() => {
@@ -63,10 +61,7 @@ export function DiseasePanel({ searchQuery = '', isBiomarkersOpen }: DiseasePane
 
     return (
         <Card>
-            <CardContent className={cn(
-                "p-6 grid grid-cols-1 gap-6 border-2 border-purple-500",
-                !isBiomarkersOpen && "md:grid-cols-2"
-            )}>
+            <CardContent className="p-6 grid grid-cols-1 gap-6 border-2 border-purple-500">
                 {panelsToShow}
             </CardContent>
         </Card>
