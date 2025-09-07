@@ -60,18 +60,7 @@ export function UploadRecordDialog() {
     }
   };
 
-  const handleFileChange = async (file: File | null) => {
-    if (!file) return;
-
-    if (file.size > 4 * 1024 * 1024) {
-      toast({
-        variant: 'destructive',
-        title: 'File too large',
-        description: 'Please upload a file smaller than 4MB.',
-      });
-      return;
-    }
-    
+  const processAndUploadFile = React.useCallback(async (file: File) => {
     setIsLoading(true);
     setStep('loading');
 
@@ -98,6 +87,90 @@ export function UploadRecordDialog() {
         setIsLoading(false);
       }
     };
+  }, [profile.enabledBiomarkers]);
+
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target?.result as string;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 1920;
+                const MAX_HEIGHT = 1080;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    return reject(new Error('Could not get canvas context'));
+                }
+                ctx.drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const newFile = new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(newFile);
+                    } else {
+                        reject(new Error('Canvas to Blob conversion failed'));
+                    }
+                }, 'image/jpeg', 0.8); // 80% quality
+            };
+            img.onerror = reject;
+        };
+        reader.onerror = reject;
+    });
+};
+
+
+  const handleFileChange = async (file: File | null) => {
+    if (!file) return;
+
+    if (file.size > 4 * 1024 * 1024) {
+      if (file.type.startsWith('image/')) {
+        toast({
+            title: 'Image is large',
+            description: 'Attempting to compress the image before uploading. Please wait...',
+        });
+        try {
+            const compressedFile = await compressImage(file);
+            await processAndUploadFile(compressedFile);
+        } catch (error) {
+            console.error("Image compression failed:", error);
+            toast({
+                variant: 'destructive',
+                title: 'Compression Failed',
+                description: 'Could not compress the image. Please try a smaller file.',
+            });
+        }
+      } else {
+         toast({
+            variant: 'destructive',
+            title: 'File too large',
+            description: 'Please upload a file smaller than 4MB. Only images can be compressed.',
+        });
+      }
+      return;
+    }
+    
+    await processAndUploadFile(file);
   };
 
   const startCamera = async () => {
@@ -126,7 +199,7 @@ export function UploadRecordDialog() {
     
     canvas.toBlob(async (blob) => {
         if (blob) {
-            handleFileChange(new File([blob], "capture.png", { type: "image/png" }));
+            await handleFileChange(new File([blob], "capture.png", { type: "image/png" }));
         }
     }, 'image/png');
   };
@@ -272,47 +345,49 @@ export function UploadRecordDialog() {
           const { testDate, results } = extractedData;
         return (
             <div className="space-y-4">
-                 <ScrollArea className="h-72">
-                    <div className="space-y-4 p-2 border rounded-lg">
-                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                                <Label>Patient Name</Label>
-                                <Input value={extractedData.patientName} readOnly disabled/>
+                 <div className="space-y-4 p-4 border rounded-lg">
+                     <ScrollArea className="h-60">
+                        <div className="space-y-4 pr-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <Label>Patient Name</Label>
+                                    <Input value={extractedData.patientName} readOnly disabled/>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label>Test Date</Label>
+                                    <DatePicker 
+                                        value={testDate && isValid(parseISO(testDate)) ? parseISO(testDate) : new Date()}
+                                        onChange={(date) => setExtractedData({...extractedData, testDate: date?.toISOString() || ''})}
+                                    />
+                                </div>
                             </div>
-                             <div className="space-y-1">
-                                <Label>Test Date</Label>
-                                <DatePicker 
-                                    value={testDate && isValid(parseISO(testDate)) ? parseISO(testDate) : new Date()}
-                                    onChange={(date) => setExtractedData({...extractedData, testDate: date?.toISOString() || ''})}
-                                />
-                            </div>
-                        </div>
 
-                        {results.length > 0 ? results.map((res, index) => (
-                             <div key={index} className="grid grid-cols-[1fr_100px_100px] gap-2 items-center">
-                                <Input 
-                                    aria-label="Biomarker Name"
-                                    value={res.biomarker} 
-                                    onChange={(e) => handleEditResult(index, 'biomarker', e.target.value)} />
-                                <Input 
-                                    aria-label="Biomarker Value"
-                                    type="number"
-                                    className="w-full"
-                                    value={res.value} 
-                                    onChange={(e) => handleEditResult(index, 'value', e.target.value)} />
-                                <Input 
-                                    aria-label="Biomarker Unit"
-                                    className="w-full"
-                                    value={res.unit} 
-                                    onChange={(e) => handleEditResult(index, 'unit', e.target.value)} />
+                            {results.length > 0 ? results.map((res, index) => (
+                                <div key={index} className="grid grid-cols-[1fr_100px_100px] gap-2 items-center">
+                                    <Input 
+                                        aria-label="Biomarker Name"
+                                        value={res.biomarker} 
+                                        onChange={(e) => handleEditResult(index, 'biomarker', e.target.value)} />
+                                    <Input 
+                                        aria-label="Biomarker Value"
+                                        type="number"
+                                        className="w-full"
+                                        value={res.value} 
+                                        onChange={(e) => handleEditResult(index, 'value', e.target.value)} />
+                                    <Input 
+                                        aria-label="Biomarker Unit"
+                                        className="w-full"
+                                        value={res.unit} 
+                                        onChange={(e) => handleEditResult(index, 'unit', e.target.value)} />
+                                </div>
+                            )) : (
+                            <div className="flex items-center justify-center h-full text-muted-foreground">
+                                <p>No relevant biomarkers were found on the document.</p>
                             </div>
-                        )) : (
-                          <div className="flex items-center justify-center h-full text-muted-foreground">
-                            <p>No relevant biomarkers were found on the document.</p>
-                          </div>
-                        )}
-                    </div>
-                 </ScrollArea>
+                            )}
+                        </div>
+                     </ScrollArea>
+                  </div>
                   <div className="flex justify-between gap-2">
                      <Button variant="ghost" onClick={() => setStep('confirmName')}>
                         <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -361,5 +436,3 @@ export function UploadRecordDialog() {
     </Dialog>
   );
 }
-
-    
