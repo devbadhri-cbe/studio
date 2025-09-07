@@ -132,7 +132,7 @@ export function MedicalHistoryCard() {
     if (editingCondition && editingCondition.id) {
         // We are updating an existing condition
         await updateMedicalCondition({
-            ...editingCondition,
+            ...editingCondition, // Preserves the original ID
             condition: data.condition,
             date: data.date.toISOString(),
             status: isDoctorLoggedIn ? 'verified' : 'pending_review',
@@ -368,3 +368,5 @@ export function MedicalHistoryCard() {
     </Card>
   );
 }
+
+    
