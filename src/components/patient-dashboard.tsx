@@ -107,7 +107,7 @@ export function PatientDashboard() {
                         )}
                     </div>
                     <CollapsibleContent className="mt-4">
-                        <DiseasePanel searchQuery={diseasePanelSearchQuery} />
+                        <DiseasePanel searchQuery={diseasePanelSearchQuery} isBiomarkersOpen={isBiomarkersOpen} />
                     </CollapsibleContent>
                 </Collapsible>
                 
