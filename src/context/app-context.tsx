@@ -46,7 +46,7 @@ interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
   addMedicalCondition: (condition: Pick<MedicalCondition, 'condition' | 'date'>) => Promise<void>;
-  updateMedicalCondition: (condition: MedicalCondition) => void;
+  updateMedicalCondition: (condition: MedicalCondition) => Promise<void>;
   removeMedicalCondition: (id: string) => void;
   approveMedicalCondition: (conditionId: string) => void;
   dismissSuggestion: (conditionId: string) => void;
@@ -326,83 +326,90 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [profile.bmi]);
   
   const addMedicalCondition = useCallback(async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
-    try {
-        const result = await getIcdCode({ conditionName: condition.condition });
-        
-        const newCondition: MedicalCondition = {
-            id: `cond-${Date.now()}`,
-            condition: result.standardizedName || condition.condition,
-            date: condition.date,
-            icdCode: result.icdCode || '',
-            status: isDoctorLoggedIn ? 'verified' : 'pending_review'
-        };
+      const tempId = `cond-${Date.now()}`;
+      // Add condition with a temporary loading state
+      const tempCondition: MedicalCondition = {
+        id: tempId,
+        condition: condition.condition,
+        date: condition.date,
+        icdCode: 'loading...',
+        status: isDoctorLoggedIn ? 'verified' : 'pending_review'
+      };
 
-        const conditionLower = newCondition.condition.toLowerCase();
-        let associatedPanel: DiseasePanelKey | undefined;
+      setProfileState(prev => ({
+        ...prev,
+        presentMedicalConditions: [...prev.presentMedicalConditions, tempCondition]
+      }));
+      setHasUnsavedChanges(true);
 
-        if (conditionLower.includes('diabet') || conditionLower.includes('glucose')) {
-            associatedPanel = 'diabetes';
-        } else if (conditionLower.includes('hypertens') || conditionLower.includes('blood pressure')) {
-            associatedPanel = 'hypertension';
-        } else if (conditionLower.includes('lipid') || conditionLower.includes('cholesterol')) {
-            associatedPanel = 'lipids';
-        }
-        
-        const panelAlreadyExists = associatedPanel ? !!profile.enabledBiomarkers?.[associatedPanel] : true;
-        
-        let newEnabledBiomarkers = profile.enabledBiomarkers || {};
+      try {
+          const result = await getIcdCode({ conditionName: condition.condition });
+          
+          const newCondition: MedicalCondition = {
+              id: tempId,
+              condition: result.standardizedName || condition.condition,
+              date: condition.date,
+              icdCode: result.icdCode || '',
+              status: isDoctorLoggedIn ? 'verified' : 'pending_review'
+          };
 
-        if (associatedPanel && isDoctorLoggedIn && !panelAlreadyExists) {
-            newEnabledBiomarkers = {
-                ...newEnabledBiomarkers,
-                [associatedPanel]: []
-            };
-        }
+          setProfileState(prev => ({
+            ...prev,
+            presentMedicalConditions: prev.presentMedicalConditions.map(c => c.id === tempId ? newCondition : c)
+          }));
+          setHasUnsavedChanges(true);
 
-        const newProfileState: UserProfile = {
-            ...profile,
-            presentMedicalConditions: [...profile.presentMedicalConditions, newCondition],
-            enabledBiomarkers: newEnabledBiomarkers,
-        };
-        
-        if (isDoctorLoggedIn) {
-            await updatePatient(profile.id, {
-                presentMedicalConditions: newProfileState.presentMedicalConditions,
-                enabledBiomarkers: newProfileState.enabledBiomarkers,
-            });
-            setProfileState(newProfileState);
-            
-            if (associatedPanel && !panelAlreadyExists) {
-                const panelInfo = availableDiseasePanels.find(p => p.key === associatedPanel);
-                toast({
-                    title: 'Panel Enabled',
-                    description: `The ${panelInfo?.label || 'related panel'} has been automatically enabled.`
-                });
-            }
-
-        } else {
-            setProfileState(newProfileState);
-            setHasUnsavedChanges(true);
-        }
-
-    } catch (error) {
-        console.error("Failed to save condition", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not save medical condition. Please try again."
-        });
-    }
-}, [isDoctorLoggedIn, profile]);
+      } catch (error) {
+          console.error("Failed to get ICD code", error);
+          toast({
+              variant: "destructive",
+              title: "AI Error",
+              description: "Could not get ICD code. Please check and save again."
+          });
+          // Revert to a non-loading state on error
+          setProfileState(prev => ({
+            ...prev,
+            presentMedicalConditions: prev.presentMedicalConditions.map(c => 
+                c.id === tempId ? { ...c, icdCode: 'Error' } : c
+            )
+          }));
+      }
+  }, [isDoctorLoggedIn]);
 
 
-  const updateMedicalCondition = useCallback((condition: MedicalCondition) => {
+  const updateMedicalCondition = useCallback(async (condition: MedicalCondition) => {
+    const originalCondition = profile.presentMedicalConditions.find(c => c.id === condition.id);
+    const hasNameChanged = originalCondition?.condition !== condition.condition;
+
+    const conditionWithLoader = { ...condition, icdCode: hasNameChanged ? 'loading...' : condition.icdCode };
     setProfileState(prevProfile => ({
       ...prevProfile,
-      presentMedicalConditions: prevProfile.presentMedicalConditions.map(c => c.id === condition.id ? condition : c)
+      presentMedicalConditions: prevProfile.presentMedicalConditions.map(c => c.id === condition.id ? conditionWithLoader : c)
     }));
     setHasUnsavedChanges(true);
-  }, []);
+    
+    if (!hasNameChanged) return;
+
+    try {
+        const result = await getIcdCode({ conditionName: condition.condition });
+        const updatedConditionWithCode = { 
+            ...condition, 
+            condition: result.standardizedName || condition.condition, 
+            icdCode: result.icdCode || ''
+        };
+        setProfileState(prevProfile => ({
+          ...prevProfile,
+          presentMedicalConditions: prevProfile.presentMedicalConditions.map(c => c.id === condition.id ? updatedConditionWithCode : c)
+        }));
+    } catch (error) {
+        console.error("Failed to get ICD code", error);
+        toast({ variant: "destructive", title: "AI Error", description: "Could not update ICD code." });
+        setProfileState(prevProfile => ({
+          ...prevProfile,
+          presentMedicalConditions: prevProfile.presentMedicalConditions.map(c => c.id === condition.id ? { ...condition, icdCode: 'Error' } : c)
+        }));
+    }
+  }, [profile.presentMedicalConditions]);
   
   const removeMedicalCondition = useCallback((id: string) => {
     setProfileState(prevProfile => ({
@@ -900,9 +907,3 @@ export function useApp() {
   }
   return context;
 }
-
-    
-
-    
-
-    

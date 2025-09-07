@@ -371,5 +371,3 @@ export function MedicalHistoryCard() {
     </Card>
   );
 }
-
-    
