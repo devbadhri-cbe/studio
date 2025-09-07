@@ -150,9 +150,10 @@ export function UploadRecordDialog() {
         const lowercasedInput = label.toLowerCase().trim();
         return Object.keys(availableBiomarkerCards).find(key => {
             const cardInfo = availableBiomarkerCards[key as BiomarkerKey];
+            if (!cardInfo) return false;
             const lowercasedLabel = cardInfo.label.toLowerCase().trim();
-            const alternateNames = cardInfo.label.split('(')[0].trim().toLowerCase();
-            return lowercasedLabel === lowercasedInput || alternateNames === lowercasedInput || lowercasedLabel.includes(lowercasedInput);
+            const mainLabel = cardInfo.label.split('(')[0].trim().toLowerCase();
+            return lowercasedLabel === lowercasedInput || mainLabel === lowercasedInput || lowercasedLabel.includes(lowercasedInput);
         }) as BiomarkerKey | undefined;
     };
     
@@ -167,7 +168,7 @@ export function UploadRecordDialog() {
         
         if (!biomarkerKey) return;
         
-        const keyHandlers = {
+        const keyHandlers: Record<BiomarkerKey, () => void> = {
             totalCholesterol: () => { lipidPanelData.totalCholesterol = value; hasLipidData = true; },
             ldl: () => { lipidPanelData.ldl = value; hasLipidData = true; },
             hdl: () => { lipidPanelData.hdl = value; hasLipidData = true; },
@@ -184,7 +185,7 @@ export function UploadRecordDialog() {
         keyHandlers[biomarkerKey]?.();
     });
 
-    if (hasLipidData) {
+    if (hasLipidData && Object.keys(lipidPanelData).length > 1) {
         recordsToBatch.lipidPanel = lipidPanelData;
     }
 
@@ -262,23 +263,21 @@ export function UploadRecordDialog() {
           const { testDate, results } = extractedData;
         return (
             <div className="space-y-4">
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                        <Label>Patient Name</Label>
-                        <Input value={extractedData.patientName} readOnly disabled/>
-                    </div>
-                    <div className="space-y-1">
-                        <Label>Test Date</Label>
-                        <DatePicker 
-                            value={testDate && isValid(parseISO(testDate)) ? parseISO(testDate) : new Date()}
-                            onChange={(date) => setExtractedData({...extractedData, testDate: date?.toISOString() || ''})}
-                        />
-                    </div>
-                 </div>
+                 <div className="space-y-1">
+                    <Label>Patient Name</Label>
+                    <Input value={extractedData.patientName} readOnly disabled/>
+                </div>
                  <ScrollArea className="h-64 border rounded-md p-2">
-                    <div className="space-y-2 p-2">
+                    <div className="space-y-4 p-2">
+                         <div className="space-y-1">
+                            <Label>Test Date</Label>
+                            <DatePicker 
+                                value={testDate && isValid(parseISO(testDate)) ? parseISO(testDate) : new Date()}
+                                onChange={(date) => setExtractedData({...extractedData, testDate: date?.toISOString() || ''})}
+                            />
+                        </div>
                         {results.length > 0 ? results.map((res, index) => (
-                             <div key={index} className="grid grid-cols-6 gap-2 items-center">
+                             <div key={index} className="grid grid-cols-5 gap-2 items-center">
                                 <Input 
                                     aria-label="Biomarker Name"
                                     className="col-span-3"
@@ -287,7 +286,7 @@ export function UploadRecordDialog() {
                                 <Input 
                                     aria-label="Biomarker Value"
                                     type="number" 
-                                    className="col-span-2"
+                                    className="col-span-1"
                                     value={res.value} 
                                     onChange={(e) => handleEditResult(index, 'value', e.target.value)} />
                                 <Input 
@@ -351,3 +350,4 @@ export function UploadRecordDialog() {
     </Dialog>
   );
 }
+
