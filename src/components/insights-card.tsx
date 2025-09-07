@@ -205,7 +205,7 @@ export function InsightsCard() {
         )}
         
         {!isLoading && !isTranslating && tipsToDisplay.length === 0 && (
-            <div className="pt-6">
+            <div className="pt-6 border-2 border-red-500">
                 <div className="flex flex-col items-center justify-center text-center gap-4">
                     <p className="text-sm text-muted-foreground">Click the button to generate personalized health tips.</p>
                     <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
