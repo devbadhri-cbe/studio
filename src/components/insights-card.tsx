@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useApp } from '@/context/app-context';
@@ -182,7 +183,7 @@ export function InsightsCard() {
         )}
         
         <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={handleGetInsights} disabled={isLoading || isTranslating} className="w-full flex-1" size="sm">
+            <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
