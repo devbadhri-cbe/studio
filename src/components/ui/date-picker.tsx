@@ -95,7 +95,13 @@ export function DatePicker({
 
   if (isMobile) {
     const handleMobileDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const date = parse(e.target.value, 'yyyy-MM-dd', new Date());
+        const dateValue = e.target.value;
+        if (!dateValue) {
+            onChange(undefined);
+            return;
+        }
+        // Add time to avoid timezone issues where parsing `yyyy-MM-dd` might result in the previous day.
+        const date = parse(dateValue, 'yyyy-MM-dd', new Date());
         if (isValid(date)) {
             onChange(date);
         } else {
