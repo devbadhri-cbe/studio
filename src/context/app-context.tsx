@@ -326,58 +326,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const addMedicalCondition = useCallback(async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
     try {
-      const result = await getIcdCode({ conditionName: condition.condition });
-      
-      const newCondition: MedicalCondition = {
-        id: `cond-${Date.now()}`,
-        condition: result.standardizedName || condition.condition,
-        date: condition.date,
-        icdCode: result.icdCode || '',
-        status: isDoctorLoggedIn ? 'verified' : 'pending_review'
-      };
+        const result = await getIcdCode({ conditionName: condition.condition });
+        
+        const newCondition: MedicalCondition = {
+            id: `cond-${Date.now()}`,
+            condition: result.standardizedName || condition.condition,
+            date: condition.date,
+            icdCode: result.icdCode || '',
+            status: isDoctorLoggedIn ? 'verified' : 'pending_review'
+        };
 
-      const conditionLower = newCondition.condition.toLowerCase();
-      let associatedPanel: DiseasePanelKey | undefined;
+        const conditionLower = newCondition.condition.toLowerCase();
+        let associatedPanel: DiseasePanelKey | undefined;
 
-      if (conditionLower.includes('diabet') || conditionLower.includes('glucose')) {
-          associatedPanel = 'diabetes';
-      } else if (conditionLower.includes('hypertens') || conditionLower.includes('blood pressure')) {
-          associatedPanel = 'hypertension';
-      } else if (conditionLower.includes('lipid') || conditionLower.includes('cholesterol')) {
-          associatedPanel = 'lipids';
-      }
+        if (conditionLower.includes('diabet') || conditionLower.includes('glucose')) {
+            associatedPanel = 'diabetes';
+        } else if (conditionLower.includes('hypertens') || conditionLower.includes('blood pressure')) {
+            associatedPanel = 'hypertension';
+        } else if (conditionLower.includes('lipid') || conditionLower.includes('cholesterol')) {
+            associatedPanel = 'lipids';
+        }
 
-      setProfileState(prevProfile => {
-          let updatedEnabledBiomarkers = prevProfile.enabledBiomarkers || {};
-          if (associatedPanel && isDoctorLoggedIn && !updatedEnabledBiomarkers[associatedPanel]) {
-              updatedEnabledBiomarkers = {
-                  ...updatedEnabledBiomarkers,
-                  [associatedPanel]: []
-              };
-              const panelInfo = availableDiseasePanels.find(p => p.key === associatedPanel);
-              toast({
-                  title: 'Panel Enabled',
-                  description: `The ${panelInfo?.label || 'related panel'} has been automatically enabled for this patient.`
-              });
-          }
+        const newProfileState = {
+            ...profile,
+            presentMedicalConditions: [...profile.presentMedicalConditions, newCondition],
+        };
 
-          return {
-            ...prevProfile,
-            presentMedicalConditions: [...prevProfile.presentMedicalConditions, newCondition],
-            enabledBiomarkers: updatedEnabledBiomarkers
-          }
-      });
-      
-      if (isDoctorLoggedIn) {
-          // The state update is asynchronous, so we need to ensure we save the *new* state.
-          // We can trigger a save by setting hasUnsavedChanges and calling saveChanges,
-          // or by directly calling updatePatient with the new state.
-          // The simplest is to just set the flag, as the user will likely save,
-          // but to be robust, we'll trigger the save.
-          setHasUnsavedChanges(true);
-      } else {
-        setHasUnsavedChanges(true);
-      }
+        if (associatedPanel && isDoctorLoggedIn && !profile.enabledBiomarkers?.[associatedPanel]) {
+            newProfileState.enabledBiomarkers = {
+                ...(profile.enabledBiomarkers || {}),
+                [associatedPanel]: []
+            };
+            const panelInfo = availableDiseasePanels.find(p => p.key === associatedPanel);
+            toast({
+                title: 'Panel Enabled',
+                description: `The ${panelInfo?.label || 'related panel'} has been automatically enabled.`
+            });
+        }
+        
+        // If a doctor adds a condition, save it immediately.
+        if (isDoctorLoggedIn) {
+            await updatePatient(profile.id, {
+                presentMedicalConditions: newProfileState.presentMedicalConditions,
+                enabledBiomarkers: newProfileState.enabledBiomarkers,
+            });
+            // Update local state after successful save
+            setProfileState(newProfileState);
+        } else {
+            // For patients, just update local state and let them save later.
+            setProfileState(newProfileState);
+            setHasUnsavedChanges(true);
+        }
 
     } catch (error) {
         console.error("Failed to save condition", error);
@@ -387,7 +386,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             description: "Could not save medical condition. Please try again."
         });
     }
-  }, [isDoctorLoggedIn]);
+}, [isDoctorLoggedIn, profile]);
+
 
   const updateMedicalCondition = useCallback((condition: MedicalCondition) => {
     setProfileState(prevProfile => ({
@@ -887,3 +887,5 @@ export function useApp() {
   }
   return context;
 }
+
+    
