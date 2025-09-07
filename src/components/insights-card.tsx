@@ -208,7 +208,7 @@ export function InsightsCard() {
                 </Button>
                 {localTips.length > 0 && (
                     <Select value={selectedLanguage} onValueChange={handleTranslate} disabled={isTranslating}>
-                        <SelectTrigger className="w-full sm:w-[150px] h-9">
+                        <SelectTrigger className="w-full sm:w-[150px] h-10">
                             <SelectValue placeholder="Translate..." />
                         </SelectTrigger>
                         <SelectContent>
