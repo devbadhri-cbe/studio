@@ -28,7 +28,7 @@ export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
-    return [...(hba1cRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime())
+    return [...(hba1cRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
   }, [hba1cRecords]);
   
   const getStatus = (value: number) => {
@@ -64,7 +64,7 @@ export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
   const RecordsList = (
     <ScrollArea className="h-full max-h-[100px] w-full">
         <ul className="space-y-1 mt-2">
-          {sortedRecords.slice().reverse().map((record) => (
+          {sortedRecords.map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                   <p className="flex-1">
                       <span className="font-semibold text-foreground">{record.value.toFixed(1)}%</span>
