@@ -19,7 +19,7 @@ export function DashboardSectionToggle({ title, icon, isOpen, children }: Dashbo
       <CollapsibleTrigger asChild>
         <Button
           variant={isOpen ? 'default' : 'outline'}
-          className={cn("w-full justify-start py-6 text-base", isOpen && "shadow-lg")}
+          className={cn("w-full justify-start py-6 text-base", isOpen && "shadow-lg", children && "!w-auto flex-1")}
         >
           {icon}
           <span className="ml-2">{title}</span>
