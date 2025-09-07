@@ -182,51 +182,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [hasUnsavedChanges]);
   
 
-  const setBiomarkerUnit = (unit: BiomarkerUnitSystem) => {
+  const setBiomarkerUnit = useCallback((unit: BiomarkerUnitSystem) => {
     setBiomarkerUnitState(unit);
-  }
+  }, []);
 
-  const getDisplayVitaminDValue = (value: number): number => {
+  const getDisplayVitaminDValue = useCallback((value: number): number => {
       if (biomarkerUnit === 'si') {
           return parseFloat(toNmolL(value).toFixed(2));
       }
       return Math.round(value);
-  }
+  }, [biomarkerUnit]);
 
-  const getDisplayGlucoseValue = (value: number): number => {
+  const getDisplayGlucoseValue = useCallback((value: number): number => {
       if (biomarkerUnit === 'si') {
           return parseFloat(toMmolL(value, 'glucose').toFixed(1));
       }
       return Math.round(value);
-  }
+  }, [biomarkerUnit]);
   
-  const getDisplayHemoglobinValue = (value: number): number => {
+  const getDisplayHemoglobinValue = useCallback((value: number): number => {
     if (biomarkerUnit === 'si') {
         return parseFloat(toGL(value).toFixed(1));
     }
     return parseFloat(value.toFixed(1));
-  }
+  }, [biomarkerUnit]);
 
-  const getDbVitaminDValue = (value: number): number => {
+  const getDbVitaminDValue = useCallback((value: number): number => {
     if (biomarkerUnit === 'si') {
         return toNgDl(value);
     }
     return value;
-  }
+  }, [biomarkerUnit]);
 
-  const getDbGlucoseValue = (value: number): number => {
+  const getDbGlucoseValue = useCallback((value: number): number => {
       if (biomarkerUnit === 'si') {
         return toMgDl(value, 'glucose');
       }
       return value;
-  }
+  }, [biomarkerUnit]);
   
-  const getDbHemoglobinValue = (value: number): number => {
+  const getDbHemoglobinValue = useCallback((value: number): number => {
     if (biomarkerUnit === 'si') {
         return toGDL(value);
     }
     return value;
-  }
+  }, [biomarkerUnit]);
   
   const setIsDoctorLoggedIn = useCallback((isLoggedIn: boolean) => {
     setIsDoctorLoggedInState(isLoggedIn);
@@ -270,7 +270,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setHasUnsavedChanges(false);
   }, []);
 
-  const saveChanges = async () => {
+  const saveChanges = useCallback(async () => {
     if (!profile.id || !hasUnsavedChanges) return;
 
     setIsSaving(true);
@@ -306,24 +306,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSaving(false);
     }
-  }
+  }, [profile, hasUnsavedChanges, hba1cRecords, fastingBloodGlucoseRecords, vitaminDRecords, thyroidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords, customBiomarkers]);
   
-  const getMedicationForRecord = (medication: Medication[]): string => {
+  const getMedicationForRecord = useCallback((medication: Medication[]): string => {
     if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
     try {
       return JSON.stringify(medication.map(m => ({name: m.name, dosage: m.dosage, frequency: m.frequency})));
     } catch {
       return 'N/A';
     }
-  }
+  }, []);
 
-  const setProfile = (newProfile: UserProfile) => {
+  const setProfile = useCallback((newProfile: UserProfile) => {
       const newBmi = calculateBmi(profile.bmi, newProfile.height);
       setProfileState({...newProfile, bmi: newBmi});
       setHasUnsavedChanges(true);
-  }
+  }, [profile.bmi]);
   
-  const addMedicalCondition = async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
+  const addMedicalCondition = useCallback(async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
     try {
       const result = await getIcdCode({ conditionName: condition.condition });
       
@@ -335,12 +335,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         status: isDoctorLoggedIn ? 'verified' : 'pending_review'
       };
 
-      const newProfileState: UserProfile = {
-        ...profile,
-        presentMedicalConditions: [...profile.presentMedicalConditions, newCondition]
-      };
-      
-      setProfileState(newProfileState);
+      setProfileState(prevProfile => ({
+        ...prevProfile,
+        presentMedicalConditions: [...prevProfile.presentMedicalConditions, newCondition]
+      }));
+
       setHasUnsavedChanges(true);
       
       if (isDoctorLoggedIn) {
@@ -356,289 +355,271 @@ export function AppProvider({ children }: { children: ReactNode }) {
             description: "Could not save medical condition. Please try again."
         });
     }
-  };
+  }, [isDoctorLoggedIn]);
 
-  const updateMedicalCondition = (condition: MedicalCondition) => {
-    const updatedConditions = profile.presentMedicalConditions.map(c => c.id === condition.id ? condition : c);
-    const newProfileState = { ...profile, presentMedicalConditions: updatedConditions };
-    setProfileState(newProfileState);
+  const updateMedicalCondition = useCallback((condition: MedicalCondition) => {
+    setProfileState(prevProfile => ({
+      ...prevProfile,
+      presentMedicalConditions: prevProfile.presentMedicalConditions.map(c => c.id === condition.id ? condition : c)
+    }));
     setHasUnsavedChanges(true);
-  };
+  }, []);
   
-  const removeMedicalCondition = (id: string) => {
-    const updatedConditions = profile.presentMedicalConditions.filter(c => c.id !== id);
-    const newProfileState = { ...profile, presentMedicalConditions: updatedConditions };
-    setProfileState(newProfileState);
+  const removeMedicalCondition = useCallback((id: string) => {
+    setProfileState(prevProfile => ({
+      ...prevProfile,
+      presentMedicalConditions: prevProfile.presentMedicalConditions.filter(c => c.id !== id)
+    }));
     setHasUnsavedChanges(true);
-  };
+  }, []);
   
-  const approveMedicalCondition = async (conditionId: string) => {
-    const updatedConditions = profile.presentMedicalConditions.map(c => {
-        if (c.id === conditionId) {
-            return { ...c, status: 'verified' as const };
-        }
-        return c;
-    });
+  const approveMedicalCondition = useCallback(async (conditionId: string) => {
+    setProfileState(prevProfile => ({
+      ...prevProfile,
+      presentMedicalConditions: prevProfile.presentMedicalConditions.map(c => 
+        c.id === conditionId ? { ...c, status: 'verified' as const } : c
+      )
+    }));
+    setHasUnsavedChanges(true);
+  }, []);
+  
+  const dismissSuggestion = useCallback((conditionId: string) => {
+    setProfileState(prevProfile => ({
+      ...prevProfile,
+      presentMedicalConditions: prevProfile.presentMedicalConditions.map(c => 
+        c.id === conditionId ? { ...c, status: 'needs_revision' as const } : c
+      )
+    }));
+    setHasUnsavedChanges(true);
+  }, []);
 
-    const newProfileState = {...profile, presentMedicalConditions: updatedConditions };
-    setProfileState(newProfileState);
-    setHasUnsavedChanges(true);
-  };
-  
-  const dismissSuggestion = (conditionId: string) => {
-    const updatedConditions = profile.presentMedicalConditions.map(c => 
-      c.id === conditionId ? { ...c, status: 'needs_revision' as const } : c
-    );
-    
-    const newProfileState = {...profile, presentMedicalConditions: updatedConditions };
-    setProfileState(newProfileState);
-    setHasUnsavedChanges(true);
-  };
-
-   const addMedication = (medication: Omit<Medication, 'id'>) => {
+   const addMedication = useCallback((medication: Omit<Medication, 'id'>) => {
     const newMedication = { ...medication, id: Date.now().toString() };
-    const updatedMedication = [...profile.medication.filter(m => m.name.toLowerCase() !== 'nil'), newMedication];
-    const newProfileState = { ...profile, medication: updatedMedication };
-    setProfileState(newProfileState);
+    setProfileState(prevProfile => ({
+      ...prevProfile,
+      medication: [...prevProfile.medication.filter(m => m.name.toLowerCase() !== 'nil'), newMedication]
+    }));
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const removeMedication = (id: string) => {
-    const updatedMedication = profile.medication.filter(m => m.id !== id);
-    const newProfileState = { ...profile, medication: updatedMedication };
-    setProfileState(newProfileState);
+  const removeMedication = useCallback((id: string) => {
+    setProfileState(prevProfile => ({
+      ...prevProfile,
+      medication: prevProfile.medication.filter(m => m.id !== id)
+    }));
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const setMedicationNil = () => {
+  const setMedicationNil = useCallback(() => {
       const nilMedication = [{ id: 'nil', name: 'Nil', dosage: '', frequency: '' }];
-      const newProfileState = {...profile, medication: nilMedication};
-      setProfileState(newProfileState);
+      setProfileState(prevProfile => ({ ...prevProfile, medication: nilMedication }));
       setHasUnsavedChanges(true);
-  }
+  }, []);
 
-  const addHba1cRecord = (record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
+  const addHba1cRecord = useCallback((record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setHba1cRecordsState([...hba1cRecords, newRecord]);
+    setHba1cRecordsState(prev => [...prev, newRecord]);
     setHasUnsavedChanges(true);
-  };
+  }, [profile.medication, getMedicationForRecord]);
 
-  const removeHba1cRecord = (id: string) => {
-    const updatedRecords = hba1cRecords.filter(r => r.id !== id);
-    setHba1cRecordsState(updatedRecords);
+  const removeHba1cRecord = useCallback((id: string) => {
+    setHba1cRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
   
-  const addFastingBloodGlucoseRecord = (record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => {
+  const addFastingBloodGlucoseRecord = useCallback((record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setFastingBloodGlucoseRecordsState([...fastingBloodGlucoseRecords, newRecord]);
+    setFastingBloodGlucoseRecordsState(prev => [...prev, newRecord]);
     setHasUnsavedChanges(true);
-  };
+  }, [profile.medication, getMedicationForRecord]);
 
-  const removeFastingBloodGlucoseRecord = (id: string) => {
-    const updatedRecords = fastingBloodGlucoseRecords.filter(r => r.id !== id);
-    setFastingBloodGlucoseRecordsState(updatedRecords);
+  const removeFastingBloodGlucoseRecord = useCallback((id: string) => {
+    setFastingBloodGlucoseRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const addVitaminDRecord = (record: Omit<VitaminDRecord, 'id' | 'medication'>) => {
+  const addVitaminDRecord = useCallback((record: Omit<VitaminDRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setVitaminDRecordsState([...vitaminDRecords, newRecord]);
+    setVitaminDRecordsState(prev => [...prev, newRecord]);
     setHasUnsavedChanges(true);
-  };
+  }, [profile.medication, getMedicationForRecord]);
 
-  const removeVitaminDRecord = (id: string) => {
-    const updatedRecords = vitaminDRecords.filter(r => r.id !== id);
-    setVitaminDRecordsState(updatedRecords);
+  const removeVitaminDRecord = useCallback((id: string) => {
+    setVitaminDRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const addThyroidRecord = (record: Omit<ThyroidRecord, 'id' | 'medication'>) => {
+  const addThyroidRecord = useCallback((record: Omit<ThyroidRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setThyroidRecordsState([...thyroidRecords, newRecord]);
+    setThyroidRecordsState(prev => [...prev, newRecord]);
     setHasUnsavedChanges(true);
-  };
+  }, [profile.medication, getMedicationForRecord]);
 
-  const removeThyroidRecord = (id: string) => {
-    const updatedRecords = thyroidRecords.filter(r => r.id !== id);
-    setThyroidRecordsState(updatedRecords);
+  const removeThyroidRecord = useCallback((id: string) => {
+    setThyroidRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
   
-  const addHemoglobinRecord = (record: Omit<HemoglobinRecord, 'id' | 'medication'>) => {
+  const addHemoglobinRecord = useCallback((record: Omit<HemoglobinRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setHemoglobinRecordsState([...hemoglobinRecords, newRecord]);
+    setHemoglobinRecordsState(prev => [...prev, newRecord]);
     setHasUnsavedChanges(true);
-  };
+  }, [profile.medication, getMedicationForRecord]);
 
-  const removeHemoglobinRecord = (id: string) => {
-    const updatedRecords = hemoglobinRecords.filter(r => r.id !== id);
-    setHemoglobinRecordsState(updatedRecords);
+  const removeHemoglobinRecord = useCallback((id: string) => {
+    setHemoglobinRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
   
-  const addWeightRecord = (record: Omit<WeightRecord, 'id'>) => {
+  const addWeightRecord = useCallback((record: Omit<WeightRecord, 'id'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const updatedRecords = [...weightRecords, newRecord];
-    setWeightRecordsState(updatedRecords);
+    setWeightRecordsState(prev => [...prev, newRecord]);
     
     const newBmi = calculateBmi(newRecord.value, profile.height);
     if(newBmi) {
-        setProfileState({
-            ...profile,
-            bmi: newBmi,
-        });
+        setProfileState(prevProfile => ({ ...prevProfile, bmi: newBmi }));
     }
     setHasUnsavedChanges(true);
-  };
+  }, [profile.medication, profile.height, getMedicationForRecord]);
 
-  const removeWeightRecord = (id: string) => {
-    const updatedRecords = weightRecords.filter(r => r.id !== id);
-    setWeightRecordsState(updatedRecords);
+  const removeWeightRecord = useCallback((id: string) => {
+    setWeightRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
   
-  const addBloodPressureRecord = (record: Omit<BloodPressureRecord, 'id' | 'medication'>) => {
+  const addBloodPressureRecord = useCallback((record: Omit<BloodPressureRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setBloodPressureRecordsState([...bloodPressureRecords, newRecord]);
+    setBloodPressureRecordsState(prev => [...prev, newRecord]);
     setHasUnsavedChanges(true);
-  };
+  }, [profile.medication, getMedicationForRecord]);
 
-  const removeBloodPressureRecord = (id: string) => {
-    const updatedRecords = bloodPressureRecords.filter(r => r.id !== id);
-    setBloodPressureRecordsState(updatedRecords);
+  const removeBloodPressureRecord = useCallback((id: string) => {
+    setBloodPressureRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const addTotalCholesterolRecord = (record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => {
+  const addTotalCholesterolRecord = useCallback((record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setTotalCholesterolRecordsState([...totalCholesterolRecords, newRecord]);
+    setTotalCholesterolRecordsState(prev => [...prev, newRecord]);
     setHasUnsavedChanges(true);
-  };
+  }, [profile.medication, getMedicationForRecord]);
 
-  const removeTotalCholesterolRecord = (id: string) => {
-    const updatedRecords = totalCholesterolRecords.filter(r => r.id !== id);
-    setTotalCholesterolRecordsState(updatedRecords);
+  const removeTotalCholesterolRecord = useCallback((id: string) => {
+    setTotalCholesterolRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const addLdlRecord = (record: Omit<LdlRecord, 'id' | 'medication'>) => {
+  const addLdlRecord = useCallback((record: Omit<LdlRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setLdlRecordsState([...ldlRecords, newRecord]);
+    setLdlRecordsState(prev => [...prev, newRecord]);
     setHasUnsavedChanges(true);
-  };
+  }, [profile.medication, getMedicationForRecord]);
 
-  const removeLdlRecord = (id: string) => {
-    const updatedRecords = ldlRecords.filter(r => r.id !== id);
-    setLdlRecordsState(updatedRecords);
+  const removeLdlRecord = useCallback((id: string) => {
+    setLdlRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const addHdlRecord = (record: Omit<HdlRecord, 'id' | 'medication'>) => {
+  const addHdlRecord = useCallback((record: Omit<HdlRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setHdlRecordsState([...hdlRecords, newRecord]);
+    setHdlRecordsState(prev => [...prev, newRecord]);
     setHasUnsavedChanges(true);
-  };
+  }, [profile.medication, getMedicationForRecord]);
 
-  const removeHdlRecord = (id: string) => {
-    const updatedRecords = hdlRecords.filter(r => r.id !== id);
-    setHdlRecordsState(updatedRecords);
+  const removeHdlRecord = useCallback((id: string) => {
+    setHdlRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const addTriglyceridesRecord = (record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => {
+  const addTriglyceridesRecord = useCallback((record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setTriglyceridesRecordsState([...triglyceridesRecords, newRecord]);
+    setTriglyceridesRecordsState(prev => [...prev, newRecord]);
     setHasUnsavedChanges(true);
-  };
+  }, [profile.medication, getMedicationForRecord]);
 
-  const removeTriglyceridesRecord = (id: string) => {
-    const updatedRecords = triglyceridesRecords.filter(r => r.id !== id);
-    setTriglyceridesRecordsState(updatedRecords);
+  const removeTriglyceridesRecord = useCallback((id: string) => {
+    setTriglyceridesRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
   
-  const addCustomBiomarker = (name: string, description?: string) => {
+  const addCustomBiomarker = useCallback((name: string, description?: string) => {
     const newBiomarker: CustomBiomarker = {
       id: `custom-${Date.now()}`,
       name,
       description,
       records: [],
     };
-    setCustomBiomarkersState([...customBiomarkers, newBiomarker]);
+    setCustomBiomarkersState(prev => [...prev, newBiomarker]);
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const removeCustomBiomarker = (id: string) => {
-    const updatedBiomarkers = customBiomarkers.filter(b => b.id !== id);
-    setCustomBiomarkersState(updatedBiomarkers);
+  const removeCustomBiomarker = useCallback((id: string) => {
+    setCustomBiomarkersState(prev => prev.filter(b => b.id !== id));
     setHasUnsavedChanges(true);
-  };
+  }, []);
   
-  const addCustomBiomarkerRecord = (biomarkerId: string, record: Omit<CustomBiomarker['records'][0], 'id'>) => {
-    const updatedBiomarkers = customBiomarkers.map(b => {
+  const addCustomBiomarkerRecord = useCallback((biomarkerId: string, record: Omit<CustomBiomarker['records'][0], 'id'>) => {
+    setCustomBiomarkersState(prev => prev.map(b => {
       if (b.id === biomarkerId) {
         const newRecord = { ...record, id: `record-${Date.now()}` };
         return { ...b, records: [...b.records, newRecord] };
       }
       return b;
-    });
-    setCustomBiomarkersState(updatedBiomarkers);
+    }));
     setHasUnsavedChanges(true);
-  };
+  }, []);
   
-  const removeCustomBiomarkerRecord = (biomarkerId: string, recordId: string) => {
-    const updatedBiomarkers = customBiomarkers.map(b => {
+  const removeCustomBiomarkerRecord = useCallback((biomarkerId: string, recordId: string) => {
+    setCustomBiomarkersState(prev => prev.map(b => {
       if (b.id === biomarkerId) {
         const updatedRecords = b.records.filter(r => r.id !== recordId);
         return { ...b, records: updatedRecords };
       }
       return b;
+    }));
+    setHasUnsavedChanges(true);
+  }, []);
+
+  const toggleDiseaseBiomarker = useCallback((panelKey: string, biomarkerKey: BiomarkerKey | string) => {
+    setProfileState(prevProfile => {
+        const currentEnabled = { ...(prevProfile.enabledBiomarkers || {}) };
+        const panelBiomarkers = currentEnabled[panelKey] || [];
+        
+        const newPanelBiomarkers = panelBiomarkers.includes(biomarkerKey)
+          ? panelBiomarkers.filter(b => b !== biomarkerKey)
+          : [...panelBiomarkers, biomarkerKey];
+
+        return {
+          ...prevProfile,
+          enabledBiomarkers: { ...currentEnabled, [panelKey]: newPanelBiomarkers }
+        };
     });
-    setCustomBiomarkersState(updatedBiomarkers);
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const toggleDiseaseBiomarker = (panelKey: string, biomarkerKey: BiomarkerKey | string) => {
-    const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
-    const panelBiomarkers = currentEnabled[panelKey] || [];
-    
-    const newPanelBiomarkers = panelBiomarkers.includes(biomarkerKey)
-      ? panelBiomarkers.filter(b => b !== biomarkerKey)
-      : [...panelBiomarkers, biomarkerKey];
+  const toggleDiseasePanel = useCallback((panelKey: DiseasePanelKey) => {
+    setProfileState(prevProfile => {
+        const currentEnabled = { ...(prevProfile.enabledBiomarkers || {}) };
+        const isEnabled = currentEnabled.hasOwnProperty(panelKey);
+        const updatedEnabledBiomarkers = { ...currentEnabled };
 
-    const updatedEnabledBiomarkers = {
-      ...currentEnabled,
-      [panelKey]: newPanelBiomarkers
-    };
-    
-    const newProfileState = { ...profile, enabledBiomarkers: updatedEnabledBiomarkers };
-    setProfileState(newProfileState);
-    setHasUnsavedChanges(true);
-  };
+        if (isEnabled) {
+            delete updatedEnabledBiomarkers[panelKey];
+        } else {
+            updatedEnabledBiomarkers[panelKey] = [];
+        }
+        
+        toast({
+            title: isEnabled ? `Panel Disabled` : `Panel Enabled`,
+            description: `The ${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel has been ${isEnabled ? 'disabled' : 'enabled'} for this patient.`
+        });
 
-  const toggleDiseasePanel = (panelKey: DiseasePanelKey) => {
-    const currentEnabled = { ...(profile.enabledBiomarkers || {}) };
-    
-    const isEnabled = currentEnabled.hasOwnProperty(panelKey);
-    const updatedEnabledBiomarkers = { ...currentEnabled };
-
-    if (isEnabled) {
-        delete updatedEnabledBiomarkers[panelKey];
-    } else {
-        updatedEnabledBiomarkers[panelKey] = [];
-    }
-    
-    const newProfileState = { ...profile, enabledBiomarkers: updatedEnabledBiomarkers };
-    setProfileState(newProfileState);
-    setHasUnsavedChanges(true);
-    toast({
-        title: isEnabled ? `Panel Disabled` : `Panel Enabled`,
-        description: `The ${panelKey.charAt(0).toUpperCase() + panelKey.slice(1)} Panel has been ${isEnabled ? 'disabled' : 'enabled'} for this patient.`
+        return { ...prevProfile, enabledBiomarkers: updatedEnabledBiomarkers };
     });
-  }
+    setHasUnsavedChanges(true);
+  }, []);
 
-  const addBatchRecords = async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
+  const addBatchRecords = useCallback(async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
     const date = batch.hba1c?.date || batch.fastingBloodGlucose?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date || batch.hemoglobin?.date || batch.lipidPanel?.date;
 
@@ -655,113 +636,138 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     const newRecordDate = startOfDay(new Date(date));
 
-    if (batch.hba1c && batch.hba1c.value) {
-      const dateExists = hba1cRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.hba1c?.value);
-      if (!dateExists) {
-        const newRecord: Hba1cRecord = { ...batch.hba1c, id: `hba1c-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        setHba1cRecordsState(prev => [...prev, newRecord]);
-        result.added.push('HbA1c');
-      } else { result.duplicates.push('HbA1c'); }
+    setHba1cRecordsState(prev => {
+        if (batch.hba1c && batch.hba1c.value) {
+            const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.hba1c?.value);
+            if (!dateExists) {
+                result.added.push('HbA1c');
+                return [...prev, { ...batch.hba1c, id: `hba1c-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
+            } else { result.duplicates.push('HbA1c'); }
+        }
+        return prev;
+    });
+
+    setFastingBloodGlucoseRecordsState(prev => {
+        if (batch.fastingBloodGlucose && batch.fastingBloodGlucose.value) {
+            const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.fastingBloodGlucose?.value);
+            if (!dateExists) {
+                result.added.push('Fasting Blood Glucose');
+                return [...prev, { ...batch.fastingBloodGlucose, id: `fbg-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
+            } else { result.duplicates.push('Fasting Blood Glucose'); }
+        }
+        return prev;
+    });
+
+    setVitaminDRecordsState(prev => {
+        if (batch.vitaminD && batch.vitaminD.value) {
+          let vitDRecordForDb = { ...batch.vitaminD };
+          if(batch.vitaminD.units && batch.vitaminD.units.toLowerCase().includes('nmol')) {
+            vitDRecordForDb.value = toNgDl(batch.vitaminD.value);
+          }
+          
+          const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === vitDRecordForDb.value);
+          if (!dateExists) {
+            result.added.push('Vitamin D');
+            return [...prev, { ...vitDRecordForDb, value: vitDRecordForDb.value, id: `vitd-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
+          } else { result.duplicates.push('Vitamin D'); }
+        }
+        return prev;
+    });
+    
+    setThyroidRecordsState(prev => {
+        if (batch.thyroid && batch.thyroid.tsh) {
+            const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.tsh === batch.thyroid?.tsh);
+            if (!dateExists) {
+                result.added.push('Thyroid Panel');
+                return [...prev, { tsh: 0, t3: 0, t4: 0, ...batch.thyroid, id: `thyroid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
+            } else { result.duplicates.push('Thyroid Panel'); }
+        }
+        return prev;
+    });
+    
+    setBloodPressureRecordsState(prev => {
+        if (batch.bloodPressure && batch.bloodPressure.systolic && batch.bloodPressure.diastolic) {
+           const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.systolic === batch.bloodPressure?.systolic);
+           if (!dateExists) {
+            result.added.push('Blood Pressure');
+            return [...prev, { ...batch.bloodPressure, id: `bp-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
+          } else { result.duplicates.push('Blood Pressure'); }
+        }
+        return prev;
+    });
+    
+    setHemoglobinRecordsState(prev => {
+        if (batch.hemoglobin && batch.hemoglobin.hemoglobin) {
+           const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.hemoglobin === batch.hemoglobin?.hemoglobin);
+           if (!dateExists) {
+            result.added.push('Hemoglobin');
+            return [...prev, { ...batch.hemoglobin, id: `anemia-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
+          } else { result.duplicates.push('Hemoglobin'); }
+        }
+        return prev;
+    });
+    
+    if (batch.lipidPanel) {
+        setTotalCholesterolRecordsState(prev => {
+            if (batch.lipidPanel?.totalCholesterol) {
+                const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.totalCholesterol);
+                if (!dateExists) {
+                    result.added.push('Total Cholesterol');
+                    return [...prev, { value: batch.lipidPanel.totalCholesterol, id: `tc-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
+                } else { result.duplicates.push('Total Cholesterol'); }
+            }
+            return prev;
+        });
+        setLdlRecordsState(prev => {
+            if (batch.lipidPanel?.ldl) {
+                const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.ldl);
+                if (!dateExists) {
+                    result.added.push('LDL');
+                    return [...prev, { value: batch.lipidPanel.ldl, id: `ldl-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
+                } else { result.duplicates.push('LDL'); }
+            }
+            return prev;
+        });
+        setHdlRecordsState(prev => {
+            if (batch.lipidPanel?.hdl) {
+                const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.hdl);
+                if (!dateExists) {
+                    result.added.push('HDL');
+                    return [...prev, { value: batch.lipidPanel.hdl, id: `hdl-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
+                } else { result.duplicates.push('HDL'); }
+            }
+            return prev;
+        });
+        setTriglyceridesRecordsState(prev => {
+            if (batch.lipidPanel?.triglycerides) {
+                const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.triglycerides);
+                if (!dateExists) {
+                    result.added.push('Triglycerides');
+                    return [...prev, { value: batch.lipidPanel.triglycerides, id: `trig-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
+                } else { result.duplicates.push('Triglycerides'); }
+            }
+            return prev;
+        });
     }
 
-    if (batch.fastingBloodGlucose && batch.fastingBloodGlucose.value) {
-      const dateExists = fastingBloodGlucoseRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.fastingBloodGlucose?.value);
-      if (!dateExists) {
-        const newRecord: FastingBloodGlucoseRecord = { ...batch.fastingBloodGlucose, id: `fbg-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        setFastingBloodGlucoseRecordsState(prev => [...prev, newRecord]);
-        result.added.push('Fasting Blood Glucose');
-      } else { result.duplicates.push('Fasting Blood Glucose'); }
-    }
-
-    if (batch.vitaminD && batch.vitaminD.value) {
-      let vitDRecordForDb = { ...batch.vitaminD };
-      if(batch.vitaminD.units && batch.vitaminD.units.toLowerCase().includes('nmol')) {
-        vitDRecordForDb.value = toNgDl(batch.vitaminD.value);
-      }
-      
-      const dateExists = vitaminDRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === vitDRecordForDb.value);
-      if (!dateExists) {
-        const newRecord: VitaminDRecord = { ...vitDRecordForDb, value: vitDRecordForDb.value, id: `vitd-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        setVitaminDRecordsState(prev => [...prev, newRecord]);
-        result.added.push('Vitamin D');
-      } else { result.duplicates.push('Vitamin D'); }
-    }
-    
-    if (batch.thyroid && batch.thyroid.tsh) {
-        const dateExists = thyroidRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.tsh === batch.thyroid?.tsh);
-        if (!dateExists) {
-            const newRecord: ThyroidRecord = { tsh: 0, t3: 0, t4: 0, ...batch.thyroid, id: `thyroid-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-            setThyroidRecordsState(prev => [...prev, newRecord]);
-            result.added.push('Thyroid Panel');
-        } else { result.duplicates.push('Thyroid Panel'); }
-    }
-    
-    if (batch.bloodPressure && batch.bloodPressure.systolic && batch.bloodPressure.diastolic) {
-       const dateExists = bloodPressureRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.systolic === batch.bloodPressure?.systolic);
-       if (!dateExists) {
-        const newRecord: BloodPressureRecord = { ...batch.bloodPressure, id: `bp-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        setBloodPressureRecordsState(prev => [...prev, newRecord]);
-        result.added.push('Blood Pressure');
-      } else { result.duplicates.push('Blood Pressure'); }
-    }
-    
-    if (batch.hemoglobin && batch.hemoglobin.hemoglobin) {
-       const dateExists = hemoglobinRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.hemoglobin === batch.hemoglobin?.hemoglobin);
-       if (!dateExists) {
-        const newRecord: HemoglobinRecord = { ...batch.hemoglobin, id: `anemia-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        setHemoglobinRecordsState(prev => [...prev, newRecord]);
-        result.added.push('Hemoglobin');
-      } else { result.duplicates.push('Hemoglobin'); }
-    }
-    
-    if (batch.lipidPanel && batch.lipidPanel.totalCholesterol) {
-       const dateExists = totalCholesterolRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.totalCholesterol);
-       if (!dateExists) {
-        const newRecord: TotalCholesterolRecord = { value: batch.lipidPanel.totalCholesterol, id: `tc-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-        setTotalCholesterolRecordsState(prev => [...prev, newRecord]);
-        result.added.push('Total Cholesterol');
-      } else { result.duplicates.push('Total Cholesterol'); }
-    }
-
-    if (batch.lipidPanel && batch.lipidPanel.ldl) {
-        const dateExists = ldlRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.ldl);
-        if (!dateExists) {
-            const newRecord: LdlRecord = { value: batch.lipidPanel.ldl, id: `ldl-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-            setLdlRecordsState(prev => [...prev, newRecord]);
-            result.added.push('LDL');
-        } else { result.duplicates.push('LDL'); }
-    }
-    if (batch.lipidPanel && batch.lipidPanel.hdl) {
-        const dateExists = hdlRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.hdl);
-        if (!dateExists) {
-            const newRecord: HdlRecord = { value: batch.lipidPanel.hdl, id: `hdl-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-            setHdlRecordsState(prev => [...prev, newRecord]);
-            result.added.push('HDL');
-        } else { result.duplicates.push('HDL'); }
-    }
-    if (batch.lipidPanel && batch.lipidPanel.triglycerides) {
-        const dateExists = triglyceridesRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === batch.lipidPanel?.triglycerides);
-        if (!dateExists) {
-            const newRecord: TriglyceridesRecord = { value: batch.lipidPanel.triglycerides, id: `trig-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() };
-            setTriglyceridesRecordsState(prev => [...prev, newRecord]);
-            result.added.push('Triglycerides');
-        } else { result.duplicates.push('Triglycerides'); }
-    }
-    
     if (result.added.length > 0) {
         setHasUnsavedChanges(true);
     }
     
     return result;
-  };
+  }, [profile.medication, getMedicationForRecord]);
 
-  const setTips = (newTips: string[]) => {
+  const setTips = useCallback((newTips: string[]) => {
     setTipsState(newTips);
-  };
+  }, []);
 
-  const setDashboardView = (view: DashboardView) => {
+  const setDashboardView = useCallback((view: DashboardView) => {
     setDashboardViewState(view);
-  }
+  }, []);
+  
+  const setTheme = useCallback((theme: Theme) => {
+    setThemeState(theme);
+  }, []);
 
   const value: AppContextType = {
     profile,
@@ -830,7 +836,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     getDbGlucoseValue,
     getDbHemoglobinValue,
     theme,
-    setTheme: setThemeState,
+    setTheme,
     dashboardSuggestions: profile.dashboardSuggestions || [],
     toggleDiseaseBiomarker,
     toggleDiseasePanel,
