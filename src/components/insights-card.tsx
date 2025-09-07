@@ -195,7 +195,7 @@ export function InsightsCard() {
         )}
         
          {!isLoading && !isTranslating && tipsToDisplay.length > 0 && (
-            <div className="flex flex-col sm:flex-row justify-center gap-2 mt-6">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-6">
                 <Button onClick={handleGetInsights} disabled={isLoading || isTranslating}>
                 {isLoading ? (
                     <>
@@ -207,21 +207,18 @@ export function InsightsCard() {
                 )}
                 </Button>
                 {localTips.length > 0 && (
-                    <div className="flex items-center gap-2">
-                        <Separator orientation="vertical" className="h-full hidden sm:block"/>
-                        <Select value={selectedLanguage} onValueChange={handleTranslate} disabled={isTranslating}>
-                            <SelectTrigger className="w-full sm:w-[150px] h-9">
-                                <SelectValue placeholder="Translate..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {supportedLanguages.map((lang) => (
-                                    <SelectItem key={lang.code} value={lang.code}>
-                                        {lang.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    <Select value={selectedLanguage} onValueChange={handleTranslate} disabled={isTranslating}>
+                        <SelectTrigger className="w-full sm:w-[150px] h-9">
+                            <SelectValue placeholder="Translate..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {supportedLanguages.map((lang) => (
+                                <SelectItem key={lang.code} value={lang.code}>
+                                    {lang.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 )}
             </div>
         )}
