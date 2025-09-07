@@ -348,7 +348,7 @@ export function UploadRecordDialog() {
                  <div className="space-y-4 p-4 border rounded-lg">
                      <ScrollArea className="h-60">
                         <div className="space-y-4 pr-4">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <Label>Patient Name</Label>
                                     <Input value={extractedData.patientName} readOnly disabled/>
