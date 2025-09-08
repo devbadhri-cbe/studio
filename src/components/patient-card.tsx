@@ -95,7 +95,9 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                  toast({ variant: 'destructive', title: 'No Phone Number Found' });
                  return;
             }
-            window.location.href = `sms:${patient.phone.replace(/\s/g, '')}?body=${encodeURIComponent(body)}`;
+            const userAgent = window.navigator.userAgent;
+            const separator = /iPad|iPhone|iPod/.test(userAgent) ? '&' : '?';
+            window.location.href = `sms:${patient.phone.replace(/\s/g, '')}${separator}body=${encodeURIComponent(body)}`;
             break;
         case 'email':
              if (!patient.email) {
