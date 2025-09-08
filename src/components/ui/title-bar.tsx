@@ -4,10 +4,6 @@
 import { Logo } from '@/components/logo';
 import * as React from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useApp } from '@/context/app-context';
-import { Button } from './button';
-import { Edit } from 'lucide-react';
-import { EditDoctorDetailsDialog } from '@/components/edit-doctor-details-dialog';
 import { doctorDetails } from '@/lib/doctor-data';
 
 interface TitleBarProps {
@@ -15,8 +11,6 @@ interface TitleBarProps {
 }
 
 export function TitleBar({ children }: TitleBarProps) {
-    const { isDoctorLoggedIn } = useApp();
-    const [isEditing, setIsEditing] = React.useState(false);
     
     return (
         <>
@@ -36,11 +30,6 @@ export function TitleBar({ children }: TitleBarProps) {
                         </div>
                          <div className="text-center text-xs text-muted-foreground mt-2 flex items-center gap-1">
                            {doctorDetails.name}
-                           {isDoctorLoggedIn && (
-                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
-                                <Edit className="h-3 w-3" />
-                            </Button>
-                           )}
                         </div>
                     </div>
                 </div>
@@ -49,7 +38,6 @@ export function TitleBar({ children }: TitleBarProps) {
                 </div>
             </div>
         </header>
-        <EditDoctorDetailsDialog open={isEditing} onOpenChange={setIsEditing} />
         </>
     );
 }
