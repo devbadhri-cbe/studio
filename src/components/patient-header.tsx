@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -71,7 +72,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
         </p>
       </div>
       <div className="w-full md:w-auto flex flex-1 items-center justify-end gap-4 border-2 border-blue-500">
-        <div className="flex flex-1 items-center gap-2 text-sm text-muted-foreground border-2 border-purple-500">
+        <div className="flex-1 flex items-center gap-2 text-sm text-muted-foreground border-2 border-purple-500 md:justify-center">
             <div className="flex flex-col md:flex-row md:items-center md:gap-2">
                 <span>Consulting with:</span>
                 <span className="font-semibold text-foreground">{profile.doctorName || 'Not Set'}</span>
