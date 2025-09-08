@@ -24,27 +24,36 @@ export default function PatientPage() {
   const isDoctorViewing = searchParams.get('viewer') === 'doctor';
 
   React.useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(setUser);
-    return () => unsubscribe();
-  }, []);
+    // Only listen for auth changes if a doctor is potentially viewing
+    if (isDoctorViewing) {
+      const unsubscribe = auth.onAuthStateChanged(setUser);
+      return () => unsubscribe();
+    }
+  }, [isDoctorViewing]);
 
   React.useEffect(() => {
     setIsDoctorLoggedIn(isDoctorViewing);
 
     const loadPatientData = async () => {
       const patientId = params.patientId as string;
-      if (!patientId || !user) {
-          setError("No patient ID provided or user not logged in.");
+      if (!patientId) {
+          setError("No patient ID provided.");
           setIsLoading(false);
           return;
       };
+
+      // If it's a doctor, we must wait for the user object to be resolved.
+      if (isDoctorViewing && !user) {
+        // This is not an error, just loading state.
+        return;
+      }
 
       try {
         const rawPatientData = await getPatient(patientId);
         if (rawPatientData) {
           
           // If a doctor is viewing and the patient already has a DIFFERENT doctor, deny access.
-          if (isDoctorViewing && rawPatientData.doctorUid && rawPatientData.doctorUid !== user.uid) {
+          if (isDoctorViewing && user && rawPatientData.doctorUid && rawPatientData.doctorUid !== user.uid) {
             setError("Access Denied. You are not the assigned doctor for this patient.");
             setIsLoading(false);
             return;
@@ -54,7 +63,7 @@ export default function PatientPage() {
           const updates: Partial<Patient> = {};
           let needsUpdate = false;
 
-          if (isDoctorViewing && !rawPatientData.doctorUid) {
+          if (isDoctorViewing && user && !rawPatientData.doctorUid) {
             updates.doctorUid = user.uid;
             updates.doctorName = user.displayName || user.email || 'Assigned Doctor';
             updates.doctorEmail = user.email || '';
@@ -86,13 +95,13 @@ export default function PatientPage() {
       }
     };
     
-    if (isClient && user) {
+    if (isClient) {
         loadPatientData();
     }
     
-  }, [params.patientId, isClient, isDoctorViewing, setPatientData, setIsDoctorLoggedIn, toast, user]);
+  }, [params.patientId, isClient, isDoctorViewing, user, setPatientData, setIsDoctorLoggedIn, toast]);
 
-  if (isLoading || !isClient || !user) {
+  if (isLoading || !isClient || (isDoctorViewing && !user)) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
