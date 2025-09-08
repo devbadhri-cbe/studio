@@ -11,8 +11,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
@@ -29,17 +27,6 @@ import { updatePatient } from '@/lib/firestore';
 import { DatePicker } from './ui/date-picker';
 import { cmToFtIn, ftInToCm } from '@/lib/utils';
 
-const ProfileSchema = z.object({
-  name: z.string().min(2, "Name is required."),
-  dob: z.date({ required_error: "A valid date is required." }),
-  gender: z.enum(['male', 'female', 'other'], { required_error: "Gender is required." }),
-  email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')),
-  country: z.string().min(1, { message: "Country is required." }),
-  phone: z.string().min(5, { message: "Phone number is too short." }).optional().or(z.literal('')),
-  height: z.coerce.number().min(50, 'Height must be at least 50cm.').optional().or(z.literal('')),
-  height_ft: z.coerce.number().optional().or(z.literal('')),
-  height_in: z.coerce.number().optional().or(z.literal('')),
-});
 
 interface EditProfileDialogProps {
     open: boolean;
@@ -51,8 +38,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
   const { profile, setProfile } = useApp();
   const { toast } = useToast();
   
-  const form = useForm<z.infer<typeof ProfileSchema>>({
-    resolver: zodResolver(ProfileSchema),
+  const form = useForm({
     defaultValues: {
       name: '',
       gender: undefined,
@@ -62,6 +48,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
       height: '',
       height_ft: '',
       height_in: '',
+      dob: new Date(),
     },
   });
 
@@ -91,7 +78,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
     }
   }, [open, profile, form, isImperial]);
 
-   const onProfileSubmit = async (data: z.infer<typeof ProfileSchema>) => {
+   const onProfileSubmit = async (data: any) => {
     setIsSubmitting(true);
 
     let heightInCm: number | undefined;

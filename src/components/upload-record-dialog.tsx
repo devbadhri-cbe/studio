@@ -2,23 +2,14 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, Camera, FileUp, Check, ArrowLeft, User } from 'lucide-react';
+import { Loader2, UploadCloud, Camera, FileUp } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { useApp } from '@/context/app-context';
-import { DatePicker } from './ui/date-picker';
-import { Input } from './ui/input';
-import { ScrollArea } from './ui/scroll-area';
-import { parseISO, isValid } from 'date-fns';
-import { Label } from './ui/label';
-import { availableBiomarkerCards } from '@/lib/biomarker-cards';
-import { BiomarkerKey } from '@/lib/types';
-import type { BatchRecords } from '@/context/app-context';
 
 
-type Step = 'initial' | 'confirmName' | 'editResults' | 'loading' | 'error';
+type Step = 'initial' | 'loading' | 'error';
 
 export function UploadRecordDialog() {
   const [open, setOpen] = React.useState(false);
@@ -29,8 +20,7 @@ export function UploadRecordDialog() {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
-
+  
   const stopCameraStream = React.useCallback(() => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
@@ -53,20 +43,6 @@ export function UploadRecordDialog() {
     }
   };
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      setIsCapturing(true);
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      setErrorMessage('Could not access the camera. Please check your browser permissions.');
-      setStep('error');
-    }
-  };
-  
   const renderContent = () => {
     switch (step) {
       case 'initial':

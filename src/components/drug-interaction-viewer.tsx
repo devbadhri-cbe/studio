@@ -48,8 +48,8 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
           </div>
         )}
         {!result && !isLoading && (
-            <Button onClick={handleInteractionCheck} className="w-full">
-                Analyze Interactions
+            <Button onClick={handleInteractionCheck} className="w-full" disabled>
+                Analyze Interactions (Disabled)
             </Button>
         )}
         {result && (

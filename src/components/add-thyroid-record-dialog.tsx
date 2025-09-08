@@ -2,9 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { startOfDay, parseISO } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
@@ -25,12 +23,6 @@ import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
 import { Loader2 } from 'lucide-react';
 
-const FormSchema = z.object({
-  date: z.date({ required_error: 'A valid date is required.' }),
-  tsh: z.coerce.number().min(0, 'Value is required.'),
-  t3: z.coerce.number().min(0, 'Value is required.'),
-  t4: z.coerce.number().min(0, 'Value is required.'),
-});
 
 interface AddThyroidRecordDialogProps {
     children?: React.ReactNode;
@@ -44,8 +36,7 @@ export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecord
   const { addThyroidRecord, profile, thyroidRecords } = useApp();
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm({
     defaultValues: {
       date: new Date(),
       tsh: '' as any,
@@ -65,7 +56,7 @@ export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecord
     }
   }, [open, form]);
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+  const onSubmit = (data: any) => {
     setIsSubmitting(true);
     const newDate = startOfDay(data.date);
 
@@ -86,9 +77,9 @@ export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecord
     
     addThyroidRecord({
       date: newDate.toISOString(),
-      tsh: data.tsh,
-      t3: data.t3,
-      t4: data.t4,
+      tsh: Number(data.tsh),
+      t3: Number(data.t3),
+      t4: Number(data.t4),
     });
     toast({
       title: 'Success!',

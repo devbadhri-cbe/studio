@@ -3,8 +3,7 @@
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Alert, AlertDescription } from './ui/alert';
 import { Loader2, BookOpen, XCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { useApp } from '@/context/app-context';
@@ -32,7 +31,6 @@ export function ConditionSynopsisDialog({ conditionName, onClose }: ConditionSyn
   const [originalSynopsis, setOriginalSynopsis] = React.useState<string | null>(null);
   const [translatedSynopsis, setTranslatedSynopsis] = React.useState<string | null>(null);
   const [selectedLanguage, setSelectedLanguage] = React.useState('en');
-  const { toast } = useToast();
   const { isDoctorLoggedIn } = useApp();
 
   const synopsisToDisplay = translatedSynopsis || originalSynopsis;

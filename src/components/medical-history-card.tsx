@@ -2,9 +2,9 @@
 
 'use client';
 
-import { Stethoscope, PlusCircle, Loader2, Pill, ShieldAlert, Info, XCircle, Trash2, Edit, AlertTriangle } from 'lucide-react';
+import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit } from 'lucide-react';
 import * as React from 'react';
-import { useForm, useFormContext } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
@@ -103,7 +103,7 @@ type ActiveSynopsis = {
 } | null;
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, removeMedicalCondition, addMedication, removeMedication, setMedicationNil, isDoctorLoggedIn, updateMedicalCondition } = useApp();
+  const { profile, addMedicalCondition, updateMedicalCondition, addMedication, removeMedication, setMedicationNil, isDoctorLoggedIn } = useApp();
   const [editingCondition, setEditingCondition] = React.useState<MedicalCondition | null>(null);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
@@ -308,20 +308,9 @@ export function MedicalHistoryCard() {
                                 )}
                                 </div>
                                     <div className="flex items-center shrink-0">
-                                        {med.name.toLowerCase() !== 'nil' ? (
-                                            <div className="flex items-center gap-2">
-                                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleSynopsisToggle('medication', med.id); }}>
-                                                    <Info className="h-5 w-5 text-blue-500" />
-                                                </Button>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
-                                                    <Trash2 className="h-5 w-5 text-destructive" />
-                                                </Button>
-                                            </div>
-                                        ) : (
-                                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
-                                                <XCircle className="h-5 w-5 text-muted-foreground" />
-                                            </Button>
-                                        )}
+                                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
+                                            <Trash2 className="h-5 w-5 text-destructive" />
+                                        </Button>
                                     </div>
                                 </li>
                                 {activeSynopsis?.type === 'medication' && activeSynopsis.id === med.id && (

@@ -2,9 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { startOfDay, parseISO } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
@@ -25,12 +23,6 @@ import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
 import { Loader2 } from 'lucide-react';
 
-const FormSchema = z.object({
-  date: z.date({ required_error: 'A valid date is required.' }),
-  systolic: z.coerce.number().min(50, 'Value seems too low.').max(300, 'Value seems too high.'),
-  diastolic: z.coerce.number().min(30, 'Value seems too low.').max(200, 'Value seems too high.'),
-  heartRate: z.coerce.number().min(30, 'Value seems too low.').max(250, 'Value seems too high.').optional(),
-});
 
 interface AddBloodPressureRecordDialogProps {
     children?: React.ReactNode;
@@ -43,8 +35,7 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
   const { addBloodPressureRecord, profile, bloodPressureRecords } = useApp();
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm({
     defaultValues: {
       date: new Date(),
       systolic: '' as any,
@@ -64,7 +55,7 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
     }
   }, [open, form]);
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+  const onSubmit = (data: any) => {
     setIsSubmitting(true);
     const newDate = startOfDay(data.date);
 
@@ -85,9 +76,9 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
     
     addBloodPressureRecord({
       date: newDate.toISOString(),
-      systolic: data.systolic,
-      diastolic: data.diastolic,
-      heartRate: data.heartRate,
+      systolic: Number(data.systolic),
+      diastolic: Number(data.diastolic),
+      heartRate: Number(data.heartRate),
     });
     toast({
       title: 'Success!',

@@ -3,8 +3,6 @@
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
@@ -19,16 +17,14 @@ import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
 import { DatePicker } from './ui/date-picker';
 
 
-const FormSchema = z.object({
-  name: z.string().min(2, "Name is required."),
-  dob: z.date({ required_error: "A valid date of birth is required." }),
-  gender: z.enum(['male', 'female', 'other'], { required_error: "Gender is required." }),
-  email: z.string().email({ message: "Please enter a valid email." }).optional().or(z.literal('')),
-  country: z.string().min(1, { message: "Country is required." }),
-  phone: z.string().min(5, { message: "Phone number is too short." }).optional().or(z.literal('')),
-});
-
-export type PatientFormData = z.infer<typeof FormSchema>;
+export type PatientFormData = {
+  name: string;
+  dob: Date;
+  gender: 'male' | 'female' | 'other';
+  email?: string;
+  country: string;
+  phone?: string;
+};
 
 interface PatientFormProps {
     patient?: Patient;
@@ -40,7 +36,6 @@ interface PatientFormProps {
 export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: PatientFormProps) {
   
   const form = useForm<PatientFormData>({
-    resolver: zodResolver(FormSchema),
     defaultValues: {
       name: '',
       dob: undefined,
@@ -132,7 +127,6 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                  <div>
                      <FormLabel>Age</FormLabel>
                      <FormField
-                        control={form.control}
                         name="age"
                         render={() => (
                              <FormItem>

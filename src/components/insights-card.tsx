@@ -1,14 +1,10 @@
 
 'use client';
 
-import { useApp } from '@/context/app-context';
-import { useToast } from '@/hooks/use-toast';
 import { Lightbulb, Loader2 } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Alert, AlertDescription } from './ui/alert';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Separator } from './ui/separator';
 
 const supportedLanguages = [
@@ -26,7 +22,6 @@ export function InsightsCard() {
   const [isTranslating, setIsTranslating] = React.useState(false);
   const [localTips, setLocalTips] = React.useState<string[]>([]);
   const [translatedTips, setTranslatedTips] = React.useState<string[] | null>(null);
-  const [selectedLanguage, setSelectedLanguage] = React.useState('en');
 
   const tipsToDisplay = translatedTips || localTips;
 

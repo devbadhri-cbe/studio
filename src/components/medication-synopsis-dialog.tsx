@@ -3,9 +3,8 @@
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from './ui/alert';
-import { Loader2, BookOpen, XCircle, Pill } from 'lucide-react';
+import { Loader2, XCircle, Pill } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Separator } from './ui/separator';
