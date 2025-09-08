@@ -8,7 +8,8 @@ import { getPatient, updatePatient } from '@/lib/firestore';
 import { PatientDashboard } from '@/components/patient-dashboard';
 import { processPatientData } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { doctorDetails } from '@/lib/doctor-data';
+import { auth } from '@/lib/auth';
+import type { User } from 'firebase/auth';
 
 export default function PatientPage() {
   const params = useParams();
@@ -17,16 +18,22 @@ export default function PatientPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
+  const [user, setUser] = React.useState<User | null>(null);
   
   const isDoctorViewing = searchParams.get('viewer') === 'doctor';
+
+  React.useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(setUser);
+    return () => unsubscribe();
+  }, []);
 
   React.useEffect(() => {
     setIsDoctorLoggedIn(isDoctorViewing);
 
     const loadPatientData = async () => {
       const patientId = params.patientId as string;
-      if (!patientId) {
-          setError("No patient ID provided.");
+      if (!patientId || !user) {
+          setError("No patient ID provided or user not logged in.");
           setIsLoading(false);
           return;
       };
@@ -35,38 +42,56 @@ export default function PatientPage() {
         const rawPatientData = await getPatient(patientId);
         if (rawPatientData) {
           
-          if (isDoctorViewing && rawPatientData.doctorUid && rawPatientData.doctorUid !== doctorDetails.uid) {
-            setError("Access Denied. You are not authorized to view this patient's dashboard.");
+          // If a doctor is viewing and the patient already has a DIFFERENT doctor, deny access.
+          if (isDoctorViewing && rawPatientData.doctorUid && rawPatientData.doctorUid !== user.uid) {
+            setError("Access Denied. You are not the assigned doctor for this patient.");
             setIsLoading(false);
             return;
           }
 
-          const patientData = processPatientData(rawPatientData);
-          setPatientData(patientData);
+          // If a doctor is viewing and the patient has NO doctor, assign this doctor.
+          const updates: Partial<Patient> = {};
+          let needsUpdate = false;
+
+          if (isDoctorViewing && !rawPatientData.doctorUid) {
+            updates.doctorUid = user.uid;
+            updates.doctorName = user.displayName || user.email || 'Assigned Doctor';
+            updates.doctorEmail = user.email || '';
+            needsUpdate = true;
+          }
           
           if (isDoctorViewing) {
-            // Update lastLogin timestamp once when doctor views the page
-            await updatePatient(patientId, { lastLogin: new Date().toISOString() });
+            updates.lastLogin = new Date().toISOString();
+            needsUpdate = true;
+          }
+
+          if (needsUpdate) {
+            const updatedData = await updatePatient(patientId, updates);
+            const patientData = processPatientData(updatedData);
+            setPatientData(patientData);
+          } else {
+             const patientData = processPatientData(rawPatientData);
+             setPatientData(patientData);
           }
 
         } else {
           setError(`No patient found with ID: ${patientId}`);
         }
       } catch (err) {
-        console.error("Failed to fetch patient data", err);
+        console.error("Failed to fetch or update patient data", err);
         setError("Failed to load patient data. Please try again.");
       } finally {
         setIsLoading(false);
       }
     };
     
-    if (isClient) {
+    if (isClient && user) {
         loadPatientData();
     }
     
-  }, [params.patientId, isClient, isDoctorViewing, setPatientData, setIsDoctorLoggedIn, toast]);
+  }, [params.patientId, isClient, isDoctorViewing, setPatientData, setIsDoctorLoggedIn, toast, user]);
 
-  if (isLoading || !isClient) {
+  if (isLoading || !isClient || !user) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -86,6 +111,5 @@ export default function PatientPage() {
     );
   }
 
-  // The PatientDashboard component will now have the correct data from the context
   return <PatientDashboard />;
 }
