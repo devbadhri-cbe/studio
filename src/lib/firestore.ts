@@ -133,6 +133,12 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
 export async function updatePatient(id: string, updates: Partial<Patient>): Promise<Patient> {
     const docRef = doc(db, PATIENTS_COLLECTION, id);
 
+    // If doctorName is updated, it implies a change of doctor, so we clear the UID.
+    // We check for doctorName to allow other patient details to be updated without affecting assignment.
+    if (updates.hasOwnProperty('doctorName')) {
+        updates.doctorUid = null;
+    }
+
     // Fetch the existing document to ensure the summary is based on the full data.
     const currentPatientData = await getPatient(id);
     if (!currentPatientData) throw new Error("Patient not found for update.");
@@ -193,5 +199,3 @@ export async function getPatientsPaginated(
 
   return { patients, lastVisible: newLastVisible };
 }
-
-    

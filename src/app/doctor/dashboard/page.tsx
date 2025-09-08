@@ -301,7 +301,7 @@ export default function DoctorDashboardPage() {
                     <Card>
                         <CardHeader className="flex flex-col md:flex-row md:items-center gap-4">
                             <div className="grid gap-2 flex-1">
-                                <CardTitle>Patient List</CardTitle>
+                                <CardTitle>{user.displayName || 'Your'} Patient List</CardTitle>
                                 <CardDescription>A scrollable list of all patients currently under your care.</CardDescription>
                             </div>
                             <div className="flex flex-col sm:flex-row items-center gap-2">
@@ -379,5 +379,3 @@ export default function DoctorDashboardPage() {
     </TooltipProvider>
   );
 }
-
-    
