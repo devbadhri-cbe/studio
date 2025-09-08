@@ -150,7 +150,7 @@ export default function DoctorDashboardPage() {
             email: data.email || '',
             country: data.country,
             phone: data.phone || '',
-        }
+        };
 
         try {
             if (editingPatient) {
@@ -161,7 +161,14 @@ export default function DoctorDashboardPage() {
                     description: `${updatedPatient.name}'s details have been updated.`,
                 });
             } else {
-                 const newPatient = await addPatient({ ...patientData, doctorUid: user.uid });
+                const doctorName = user.displayName || user.email || 'Assigned Doctor';
+                const doctorEmail = user.email || '';
+                const newPatient = await addPatient({ 
+                    ...patientData, 
+                    doctorUid: user.uid,
+                    doctorName: doctorName,
+                    doctorEmail: doctorEmail,
+                });
                 toast({
                     title: 'Patient Added',
                     description: `${newPatient.name} has been successfully added.`,
