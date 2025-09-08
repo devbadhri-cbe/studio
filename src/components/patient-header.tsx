@@ -7,6 +7,7 @@ import { useApp } from '@/context/app-context';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
 import { doctorDetails } from '@/lib/doctor-data';
+import { Edit, Mail, Phone } from 'lucide-react';
 
 
 // A simple SVG for WhatsApp icon
@@ -22,41 +23,55 @@ interface PatientHeaderProps {
 }
 
 export function PatientHeader({ children }: PatientHeaderProps) {
-  const { profile, isDoctorLoggedIn } = useApp();
+  const { profile, isDoctorLoggedIn, setProfile } = useApp();
+  const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
+  const [doctorName, setDoctorName] = React.useState(profile.doctorName || '');
   
   const pageTitle = isDoctorLoggedIn
     ? `${profile.name}'s Dashboard`
     : `Welcome, ${profile.name || 'User'}!`;
   
-  const doctorName = profile.doctorName || doctorDetails.name;
-  const doctorWhatsapp = doctorDetails.whatsapp;
-
-  const handleContact = () => {
-    if (!doctorWhatsapp) return;
-    const message = `Hello Dr. ${doctorName}, this is ${profile.name}. I have a question.`;
-    const whatsappUrl = `https://wa.me/${doctorWhatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  }
+  const handleSaveDoctorName = () => {
+    setProfile({ ...profile, doctorName });
+    setIsEditingDoctor(false);
+  };
 
 
   return (
-    <div className="flex flex-col md:flex-row items-center gap-4">
+    <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
       <div className="flex-1 text-center md:text-left">
         <h1 className="text-2xl md:text-3xl font-semibold font-headline">
           {pageTitle}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Your health overview. Consult {doctorName} before making any decisions.
-        </p>
+        <div className="text-sm text-muted-foreground mt-2">
+            {!isDoctorLoggedIn && (
+                isEditingDoctor ? (
+                     <div className="flex items-center gap-2 max-w-sm">
+                        <input
+                            type="text"
+                            value={doctorName}
+                            onChange={(e) => setDoctorName(e.target.value)}
+                            className="bg-transparent border-b border-primary outline-none focus:ring-0"
+                            placeholder="Enter Doctor's Name"
+                            onBlur={handleSaveDoctorName}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSaveDoctorName()}
+                            autoFocus
+                        />
+                         <Button size="sm" onClick={handleSaveDoctorName}>Save</Button>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-2">
+                        <span>Consulting with: <span className="font-semibold text-foreground">{doctorName || 'Not Set'}</span></span>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditingDoctor(true)}>
+                            <Edit className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            )}
+        </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 self-center md:self-auto">
         <UploadRecordDialog />
-        {!isDoctorLoggedIn && (
-            <Button size="sm" variant="outline" onClick={handleContact} disabled={!doctorWhatsapp}>
-                <WhatsAppIcon className="mr-2 h-4 w-4" />
-                Chat with Doctor
-            </Button>
-        )}
       </div>
     </div>
   );

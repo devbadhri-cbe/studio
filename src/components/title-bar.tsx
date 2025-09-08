@@ -3,13 +3,11 @@
 'use client';
 
 import { Logo } from '@/components/logo';
-import { Mail, Phone, Edit } from 'lucide-react';
 import * as React from 'react';
 import { ThemeToggle } from './theme-toggle';
 import { useApp } from '@/context/app-context';
-import { doctorDetails } from '@/lib/doctor-data';
 import { Button } from './ui/button';
-import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
+import { doctorDetails } from '@/lib/doctor-data';
 
 interface TitleBarProps {
     children?: React.ReactNode;
@@ -35,30 +33,8 @@ export function TitleBar({ children }: TitleBarProps) {
                                 <span className="animate-fade-in-down" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>Guardian</span>
                             </div>
                         </div>
-                        <div className="text-center text-xs text-muted-foreground my-2">
-                            by
-                        </div>
-                        <div className="relative group">
-                            <div className="text-center text-sm text-muted-foreground">
-                                <p className="font-semibold text-lg text-foreground whitespace-nowrap">{doctorDetails.name}</p>
-                                <a href={`mailto:${doctorDetails.email}`} className="flex items-center justify-center gap-1.5 hover:text-primary">
-                                    <Mail className="h-3 w-3" />
-                                    {doctorDetails.email}
-                                </a>
-                                {doctorDetails.phone && (
-                                    <a href={`tel:${doctorDetails.phone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-1.5 hover:text-primary">
-                                        <Phone className="h-3 w-3" />
-                                        {doctorDetails.phone}
-                                    </a>
-                                )}
-                            </div>
-                            {isDoctorLoggedIn && (
-                                <div className="absolute -top-2 -right-8">
-                                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setIsEditing(true)}>
-                                        <Edit className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            )}
+                        <div className="text-center text-xs text-muted-foreground mt-2">
+                            by {doctorDetails.name}
                         </div>
                     </div>
                 </div>
@@ -67,7 +43,6 @@ export function TitleBar({ children }: TitleBarProps) {
                 </div>
             </div>
         </header>
-        <EditDoctorDetailsDialog open={isEditing} onOpenChange={setIsEditing} />
         </>
     );
 }
