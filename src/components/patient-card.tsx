@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Sun, Zap, Globe, MessageSquare, Clock, Bell, Share2, Droplet } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Sun, Zap, Globe, MessageCircle, Clock, Bell, Share2, Droplet } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
@@ -53,7 +53,6 @@ const statusDescriptions: Record<Patient['status'], string> = {
 
 
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
-  const { toast } = useToast();
   const { isDoctorLoggedIn } = useApp();
   const [isShareOpen, setIsShareOpen] = React.useState(false);
 
@@ -72,34 +71,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         setIsNameOverflowing(nameRef.current.scrollWidth > nameRef.current.clientWidth);
     }
   }, [patient.name]);
-
-  const handleContact = (method: 'whatsapp' | 'email') => {
-    const doctorName = patient.doctorName || "your doctor";
-    let origin = window.location.origin;
-    if (origin.includes('6000-')) {
-        origin = origin.replace('6000-', '9000-');
-    }
-    const dashboardLink = `${origin}/patient/${patient.id}`;
-    let body = `Hello ${patient.name},\n\nThis is a message from ${doctorName} regarding your Health Guardian dashboard. You can access it here:\n${dashboardLink}\n\nBest,\n${doctorName}`;
-    
-    switch (method) {
-        case 'whatsapp':
-            if (!patient.phone) {
-                 toast({ variant: 'destructive', title: 'No Phone Number Found' });
-                 return;
-            }
-            window.open(`https://wa.me/${patient.phone.replace(/\D/g, '')}?text=${encodeURIComponent(body)}`, '_blank');
-            break;
-        case 'email':
-             if (!patient.email) {
-                 toast({ variant: 'destructive', title: 'No Email Found' });
-                 return;
-            }
-            const subject = `Your Health Guardian Dashboard`;
-            window.location.href = `mailto:${patient.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            break;
-    }
-  }
 
   const handleDropdownSelect = (e: Event, callback: () => void) => {
     e.preventDefault();
@@ -192,16 +163,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                              <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => setIsShareOpen(true))}>
                                 <Share2 className="mr-2 h-4 w-4" />
                                 Share Access
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuLabel>Contact Patient</DropdownMenuLabel>
-                            <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('whatsapp'))} disabled={!patient.phone}>
-                                <WhatsAppIcon className="mr-2 h-4 w-4" />
-                                WhatsApp
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('email'))} disabled={!patient.email}>
-                                <Mail className="mr-2 h-4 w-4" />
-                                Email
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
