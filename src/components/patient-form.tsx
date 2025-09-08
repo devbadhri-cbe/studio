@@ -125,17 +125,13 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                     />
                  </div>
                  <div>
-                     <FormLabel>Age</FormLabel>
-                     <FormField
-                        name="age"
-                        render={() => (
-                             <FormItem>
-                                <FormControl>
-                                    <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
-                                </FormControl>
-                             </FormItem>
-                        )}
-                     />
+                    <FormItem>
+                        <FormLabel>Age</FormLabel>
+                        <FormControl>
+                            <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
                  </div>
                 <div className="md:col-span-2">
                     <FormField
