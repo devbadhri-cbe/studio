@@ -75,7 +75,11 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
 
   const handleContact = (method: 'whatsapp' | 'sms' | 'email') => {
     const doctorName = patient.doctorName || "your doctor";
-    const dashboardLink = `${window.location.origin}/patient/${patient.id}`;
+    let origin = window.location.origin;
+    if (origin.includes('6000-')) {
+        origin = origin.replace('6000-', '9000-');
+    }
+    const dashboardLink = `${origin}/patient/${patient.id}`;
     let body = `Hello ${patient.name},\n\nThis is a message from ${doctorName} regarding your Health Guardian dashboard. You can access it here:\n${dashboardLink}\n\nBest,\n${doctorName}`;
     
     switch (method) {

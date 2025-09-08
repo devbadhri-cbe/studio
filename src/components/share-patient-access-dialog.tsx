@@ -39,7 +39,10 @@ export function SharePatientAccessDialog({
     if (open) {
       setIsLoading(true);
       // Ensure this code runs only on the client
-      const origin = window.location.origin;
+      let origin = window.location.origin;
+      if (origin.includes('6000-')) {
+          origin = origin.replace('6000-', '9000-');
+      }
       setDashboardLink(`${origin}/patient/${patient.id}`);
       setLoginPageLink(`${origin}/`);
       setIsLoading(false);
