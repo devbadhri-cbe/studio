@@ -127,6 +127,11 @@ export default function PatientLoginPage() {
               Create one now
             </Button>
           </div>
+          <div className="mt-6 text-center">
+            <Button variant="link" size="sm" onClick={() => router.push('/doctor/dashboard')}>
+              Are you the doctor? Go to dashboard.
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
