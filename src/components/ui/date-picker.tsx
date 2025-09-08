@@ -124,10 +124,10 @@ export function DatePicker({
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex items-center rounded-md border border-input h-10 w-fit px-1.5 space-x-0.5 text-sm">
-      <div className="w-[4.5rem]">
+    <div className="flex items-center rounded-md border border-input h-10 w-fit px-2 space-x-1 text-sm">
+      <div className="w-[3rem]">
         <Select value={day} onValueChange={handleDayChange}>
-          <SelectTrigger icon={null} className="border-0 p-1 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
+          <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Day" />
           </SelectTrigger>
           <SelectContent>
@@ -142,9 +142,9 @@ export function DatePicker({
 
       <span className="text-muted-foreground">/</span>
 
-      <div className="w-[5.5rem]">
+      <div className="w-[4rem]">
         <Select value={month} onValueChange={handleMonthChange}>
-            <SelectTrigger icon={null} className="border-0 p-1 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
+            <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Month" />
             </SelectTrigger>
             <SelectContent>
@@ -159,9 +159,9 @@ export function DatePicker({
 
       <span className="text-muted-foreground">/</span>
       
-      <div className="w-[6rem]">
+      <div className="w-[4.5rem]">
         <Select value={year} onValueChange={handleYearChange}>
-            <SelectTrigger icon={null} className="border-0 p-1 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
+            <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Year" />
             </SelectTrigger>
             <SelectContent>
@@ -176,4 +176,3 @@ export function DatePicker({
     </div>
   );
 }
-
