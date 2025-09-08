@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -35,10 +36,11 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 interface SharePatientAccessDialogProps {
   patient: Patient;
   children: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function SharePatientAccessDialog({ patient, children }: SharePatientAccessDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function SharePatientAccessDialog({ patient, children, open, onOpenChange }: SharePatientAccessDialogProps) {
   const [dashboardLink, setDashboardLink] = React.useState('');
   const [loginPageLink, setLoginPageLink] = React.useState('');
   const qrRef = React.useRef<HTMLDivElement>(null);
@@ -110,43 +112,43 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
         label: 'Send via Email',
         icon: <Mail className="mr-2 h-4 w-4" />,
         action: () => {
-            if (!patient.email) {
-                toast({ variant: 'destructive', title: 'No Email Found', description: 'This patient does not have an email address on file.' });
+            if (!patient.doctorEmail) {
+                toast({ variant: 'destructive', title: 'No Doctor Email Found', description: 'Please add your doctor\'s email address first.' });
                 return;
             }
             const subject = `Your Health Guardian Dashboard Access`;
-            const body = `Hello ${patient.name},\n\nYou can access your Health Guardian dashboard via this link:\n\n${dashboardLink}\n\nAlternatively, you can scan the QR code (if attached) or use your Patient ID on the main login page.\n\nBest,\n${patient.doctorName || 'Your Doctor'}`;
-            window.location.href = `mailto:${patient.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            const body = `Hello Dr. ${patient.doctorName || ''},\n\nYou can access my Health Guardian dashboard via this link:\n\n${dashboardLink}\n\nBest,\n${patient.name}`;
+            window.location.href = `mailto:${patient.doctorEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         }
     },
     {
         label: 'Send via Messages',
         icon: <MessageSquare className="mr-2 h-4 w-4" />,
         action: () => {
-             if (!patient.phone) {
-                toast({ variant: 'destructive', title: 'No Phone Number Found', description: 'This patient does not have a phone number on file.' });
+             if (!patient.doctorPhone) {
+                toast({ variant: 'destructive', title: 'No Doctor Phone Number Found', description: 'This patient does not have a phone number on file.' });
                 return;
             }
-            const body = `Hello ${patient.name}, here is the link to your Health Guardian dashboard: ${dashboardLink}`;
-            window.location.href = `sms:${patient.phone.replace(/\s/g, '')}?&body=${encodeURIComponent(body)}`;
+            const body = `Hello Dr. ${patient.doctorName || ''}, here is the link to my Health Guardian dashboard: ${dashboardLink}`;
+            window.location.href = `sms:${patient.doctorPhone.replace(/\s/g, '')}?&body=${encodeURIComponent(body)}`;
         }
     },
      {
         label: 'Send via WhatsApp',
         icon: <WhatsAppIcon className="mr-2 h-4 w-4" />,
         action: () => {
-            if (!patient.phone) {
-                toast({ variant: 'destructive', title: 'No Phone Number Found', description: 'This patient does not have a phone number on file.' });
+            if (!patient.doctorPhone) {
+                toast({ variant: 'destructive', title: 'No Doctor Phone Number Found', description: 'This patient does not have a phone number on file.' });
                 return;
             }
-            const body = `Hello ${patient.name}, here is the link to your Health Guardian dashboard: ${dashboardLink}`;
-            window.open(`https://wa.me/${patient.phone.replace(/\D/g, '')}?text=${encodeURIComponent(body)}`, '_blank');
+            const body = `Hello Dr. ${patient.doctorName || ''}, here is the link to my Health Guardian dashboard: ${dashboardLink}`;
+            window.open(`https://wa.me/${patient.doctorPhone.replace(/\D/g, '')}?text=${encodeURIComponent(body)}`, '_blank');
         }
     }
   ]
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
         {children}
       </DialogTrigger>
@@ -213,4 +215,3 @@ export function SharePatientAccessDialog({ patient, children }: SharePatientAcce
   );
 }
 
-    

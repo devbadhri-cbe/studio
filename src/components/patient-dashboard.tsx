@@ -12,7 +12,7 @@ import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
 import { DoctorReviewCard } from '@/components/doctor-review-card';
-import { TitleBar } from '@/components/title-bar';
+import { TitleBar } from '@/components/ui/title-bar';
 import { DiseasePanel } from '@/components/disease-panel';
 import { BiomarkersPanel } from '@/components/biomarkers-panel';
 import { InsightsCard } from '@/components/insights-card';
