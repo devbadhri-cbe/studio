@@ -51,7 +51,6 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
     },
   });
   
-  const watchCountry = form.watch('country');
   const watchDob = form.watch('dob');
   const age = React.useMemo(() => watchDob ? calculateAge(watchDob.toISOString()) : null, [watchDob]);
 
@@ -67,16 +66,6 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
         });
     }
   }, [patient, form]);
-
-  React.useEffect(() => {
-    if (watchCountry) {
-        const countryData = countries.find(c => c.code === watchCountry);
-        const currentPhone = form.getValues('phone');
-        if (countryData && (!currentPhone || currentPhone.startsWith('+'))) {
-             form.setValue('phone', countryData.phoneCode, { shouldValidate: false });
-        }
-    }
-  }, [watchCountry, form]);
   
   return (
     <>
