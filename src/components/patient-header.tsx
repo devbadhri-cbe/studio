@@ -26,15 +26,15 @@ export function PatientHeader() {
         <p className="text-muted-foreground mt-2">
             Your health overview. Consult your doctor before making any decisions.
         </p>
-         {isDoctorLoggedIn && (
-            <div className="mt-2 flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Consulting Doctor:</span>
-              <span className="font-semibold">{profile.doctorName || 'Not Assigned'}</span>
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
+        <div className="mt-2 flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Consulting Doctor:</span>
+            <span className="font-semibold">{profile.doctorName || 'Not Assigned'}</span>
+            {!isDoctorLoggedIn && (
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
                 <Edit className="h-3 w-3" />
-              </Button>
-            </div>
-          )}
+            </Button>
+            )}
+        </div>
       </div>
       <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-2 md:gap-4 shrink-0">
         <div className="flex items-center gap-2">
@@ -42,7 +42,7 @@ export function PatientHeader() {
         </div>
       </div>
     </div>
-    {isDoctorLoggedIn && <EditDoctorDetailsDialog open={isEditing} onOpenChange={setIsEditing} />}
+    <EditDoctorDetailsDialog open={isEditing} onOpenChange={setIsEditing} />
     </>
   );
 }
