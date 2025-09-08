@@ -53,25 +53,23 @@ export function PatientHeader({ children }: PatientHeaderProps) {
             Your health overview. Consult your doctor before making any decisions.
         </p>
       </div>
-      <div className="flex items-center gap-2 self-center md:self-auto">
-        {!isDoctorLoggedIn && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Consulting with: <span className="font-semibold text-foreground">{profile.doctorName || 'Not Set'}</span></span>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
-                    <Edit className="h-4 w-4" />
-                </Button>
-                {profile.doctorName && (
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                                <Info className="h-4 w-4 text-yellow-500" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Your doctor has not logged in yet. <br /> Use the chat button to invite them.</p>
-                        </TooltipContent>
-                    </Tooltip>
-                )}
-            </div>
-        )}
+      <div className="flex items-center gap-4 self-center md:self-auto">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Consulting with: <span className="font-semibold text-foreground">{profile.doctorName || 'Not Set'}</span></span>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
+                <Edit className="h-4 w-4" />
+            </Button>
+            {!isDoctorLoggedIn && profile.doctorName && (
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-yellow-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Your doctor has not logged in yet. <br /> Use the chat button to invite them.</p>
+                    </TooltipContent>
+                </Tooltip>
+            )}
+        </div>
         <UploadRecordDialog />
       </div>
     </div>
@@ -79,4 +77,5 @@ export function PatientHeader({ children }: PatientHeaderProps) {
     </>
   );
 }
+
 
