@@ -6,7 +6,6 @@ import { useApp } from '@/context/app-context';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
 import { Edit } from 'lucide-react';
-import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 
 
 interface PatientHeaderProps {
@@ -15,8 +14,6 @@ interface PatientHeaderProps {
 
 export function PatientHeader({ children }: PatientHeaderProps) {
   const { profile, isDoctorLoggedIn } = useApp();
-  const [isEditing, setIsEditing] = React.useState(false);
-
 
   const pageTitle = isDoctorLoggedIn
     ? `${profile.name}'s Dashboard`
@@ -30,7 +27,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
           {pageTitle}
         </h1>
         <p className="text-muted-foreground mt-2">
-            Your health overview. Consult your doctor before making any decisions.
+            Consulting with: <span className="font-semibold text-foreground/90">{profile.doctorName || 'Not Assigned'}</span>
         </p>
       </div>
       <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-2 md:gap-4">
@@ -39,7 +36,6 @@ export function PatientHeader({ children }: PatientHeaderProps) {
         </div>
       </div>
     </div>
-    <EditDoctorDetailsDialog open={isEditing} onOpenChange={setIsEditing} />
     </>
   );
 }
