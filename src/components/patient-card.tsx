@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Sun, Zap, Globe, MessageSquare, Clock, Bell, Droplet, Share2 } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Sun, Zap, Globe, MessageSquare, Clock, Bell, Share2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
@@ -96,7 +96,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                  return;
             }
             const userAgent = window.navigator.userAgent;
-            // The separator logic is crucial for cross-platform compatibility, especially for iMessage on iOS.
             const separator = /iPad|iPhone|iPod/.test(userAgent) ? '&' : '?';
             const cleanPhone = `+${patient.phone.replace(/\D/g, '')}`;
             window.location.href = `sms:${cleanPhone}${separator}body=${encodeURIComponent(body)}`;
@@ -294,5 +293,3 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     </>
   );
 }
-
-    
