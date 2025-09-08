@@ -43,12 +43,22 @@ export default function DoctorDashboardPage() {
     'On Track': 3,
   };
 
+  const patientNeedsReview = (patient: Patient) => {
+    return patient.presentMedicalConditions?.some(c => c.status === 'pending_review') || patient.dashboardSuggestions?.some(s => s.status === 'pending');
+  }
+
 
   const fetchPatients = React.useCallback(async () => {
     setIsLoading(true);
     try {
       const allPatients = await getAllPatients();
       const sortedPatients = allPatients.sort((a, b) => {
+        const aNeedsReview = patientNeedsReview(a);
+        const bNeedsReview = patientNeedsReview(b);
+
+        if (aNeedsReview && !bNeedsReview) return -1;
+        if (!aNeedsReview && bNeedsReview) return 1;
+
         const priorityA = statusPriority[a.status] || 4;
         const priorityB = statusPriority[b.status] || 4;
         if (priorityA !== priorityB) {
