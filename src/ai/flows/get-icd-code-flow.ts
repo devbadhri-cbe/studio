@@ -8,8 +8,7 @@
  * - GetIcdCodeOutput - The return type for the getIcdCode function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, googleAI} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GetIcdCodeInputSchema = z.object({

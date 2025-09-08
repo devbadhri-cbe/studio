@@ -8,8 +8,7 @@
  * - GetMedicationDetailsOutput - The return type for the function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, googleAI} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GetMedicationDetailsInputSchema = z.object({
@@ -40,7 +39,7 @@ Based on the input, you must return both the standardized chemical name and the 
 For example:
 - If the input is "Lipitor", you should return chemicalName: "Atorvastatin" and brandName: "Lipitor".
 - If the input is "Metformin", you should return chemicalName: "Metformin" and brandName: "Glucophage".
-- If the input is "Rosuvas 10", you should return chemicalName: "Rosuvastatin" and brandName: "Rosuvas".
+- If the input is "Rosuvas 10", you should return chemicalName: "Rosuvas" and brandName: "Rosuvas".
 
 Medication Name: {{{medicationName}}}
 

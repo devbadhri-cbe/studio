@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to translate text to a specified language.
@@ -7,8 +8,7 @@
  * - TranslateTextOutput - The return type for the translateText function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, googleAI} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const TranslateTextInputSchema = z.object({

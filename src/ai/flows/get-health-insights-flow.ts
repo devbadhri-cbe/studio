@@ -8,8 +8,7 @@
  * - GetHealthInsightsOutput - The return type for the getHealthInsights function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, googleAI} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GetHealthInsightsInputSchema = z.object({

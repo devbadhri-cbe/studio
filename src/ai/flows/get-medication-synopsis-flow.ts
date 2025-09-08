@@ -8,8 +8,7 @@
  * - GetMedicationSynopsisOutput - The return type for the getMedicationSynopsis function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, googleAI} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GetMedicationSynopsisInputSchema = z.object({

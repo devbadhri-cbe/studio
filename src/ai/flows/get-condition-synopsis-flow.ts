@@ -8,8 +8,7 @@
  * - GetConditionSynopsisOutput - The return type for the getConditionSynopsis function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, googleAI} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GetConditionSynopsisInputSchema = z.object({
@@ -72,4 +71,3 @@ const getConditionSynopsisFlow = ai.defineFlow(
         return output!;
     }
 );
-
