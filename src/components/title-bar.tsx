@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Logo } from '@/components/logo';
@@ -13,8 +14,8 @@ interface TitleBarProps {
 
 export function TitleBar({ children }: TitleBarProps) {
 
-    const doctorPhone = '+91 98402 36905';
-    const whatsAppNumber = '+919840236905';
+    const doctorPhone = ''; // Removed hardcoded number
+    const whatsAppNumber = ''; // Removed hardcoded number
 
     return (
         <header className="border-b px-4 py-2 md:px-6">
@@ -40,10 +41,12 @@ export function TitleBar({ children }: TitleBarProps) {
                                 <Mail className="h-3 w-3" />
                                 drbadhri@gmail.com
                             </a>
-                            <a href={`https://wa.me/${whatsAppNumber}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 hover:text-primary">
-                                <Phone className="h-3 w-3" />
-                                {doctorPhone}
-                            </a>
+                            {doctorPhone && (
+                                <a href={`tel:${doctorPhone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-1.5 hover:text-primary">
+                                    <Phone className="h-3 w-3" />
+                                    {doctorPhone}
+                                </a>
+                            )}
                         </div>
                     </div>
                 </div>

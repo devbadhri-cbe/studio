@@ -1,12 +1,11 @@
 
+
 'use client';
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { Card, CardContent } from './ui/card';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
-import { MessageCircle } from 'lucide-react';
 
 // A simple SVG for WhatsApp icon
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -28,9 +27,10 @@ export function PatientHeader({ children }: PatientHeaderProps) {
     : `Welcome, ${profile.name || 'User'}!`;
   
   const doctorName = profile.doctorName || 'your doctor';
-  const doctorWhatsapp = '+919840236905';
+  const doctorWhatsapp = ''; // Removed hardcoded number
 
   const handleContact = () => {
+    if (!doctorWhatsapp) return;
     const message = `Hello Dr. ${doctorName}, this is ${profile.name}. I have a question.`;
     const whatsappUrl = `https://wa.me/${doctorWhatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -38,26 +38,24 @@ export function PatientHeader({ children }: PatientHeaderProps) {
 
 
   return (
-    <Card className="shadow-xl">
-      <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
-        <div className="flex flex-col items-center md:items-start flex-1 gap-4 w-full">
-            <div className="text-center md:text-left">
-                <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                    {pageTitle}
-                </h1>
-                <p className="text-sm text-muted-foreground">Your health overview. Consult {doctorName} before making any decisions.</p>
-            </div>
-        </div>
-         <div className="flex items-center gap-2">
-            <UploadRecordDialog />
-             {!isDoctorLoggedIn && (
-                <Button size="sm" variant="outline" onClick={handleContact}>
-                    <WhatsAppIcon className="mr-2 h-4 w-4" />
-                    Chat with Doctor
-                </Button>
-            )}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex flex-col md:flex-row items-center gap-4">
+      <div className="flex-1 text-center md:text-left">
+        <h1 className="text-2xl md:text-3xl font-semibold font-headline">
+          {pageTitle}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Your health overview. Consult {doctorName} before making any decisions.
+        </p>
+      </div>
+      <div className="flex items-center gap-2">
+        <UploadRecordDialog />
+        {!isDoctorLoggedIn && (
+            <Button size="sm" variant="outline" onClick={handleContact} disabled={!doctorWhatsapp}>
+                <WhatsAppIcon className="mr-2 h-4 w-4" />
+                Chat with Doctor
+            </Button>
+        )}
+      </div>
+    </div>
   );
 }
