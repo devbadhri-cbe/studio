@@ -155,10 +155,11 @@ export default function DoctorDashboardPage() {
         try {
             if (editingPatient) {
                 const updatedPatientData = await updatePatient(editingPatient.id, patientData);
-                const updatedPatient = processPatientData(updatedPatientData);
+                const processedPatient = processPatientData(updatedPatientData);
+                 setPatients(prev => prev.map(p => p.id === processedPatient.id ? processedPatient : p));
                 toast({
                     title: 'Patient Updated',
-                    description: `${updatedPatient.name}'s details have been updated.`,
+                    description: `${processedPatient.name}'s details have been updated.`,
                 });
             } else {
                 const doctorName = user.displayName || user.email || 'Assigned Doctor';
@@ -169,12 +170,13 @@ export default function DoctorDashboardPage() {
                     doctorName: doctorName,
                     doctorEmail: doctorEmail,
                 });
+                const processedPatient = processPatientData(newPatient);
+                setPatients(prev => [processedPatient, ...prev]);
                 toast({
                     title: 'Patient Added',
                     description: `${newPatient.name} has been successfully added.`,
                 });
             }
-            await fetchPatients(false);
             closeForm();
         } catch (error) {
             console.error("Failed to save patient", error);
@@ -377,3 +379,5 @@ export default function DoctorDashboardPage() {
     </TooltipProvider>
   );
 }
+
+    

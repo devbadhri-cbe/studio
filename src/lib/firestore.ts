@@ -123,11 +123,11 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         status: 'On Track' as const,
     }
   const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), docData);
-  
-   return {
-    ...docData,
-    id: docRef.id,
-  } as Patient;
+  const newPatientDoc = await getPatient(docRef.id);
+  if (!newPatientDoc) {
+      throw new Error("Failed to create and retrieve new patient.");
+  }
+  return newPatientDoc;
 }
 
 export async function updatePatient(id: string, updates: Partial<Patient>): Promise<Patient> {
@@ -193,4 +193,5 @@ export async function getPatientsPaginated(
 
   return { patients, lastVisible: newLastVisible };
 }
+
     
