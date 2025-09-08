@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -49,9 +48,8 @@ export function SharePatientAccessDialog({ patient, children, open, onOpenChange
   React.useEffect(() => {
     if (open && typeof window !== 'undefined') {
        const origin = window.location.origin;
-       const publicUrl = origin.includes('://localhost:') ? origin : window.location.protocol + '//' + window.location.hostname;
-       setDashboardLink(`${publicUrl}/patient/${patient.id}`);
-       setLoginPageLink(`${publicUrl}/doctor/login`);
+       setDashboardLink(`${origin}/patient/${patient.id}`);
+       setLoginPageLink(`${origin}/doctor/login`);
     }
   }, [open, patient.id]);
 
