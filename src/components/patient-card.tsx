@@ -14,7 +14,6 @@ import * as React from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { useApp } from '@/context/app-context';
 import { cn } from '@/lib/utils';
 import { SharePatientAccessDialog } from './share-patient-access-dialog';
 
@@ -73,6 +72,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
 
   const handleDropdownSelect = (e: Event, callback: () => void) => {
     e.preventDefault();
+    e.stopPropagation();
     callback();
   }
   

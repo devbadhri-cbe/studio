@@ -3,16 +3,27 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { getAllPatients } from '@/lib/firestore';
+import { getAllPatients, deletePatient as deletePatientFromDB } from '@/lib/firestore';
 import type { Patient } from '@/lib/types';
 import { PatientCard } from '@/components/patient-card';
 import { TitleBar } from '@/components/ui/title-bar';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { addPatient } from '@/lib/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 
@@ -22,6 +33,7 @@ export default function DoctorDashboardPage() {
   const [isCreating, setIsCreating] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [editingPatient, setEditingPatient] = React.useState<Patient | null>(null);
+  const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -54,9 +66,25 @@ export default function DoctorDashboardPage() {
     setEditingPatient(patient);
   };
   
-  const handleDeletePatient = (patient: Patient) => {
-    // This would be a call to a delete function in firestore
-    console.log("Deleting", patient.id);
+  const handleDeletePatient = async () => {
+    if (!patientToDelete) return;
+    try {
+      await deletePatientFromDB(patientToDelete.id);
+      toast({
+        title: 'Patient Deleted',
+        description: `${patientToDelete.name}'s profile has been deleted.`,
+      });
+      fetchPatients();
+    } catch (error) {
+      console.error("Failed to delete patient", error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not delete the patient profile.',
+      });
+    } finally {
+      setPatientToDelete(null);
+    }
   };
 
   const handleFormSubmit = async (data: PatientFormData) => {
@@ -137,7 +165,7 @@ export default function DoctorDashboardPage() {
                   patient={patient}
                   onView={handleViewPatient}
                   onEdit={handleEditPatient}
-                  onDelete={handleDeletePatient}
+                  onDelete={() => setPatientToDelete(patient)}
                 />
               ))}
             </div>
@@ -170,6 +198,22 @@ export default function DoctorDashboardPage() {
              <PatientForm patient={editingPatient!} onSubmit={handleEditFormSubmit} isSubmitting={isSubmitting} onCancel={() => setEditingPatient(null)} />
          </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!patientToDelete} onOpenChange={(open) => !open && setPatientToDelete(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the patient's profile and all associated data.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeletePatient} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div>
     </TooltipProvider>
