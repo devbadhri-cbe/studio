@@ -10,6 +10,8 @@ import { Edit, Info, MessageSquare } from 'lucide-react';
 import { doctorDetails } from '@/lib/doctor-data';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
 
 
 // A simple SVG for WhatsApp icon
@@ -27,19 +29,36 @@ interface PatientHeaderProps {
 export function PatientHeader({ children }: PatientHeaderProps) {
   const { profile, isDoctorLoggedIn, setProfile } = useApp();
   const [isEditing, setIsEditing] = React.useState(false);
+  const { toast } = useToast();
   
   const pageTitle = isDoctorLoggedIn
     ? `${profile.name}'s Dashboard`
     : `Welcome, ${profile.name || 'User'}!`;
   
-  const handleChat = () => {
-    if (!profile.doctorPhone) return;
+  const handleChat = (method: 'whatsapp' | 'sms' | 'email') => {
+    if (!profile.doctorPhone) {
+        toast({variant: 'destructive', title: 'No Doctor Phone Number', description: 'Please add your doctor\'s phone number first.'});
+        return;
+    }
 
     const loginPageLink = `${window.location.origin}/doctor/login`;
     const message = `Hello Dr. ${profile.doctorName || ''}, please use this link to access my Health Guardian dashboard: ${loginPageLink}`;
 
-    const whatsappUrl = `https://wa.me/${profile.doctorPhone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    switch(method) {
+        case 'whatsapp':
+             window.open(`https://wa.me/${profile.doctorPhone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+             break;
+        case 'sms':
+            window.location.href = `sms:${profile.doctorPhone.replace(/\s/g, '')}?&body=${encodeURIComponent(message)}`;
+            break;
+        case 'email':
+             if (!profile.doctorEmail) {
+                toast({variant: 'destructive', title: 'No Doctor Email', description: 'Please add your doctor\'s email address first.'});
+                return;
+            }
+             window.location.href = `mailto:${profile.doctorEmail}?subject=${encodeURIComponent("Health Guardian Dashboard")}&body=${encodeURIComponent(message)}`;
+             break;
+    }
   };
 
   return (
@@ -55,12 +74,17 @@ export function PatientHeader({ children }: PatientHeaderProps) {
       </div>
       <div className="flex items-center gap-4 self-center md:self-auto">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Consulting with: <span className="font-semibold text-foreground">{profile.doctorName || 'Not Set'}</span></span>
+            <div className="flex flex-col md:flex-row md:items-center md:gap-2">
+                <span>Consulting with:</span>
+                <span className="font-semibold text-foreground">{profile.doctorName || 'Not Set'}</span>
+            </div>
+            
             {!isDoctorLoggedIn && (
                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
                     <Edit className="h-4 w-4" />
                 </Button>
             )}
+
             {!isDoctorLoggedIn && profile.doctorName && (
                 <>
                 <Tooltip>
@@ -71,16 +95,23 @@ export function PatientHeader({ children }: PatientHeaderProps) {
                         <p>Your doctor has not logged in yet. <br /> Use the chat button to invite them.</p>
                     </TooltipContent>
                 </Tooltip>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleChat}>
-                            <WhatsAppIcon className="h-4 w-4 text-green-500" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Chat with doctor on WhatsApp</p>
-                    </TooltipContent>
-                </Tooltip>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                        <MessageSquare className="h-4 w-4 text-primary" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onSelect={() => handleChat('whatsapp')}>
+                        <WhatsAppIcon className="mr-2 h-4 w-4" />
+                        <span>WhatsApp</span>
+                    </DropdownMenuItem>
+                     <DropdownMenuItem onSelect={() => handleChat('sms')}>
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        <span>SMS / iMessage</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 </>
             )}
         </div>
@@ -91,4 +122,5 @@ export function PatientHeader({ children }: PatientHeaderProps) {
     </>
   );
 }
+
 
