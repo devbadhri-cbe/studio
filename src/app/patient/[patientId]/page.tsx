@@ -10,6 +10,7 @@ import { processPatientData } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { auth } from '@/lib/auth';
 import type { User } from 'firebase/auth';
+import type { Patient } from '@/lib/types';
 
 export default function PatientPage() {
   const params = useParams();
