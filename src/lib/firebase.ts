@@ -11,10 +11,9 @@ import { getStorage } from "firebase/storage";
 const firebaseConfig = {
   "projectId": "glycemic-guardian-6uxyg",
   "appId": "1:1023747133263:web:fc7ad4f2a467dad6c9ff3a",
-  "storageBucket": "glycemic-guardian-6uxyg.firebasestorage.app",
+  "storageBucket": "glycemic-guardian-6uxyg.appspot.com",
   "apiKey": "AIzaSyDRROv81qKWJOF1DlsskWYTzWcyYOXvnl4",
   "authDomain": "glycemic-guardian-6uxyg.firebaseapp.com",
-  "measurementId": "",
   "messagingSenderId": "1023747133263"
 };
 

@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Search, UserPlus, Loader2 } from 'lucide-react';
+import { Search, UserPlus, Loader2, LogOut } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Patient } from '@/lib/types';
 import {
@@ -25,10 +25,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { useApp } from '@/context/app-context';
 import { TitleBar } from '@/components/ui/title-bar';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { processPatientData } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth, logout } from '@/lib/auth';
 
 const PAGE_SIZE = 8;
 
@@ -36,6 +38,7 @@ export default function DoctorDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
     const { setPatientData, setIsDoctorLoggedIn, isClient } = useApp();
+    const [user, setUser] = React.useState<User | null>(null);
     const [patients, setPatients] = React.useState<Patient[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
@@ -47,6 +50,20 @@ export default function DoctorDashboardPage() {
     const [hasMore, setHasMore] = React.useState(true);
     const [isFetchingMore, setIsFetchingMore] = React.useState(false);
     const loadMoreRef = React.useRef(null);
+
+    React.useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+          if (currentUser) {
+            setUser(currentUser);
+            setIsDoctorLoggedIn(true);
+          } else {
+            setUser(null);
+            setIsDoctorLoggedIn(false);
+            router.push('/doctor/login');
+          }
+        });
+        return () => unsubscribe();
+    }, [router, setIsDoctorLoggedIn]);
 
     const fetchPatients = React.useCallback(async (loadMore = false) => {
         if (!loadMore) {
@@ -81,12 +98,11 @@ export default function DoctorDashboardPage() {
     }, [toast, lastVisible, hasMore, isFetchingMore]);
     
     React.useEffect(() => {
-        setIsDoctorLoggedIn(true);
-        if (isClient) {
+        if (user) {
             fetchPatients(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isClient, setIsDoctorLoggedIn]);
+    }, [user]);
     
     useIntersectionObserver({
         target: loadMoreRef,
@@ -173,6 +189,11 @@ export default function DoctorDashboardPage() {
         setIsFormOpen(false);
         setEditingPatient(null);
     }
+
+    const handleLogout = async () => {
+        await logout();
+        router.push('/doctor/login');
+    }
     
     const filteredAndSortedPatients = React.useMemo(() => {
         let processedPatients = [...patients];
@@ -203,10 +224,30 @@ export default function DoctorDashboardPage() {
         });
     }, [patients, searchQuery]);
 
+  if (!user || isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <p className="ml-4">Loading Dashboard...</p>
+      </div>
+    );
+  }
+
   return (
     <TooltipProvider>
         <div className="flex min-h-screen w-full flex-col bg-background">
-        <TitleBar />
+        <TitleBar>
+             <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button onClick={handleLogout} size="icon" variant="ghost">
+                        <LogOut className="h-4 w-4" />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>Logout</p>
+                </TooltipContent>
+            </Tooltip>
+        </TitleBar>
         <main className="flex-1 p-4 md:p-6">
             <div className="mx-auto w-full max-w-7xl">
                 {isFormOpen ? (
