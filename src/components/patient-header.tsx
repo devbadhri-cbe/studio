@@ -27,7 +27,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
     : `Welcome, ${profile.name || 'User'}!`;
   
   const doctorName = profile.doctorName || 'your doctor';
-  const doctorWhatsapp = ''; // Removed hardcoded number
+  const doctorWhatsapp = ''; // This should be replaced with the actual number
 
   const handleContact = () => {
     if (!doctorWhatsapp) return;

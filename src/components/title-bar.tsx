@@ -14,8 +14,8 @@ interface TitleBarProps {
 
 export function TitleBar({ children }: TitleBarProps) {
 
-    const doctorPhone = ''; // Removed hardcoded number
-    const whatsAppNumber = ''; // Removed hardcoded number
+    const doctorPhone = ''; // This should be replaced with the actual number
+    const whatsAppNumber = ''; // This should be replaced with the actual number
 
     return (
         <header className="border-b px-4 py-2 md:px-6">
