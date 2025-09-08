@@ -36,8 +36,8 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 interface SharePatientAccessDialogProps {
   patient: Patient;
   children: React.ReactNode;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function SharePatientAccessDialog({ patient, children, open, onOpenChange }: SharePatientAccessDialogProps) {
@@ -49,9 +49,9 @@ export function SharePatientAccessDialog({ patient, children, open, onOpenChange
   React.useEffect(() => {
     if (open && typeof window !== 'undefined') {
        const origin = window.location.origin;
-       const publicUrl = origin.includes('://6000-') ? origin.replace('://6000-', '://9000-') : origin;
+       const publicUrl = origin.includes('://localhost:') ? origin : window.location.protocol + '//' + window.location.hostname;
        setDashboardLink(`${publicUrl}/patient/${patient.id}`);
-       setLoginPageLink(`${publicUrl}/`);
+       setLoginPageLink(`${publicUrl}/doctor/login`);
     }
   }, [open, patient.id]);
 
@@ -214,4 +214,3 @@ export function SharePatientAccessDialog({ patient, children, open, onOpenChange
     </Dialog>
   );
 }
-
