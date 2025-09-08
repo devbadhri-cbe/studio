@@ -53,7 +53,6 @@ const statusDescriptions: Record<Patient['status'], string> = {
 
 
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
-  const { isDoctorLoggedIn } = useApp();
   const [isShareOpen, setIsShareOpen] = React.useState(false);
 
   const statusVariant = getStatusVariant(patient.status);
@@ -119,7 +118,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                                     WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
                                 } : {}}
                             >{patient.name}</CardTitle>
-                            {isDoctorLoggedIn && needsReview && (
+                            {needsReview && (
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <div className="relative">

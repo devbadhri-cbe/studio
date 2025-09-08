@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -93,6 +92,17 @@ export async function getPatient(id: string): Promise<any | null> {
   }
   return null;
 }
+
+export async function getAllPatients(): Promise<Patient[]> {
+  const q = query(collection(db, PATIENTS_COLLECTION), orderBy('name'));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => {
+      const patientData = { id: doc.id, ...convertTimestamps(doc.data()) };
+      const summary = getPatientSummary(patientData);
+      return { ...patientData, ...summary } as Patient;
+  });
+}
+
 
 export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'doctorUid' | 'doctorName' | 'doctorEmail'>): Promise<Patient> {
     const docData = {
