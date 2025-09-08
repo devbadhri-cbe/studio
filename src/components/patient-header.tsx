@@ -41,7 +41,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
         return;
     }
 
-    const loginPageLink = `${window.location.origin}/doctor/login`;
+    const loginPageLink = `${window.location.origin}/patient/${profile.id}`;
     const message = `Hello Dr. ${profile.doctorName || ''}, please use this link to access my Health Guardian dashboard: ${loginPageLink}`;
 
     switch(method) {
@@ -72,7 +72,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
             Your health overview. Consult your doctor before making any decisions.
         </p>
       </div>
-      <div className="flex flex-1 items-center justify-end gap-4 self-center md:self-auto">
+      <div className="flex w-full md:flex-1 items-center justify-between md:justify-end gap-4 self-center md:self-auto">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <div className="flex flex-col md:flex-row md:items-center md:gap-2">
                 <span>Consulting with:</span>
@@ -85,7 +85,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
                 </Button>
             )}
 
-            {!isDoctorLoggedIn && profile.doctorName && (
+            {!isDoctorLoggedIn && profile.doctorName && !profile.doctorUid && (
                 <>
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -110,6 +110,10 @@ export function PatientHeader({ children }: PatientHeaderProps) {
                         <MessageSquare className="mr-2 h-4 w-4" />
                         <span>SMS / iMessage</span>
                     </DropdownMenuItem>
+                     <DropdownMenuItem onSelect={() => handleChat('email')}>
+                        <Mail className="mr-2 h-4 w-4" />
+                        <span>Email</span>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 </>
@@ -122,7 +126,3 @@ export function PatientHeader({ children }: PatientHeaderProps) {
     </>
   );
 }
-
-
-
-
