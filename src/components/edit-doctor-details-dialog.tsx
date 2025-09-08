@@ -52,6 +52,7 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
         doctorName: data.doctorName,
         doctorEmail: data.doctorEmail,
         doctorPhone: data.doctorPhone,
+        doctorUid: undefined, // Clear the UID to un-assign from the previous doctor
       };
       
       const updatedPatient = await updatePatient(profile.id, updatedProfileData);
@@ -78,9 +79,9 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Your Details</DialogTitle>
+          <DialogTitle>Edit Your Doctor's Details</DialogTitle>
           <DialogDescription>
-            Update your professional information that will be visible to your patients.
+            Update your doctor's information. This will un-link you from your current doctor's dashboard.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

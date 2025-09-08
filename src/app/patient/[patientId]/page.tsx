@@ -25,11 +25,9 @@ export default function PatientPage() {
 
   React.useEffect(() => {
     // Only listen for auth changes if a doctor is potentially viewing
-    if (isDoctorViewing) {
-      const unsubscribe = auth.onAuthStateChanged(setUser);
-      return () => unsubscribe();
-    }
-  }, [isDoctorViewing]);
+    const unsubscribe = auth.onAuthStateChanged(setUser);
+    return () => unsubscribe();
+  }, []);
 
   React.useEffect(() => {
     setIsDoctorLoggedIn(isDoctorViewing);
@@ -52,8 +50,8 @@ export default function PatientPage() {
         const rawPatientData = await getPatient(patientId);
         if (rawPatientData) {
           
-          // If a doctor is viewing and the patient already has a DIFFERENT doctor, deny access.
-          if (isDoctorViewing && user && rawPatientData.doctorUid && rawPatientData.doctorUid !== user.uid) {
+          // SECURITY CHECK: If a doctor is viewing, verify they are the assigned doctor.
+          if (isDoctorViewing && user && rawPatientData.doctorUid !== user.uid) {
             setError("Access Denied. You are not the assigned doctor for this patient.");
             setIsLoading(false);
             return;
@@ -70,7 +68,8 @@ export default function PatientPage() {
             needsUpdate = true;
           }
           
-          if (isDoctorViewing) {
+          // Always update last login time for doctor, but only if they are the assigned doctor
+          if (isDoctorViewing && user && rawPatientData.doctorUid === user.uid) {
             updates.lastLogin = new Date().toISOString();
             needsUpdate = true;
           }
