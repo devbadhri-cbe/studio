@@ -166,6 +166,15 @@ export function SharePatientAccessDialog({
                 </Button>
               </div>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="patient-id">Patient ID</Label>
+              <div className="flex gap-2">
+                <Input id="patient-id" value={patient.id} readOnly />
+                <Button variant="outline" size="icon" onClick={() => copyToClipboard(patient.id, 'Patient ID')}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </DialogContent>
