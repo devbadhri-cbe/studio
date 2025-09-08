@@ -6,6 +6,8 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
+import { doctorDetails } from '@/lib/doctor-data';
+
 
 // A simple SVG for WhatsApp icon
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -26,8 +28,8 @@ export function PatientHeader({ children }: PatientHeaderProps) {
     ? `${profile.name}'s Dashboard`
     : `Welcome, ${profile.name || 'User'}!`;
   
-  const doctorName = profile.doctorName || 'your doctor';
-  const doctorWhatsapp = ''; // This should be replaced with the actual number
+  const doctorName = profile.doctorName || doctorDetails.name;
+  const doctorWhatsapp = doctorDetails.whatsapp;
 
   const handleContact = () => {
     if (!doctorWhatsapp) return;
