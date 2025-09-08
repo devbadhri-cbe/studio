@@ -56,14 +56,25 @@ export default function DoctorDashboardPage() {
         const aNeedsReview = patientNeedsReview(a);
         const bNeedsReview = patientNeedsReview(b);
 
+        // 1. Prioritize patients needing review (with the bell icon)
         if (aNeedsReview && !bNeedsReview) return -1;
         if (!aNeedsReview && bNeedsReview) return 1;
 
+        // 2. For patients in the same review category, sort by lastLogin date
+        const aDate = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
+        const bDate = b.lastLogin ? new Date(b.lastLogin).getTime() : 0;
+
+        if (aDate !== bDate) {
+          return bDate - aDate; // Sort descending (most recent first)
+        }
+
+        // 3. As a final tie-breaker, sort by status priority, then by name
         const priorityA = statusPriority[a.status] || 4;
         const priorityB = statusPriority[b.status] || 4;
         if (priorityA !== priorityB) {
           return priorityA - priorityB;
         }
+        
         return a.name.localeCompare(b.name);
       });
       setPatients(sortedPatients);
