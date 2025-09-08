@@ -97,7 +97,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
             }
             const userAgent = window.navigator.userAgent;
             const separator = /iPad|iPhone|iPod/.test(userAgent) ? '&' : '?';
-            const cleanPhone = `+${patient.phone.replace(/\D/g, '')}`;
+            const cleanPhone = patient.phone.replace(/\D/g, '');
             window.location.href = `sms:${cleanPhone}${separator}body=${encodeURIComponent(body)}`;
             break;
         case 'email':
