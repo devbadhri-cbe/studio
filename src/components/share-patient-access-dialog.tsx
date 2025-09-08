@@ -10,16 +10,14 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Patient } from '@/lib/types';
-import { Copy, Share2, Mail, MessageCircle } from 'lucide-react';
+import { Copy, Share2, Mail } from 'lucide-react';
 import * as React from 'react';
 import QRCode from 'react-qr-code';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Separator } from './ui/separator';
 import { Skeleton } from './ui/skeleton';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
-import { cn } from '@/lib/utils';
 
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -44,6 +42,7 @@ export function SharePatientAccessDialog({
   const [dashboardLink, setDashboardLink] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(true);
   const [isShareOpen, setIsShareOpen] = React.useState(false);
+  const qrCodeRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (open) {
@@ -57,9 +56,10 @@ export function SharePatientAccessDialog({
     }
   }, [open, patient.id]);
 
-  const getShareText = () => {
+  const getShareText = (includeTitle: boolean = true) => {
     const doctorName = patient.doctorName || "your doctor";
-    return `Hello ${patient.name},\n\nThis is a message from ${doctorName} regarding your Health Guardian dashboard. You can access it here:\n${dashboardLink}\n\nBest,\n${doctorName}`;
+    const title = `Hello ${patient.name},\n\nThis is a message from ${doctorName} regarding your Health Guardian dashboard. You can access it here:\n`;
+    return `${includeTitle ? title : ''}${dashboardLink}`;
   }
 
   const copyToClipboard = (text: string, label: string) => {
@@ -99,6 +99,71 @@ export function SharePatientAccessDialog({
     }
   }
 
+  const svgToPngFile = async (svgElement: SVGSVGElement, fileName: string): Promise<File | null> => {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const { width, height } = svgElement.getBBox();
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(null);
+
+        const img = new Image();
+        const svgBlob = new Blob([svgElement.outerHTML], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = () => {
+            ctx.drawImage(img, 0, 0);
+            URL.revokeObjectURL(url);
+            canvas.toBlob((blob) => {
+                if (!blob) return resolve(null);
+                resolve(new File([blob], fileName, { type: 'image/png' }));
+            }, 'image/png');
+        };
+        img.src = url;
+    });
+  };
+
+  const handleShare = async () => {
+    const shareText = getShareText(true);
+
+    if (navigator.share && qrCodeRef.current) {
+        const svgElement = qrCodeRef.current.querySelector('svg');
+        if (!svgElement) return;
+
+        const file = await svgToPngFile(svgElement, `qr-code-${patient.id}.png`);
+        
+        if (file && navigator.canShare({ files: [file] })) {
+             try {
+                await navigator.share({
+                    title: 'Patient Dashboard QR Code',
+                    text: shareText,
+                    files: [file],
+                });
+                return;
+            } catch (error) {
+                console.info('Sharing with image failed, falling back to text only:', error);
+            }
+        }
+    }
+    
+    // Fallback for browsers that don't support sharing files or if image conversion fails
+    try {
+        await navigator.share({
+            title: 'Patient Dashboard Link',
+            text: shareText,
+            url: dashboardLink,
+        });
+    } catch (error) {
+        console.error('Sharing failed:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Sharing Not Supported',
+            description: 'Your browser does not support the Web Share API. Please use the manual copy options.',
+        });
+    }
+  };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -120,7 +185,7 @@ export function SharePatientAccessDialog({
         <div className="space-y-6 py-4">
           <div className="flex flex-col items-center gap-4 rounded-lg border p-4">
             <h3 className="text-sm font-medium">Direct Access via QR Code</h3>
-            <div className="rounded-lg bg-white p-3">
+            <div className="rounded-lg bg-white p-3" ref={qrCodeRef}>
               {isLoading ? (
                 <Skeleton className="h-32 w-32" />
               ) : (
@@ -136,7 +201,7 @@ export function SharePatientAccessDialog({
            <Collapsible open={isShareOpen} onOpenChange={setIsShareOpen} className="w-full">
             <div className="flex items-center justify-center">
               <CollapsibleTrigger asChild>
-                <Button>
+                <Button onClick={handleShare}>
                   <Share2 className="mr-2 h-4 w-4" />
                   Share Options
                 </Button>
@@ -150,6 +215,10 @@ export function SharePatientAccessDialog({
                 <Button variant="outline" className="w-full" onClick={() => handleContact('email')}>
                     <Mail className="mr-2 h-4 w-4" />
                     Share via Email
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => copyToClipboard(getShareText(false), 'Dashboard Link')}>
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy Link
                 </Button>
             </CollapsibleContent>
            </Collapsible>
@@ -181,4 +250,3 @@ export function SharePatientAccessDialog({
     </Dialog>
   );
 }
-
