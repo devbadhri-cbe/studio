@@ -96,8 +96,10 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                  return;
             }
             const userAgent = window.navigator.userAgent;
+            // The separator logic is crucial for cross-platform compatibility, especially for iMessage on iOS.
             const separator = /iPad|iPhone|iPod/.test(userAgent) ? '&' : '?';
-            window.location.href = `sms:${patient.phone.replace(/\s/g, '')}${separator}body=${encodeURIComponent(body)}`;
+            const cleanPhone = `+${patient.phone.replace(/\D/g, '')}`;
+            window.location.href = `sms:${cleanPhone}${separator}body=${encodeURIComponent(body)}`;
             break;
         case 'email':
              if (!patient.email) {
@@ -292,3 +294,5 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     </>
   );
 }
+
+    
