@@ -5,19 +5,18 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Sun, Zap, Globe, User, MessageSquare, Clock, Info, Bell, Droplet } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Sun, Zap, Globe, MessageSquare, Clock, Bell, Droplet, Share2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
-import { Separator } from './ui/separator';
 import { countries } from '@/lib/countries';
 import * as React from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useApp } from '@/context/app-context';
 import { cn } from '@/lib/utils';
+import { SharePatientAccessDialog } from './share-patient-access-dialog';
 
 // A simple SVG for WhatsApp icon
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -56,6 +55,8 @@ const statusDescriptions: Record<Patient['status'], string> = {
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
   const { toast } = useToast();
   const { isDoctorLoggedIn } = useApp();
+  const [isShareOpen, setIsShareOpen] = React.useState(false);
+
   const statusVariant = getStatusVariant(patient.status);
   const age = calculateAge(patient.dob);
   const country = countries.find(c => c.code === patient.country);
@@ -115,6 +116,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   }
 
   return (
+    <>
     <Card 
         className="relative w-full flex flex-col transition-all group md:hover:border-primary/50 shadow-md md:hover:shadow-lg"
     >
@@ -187,6 +189,10 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                             <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onEdit(patient))}>
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Edit Patient
+                            </DropdownMenuItem>
+                             <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => setIsShareOpen(true))}>
+                                <Share2 className="mr-2 h-4 w-4" />
+                                Share Access
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuLabel>Contact Patient</DropdownMenuLabel>
@@ -273,9 +279,8 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
             </Tooltip>
         </div>
       </div>
-
     </Card>
+    {patient && <SharePatientAccessDialog open={isShareOpen} onOpenChange={setIsShareOpen} patient={patient} />}
+    </>
   );
 }
-
-    
