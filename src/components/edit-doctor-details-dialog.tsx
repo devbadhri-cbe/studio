@@ -54,8 +54,8 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
         doctorPhone: data.doctorPhone,
       };
       
-      await updatePatient(profile.id, updatedProfileData);
-      setProfile({ ...profile, ...updatedProfileData });
+      const updatedPatient = await updatePatient(profile.id, updatedProfileData);
+      setProfile(updatedPatient);
 
       toast({
         title: 'Success',
