@@ -6,7 +6,7 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
-import { Edit, Info, MessageSquare } from 'lucide-react';
+import { Edit, Info, MessageSquare, Mail } from 'lucide-react';
 import { doctorDetails } from '@/lib/doctor-data';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
@@ -36,26 +36,26 @@ export function PatientHeader({ children }: PatientHeaderProps) {
     : `Welcome, ${profile.name || 'User'}!`;
   
   const handleChat = (method: 'whatsapp' | 'sms' | 'email') => {
-    if (!profile.doctorPhone) {
+    if (!profile.doctorPhone && (method === 'whatsapp' || method === 'sms')) {
         toast({variant: 'destructive', title: 'No Doctor Phone Number', description: 'Please add your doctor\'s phone number first.'});
         return;
     }
+     if (!profile.doctorEmail && method === 'email') {
+        toast({variant: 'destructive', title: 'No Doctor Email', description: 'Please add your doctor\'s email address first.'});
+        return;
+    }
 
-    const loginPageLink = `${window.location.origin}/patient/${profile.id}`;
+    const loginPageLink = `${window.location.origin}/patient/${profile.id}?viewer=doctor`;
     const message = `Hello Dr. ${profile.doctorName || ''}, please use this link to access my Health Guardian dashboard: ${loginPageLink}`;
 
     switch(method) {
         case 'whatsapp':
-             window.open(`https://wa.me/${profile.doctorPhone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+             window.open(`https://wa.me/${profile.doctorPhone!.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
              break;
         case 'sms':
-            window.location.href = `sms:${profile.doctorPhone.replace(/\s/g, '')}?&body=${encodeURIComponent(message)}`;
+            window.location.href = `sms:${profile.doctorPhone!.replace(/\s/g, '')}?&body=${encodeURIComponent(message)}`;
             break;
         case 'email':
-             if (!profile.doctorEmail) {
-                toast({variant: 'destructive', title: 'No Doctor Email', description: 'Please add your doctor\'s email address first.'});
-                return;
-            }
              window.location.href = `mailto:${profile.doctorEmail}?subject=${encodeURIComponent("Health Guardian Dashboard")}&body=${encodeURIComponent(message)}`;
              break;
     }
@@ -63,8 +63,8 @@ export function PatientHeader({ children }: PatientHeaderProps) {
 
   return (
     <>
-    <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-      <div className="flex-1 text-center md:text-left">
+    <div className="flex flex-col md:flex-row items-start md:items-center gap-4 border border-red-500 p-2">
+      <div className="flex-1 text-center md:text-left border border-green-500 p-2">
         <h1 className="text-2xl md:text-3xl font-semibold font-headline">
           {pageTitle}
         </h1>
@@ -72,8 +72,8 @@ export function PatientHeader({ children }: PatientHeaderProps) {
             Your health overview. Consult your doctor before making any decisions.
         </p>
       </div>
-      <div className="flex w-full md:flex-1 items-center justify-between md:justify-end gap-4 self-center md:self-auto">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="flex w-full md:flex-auto items-center justify-between md:justify-end gap-4 self-center md:self-auto border border-blue-500 p-2">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground border border-purple-500 p-2">
             <div className="flex flex-col md:flex-row md:items-center md:gap-2">
                 <span>Consulting with:</span>
                 <span className="font-semibold text-foreground">{profile.doctorName || 'Not Set'}</span>
@@ -95,7 +95,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
                         <p>Your doctor has not logged in yet. <br /> Use the chat button to invite them.</p>
                     </TooltipContent>
                 </Tooltip>
-                <DropdownMenu>
+                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-6 w-6">
                         <MessageSquare className="h-4 w-4 text-primary" />
