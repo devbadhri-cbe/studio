@@ -251,6 +251,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       enabledBiomarkers: patient.enabledBiomarkers || {},
       bmi: patient.bmi,
       doctorName: patient.doctorName,
+      doctorEmail: patient.doctorEmail,
+      doctorPhone: patient.doctorPhone,
       dashboardSuggestions: patient.dashboardSuggestions || [],
     };
     setProfileState(patientProfile);

@@ -128,10 +128,12 @@ export async function getPatient(id: string): Promise<any | null> {
   return null;
 }
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorName' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords'>): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorName' | 'doctorEmail' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords'>): Promise<Patient> {
     const docData = {
         ...patientData,
-        doctorName: 'Dr. Badhrinathan N',
+        doctorName: '',
+        doctorEmail: '',
+        doctorPhone: '',
         lastLogin: null,
         hba1cRecords: [],
         fastingBloodGlucoseRecords: [],

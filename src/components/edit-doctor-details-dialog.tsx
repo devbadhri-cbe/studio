@@ -17,13 +17,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from './ui/input';
 import { Loader2, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { doctorDetails } from '@/lib/doctor-data';
+import { useApp } from '@/context/app-context';
 
 const DoctorDetailsSchema = z.object({
-  name: z.string().min(2, "Name is required."),
-  email: z.string().email("Please enter a valid email."),
-  phone: z.string().min(10, "Please enter a valid phone number."),
-  whatsapp: z.string().min(10, "Please enter a valid WhatsApp number."),
+  doctorName: z.string().min(2, "Name is required."),
+  doctorEmail: z.string().email("Please enter a valid email.").optional().or(z.literal('')),
+  doctorPhone: z.string().min(10, "Please enter a valid phone number.").optional().or(z.literal('')),
 });
 
 interface EditDoctorDetailsDialogProps {
@@ -34,47 +33,41 @@ interface EditDoctorDetailsDialogProps {
 export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetailsDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
+  const { profile, setProfile } = useApp();
   
   const form = useForm<z.infer<typeof DoctorDetailsSchema>>({
     resolver: zodResolver(DoctorDetailsSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      phone: '',
-      whatsapp: '',
+      doctorName: '',
+      doctorEmail: '',
+      doctorPhone: '',
     },
   });
 
   React.useEffect(() => {
     if (open) {
-        // In a real app, you would fetch this from a server/API.
-        // For this demo, we'll use the hardcoded details.
         form.reset({
-            name: doctorDetails.name,
-            email: doctorDetails.email,
-            phone: doctorDetails.phone,
-            whatsapp: doctorDetails.whatsapp,
+            doctorName: profile.doctorName || '',
+            doctorEmail: profile.doctorEmail || '',
+            doctorPhone: profile.doctorPhone || '',
         });
     }
-  }, [open, form]);
+  }, [open, form, profile]);
 
   const onSubmit = async (data: z.infer<typeof DoctorDetailsSchema>) => {
     setIsSubmitting(true);
     try {
-      // In a real application, you would send this data to your backend to be saved.
-      // For this prototype, we'll just show a success message.
-      console.log('Updated Doctor Details:', data);
-      
-      // Here you would typically make an API call to update a doctor.json file or a database.
-      // For now, we will just simulate a delay and close.
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      setProfile({
+        ...profile,
+        doctorName: data.doctorName,
+        doctorEmail: data.doctorEmail,
+        doctorPhone: data.doctorPhone,
+      });
 
       toast({
         title: 'Details Updated',
-        description: "The doctor's contact information has been updated.",
+        description: "The doctor's contact information has been updated for this patient.",
       });
-      // NOTE: The page will need to be refreshed to see the changes globally
-      // as we are not updating the imported `doctorDetails` object in real-time.
       onOpenChange(false);
     } catch (error) {
       console.error("Failed to update details", error);
@@ -94,15 +87,14 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
         <DialogHeader>
           <DialogTitle>Edit Doctor's Details</DialogTitle>
           <DialogDescription>
-            Update the contact information displayed throughout the application.
+            Update the contact information for the doctor associated with this patient.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Doctor's Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
-            <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem> )} />
-            <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Public Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
-            <FormField control={form.control} name="whatsapp" render={({ field }) => ( <FormItem><FormLabel>WhatsApp Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
+            <FormField control={form.control} name="doctorName" render={({ field }) => ( <FormItem><FormLabel>Doctor's Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+            <FormField control={form.control} name="doctorEmail" render={({ field }) => ( <FormItem><FormLabel>Doctor's Email Address</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem> )} />
+            <FormField control={form.control} name="doctorPhone" render={({ field }) => ( <FormItem><FormLabel>Doctor's Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
             
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>

@@ -59,6 +59,8 @@ export interface UserProfile {
   bmi?: number;
   enabledBiomarkers?: { [key: string]: string[] };
   doctorName?: string;
+  doctorEmail?: string;
+  doctorPhone?: string;
   dashboardSuggestions?: DashboardSuggestion[];
 }
 
@@ -207,6 +209,8 @@ export interface Patient {
   presentMedicalConditions: MedicalCondition[];
   enabledBiomarkers: { [key: string]: string[] };
   doctorName?: string;
+  doctorEmail?: string;
+  doctorPhone?: string;
   dashboardSuggestions?: DashboardSuggestion[];
 }
 

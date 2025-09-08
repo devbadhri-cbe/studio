@@ -6,8 +6,10 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
+import { Edit, Info, MessageSquare } from 'lucide-react';
 import { doctorDetails } from '@/lib/doctor-data';
-import { Edit, Mail, Phone } from 'lucide-react';
+import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 
 // A simple SVG for WhatsApp icon
@@ -24,55 +26,61 @@ interface PatientHeaderProps {
 
 export function PatientHeader({ children }: PatientHeaderProps) {
   const { profile, isDoctorLoggedIn, setProfile } = useApp();
-  const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
-  const [doctorName, setDoctorName] = React.useState(profile.doctorName || '');
+  const [isEditing, setIsEditing] = React.useState(false);
   
   const pageTitle = isDoctorLoggedIn
     ? `${profile.name}'s Dashboard`
     : `Welcome, ${profile.name || 'User'}!`;
   
-  const handleSaveDoctorName = () => {
-    setProfile({ ...profile, doctorName });
-    setIsEditingDoctor(false);
+  const handleChat = () => {
+    if (!profile.doctorPhone) return;
+
+    const loginPageLink = `${window.location.origin}/doctor/login`;
+    const message = `Hello Dr. ${profile.doctorName || ''}, please use this link to access my Health Guardian dashboard: ${loginPageLink}`;
+
+    const whatsappUrl = `https://wa.me/${profile.doctorPhone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
-
   return (
+    <>
     <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
       <div className="flex-1 text-center md:text-left">
         <h1 className="text-2xl md:text-3xl font-semibold font-headline">
           {pageTitle}
         </h1>
-        <div className="text-sm text-muted-foreground mt-2">
-            {!isDoctorLoggedIn && (
-                isEditingDoctor ? (
-                     <div className="flex items-center gap-2 max-w-sm">
-                        <input
-                            type="text"
-                            value={doctorName}
-                            onChange={(e) => setDoctorName(e.target.value)}
-                            className="bg-transparent border-b border-primary outline-none focus:ring-0"
-                            placeholder="Enter Doctor's Name"
-                            onBlur={handleSaveDoctorName}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSaveDoctorName()}
-                            autoFocus
-                        />
-                         <Button size="sm" onClick={handleSaveDoctorName}>Save</Button>
-                    </div>
-                ) : (
-                    <div className="flex items-center gap-2">
-                        <span>Consulting with: <span className="font-semibold text-foreground">{doctorName || 'Not Set'}</span></span>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditingDoctor(true)}>
-                            <Edit className="h-4 w-4" />
-                        </Button>
-                    </div>
-                )
-            )}
-        </div>
+        {!isDoctorLoggedIn && (
+            <div className="text-sm text-muted-foreground mt-2">
+                 <div className="flex items-center gap-2">
+                    <span>Consulting with: <span className="font-semibold text-foreground">{profile.doctorName || 'Not Set'}</span></span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
+                        <Edit className="h-4 w-4" />
+                    </Button>
+                    {profile.doctorName && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                 <Info className="h-4 w-4 text-yellow-500" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Your doctor has not logged in yet. <br /> Use the chat button to invite them.</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
+                </div>
+            </div>
+        )}
       </div>
       <div className="flex items-center gap-2 self-center md:self-auto">
+        {!isDoctorLoggedIn && profile.doctorName && (
+             <Button size="sm" onClick={handleChat} disabled={!profile.doctorPhone}>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Chat with Doctor
+            </Button>
+        )}
         <UploadRecordDialog />
       </div>
     </div>
+    <EditDoctorDetailsDialog open={isEditing} onOpenChange={setIsEditing} />
+    </>
   );
 }
