@@ -5,12 +5,8 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
-import { Edit, Info } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { auth } from '@/lib/auth';
-import type { User } from 'firebase/auth';
-import { doctorDetails } from '@/lib/doctor-data';
 
 
 interface PatientHeaderProps {
@@ -19,6 +15,8 @@ interface PatientHeaderProps {
 
 export function PatientHeader({ children }: PatientHeaderProps) {
   const { profile, isDoctorLoggedIn } = useApp();
+  const [isEditing, setIsEditing] = React.useState(false);
+
 
   const pageTitle = isDoctorLoggedIn
     ? `${profile.name}'s Dashboard`
@@ -41,6 +39,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
         </div>
       </div>
     </div>
+    <EditDoctorDetailsDialog open={isEditing} onOpenChange={setIsEditing} />
     </>
   );
 }

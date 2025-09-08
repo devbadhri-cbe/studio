@@ -34,7 +34,7 @@ export function TitleBar({ children }: TitleBarProps) {
                             </div>
                         </div>
                          <div className="text-center text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                           {isDoctorLoggedIn ? (profile.doctorName || profile.doctorEmail) : 'Your Health Partner'}
+                           {(isDoctorLoggedIn && profile.doctorName) || 'Your Health Partner'}
                            {isDoctorLoggedIn && (
                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
                                 <Edit className="h-3 w-3" />
