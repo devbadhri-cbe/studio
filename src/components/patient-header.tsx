@@ -62,6 +62,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
                 </Button>
             )}
             {!isDoctorLoggedIn && profile.doctorName && (
+                <>
                 <Tooltip>
                     <TooltipTrigger asChild>
                             <Info className="h-4 w-4 text-yellow-500" />
@@ -70,6 +71,17 @@ export function PatientHeader({ children }: PatientHeaderProps) {
                         <p>Your doctor has not logged in yet. <br /> Use the chat button to invite them.</p>
                     </TooltipContent>
                 </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleChat}>
+                            <WhatsAppIcon className="h-4 w-4 text-green-500" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Chat with doctor on WhatsApp</p>
+                    </TooltipContent>
+                </Tooltip>
+                </>
             )}
         </div>
         <UploadRecordDialog />
@@ -79,7 +91,4 @@ export function PatientHeader({ children }: PatientHeaderProps) {
     </>
   );
 }
-
-
-
 
