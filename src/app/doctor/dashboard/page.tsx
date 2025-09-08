@@ -22,7 +22,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
@@ -68,22 +67,29 @@ export default function DoctorDashboardPage() {
   
   const handleDeletePatient = async () => {
     if (!patientToDelete) return;
+    
+    // Optimistically update the UI
+    setPatients(currentPatients => currentPatients.filter(p => p.id !== patientToDelete.id));
+    const patientName = patientToDelete.name;
+    setPatientToDelete(null);
+
     try {
       await deletePatientFromDB(patientToDelete.id);
       toast({
         title: 'Patient Deleted',
-        description: `${patientToDelete.name}'s profile has been deleted.`,
+        description: `${patientName}'s profile has been deleted.`,
       });
-      fetchPatients();
+      // Optionally re-fetch to ensure data consistency, though the optimistic update handles the UI.
+      // fetchPatients();
     } catch (error) {
       console.error("Failed to delete patient", error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Could not delete the patient profile.',
+        description: 'Could not delete the patient profile. The list will be refreshed.',
       });
-    } finally {
-      setPatientToDelete(null);
+      // If the deletion fails, re-fetch the list to bring the patient back
+      fetchPatients();
     }
   };
 
