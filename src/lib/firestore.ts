@@ -75,57 +75,14 @@ const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
 }
 
 
-export async function getPatients(lastVisible: any = null, pageSize: number = 8): Promise<{ patients: Patient[]; lastVisible: any | null; }> {
-  let q;
-  if (lastVisible) {
-    q = query(collection(db, PATIENTS_COLLECTION), orderBy("name"), startAfter(lastVisible), limit(pageSize));
-  } else {
-    q = query(collection(db, PATIENTS_COLLECTION), orderBy("name"), limit(pageSize));
-  }
-  const snapshot = await getDocs(q);
-  const patients = snapshot.docs.map(doc => ({ id: doc.id, ...convertTimestamps(doc.data()) })) as Patient[];
-  const newLastVisible = snapshot.docs[snapshot.docs.length - 1];
-  return { patients, lastVisible: newLastVisible || null };
-}
-
-export async function getPatientsPaginated(
-  lastVisible: any | null,
-  pageSize: number
-): Promise<{ patients: Patient[]; lastVisible: any | null }> {
-  let q;
-  if (lastVisible) {
-    q = query(
-      collection(db, PATIENTS_COLLECTION),
-      orderBy('name'),
-      startAfter(lastVisible),
-      limit(pageSize)
-    );
-  } else {
-    q = query(
-      collection(db, PATIENTS_COLLECTION),
-      orderBy('name'),
-      limit(pageSize)
-    );
-  }
-
-  const documentSnapshots = await getDocs(q);
-  const patients = documentSnapshots.docs.map(doc => ({
-    id: doc.id,
-    ...convertTimestamps(doc.data()),
-  })) as Patient[];
-
-  const newLastVisible =
-    documentSnapshots.docs[documentSnapshots.docs.length - 1];
-
-  return { patients, lastVisible: newLastVisible || null };
-}
-
 export async function getPatient(id: string): Promise<any | null> {
   const docRef = doc(db, PATIENTS_COLLECTION, id);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
     try {
-      return { id: docSnap.id, ...convertTimestamps(docSnap.data()) };
+      const patientData = { id: docSnap.id, ...convertTimestamps(docSnap.data()) };
+      const summary = getPatientSummary(patientData);
+      return { ...patientData, ...summary };
     } catch (e) {
       console.error("getPatient: Error processing document:", e);
       return null;
@@ -207,4 +164,30 @@ export async function deletePatient(id: string): Promise<void> {
   await deleteDoc(docRef);
 }
 
+export async function getPatientsPaginated(
+  lastVisible: any | null,
+  pageSize: number
+): Promise<{ patients: Patient[]; lastVisible: any | null }> {
+  let q;
+  const patientsCollection = collection(db, PATIENTS_COLLECTION);
+  const baseQuery = [orderBy('name'), limit(pageSize)];
+
+  if (lastVisible) {
+    q = query(patientsCollection, ...baseQuery, startAfter(lastVisible));
+  } else {
+    q = query(patientsCollection, ...baseQuery);
+  }
+
+  const documentSnapshots = await getDocs(q);
+  
+  const patients = documentSnapshots.docs.map(doc => {
+    const patientData = { id: doc.id, ...convertTimestamps(doc.data()) };
+    const summary = getPatientSummary(patientData);
+    return { ...patientData, ...summary } as Patient;
+  });
+
+  const newLastVisible = documentSnapshots.docs.length === pageSize ? documentSnapshots.docs[documentSnapshots.docs.length - 1] : null;
+
+  return { patients, lastVisible: newLastVisible };
+}
     
