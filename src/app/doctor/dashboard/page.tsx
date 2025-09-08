@@ -175,18 +175,20 @@ export default function DoctorDashboardPage() {
     }
     
     const filteredAndSortedPatients = React.useMemo(() => {
-        const filtered = patients.filter(patient => {
-            const query = searchQuery.toLowerCase();
-            return (
-                patient.name.toLowerCase().includes(query) ||
-                (patient.email && patient.email.toLowerCase().includes(query)) ||
-                (patient.phone && patient.phone.toLowerCase().includes(query))
-            );
-        });
+        let processedPatients = [...patients];
 
-        if (searchQuery) return filtered;
+        if (searchQuery) {
+            processedPatients = processedPatients.filter(patient => {
+                const query = searchQuery.toLowerCase();
+                return (
+                    patient.name.toLowerCase().includes(query) ||
+                    (patient.email && patient.email.toLowerCase().includes(query)) ||
+                    (patient.phone && patient.phone.toLowerCase().includes(query))
+                );
+            });
+        }
 
-        return filtered.sort((a, b) => {
+        return processedPatients.sort((a, b) => {
             const aNeedsReview = a.presentMedicalConditions?.some(c => c.status === 'pending_review') || a.dashboardSuggestions?.some(s => s.status === 'pending');
             const bNeedsReview = b.presentMedicalConditions?.some(c => c.status === 'pending_review') || b.dashboardSuggestions?.some(s => s.status === 'pending');
             
