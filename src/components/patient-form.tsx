@@ -106,8 +106,8 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 </FormItem>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 border p-4 rounded-md items-start">
-                 <div className="border border-red-500">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md items-start">
+                 <div className="md:col-span-1">
                     <FormField
                         control={form.control}
                         name="dob"
@@ -125,7 +125,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         )}
                     />
                  </div>
-                 <div className="border border-green-500">
+                 <div className="md:col-span-1">
                     <FormItem>
                         <FormLabel>Age</FormLabel>
                         <FormControl>
@@ -133,7 +133,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         </FormControl>
                     </FormItem>
                 </div>
-                <div className="md:col-span-2 border border-blue-500">
+                <div className="md:col-span-1">
                     <FormField
                         control={form.control}
                         name="gender"
@@ -141,7 +141,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                             <FormItem>
                                 <FormLabel>Gender</FormLabel>
                                 <FormControl>
-                                    <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 h-10 w-full">
+                                    <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center justify-start md:justify-end space-x-4 h-10 w-full">
                                         <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem>
                                         <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem>
                                         <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem>
