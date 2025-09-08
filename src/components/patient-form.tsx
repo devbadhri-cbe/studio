@@ -37,12 +37,12 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
   
   const form = useForm<PatientFormData>({
     defaultValues: {
-      name: '',
-      dob: undefined,
-      gender: undefined,
-      email: '',
-      country: '',
-      phone: '',
+      name: patient?.name || '',
+      dob: patient?.dob ? parseISO(patient.dob) : new Date(),
+      gender: patient?.gender,
+      email: patient?.email || '',
+      country: patient?.country || '',
+      phone: patient?.phone || '',
     },
   });
   
