@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Input } from "./input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
-import { ChevronDown } from "lucide-react"
 
 interface DatePickerProps {
   value?: Date;
@@ -125,10 +124,10 @@ export function DatePicker({
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex items-center rounded-md border border-input h-10 w-fit px-1.5 space-x-1">
-      <div className="w-20">
+    <div className="flex items-center rounded-md border border-input h-10 w-fit px-1.5 space-x-0.5 text-sm">
+      <div className="w-[4.5rem]">
         <Select value={day} onValueChange={handleDayChange}>
-          <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
+          <SelectTrigger icon={null} className="border-0 p-1 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Day" />
           </SelectTrigger>
           <SelectContent>
@@ -143,9 +142,9 @@ export function DatePicker({
 
       <span className="text-muted-foreground">/</span>
 
-      <div className="w-24">
+      <div className="w-[5.5rem]">
         <Select value={month} onValueChange={handleMonthChange}>
-            <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
+            <SelectTrigger icon={null} className="border-0 p-1 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Month" />
             </SelectTrigger>
             <SelectContent>
@@ -160,9 +159,9 @@ export function DatePicker({
 
       <span className="text-muted-foreground">/</span>
       
-      <div className="w-28">
+      <div className="w-[6rem]">
         <Select value={year} onValueChange={handleYearChange}>
-            <SelectTrigger icon={<ChevronDown className="h-4 w-4 opacity-50" />} className="border-0 p-2 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-between">
+            <SelectTrigger icon={null} className="border-0 p-1 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Year" />
             </SelectTrigger>
             <SelectContent>

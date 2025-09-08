@@ -107,12 +107,12 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
 
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 border p-4 rounded-md items-start">
                  <div className="md:col-span-2">
-                    <FormLabel>Date of Birth</FormLabel>
                     <FormField
                         control={form.control}
                         name="dob"
                         render={({ field }) => (
                             <FormItem>
+                                 <FormLabel>Date of Birth</FormLabel>
                                 <FormControl>
                                     <DatePicker
                                         value={field.value}
