@@ -64,16 +64,24 @@ export const cmToFtIn = (cm: number) => {
 };
 
 export const formatDisplayPhoneNumber = (phone?: string, countryCode?: string): string => {
-    if (!phone || !countryCode) return phone || 'N/A';
+    if (!phone) return 'N/A';
+    if (!countryCode) return phone;
+    
     const country = countries.find(c => c.code === countryCode);
     if (!country) return phone;
     
     const phoneDigits = phone.replace(/\D/g, '');
     const countryPhoneCodeDigits = country.phoneCode.replace(/\D/g, '');
     
-    const nationalNumber = phoneDigits.startsWith(countryPhoneCodeDigits)
-        ? phoneDigits.substring(countryPhoneCodeDigits.length)
-        : phoneDigits;
+    let nationalNumber = phoneDigits;
+    if (phoneDigits.startsWith(countryPhoneCodeDigits)) {
+        nationalNumber = phoneDigits.substring(countryPhoneCodeDigits.length);
+    }
+    
+    // Fallback for empty national number
+    if (!nationalNumber) {
+        return country.phoneCode;
+    }
 
     switch (countryCode) {
         case 'US':
@@ -89,13 +97,15 @@ export const formatDisplayPhoneNumber = (phone?: string, countryCode?: string): 
             break;
         case 'GB':
              if (nationalNumber.length === 10) {
-                return `${country.phoneCode} ${nationalNumber.substring(0, 4)} ${nationalNumber.substring(4)}`;
+                return `${country.phoneCode} 0${nationalNumber.substring(0, 4)} ${nationalNumber.substring(4)}`;
             }
             break;
         default:
+            // Generic formatting for other countries
             return `${country.phoneCode} ${nationalNumber}`;
     }
     
+    // Return formatted with country code if no specific format matched
     return `${country.phoneCode} ${nationalNumber}`;
 }
 

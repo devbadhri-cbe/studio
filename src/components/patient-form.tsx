@@ -15,7 +15,7 @@ import { Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import type { Patient } from '@/lib/types';
 import { parseISO } from 'date-fns';
-import { calculateAge } from '@/lib/utils';
+import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
 import { DatePicker } from './ui/date-picker';
 
 
@@ -57,28 +57,44 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
 
   React.useEffect(() => {
     if (patient) {
+        let countryCode = patient.country || '';
+        // If country is not set, try to infer it from the phone number
+        if (!countryCode && patient.phone) {
+            const matchedCountry = countries.find(c => patient.phone?.startsWith(c.phoneCode));
+            if (matchedCountry) {
+                countryCode = matchedCountry.code;
+            }
+        }
+        
         form.reset({
             name: patient.name || '',
             dob: patient.dob ? parseISO(patient.dob) : new Date(),
             gender: patient.gender || undefined,
             email: patient.email || '',
-            country: patient.country || '',
+            country: countryCode,
             phone: patient.phone || '',
         });
     }
   }, [patient, form]);
 
   React.useEffect(() => {
-    const phoneField = form.getValues('phone');
-    if (watchCountry && !patient?.phone && !phoneField) {
+    const currentPhoneValue = form.getValues('phone');
+    // Only set the phone code if we are creating a new patient (no patient.phone) AND the field is empty
+    if (watchCountry && !patient?.phone && !currentPhoneValue) {
       const selectedCountry = countries.find(c => c.code === watchCountry);
       if (selectedCountry) {
         form.setValue('phone', selectedCountry.phoneCode, { shouldValidate: true });
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchCountry, form, patient?.phone]);
   
+  const displayPhone = React.useMemo(() => {
+      const phoneValue = form.watch('phone');
+      const countryValue = form.watch('country');
+      return formatDisplayPhoneNumber(phoneValue, countryValue);
+  }, [form.watch('phone'), form.watch('country')]);
+
+
   return (
     <>
     <Form {...form}>
@@ -170,7 +186,19 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                     </FormItem>
                 )}
                 />
-            <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )} />
+            <FormField 
+                control={form.control} 
+                name="phone" 
+                render={({ field }) => ( 
+                    <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                            <Input type="tel" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem> 
+                )} 
+            />
             <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
 
              <div className="flex justify-end gap-2 pt-4">
