@@ -36,12 +36,27 @@ export default function DoctorDashboardPage() {
 
   const router = useRouter();
   const { toast } = useToast();
+  
+  const statusPriority = {
+    'Urgent': 1,
+    'Needs Review': 2,
+    'On Track': 3,
+  };
+
 
   const fetchPatients = React.useCallback(async () => {
     setIsLoading(true);
     try {
       const allPatients = await getAllPatients();
-      setPatients(allPatients);
+      const sortedPatients = allPatients.sort((a, b) => {
+        const priorityA = statusPriority[a.status] || 4;
+        const priorityB = statusPriority[b.status] || 4;
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+        return a.name.localeCompare(b.name);
+      });
+      setPatients(sortedPatients);
     } catch (error) {
       toast({
         variant: 'destructive',
