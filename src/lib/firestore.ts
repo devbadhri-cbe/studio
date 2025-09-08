@@ -76,10 +76,17 @@ const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
 }
 
 
-export async function getPatients(): Promise<any[]> {
-  const q = query(collection(db, PATIENTS_COLLECTION));
+export async function getPatients(lastVisible: any = null, pageSize: number = 8): Promise<{ patients: Patient[]; lastVisible: any | null; }> {
+  let q;
+  if (lastVisible) {
+    q = query(collection(db, PATIENTS_COLLECTION), orderBy("name"), startAfter(lastVisible), limit(pageSize));
+  } else {
+    q = query(collection(db, PATIENTS_COLLECTION), orderBy("name"), limit(pageSize));
+  }
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...convertTimestamps(doc.data()) }));
+  const patients = snapshot.docs.map(doc => ({ id: doc.id, ...convertTimestamps(doc.data()) })) as Patient[];
+  const newLastVisible = snapshot.docs[snapshot.docs.length - 1];
+  return { patients, lastVisible: newLastVisible || null };
 }
 
 export async function getPatientsPaginated(

@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Search, UserPlus } from 'lucide-react';
+import { Search, UserPlus, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Patient } from '@/lib/types';
 import {
@@ -42,13 +42,29 @@ export default function DoctorDashboardPage() {
     const [isFormOpen, setIsFormOpen] = React.useState(false);
     const [editingPatient, setEditingPatient] = React.useState<Patient | null>(null);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [lastVisible, setLastVisible] = React.useState<any>(null);
+    const [hasMore, setHasMore] = React.useState(true);
+    const [isFetchingMore, setIsFetchingMore] = React.useState(false);
 
-    const fetchPatients = React.useCallback(async () => {
-        setIsLoading(true);
+    const fetchPatients = React.useCallback(async (loadMore = false) => {
+        if (!loadMore) {
+            setIsLoading(true);
+            setPatients([]);
+            setLastVisible(null);
+            setHasMore(true);
+        } else {
+            if (!hasMore || isFetchingMore) return;
+            setIsFetchingMore(true);
+        }
+
         try {
-            const rawPatientsData = await getPatients();
-            const fetchedPatients = rawPatientsData.map(processPatientData);
-            setPatients(fetchedPatients);
+            const { patients: newPatients, lastVisible: newLastVisible } = await getPatients(loadMore ? lastVisible : null, PAGE_SIZE);
+            const fetchedPatients = newPatients.map(processPatientData);
+            
+            setPatients(prev => loadMore ? [...prev, ...fetchedPatients] : fetchedPatients);
+            setLastVisible(newLastVisible);
+            setHasMore(newPatients.length === PAGE_SIZE);
+
         } catch (error) {
             console.error("Failed to fetch patients from Firestore", error);
             toast({
@@ -58,16 +74,17 @@ export default function DoctorDashboardPage() {
             });
         } finally {
             setIsLoading(false);
+            setIsFetchingMore(false);
         }
-    }, [toast]);
+    }, [toast, hasMore, isFetchingMore, lastVisible]);
     
     React.useEffect(() => {
         setIsDoctorLoggedIn(true);
         if (isClient) {
-            fetchPatients();
+            fetchPatients(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isClient, setIsDoctorLoggedIn, fetchPatients]);
+    }, [isClient, setIsDoctorLoggedIn]);
     
 
     const viewPatientDashboard = (patient: Patient) => {
@@ -84,8 +101,6 @@ export default function DoctorDashboardPage() {
                 title: 'Patient Deleted',
                 description: 'The patient has been removed from the list.'
             });
-            // Refetch patients to ensure list is up to date
-            fetchPatients();
         } catch (error) {
              console.error("Failed to delete patient:", error);
              toast({
@@ -122,7 +137,7 @@ export default function DoctorDashboardPage() {
                     description: `${newPatient.name} has been successfully added.`,
                 });
             }
-            await fetchPatients();
+            await fetchPatients(false);
             closeForm();
         } catch (error) {
             console.error("Failed to save patient", error);
@@ -235,7 +250,7 @@ export default function DoctorDashboardPage() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <ScrollArea className="h-[calc(100vh-350px)]">
+                            <ScrollArea className="h-[calc(100vh-380px)]">
                                 {isLoading ? (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pr-4">
                                         {[...Array(PAGE_SIZE)].map((_, i) => <Skeleton key={i} className="h-[300px] w-full" />)}
@@ -260,6 +275,17 @@ export default function DoctorDashboardPage() {
                                     </div>
                                 )}
                             </ScrollArea>
+                             {hasMore && !searchQuery && (
+                                <div className="pt-4 text-center">
+                                    <Button
+                                        onClick={() => fetchPatients(true)}
+                                        disabled={isFetchingMore}
+                                    >
+                                        {isFetchingMore && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Load More
+                                    </Button>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                     </>
