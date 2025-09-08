@@ -37,7 +37,7 @@ export default function DoctorDashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
   
-  const statusPriority = {
+  const statusPriority: { [key in Patient['status']]: number } = {
     'Urgent': 1,
     'Needs Review': 2,
     'On Track': 3,
@@ -68,13 +68,14 @@ export default function DoctorDashboardPage() {
           return bDate - aDate; // Sort descending (most recent first)
         }
 
-        // 3. As a final tie-breaker, sort by status priority, then by name
+        // 3. As a tie-breaker, sort by status priority
         const priorityA = statusPriority[a.status] || 4;
         const priorityB = statusPriority[b.status] || 4;
         if (priorityA !== priorityB) {
           return priorityA - priorityB;
         }
         
+        // 4. Final tie-breaker: sort by name
         return a.name.localeCompare(b.name);
       });
       setPatients(sortedPatients);
@@ -104,9 +105,9 @@ export default function DoctorDashboardPage() {
   const handleDeletePatient = async () => {
     if (!patientToDelete) return;
     
+    const patientName = patientToDelete.name;
     // Optimistically update the UI
     setPatients(currentPatients => currentPatients.filter(p => p.id !== patientToDelete.id));
-    const patientName = patientToDelete.name;
     setPatientToDelete(null);
 
     try {
@@ -115,8 +116,6 @@ export default function DoctorDashboardPage() {
         title: 'Patient Deleted',
         description: `${patientName}'s profile has been deleted.`,
       });
-      // Optionally re-fetch to ensure data consistency, though the optimistic update handles the UI.
-      // fetchPatients();
     } catch (error) {
       console.error("Failed to delete patient", error);
       toast({
