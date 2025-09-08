@@ -99,71 +99,6 @@ export function SharePatientAccessDialog({
     }
   }
 
-  const svgToPngFile = async (svgElement: SVGSVGElement, fileName: string): Promise<File | null> => {
-    return new Promise((resolve) => {
-        const canvas = document.createElement('canvas');
-        const { width, height } = svgElement.getBBox();
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return resolve(null);
-
-        const img = new Image();
-        const svgBlob = new Blob([svgElement.outerHTML], { type: 'image/svg+xml' });
-        const url = URL.createObjectURL(svgBlob);
-
-        img.onload = () => {
-            ctx.drawImage(img, 0, 0);
-            URL.revokeObjectURL(url);
-            canvas.toBlob((blob) => {
-                if (!blob) return resolve(null);
-                resolve(new File([blob], fileName, { type: 'image/png' }));
-            }, 'image/png');
-        };
-        img.src = url;
-    });
-  };
-
-  const handleShare = async () => {
-    const shareText = getShareText(true);
-
-    if (navigator.share && qrCodeRef.current) {
-        const svgElement = qrCodeRef.current.querySelector('svg');
-        if (!svgElement) return;
-
-        const file = await svgToPngFile(svgElement, `qr-code-${patient.id}.png`);
-        
-        if (file && navigator.canShare({ files: [file] })) {
-             try {
-                await navigator.share({
-                    title: 'Patient Dashboard QR Code',
-                    text: shareText,
-                    files: [file],
-                });
-                return;
-            } catch (error) {
-                console.info('Sharing with image failed, falling back to text only:', error);
-            }
-        }
-    }
-    
-    // Fallback for browsers that don't support sharing files or if image conversion fails
-    try {
-        await navigator.share({
-            title: 'Patient Dashboard Link',
-            text: shareText,
-            url: dashboardLink,
-        });
-    } catch (error) {
-        console.error('Sharing failed:', error);
-        toast({
-            variant: 'destructive',
-            title: 'Sharing Not Supported',
-            description: 'Your browser does not support the Web Share API. Please use the manual copy options.',
-        });
-    }
-  };
-
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -201,7 +136,7 @@ export function SharePatientAccessDialog({
            <Collapsible open={isShareOpen} onOpenChange={setIsShareOpen} className="w-full">
             <div className="flex items-center justify-center">
               <CollapsibleTrigger asChild>
-                <Button onClick={handleShare}>
+                <Button>
                   <Share2 className="mr-2 h-4 w-4" />
                   Share Options
                 </Button>
