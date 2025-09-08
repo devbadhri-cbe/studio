@@ -75,28 +75,30 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
 
   const handleContact = (method: 'whatsapp' | 'sms' | 'email') => {
     const doctorName = patient.doctorName || "your doctor";
+    const dashboardLink = `${window.location.origin}/patient/${patient.id}`;
+    let body = `Hello ${patient.name},\n\nThis is a message from ${doctorName} regarding your Health Guardian dashboard. You can access it here:\n${dashboardLink}\n\nBest,\n${doctorName}`;
+    
     switch (method) {
         case 'whatsapp':
             if (!patient.phone) {
                  toast({ variant: 'destructive', title: 'No Phone Number Found' });
                  return;
             }
-            window.open(`https://wa.me/${patient.phone.replace(/\D/g, '')}`, '_blank');
+            window.open(`https://wa.me/${patient.phone.replace(/\D/g, '')}?text=${encodeURIComponent(body)}`, '_blank');
             break;
         case 'sms':
              if (!patient.phone) {
                  toast({ variant: 'destructive', title: 'No Phone Number Found' });
                  return;
             }
-            window.location.href = `sms:${patient.phone.replace(/\s/g, '')}`;
+            window.location.href = `sms:${patient.phone.replace(/\s/g, '')}?body=${encodeURIComponent(body)}`;
             break;
         case 'email':
              if (!patient.email) {
                  toast({ variant: 'destructive', title: 'No Email Found' });
                  return;
             }
-            const subject = `Message from your doctor`;
-            const body = `Hello ${patient.name},\n\nThis is a message from ${doctorName} regarding your health status. Please get in touch.\n\nBest,\n${doctorName}`;
+            const subject = `Your Health Guardian Dashboard`;
             window.location.href = `mailto:${patient.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             break;
     }
