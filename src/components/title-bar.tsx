@@ -1,13 +1,11 @@
 
-
 'use client';
 
 import { Logo } from '@/components/logo';
 import * as React from 'react';
-import { ThemeToggle } from './theme-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { doctorDetails } from '@/lib/doctor-data';
 import { Edit } from 'lucide-react';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 
@@ -16,7 +14,7 @@ interface TitleBarProps {
 }
 
 export function TitleBar({ children }: TitleBarProps) {
-    const { isDoctorLoggedIn } = useApp();
+    const { isDoctorLoggedIn, profile } = useApp();
     const [isEditing, setIsEditing] = React.useState(false);
     
     return (
@@ -35,10 +33,10 @@ export function TitleBar({ children }: TitleBarProps) {
                                 <span className="animate-fade-in-down" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>Guardian</span>
                             </div>
                         </div>
-                        <div className="text-center text-xs text-muted-foreground mt-2">
-                           {doctorDetails.name}
+                         <div className="text-center text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                           {isDoctorLoggedIn ? (profile.doctorName || profile.doctorEmail) : 'Your Health Partner'}
                            {isDoctorLoggedIn && (
-                             <Button variant="ghost" size="icon" className="h-6 w-6 ml-1" onClick={() => setIsEditing(true)}>
+                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
                                 <Edit className="h-3 w-3" />
                             </Button>
                            )}
