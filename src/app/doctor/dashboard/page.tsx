@@ -28,6 +28,7 @@ import { TitleBar } from '@/components/ui/title-bar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { processPatientData } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIntersectionObserver } from '@/hooks/use-intersection-observer';
 
 const PAGE_SIZE = 8;
 
@@ -45,12 +46,14 @@ export default function DoctorDashboardPage() {
     const [lastVisible, setLastVisible] = React.useState<any>(null);
     const [hasMore, setHasMore] = React.useState(true);
     const [isFetchingMore, setIsFetchingMore] = React.useState(false);
+    const loadMoreRef = React.useRef(null);
 
     const fetchPatients = React.useCallback(async (loadMore = false) => {
         if (!loadMore) {
             setIsLoading(true);
             setPatients([]);
             setLastVisible(null);
+            setHasMore(true);
         } else {
             if (!hasMore || isFetchingMore) return;
             setIsFetchingMore(true);
@@ -75,8 +78,6 @@ export default function DoctorDashboardPage() {
             if (!loadMore) setIsLoading(false);
             setIsFetchingMore(false);
         }
-    // We only want to re-run fetch when loadMore changes, not other deps.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [toast, lastVisible, hasMore, isFetchingMore]);
     
     React.useEffect(() => {
@@ -87,6 +88,12 @@ export default function DoctorDashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isClient, setIsDoctorLoggedIn]);
     
+    useIntersectionObserver({
+        target: loadMoreRef,
+        onIntersect: () => fetchPatients(true),
+        enabled: hasMore && !isLoading && !isFetchingMore && !searchQuery,
+    });
+
 
     const viewPatientDashboard = (patient: Patient) => {
         setPatientData(patient);
@@ -176,6 +183,8 @@ export default function DoctorDashboardPage() {
                 (patient.phone && patient.phone.toLowerCase().includes(query))
             );
         });
+
+        if (searchQuery) return filtered;
 
         return filtered.sort((a, b) => {
             const aNeedsReview = a.presentMedicalConditions?.some(c => c.status === 'pending_review') || a.dashboardSuggestions?.some(s => s.status === 'pending');
@@ -269,6 +278,12 @@ export default function DoctorDashboardPage() {
                                         ))}
                                     </div>
                                 )}
+                                <div ref={loadMoreRef} className="h-4" />
+                                {isFetchingMore && (
+                                    <div className="flex justify-center items-center p-4">
+                                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                    </div>
+                                )}
                                 {(!isLoading && filteredAndSortedPatients.length === 0) && (
                                     <div className="text-center text-muted-foreground py-12">
                                         <p>No patients found.</p>
@@ -276,17 +291,6 @@ export default function DoctorDashboardPage() {
                                     </div>
                                 )}
                             </ScrollArea>
-                             {hasMore && !searchQuery && (
-                                <div className="pt-4 text-center">
-                                    <Button
-                                        onClick={() => fetchPatients(true)}
-                                        disabled={isFetchingMore}
-                                    >
-                                        {isFetchingMore && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Load More
-                                    </Button>
-                                </div>
-                            )}
                         </CardContent>
                     </Card>
                     </>
@@ -317,5 +321,3 @@ export default function DoctorDashboardPage() {
     </TooltipProvider>
   );
 }
-
-    
