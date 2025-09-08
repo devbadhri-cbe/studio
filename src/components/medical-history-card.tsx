@@ -4,9 +4,7 @@
 
 import { Stethoscope, PlusCircle, Loader2, Pill, ShieldAlert, Info, XCircle, Trash2, Edit, AlertTriangle } from 'lucide-react';
 import * as React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { useForm, useFormContext } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
@@ -22,17 +20,6 @@ import { Separator } from './ui/separator';
 import type { MedicalCondition, Medication } from '@/lib/types';
 import { parseISO } from 'date-fns';
 
-const ConditionSchema = z.object({
-  condition: z.string().min(2, 'Condition name is required.'),
-  date: z.date({ required_error: 'A valid date is required.' }),
-});
-
-const MedicationSchema = z.object({
-  medicationName: z.string().min(2, 'Medication name is required.'),
-  dosage: z.string(),
-  frequency: z.string(),
-});
-
 function capitalizeFirstLetter(string: string) {
     if (!string) return string;
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -43,7 +30,7 @@ function MedicalConditionForm({
     onCancel,
     initialData,
 }: { 
-    onSave: (data: z.infer<typeof ConditionSchema>) => Promise<void>, 
+    onSave: (data: { condition: string; date: Date }) => Promise<void>, 
     onCancel: () => void,
     initialData?: MedicalCondition,
 }) {
@@ -56,15 +43,14 @@ function MedicalConditionForm({
     }, 100);
   }, []);
 
-  const form = useForm<z.infer<typeof ConditionSchema>>({
-    resolver: zodResolver(ConditionSchema),
+  const { register, handleSubmit, formState: { errors }, control } = useForm<{ condition: string; date: Date }>({
     defaultValues: { 
         condition: initialData?.condition || '', 
         date: initialData?.date ? parseISO(initialData.date) : new Date() 
     },
   });
   
-  const handleSubmit = async (data: z.infer<typeof ConditionSchema>) => {
+  const handleFormSubmit = async (data: { condition: string; date: Date }) => {
     setIsSubmitting(true);
     await onSave({
         ...data,
@@ -74,10 +60,9 @@ function MedicalConditionForm({
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-4">
         <FormField
-          control={form.control}
+          control={control}
           name="date"
           render={({ field }) => (
             <FormItem>
@@ -94,7 +79,14 @@ function MedicalConditionForm({
             </FormItem>
           )}
         />
-        <FormField control={form.control} name="condition" render={({ field }) => ( <FormItem><FormLabel>Condition Name</FormLabel><FormControl><Input ref={inputRef} placeholder="e.g., Type 2 Diabetes" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+        <FormItem>
+            <FormLabel>Condition Name</FormLabel>
+            <FormControl>
+                <Input ref={inputRef} placeholder="e.g., Type 2 Diabetes" {...register("condition", { required: "Condition name is required."})} />
+            </FormControl>
+            <FormMessage>{errors.condition?.message}</FormMessage>
+        </FormItem>
+
         <div className="flex justify-end gap-2">
           <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
           <Button type="submit" size="sm" disabled={isSubmitting}>
@@ -102,7 +94,6 @@ function MedicalConditionForm({
           </Button>
         </div>
       </form>
-    </Form>
   );
 }
 
@@ -121,16 +112,14 @@ export function MedicalHistoryCard() {
 
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
 
-  const medicationForm = useForm<z.infer<typeof MedicationSchema>>({
-    resolver: zodResolver(MedicationSchema),
+  const medicationForm = useForm<{medicationName: string, dosage: string, frequency: string}>({
     defaultValues: { medicationName: '', dosage: '', frequency: '' },
   });
 
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
-  const handleSaveCondition = async (data: z.infer<typeof ConditionSchema>) => {
+  const handleSaveCondition = async (data: { condition: string; date: Date }) => {
     if (editingCondition && editingCondition.id) {
-        // We are updating an existing condition
         await updateMedicalCondition({
             ...editingCondition,
             condition: data.condition,
@@ -138,7 +127,6 @@ export function MedicalHistoryCard() {
             status: isDoctorLoggedIn ? 'verified' : 'pending_review',
         });
     } else {
-        // We are adding a new condition
         await addMedicalCondition({
           condition: data.condition,
           date: data.date.toISOString(),
@@ -151,7 +139,7 @@ export function MedicalHistoryCard() {
       setEditingCondition(conditionToEdit);
   }
 
-  const handleSaveMedication = async (data: z.infer<typeof MedicationSchema>) => {
+  const handleSaveMedication = async (data: {medicationName: string, dosage: string, frequency: string}) => {
     setIsSubmitting(true);
     addMedication({
         name: data.medicationName,

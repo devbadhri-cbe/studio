@@ -8,7 +8,6 @@ import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { useApp } from '@/context/app-context';
-import { ExtractLabResultsInput, extractLabResults, ExtractLabResultsOutput } from '@/ai/flows/extract-lab-results-flow';
 import { DatePicker } from './ui/date-picker';
 import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
@@ -20,21 +19,17 @@ import type { BatchRecords } from '@/context/app-context';
 
 
 type Step = 'initial' | 'confirmName' | 'editResults' | 'loading' | 'error';
-type ExtractedResult = ExtractLabResultsOutput['results'][0];
 
 export function UploadRecordDialog() {
   const [open, setOpen] = React.useState(false);
   const [step, setStep] = React.useState<Step>('initial');
   const [errorMessage, setErrorMessage] = React.useState('');
   const [isCapturing, setIsCapturing] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [extractedData, setExtractedData] = React.useState<ExtractLabResultsOutput | null>(null);
   
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { profile, addBatchRecords } = useApp();
 
   const stopCameraStream = React.useCallback(() => {
     if (videoRef.current && videoRef.current.srcObject) {
@@ -48,8 +43,6 @@ export function UploadRecordDialog() {
     setStep('initial');
     setErrorMessage('');
     setIsCapturing(false);
-    setIsLoading(false);
-    setExtractedData(null);
     stopCameraStream();
   }, [stopCameraStream]);
 
@@ -58,119 +51,6 @@ export function UploadRecordDialog() {
     if (!isOpen) {
       resetState();
     }
-  };
-
-  const processAndUploadFile = React.useCallback(async (file: File) => {
-    setIsLoading(true);
-    setStep('loading');
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = async () => {
-      const base64data = reader.result as string;
-      try {
-        const enabledBiomarkers = Object.values(profile.enabledBiomarkers || {}).flat();
-        const requiredBiomarkers = enabledBiomarkers.length > 0 ? enabledBiomarkers.map(key => availableBiomarkerCards[key as BiomarkerKey]?.label).filter(Boolean) : Object.values(availableBiomarkerCards).map(b => b.label);
-
-        const result = await extractLabResults({ 
-            photoDataUri: base64data,
-            requiredBiomarkers,
-        });
-        
-        setExtractedData(result);
-        setStep('confirmName');
-      } catch (error) {
-        console.error('AI extraction failed:', error);
-        setErrorMessage('The AI failed to analyze the document. Please ensure it is a clear lab report and try again.');
-        setStep('error');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-  }, [profile.enabledBiomarkers]);
-
-  const compressImage = (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target?.result as string;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 1920;
-                const MAX_HEIGHT = 1080;
-                let width = img.width;
-                let height = img.height;
-
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
-                }
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) {
-                    return reject(new Error('Could not get canvas context'));
-                }
-                ctx.drawImage(img, 0, 0, width, height);
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        const newFile = new File([blob], file.name, {
-                            type: 'image/jpeg',
-                            lastModified: Date.now(),
-                        });
-                        resolve(newFile);
-                    } else {
-                        reject(new Error('Canvas to Blob conversion failed'));
-                    }
-                }, 'image/jpeg', 0.8); // 80% quality
-            };
-            img.onerror = reject;
-        };
-        reader.onerror = reject;
-    });
-};
-
-
-  const handleFileChange = async (file: File | null) => {
-    if (!file) return;
-
-    if (file.size > 4 * 1024 * 1024) {
-      if (file.type.startsWith('image/')) {
-        toast({
-            title: 'Image is large',
-            description: 'Attempting to compress the image before uploading. Please wait...',
-        });
-        try {
-            const compressedFile = await compressImage(file);
-            await processAndUploadFile(compressedFile);
-        } catch (error) {
-            console.error("Image compression failed:", error);
-            toast({
-                variant: 'destructive',
-                title: 'Compression Failed',
-                description: 'Could not compress the image. Please try a smaller file.',
-            });
-        }
-      } else {
-         toast({
-            variant: 'destructive',
-            title: 'File too large',
-            description: 'Please upload a file smaller than 4MB. Only images can be compressed.',
-        });
-      }
-      return;
-    }
-    
-    await processAndUploadFile(file);
   };
 
   const startCamera = async () => {
@@ -187,142 +67,27 @@ export function UploadRecordDialog() {
     }
   };
   
-  const captureImage = () => {
-    if (!videoRef.current || !canvasRef.current) return;
-    
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext('2d');
-    context?.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    canvas.toBlob(async (blob) => {
-        if (blob) {
-            await handleFileChange(new File([blob], "capture.png", { type: "image/png" }));
-        }
-    }, 'image/png');
-  };
-
-  const handleEditResult = (index: number, field: keyof ExtractedResult, value: string | number) => {
-    if (!extractedData) return;
-    const newResults = [...extractedData.results];
-    (newResults[index] as any)[field] = value;
-    setExtractedData({ ...extractedData, results: newResults });
-  };
-  
-  const handleSaveChanges = async () => {
-    if (!extractedData) return;
-    
-    if (!extractedData.testDate || !isValid(parseISO(extractedData.testDate))) {
-        toast({
-            variant: 'destructive',
-            title: 'Invalid Date',
-            description: 'Please provide a valid test date before saving.',
-        });
-        return;
-    }
-
-    setIsLoading(true);
-
-    const recordsToBatch: BatchRecords = {};
-    const date = extractedData.testDate;
-
-    const findKeyByLabel = (label: string): BiomarkerKey | undefined => {
-        const lowercasedInput = label.toLowerCase().trim();
-        return Object.keys(availableBiomarkerCards).find(key => {
-            const cardInfo = availableBiomarkerCards[key as BiomarkerKey];
-            if (!cardInfo) return false;
-            
-            // Normalize label by removing parenthetical parts for matching
-            const mainLabel = cardInfo.label.split('(')[0].trim().toLowerCase();
-            const fullLabel = cardInfo.label.toLowerCase().trim();
-
-            return fullLabel === lowercasedInput || mainLabel === lowercasedInput;
-        }) as BiomarkerKey | undefined;
-    };
-    
-    const lipidPanelData: any = { date };
-    let hasLipidData = false;
-    const thyroidPanelData: any = { date };
-    let hasThyroidData = false;
-
-    extractedData.results.forEach(res => {
-        const value = Number(res.value);
-        if (isNaN(value)) return;
-
-        const biomarkerKey = findKeyByLabel(res.biomarker);
-        if (!biomarkerKey) return;
-        
-        // This mapping ensures the correct record type is created
-        const keyHandlers: Record<BiomarkerKey, () => void> = {
-            'totalCholesterol': () => { lipidPanelData.totalCholesterol = value; hasLipidData = true; },
-            'ldl': () => { lipidPanelData.ldl = value; hasLipidData = true; },
-            'hdl': () => { lipidPanelData.hdl = value; hasLipidData = true; },
-            'triglycerides': () => { lipidPanelData.triglycerides = value; hasLipidData = true; },
-            'hba1c': () => { recordsToBatch.hba1c = { date, value }; },
-            'glucose': () => { recordsToBatch.fastingBloodGlucose = { date, value }; },
-            'vitaminD': () => { recordsToBatch.vitaminD = { date, value, units: res.unit }; },
-            'thyroid': () => { 
-                const lowerBiomarker = res.biomarker.toLowerCase();
-                if (lowerBiomarker.includes('tsh')) thyroidPanelData.tsh = value;
-                if (lowerBiomarker.includes('t3')) thyroidPanelData.t3 = value;
-                if (lowerBiomarker.includes('t4')) thyroidPanelData.t4 = value;
-                hasThyroidData = true;
-            },
-            'hemoglobin': () => { recordsToBatch.hemoglobin = { date, hemoglobin: value }; },
-            'bloodPressure': () => { /* Not typically from lab reports */ },
-            'weight': () => { /* Not typically from lab reports */ },
-        };
-        
-        keyHandlers[biomarkerKey]?.();
-    });
-
-    if (hasLipidData) recordsToBatch.lipidPanel = lipidPanelData;
-    if (hasThyroidData) recordsToBatch.thyroid = thyroidPanelData;
-
-    try {
-        const result = await addBatchRecords(recordsToBatch);
-        let description = '';
-        if (result.added.length > 0) {
-            description += `Added: ${result.added.join(', ')}. `;
-        }
-        if (result.duplicates.length > 0) {
-            description += `Skipped duplicates: ${result.duplicates.join(', ')}.`;
-        }
-        if (description) {
-            toast({ title: 'Records Processed', description });
-        } else {
-            toast({ title: 'No New Records Added', description: 'All extracted records were already present or could not be mapped.' });
-        }
-        handleOpenChange(false);
-    } catch (e) {
-         toast({ variant: 'destructive', title: 'Error', description: 'Could not save the records.' });
-    } finally {
-        setIsLoading(false);
-    }
-}
-
-
   const renderContent = () => {
     switch (step) {
       case 'initial':
       case 'error':
         return (
           <>
-            {errorMessage && <Alert variant="destructive"><AlertDescription>{errorMessage}</AlertDescription></Alert>}
+            <Alert variant="destructive">
+                <AlertTitle>Feature Disabled</AlertTitle>
+                <AlertDescription>The AI-powered document upload feature is temporarily disabled.</AlertDescription>
+            </Alert>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-              <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+              <Button variant="outline" disabled>
                 <FileUp className="mr-2 h-5 w-5" /> Upload File
               </Button>
-              <Button variant="outline" onClick={startCamera}>
+              <Button variant="outline" disabled>
                 <Camera className="mr-2 h-5 w-5" /> Use Camera
               </Button>
             </div>
             <input
               type="file"
               ref={fileInputRef}
-              onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
               className="hidden"
               accept="image/*,application/pdf"
             />
@@ -331,85 +96,8 @@ export function UploadRecordDialog() {
       case 'loading':
         return <div className="flex justify-center items-center h-40"><Loader2 className="h-12 w-12 animate-spin text-primary" /><p className="ml-4">AI is analyzing...</p></div>;
       
-      case 'confirmName':
-        return (
-          <div className="space-y-4">
-            <Alert>
-              <User className="h-4 w-4" />
-              <AlertTitle>Confirm Patient Name</AlertTitle>
-              <AlertDescription>
-                The AI identified the name on this document as <span className="font-bold">{extractedData?.patientName}</span>. Does this match the current patient, <span className="font-bold">{profile.name}</span>?
-              </AlertDescription>
-            </Alert>
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" onClick={resetState}>Cancel</Button>
-              <Button onClick={() => setStep('editResults')}>
-                <Check className="mr-2 h-4 w-4" /> Yes, Continue
-              </Button>
-            </div>
-          </div>
-        );
-      
-      case 'editResults':
-          if (!extractedData) return null;
-          const { testDate, results } = extractedData;
-          const isDateValid = testDate && isValid(parseISO(testDate));
-        return (
-            <div className="space-y-4">
-                 <div className="space-y-4 p-4 border rounded-lg">
-                     <ScrollArea className="h-60">
-                        <div className="space-y-4 pr-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <Label>Patient Name</Label>
-                                    <Input value={extractedData.patientName} readOnly disabled/>
-                                </div>
-                                <div className="space-y-1">
-                                    <Label>Test Date</Label>
-                                    <DatePicker 
-                                        value={isDateValid ? parseISO(testDate) : undefined}
-                                        onChange={(date) => setExtractedData({...extractedData, testDate: date?.toISOString() || ''})}
-                                    />
-                                </div>
-                            </div>
-
-                            {results.length > 0 ? results.map((res, index) => (
-                                <div key={index} className="grid grid-cols-[1fr_100px_100px] gap-2 items-center">
-                                    <Input 
-                                        aria-label="Biomarker Name"
-                                        value={res.biomarker} 
-                                        onChange={(e) => handleEditResult(index, 'biomarker', e.target.value)} />
-                                    <Input 
-                                        aria-label="Biomarker Value"
-                                        type="number"
-                                        className="w-full"
-                                        value={res.value} 
-                                        onChange={(e) => handleEditResult(index, 'value', e.target.value)} />
-                                    <Input 
-                                        aria-label="Biomarker Unit"
-                                        className="w-full"
-                                        value={res.unit} 
-                                        onChange={(e) => handleEditResult(index, 'unit', e.target.value)} />
-                                </div>
-                            )) : (
-                            <div className="flex items-center justify-center h-full text-muted-foreground">
-                                <p>No relevant biomarkers were found on the document.</p>
-                            </div>
-                            )}
-                        </div>
-                     </ScrollArea>
-                  </div>
-                  <div className="flex justify-between gap-2">
-                     <Button variant="ghost" onClick={() => setStep('confirmName')}>
-                        <ArrowLeft className="mr-2 h-4 w-4" /> Back
-                     </Button>
-                    <Button onClick={handleSaveChanges} disabled={isLoading || results.length === 0 || !isDateValid}>
-                       {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />}
-                       Enter
-                    </Button>
-                </div>
-            </div>
-        )
+      default:
+        return null;
     }
   };
 
@@ -438,7 +126,7 @@ export function UploadRecordDialog() {
                              setIsCapturing(false);
                              stopCameraStream();
                          }}>Cancel</Button>
-                        <Button onClick={captureImage}>Capture Image</Button>
+                        <Button disabled>Capture Image</Button>
                     </div>
                 </div>
             ) : renderContent()}
