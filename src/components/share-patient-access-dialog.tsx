@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
-import { Clipboard, Mail, Share2, Copy, Image as ImageIcon, ExternalLink } from 'lucide-react';
+import { Mail, Share2, Copy, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -64,7 +64,6 @@ export function SharePatientAccessDialog({ patient, children, open, onOpenChange
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Add a white background to the QR code
     const img = document.createElement('img');
     img.onload = () => {
         canvas.width = 256;
@@ -87,7 +86,7 @@ export function SharePatientAccessDialog({ patient, children, open, onOpenChange
   const shareActions = [
     {
         label: 'Copy Dashboard Link',
-        icon: <Clipboard className="mr-2 h-4 w-4" />,
+        icon: <Copy className="mr-2 h-4 w-4" />,
         action: () => copyToClipboard(dashboardLink, 'Dashboard Link')
     },
     {
