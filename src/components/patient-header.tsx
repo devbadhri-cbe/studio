@@ -4,15 +4,8 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { UploadRecordDialog } from './upload-record-dialog';
-import { Button } from './ui/button';
-import { Edit } from 'lucide-react';
 
-
-interface PatientHeaderProps {
-    children?: React.ReactNode;
-}
-
-export function PatientHeader({ children }: PatientHeaderProps) {
+export function PatientHeader() {
   const { profile, isDoctorLoggedIn } = useApp();
 
   const pageTitle = isDoctorLoggedIn
