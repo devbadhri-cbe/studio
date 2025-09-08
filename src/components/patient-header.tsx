@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -7,7 +6,6 @@ import { useApp } from '@/context/app-context';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
 import { Edit, Info, MessageSquare, Mail } from 'lucide-react';
-import { doctorDetails } from '@/lib/doctor-data';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
@@ -63,8 +61,8 @@ export function PatientHeader({ children }: PatientHeaderProps) {
 
   return (
     <>
-    <div className="flex flex-col md:flex-row items-center gap-4">
-      <div className="flex-1 text-center md:text-left">
+    <div className="flex flex-col md:flex-row items-center gap-4 border-2 border-red-500">
+      <div className="flex-1 text-center md:text-left border-2 border-green-500">
         <h1 className="text-2xl md:text-3xl font-semibold font-headline">
           {pageTitle}
         </h1>
@@ -72,8 +70,8 @@ export function PatientHeader({ children }: PatientHeaderProps) {
             Your health overview. Consult your doctor before making any decisions.
         </p>
       </div>
-      <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-4 border-2 border-blue-500">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground border-2 border-purple-500">
             <div className="flex flex-col md:flex-row md:items-center md:gap-2">
                 <span>Consulting with:</span>
                 <span className="font-semibold text-foreground">{profile.doctorName || 'Not Set'}</span>
