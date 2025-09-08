@@ -8,6 +8,7 @@ import { getPatient, updatePatient } from '@/lib/firestore';
 import { PatientDashboard } from '@/components/patient-dashboard';
 import { processPatientData } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { doctorDetails } from '@/lib/doctor-data';
 
 export default function PatientPage() {
   const params = useParams();
@@ -33,6 +34,13 @@ export default function PatientPage() {
       try {
         const rawPatientData = await getPatient(patientId);
         if (rawPatientData) {
+          
+          if (isDoctorViewing && rawPatientData.doctorEmail && rawPatientData.doctorEmail !== doctorDetails.email) {
+            setError("Access Denied. You are not authorized to view this patient's dashboard.");
+            setIsLoading(false);
+            return;
+          }
+
           const patientData = processPatientData(rawPatientData);
           setPatientData(patientData);
           
@@ -56,7 +64,7 @@ export default function PatientPage() {
         loadPatientData();
     }
     
-  }, [params.patientId, isClient, isDoctorViewing]);
+  }, [params.patientId, isClient, isDoctorViewing, setPatientData, setIsDoctorLoggedIn, toast]);
 
   if (isLoading || !isClient) {
     return (
