@@ -27,7 +27,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
           {pageTitle}
         </h1>
         <p className="text-muted-foreground mt-2">
-            Consulting with: <span className="font-semibold text-foreground/90">{profile.doctorName || 'Not Assigned'}</span>
+            Your health overview. Consult your doctor before making any decisions.
         </p>
       </div>
       <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-2 md:gap-4">
