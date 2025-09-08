@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -207,3 +206,5 @@ export async function deletePatient(id: string): Promise<void> {
   const docRef = doc(db, PATIENTS_COLLECTION, id);
   await deleteDoc(docRef);
 }
+
+    

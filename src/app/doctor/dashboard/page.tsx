@@ -20,7 +20,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { PatientCard } from '@/components/patient-card';
-import { getPatients, deletePatient, addPatient, updatePatient } from '@/lib/firestore';
+import { getPatientsPaginated, deletePatient, addPatient, updatePatient } from '@/lib/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { useApp } from '@/context/app-context';
@@ -51,14 +51,13 @@ export default function DoctorDashboardPage() {
             setIsLoading(true);
             setPatients([]);
             setLastVisible(null);
-            setHasMore(true);
         } else {
             if (!hasMore || isFetchingMore) return;
             setIsFetchingMore(true);
         }
 
         try {
-            const { patients: newPatients, lastVisible: newLastVisible } = await getPatients(loadMore ? lastVisible : null, PAGE_SIZE);
+            const { patients: newPatients, lastVisible: newLastVisible } = await getPatientsPaginated(loadMore ? lastVisible : null, PAGE_SIZE);
             const fetchedPatients = newPatients.map(processPatientData);
             
             setPatients(prev => loadMore ? [...prev, ...fetchedPatients] : fetchedPatients);
@@ -73,10 +72,12 @@ export default function DoctorDashboardPage() {
                 description: "Failed to load patient data. Please check your connection and permissions."
             });
         } finally {
-            setIsLoading(false);
+            if (!loadMore) setIsLoading(false);
             setIsFetchingMore(false);
         }
-    }, [toast, hasMore, isFetchingMore, lastVisible]);
+    // We only want to re-run fetch when loadMore changes, not other deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [toast, lastVisible, hasMore, isFetchingMore]);
     
     React.useEffect(() => {
         setIsDoctorLoggedIn(true);
@@ -316,3 +317,5 @@ export default function DoctorDashboardPage() {
     </TooltipProvider>
   );
 }
+
+    
