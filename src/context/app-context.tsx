@@ -250,6 +250,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
       enabledBiomarkers: patient.enabledBiomarkers || {},
       bmi: patient.bmi,
+      doctorUid: patient.doctorUid,
       doctorName: patient.doctorName,
       doctorEmail: patient.doctorEmail,
       doctorPhone: patient.doctorPhone,

@@ -35,7 +35,7 @@ export default function PatientPage() {
         const rawPatientData = await getPatient(patientId);
         if (rawPatientData) {
           
-          if (isDoctorViewing && rawPatientData.doctorEmail && rawPatientData.doctorEmail !== doctorDetails.email) {
+          if (isDoctorViewing && rawPatientData.doctorUid && rawPatientData.doctorUid !== doctorDetails.uid) {
             setError("Access Denied. You are not authorized to view this patient's dashboard.");
             setIsLoading(false);
             return;

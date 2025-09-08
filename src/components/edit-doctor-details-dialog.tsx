@@ -18,6 +18,7 @@ import { Input } from './ui/input';
 import { Loader2, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useApp } from '@/context/app-context';
+import { doctorDetails } from '@/lib/doctor-data';
 
 const DoctorDetailsSchema = z.object({
   doctorName: z.string().min(2, "Name is required."),
@@ -62,6 +63,7 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
         doctorName: data.doctorName,
         doctorEmail: data.doctorEmail,
         doctorPhone: data.doctorPhone,
+        doctorUid: doctorDetails.uid, // Assign the current doctor's UID
       });
 
       toast({

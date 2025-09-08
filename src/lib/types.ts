@@ -58,6 +58,7 @@ export interface UserProfile {
   medication: Medication[];
   bmi?: number;
   enabledBiomarkers?: { [key: string]: string[] };
+  doctorUid?: string;
   doctorName?: string;
   doctorEmail?: string;
   doctorPhone?: string;
@@ -208,6 +209,7 @@ export interface Patient {
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
   enabledBiomarkers: { [key: string]: string[] };
+  doctorUid?: string;
   doctorName?: string;
   doctorEmail?: string;
   doctorPhone?: string;
