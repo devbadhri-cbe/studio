@@ -322,9 +322,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setProfile = useCallback((newProfile: UserProfile) => {
       const newBmi = calculateBmi(newProfile.bmi, newProfile.height);
-      setProfileState({...newProfile, bmi: newBmi});
+      const updatedProfile = { ...newProfile, bmi: newBmi };
+      
+      // Ensure doctorUid is handled correctly
+      if (newProfile.doctorUid === undefined) {
+        updatedProfile.doctorUid = profile.doctorUid;
+      }
+
+      setProfileState(updatedProfile);
       setHasUnsavedChanges(true);
-  }, []);
+  }, [profile.doctorUid]);
   
   const addMedicalCondition = useCallback(async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
     const tempId = `cond-${Date.now()}`;

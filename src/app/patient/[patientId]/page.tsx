@@ -41,8 +41,9 @@ export default function PatientPage() {
       };
 
       // If it's a doctor, we must wait for the user object to be resolved.
+      // If it's a patient, we can load immediately.
       if (isDoctorViewing && !user) {
-        // This is not an error, just loading state.
+        // This is not an error, just loading state while we check auth for the doctor.
         return;
       }
 
