@@ -155,17 +155,6 @@ export function SharePatientAccessDialog({
            </Collapsible>
           
 
-          <div className="relative">
-            <Separator />
-            <div className="absolute inset-0 flex items-center" aria-hidden="true">
-              <div className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-background px-2 text-sm text-muted-foreground">Or</span>
-            </div>
-          </div>
-
-
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-center">Manual Copy</h3>
             <div className="space-y-2">
