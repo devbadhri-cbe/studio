@@ -5,7 +5,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Sun, Zap, Globe, User, Share2, MessageSquare, Clock, Info, Bell, Droplet } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Sun, Zap, Globe, User, MessageSquare, Clock, Info, Bell, Droplet } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
@@ -14,7 +14,6 @@ import { countries } from '@/lib/countries';
 import * as React from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import { SharePatientAccessDialog } from './share-patient-access-dialog';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useApp } from '@/context/app-context';
@@ -189,12 +188,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Edit Patient
                             </DropdownMenuItem>
-                            <SharePatientAccessDialog patient={patient}>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                    <Share2 className="mr-2 h-4 w-4" />
-                                    Share Patient Access
-                                </DropdownMenuItem>
-                            </SharePatientAccessDialog>
                             <DropdownMenuSeparator />
                             <DropdownMenuLabel>Contact Patient</DropdownMenuLabel>
                             <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('whatsapp'))} disabled={!patient.phone}>

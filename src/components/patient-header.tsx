@@ -9,7 +9,6 @@ import { Button } from './ui/button';
 import { Edit, Info } from 'lucide-react';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { ShareAccessButton } from './share-access-button';
 
 
 interface PatientHeaderProps {
@@ -64,7 +63,6 @@ export function PatientHeader({ children }: PatientHeaderProps) {
             </div>
         </div>
         <div className="flex items-center gap-2">
-            {!isDoctorLoggedIn && <ShareAccessButton patient={profile} />}
             <UploadRecordDialog />
         </div>
       </div>
