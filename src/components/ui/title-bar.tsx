@@ -4,7 +4,7 @@
 
 import { Logo } from '@/components/logo';
 import * as React from 'react';
-import { ThemeToggle } from './theme-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { useApp } from '@/context/app-context';
 import { doctorDetails } from '@/lib/doctor-data';
 
