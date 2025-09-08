@@ -107,7 +107,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 border p-4 rounded-md items-start">
-                 <div className="md:col-span-2">
+                 <div className="md:col-span-2 border border-red-500">
                     <FormField
                         control={form.control}
                         name="dob"
@@ -125,13 +125,15 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         )}
                     />
                  </div>
-                 <FormItem>
-                    <Label>Age</Label>
-                    <FormControl>
-                        <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
-                    </FormControl>
-                </FormItem>
-                <div className="md:col-span-2">
+                 <div className="border border-green-500">
+                    <FormItem>
+                        <FormLabel>Age</FormLabel>
+                        <FormControl>
+                            <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
+                        </FormControl>
+                    </FormItem>
+                </div>
+                <div className="md:col-span-2 border border-blue-500">
                     <FormField
                         control={form.control}
                         name="gender"
