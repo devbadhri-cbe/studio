@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Patient } from '@/lib/types';
-import { Copy, QrCode, Share2 } from 'lucide-react';
+import { Copy, Share2 } from 'lucide-react';
 import * as React from 'react';
 import QRCode from 'react-qr-code';
 import { Button } from './ui/button';
