@@ -117,7 +117,9 @@ export function PatientHeader({ children }: PatientHeaderProps) {
                 </>
             )}
         </div>
-        <UploadRecordDialog />
+        <div className="flex border-2 border-orange-500">
+            <UploadRecordDialog />
+        </div>
       </div>
     </div>
     <EditDoctorDetailsDialog open={isEditing} onOpenChange={setIsEditing} />
