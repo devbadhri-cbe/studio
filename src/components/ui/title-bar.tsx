@@ -46,11 +46,15 @@ export function TitleBar({ children }: TitleBarProps) {
                             </div>
                         </div>
                         <div className="text-center text-xs text-muted-foreground mt-2">
-                           {isDoctorLoggedIn && isDeveloper ? doctorDetails.name : "Your Personal Health Companion"}
-                           {isDoctorLoggedIn && isDeveloper && (
-                             <Button variant="ghost" size="icon" className="h-6 w-6 ml-1" onClick={() => setIsEditing(true)}>
-                                <Edit className="h-3 w-3" />
-                            </Button>
+                           {isDoctorLoggedIn && isDeveloper ? (
+                             <div className="flex items-center gap-1">
+                                <span>{doctorDetails.name}</span>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
+                                    <Edit className="h-3 w-3" />
+                                </Button>
+                             </div>
+                           ) : (
+                            "Your Personal Health Companion"
                            )}
                         </div>
                     </div>
