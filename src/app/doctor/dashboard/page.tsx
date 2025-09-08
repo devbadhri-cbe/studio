@@ -24,7 +24,7 @@ import { getPatients, deletePatient, addPatient, updatePatient } from '@/lib/fir
 import { Skeleton } from '@/components/ui/skeleton';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { useApp } from '@/context/app-context';
-import { TitleBar } from '@/components/title-bar';
+import { TitleBar } from '@/components/ui/title-bar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { processPatientData } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -59,8 +59,7 @@ export default function DoctorDashboardPage() {
         } finally {
             setIsLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [toast]);
     
     React.useEffect(() => {
         setIsDoctorLoggedIn(true);
