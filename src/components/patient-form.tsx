@@ -125,9 +125,11 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                         )}
                     />
                  </div>
-                 <FormItem className="flex flex-col space-y-2">
+                 <FormItem>
                     <Label>Age</Label>
-                    <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
+                    <FormControl>
+                        <Input readOnly value={age !== null ? `${age} years` : ''} placeholder="Age" />
+                    </FormControl>
                 </FormItem>
                 <div className="md:col-span-2">
                     <FormField
