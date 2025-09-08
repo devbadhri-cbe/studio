@@ -62,7 +62,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
   return (
     <>
     <div className="flex flex-col md:flex-row items-center gap-4 border-2 border-red-500">
-      <div className="flex-1 text-center md:text-left border-2 border-green-500">
+      <div className="text-center md:text-left border-2 border-green-500">
         <h1 className="text-2xl md:text-3xl font-semibold font-headline">
           {pageTitle}
         </h1>
@@ -70,7 +70,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
             Your health overview. Consult your doctor before making any decisions.
         </p>
       </div>
-      <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-4 border-2 border-blue-500">
+      <div className="w-full md:w-auto flex flex-1 items-center justify-end gap-4 border-2 border-blue-500">
         <div className="flex items-center gap-2 text-sm text-muted-foreground border-2 border-purple-500">
             <div className="flex flex-col md:flex-row md:items-center md:gap-2">
                 <span>Consulting with:</span>
