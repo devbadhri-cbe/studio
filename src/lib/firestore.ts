@@ -15,6 +15,7 @@ import {
   Timestamp,
   limit,
   startAfter,
+  where,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Patient } from './types';
@@ -91,10 +92,9 @@ export async function getPatient(id: string): Promise<any | null> {
   return null;
 }
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorUid' | 'doctorName' | 'doctorEmail' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords'>): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorName' | 'doctorEmail' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords'>): Promise<Patient> {
     const docData = {
         ...patientData,
-        doctorUid: '',
         doctorName: '',
         doctorEmail: '',
         doctorPhone: '',
@@ -165,12 +165,17 @@ export async function deletePatient(id: string): Promise<void> {
 }
 
 export async function getPatientsPaginated(
+  doctorUid: string,
   lastVisible: any | null,
   pageSize: number
 ): Promise<{ patients: Patient[]; lastVisible: any | null }> {
   let q;
   const patientsCollection = collection(db, PATIENTS_COLLECTION);
-  const baseQuery = [orderBy('name'), limit(pageSize)];
+  const baseQuery = [
+    where('doctorUid', '==', doctorUid),
+    orderBy('name'), 
+    limit(pageSize)
+];
 
   if (lastVisible) {
     q = query(patientsCollection, ...baseQuery, startAfter(lastVisible));

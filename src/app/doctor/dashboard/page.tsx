@@ -66,6 +66,8 @@ export default function DoctorDashboardPage() {
     }, [router, setIsDoctorLoggedIn]);
 
     const fetchPatients = React.useCallback(async (loadMore = false) => {
+        if (!user) return;
+
         if (!loadMore) {
             setIsLoading(true);
             setPatients([]);
@@ -77,7 +79,7 @@ export default function DoctorDashboardPage() {
         }
 
         try {
-            const { patients: newPatients, lastVisible: newLastVisible } = await getPatientsPaginated(loadMore ? lastVisible : null, PAGE_SIZE);
+            const { patients: newPatients, lastVisible: newLastVisible } = await getPatientsPaginated(user.uid, loadMore ? lastVisible : null, PAGE_SIZE);
             const fetchedPatients = newPatients.map(processPatientData);
             
             setPatients(prev => loadMore ? [...prev, ...fetchedPatients] : fetchedPatients);
@@ -95,7 +97,7 @@ export default function DoctorDashboardPage() {
             if (!loadMore) setIsLoading(false);
             setIsFetchingMore(false);
         }
-    }, [toast, lastVisible, hasMore, isFetchingMore]);
+    }, [toast, lastVisible, hasMore, isFetchingMore, user]);
     
     React.useEffect(() => {
         if (user) {
@@ -136,6 +138,10 @@ export default function DoctorDashboardPage() {
     }
 
     const handleFormSubmit = async (data: PatientFormData) => {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Authentication Error', description: 'You must be logged in to manage patients.' });
+            return;
+        }
         setIsSubmitting(true);
         const patientData = {
             name: data.name,
@@ -155,7 +161,7 @@ export default function DoctorDashboardPage() {
                     description: `${updatedPatient.name}'s details have been updated.`,
                 });
             } else {
-                 const newPatient = await addPatient(patientData);
+                 const newPatient = await addPatient({ ...patientData, doctorUid: user.uid });
                 toast({
                     title: 'Patient Added',
                     description: `${newPatient.name} has been successfully added.`,

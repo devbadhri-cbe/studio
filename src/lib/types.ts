@@ -209,7 +209,7 @@ export interface Patient {
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
   enabledBiomarkers: { [key: string]: string[] };
-  doctorUid?: string;
+  doctorUid: string;
   doctorName?: string;
   doctorEmail?: string;
   doctorPhone?: string;
