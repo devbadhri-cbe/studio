@@ -73,7 +73,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
     }
   }, [patient.name]);
 
-  const handleContact = (method: 'whatsapp' | 'sms' | 'email') => {
+  const handleContact = (method: 'whatsapp' | 'email') => {
     const doctorName = patient.doctorName || "your doctor";
     let origin = window.location.origin;
     if (origin.includes('6000-')) {
@@ -89,16 +89,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                  return;
             }
             window.open(`https://wa.me/${patient.phone.replace(/\D/g, '')}?text=${encodeURIComponent(body)}`, '_blank');
-            break;
-        case 'sms':
-             if (!patient.phone) {
-                 toast({ variant: 'destructive', title: 'No Phone Number Found' });
-                 return;
-            }
-            const userAgent = window.navigator.userAgent;
-            const separator = /iPad|iPhone|iPod/.test(userAgent) ? '&' : '?';
-            const cleanPhone = patient.phone.replace(/\D/g, '');
-            window.location.href = `sms:${cleanPhone}${separator}body=${encodeURIComponent(body)}`;
             break;
         case 'email':
              if (!patient.email) {
@@ -208,10 +198,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                             <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('whatsapp'))} disabled={!patient.phone}>
                                 <WhatsAppIcon className="mr-2 h-4 w-4" />
                                 WhatsApp
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('sms'))} disabled={!patient.phone}>
-                                <MessageSquare className="mr-2 h-4 w-4" />
-                                SMS / iMessage
                             </DropdownMenuItem>
                             <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => handleContact('email'))} disabled={!patient.email}>
                                 <Mail className="mr-2 h-4 w-4" />
