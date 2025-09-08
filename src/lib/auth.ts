@@ -15,9 +15,12 @@ export const signup = async (email: string, password: string): Promise<User> => 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     return userCredential.user;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error signing up:', error);
-    throw error;
+    if (error.code === 'auth/email-already-in-use') {
+      throw new Error('This email address is already in use.');
+    }
+    throw new Error('An unexpected error occurred during sign up.');
   }
 };
 
@@ -26,9 +29,12 @@ export const login = async (email: string, password: string): Promise<User> => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error logging in:', error);
-    throw error;
+     if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+      throw new Error('Invalid credentials. Please check your email and password.');
+    }
+    throw new Error('An unexpected error occurred during login.');
   }
 };
 
