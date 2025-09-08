@@ -17,6 +17,8 @@ import { Input } from './ui/input';
 import { Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { updatePatient } from '@/lib/firestore';
+import { doctorDetails } from '@/lib/doctor-data';
+
 
 interface EditDoctorDetailsDialogProps {
   open: boolean;
@@ -38,50 +40,33 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
   React.useEffect(() => {
     if (open) {
       form.reset({
-        doctorName: profile.doctorName || '',
-        doctorEmail: profile.doctorEmail || '',
-        doctorPhone: profile.doctorPhone || '',
+        doctorName: doctorDetails.name || '',
+        doctorEmail: doctorDetails.email || '',
+        doctorPhone: '',
       });
     }
-  }, [open, profile, form]);
+  }, [open, form]);
 
   const onSubmit = async (data: { doctorName?: string; doctorEmail?: string; doctorPhone?: string }) => {
     setIsSubmitting(true);
-    try {
-      const updatedProfileData = {
-        doctorName: data.doctorName,
-        doctorEmail: data.doctorEmail,
-        doctorPhone: data.doctorPhone,
-        doctorUid: null, // Clear the UID to un-assign from the previous doctor
-      };
-      
-      const updatedPatient = await updatePatient(profile.id, updatedProfileData);
-      setProfile(updatedPatient);
-
-      toast({
-        title: 'Success',
-        description: "Doctor's details have been updated.",
-      });
-      onOpenChange(false);
-    } catch (error) {
-      console.error('Failed to update doctor details', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not update details. Please try again.',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // This functionality is disabled in the single-doctor model.
+    setTimeout(() => {
+        toast({
+            title: 'Action Disabled',
+            description: "This feature is not available.",
+        });
+        setIsSubmitting(false);
+        onOpenChange(false);
+    }, 500);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Your Doctor's Details</DialogTitle>
+          <DialogTitle>Doctor's Details</DialogTitle>
           <DialogDescription>
-            Update your doctor's information. This will remove your records from your current doctor's dashboard.
+            Details of your consulting doctor.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -93,7 +78,7 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Dr. John Doe" {...field} />
+                    <Input placeholder="Dr. John Doe" {...field} disabled />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,7 +91,7 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="doctor@example.com" {...field} />
+                    <Input type="email" placeholder="doctor@example.com" {...field} disabled />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -119,7 +104,7 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="+1 (555) 123-4567" {...field} />
+                    <Input type="tel" placeholder="+1 (555) 123-4567" {...field} disabled />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -127,11 +112,7 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
             />
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
+                Close
               </Button>
             </div>
           </form>

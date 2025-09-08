@@ -4,15 +4,13 @@
 import { Logo } from '@/components/logo';
 import * as React from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useApp } from '@/context/app-context';
-import { EditDoctorDetailsDialog } from '../edit-doctor-details-dialog';
+import { doctorDetails } from '@/lib/doctor-data';
 
 interface TitleBarProps {
     children?: React.ReactNode;
 }
 
 export function TitleBar({ children }: TitleBarProps) {
-    const [isEditing, setIsEditing] = React.useState(false);
     
     return (
         <>
@@ -31,7 +29,7 @@ export function TitleBar({ children }: TitleBarProps) {
                             </div>
                         </div>
                          <div className="text-center text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                           Dr. Badhrinathan N
+                           {doctorDetails.name}
                         </div>
                     </div>
                 </div>
@@ -40,7 +38,6 @@ export function TitleBar({ children }: TitleBarProps) {
                 </div>
             </div>
         </header>
-        <EditDoctorDetailsDialog open={isEditing} onOpenChange={setIsEditing} />
         </>
     );
 }
