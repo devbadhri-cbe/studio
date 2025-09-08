@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -7,8 +6,7 @@ import { useApp } from '@/context/app-context';
 import { Card, CardContent } from './ui/card';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
-import { Mail, MessageCircle } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { MessageCircle } from 'lucide-react';
 
 // A simple SVG for WhatsApp icon
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -30,17 +28,14 @@ export function PatientHeader({ children }: PatientHeaderProps) {
     : `Welcome, ${profile.name || 'User'}!`;
   
   const doctorName = profile.doctorName || 'your doctor';
-  const doctorEmail = 'drbadhri@gmail.com';
-  const doctorWhatsapp = '+919840236905'; // Example number
+  const doctorWhatsapp = '+919840236905';
 
-  const handleContact = (method: 'whatsapp' | 'email') => {
-    if (method === 'whatsapp') {
-        window.open(`https://wa.me/${doctorWhatsapp.replace(/\D/g, '')}`, '_blank');
-    } else if (method === 'email') {
-        const subject = `Message from patient ${profile.name}`;
-        window.location.href = `mailto:${doctorEmail}?subject=${encodeURIComponent(subject)}`;
-    }
+  const handleContact = () => {
+    const message = `Hello Dr. ${doctorName}, this is ${profile.name}. I have a question.`;
+    const whatsappUrl = `https://wa.me/${doctorWhatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   }
+
 
   return (
     <Card className="shadow-xl">
@@ -56,24 +51,10 @@ export function PatientHeader({ children }: PatientHeaderProps) {
          <div className="flex items-center gap-2">
             <UploadRecordDialog />
              {!isDoctorLoggedIn && (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button size="sm" variant="outline">
-                            <MessageCircle className="mr-2 h-4 w-4" />
-                            Contact Doctor
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuItem onSelect={() => handleContact('email')}>
-                            <Mail className="mr-2 h-4 w-4" />
-                            Email
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleContact('whatsapp')}>
-                            <WhatsAppIcon className="mr-2 h-4 w-4" />
-                            WhatsApp
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <Button size="sm" variant="outline" onClick={handleContact}>
+                    <WhatsAppIcon className="mr-2 h-4 w-4" />
+                    Chat with Doctor
+                </Button>
             )}
         </div>
       </CardContent>

@@ -2,7 +2,7 @@
 'use client';
 
 import { Logo } from '@/components/logo';
-import { Mail } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import * as React from 'react';
 import { ThemeToggle } from './theme-toggle';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,9 @@ interface TitleBarProps {
 }
 
 export function TitleBar({ children }: TitleBarProps) {
+
+    const doctorPhone = '+91 98402 36905';
+    const whatsAppNumber = '+919840236905';
 
     return (
         <header className="border-b px-4 py-2 md:px-6">
@@ -36,6 +39,10 @@ export function TitleBar({ children }: TitleBarProps) {
                             <a href={`mailto:drbadhri@gmail.com`} className="flex items-center justify-center gap-1.5 hover:text-primary">
                                 <Mail className="h-3 w-3" />
                                 drbadhri@gmail.com
+                            </a>
+                            <a href={`https://wa.me/${whatsAppNumber}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 hover:text-primary">
+                                <Phone className="h-3 w-3" />
+                                {doctorPhone}
                             </a>
                         </div>
                     </div>
