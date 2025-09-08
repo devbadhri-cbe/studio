@@ -55,8 +55,6 @@ interface AppContextType {
   addMedicalCondition: (condition: Pick<MedicalCondition, 'condition' | 'date'>) => Promise<void>;
   updateMedicalCondition: (condition: MedicalCondition) => Promise<void>;
   removeMedicalCondition: (id: string) => void;
-  approveMedicalCondition: (conditionId: string) => void;
-  dismissSuggestion: (conditionId: string) => void;
   addMedication: (medication: Omit<Medication, 'id'>) => void;
   removeMedication: (id: string) => void;
   setMedicationNil: () => void;
@@ -95,8 +93,6 @@ interface AppContextType {
   isClient: boolean;
   dashboardView: DashboardView;
   setDashboardView: (view: DashboardView) => void;
-  isDoctorLoggedIn: boolean;
-  setIsDoctorLoggedIn: (isLoggedIn: boolean) => void;
   setPatientData: (patient: Patient) => void;
   biomarkerUnit: BiomarkerUnitSystem;
   setBiomarkerUnit: (unit: BiomarkerUnitSystem) => void;
@@ -135,7 +131,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [tips, setTipsState] = useState<string[]>([]);
   const [dashboardView, setDashboardViewState] = useState<DashboardView>('report');
   const [isClient, setIsClient] = useState(false);
-  const [isDoctorLoggedIn, setIsDoctorLoggedInState] = useState(false);
   const [theme, setThemeState] = useState<Theme>('system');
   const [biomarkerUnit, setBiomarkerUnitState] = useState<BiomarkerUnitSystem>('conventional');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -228,10 +223,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return value;
   }, [biomarkerUnit]);
   
-  const setIsDoctorLoggedIn = useCallback((isLoggedIn: boolean) => {
-    setIsDoctorLoggedInState(isLoggedIn);
-  }, []);
-  
   const setPatientData = useCallback((patient: Patient) => {
     const patientProfile: UserProfile = {
       id: patient.id,
@@ -248,10 +239,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
       enabledBiomarkers: patient.enabledBiomarkers || {},
       bmi: patient.bmi,
-      doctorUid: patient.doctorUid,
-      doctorName: patient.doctorName,
-      doctorEmail: patient.doctorEmail,
-      doctorPhone: patient.doctorPhone,
       dashboardSuggestions: patient.dashboardSuggestions || [],
     };
     setProfileState(patientProfile);
@@ -323,15 +310,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setProfile = useCallback((newProfile: UserProfile) => {
       const newBmi = calculateBmi(newProfile.bmi, newProfile.height);
       const updatedProfile = { ...newProfile, bmi: newBmi };
-      
-      // Ensure doctorUid is handled correctly
-      if (newProfile.doctorUid === undefined) {
-        updatedProfile.doctorUid = profile.doctorUid;
-      }
-
       setProfileState(updatedProfile);
       setHasUnsavedChanges(true);
-  }, [profile.doctorUid]);
+  }, []);
   
   const addMedicalCondition = useCallback(async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
     const tempId = `cond-${Date.now()}`;
@@ -340,7 +321,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       condition: condition.condition,
       date: condition.date.toISOString(),
       icdCode: '',
-      status: isDoctorLoggedIn ? 'verified' : 'pending_review'
+      status: 'verified'
     };
 
     setProfileState(prev => ({
@@ -348,7 +329,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       presentMedicalConditions: [...prev.presentMedicalConditions, newCondition]
     }));
     setHasUnsavedChanges(true);
-  }, [isDoctorLoggedIn]);
+  }, []);
 
   const updateMedicalCondition = useCallback(async (condition: MedicalCondition) => {
     setProfileState(prevProfile => ({
@@ -366,26 +347,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setHasUnsavedChanges(true);
   }, []);
   
-  const approveMedicalCondition = useCallback(async (conditionId: string) => {
-    setProfileState(prevProfile => ({
-      ...prevProfile,
-      presentMedicalConditions: prevProfile.presentMedicalConditions.map(c => 
-        c.id === conditionId ? { ...c, status: 'verified' as const } : c
-      )
-    }));
-    setHasUnsavedChanges(true);
-  }, []);
-  
-  const dismissSuggestion = useCallback((conditionId: string) => {
-    setProfileState(prevProfile => ({
-      ...prevProfile,
-      presentMedicalConditions: prevProfile.presentMedicalConditions.map(c => 
-        c.id === conditionId ? { ...c, status: 'needs_revision' as const } : c
-      )
-    }));
-    setHasUnsavedChanges(true);
-  }, []);
-
    const addMedication = useCallback((medication: Omit<Medication, 'id'>) => {
     const newMedication = { ...medication, id: Date.now().toString() };
     setProfileState(prevProfile => ({
@@ -766,15 +727,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return combined;
   }, [totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
 
-
+  // Removed approveMedicalCondition, dismissSuggestion, setIsDoctorLoggedIn
   const value: AppContextType = {
     profile,
     setProfile,
     addMedicalCondition,
     updateMedicalCondition,
     removeMedicalCondition,
-    approveMedicalCondition,
-    dismissSuggestion,
     addMedication,
     removeMedication,
     setMedicationNil,
@@ -813,8 +772,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     isClient,
     dashboardView,
     setDashboardView,
-    isDoctorLoggedIn,
-    setIsDoctorLoggedIn,
     setPatientData,
     biomarkerUnit,
     setBiomarkerUnit,
@@ -832,6 +789,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     hasUnsavedChanges,
     saveChanges,
     isSaving,
+    approveMedicalCondition: () => {}, // No-op
+    dismissSuggestion: () => {}, // No-op
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

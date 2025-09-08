@@ -13,26 +13,25 @@ interface InteractivePanelGridProps {
 
 export function InteractivePanelGrid({ children }: InteractivePanelGridProps) {
     const [expandedIndex, setExpandedIndex] = React.useState<number | null>(null);
-    const { isDoctorLoggedIn } = useApp();
     
     const validChildren = React.Children.toArray(children).filter(React.isValidElement);
 
     React.useEffect(() => {
         // If there's only one card, default to expanded view
-        if (validChildren.length === 1 && !isDoctorLoggedIn) {
+        if (validChildren.length === 1) {
             setExpandedIndex(0);
         } else {
             setExpandedIndex(null);
         }
-    }, [validChildren.length, isDoctorLoggedIn]);
+    }, [validChildren.length]);
     
     const handleCardClick = (index: number) => {
         setExpandedIndex(index);
     };
 
     const handleBackClick = () => {
-        // Don't go back to grid if there's only one item unless it's the doctor viewing
-        if (validChildren.length > 1 || isDoctorLoggedIn) {
+        // Don't go back to grid if there's only one item
+        if (validChildren.length > 1) {
             setExpandedIndex(null);
         }
     };
@@ -47,7 +46,7 @@ export function InteractivePanelGrid({ children }: InteractivePanelGridProps) {
     if (expandedIndex !== null) {
         return (
             <div className="flex-1 flex flex-col h-full">
-                {(validChildren.length > 1 || isDoctorLoggedIn) && (
+                {(validChildren.length > 1) && (
                      <div className="mb-2">
                         <Button variant="ghost" size="sm" onClick={handleBackClick}>
                             <ArrowLeft className="mr-2 h-4 w-4" />

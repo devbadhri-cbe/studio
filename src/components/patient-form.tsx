@@ -15,7 +15,6 @@ import type { Patient } from '@/lib/types';
 import { parseISO } from 'date-fns';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
 import { DatePicker } from './ui/date-picker';
-import { Label } from './ui/label';
 
 
 export type PatientFormData = {

@@ -2,5 +2,5 @@
 import { redirect } from 'next/navigation';
 
 export default function AppRootPage() {
-  redirect('/doctor/login');
+  redirect('/patient/login');
 }

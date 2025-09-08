@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Settings, Check } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { availableBiomarkerCards, type BiomarkerKey, DiseasePanelKey } from '@/lib/biomarker-cards';
 import { useApp } from '@/context/app-context';
 import { cn } from '@/lib/utils';
@@ -23,7 +23,6 @@ interface DiseasePanelCardProps {
   icon: React.ReactNode;
   children: React.ReactNode;
   className?: string;
-  isDoctorLoggedIn: boolean;
   panelKey: DiseasePanelKey;
   allPanelBiomarkers: (BiomarkerKey | string)[];
 }
@@ -33,7 +32,6 @@ export function DiseasePanelCard({
   icon,
   children,
   className,
-  isDoctorLoggedIn,
   panelKey,
   allPanelBiomarkers,
 }: DiseasePanelCardProps) {
@@ -54,45 +52,43 @@ export function DiseasePanelCard({
             {icon}
             <CardTitle>{title}</CardTitle>
             </div>
-            {isDoctorLoggedIn && (
-                 <div className="flex items-center gap-2">
-                    <Button 
-                        size="sm"
-                        variant={isPanelEnabledForPatient ? 'secondary' : 'default'}
-                        onClick={handlePanelToggle}
-                    >
-                         {isPanelEnabledForPatient ? "Disable Panel" : "Enable Panel"}
+            <div className="flex items-center gap-2">
+                <Button 
+                    size="sm"
+                    variant={isPanelEnabledForPatient ? 'secondary' : 'default'}
+                    onClick={handlePanelToggle}
+                >
+                     {isPanelEnabledForPatient ? "Disable Panel" : "Enable Panel"}
+                </Button>
+                <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient}>
+                        <Settings className="h-4 w-4" />
                     </Button>
-                    <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient}>
-                            <Settings className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-64" align="end" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenuLabel>Visible Biomarkers</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {allPanelBiomarkers.map((key) => {
-                            const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
-                            if (!biomarkerInfo) return null;
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64" align="end" onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenuLabel>Visible Biomarkers</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {allPanelBiomarkers.map((key) => {
+                        const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
+                        if (!biomarkerInfo) return null;
 
-                            const isChecked = enabledForPanel.includes(key);
+                        const isChecked = enabledForPanel.includes(key);
 
-                            return (
-                                <DropdownMenuCheckboxItem
-                                key={key}
-                                checked={isChecked}
-                                onSelect={(e) => e.preventDefault()}
-                                onClick={() => toggleDiseaseBiomarker(panelKey, key)}
-                                >
-                                {biomarkerInfo.label}
-                                </DropdownMenuCheckboxItem>
-                            );
-                        })}
-                    </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            )}
+                        return (
+                            <DropdownMenuCheckboxItem
+                            key={key}
+                            checked={isChecked}
+                            onSelect={(e) => e.preventDefault()}
+                            onClick={() => toggleDiseaseBiomarker(panelKey, key)}
+                            >
+                            {biomarkerInfo.label}
+                            </DropdownMenuCheckboxItem>
+                        );
+                    })}
+                </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-4 pt-0">
         {isPanelEnabledForPatient ? (

@@ -2,36 +2,22 @@
 'use client';
 
 import * as React from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useApp } from '@/context/app-context';
 import { getPatient, updatePatient } from '@/lib/firestore';
 import { PatientDashboard } from '@/components/patient-dashboard';
 import { processPatientData } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { auth } from '@/lib/auth';
-import type { User } from 'firebase/auth';
 import type { Patient } from '@/lib/types';
 
 export default function PatientPage() {
   const params = useParams();
-  const searchParams = useSearchParams();
-  const { setPatientData, isClient, setIsDoctorLoggedIn } = useApp();
+  const { setPatientData, isClient } = useApp();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
-  const [user, setUser] = React.useState<User | null>(null);
   
-  const isDoctorViewing = searchParams.get('viewer') === 'doctor';
-
   React.useEffect(() => {
-    // Only listen for auth changes if a doctor is potentially viewing
-    const unsubscribe = auth.onAuthStateChanged(setUser);
-    return () => unsubscribe();
-  }, []);
-
-  React.useEffect(() => {
-    setIsDoctorLoggedIn(isDoctorViewing);
-
     const loadPatientData = async () => {
       const patientId = params.patientId as string;
       if (!patientId) {
@@ -40,50 +26,11 @@ export default function PatientPage() {
           return;
       };
 
-      // If it's a doctor, we must wait for the user object to be resolved.
-      // If it's a patient, we can load immediately.
-      if (isDoctorViewing && !user) {
-        // This is not an error, just loading state while we check auth for the doctor.
-        return;
-      }
-
       try {
         const rawPatientData = await getPatient(patientId);
         if (rawPatientData) {
-          
-          // SECURITY CHECK: If a doctor is viewing, verify they are the assigned doctor.
-          if (isDoctorViewing && user && rawPatientData.doctorUid !== user.uid) {
-            setError("Access Denied. You are not the assigned doctor for this patient.");
-            setIsLoading(false);
-            return;
-          }
-
-          // If a doctor is viewing and the patient has NO doctor, assign this doctor.
-          const updates: Partial<Patient> = {};
-          let needsUpdate = false;
-
-          if (isDoctorViewing && user && !rawPatientData.doctorUid) {
-            updates.doctorUid = user.uid;
-            updates.doctorName = user.displayName || user.email || 'Assigned Doctor';
-            updates.doctorEmail = user.email || '';
-            needsUpdate = true;
-          }
-          
-          // Always update last login time for doctor, but only if they are the assigned doctor
-          if (isDoctorViewing && user && rawPatientData.doctorUid === user.uid) {
-            updates.lastLogin = new Date().toISOString();
-            needsUpdate = true;
-          }
-
-          if (needsUpdate) {
-            const updatedData = await updatePatient(patientId, updates);
-            const patientData = processPatientData(updatedData);
-            setPatientData(patientData);
-          } else {
-             const patientData = processPatientData(rawPatientData);
-             setPatientData(patientData);
-          }
-
+          const patientData = processPatientData(rawPatientData);
+          setPatientData(patientData);
         } else {
           setError(`No patient found with ID: ${patientId}`);
         }
@@ -99,9 +46,9 @@ export default function PatientPage() {
         loadPatientData();
     }
     
-  }, [params.patientId, isClient, isDoctorViewing, user, setPatientData, setIsDoctorLoggedIn, toast]);
+  }, [params.patientId, isClient, setPatientData, toast]);
 
-  if (isLoading || !isClient || (isDoctorViewing && !user)) {
+  if (isLoading || !isClient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />

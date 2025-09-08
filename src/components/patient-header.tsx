@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -7,11 +8,9 @@ import { UploadRecordDialog } from './upload-record-dialog';
 import { doctorDetails } from '@/lib/doctor-data';
 
 export function PatientHeader() {
-  const { profile, isDoctorLoggedIn } = useApp();
+  const { profile } = useApp();
 
-  const pageTitle = isDoctorLoggedIn
-    ? `${profile.name}'s Dashboard`
-    : `Welcome, ${profile.name || 'User'}!`;
+  const pageTitle = `Welcome, ${profile.name || 'User'}!`;
   
   return (
     <>

@@ -103,7 +103,7 @@ type ActiveSynopsis = {
 } | null;
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, updateMedicalCondition, addMedication, removeMedication, setMedicationNil, isDoctorLoggedIn } = useApp();
+  const { profile, addMedicalCondition, updateMedicalCondition, addMedication, removeMedication, setMedicationNil } = useApp();
   const [editingCondition, setEditingCondition] = React.useState<MedicalCondition | null>(null);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
@@ -124,7 +124,7 @@ export function MedicalHistoryCard() {
             ...editingCondition,
             condition: data.condition,
             date: data.date.toISOString(),
-            status: isDoctorLoggedIn ? 'verified' : 'pending_review',
+            status: 'verified',
         });
     } else {
         await addMedicalCondition({

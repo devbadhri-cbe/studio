@@ -26,7 +26,7 @@ const statusConfig = {
 
 export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
   const [activeSynopsis, setActiveSynopsis] = React.useState<string | null>(null);
-  const { isDoctorLoggedIn, removeMedicalCondition } = useApp();
+  const { removeMedicalCondition } = useApp();
   const formatDate = useDateFormatter();
 
   const statusInfo = statusConfig[condition.status] || statusConfig.pending_review;
@@ -95,7 +95,7 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
           </Button>
         </div>
       </li>
-      {condition.status === 'needs_revision' && !isDoctorLoggedIn && (
+      {condition.status === 'needs_revision' && (
         <li className="pl-3 pb-2">
           <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive text-xs p-2">
             <AlertTriangle className="h-4 w-4 !text-destructive" />

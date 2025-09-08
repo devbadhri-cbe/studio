@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -19,6 +20,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Patient } from './types';
+import { doctorDetails } from './doctor-data';
 
 const PATIENTS_COLLECTION = 'patients';
 
@@ -92,9 +94,12 @@ export async function getPatient(id: string): Promise<any | null> {
   return null;
 }
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords'>): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'doctorUid' | 'doctorName' | 'doctorEmail'>): Promise<Patient> {
     const docData = {
         ...patientData,
+        doctorUid: doctorDetails.uid,
+        doctorName: doctorDetails.name,
+        doctorEmail: doctorDetails.email,
         doctorPhone: '',
         lastLogin: null,
         hba1cRecords: [],
@@ -133,12 +138,6 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
 export async function updatePatient(id: string, updates: Partial<Patient>): Promise<Patient> {
     const docRef = doc(db, PATIENTS_COLLECTION, id);
 
-    // If doctorName is updated, it implies a change of doctor, so we clear the UID.
-    // We check for doctorName to allow other patient details to be updated without affecting assignment.
-    if (updates.hasOwnProperty('doctorName')) {
-        updates.doctorUid = null;
-    }
-
     // Fetch the existing document to ensure the summary is based on the full data.
     const currentPatientData = await getPatient(id);
     if (!currentPatientData) throw new Error("Patient not found for update.");
@@ -168,6 +167,7 @@ export async function deletePatient(id: string): Promise<void> {
   await deleteDoc(docRef);
 }
 
+// This function is no longer needed in the single-doctor model but is kept for potential future use.
 export async function getPatientsPaginated(
   doctorUid: string,
   lastVisible: any | null,
