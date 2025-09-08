@@ -9,6 +9,9 @@ import { Button } from './ui/button';
 import { Edit, Info } from 'lucide-react';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { auth } from '@/lib/auth';
+import type { User } from 'firebase/auth';
+import { doctorDetails } from '@/lib/doctor-data';
 
 
 interface PatientHeaderProps {
@@ -18,7 +21,15 @@ interface PatientHeaderProps {
 export function PatientHeader({ children }: PatientHeaderProps) {
   const { profile, isDoctorLoggedIn } = useApp();
   const [isEditing, setIsEditing] = React.useState(false);
-  
+  const [user, setUser] = React.useState<User | null>(null);
+
+  React.useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(setUser);
+    return () => unsubscribe();
+  }, []);
+
+  const isDeveloper = user?.email === doctorDetails.developerEmail;
+
   const pageTitle = isDoctorLoggedIn
     ? `${profile.name}'s Dashboard`
     : `Welcome, ${profile.name || 'User'}!`;
@@ -43,7 +54,7 @@ export function PatientHeader({ children }: PatientHeaderProps) {
             <div className="flex flex-col">
                 <span className="font-semibold text-foreground text-base">{profile.doctorName || 'Not Set'}</span>
                  <div className="flex items-center gap-1">
-                    {!isDoctorLoggedIn && (
+                    {(isDoctorLoggedIn && isDeveloper) && (
                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
                             <Edit className="h-4 w-4" />
                         </Button>

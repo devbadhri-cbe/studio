@@ -10,6 +10,8 @@ import { doctorDetails } from '@/lib/doctor-data';
 import { Button } from './button';
 import { Edit } from 'lucide-react';
 import { EditDoctorDetailsDialog } from '../edit-doctor-details-dialog';
+import { auth } from '@/lib/auth';
+import type { User } from 'firebase/auth';
 
 interface TitleBarProps {
     children?: React.ReactNode;
@@ -18,6 +20,14 @@ interface TitleBarProps {
 export function TitleBar({ children }: TitleBarProps) {
     const { isDoctorLoggedIn } = useApp();
     const [isEditing, setIsEditing] = React.useState(false);
+    const [user, setUser] = React.useState<User | null>(null);
+
+    React.useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(setUser);
+        return () => unsubscribe();
+    }, []);
+
+    const isDeveloper = user?.email === doctorDetails.developerEmail;
     
     return (
         <>
@@ -36,7 +46,12 @@ export function TitleBar({ children }: TitleBarProps) {
                             </div>
                         </div>
                         <div className="text-center text-xs text-muted-foreground mt-2">
-                           {isDoctorLoggedIn ? doctorDetails.name : "Your Personal Health Companion"}
+                           {isDoctorLoggedIn && isDeveloper ? doctorDetails.name : "Your Personal Health Companion"}
+                           {isDoctorLoggedIn && isDeveloper && (
+                             <Button variant="ghost" size="icon" className="h-6 w-6 ml-1" onClick={() => setIsEditing(true)}>
+                                <Edit className="h-3 w-3" />
+                            </Button>
+                           )}
                         </div>
                     </div>
                 </div>
