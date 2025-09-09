@@ -144,6 +144,74 @@ function MedicalInfoSection({ title, icon, actions, children }: MedicalInfoSecti
   )
 }
 
+function MedicationListItem({ med, isEditing, onRemove, formatDetails }: MedicationListItemProps) {
+    const [isSynopsisOpen, setIsSynopsisOpen] = React.useState(false);
+
+    return (
+        <React.Fragment>
+            <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+            <div className="flex-1">
+            {med.name.toLowerCase() === 'nil' ? (
+                    <span className="font-semibold text-foreground">Nil - No medication</span>
+            ) : (
+                <div>
+                    {med.brandName && med.brandName.toLowerCase() !== med.name.toLowerCase() && (
+                        <p className="font-semibold text-foreground">{med.brandName}</p>
+                    )}
+                    <p className={cn("text-foreground", med.brandName && "text-muted-foreground text-xs")}>
+                        <span className="font-semibold">{med.name}</span>
+                        <span className="text-muted-foreground text-xs ml-2">{formatDetails(med)}</span>
+                    </p>
+                </div>
+            )}
+            </div>
+                <div className="flex items-center shrink-0">
+                    {med.name.toLowerCase() !== 'nil' && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 shrink-0"
+                                    onClick={(e) => { e.stopPropagation(); setIsSynopsisOpen(prev => !prev); }}
+                                >
+                                    <Info className="h-5 w-5 text-blue-500" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>View Synopsis</TooltipContent>
+                        </Tooltip>
+                    )}
+                    {isEditing && med.name.toLowerCase() !== 'nil' && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onRemove(med.id); }}>
+                                    <Trash2 className="h-5 w-5 text-destructive" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete Medication</TooltipContent>
+                        </Tooltip>
+                    )}
+                </div>
+            </li>
+            {isSynopsisOpen && (
+                <li className="pl-5 pb-2">
+                    <MedicationSynopsisDialog
+                        medicationName={med.name}
+                        onClose={() => setIsSynopsisOpen(false)}
+                    />
+                </li>
+            )}
+        </React.Fragment>
+    )
+}
+
+interface MedicationListItemProps {
+    med: Medication;
+    isEditing: boolean;
+    onRemove: (id: string) => void;
+    formatDetails: (med: Medication) => string;
+}
+
 export function MedicalHistoryCard() {
   const { profile, addMedicalCondition, updateMedicalCondition, removeMedicalCondition, addMedication, removeMedication, setMedicationNil } = useApp();
   const [editingCondition, setEditingCondition] = React.useState<MedicalCondition | null>(null);
@@ -168,7 +236,6 @@ export function MedicalHistoryCard() {
     const isUpdate = !!editingCondition?.id;
     const tempId = editingCondition?.id || `cond-${Date.now()}`;
 
-    // Immediately add/update the condition in the UI with a loading state
     const optimisticCondition: MedicalCondition = {
       id: tempId,
       condition: data.condition,
@@ -191,17 +258,17 @@ export function MedicalHistoryCard() {
       
       const conditionsForCheck = isUpdate
         ? profile.presentMedicalConditions.filter(c => c.id !== tempId)
-        : profile.presentMedicalConditions;
+        : [...profile.presentMedicalConditions, optimisticCondition];
 
-      const isDuplicate = result.icdCode && conditionsForCheck.some(c => c.icdCode === result.icdCode);
-
-      if (isDuplicate) {
-        removeMedicalCondition(tempId);
-        toast({ variant: 'destructive', title: 'Duplicate Condition', description: `This condition (ICD-11: ${result.icdCode}) already exists in the patient's record.` });
-        return;
-      }
-      
       if(result.isValid && result.standardizedName && result.icdCode) {
+          const isDuplicate = conditionsForCheck.some(c => c.id !== tempId && c.icdCode === result.icdCode);
+
+          if (isDuplicate) {
+            removeMedicalCondition(tempId);
+            toast({ variant: 'destructive', title: 'Duplicate Condition', description: `This condition (ICD-11: ${result.icdCode}) already exists in the patient's record.` });
+            return;
+          }
+
           const finalCondition: MedicalCondition = {
             ...optimisticCondition,
             condition: result.standardizedName,
@@ -212,13 +279,11 @@ export function MedicalHistoryCard() {
           updateMedicalCondition(finalCondition);
           toast({ title: 'Condition Verified', description: `${result.standardizedName} has been processed.` });
       } else {
-        // If not valid, remove the optimistic entry and show toast
         removeMedicalCondition(tempId);
-        toast({ variant: 'destructive', title: 'Condition Invalid', description: `"${data.condition}" is not a recognized condition.` });
+        toast({ variant: 'destructive', title: 'Condition Invalid', description: `"${data.condition}" is not a recognized condition. Suggestions: ${result.suggestions?.join(', ')}` });
       }
     } catch (e) {
       console.error(e);
-      // If AI fails, update the optimistic entry to show an error state
       const failedCondition: MedicalCondition = {
         ...optimisticCondition,
         icdCode: 'error',
@@ -413,74 +478,3 @@ export function MedicalHistoryCard() {
     </>
   );
 }
-
-interface MedicationListItemProps {
-    med: Medication;
-    isEditing: boolean;
-    onRemove: (id: string) => void;
-    formatDetails: (med: Medication) => string;
-}
-
-function MedicationListItem({ med, isEditing, onRemove, formatDetails }: MedicationListItemProps) {
-    const [isSynopsisOpen, setIsSynopsisOpen] = React.useState(false);
-
-    return (
-        <React.Fragment>
-            <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-            <div className="flex-1">
-            {med.name.toLowerCase() === 'nil' ? (
-                    <span className="font-semibold text-foreground">Nil - No medication</span>
-            ) : (
-                <div>
-                    {med.brandName && med.brandName.toLowerCase() !== med.name.toLowerCase() && (
-                        <p className="font-semibold text-foreground">{med.brandName}</p>
-                    )}
-                    <p className={cn("text-foreground", med.brandName && "text-muted-foreground text-xs")}>
-                        <span className="font-semibold">{med.name}</span>
-                        <span className="text-muted-foreground text-xs ml-2">{formatDetails(med)}</span>
-                    </p>
-                </div>
-            )}
-            </div>
-                <div className="flex items-center shrink-0">
-                    {med.name.toLowerCase() !== 'nil' && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 shrink-0"
-                                    onClick={(e) => { e.stopPropagation(); setIsSynopsisOpen(prev => !prev); }}
-                                >
-                                    <Info className="h-5 w-5 text-blue-500" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>View Synopsis</TooltipContent>
-                        </Tooltip>
-                    )}
-                    {isEditing && med.name.toLowerCase() !== 'nil' && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onRemove(med.id); }}>
-                                    <Trash2 className="h-5 w-5 text-destructive" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Delete Medication</TooltipContent>
-                        </Tooltip>
-                    )}
-                </div>
-            </li>
-            {isSynopsisOpen && (
-                <li className="pl-5 pb-2">
-                    <MedicationSynopsisDialog
-                        medicationName={med.name}
-                        onClose={() => setIsSynopsisOpen(false)}
-                    />
-                </li>
-            )}
-        </React.Fragment>
-    )
-}
-
-    
-
