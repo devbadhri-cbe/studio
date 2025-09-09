@@ -28,7 +28,7 @@ export function TitleBar({ children, backButton }: TitleBarProps) {
                     <div className="flex flex-col items-center border border-red-500">
                         <div className="flex items-center justify-center gap-2 border border-red-500">
                             <Logo className="h-14 w-14 text-primary md:h-10 md:w-10 animate-fade-in-scale" style={{ animationDelay: '200ms', animationFillMode: 'both' }} />
-                            <div className="flex flex-col text-2xl md:text-4xl font-bold font-headline text-center md:flex-row md:gap-2 border border-red-500">
+                            <div className="flex flex-col text-2xl md:text-4xl font-bold font-headline text-center md:flex-row md:gap-2 border border-red-500 text-shadow-3d">
                                 <span className="animate-fade-in-down" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>Health</span>
                                 <span className="animate-fade-in-down" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>Guardian</span>
                             </div>
