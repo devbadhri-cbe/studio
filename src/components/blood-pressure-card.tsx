@@ -41,7 +41,7 @@ export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps
   const Icon = <Heart className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = !isReadOnly ? (
-     <AddBloodPressureRecordDialog>
+    <AddBloodPressureRecordDialog>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -54,7 +54,7 @@ export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-     </AddBloodPressureRecordDialog>
+    </AddBloodPressureRecordDialog>
   ) : null;
 
   const formattedRecords = sortedRecords.map(r => ({

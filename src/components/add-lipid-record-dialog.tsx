@@ -5,23 +5,20 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { startOfDay, parseISO } from 'date-fns';
 
-import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
-import { Loader2 } from 'lucide-react';
+import { AddRecordDialogLayout } from './add-record-dialog-layout';
 
 
 interface AddLipidRecordDialogProps {
@@ -108,98 +105,88 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
 
 
   return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          {triggerButton}
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add New Lipid Panel Record</DialogTitle>
-            <DialogDescription>Enter the details of your new lipid panel result here.</DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-              <FormField
+      <AddRecordDialogLayout
+        open={open}
+        onOpenChange={setOpen}
+        trigger={triggerButton}
+        title="Add New Lipid Panel Record"
+        description="Enter the details of your new lipid panel result here."
+        form={form}
+        onSubmit={onSubmit}
+        isSubmitting={isSubmitting}
+      >
+        <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+                <FormItem className="flex flex-col">
+                <FormLabel>Test Date</FormLabel>
+                <FormControl>
+                    <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    fromYear={new Date().getFullYear() - 10}
+                    toYear={new Date().getFullYear()}
+                    />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+        />
+        <div className="grid grid-cols-2 gap-4">
+            <FormField
                 control={form.control}
-                name="date"
+                name="totalCholesterol"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Test Date</FormLabel>
+                <FormItem>
+                    <FormLabel>Total Cholesterol (mg/dL)</FormLabel>
                     <FormControl>
-                      <DatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        fromYear={new Date().getFullYear() - 10}
-                        toYear={new Date().getFullYear()}
-                      />
+                    <Input type="number" placeholder="e.g., 200" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                </FormItem>
                 )}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="totalCholesterol"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Total Cholesterol (mg/dL)</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="e.g., 200" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="triglycerides"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Triglycerides (mg/dL)</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="e.g., 150" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="ldl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>LDL (mg/dL)</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.1" placeholder="e.g., 100" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="hdl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>HDL (mg/dL)</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="e.g., 50" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <DialogFooter>
-                 <Button type="submit" disabled={isSubmitting}>
-                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Record
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+            />
+            <FormField
+                control={form.control}
+                name="triglycerides"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Triglycerides (mg/dL)</FormLabel>
+                    <FormControl>
+                    <Input type="number" placeholder="e.g., 150" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="ldl"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>LDL (mg/dL)</FormLabel>
+                    <FormControl>
+                    <Input type="number" step="0.1" placeholder="e.g., 100" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="hdl"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>HDL (mg/dL)</FormLabel>
+                    <FormControl>
+                    <Input type="number" placeholder="e.g., 50" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
+      </AddRecordDialogLayout>
   );
 }

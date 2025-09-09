@@ -5,23 +5,20 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { startOfDay, parseISO } from 'date-fns';
 
-import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
-import { Loader2 } from 'lucide-react';
+import { AddRecordDialogLayout } from './add-record-dialog-layout';
 
 
 interface AddThyroidRecordDialogProps {
@@ -105,85 +102,75 @@ export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecord
 
 
   return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          {triggerButton}
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add New Thyroid Record</DialogTitle>
-            <DialogDescription>Enter the details of your new thyroid panel result here.</DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-              <FormField
+      <AddRecordDialogLayout
+        open={open}
+        onOpenChange={setOpen}
+        trigger={triggerButton}
+        title="Add New Thyroid Record"
+        description="Enter the details of your new thyroid panel result here."
+        form={form}
+        onSubmit={onSubmit}
+        isSubmitting={isSubmitting}
+      >
+        <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+                <FormItem className="flex flex-col">
+                <FormLabel>Test Date</FormLabel>
+                <FormControl>
+                    <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    fromYear={new Date().getFullYear() - 10}
+                    toYear={new Date().getFullYear()}
+                    />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+        />
+        <div className="grid grid-cols-3 gap-4">
+            <FormField
                 control={form.control}
-                name="date"
+                name="tsh"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Test Date</FormLabel>
+                <FormItem>
+                    <FormLabel>TSH (μIU/mL)</FormLabel>
                     <FormControl>
-                      <DatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        fromYear={new Date().getFullYear() - 10}
-                        toYear={new Date().getFullYear()}
-                      />
+                    <Input type="number" step="0.01" placeholder="e.g., 2.5" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                </FormItem>
                 )}
-              />
-              <div className="grid grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="tsh"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>TSH (μIU/mL)</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.01" placeholder="e.g., 2.5" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="t3"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>T3 (pg/mL)</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="e.g., 3.0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="t4"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>T4 (ng/dL)</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.1" placeholder="e.g., 1.2" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <DialogFooter>
-                 <Button type="submit" disabled={isSubmitting}>
-                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Record
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+            />
+            <FormField
+                control={form.control}
+                name="t3"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>T3 (pg/mL)</FormLabel>
+                    <FormControl>
+                    <Input type="number" placeholder="e.g., 3.0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="t4"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>T4 (ng/dL)</FormLabel>
+                    <FormControl>
+                    <Input type="number" step="0.1" placeholder="e.g., 1.2" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
+      </AddRecordDialogLayout>
   );
 }

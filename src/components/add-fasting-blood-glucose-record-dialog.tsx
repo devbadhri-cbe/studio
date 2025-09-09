@@ -7,23 +7,17 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { startOfDay } from 'date-fns';
 
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
+import { AddRecordDialogLayout } from './add-record-dialog-layout';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -100,57 +94,47 @@ export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBlood
 
 
   return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-            {triggerButton}
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add New Fasting Blood Glucose Record</DialogTitle>
-            <DialogDescription>Enter your value and the date it was measured.</DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Date</FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        fromYear={new Date().getFullYear() - 10}
-                        toYear={new Date().getFullYear()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                  control={form.control}
-                  name="value"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fasting Blood Glucose ({unitLabel})</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="any" placeholder={unitLabel === 'mg/dL' ? 'e.g., 95' : 'e.g., 5.3'} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              <DialogFooter>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Record
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      <AddRecordDialogLayout
+        open={open}
+        onOpenChange={setOpen}
+        trigger={triggerButton}
+        title="Add New Fasting Blood Glucose Record"
+        description="Enter your value and the date it was measured."
+        form={form}
+        onSubmit={onSubmit}
+        isSubmitting={isSubmitting}
+      >
+        <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+                <FormItem className="flex flex-col">
+                <FormLabel>Date</FormLabel>
+                <FormControl>
+                    <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    fromYear={new Date().getFullYear() - 10}
+                    toYear={new Date().getFullYear()}
+                    />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+        />
+        <FormField
+            control={form.control}
+            name="value"
+            render={({ field }) => (
+            <FormItem>
+                <FormLabel>Fasting Blood Glucose ({unitLabel})</FormLabel>
+                <FormControl>
+                <Input type="number" step="any" placeholder={unitLabel === 'mg/dL' ? 'e.g., 95' : 'e.g., 5.3'} {...field} />
+                </FormControl>
+                <FormMessage />
+            </FormItem>
+            )}
+        />
+      </AddRecordDialogLayout>
   );
 }

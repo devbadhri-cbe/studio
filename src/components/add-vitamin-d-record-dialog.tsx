@@ -7,23 +7,20 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { startOfDay, parseISO } from 'date-fns';
 
-import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
-import { Loader2 } from 'lucide-react';
+import { AddRecordDialogLayout } from './add-record-dialog-layout';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -108,57 +105,47 @@ export function AddVitaminDRecordDialog({ children, onSuccess }: AddVitaminDReco
   const triggerButton = children || <AddRecordButton tooltipContent="Add Vitamin D Record" onClick={handleTriggerClick} />;
 
   return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-           {triggerButton}
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add New Vitamin D Record</DialogTitle>
-            <DialogDescription>Enter the details of your new Vitamin D result here.</DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Test Date</FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        fromYear={new Date().getFullYear() - 10}
-                        toYear={new Date().getFullYear()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="value"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vitamin D ({getUnitLabel(biomarkerUnit)})</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="any" placeholder={biomarkerUnit === 'si' ? "e.g., 75" : "e.g., 30"} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button type="submit" disabled={isSubmitting}>
-                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Record
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      <AddRecordDialogLayout
+        open={open}
+        onOpenChange={setOpen}
+        trigger={triggerButton}
+        title="Add New Vitamin D Record"
+        description="Enter the details of your new Vitamin D result here."
+        form={form}
+        onSubmit={onSubmit}
+        isSubmitting={isSubmitting}
+      >
+        <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+                <FormItem className="flex flex-col">
+                <FormLabel>Test Date</FormLabel>
+                <FormControl>
+                    <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    fromYear={new Date().getFullYear() - 10}
+                    toYear={new Date().getFullYear()}
+                    />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+        />
+        <FormField
+            control={form.control}
+            name="value"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Vitamin D ({getUnitLabel(biomarkerUnit)})</FormLabel>
+                <FormControl>
+                    <Input type="number" step="any" placeholder={biomarkerUnit === 'si' ? "e.g., 75" : "e.g., 30"} {...field} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+        />
+      </AddRecordDialogLayout>
   );
 }
