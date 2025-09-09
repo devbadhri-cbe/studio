@@ -98,14 +98,8 @@ export type LabDataExtractionOutput = z.infer<typeof LabDataExtractionOutputSche
 //- Medical Condition Processing Flow Types
 //-================================================================----------
 
-const ExistingConditionSchema = z.object({
-  condition: z.string(),
-  icdCode: z.string(),
-});
-
 export const MedicalConditionInputSchema = z.object({
   condition: z.string().describe('The medical condition entered by the user.'),
-  existingConditions: z.array(ExistingConditionSchema).optional().describe('A list of existing conditions the patient already has, including their ICD codes.'),
 });
 export type MedicalConditionInput = z.infer<typeof MedicalConditionInputSchema>;
 

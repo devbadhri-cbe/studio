@@ -22,23 +22,14 @@ const prompt = ai.definePrompt({
     prompt: `You are a medical data validation expert. Your task is to analyze a user-provided medical condition.
 
 User Input: "{{condition}}"
-Existing Conditions:
-{{#if existingConditions}}
-  {{#each existingConditions}}
-- Name: {{this.condition}}, ICD-11: {{this.icdCode}}
-  {{/each}}
-{{else}}
-  None
-{{/if}}
 
-1.  First, determine the most likely ICD-11 code for the user's input. Then, check if this resulting ICD-11 code would be a duplicate of any of the 'Existing Conditions'. A duplicate is defined as having the exact same ICD-11 code. Do not use the user-provided text or the standardized name for the duplicate check, only the ICD-11 code. If it is a duplicate, immediately set 'isValid' to false and provide no suggestions. This is the most important step.
-2.  If the resulting ICD-11 code is not a duplicate, determine if the input is a valid, specific medical condition. "Feeling tired" is not specific, but "Chronic Fatigue Syndrome" is.
-3.  If the input is a valid condition and not a duplicate:
+1.  First, determine if the input is a valid, specific medical condition. "Feeling tired" is not specific, but "Chronic Fatigue Syndrome" is.
+2.  If the input is a valid condition:
     - Set 'isValid' to true.
     - Provide the 'standardizedName' (e.g., for "high blood pressure," return "Hypertension").
-    - Provide the 'icdCode' you determined earlier from the ICD-11 classification.
+    - Provide the most likely 'icdCode' from the ICD-11 classification.
     - YOU MUST provide a brief, one-paragraph 'synopsis' of the condition, suitable for a patient to read.
-4.  If the input is ambiguous, a symptom, or not a recognized medical condition:
+3.  If the input is ambiguous, a symptom, or not a recognized medical condition:
     - Set 'isValid' to false.
     - Provide a list of up to 3 'suggestions' for more specific, valid medical conditions the user might have meant. For example, if the user enters "sugar problems", suggest "Type 2 Diabetes", "Hypoglycemia", "Hyperglycemia".
     - Do not provide icdCode or synopsis.`,
