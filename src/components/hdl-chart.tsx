@@ -8,9 +8,10 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { format, parseISO } from 'date-fns';
 
 export function HdlChart() {
-  const { hdlRecords, profile } = useApp();
+  const { hdlRecords, profile, getDisplayLipidValue, biomarkerUnit } = useApp();
   const formatDate = useDateFormatter();
   const isMale = profile.gender === 'male';
+  const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
   const sortedRecords = [...(hdlRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
   
@@ -18,24 +19,27 @@ export function HdlChart() {
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
-    value: r.value,
+    value: getDisplayLipidValue(r.value, 'hdl'),
   }));
   
   const yAxisDomain = React.useMemo(() => {
-    if (chartData.length === 0) return [20, 100];
+    const defaultMin = biomarkerUnit === 'si' ? 0.5 : 20;
+    const defaultMax = biomarkerUnit === 'si' ? 3 : 120;
+    if (chartData.length === 0) return [defaultMin, defaultMax];
+    
     const values = chartData.map(d => d.value);
     const min = Math.min(...values);
-    const max = Math.max(...values, 80);
+    const max = Math.max(...values, getDisplayLipidValue(80, 'hdl'));
     const padding = (max - min) * 0.2;
     return [Math.max(0, Math.floor(min - padding)), Math.ceil(max + padding)];
-  }, [chartData]);
+  }, [chartData, biomarkerUnit, getDisplayLipidValue]);
   
   const formatShortDate = (tickItem: string) => {
     return format(parseISO(tickItem), "MMM d");
   }
 
-  const lowRangeMax = isMale ? 39 : 49;
-  const optimalRangeMin = 60;
+  const lowRangeMax = getDisplayLipidValue(isMale ? 39 : 49, 'hdl');
+  const optimalRangeMin = getDisplayLipidValue(60, 'hdl');
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -53,7 +57,7 @@ export function HdlChart() {
               />
               <YAxis
                 domain={yAxisDomain}
-                allowDecimals={false}
+                allowDecimals
                 tickLine={false}
                 axisLine={false}
                 tick={{ fontSize: 10 }}
@@ -73,7 +77,7 @@ export function HdlChart() {
                           <div className="flex flex-col">
                             <span className="text-[0.70rem] uppercase text-muted-foreground">HDL</span>
                             <span className="font-bold" style={{ color: 'hsl(var(--chart-2))' }}>
-                              {payload[0].value} mg/dL
+                              {payload[0].value} {unitLabel}
                             </span>
                           </div>
                         </div>

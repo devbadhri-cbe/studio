@@ -8,8 +8,9 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { format, parseISO } from 'date-fns';
 
 export function TotalCholesterolChart() {
-  const { totalCholesterolRecords } = useApp();
+  const { totalCholesterolRecords, getDisplayLipidValue, biomarkerUnit } = useApp();
   const formatDate = useDateFormatter();
+  const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
   const sortedRecords = [...(totalCholesterolRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
   
@@ -17,21 +18,29 @@ export function TotalCholesterolChart() {
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
-    value: r.value,
+    value: getDisplayLipidValue(r.value, 'total'),
   }));
   
   const yAxisDomain = React.useMemo(() => {
-    if (chartData.length === 0) return [100, 300];
+    const defaultMin = biomarkerUnit === 'si' ? 2 : 80;
+    const defaultMax = biomarkerUnit === 'si' ? 8 : 300;
+    if (chartData.length === 0) return [defaultMin, defaultMax];
+
     const values = chartData.map(d => d.value);
     const min = Math.min(...values);
-    const max = Math.max(...values, 250);
+    const max = Math.max(...values, getDisplayLipidValue(250, 'total'));
     const padding = (max - min) * 0.2;
     return [Math.max(0, Math.floor(min - padding)), Math.ceil(max + padding)];
-  }, [chartData]);
+  }, [chartData, biomarkerUnit, getDisplayLipidValue]);
   
   const formatShortDate = (tickItem: string) => {
     return format(parseISO(tickItem), "MMM d");
   }
+
+  const desirableMax = getDisplayLipidValue(199, 'total');
+  const borderlineMin = getDisplayLipidValue(200, 'total');
+  const borderlineMax = getDisplayLipidValue(239, 'total');
+  const highMin = getDisplayLipidValue(240, 'total');
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -49,7 +58,7 @@ export function TotalCholesterolChart() {
               />
               <YAxis
                 domain={yAxisDomain}
-                allowDecimals={false}
+                allowDecimals
                 tickLine={false}
                 axisLine={false}
                 tick={{ fontSize: 10 }}
@@ -69,7 +78,7 @@ export function TotalCholesterolChart() {
                           <div className="flex flex-col">
                             <span className="text-[0.70rem] uppercase text-muted-foreground">Total Cholesterol</span>
                             <span className="font-bold" style={{ color: 'hsl(var(--chart-1))' }}>
-                              {payload[0].value} mg/dL
+                              {payload[0].value} {unitLabel}
                             </span>
                           </div>
                         </div>
@@ -79,13 +88,13 @@ export function TotalCholesterolChart() {
                   return null;
                 }}
               />
-                <ReferenceArea y1={0} y2={199} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
+                <ReferenceArea y1={0} y2={desirableMax} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
                    <Label value="Desirable" position="insideTopRight" fill="hsl(var(--accent))" fontSize={10} />
                 </ReferenceArea>
-                <ReferenceArea y1={200} y2={239} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
+                <ReferenceArea y1={borderlineMin} y2={borderlineMax} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
                    <Label value="Borderline High" position="insideTopRight" fill="hsl(var(--chart-3))" fontSize={10} />
                 </ReferenceArea>
-                <ReferenceArea y1={240} y2={yAxisDomain[1]} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
+                <ReferenceArea y1={highMin} y2={yAxisDomain[1]} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
                   <Label value="High" position="insideTopRight" fill="hsl(var(--destructive))" fontSize={10} />
                 </ReferenceArea>
 

@@ -14,24 +14,34 @@ interface TriglyceridesCardProps {
 }
 
 export function TriglyceridesCard({ isReadOnly = false }: TriglyceridesCardProps) {
-  const { triglyceridesRecords, removeTriglyceridesRecord } = useApp();
+  const { triglyceridesRecords, removeTriglyceridesRecord, getDisplayLipidValue, biomarkerUnit, setBiomarkerUnit } = useApp();
 
   const getStatus = (record: TriglyceridesRecord) => {
+    // Status logic is always based on the stored mg/dL value
     if (record.value < 150) return { text: 'Normal', variant: 'outline' as const };
     if (record.value < 200) return { text: 'Borderline High', variant: 'secondary' as const };
     if (record.value < 500) return { text: 'High', variant: 'destructive' as const };
     return { text: 'Very High', variant: 'destructive' as const };
   }
 
+  const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
+
   const formatRecord = (record: TriglyceridesRecord) => ({
       id: record.id,
       date: record.date as string,
-      displayValue: `${record.value} mg/dL`
+      displayValue: `${getDisplayLipidValue(record.value, 'triglycerides')}`
   });
+
+  const unitSwitchProps = {
+    labelA: 'mg/dL',
+    labelB: 'mmol/L',
+    isChecked: biomarkerUnit === 'si',
+    onCheckedChange: (checked: boolean) => setBiomarkerUnit(checked ? 'si' : 'conventional'),
+  };
 
   return (
     <BiomarkerCard<TriglyceridesRecord>
-      title="Triglycerides (mg/dL)"
+      title={`Triglycerides (${unitLabel})`}
       icon={<Flame className="h-5 w-5 shrink-0 text-muted-foreground" />}
       records={triglyceridesRecords}
       onRemoveRecord={removeTriglyceridesRecord}
@@ -40,6 +50,7 @@ export function TriglyceridesCard({ isReadOnly = false }: TriglyceridesCardProps
       addRecordDialog={<AddTriglyceridesRecordDialog />}
       chart={<TriglyceridesChart />}
       isReadOnly={isReadOnly}
+      unitSwitch={unitSwitchProps}
     />
   );
 }

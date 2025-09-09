@@ -8,8 +8,9 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { format, parseISO } from 'date-fns';
 
 export function TriglyceridesChart() {
-  const { triglyceridesRecords } = useApp();
+  const { triglyceridesRecords, getDisplayLipidValue, biomarkerUnit } = useApp();
   const formatDate = useDateFormatter();
+  const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
   const sortedRecords = [...(triglyceridesRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
   
@@ -17,21 +18,29 @@ export function TriglyceridesChart() {
   
   const chartData = latestRecords.map((r) => ({
     date: r.date,
-    value: r.value,
+    value: getDisplayLipidValue(r.value, 'triglycerides'),
   }));
   
   const yAxisDomain = React.useMemo(() => {
-    if (chartData.length === 0) return [50, 300];
+    const defaultMin = biomarkerUnit === 'si' ? 0.5 : 50;
+    const defaultMax = biomarkerUnit === 'si' ? 6 : 500;
+    if (chartData.length === 0) return [defaultMin, defaultMax];
+
     const values = chartData.map(d => d.value);
     const min = Math.min(...values);
-    const max = Math.max(...values, 250);
+    const max = Math.max(...values, getDisplayLipidValue(300, 'triglycerides'));
     const padding = (max - min) * 0.2;
     return [Math.max(0, Math.floor(min - padding)), Math.ceil(max + padding)];
-  }, [chartData]);
+  }, [chartData, biomarkerUnit, getDisplayLipidValue]);
   
   const formatShortDate = (tickItem: string) => {
     return format(parseISO(tickItem), "MMM d");
   }
+
+  const normalMax = getDisplayLipidValue(149, 'triglycerides');
+  const borderlineMin = getDisplayLipidValue(150, 'triglycerides');
+  const borderlineMax = getDisplayLipidValue(199, 'triglycerides');
+  const highMin = getDisplayLipidValue(200, 'triglycerides');
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -49,7 +58,7 @@ export function TriglyceridesChart() {
               />
               <YAxis
                 domain={yAxisDomain}
-                allowDecimals={false}
+                allowDecimals
                 tickLine={false}
                 axisLine={false}
                 tick={{ fontSize: 10 }}
@@ -69,7 +78,7 @@ export function TriglyceridesChart() {
                           <div className="flex flex-col">
                             <span className="text-[0.70rem] uppercase text-muted-foreground">Triglycerides</span>
                             <span className="font-bold" style={{ color: 'hsl(var(--chart-3))' }}>
-                              {payload[0].value} mg/dL
+                              {payload[0].value} {unitLabel}
                             </span>
                           </div>
                         </div>
@@ -79,13 +88,13 @@ export function TriglyceridesChart() {
                   return null;
                 }}
               />
-                <ReferenceArea y1={0} y2={149} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
+                <ReferenceArea y1={0} y2={normalMax} fill="hsl(var(--accent))" strokeOpacity={0.3} fillOpacity={0.1}>
                    <Label value="Normal" position="insideTopRight" fill="hsl(var(--accent))" fontSize={10} />
                 </ReferenceArea>
-                <ReferenceArea y1={150} y2={199} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
+                <ReferenceArea y1={borderlineMin} y2={borderlineMax} fill="hsl(var(--chart-3))" strokeOpacity={0.3} fillOpacity={0.1}>
                    <Label value="Borderline High" position="insideTopRight" fill="hsl(var(--chart-3))" fontSize={10} />
                 </ReferenceArea>
-                <ReferenceArea y1={200} y2={yAxisDomain[1]} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
+                <ReferenceArea y1={highMin} y2={yAxisDomain[1]} fill="hsl(var(--destructive))" strokeOpacity={0.3} fillOpacity={0.1}>
                   <Label value="High" position="insideTopRight" fill="hsl(var(--destructive))" fontSize={10} />
                 </ReferenceArea>
 

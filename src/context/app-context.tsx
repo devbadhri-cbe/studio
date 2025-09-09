@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -107,6 +106,7 @@ interface AppContextType {
   getDisplayVitaminDValue: (value: number) => number;
   getDisplayGlucoseValue: (value: number) => number;
   getDisplayHemoglobinValue: (value: number) => number;
+  getDisplayLipidValue: (value: number, type: 'total' | 'ldl' | 'hdl' | 'triglycerides') => number;
   getDbVitaminDValue: (value: number) => number;
   getDbGlucoseValue: (value: number) => number;
   getDbHemoglobinValue: (value: number) => number;
@@ -211,6 +211,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return parseFloat(toGL(value).toFixed(1));
     }
     return parseFloat(value.toFixed(1));
+  }, [biomarkerUnit]);
+
+  const getDisplayLipidValue = useCallback((value: number, type: 'total' | 'ldl' | 'hdl' | 'triglycerides'): number => {
+    if (biomarkerUnit === 'si') {
+      return parseFloat(toMmolL(value, type).toFixed(2));
+    }
+    return Math.round(value);
   }, [biomarkerUnit]);
 
   const getDbVitaminDValue = useCallback((value: number): number => {
@@ -823,6 +830,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     getDisplayVitaminDValue,
     getDisplayGlucoseValue,
     getDisplayHemoglobinValue,
+    getDisplayLipidValue,
     getDbVitaminDValue,
     getDbGlucoseValue,
     getDbHemoglobinValue,
@@ -849,5 +857,3 @@ export function useApp() {
   }
   return context;
 }
-
-    

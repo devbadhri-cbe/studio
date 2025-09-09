@@ -14,23 +14,33 @@ interface TotalCholesterolCardProps {
 }
 
 export function TotalCholesterolCard({ isReadOnly = false }: TotalCholesterolCardProps) {
-  const { totalCholesterolRecords, removeTotalCholesterolRecord } = useApp();
+  const { totalCholesterolRecords, removeTotalCholesterolRecord, getDisplayLipidValue, biomarkerUnit, setBiomarkerUnit } = useApp();
   
   const getStatus = (record: TotalCholesterolRecord) => {
+    // Status logic is always based on the stored mg/dL value
     if (record.value < 200) return { text: 'Desirable', variant: 'outline' as const };
     if (record.value < 240) return { text: 'Borderline High', variant: 'secondary' as const };
     return { text: 'High', variant: 'destructive' as const };
   }
 
+  const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
+
   const formatRecord = (record: TotalCholesterolRecord) => ({
       id: record.id,
       date: record.date as string,
-      displayValue: `${record.value} mg/dL`
+      displayValue: `${getDisplayLipidValue(record.value, 'total')}`
   });
+
+  const unitSwitchProps = {
+    labelA: 'mg/dL',
+    labelB: 'mmol/L',
+    isChecked: biomarkerUnit === 'si',
+    onCheckedChange: (checked: boolean) => setBiomarkerUnit(checked ? 'si' : 'conventional'),
+  };
 
   return (
     <BiomarkerCard<TotalCholesterolRecord>
-      title="Total Cholesterol (mg/dL)"
+      title={`Total Cholesterol (${unitLabel})`}
       icon={<Flame className="h-5 w-5 shrink-0 text-muted-foreground" />}
       records={totalCholesterolRecords}
       onRemoveRecord={removeTotalCholesterolRecord}
@@ -39,6 +49,7 @@ export function TotalCholesterolCard({ isReadOnly = false }: TotalCholesterolCar
       addRecordDialog={<AddTotalCholesterolRecordDialog />}
       chart={<TotalCholesterolChart />}
       isReadOnly={isReadOnly}
+      unitSwitch={unitSwitchProps}
     />
   );
 }

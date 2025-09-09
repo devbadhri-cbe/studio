@@ -1,9 +1,12 @@
 
-
 // Conversion Factors
 const VITAMIN_D_CONVERSION_FACTOR = 2.496;
 const GLUCOSE_CONVERSION_FACTOR = 18.018;
 const HEMOGLOBIN_CONVERSION_FACTOR = 10;
+const LDL_HDL_TOTAL_CHOLESTEROL_CONVERSION_FACTOR = 38.67;
+const TRIGLYCERIDES_CONVERSION_FACTOR = 88.57;
+
+type LipidType = 'total' | 'ldl' | 'hdl' | 'triglycerides' | 'glucose';
 
 
 /**
@@ -12,11 +15,19 @@ const HEMOGLOBIN_CONVERSION_FACTOR = 10;
  * @param type The type of lipid ('ldl', 'hdl', 'total', or 'triglycerides').
  * @returns The value in mmol/L.
  */
-export function toMmolL(value: number, type: 'glucose'): number {
-  if (type === 'glucose') {
-    return value / GLUCOSE_CONVERSION_FACTOR;
+export function toMmolL(value: number, type: LipidType): number {
+  switch (type) {
+    case 'glucose':
+      return value / GLUCOSE_CONVERSION_FACTOR;
+    case 'triglycerides':
+      return value / TRIGLYCERIDES_CONVERSION_FACTOR;
+    case 'ldl':
+    case 'hdl':
+    case 'total':
+      return value / LDL_HDL_TOTAL_CHOLESTEROL_CONVERSION_FACTOR;
+    default:
+      return value;
   }
-  return value;
 }
 
 /**
@@ -25,11 +36,19 @@ export function toMmolL(value: number, type: 'glucose'): number {
  * @param type The type of lipid ('ldl', 'hdl', 'total', or 'triglycerides').
  * @returns The value in mg/dL.
  */
-export function toMgDl(value: number, type: 'glucose'): number {
-  if (type === 'glucose') {
-    return value * GLUCOSE_CONVERSION_FACTOR;
+export function toMgDl(value: number, type: LipidType): number {
+  switch (type) {
+    case 'glucose':
+      return value * GLUCOSE_CONVERSION_FACTOR;
+    case 'triglycerides':
+      return value * TRIGLYCERIDES_CONVERSION_FACTOR;
+    case 'ldl':
+    case 'hdl':
+    case 'total':
+      return value * LDL_HDL_TOTAL_CHOLESTEROL_CONVERSION_FACTOR;
+    default:
+      return value;
   }
-  return value;
 }
 
 /**
