@@ -114,39 +114,41 @@ export function BiomarkerCardTemplate({
   return (
     <Card className={cn("w-full flex flex-col h-full shadow-xl", className)}>
       <CardHeader>
-          <div className="flex items-center justify-between border-2 border-green-500">
-              <div className="flex items-center gap-3 border-2 border-yellow-500">
+          <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
                 {icon}
                 <div>
                   <CardTitle>{title}</CardTitle>
                   {description && <CardDescription>{description}</CardDescription>}
                 </div>
               </div>
-               <div className="flex items-center gap-1 shrink-0 border-2 border-pink-500">
+               <div className="flex items-center gap-1 shrink-0">
                   {actions}
               </div>
           </div>
         </CardHeader>
-      <CardContent className="flex flex-col flex-1 h-full text-sm p-4 pt-0 space-y-4 border-2 border-purple-500">
+      <CardContent className="flex flex-col flex-1 h-full text-sm p-4 pt-0">
         {hasRecords ? (
-          <>
-            <div className={cn("flex flex-row gap-4 border-2 border-orange-500", getBorderColorClass())}>
-                <div className="shrink-0">
-                    {RecordsList}
-                </div>
-                <div className="flex-1 w-full flex flex-col items-center justify-center border-2 border-cyan-500">
-                    {statusDisplay}
-                </div>
+          <div className="flex flex-col flex-1">
+            <div className="flex-1">
+              <div className={cn("flex flex-row gap-4", getBorderColorClass())}>
+                  <div className="shrink-0">
+                      {RecordsList}
+                  </div>
+                  <div className="flex-1 w-full flex flex-col items-center justify-center">
+                      {statusDisplay}
+                  </div>
+              </div>
+              
+              <Separator className="my-4" />
             </div>
-            
-            <Separator className="my-4" />
 
-            <div className="flex w-full rounded-lg p-2 min-h-[200px] border-2 border-blue-500">
+            <div className="flex w-full rounded-lg p-2 min-h-[200px]">
                 {chart}
             </div>
-          </>
+          </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px] border-2 border-teal-500">
+          <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px]">
               <p className="text-sm">{noRecordsMessage}</p>
           </div>
         )}
