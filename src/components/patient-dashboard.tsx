@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation';
 
 
 export function PatientDashboard() {
-  const { isClient } = useApp();
+  const { isClient, isDoctorLoggedIn } = useApp();
   const router = useRouter();
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(false);
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
@@ -39,7 +39,7 @@ export function PatientDashboard() {
     );
   }
 
-  const BackButton = (
+  const BackButton = isDoctorLoggedIn ? (
     <Tooltip>
         <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" onClick={() => router.push('/doctor/dashboard')}>
@@ -51,7 +51,7 @@ export function PatientDashboard() {
             <p>Back to Dashboard</p>
         </TooltipContent>
     </Tooltip>
-  );
+  ) : null;
 
   return (
     <TooltipProvider>

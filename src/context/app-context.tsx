@@ -110,6 +110,9 @@ interface AppContextType {
   hasUnsavedChanges: boolean;
   saveChanges: () => Promise<void>;
   isSaving: boolean;
+  isDoctorLoggedIn: boolean;
+  approveMedicalCondition: (conditionId: string) => void;
+  dismissSuggestion: (suggestionId: string, isPermanent: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -135,6 +138,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [biomarkerUnit, setBiomarkerUnitState] = useState<BiomarkerUnitSystem>('conventional');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDoctorLoggedIn, setIsDoctorLoggedIn] = React.useState(false);
   
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
@@ -241,6 +245,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       bmi: patient.bmi,
       dashboardSuggestions: patient.dashboardSuggestions || [],
     };
+    if (document.referrer.includes('/doctor/dashboard')) {
+        setIsDoctorLoggedIn(true);
+    } else {
+        setIsDoctorLoggedIn(false);
+    }
     setProfileState(patientProfile);
     setHba1cRecordsState(patient.hba1cRecords || []);
     setFastingBloodGlucoseRecordsState(patient.fastingBloodGlucoseRecords || []);
@@ -789,6 +798,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     hasUnsavedChanges,
     saveChanges,
     isSaving,
+    isDoctorLoggedIn,
     approveMedicalCondition: () => {}, // No-op
     dismissSuggestion: () => {}, // No-op
   };
