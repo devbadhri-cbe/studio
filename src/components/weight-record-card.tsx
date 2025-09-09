@@ -5,18 +5,15 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Weight, Edit } from 'lucide-react';
 import { AddWeightRecordDialog } from './add-weight-record-dialog';
-import { kgToLbs, getBmiStatus, BMI_CATEGORIES, cmToFtIn } from '@/lib/utils';
+import { kgToLbs, getBmiStatus, cmToFtIn } from '@/lib/utils';
 import { WeightChart } from './weight-chart';
 import { Badge } from './ui/badge';
-import { Label } from './ui/label';
-import { Switch } from './ui/switch';
 import type { EditHeightDialogHandles } from './edit-height-dialog';
 import { BiomarkerCard } from './biomarker-card';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { AddRecordDialog } from './add-record-dialog';
-import { DropdownMenuItem, DropdownMenuSeparator } from './ui/dropdown-menu';
+import { DropdownMenuItem } from './ui/dropdown-menu';
 import type { WeightRecord } from '@/lib/types';
-import { BiomarkerCardTemplate } from './biomarker-card-template';
+import { EditHeightDialog } from './edit-height-dialog';
+import { Separator } from './ui/separator';
 
 interface WeightRecordCardProps {
     isReadOnly?: boolean;
@@ -24,14 +21,9 @@ interface WeightRecordCardProps {
 
 export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) {
   const { weightRecords, removeWeightRecord, profile, setProfile } = useApp();
-  const [isEditMode, setIsEditMode] = React.useState(false);
   const isImperial = profile.unitSystem === 'imperial';
   const weightUnit = isImperial ? 'lbs' : 'kg';
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
-
-  const sortedWeights = React.useMemo(() => {
-    return [...(weightRecords || [])].sort((a,b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime())
-  }, [weightRecords]);
   
   const bmiStatus = getBmiStatus(profile.bmi);
 
@@ -61,29 +53,56 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
     onCheckedChange: (checked: boolean) => setProfile({...profile, unitSystem: checked ? 'imperial' : 'metric'})
   };
 
-  const AddRecordDialogWithProps = React.cloneElement(<AddWeightRecordDialog />, {
-    children: <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Add New Record</DropdownMenuItem>
-  });
+  const getStatus = () => {
+    return (
+        <div className="flex flex-col items-center justify-center gap-2 text-xs w-full">
+            <div className="flex justify-around w-full">
+                <div className="text-center">
+                    <div className="text-muted-foreground">Height</div>
+                    <div className="font-semibold text-foreground">{heightDisplay}</div>
+                </div>
+                <div className="text-center">
+                    <div className="text-muted-foreground">BMI</div>
+                    <div className="font-semibold text-foreground">{profile.bmi || 'N/A'}</div>
+                </div>
+            </div>
+            {bmiStatus && (
+                <div className="w-full flex flex-col items-center gap-1">
+                    <Separator className="my-1" />
+                    <span className="text-muted-foreground">Current Status:</span>
+                    <Badge variant={bmiStatus.variant} className={bmiStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
+                        {bmiStatus.text}
+                    </Badge>
+                </div>
+            )}
+        </div>
+    );
+  };
   
+
   const EditHeightItem = (
-    <DropdownMenuItem onSelect={() => editHeightDialogRef.current?.open()}>
+    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); editHeightDialogRef.current?.open(); }}>
         <Edit className="mr-2 h-4 w-4"/>
         Edit Height
     </DropdownMenuItem>
   )
 
   return (
+    <>
     <BiomarkerCard<WeightRecord>
         title={`Weight & BMI (${weightUnit})`}
         icon={<Weight className="h-5 w-5 shrink-0 text-muted-foreground" />}
         records={weightRecords}
         onRemoveRecord={removeWeightRecord}
-        getStatus={() => bmiStatus}
+        getStatus={getStatus}
         formatRecord={formatRecord}
         addRecordDialog={<AddWeightRecordDialog />}
         chart={<WeightChart />}
         unitSwitch={unitSwitchProps}
         isReadOnly={isReadOnly}
+        editMenuItems={EditHeightItem}
     />
+    <EditHeightDialog ref={editHeightDialogRef} />
+    </>
   );
 }

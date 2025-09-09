@@ -4,7 +4,6 @@
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Settings, Edit } from 'lucide-react';
-import { Badge } from './ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,11 +22,6 @@ interface Record {
   [key: string]: any;
 }
 
-interface Status {
-  text: string;
-  variant: 'destructive' | 'secondary' | 'outline' | 'default';
-}
-
 interface UnitSwitchProps {
   labelA: string;
   labelB: string;
@@ -41,12 +35,13 @@ interface BiomarkerCardProps<T extends Record> {
   icon: React.ReactNode;
   records: T[];
   onRemoveRecord: (id: string) => void;
-  getStatus: (record: T) => Status | null;
+  getStatus: (record?: T) => React.ReactNode;
   formatRecord: (record: T) => { id: string; date: string; displayValue: string };
   addRecordDialog: React.ReactNode;
   chart: React.ReactNode;
   unitSwitch?: UnitSwitchProps;
   isReadOnly?: boolean;
+  editMenuItems?: React.ReactNode;
 }
 
 export function BiomarkerCard<T extends Record>({
@@ -60,6 +55,7 @@ export function BiomarkerCard<T extends Record>({
   chart,
   unitSwitch,
   isReadOnly = false,
+  editMenuItems,
 }: BiomarkerCardProps<T>) {
   const [isEditMode, setIsEditMode] = React.useState(false);
 
@@ -68,7 +64,7 @@ export function BiomarkerCard<T extends Record>({
   }, [records]);
 
   const latestRecord = sortedRecords[0];
-  const currentStatus = latestRecord ? getStatus(latestRecord) : null;
+  const statusContent = getStatus(latestRecord);
 
   const formattedRecords = sortedRecords.map(formatRecord);
 
@@ -102,6 +98,7 @@ export function BiomarkerCard<T extends Record>({
           <Edit className="mr-2 h-4 w-4" />
           {isEditMode ? 'Done Editing' : 'Edit Records'}
         </DropdownMenuItem>
+        {editMenuItems}
         {UnitSwitchComponent && (
           <>
             <DropdownMenuSeparator />
@@ -116,17 +113,8 @@ export function BiomarkerCard<T extends Record>({
   ) : null;
 
   const StatusDisplay = (
-    <div className="text-center text-xs text-muted-foreground flex items-center justify-center h-full">
-      {currentStatus ? (
-        <div className="flex flex-col items-center gap-1">
-          <span>Current Status:</span>
-          <Badge variant={currentStatus.variant} className={currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
-            {currentStatus.text}
-          </Badge>
-        </div>
-      ) : (
-        <p>No status</p>
-      )}
+    <div className="text-center text-xs text-muted-foreground flex items-center justify-center h-full w-full">
+      {statusContent}
     </div>
   );
 
@@ -140,7 +128,6 @@ export function BiomarkerCard<T extends Record>({
       statusDisplay={StatusDisplay}
       chart={chart}
       hasRecords={(records || []).length > 0}
-      statusVariant={currentStatus?.variant}
       isReadOnly={isReadOnly}
       isEditMode={isEditMode}
       setIsEditMode={setIsEditMode}
