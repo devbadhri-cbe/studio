@@ -4,8 +4,6 @@
 import { Logo } from '@/components/logo';
 import * as React from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Button } from './button';
-import { Edit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TitleBarProps {
@@ -17,6 +15,16 @@ interface TitleBarProps {
 }
 
 export function TitleBar({ title, subtitle, onSubtitleClick, children, backButton }: TitleBarProps) {
+    const [isScrolled, setIsScrolled] = React.useState(false);
+
+    React.useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 50);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
     
     const renderTitle = () => {
         if(title.length === 1) {
@@ -28,7 +36,12 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, backButto
     };
 
     return (
-        <header className="border-b p-4 md:p-6">
+        <header className={cn(
+            "sticky top-0 z-50 border-b transition-all duration-300",
+            isScrolled 
+                ? "bg-background/90 backdrop-blur-sm shadow-md p-2 md:p-3" 
+                : "p-4 md:p-6"
+        )}>
             <div className="mx-auto w-full max-w-7xl flex items-center justify-between">
                  <div className="flex justify-start items-center gap-2 w-24">
                     {backButton || children}
@@ -36,13 +49,22 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, backButto
                 <div className="flex-1 flex justify-center">
                     <div className="flex flex-col items-center">
                         <div className="flex items-center justify-center gap-2">
-                            <Logo className="h-14 w-14 text-primary md:h-10 md:w-10 animate-fade-in-scale" style={{ animationDelay: '200ms', animationFillMode: 'both' }} />
-                            <div className="flex flex-col text-2xl md:text-4xl font-bold font-headline text-center md:flex-row md:gap-2 text-shadow-3d">
+                            <Logo className={cn(
+                                "text-primary transition-all duration-300",
+                                isScrolled ? "h-8 w-8 md:h-8 md:w-8" : "h-14 w-14 md:h-10 md:w-10"
+                            )} />
+                            <div className={cn(
+                                "flex flex-col font-bold font-headline text-center md:flex-row md:gap-2 text-shadow-3d transition-all duration-300",
+                                isScrolled ? "text-xl md:text-2xl" : "text-2xl md:text-4xl"
+                            )}>
                                 {renderTitle()}
                             </div>
                         </div>
                         {subtitle && (
-                             <div className="text-center text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                             <div className={cn(
+                                "text-center text-xs text-muted-foreground mt-2 flex items-center gap-1 transition-all duration-300",
+                                isScrolled ? "opacity-0 h-0" : "opacity-100 h-auto"
+                             )}>
                                 <button onClick={onSubtitleClick} className={cn("hover:underline", onSubtitleClick && "cursor-pointer")}>{subtitle}</button>
                             </div>
                         )}
