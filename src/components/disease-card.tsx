@@ -33,11 +33,11 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
   const Icon = statusInfo.icon;
   const isIcdLoading = condition.icdCode === 'loading...';
   
-  const handleRemoveCondition = (e: React.MouseEvent, id: string) => {
+  const handleRemoveCondition = (e: React.MouseEvent) => {
     e.stopPropagation();
-    removeMedicalCondition(id);
+    removeMedicalCondition(condition.id);
     if (isActive) {
-      onSynopsisToggle(id);
+      onSynopsisToggle(condition.id);
     }
   };
 
@@ -72,33 +72,34 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
           <p className="text-xs text-muted-foreground">{formatDate(condition.date)}</p>
         </div>
         <div className="flex items-center shrink-0 gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 shrink-0"
-                onClick={handleToggleSynopsis}
-                disabled={!condition.synopsis}
-              >
-                <Info className="h-5 w-5 text-blue-500" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>View Synopsis</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 shrink-0"
-                onClick={(e) => handleRemoveCondition(e, condition.id)}
-              >
-                <Trash2 className="h-5 w-5 text-destructive" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Delete Condition</TooltipContent>
-          </Tooltip>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 shrink-0"
+                        onClick={handleToggleSynopsis}
+                        disabled={!condition.synopsis}
+                    >
+                        <Info className="h-5 w-5 text-blue-500" />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>View Synopsis</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 shrink-0"
+                        onClick={handleRemoveCondition}
+                    >
+                        <Trash2 className="h-5 w-5 text-destructive" />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>Delete Condition</TooltipContent>
+            </Tooltip>
         </div>
       </li>
       {condition.status === 'needs_revision' && (
