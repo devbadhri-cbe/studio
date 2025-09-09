@@ -6,6 +6,7 @@ import { useApp } from '@/context/app-context';
 import { availableBiomarkerCards, type BiomarkerKey } from '@/lib/biomarker-cards';
 import { Card, CardContent } from './ui/card';
 import * as React from 'react';
+import { CustomBiomarkerCard } from './custom-biomarker-card';
 
 interface BiomarkersPanelProps {
     searchQuery?: string;
@@ -25,20 +26,35 @@ export function BiomarkersPanel({ searchQuery = '' }: BiomarkersPanelProps) {
         component: React.cloneElement(value.component, { key, isReadOnly: false }),
     }));
     
+    const customCards = (profile.customBiomarkers || []).map(biomarker => ({
+        key: biomarker.id,
+        label: biomarker.name.toLowerCase(),
+        component: <CustomBiomarkerCard key={biomarker.id} biomarker={biomarker} />
+    }));
+
     const sortedAndFilteredCards = React.useMemo(() => {
         const lowercasedQuery = searchQuery.toLowerCase();
-        const filtered = allCards.filter(card => 
+        const combinedCards = [...allCards, ...customCards];
+
+        const filtered = combinedCards.filter(card => 
             searchQuery ? card.label.includes(lowercasedQuery) : true
         );
 
         return filtered.sort((a, b) => {
+            const aIsStandard = a.key in availableBiomarkerCards;
+            const bIsStandard = b.key in availableBiomarkerCards;
+
+            if (aIsStandard && !bIsStandard) return -1;
+            if (!aIsStandard && bIsStandard) return 1;
+
             const aIsEnabled = enabledForPatient.includes(a.key);
             const bIsEnabled = enabledForPatient.includes(b.key);
             if (aIsEnabled && !bIsEnabled) return -1;
             if (!aIsEnabled && bIsEnabled) return 1;
+
             return a.label.localeCompare(b.label);
         });
-    }, [allCards, enabledForPatient, searchQuery]);
+    }, [allCards, customCards, enabledForPatient, searchQuery]);
 
     return (
         <Card>
