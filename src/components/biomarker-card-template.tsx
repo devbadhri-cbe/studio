@@ -101,7 +101,7 @@ export function BiomarkerCardTemplate({
   if (children) {
     return (
         <Card className={cn("w-full h-full shadow-xl", className)}>
-            <CardContent className="p-4 flex items-center gap-4">
+            <CardContent className="p-4 flex items-center gap-4 border-2 border-blue-500">
                  <div className="flex-shrink-0">{icon}</div>
                  <div className="flex-1">
                     {children}
@@ -112,29 +112,29 @@ export function BiomarkerCardTemplate({
   }
 
   return (
-    <Card className={cn("w-full flex flex-col h-full shadow-xl", className)}>
+    <Card className={cn("w-full flex flex-col h-full shadow-xl border-2 border-red-500", className)}>
       <CardHeader>
-          <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between border-2 border-green-500">
+              <div className="flex items-center gap-3 border-2 border-yellow-500">
                 {icon}
                 <div>
                   <CardTitle>{title}</CardTitle>
                   {description && <CardDescription>{description}</CardDescription>}
                 </div>
               </div>
-               <div className="flex items-center gap-1 shrink-0">
+               <div className="flex items-center gap-1 shrink-0 border-2 border-pink-500">
                   {actions}
               </div>
           </div>
         </CardHeader>
-      <CardContent className="flex flex-col flex-1 h-full text-sm p-4 pt-0 space-y-4">
+      <CardContent className="flex flex-col flex-1 h-full text-sm p-4 pt-0 space-y-4 border-2 border-purple-500">
         {hasRecords ? (
           <>
-            <div className={cn("flex flex-row gap-4", getBorderColorClass())}>
+            <div className={cn("flex flex-row gap-4 border-2 border-orange-500", getBorderColorClass())}>
                 <div className="shrink-0">
                     {RecordsList}
                 </div>
-                <div className="flex-1 w-full flex flex-col items-center justify-center">
+                <div className="flex-1 w-full flex flex-col items-center justify-center border-2 border-cyan-500">
                     {statusDisplay}
                 </div>
             </div>
@@ -146,7 +146,7 @@ export function BiomarkerCardTemplate({
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px]">
+          <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px] border-2 border-teal-500">
               <p className="text-sm">{noRecordsMessage}</p>
           </div>
         )}
