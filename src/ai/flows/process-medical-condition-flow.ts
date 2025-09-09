@@ -8,6 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { MedicalConditionInputSchema, MedicalConditionOutputSchema, type MedicalConditionInput, type MedicalConditionOutput } from '@/lib/ai-types';
+import { gemini15Flash } from 'genkit/models';
 
 export async function processMedicalCondition(input: MedicalConditionInput): Promise<MedicalConditionOutput> {
   return processMedicalConditionFlow(input);
@@ -17,6 +18,7 @@ const prompt = ai.definePrompt({
     name: 'processMedicalConditionPrompt',
     input: { schema: MedicalConditionInputSchema },
     output: { schema: MedicalConditionOutputSchema },
+    model: gemini15Flash,
     prompt: `You are a medical data validation expert. Your task is to analyze a user-provided medical condition.
 
 User Input: "{{condition}}"
