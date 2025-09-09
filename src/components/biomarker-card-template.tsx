@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { cn } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { Button } from './ui/button';
-import { Edit, Trash2, X } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { ScrollArea } from './ui/scroll-area';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { Settings } from 'lucide-react';
 
 interface RecordItem {
   id: string;

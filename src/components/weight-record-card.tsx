@@ -35,7 +35,7 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
 
   const sortedWeights = React.useMemo(() => {
-    return [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    return [...(weightRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   }, [weightRecords]);
   
   const bmiStatus = getBmiStatus(profile.bmi);
