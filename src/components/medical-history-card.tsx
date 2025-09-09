@@ -265,7 +265,7 @@ export function MedicalHistoryCard() {
       setMedicationNil();
   }
 
-  const handleSynopsisToggle = (type: 'medication' | 'condition', id: string) => {
+  const handleSynopsisToggle = (type: 'medication', id: string) => {
     if (activeSynopsis?.type === type && activeSynopsis?.id === id) {
       setActiveSynopsis(null);
     } else {
@@ -365,8 +365,6 @@ export function MedicalHistoryCard() {
                                     key={condition.id}
                                     condition={condition}
                                     onRevise={handleReviseCondition}
-                                    onSynopsisToggle={() => handleSynopsisToggle('condition', condition.id)}
-                                    isActive={activeSynopsis?.type === 'condition' && activeSynopsis?.id === condition.id}
                                     isEditMode={isEditingConditions}
                                 />
                             )

@@ -16,8 +16,6 @@ import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 interface DiseaseCardProps {
   condition: MedicalCondition;
   onRevise: (condition: MedicalCondition) => void;
-  onSynopsisToggle: (id: string) => void;
-  isActive: boolean;
   isEditMode: boolean;
 }
 
@@ -27,9 +25,10 @@ const statusConfig = {
   needs_revision: { icon: AlertTriangle, text: 'Doctor requested revision', color: 'text-destructive' },
 };
 
-export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive, isEditMode }: DiseaseCardProps) {
+export function DiseaseCard({ condition, onRevise, isEditMode }: DiseaseCardProps) {
   const { removeMedicalCondition } = useApp();
   const formatDate = useDateFormatter();
+  const [isActive, setIsActive] = React.useState(false);
 
   const statusInfo = statusConfig[condition.status] || statusConfig.pending_review;
   const Icon = statusInfo.icon;
@@ -38,14 +37,11 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive, i
   const handleRemoveCondition = (e: React.MouseEvent) => {
     e.stopPropagation();
     removeMedicalCondition(condition.id);
-    if (isActive) {
-      onSynopsisToggle(condition.id);
-    }
   };
 
   const handleToggleSynopsis = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onSynopsisToggle(condition.id);
+    setIsActive(prev => !prev);
   };
 
   return (
@@ -129,7 +125,7 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive, i
           <ConditionSynopsisDialog
             conditionName={condition.condition}
             initialSynopsis={condition.synopsis}
-            onClose={() => onSynopsisToggle(condition.id)}
+            onClose={() => setIsActive(false)}
           />
         </li>
       )}
