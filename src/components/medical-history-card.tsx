@@ -57,7 +57,7 @@ function MedicalConditionForm({
     }, 100);
   }, []);
 
-  const { register, handleSubmit, formState: { errors }, control, getValues } = useForm<{ condition: string; date: Date }>({
+  const form = useForm<{ condition: string; date: Date }>({
     defaultValues: { 
         condition: initialData?.condition || '', 
         date: initialData?.date ? parseISO(initialData.date) : new Date() 
@@ -72,56 +72,65 @@ function MedicalConditionForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-4">
-      {aiResult && !aiResult.isValid && aiResult.suggestions && (
-        <Alert>
-          <AlertTitle>Refine Your Input</AlertTitle>
-          <AlertDescription>
-            The AI couldn't recognize "{getValues('condition')}". Did you mean one of these?
-            <div className="flex flex-wrap gap-2 mt-2">
-              {aiResult.suggestions.map((suggestion) => (
-                <Button key={suggestion} size="sm" variant="outline" onClick={() => onSuggestionClick(suggestion)}>
-                  {suggestion}
-                </Button>
-              ))}
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <FormField
-        control={control}
-        name="date"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Date of Diagnosis</FormLabel>
-            <FormControl>
-              <DatePicker
-                value={field.value}
-                onChange={field.onChange}
-                fromYear={new Date().getFullYear() - 50}
-                toYear={new Date().getFullYear()}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-4">
+        {aiResult && !aiResult.isValid && aiResult.suggestions && (
+          <Alert>
+            <AlertTitle>Refine Your Input</AlertTitle>
+            <AlertDescription>
+              The AI couldn't recognize "{form.getValues('condition')}". Did you mean one of these?
+              <div className="flex flex-wrap gap-2 mt-2">
+                {aiResult.suggestions.map((suggestion) => (
+                  <Button key={suggestion} size="sm" variant="outline" onClick={() => onSuggestionClick(suggestion)}>
+                    {suggestion}
+                  </Button>
+                ))}
+              </div>
+            </AlertDescription>
+          </Alert>
         )}
-      />
-      <FormItem>
-          <FormLabel>Condition Name</FormLabel>
-          <FormControl>
-              <Input ref={inputRef} placeholder="e.g., Type 2 Diabetes" {...register("condition", { required: "Condition name is required."})} />
-          </FormControl>
-          <FormMessage>{errors.condition?.message}</FormMessage>
-      </FormItem>
 
-      <div className="flex justify-end gap-2">
-        <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isProcessing}>Cancel</Button>
-        <Button type="submit" size="sm" disabled={isProcessing}>
-           {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
-        </Button>
-      </div>
-    </form>
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date of Diagnosis</FormLabel>
+              <FormControl>
+                <DatePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  fromYear={new Date().getFullYear() - 50}
+                  toYear={new Date().getFullYear()}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+            control={form.control}
+            name="condition"
+            rules={{ required: "Condition name is required." }}
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Condition Name</FormLabel>
+                    <FormControl>
+                        <Input ref={inputRef} placeholder="e.g., Type 2 Diabetes" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+
+        <div className="flex justify-end gap-2">
+          <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isProcessing}>Cancel</Button>
+          <Button type="submit" size="sm" disabled={isProcessing}>
+             {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
 
