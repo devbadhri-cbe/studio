@@ -241,8 +241,11 @@ function MedicationListItem({ med, isEditing, onRemove, formatDetails }: Medicat
             ) : (
                 <div>
                     <p className="font-semibold text-foreground">{med.name}</p>
+                    <p className="text-muted-foreground text-xs italic">
+                        Patient Input: "{med.brandName}"
+                    </p>
                     <p className="text-muted-foreground text-xs">
-                        {med.brandName} {formatDetails(med)}
+                        {formatDetails(med)}
                     </p>
                 </div>
             )}
