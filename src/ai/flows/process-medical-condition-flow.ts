@@ -27,7 +27,7 @@ Existing Conditions: {{#if existingConditions}}{{#each existingConditions}}- {{t
     - Set 'isValid' to true.
     - Provide the 'standardizedName' (e.g., for "high blood pressure," return "Hypertension").
     - Find and provide the most likely 'icdCode' from the ICD-11 classification.
-    - Provide a brief, one-paragraph 'synopsis' of the condition, suitable for a patient to read.
+    - YOU MUST provide a brief, one-paragraph 'synopsis' of the condition, suitable for a patient to read.
 3.  If the input is ambiguous, a symptom, or not a recognized medical condition:
     - Set 'isValid' to false.
     - Provide a list of up to 3 'suggestions' for more specific, valid medical conditions the user might have meant. For example, if the user enters "sugar problems", suggest "Type 2 Diabetes", "Hypoglycemia", "Hyperglycemia".
