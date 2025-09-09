@@ -15,7 +15,7 @@ interface DrugInteractionViewerProps {
 }
 
 export function DrugInteractionViewer({ medications, onClose }: DrugInteractionViewerProps) {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [result, setResult] = React.useState<string | null>(null);
   const { toast } = useToast();
 
@@ -52,6 +52,11 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
     
   }, [medications, toast, onClose]);
 
+  React.useEffect(() => {
+    handleInteractionCheck();
+  }, [handleInteractionCheck]);
+
+
   return (
     <Card className="mt-2">
       <CardContent className="p-4 space-y-4">
@@ -60,11 +65,6 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p>Analyzing interactions...</p>
           </div>
-        )}
-        {!result && !isLoading && (
-            <Button onClick={handleInteractionCheck} className="w-full">
-                Analyze Interactions
-            </Button>
         )}
         {result && (
             <div className="space-y-4">
