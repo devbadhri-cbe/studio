@@ -129,24 +129,22 @@ export function BiomarkerCardTemplate({
         </CardHeader>
       <CardContent className="flex flex-col flex-1 h-full text-sm p-4 pt-0 space-y-4">
         {hasRecords ? (
-          <div className="flex-1 flex flex-col min-h-0 basis-1/2">
-              {/* Top Section: Records & Status */}
-              <div className={cn("flex flex-row gap-4 min-h-0 basis-1/2", getBorderColorClass())}>
-                  <div className="shrink-0">
-                      {RecordsList}
-                  </div>
-                  <div className="flex-1 w-full flex flex-col items-center justify-center">
-                      {statusDisplay}
-                  </div>
-              </div>
-              
-              <Separator className="my-4" />
+          <>
+            <div className={cn("flex flex-row gap-4", getBorderColorClass())}>
+                <div className="shrink-0">
+                    {RecordsList}
+                </div>
+                <div className="flex-1 w-full flex flex-col items-center justify-center">
+                    {statusDisplay}
+                </div>
+            </div>
+            
+            <Separator className="my-4" />
 
-              {/* Bottom Section: Chart */}
-              <div className="w-full rounded-lg p-2 flex flex-col basis-1/2">
-                  {chart}
-              </div>
-          </div>
+            <div className="w-full rounded-lg p-2 min-h-[200px]">
+                {chart}
+            </div>
+          </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px]">
               <p className="text-sm">{noRecordsMessage}</p>
