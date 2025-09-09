@@ -53,6 +53,7 @@ function MedicalConditionForm({
 }: MedicalConditionFormProps) {
   const { profile } = useApp();
   const [isProcessing, setIsProcessing] = React.useState(false);
+  const [hasBeenProcessed, setHasBeenProcessed] = React.useState(!!initialData?.icdCode);
   const inputRef = React.useRef<HTMLInputElement>(null);
   
   React.useEffect(() => {
@@ -74,7 +75,7 @@ function MedicalConditionForm({
     const userInput = form.getValues('condition');
     if (!userInput) {
         form.setError('condition', { type: 'manual', message: 'Condition name is required.' });
-        return;
+        return false;
     }
     setIsProcessing(true);
     try {
@@ -84,18 +85,29 @@ function MedicalConditionForm({
         form.setValue('icdCode', result.icdCode);
         form.setValue('synopsis', result.synopsis || '');
         toast({ title: 'Condition Processed', description: `AI suggested: ${result.standardizedName} (${result.icdCode})` });
+        setHasBeenProcessed(true);
+        return true;
       } else {
         toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}` });
+        setHasBeenProcessed(false);
+        return false;
       }
     } catch(e) {
       console.error(e);
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
+      setHasBeenProcessed(false);
+      return false;
     } finally {
       setIsProcessing(false);
     }
   }
 
-  const handleFormSubmit = (data: MedicalConditionFormValues) => {
+  const handleFormSubmit = async (data: MedicalConditionFormValues) => {
+    if (!hasBeenProcessed) {
+        await handleProcessCondition();
+        return;
+    }
+    
     if (!data.icdCode) {
         form.setError('icdCode', { type: 'manual', message: 'Please process the condition to get an ICD code before saving.' });
         return;
@@ -110,7 +122,7 @@ function MedicalConditionForm({
     onSave({
       id: initialData?.id || `cond-${Date.now()}`,
       condition: data.condition,
-      userInput: initialData?.userInput || data.condition,
+      userInput: initialData?.userInput || form.getValues('condition'),
       date: data.date.toISOString(),
       icdCode: data.icdCode,
       synopsis: data.synopsis,
@@ -129,14 +141,9 @@ function MedicalConditionForm({
             render={({ field }) => (
                 <FormItem>
                     <FormLabel>Condition Name</FormLabel>
-                     <div className="flex gap-2">
-                        <FormControl>
-                            <Input {...field} ref={inputRef} placeholder="e.g., Type 2 Diabetes" autoComplete="off" />
-                        </FormControl>
-                        <Button type="button" onClick={handleProcessCondition} disabled={isProcessing} variant="secondary">
-                           {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Process'}
-                        </Button>
-                    </div>
+                    <FormControl>
+                        <Input {...field} ref={inputRef} placeholder="e.g., Type 2 Diabetes" autoComplete="off" />
+                    </FormControl>
                     <FormMessage />
                 </FormItem>
             )}
@@ -175,7 +182,9 @@ function MedicalConditionForm({
        
         <div className="flex justify-end gap-2">
           <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
-          <Button type="submit" size="sm">Save</Button>
+          <Button type="submit" size="sm" disabled={isProcessing}>
+            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+          </Button>
         </div>
       </form>
     </Form>
@@ -483,3 +492,5 @@ export function MedicalHistoryCard() {
     </>
   );
 }
+
+    
