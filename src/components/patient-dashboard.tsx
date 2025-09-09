@@ -21,6 +21,8 @@ import { DashboardSectionToggle } from './dashboard-section-toggle';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
+import { doctorDetails } from '@/lib/doctor-data';
+import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 
 
 export function PatientDashboard() {
@@ -30,6 +32,7 @@ export function PatientDashboard() {
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
   const [diseasePanelSearchQuery, setDiseasePanelSearchQuery] = React.useState('');
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
+  const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
   
   if (!isClient) {
     return (
@@ -56,8 +59,12 @@ export function PatientDashboard() {
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
-         <TitleBar backButton={BackButton} />
-
+         <TitleBar
+            title={['Health', 'Guardian']}
+            subtitle={doctorDetails.name}
+            onSubtitleClick={() => isDoctorLoggedIn && setIsEditingDoctor(true)}
+            backButton={BackButton} 
+         />
         <main className="flex-1 p-4 md:pt-10 md:p-6 pb-24">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              
@@ -139,6 +146,7 @@ export function PatientDashboard() {
         </main>
         <UnsavedChangesBar />
       </div>
+      <EditDoctorDetailsDialog open={isEditingDoctor} onOpenChange={setIsEditingDoctor} />
     </TooltipProvider>
   );
 }

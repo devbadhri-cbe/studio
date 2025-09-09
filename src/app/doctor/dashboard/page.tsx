@@ -23,6 +23,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { TitleBar } from '@/components/ui/title-bar';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { doctorDetails } from '@/lib/doctor-data';
+import { EditDoctorDetailsDialog } from '@/components/edit-doctor-details-dialog';
 
 export default function DoctorDashboardPage() {
   const [patients, setPatients] = React.useState<Patient[]>([]);
@@ -31,6 +33,7 @@ export default function DoctorDashboardPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [editingPatient, setEditingPatient] = React.useState<Patient | null>(null);
   const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
+  const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -182,7 +185,11 @@ export default function DoctorDashboardPage() {
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
-        <TitleBar />
+        <TitleBar
+          title={['Health', 'Guardian']}
+          subtitle={doctorDetails.name}
+          onSubtitleClick={() => setIsEditingDoctor(true)}
+        />
         <main className="flex-1 p-4 md:p-6">
             <div className="mx-auto w-full max-w-7xl">
               <div className="mb-6 flex items-center justify-between">
@@ -249,6 +256,7 @@ export default function DoctorDashboardPage() {
             </div>
         </main>
       </div>
+      <EditDoctorDetailsDialog open={isEditingDoctor} onOpenChange={setIsEditingDoctor} />
     </TooltipProvider>
   );
 }
