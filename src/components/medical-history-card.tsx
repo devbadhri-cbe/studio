@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit } from 'lucide-react';
@@ -282,7 +281,7 @@ export function MedicalHistoryCard() {
       setIsClearAllDialogOpen(false);
       toast({
         title: 'Conditions Cleared',
-        description: 'All medical conditions have been removed.',
+        description: 'All medical conditions have been removed from your unsaved changes.',
       });
     } catch (e) {
       toast({
@@ -479,7 +478,7 @@ export function MedicalHistoryCard() {
             <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                    This action will permanently remove all medical conditions from this patient's profile. This cannot be undone.
+                    This will remove all medical conditions. This action can be saved or undone from the "Unsaved Changes" bar.
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -493,3 +492,5 @@ export function MedicalHistoryCard() {
     </>
   );
 }
+
+    

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -352,12 +351,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const removeAllMedicalConditions = useCallback(async () => {
-    await updatePatient(profile.id, { presentMedicalConditions: [] });
     setProfileState(prevProfile => ({
       ...prevProfile,
       presentMedicalConditions: []
     }));
-  }, [profile.id]);
+    setHasUnsavedChanges(true);
+  }, []);
   
    const addMedication = useCallback((medication: Omit<Medication, 'id'>) => {
     const newMedication = { ...medication, id: Date.now().toString() };
@@ -817,3 +816,5 @@ export function useApp() {
   }
   return context;
 }
+
+    
