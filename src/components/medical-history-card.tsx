@@ -119,7 +119,7 @@ function MedicalConditionForm({
 }
 
 type ActiveSynopsis = {
-    type: 'medication' | 'condition';
+    type: 'medication';
     id: string;
 } | null;
 
@@ -132,18 +132,20 @@ interface MedicalInfoSectionProps {
 
 function MedicalInfoSection({ title, icon, actions, children }: MedicalInfoSectionProps) {
   return (
-    <div>
-        <div className="flex items-center justify-between mb-2">
-            <div className='flex items-center gap-3 flex-1'>
-                {icon}
-                <h3 className="font-medium">{title}</h3>
+    <Card className="shadow-xl h-full flex flex-col">
+        <CardContent className="space-y-4 text-sm p-4 flex-1 flex flex-col">
+            <div className="flex items-center justify-between mb-2">
+                <div className='flex items-center gap-3 flex-1'>
+                    {icon}
+                    <h3 className="font-medium">{title}</h3>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                    {actions}
+                </div>
             </div>
-            <div className="flex items-center gap-1 shrink-0">
-                {actions}
-            </div>
-        </div>
-        {children}
-    </div>
+            {children}
+        </CardContent>
+    </Card>
   )
 }
 
@@ -341,138 +343,132 @@ export function MedicalHistoryCard() {
 
   return (
     <>
-    <Card className="shadow-xl">
-        <CardContent className="space-y-4 text-sm p-4">
-            <MedicalInfoSection
-              title="Present Medical Conditions"
-              icon={<Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />}
-              actions={!editingCondition && conditionActions}
-            >
-              {editingCondition && (
-                    <MedicalConditionForm 
-                        onSave={handleProcessCondition} 
-                        onCancel={handleCancelCondition} 
-                        initialData={editingCondition.id ? editingCondition : undefined}
-                        isProcessing={isProcessingCondition}
-                    />
-                )}
-                {profile.presentMedicalConditions.length > 0 ? (
-                    <ul className="space-y-1 mt-2">
-                        {profile.presentMedicalConditions.map((condition) => {
-                            if (!condition || !condition.id) return null;
-                            return (
-                                <DiseaseCard 
-                                    key={condition.id}
-                                    condition={condition}
-                                    onRevise={handleReviseCondition}
-                                    isEditMode={isEditingConditions}
-                                />
-                            )
-                        })}
-                    </ul>
-                ) : (
-                    !editingCondition && <p className="text-xs text-muted-foreground pl-8 pt-2">No conditions recorded.</p>
-                )}
-            </MedicalInfoSection>
-            
+        <MedicalInfoSection
+            title="Present Medical Conditions"
+            icon={<Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />}
+            actions={!editingCondition && conditionActions}
+        >
+            {editingCondition && (
+                <MedicalConditionForm 
+                    onSave={handleProcessCondition} 
+                    onCancel={handleCancelCondition} 
+                    initialData={editingCondition.id ? editingCondition : undefined}
+                    isProcessing={isProcessingCondition}
+                />
+            )}
+            {profile.presentMedicalConditions.length > 0 ? (
+                <ul className="space-y-1 mt-2">
+                    {profile.presentMedicalConditions.map((condition) => {
+                        if (!condition || !condition.id) return null;
+                        return (
+                            <DiseaseCard 
+                                key={condition.id}
+                                condition={condition}
+                                onRevise={handleReviseCondition}
+                                isEditMode={isEditingConditions}
+                            />
+                        )
+                    })}
+                </ul>
+            ) : (
+                !editingCondition && <p className="text-xs text-muted-foreground pl-8 pt-2">No conditions recorded.</p>
+            )}
+        </MedicalInfoSection>
+        
 
-            <Separator />
-
-            <MedicalInfoSection
-              title="Current Medication"
-              icon={<Pill className="h-5 w-5 shrink-0 text-muted-foreground" />}
-              actions={!isAddingMedication && medicationActions}
-            >
-              {isAddingMedication && (
-                    <Form {...medicationForm}>
-                        <form onSubmit={medicationForm.handleSubmit(handleSaveMedication)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-                            <FormField control={medicationForm.control} name="medicationName" render={({ field }) => (<FormItem><FormControl><Input ref={medicationNameInputRef} placeholder="Medication Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                            <div className="grid grid-cols-2 gap-2">
-                                <FormField control={medicationForm.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                <FormField control={medicationForm.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                            </div>
-                            <div className="flex justify-end gap-2">
-                                <Button type="button" size="sm" variant="ghost" onClick={() => setIsAddingMedication(false)}>Close</Button>
-                                <Button type="submit" size="sm" disabled={isSubmittingMedication}>
-                                    {isSubmittingMedication ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
-                                </Button>
-                            </div>
-                        </form>
-                    </Form>
-                )}
-                {profile.medication.length > 0 ? (
-                    <ul className="space-y-1 mt-2">
-                        {profile.medication.map((med) => (
-                            <React.Fragment key={med.id}>
-                                <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                                <div className="flex-1">
-                                {med.name.toLowerCase() === 'nil' ? (
-                                        <span className="font-semibold text-foreground">Nil - No medication</span>
-                                ) : (
-                                    <div>
-                                        {med.brandName && med.brandName.toLowerCase() !== med.name.toLowerCase() && (
-                                            <p className="font-semibold text-foreground">{med.brandName}</p>
-                                        )}
-                                        <p className={cn("text-foreground", med.brandName && "text-muted-foreground text-xs")}>
-                                            <span className="font-semibold">{med.name}</span>
-                                            <span className="text-muted-foreground text-xs ml-2">{formatMedicationDetails(med)}</span>
-                                        </p>
-                                    </div>
-                                )}
+        <MedicalInfoSection
+            title="Current Medication"
+            icon={<Pill className="h-5 w-5 shrink-0 text-muted-foreground" />}
+            actions={!isAddingMedication && medicationActions}
+        >
+            {isAddingMedication && (
+                <Form {...medicationForm}>
+                    <form onSubmit={medicationForm.handleSubmit(handleSaveMedication)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
+                        <FormField control={medicationForm.control} name="medicationName" render={({ field }) => (<FormItem><FormControl><Input ref={medicationNameInputRef} placeholder="Medication Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <div className="grid grid-cols-2 gap-2">
+                            <FormField control={medicationForm.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={medicationForm.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <Button type="button" size="sm" variant="ghost" onClick={() => setIsAddingMedication(false)}>Close</Button>
+                            <Button type="submit" size="sm" disabled={isSubmittingMedication}>
+                                {isSubmittingMedication ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            )}
+            {profile.medication.length > 0 ? (
+                <ul className="space-y-1 mt-2">
+                    {profile.medication.map((med) => (
+                        <React.Fragment key={med.id}>
+                            <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                            <div className="flex-1">
+                            {med.name.toLowerCase() === 'nil' ? (
+                                    <span className="font-semibold text-foreground">Nil - No medication</span>
+                            ) : (
+                                <div>
+                                    {med.brandName && med.brandName.toLowerCase() !== med.name.toLowerCase() && (
+                                        <p className="font-semibold text-foreground">{med.brandName}</p>
+                                    )}
+                                    <p className={cn("text-foreground", med.brandName && "text-muted-foreground text-xs")}>
+                                        <span className="font-semibold">{med.name}</span>
+                                        <span className="text-muted-foreground text-xs ml-2">{formatMedicationDetails(med)}</span>
+                                    </p>
                                 </div>
-                                    <div className="flex items-center shrink-0">
-                                         {med.name.toLowerCase() !== 'nil' && (
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="h-8 w-8 shrink-0"
-                                                        onClick={(e) => { e.stopPropagation(); handleSynopsisToggle('medication', med.id); }}
-                                                    >
-                                                        <Info className="h-5 w-5 text-blue-500" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>View Synopsis</TooltipContent>
-                                            </Tooltip>
-                                        )}
-                                        {isEditingMedications && med.name.toLowerCase() !== 'nil' && (
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
-                                                        <Trash2 className="h-5 w-5 text-destructive" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>Delete Medication</TooltipContent>
-                                            </Tooltip>
-                                        )}
-                                    </div>
+                            )}
+                            </div>
+                                <div className="flex items-center shrink-0">
+                                        {med.name.toLowerCase() !== 'nil' && (
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 shrink-0"
+                                                    onClick={(e) => { e.stopPropagation(); handleSynopsisToggle('medication', med.id); }}
+                                                >
+                                                    <Info className="h-5 w-5 text-blue-500" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>View Synopsis</TooltipContent>
+                                        </Tooltip>
+                                    )}
+                                    {isEditingMedications && med.name.toLowerCase() !== 'nil' && (
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
+                                                    <Trash2 className="h-5 w-5 text-destructive" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Delete Medication</TooltipContent>
+                                        </Tooltip>
+                                    )}
+                                </div>
+                            </li>
+                            {activeSynopsis?.type === 'medication' && activeSynopsis.id === med.id && (
+                                <li className="pl-5 pb-2">
+                                    <MedicationSynopsisDialog
+                                        medicationName={med.name}
+                                        onClose={() => setActiveSynopsis(null)}
+                                    />
                                 </li>
-                                {activeSynopsis?.type === 'medication' && activeSynopsis.id === med.id && (
-                                    <li className="pl-5 pb-2">
-                                        <MedicationSynopsisDialog
-                                            medicationName={med.name}
-                                            onClose={() => setActiveSynopsis(null)}
-                                        />
-                                    </li>
-                                )}
-                            </React.Fragment>
-                        ))}
-                    </ul>
-                ) : (
-                    !isAddingMedication && !editingCondition && <p className="text-xs text-muted-foreground pl-8 pt-2">No medication recorded.</p>
-                )}
-                {profile.medication.length > 1 && !isMedicationNil && (
-                    <div className="pt-2">
-                         <DrugInteractionViewer
-                            medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                            onClose={() => setShowInteraction(false)}
-                        />
-                    </div>
-                )}
-            </MedicalInfoSection>
-        </CardContent>
-    </Card>
+                            )}
+                        </React.Fragment>
+                    ))}
+                </ul>
+            ) : (
+                !isAddingMedication && !editingCondition && <p className="text-xs text-muted-foreground pl-8 pt-2">No medication recorded.</p>
+            )}
+            {profile.medication.length > 1 && !isMedicationNil && (
+                <div className="pt-2">
+                        <DrugInteractionViewer
+                        medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
+                        onClose={() => setShowInteraction(false)}
+                    />
+                </div>
+            )}
+        </MedicalInfoSection>
     </>
   );
 }
