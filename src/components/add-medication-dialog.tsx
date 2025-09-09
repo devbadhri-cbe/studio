@@ -90,7 +90,7 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
     }
     addMedication({
         name: processedMed.activeIngredient,
-        brandName: processedMed.correctedMedicationName || data.medicationName,
+        brandName: data.medicationName,
         dosage: data.dosage,
         frequency: data.frequency,
         foodInstructions: data.foodInstructions,
