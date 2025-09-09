@@ -127,6 +127,11 @@ export function PatientDashboard() {
                           searchQuery={biomarkerSearchQuery}
                           onSearchChange={setBiomarkerSearchQuery}
                           searchPlaceholder="Search biomarkers..."
+                          showCreateButton
+                          onCreateClick={() => {
+                            // This will be implemented in a future step.
+                            alert("Create custom biomarker clicked!");
+                          }}
                       />
                       <CollapsibleContent className="mt-4">
                           <BiomarkersPanel searchQuery={biomarkerSearchQuery} />

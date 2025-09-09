@@ -4,9 +4,10 @@
 import * as React from 'react';
 import { CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
-import { ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Search, PlusCircle } from 'lucide-react';
 import { Input } from './ui/input';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
+import { Button } from './ui/button';
 
 interface DashboardSectionToggleProps {
   title: string;
@@ -16,6 +17,8 @@ interface DashboardSectionToggleProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   searchPlaceholder: string;
+  showCreateButton?: boolean;
+  onCreateClick?: () => void;
 }
 
 export function DashboardSectionToggle({ 
@@ -25,7 +28,9 @@ export function DashboardSectionToggle({
   isOpen,
   searchQuery,
   onSearchChange,
-  searchPlaceholder
+  searchPlaceholder,
+  showCreateButton = false,
+  onCreateClick
 }: DashboardSectionToggleProps) {
 
   const content = (
@@ -51,6 +56,12 @@ export function DashboardSectionToggle({
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
+            )}
+             {isOpen && showCreateButton && (
+                <Button size="sm" onClick={onCreateClick} className="h-9">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create
+                </Button>
             )}
              <CollapsibleTrigger asChild>
                 <ChevronDown className={cn("h-5 w-5 transition-transform cursor-pointer", isOpen && "rotate-180")} />
