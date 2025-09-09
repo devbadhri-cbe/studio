@@ -107,22 +107,20 @@ export function PatientDashboard() {
             
             <div className="flex flex-col gap-4">
                 <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
-                    <DashboardSectionToggle
+                     <DashboardSectionToggle
                         title="Disease Panels"
                         icon={<Stethoscope className="h-5 w-5" />}
                         isOpen={isDiseasePanelOpen}
                     >
-                        {isDiseasePanelOpen && (
-                            <div className="relative">
-                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search panels..."
-                                    value={diseasePanelSearchQuery}
-                                    onChange={(e) => setDiseasePanelSearchQuery(e.target.value)}
-                                    className="pl-8 h-full"
-                                />
-                            </div>
-                        )}
+                         <div className="relative">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search panels..."
+                                value={diseasePanelSearchQuery}
+                                onChange={(e) => setDiseasePanelSearchQuery(e.target.value)}
+                                className="pl-8 h-9"
+                            />
+                        </div>
                     </DashboardSectionToggle>
                     <CollapsibleContent className="mt-4">
                         <DiseasePanel searchQuery={diseasePanelSearchQuery} />
@@ -131,22 +129,20 @@ export function PatientDashboard() {
                 
                 {isDoctorLoggedIn && (
                   <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
-                      <DashboardSectionToggle
+                       <DashboardSectionToggle
                           title="Biomarker Cards"
                           icon={<Shapes className="h-5 w-5" />}
                           isOpen={isBiomarkersOpen}
                       >
-                          {isBiomarkersOpen && (
-                              <div className="relative">
-                                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                  <Input
-                                      placeholder="Search biomarkers..."
-                                      value={biomarkerSearchQuery}
-                                      onChange={(e) => setBiomarkerSearchQuery(e.target.value)}
-                                      className="pl-8 h-full"
-                                  />
-                              </div>
-                          )}
+                          <div className="relative">
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search biomarkers..."
+                                    value={biomarkerSearchQuery}
+                                    onChange={(e) => setBiomarkerSearchQuery(e.target.value)}
+                                    className="pl-8 h-9"
+                                />
+                            </div>
                       </DashboardSectionToggle>
                       <CollapsibleContent className="mt-4">
                           <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
