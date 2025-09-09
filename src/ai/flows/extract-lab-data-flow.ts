@@ -51,7 +51,7 @@ const extractLabDataFlow = ai.defineFlow(
           if (retries === 0) throw e;
           await new Promise(resolve => setTimeout(resolve, 1000)); // wait 1s
         } else {
-          throw e;
+          throw e; // Re-throw other errors immediately
         }
       }
     }
