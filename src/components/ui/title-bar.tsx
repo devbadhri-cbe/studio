@@ -19,7 +19,7 @@ export function TitleBar({ children, backButton }: TitleBarProps) {
     
     return (
         <>
-        <header className="border-b px-4 py-2 md:px-6">
+        <header className="border-b p-4 md:p-6">
             <div className="mx-auto w-full max-w-7xl flex items-center justify-between border border-red-500">
                  <div className="flex justify-start items-center gap-2 w-24 border border-red-500">
                     {backButton || children}
