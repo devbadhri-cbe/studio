@@ -1,0 +1,49 @@
+
+'use client';
+
+import * as React from 'react';
+import { useApp } from '@/context/app-context';
+import { Flame } from 'lucide-react';
+import { AddHdlRecordDialog } from './add-hdl-record-dialog';
+import { HdlChart } from './hdl-chart';
+import { BiomarkerCard } from './biomarker-card';
+import type { HdlRecord } from '@/lib/types';
+
+interface HdlCardProps {
+  isReadOnly?: boolean;
+}
+
+export function HdlCard({ isReadOnly = false }: HdlCardProps) {
+  const { hdlRecords, removeHdlRecord, profile } = useApp();
+
+  const getStatus = (record: HdlRecord) => {
+    const isMale = profile.gender === 'male';
+    if (isMale) {
+        if (record.value < 40) return { text: 'Low', variant: 'destructive' as const };
+    } else {
+        if (record.value < 50) return { text: 'Low', variant: 'destructive' as const };
+    }
+    if (record.value >= 60) return { text: 'Optimal', variant: 'outline' as const };
+    return { text: 'Normal', variant: 'default' as const };
+  }
+
+  const formatRecord = (record: HdlRecord) => ({
+      id: record.id,
+      date: record.date as string,
+      displayValue: `${record.value} mg/dL`
+  });
+
+  return (
+    <BiomarkerCard<HdlRecord>
+      title="HDL Cholesterol (mg/dL)"
+      icon={<Flame className="h-5 w-5 shrink-0 text-muted-foreground" />}
+      records={hdlRecords}
+      onRemoveRecord={removeHdlRecord}
+      getStatus={getStatus}
+      formatRecord={formatRecord}
+      addRecordDialog={<AddHdlRecordDialog />}
+      chart={<HdlChart />}
+      isReadOnly={isReadOnly}
+    />
+  );
+}

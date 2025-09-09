@@ -86,6 +86,15 @@ interface AppContextType {
   totalCholesterolRecords: TotalCholesterolRecord[];
   addTotalCholesterolRecord: (record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => void;
   removeTotalCholesterolRecord: (id: string) => void;
+  ldlRecords: LdlRecord[];
+  addLdlRecord: (record: Omit<LdlRecord, 'id' | 'medication'>) => void;
+  removeLdlRecord: (id: string) => void;
+  hdlRecords: HdlRecord[];
+  addHdlRecord: (record: Omit<HdlRecord, 'id' | 'medication'>) => void;
+  removeHdlRecord: (id: string) => void;
+  triglyceridesRecords: TriglyceridesRecord[];
+  addTriglyceridesRecord: (record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => void;
+  removeTriglyceridesRecord: (id: string) => void;
   addBatchRecords: (records: BatchRecords) => Promise<AddBatchRecordsResult>;
   tips: string[];
   setTips: (tips: string[]) => void;
@@ -491,6 +500,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setHasUnsavedChanges(true);
   }, []);
 
+  const addLdlRecord = useCallback((record: Omit<LdlRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    setLdlRecordsState(prev => [...prev, newRecord]);
+    setHasUnsavedChanges(true);
+  }, [profile.medication, getMedicationForRecord]);
+
+  const removeLdlRecord = useCallback((id: string) => {
+    setLdlRecordsState(prev => prev.filter(r => r.id !== id));
+    setHasUnsavedChanges(true);
+  }, []);
+  
+  const addHdlRecord = useCallback((record: Omit<HdlRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    setHdlRecordsState(prev => [...prev, newRecord]);
+    setHasUnsavedChanges(true);
+  }, [profile.medication, getMedicationForRecord]);
+
+  const removeHdlRecord = useCallback((id: string) => {
+    setHdlRecordsState(prev => prev.filter(r => r.id !== id));
+    setHasUnsavedChanges(true);
+  }, []);
+
+  const addTriglyceridesRecord = useCallback((record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    setTriglyceridesRecordsState(prev => [...prev, newRecord]);
+    setHasUnsavedChanges(true);
+  }, [profile.medication, getMedicationForRecord]);
+
+  const removeTriglyceridesRecord = useCallback((id: string) => {
+    setTriglyceridesRecordsState(prev => prev.filter(r => r.id !== id));
+    setHasUnsavedChanges(true);
+  }, []);
+
   const toggleDiseaseBiomarker = useCallback((panelKey: string, biomarkerKey: BiomarkerKey | string) => {
     setProfileState(prevProfile => {
         const currentEnabled = { ...(prevProfile.enabledBiomarkers || {}) };
@@ -760,6 +802,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     totalCholesterolRecords,
     addTotalCholesterolRecord,
     removeTotalCholesterolRecord,
+    ldlRecords,
+    addLdlRecord,
+    removeLdlRecord,
+    hdlRecords,
+    addHdlRecord,
+    removeHdlRecord,
+    triglyceridesRecords,
+    addTriglyceridesRecord,
+    removeTriglyceridesRecord,
     addBatchRecords,
     tips,
     setTips,

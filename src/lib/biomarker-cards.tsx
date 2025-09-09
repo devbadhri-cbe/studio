@@ -21,6 +21,12 @@ import { AddLipidRecordDialog } from '@/components/add-lipid-record-dialog';
 import { LipidCard } from '@/components/lipid-card';
 import { TotalCholesterolCard } from '@/components/total-cholesterol-card';
 import { AddTotalCholesterolRecordDialog } from '@/components/add-total-cholesterol-record-dialog';
+import { LdlCard } from '@/components/ldl-card';
+import { AddLdlRecordDialog } from '@/components/add-ldl-record-dialog';
+import { HdlCard } from '@/components/hdl-card';
+import { AddHdlRecordDialog } from '@/components/add-hdl-record-dialog';
+import { TriglyceridesCard } from '@/components/triglycerides-card';
+import { AddTriglyceridesRecordDialog } from '@/components/add-triglycerides-record-dialog';
 
 
 export const availableBiomarkerCards = {
@@ -71,6 +77,24 @@ export const availableBiomarkerCards = {
     component: <TotalCholesterolCard />,
     addRecordLabel: 'New Total Cholesterol Record',
     addRecordDialog: <AddTotalCholesterolRecordDialog />,
+  },
+  ldl: {
+    label: 'LDL Cholesterol',
+    component: <LdlCard />,
+    addRecordLabel: 'New LDL Record',
+    addRecordDialog: <AddLdlRecordDialog />,
+  },
+  hdl: {
+    label: 'HDL Cholesterol',
+    component: <HdlCard />,
+    addRecordLabel: 'New HDL Record',
+    addRecordDialog: <AddHdlRecordDialog />,
+  },
+  triglycerides: {
+    label: 'Triglycerides',
+    component: <TriglyceridesCard />,
+    addRecordLabel: 'New Triglycerides Record',
+    addRecordDialog: <AddTriglyceridesRecordDialog />,
   },
 };
 
