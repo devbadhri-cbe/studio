@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings } from 'lucide-react';
@@ -104,31 +105,40 @@ function MedicalConditionForm({
 
   const handleFormSubmit = async (data: MedicalConditionFormValues) => {
     if (!hasBeenProcessed) {
-        await handleProcessCondition();
-        return;
-    }
-    
-    if (!data.icdCode) {
-        form.setError('icdCode', { type: 'manual', message: 'Please process the condition to get an ICD code before saving.' });
-        return;
-    }
+        const success = await handleProcessCondition();
+        if (!success) return; // Stop if processing fails
+        
+        // After successful processing, we need to get the updated data for the final save
+        const updatedData = form.getValues();
+        const isDuplicate = profile.presentMedicalConditions.some(c => c.id !== initialData?.id && c.icdCode === updatedData.icdCode);
 
-    const isDuplicate = profile.presentMedicalConditions.some(c => c.id !== initialData?.id && c.icdCode === data.icdCode);
-    if (isDuplicate) {
-        toast({ variant: 'destructive', title: 'Duplicate Condition', description: `A condition with ICD-11 code ${data.icdCode} already exists.` });
-        return;
+        if (isDuplicate) {
+            toast({ variant: 'destructive', title: 'Duplicate Condition', description: `A condition with ICD-11 code ${updatedData.icdCode} already exists.` });
+            return;
+        }
+    } else {
+         if (!data.icdCode) {
+            form.setError('icdCode', { type: 'manual', message: 'Please process the condition to get an ICD code before saving.' });
+            return;
+        }
+        
+        const isDuplicate = profile.presentMedicalConditions.some(c => c.id !== initialData?.id && c.icdCode === data.icdCode);
+        if (isDuplicate) {
+            toast({ variant: 'destructive', title: 'Duplicate Condition', description: `A condition with ICD-11 code ${data.icdCode} already exists.` });
+            return;
+        }
+        
+        onSave({
+          id: initialData?.id || `cond-${Date.now()}`,
+          condition: data.condition,
+          userInput: initialData?.userInput || form.getValues('condition'),
+          date: data.date.toISOString(),
+          icdCode: data.icdCode,
+          synopsis: data.synopsis,
+          status: 'pending_review',
+        });
+        onCancel();
     }
-    
-    onSave({
-      id: initialData?.id || `cond-${Date.now()}`,
-      condition: data.condition,
-      userInput: initialData?.userInput || form.getValues('condition'),
-      date: data.date.toISOString(),
-      icdCode: data.icdCode,
-      synopsis: data.synopsis,
-      status: 'pending_review',
-    });
-    onCancel();
   };
 
   return (
@@ -161,31 +171,33 @@ function MedicalConditionForm({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date of Diagnosis</FormLabel>
-              <FormControl>
-                <DatePicker
-                  value={field.value}
-                  onChange={field.onChange}
-                  fromYear={new Date().getFullYear() - 50}
-                  toYear={new Date().getFullYear()}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
        
-        <div className="flex justify-end gap-2">
-          <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
-          <Button type="submit" size="sm" disabled={isProcessing}>
-            {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />}
-            {hasBeenProcessed ? 'Confirm & Save' : 'Process & Review'}
-          </Button>
+        <div className="flex justify-between items-end gap-4">
+            <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+                <FormItem className="flex-1">
+                <FormLabel>Date of Diagnosis</FormLabel>
+                <FormControl>
+                    <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    fromYear={new Date().getFullYear() - 50}
+                    toYear={new Date().getFullYear()}
+                    />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            <div className="flex items-center gap-2">
+                <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+                <Button type="submit" size="sm" disabled={isProcessing}>
+                    {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                    {hasBeenProcessed ? 'Confirm & Save' : 'Process & Review'}
+                </Button>
+            </div>
         </div>
       </form>
     </Form>
@@ -287,7 +299,7 @@ interface MedicationListItemProps {
 }
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, updateMedicalCondition, addMedication, removeMedication, setMedicationNil } = useApp();
+  const { profile, addMedicalCondition, updateMedicalCondition, addMedication, removeMedication, setMedicationNil, removeMedicalCondition: removeMedicalConditionFromContext } = useApp();
   const [editingCondition, setEditingCondition] = React.useState<MedicalCondition | null>(null);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
@@ -308,7 +320,9 @@ export function MedicalHistoryCard() {
     if (isUpdate) {
         updateMedicalCondition(condition);
     } else {
-        addMedicalCondition(condition);
+        const optimisticId = `cond-${Date.now()}`;
+        const newCondition = { ...condition, id: optimisticId, status: 'pending_review' as const };
+        addMedicalCondition(newCondition);
     }
   }
 
@@ -434,6 +448,7 @@ export function MedicalHistoryCard() {
                                 condition={condition}
                                 onRevise={handleReviseCondition}
                                 isEditMode={isEditingConditions}
+                                onRemove={() => removeMedicalConditionFromContext(condition.id)}
                             />
                         )
                     })}

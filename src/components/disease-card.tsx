@@ -10,13 +10,13 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from './ui/alert';
 import { Loader2, Info, Trash2, CheckCircle, AlertTriangle, Edit } from 'lucide-react';
 import * as React from 'react';
-import { useApp } from '@/context/app-context';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 
 interface DiseaseCardProps {
   condition: MedicalCondition;
   onRevise: (condition: MedicalCondition) => void;
   isEditMode: boolean;
+  onRemove: (id: string) => void;
 }
 
 const statusConfig = {
@@ -25,8 +25,7 @@ const statusConfig = {
   needs_revision: { icon: AlertTriangle, text: 'Doctor requested revision', color: 'text-destructive' },
 };
 
-export function DiseaseCard({ condition, onRevise, isEditMode }: DiseaseCardProps) {
-  const { removeMedicalCondition } = useApp();
+export function DiseaseCard({ condition, onRevise, isEditMode, onRemove }: DiseaseCardProps) {
   const formatDate = useDateFormatter();
   const [isActive, setIsActive] = React.useState(false);
 
@@ -36,7 +35,7 @@ export function DiseaseCard({ condition, onRevise, isEditMode }: DiseaseCardProp
   
   const handleRemoveCondition = (e: React.MouseEvent) => {
     e.stopPropagation();
-    removeMedicalCondition(condition.id);
+    onRemove(condition.id);
   };
 
   const handleToggleSynopsis = (e: React.MouseEvent) => {
