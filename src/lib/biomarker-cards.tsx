@@ -65,30 +65,6 @@ export const availableBiomarkerCards = {
     addRecordLabel: 'New Weight Record',
     addRecordDialog: <AddWeightRecordDialog />,
   },
-  totalCholesterol: {
-    label: 'Total Cholesterol',
-    component: <LipidCard />,
-    addRecordLabel: 'New Lipid Panel Record',
-    addRecordDialog: <AddLipidRecordDialog />,
-  },
-  ldl: {
-    label: 'LDL Cholesterol',
-    component: <LipidCard />,
-    addRecordLabel: 'New Lipid Panel Record',
-    addRecordDialog: <AddLipidRecordDialog />,
-  },
-  hdl: {
-    label: 'HDL Cholesterol',
-    component: <LipidCard />,
-    addRecordLabel: 'New Lipid Panel Record',
-    addRecordDialog: <AddLipidRecordDialog />,
-  },
-  triglycerides: {
-    label: 'Triglycerides',
-    component: <LipidCard />,
-    addRecordLabel: 'New Lipid Panel Record',
-    addRecordDialog: <AddLipidRecordDialog />,
-  },
 };
 
 export const availableDiseasePanels = [
