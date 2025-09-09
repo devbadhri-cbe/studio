@@ -137,7 +137,7 @@ function MedicalConditionForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 border border-red-500">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormField
             control={form.control}
             name="userInput"
@@ -164,7 +164,7 @@ function MedicalConditionForm({
         )}
        
         <div className="flex justify-between items-end gap-4 border border-purple-500">
-          <div className="flex-1 border border-green-500">
+          <div className="border border-green-500">
             <FormField
               control={form.control}
               name="date"
@@ -208,12 +208,12 @@ function MedicalInfoSection({ title, icon, actions, children }: MedicalInfoSecti
   return (
     <Card className="shadow-xl h-full flex flex-col">
         <CardContent className="space-y-4 text-sm p-4 flex-1 flex flex-col">
-            <div className="flex items-center justify-between mb-2 border border-pink-500">
-                <div className='flex items-center gap-3 flex-1 border border-yellow-500'>
+            <div className="flex items-center justify-between mb-2">
+                <div className='flex items-center gap-3 flex-1'>
                     {icon}
                     <h3 className="font-medium">{title}</h3>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 border border-orange-500">
+                <div className="flex items-center gap-1 shrink-0">
                     {actions}
                 </div>
             </div>
