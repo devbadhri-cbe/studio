@@ -35,6 +35,8 @@ const months = [
 
 const days = Array.from({ length: 31 }, (_, i) => ({ value: (i + 1).toString(), label: (i + 1).toString() }));
 
+type OpenSelect = 'day' | 'month' | 'year' | null;
+
 export function DatePicker({
   value,
   onChange,
@@ -46,6 +48,7 @@ export function DatePicker({
   const [day, setDay] = React.useState<string>(() => value ? format(value, 'd') : '');
   const [month, setMonth] = React.useState<string>(() => value ? String(value.getMonth()) : '');
   const [year, setYear] = React.useState<string>(() => value ? format(value, 'yyyy') : '');
+  const [openSelect, setOpenSelect] = React.useState<OpenSelect>(null);
 
   React.useEffect(() => {
     if (value && isValid(value)) {
@@ -89,8 +92,12 @@ export function DatePicker({
 
   const handleYearChange = (newYear: string) => {
     setYear(newYear);
-    handleDateChange(day, month, newYear);
+    handleDateChange(day, month, year);
   };
+  
+  const handleOpenChange = (select: OpenSelect) => (isOpen: boolean) => {
+    setOpenSelect(isOpen ? select : null);
+  }
 
   if (isMobile) {
     const handleMobileDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,7 +133,12 @@ export function DatePicker({
   return (
     <div className="flex items-center rounded-md border border-input h-10 w-fit px-2 space-x-1 text-sm">
       <div className="w-auto">
-        <Select value={day} onValueChange={handleDayChange}>
+        <Select 
+            value={day} 
+            onValueChange={handleDayChange}
+            open={openSelect === 'day'}
+            onOpenChange={handleOpenChange('day')}
+        >
           <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Day" />
           </SelectTrigger>
@@ -143,7 +155,12 @@ export function DatePicker({
       <span className="text-muted-foreground">/</span>
 
       <div className="w-auto">
-        <Select value={month} onValueChange={handleMonthChange}>
+        <Select 
+            value={month} 
+            onValueChange={handleMonthChange}
+            open={openSelect === 'month'}
+            onOpenChange={handleOpenChange('month')}
+        >
             <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Month" />
             </SelectTrigger>
@@ -160,7 +177,12 @@ export function DatePicker({
       <span className="text-muted-foreground">/</span>
       
       <div className="w-auto">
-        <Select value={year} onValueChange={handleYearChange}>
+        <Select 
+            value={year} 
+            onValueChange={handleYearChange}
+            open={openSelect === 'year'}
+            onOpenChange={handleOpenChange('year')}
+        >
             <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Year" />
             </SelectTrigger>
