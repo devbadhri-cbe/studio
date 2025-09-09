@@ -3,12 +3,14 @@
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from './ui/alert';
-import { Loader2, BookOpen, XCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Loader2, BookOpen, XCircle, Languages } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { useApp } from '@/context/app-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Separator } from './ui/separator';
+import { getConditionSynopsis, ConditionSynopsisOutput } from '@/ai/flows/condition-synopsis-flow';
+import { toast } from '@/hooks/use-toast';
 
 const supportedLanguages = [
     { code: 'en', name: 'English' },
@@ -22,18 +24,46 @@ const supportedLanguages = [
 
 interface ConditionSynopsisProps {
   conditionName: string;
+  initialSynopsis: string;
   onClose: () => void;
 }
 
-export function ConditionSynopsisDialog({ conditionName, onClose }: ConditionSynopsisProps) {
-  const [isLoading, setIsLoading] = React.useState(false);
+export function ConditionSynopsisDialog({ conditionName, initialSynopsis, onClose }: ConditionSynopsisProps) {
   const [isTranslating, setIsTranslating] = React.useState(false);
-  const [originalSynopsis, setOriginalSynopsis] = React.useState<string | null>(null);
-  const [translatedSynopsis, setTranslatedSynopsis] = React.useState<string | null>(null);
+  const [synopsis, setSynopsis] = React.useState<string>(initialSynopsis);
   const [selectedLanguage, setSelectedLanguage] = React.useState('en');
-  const { isDoctorLoggedIn } = useApp();
+  const [error, setError] = React.useState<string | null>(null);
 
-  const synopsisToDisplay = translatedSynopsis || originalSynopsis;
+  const handleLanguageChange = async (languageCode: string) => {
+    if (!languageCode) return;
+    setSelectedLanguage(languageCode);
+    
+    if (languageCode === 'en') {
+        setSynopsis(initialSynopsis);
+        return;
+    }
+    
+    setIsTranslating(true);
+    setError(null);
+    try {
+        const result = await getConditionSynopsis({
+            conditionName,
+            language: supportedLanguages.find(l => l.code === languageCode)?.name || 'English'
+        });
+        if (result.synopsis) {
+            setSynopsis(result.synopsis);
+        } else {
+            throw new Error("No synopsis returned from AI.");
+        }
+    } catch (e) {
+        console.error("Translation failed", e);
+        setError("Failed to translate the synopsis. Please try again.");
+        toast({ variant: 'destructive', title: 'Translation Error' });
+    } finally {
+        setIsTranslating(false);
+    }
+  }
+
 
   return (
     <Card className="mt-2 shadow-none border-0 bg-transparent">
@@ -52,24 +82,29 @@ export function ConditionSynopsisDialog({ conditionName, onClose }: ConditionSyn
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
              <Separator className="mb-6"/>
-             {(isLoading || isTranslating) && (
+             {isTranslating && (
                 <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground h-40">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p>{isTranslating ? 'Translating...' : 'Loading synopsis...'}</p>
+                    <p>Translating...</p>
                 </div>
             )}
-            <Alert className="bg-muted/50">
-                <AlertDescription className="whitespace-pre-wrap leading-relaxed">
-                    AI features are temporarily disabled.
-                </AlertDescription>
-            </Alert>
+            
+            {!isTranslating && (
+                 <Alert className="bg-muted/50">
+                    <AlertDescription className="whitespace-pre-wrap leading-relaxed">
+                        {error || synopsis}
+                    </AlertDescription>
+                </Alert>
+            )}
+
             <div className="flex justify-between items-center gap-2 pt-4">
                 <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onClose}>
                     <XCircle className="mr-2 h-4 w-4" />
                     Close
                 </Button>
-                {originalSynopsis && (
-                    <Select value={selectedLanguage} disabled={true}>
+                <div className="flex items-center gap-2">
+                    <Languages className="h-4 w-4 text-muted-foreground" />
+                    <Select value={selectedLanguage} onValueChange={handleLanguageChange} disabled={isTranslating}>
                         <SelectTrigger className="w-[150px] h-9 text-sm">
                             <SelectValue placeholder="Translate..." />
                         </SelectTrigger>
@@ -81,7 +116,7 @@ export function ConditionSynopsisDialog({ conditionName, onClose }: ConditionSyn
                             ))}
                         </SelectContent>
                     </Select>
-                )}
+                </div>
             </div>
         </CardContent>
     </Card>

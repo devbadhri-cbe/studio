@@ -52,7 +52,7 @@ interface LipidRecordData {
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
-  addMedicalCondition: (condition: Pick<MedicalCondition, 'condition' | 'date'>) => Promise<void>;
+  addMedicalCondition: (condition: Omit<MedicalCondition, 'id' | 'status'> & Partial<Pick<MedicalCondition, 'status'>>) => Promise<void>;
   updateMedicalCondition: (condition: MedicalCondition) => Promise<void>;
   removeMedicalCondition: (id: string) => void;
   addMedication: (medication: Omit<Medication, 'id'>) => void;
@@ -319,14 +319,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setHasUnsavedChanges(true);
   }, []);
   
-  const addMedicalCondition = useCallback(async (condition: Pick<MedicalCondition, 'condition' | 'date'>) => {
+  const addMedicalCondition = useCallback(async (condition: Omit<MedicalCondition, 'id' | 'status'> & Partial<Pick<MedicalCondition, 'status'>>) => {
     const tempId = `cond-${Date.now()}`;
     const newCondition: MedicalCondition = {
       id: tempId,
-      condition: condition.condition,
-      date: condition.date.toISOString(),
-      icdCode: '',
-      status: 'verified'
+      ...condition,
+      status: condition.status || 'verified'
     };
 
     setProfileState(prev => ({

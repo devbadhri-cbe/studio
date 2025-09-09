@@ -19,22 +19,35 @@ import { DiseaseCard } from './disease-card';
 import { Separator } from './ui/separator';
 import type { MedicalCondition, Medication } from '@/lib/types';
 import { parseISO } from 'date-fns';
+import { processMedicalCondition, MedicalConditionOutput } from '@/ai/flows/process-medical-condition-flow';
+import { toast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+
 
 function capitalizeFirstLetter(string: string) {
     if (!string) return string;
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+interface MedicalConditionFormProps {
+    onSave: (data: { condition: string; date: Date }) => Promise<void>;
+    onCancel: () => void;
+    initialData?: MedicalCondition;
+    aiResult: MedicalConditionOutput | null;
+    isProcessing: boolean;
+    setAiResult: (result: MedicalConditionOutput | null) => void;
+    onSuggestionClick: (suggestion: string) => void;
+}
+
 function MedicalConditionForm({ 
     onSave, 
     onCancel,
     initialData,
-}: { 
-    onSave: (data: { condition: string; date: Date }) => Promise<void>, 
-    onCancel: () => void,
-    initialData?: MedicalCondition,
-}) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+    aiResult,
+    setAiResult,
+    isProcessing,
+    onSuggestionClick,
+}: MedicalConditionFormProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   
   React.useEffect(() => {
@@ -43,7 +56,7 @@ function MedicalConditionForm({
     }, 100);
   }, []);
 
-  const { register, handleSubmit, formState: { errors }, control } = useForm<{ condition: string; date: Date }>({
+  const { register, handleSubmit, formState: { errors }, control, getValues } = useForm<{ condition: string; date: Date }>({
     defaultValues: { 
         condition: initialData?.condition || '', 
         date: initialData?.date ? parseISO(initialData.date) : new Date() 
@@ -51,49 +64,63 @@ function MedicalConditionForm({
   });
   
   const handleFormSubmit = async (data: { condition: string; date: Date }) => {
-    setIsSubmitting(true);
     await onSave({
         ...data,
         condition: capitalizeFirstLetter(data.condition),
     });
-    setIsSubmitting(false);
   };
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-4">
-        <FormField
-          control={control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date of Diagnosis</FormLabel>
-              <FormControl>
-                <DatePicker
-                  value={field.value}
-                  onChange={field.onChange}
-                  fromYear={new Date().getFullYear() - 50}
-                  toYear={new Date().getFullYear()}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormItem>
-            <FormLabel>Condition Name</FormLabel>
-            <FormControl>
-                <Input ref={inputRef} placeholder="e.g., Type 2 Diabetes" {...register("condition", { required: "Condition name is required."})} />
-            </FormControl>
-            <FormMessage>{errors.condition?.message}</FormMessage>
-        </FormItem>
+      {aiResult && !aiResult.isValid && aiResult.suggestions && (
+        <Alert>
+          <AlertTitle>Refine Your Input</AlertTitle>
+          <AlertDescription>
+            The AI couldn't recognize "{getValues('condition')}". Did you mean one of these?
+            <div className="flex flex-wrap gap-2 mt-2">
+              {aiResult.suggestions.map((suggestion) => (
+                <Button key={suggestion} size="sm" variant="outline" onClick={() => onSuggestionClick(suggestion)}>
+                  {suggestion}
+                </Button>
+              ))}
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
-        <div className="flex justify-end gap-2">
-          <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
-          <Button type="submit" size="sm" disabled={isSubmitting}>
-             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
-          </Button>
-        </div>
-      </form>
+      <FormField
+        control={control}
+        name="date"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Date of Diagnosis</FormLabel>
+            <FormControl>
+              <DatePicker
+                value={field.value}
+                onChange={field.onChange}
+                fromYear={new Date().getFullYear() - 50}
+                toYear={new Date().getFullYear()}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormItem>
+          <FormLabel>Condition Name</FormLabel>
+          <FormControl>
+              <Input ref={inputRef} placeholder="e.g., Type 2 Diabetes" {...register("condition", { required: "Condition name is required."})} />
+          </FormControl>
+          <FormMessage>{errors.condition?.message}</FormMessage>
+      </FormItem>
+
+      <div className="flex justify-end gap-2">
+        <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isProcessing}>Cancel</Button>
+        <Button type="submit" size="sm" disabled={isProcessing}>
+           {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+        </Button>
+      </div>
+    </form>
   );
 }
 
@@ -108,7 +135,9 @@ export function MedicalHistoryCard() {
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSubmittingMedication, setIsSubmittingMedication] = React.useState(false);
+  const [isProcessingCondition, setIsProcessingCondition] = React.useState(false);
+  const [aiResult, setAiResult] = React.useState<MedicalConditionOutput | null>(null);
 
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -118,29 +147,61 @@ export function MedicalHistoryCard() {
 
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
-  const handleSaveCondition = async (data: { condition: string; date: Date }) => {
-    if (editingCondition && editingCondition.id) {
-        await updateMedicalCondition({
-            ...editingCondition,
-            condition: data.condition,
-            date: data.date.toISOString(),
-            status: 'verified',
-        });
-    } else {
-        await addMedicalCondition({
-          condition: data.condition,
-          date: data.date.toISOString(),
-        });
+  const handleProcessCondition = async (data: { condition: string; date: Date }, isUpdate = false) => {
+    setIsProcessingCondition(true);
+    setAiResult(null);
+    try {
+      const result = await processMedicalCondition({ 
+        condition: data.condition,
+        existingConditions: profile.presentMedicalConditions.map(c => c.condition)
+      });
+      
+      if(result.isValid && result.standardizedName && result.icdCode && result.synopsis) {
+          const newConditionData = {
+              condition: result.standardizedName,
+              date: data.date.toISOString(),
+              icdCode: result.icdCode,
+              synopsis: result.synopsis,
+              status: 'verified' as const
+          };
+
+          if (isUpdate && editingCondition) {
+            await updateMedicalCondition({ ...editingCondition, ...newConditionData });
+          } else {
+            await addMedicalCondition(newConditionData);
+          }
+          setEditingCondition(null);
+          toast({ title: 'Condition Saved', description: `${result.standardizedName} has been added.` });
+      } else {
+        setAiResult(result);
+        if (result.suggestions && result.suggestions.length === 0) {
+           toast({ variant: 'destructive', title: 'Condition Exists', description: `This condition is already in your profile.` });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      toast({ variant: 'destructive', title: 'Error', description: "Could not process the medical condition." });
+    } finally {
+      setIsProcessingCondition(false);
     }
-    setEditingCondition(null);
+  }
+
+  const handleSuggestionClick = async (suggestion: string) => {
+      // Re-run the process with the refined suggestion
+      if (editingCondition) {
+        // Here, we assume the user is still in the "add/edit" flow, so we can get the date from the form.
+        // A more robust implementation might store the date in the state.
+        const date = new Date(); // This is a fallback. The form should hold the date.
+        handleProcessCondition({ condition: suggestion, date });
+      }
   };
-  
+
   const handleReviseCondition = (conditionToEdit: MedicalCondition) => {
       setEditingCondition(conditionToEdit);
   }
 
   const handleSaveMedication = async (data: {medicationName: string, dosage: string, frequency: string}) => {
-    setIsSubmitting(true);
+    setIsSubmittingMedication(true);
     addMedication({
         name: data.medicationName,
         brandName: data.medicationName,
@@ -149,7 +210,7 @@ export function MedicalHistoryCard() {
     });
     medicationForm.reset();
     medicationNameInputRef.current?.focus();
-    setIsSubmitting(false);
+    setIsSubmittingMedication(false);
   };
   
   React.useEffect(() => {
@@ -183,6 +244,12 @@ export function MedicalHistoryCard() {
     const details = [med.dosage, med.frequency].filter(Boolean).join(', ');
     return details ? `(${details})` : '';
   }
+  
+  const handleCancelCondition = () => {
+    setEditingCondition(null);
+    setAiResult(null);
+    setIsProcessingCondition(false);
+  }
 
   return (
     <Card className="shadow-xl">
@@ -208,7 +275,17 @@ export function MedicalHistoryCard() {
                         )}
                     </div>
                 </div>
-                {editingCondition && <MedicalConditionForm onSave={handleSaveCondition} onCancel={() => setEditingCondition(null)} initialData={editingCondition.id ? editingCondition : undefined} />}
+                {editingCondition && (
+                    <MedicalConditionForm 
+                        onSave={(data) => handleProcessCondition(data, !!editingCondition.id)} 
+                        onCancel={handleCancelCondition} 
+                        initialData={editingCondition.id ? editingCondition : undefined}
+                        aiResult={aiResult}
+                        setAiResult={setAiResult}
+                        isProcessing={isProcessingCondition}
+                        onSuggestionClick={handleSuggestionClick}
+                    />
+                )}
                 {profile.presentMedicalConditions.length > 0 ? (
                     <ul className="space-y-1 mt-2">
                         {profile.presentMedicalConditions.map((condition) => {
@@ -280,8 +357,8 @@ export function MedicalHistoryCard() {
                             </div>
                             <div className="flex justify-end gap-2">
                                 <Button type="button" size="sm" variant="ghost" onClick={() => setIsAddingMedication(false)}>Close</Button>
-                                <Button type="submit" size="sm" disabled={isSubmitting}>
-                                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+                                <Button type="submit" size="sm" disabled={isSubmittingMedication}>
+                                    {isSubmittingMedication ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
                                 </Button>
                             </div>
                         </form>

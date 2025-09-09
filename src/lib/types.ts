@@ -16,6 +16,7 @@ export interface MedicalCondition {
   date: string; // Stored as 'YYYY-MM-DD' string
   condition: string;
   icdCode?: string;
+  synopsis?: string;
   status: 'verified' | 'pending_review' | 'needs_revision';
 }
 

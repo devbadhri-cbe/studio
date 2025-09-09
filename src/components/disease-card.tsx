@@ -79,6 +79,7 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
             variant="ghost"
             className="h-8 w-8 shrink-0"
             onClick={() => handleSynopsisToggle(condition.id)}
+            disabled={!condition.synopsis}
           >
             <Info className="h-5 w-5 text-blue-500" />
           </Button>
@@ -109,10 +110,11 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
           </Alert>
         </li>
       )}
-      {activeSynopsis === condition.id && (
+      {activeSynopsis === condition.id && condition.synopsis && (
         <li className="pl-5 pb-2">
           <ConditionSynopsisDialog
             conditionName={condition.condition}
+            initialSynopsis={condition.synopsis}
             onClose={() => setActiveSynopsis(null)}
           />
         </li>
