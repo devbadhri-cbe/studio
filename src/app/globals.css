@@ -99,7 +99,3 @@
   }
 }
 
-/* Diagnostic borders for flex containers */
-.flex {
-  border: 1px solid red;
-}
