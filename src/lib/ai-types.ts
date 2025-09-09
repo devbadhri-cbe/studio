@@ -111,3 +111,18 @@ export const MedicalConditionOutputSchema = z.object({
     suggestions: z.array(z.string()).optional().describe('A list of suggested valid condition names if the input is ambiguous or not recognized.'),
 });
 export type MedicalConditionOutput = z.infer<typeof MedicalConditionOutputSchema>;
+
+//-================================================================----------
+//- Medication Processing Flow Types
+//-================================================================----------
+
+export const MedicationInfoInputSchema = z.object({
+  medicationName: z.string().describe('The brand or generic name of the medication provided by the user.'),
+});
+export type MedicationInfoInput = z.infer<typeof MedicationInfoInputSchema>;
+
+export const MedicationInfoOutputSchema = z.object({
+  activeIngredient: z.string().describe('The active pharmaceutical ingredient (API) or generic name of the medication.'),
+  isBrandName: z.boolean().describe('Whether the user input was identified as a brand name.'),
+});
+export type MedicationInfoOutput = z.infer<typeof MedicationInfoOutputSchema>;

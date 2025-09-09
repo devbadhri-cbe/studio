@@ -5,9 +5,14 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { AddRecordDialogLayout } from './add-record-dialog-layout';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
+import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
+import { Loader2 } from 'lucide-react';
+import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import type { MedicationInfoOutput } from '@/lib/ai-types';
 
 interface AddMedicationDialogProps {
   children?: React.ReactNode;
@@ -17,7 +22,8 @@ interface AddMedicationDialogProps {
 }
 
 export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }: AddMedicationDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isProcessing, setIsProcessing] = React.useState(false);
+  const [processedMed, setProcessedMed] = React.useState<MedicationInfoOutput | null>(null);
   const { addMedication } = useApp();
   const { toast } = useToast();
 
@@ -36,14 +42,41 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
         dosage: '',
         frequency: '',
       });
+      setProcessedMed(null);
     }
   }, [open, form]);
 
-  const onSubmit = (data: {medicationName: string, dosage: string, frequency: string}) => {
-    setIsSubmitting(true);
+  const handleProcessMedication = async () => {
+    const brandName = form.getValues('medicationName');
+    if (!brandName) {
+      form.setError('medicationName', { type: 'manual', message: 'Medication name is required.' });
+      return;
+    }
+    setIsProcessing(true);
+    setProcessedMed(null);
+    try {
+      const result = await getMedicationInfo({ medicationName: brandName });
+      if (result.activeIngredient) {
+        setProcessedMed(result);
+      } else {
+        toast({ variant: 'destructive', title: 'Could not identify medication.' });
+      }
+    } catch(e) {
+      console.error(e);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication.' });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const onSubmit = async (data: {medicationName: string, dosage: string, frequency: string}) => {
+    if (!processedMed) {
+      await handleProcessMedication();
+      return;
+    }
     addMedication({
-        name: data.medicationName,
-        brandName: data.medicationName, // Assuming brandName is same as name for now
+        name: processedMed.activeIngredient,
+        brandName: data.medicationName,
         dosage: data.dosage,
         frequency: data.frequency,
     });
@@ -51,63 +84,85 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
         title: 'Medication Added',
         description: `${data.medicationName} has been added to your list.`
     });
-    setIsSubmitting(false);
     onOpenChange(false);
     onSuccess?.();
   };
 
+  const handleCancel = () => {
+    onOpenChange(false);
+  }
+
   return (
-    <AddRecordDialogLayout
-      open={open}
-      onOpenChange={onOpenChange}
-      trigger={children}
-      title="Add New Medication"
-      description="Enter the details of your new medication."
-      form={form}
-      onSubmit={onSubmit}
-      isSubmitting={isSubmitting}
-    >
-      <FormField
-        control={form.control}
-        name="medicationName"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Medication Name</FormLabel>
-            <FormControl>
-              <Input placeholder="e.g., Metformin" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-       <div className="grid grid-cols-2 gap-4">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {children && <div style={{display: 'contents'}}>{children}</div>}
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add New Medication</DialogTitle>
+          <DialogDescription>Enter the medication details below. The AI will identify the active ingredient.</DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
             <FormField
+              control={form.control}
+              name="medicationName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Medication Name (Brand or Generic)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Rosuvas 20 or Metformin" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {processedMed && (
+              <Alert variant="default" className="bg-background">
+                <AlertTitle className="font-semibold">AI Identified Ingredient</AlertTitle>
+                <AlertDescription>
+                  <p><strong>Active Ingredient:</strong> {processedMed.activeIngredient}</p>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
                 control={form.control}
                 name="dosage"
                 render={({ field }) => (
-                <FormItem>
+                  <FormItem>
                     <FormLabel>Dosage</FormLabel>
                     <FormControl>
-                    <Input placeholder="e.g., 500mg" {...field} />
+                      <Input placeholder="e.g., 500mg" {...field} />
                     </FormControl>
                     <FormMessage />
-                </FormItem>
+                  </FormItem>
                 )}
-            />
-            <FormField
+              />
+              <FormField
                 control={form.control}
                 name="frequency"
                 render={({ field }) => (
-                <FormItem>
+                  <FormItem>
                     <FormLabel>Frequency</FormLabel>
                     <FormControl>
-                    <Input placeholder="e.g., Twice daily" {...field} />
+                      <Input placeholder="e.g., Twice daily" {...field} />
                     </FormControl>
                     <FormMessage />
-                </FormItem>
+                  </FormItem>
                 )}
-            />
-        </div>
-    </AddRecordDialogLayout>
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={handleCancel}>Cancel</Button>
+              <Button type="submit" disabled={isProcessing}>
+                {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {processedMed ? 'Save Medication' : 'Check & Confirm'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }
