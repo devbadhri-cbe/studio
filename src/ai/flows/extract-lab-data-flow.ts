@@ -8,6 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { LabDataExtractionInputSchema, LabDataExtractionOutputSchema, type LabDataExtractionInput, type LabDataExtractionOutput } from '@/lib/ai-types';
+import { gemini15Flash } from '@genkit-ai/googleai';
 
 export async function extractLabData(input: LabDataExtractionInput): Promise<LabDataExtractionOutput> {
   return extractLabDataFlow(input);
@@ -17,6 +18,7 @@ const prompt = ai.definePrompt({
   name: 'extractLabDataPrompt',
   input: { schema: LabDataExtractionInputSchema },
   output: { schema: LabDataExtractionOutputSchema },
+  model: gemini15Flash,
   prompt: `You are a specialized medical data entry assistant. Your task is to accurately extract biomarker data from an image of a patient's lab report.
 
 Analyze the provided image and extract any of the following biomarkers. If a biomarker is not present, do not include it in the output. For each biomarker found, you MUST extract the date of the test. Ensure the date is in YYYY-MM-DD format.
