@@ -1,12 +1,13 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // WARNING: This is a temporary, insecure rule to allow development.
-      // It allows any client to read and write to the database.
-      // TODO: Implement proper authentication and secure these rules.
-      allow read, write: if true;
+    match /patients/{patientId} {
+      // Allow read access for the collection to any authenticated user (the doctor)
+      allow get, list: if request.auth != null;
+      
+      // Allow create, update, delete only for authenticated users.
+      // A more secure rule would check if request.auth.uid == resource.data.doctorUid
+      allow create, update, delete: if request.auth != null;
     }
   }
 }
