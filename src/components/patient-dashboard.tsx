@@ -23,7 +23,6 @@ import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
 import { doctorDetails } from '@/lib/doctor-data';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
-import { CreateCustomBiomarkerDialog } from './create-custom-biomarker-dialog';
 
 
 export function PatientDashboard() {
@@ -35,7 +34,6 @@ export function PatientDashboard() {
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [isCreatingBiomarker, setIsCreatingBiomarker] = React.useState(false);
 
   const headerSeparatorRef = React.useRef<HTMLDivElement>(null);
   
@@ -129,8 +127,6 @@ export function PatientDashboard() {
                           searchQuery={biomarkerSearchQuery}
                           onSearchChange={setBiomarkerSearchQuery}
                           searchPlaceholder="Search biomarkers..."
-                          showCreateButton
-                          onCreateClick={() => setIsCreatingBiomarker(true)}
                       />
                       <CollapsibleContent className="mt-4">
                           <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
@@ -155,7 +151,6 @@ export function PatientDashboard() {
         <UnsavedChangesBar />
       </div>
       <EditDoctorDetailsDialog open={isEditingDoctor} onOpenChange={setIsEditingDoctor} />
-      <CreateCustomBiomarkerDialog open={isCreatingBiomarker} onOpenChange={setIsCreatingBiomarker} />
     </TooltipProvider>
   );
 }

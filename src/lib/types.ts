@@ -146,18 +146,6 @@ export interface TriglyceridesRecord {
 
 export type LipidRecord = TotalCholesterolRecord & { ldl: number; hdl: number; triglycerides: number; };
 
-export interface CustomBiomarker {
-    id: string;
-    name: string;
-    description?: string;
-    records: {
-        id: string;
-        date: string;
-        value: number;
-        unit?: string;
-    }[];
-}
-
 export interface Patient {
   id: string;
   name: string;
@@ -210,7 +198,6 @@ export interface Patient {
   ldlRecords: LdlRecord[];
   hdlRecords: HdlRecord[];
   triglyceridesRecords: TriglyceridesRecord[];
-  customBiomarkers?: CustomBiomarker[];
   medication: Medication[];
   presentMedicalConditions: MedicalCondition[];
   enabledBiomarkers: { [key: string]: string[] };

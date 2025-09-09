@@ -57,12 +57,6 @@ export function DashboardSectionToggle({
                 />
               </div>
             )}
-             {isOpen && showCreateButton && (
-                <Button size="sm" onClick={onCreateClick} className="h-9">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Create
-                </Button>
-            )}
              <CollapsibleTrigger asChild>
                 <ChevronDown className={cn("h-5 w-5 transition-transform cursor-pointer", isOpen && "rotate-180")} />
             </CollapsibleTrigger>
