@@ -26,7 +26,7 @@ User-provided Dosage: "{{dosage}}"
 User-provided Frequency: "{{frequency}}"
 User-provided Food Instruction: "{{foodInstructions}}"
 
-1.  Analyze the input "medicationName". Check for common spelling mistakes. If you identify a likely correction, populate the 'correctedMedicationName' field with the correct spelling.
+1.  Analyze the input "medicationName", which could be a brand or generic name. Check for common spelling mistakes. If you identify a likely correction, populate the 'correctedMedicationName' field with the correct spelling.
 2.  Determine the primary active ingredient (generic name) for the corrected medication name (or the original if no correction was needed).
 3.  Set 'isBrandName' to true if the input is a commercial brand name, and false if it's a generic name.
 4.  Analyze the 'dosage' and 'frequency' inputs.
