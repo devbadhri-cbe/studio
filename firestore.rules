@@ -1,22 +1,22 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow an authenticated user to list patients for the doctor dashboard.
-    // Note: In a multi-doctor app, this should be more specific, e.g.,
-    // allow list: if request.auth != null && get(/databases/$(database)/documents/doctors/$(request.auth.uid)).exists;
+    // Rules for individual document access (get, create, update, delete)
     match /patients/{patientId} {
       // Allow any authenticated user to create a patient.
       allow create: if request.auth != null;
 
-      // Allow read, write, and delete by any authenticated user.
-      // In a real multi-user patient/doctor app, this would be more restrictive,
-      // for example: allow read, write: if request.auth.uid == resource.data.doctorUid || request.auth.uid == resource.data.patientUid;
-      allow read, update, delete: if request.auth != null;
+      // Allow read, update, delete only if the user is the assigned doctor.
+      allow get, update, delete: if request.auth != null && request.auth.uid == resource.data.doctorUid;
     }
-    
-    // This rule is essential for the doctor's dashboard to fetch the list of all patients.
+
+    // Rules for collection-level queries (list)
     match /patients/{document=**} {
-      allow read, list: if request.auth != null;
+        // Allow an authenticated user to list the patients collection.
+        // This is needed for the doctor's dashboard.
+        // A where() clause should be used in the query to scope this to the doctor's UID for security.
+        allow list: if request.auth != null;
     }
   }
 }
