@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Droplet, Settings } from 'lucide-react';
+import { Droplet, Settings, Edit } from 'lucide-react';
 import { AddFastingBloodGlucoseRecordDialog } from './add-fasting-blood-glucose-record-dialog';
 import { FastingBloodGlucoseChart } from './fasting-blood-glucose-chart';
 import { Badge } from './ui/badge';
@@ -26,6 +26,7 @@ interface FastingBloodGlucoseCardProps {
 
 export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGlucoseCardProps) {
   const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord, getDisplayGlucoseValue, biomarkerUnit, setBiomarkerUnit } = useApp();
+  const [isEditMode, setIsEditMode] = React.useState(false);
 
   const sortedRecords = React.useMemo(() => {
     return [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
@@ -56,6 +57,10 @@ export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGluc
              <AddFastingBloodGlucoseRecordDialog>
                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Add New Record</DropdownMenuItem>
             </AddFastingBloodGlucoseRecordDialog>
+            <DropdownMenuItem onSelect={() => setIsEditMode(prev => !prev)} disabled={sortedRecords.length === 0}>
+                <Edit className="mr-2 h-4 w-4" />
+                {isEditMode ? 'Done Editing' : 'Edit Records'}
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Biomarker Units</DropdownMenuLabel>
             <div className="flex items-center justify-center space-x-2 py-2">
@@ -106,6 +111,8 @@ export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGluc
       hasRecords={(fastingBloodGlucoseRecords || []).length > 0}
       statusVariant={currentStatus?.variant}
       isReadOnly={isReadOnly}
+      isEditMode={isEditMode}
+      setIsEditMode={setIsEditMode}
     />
   );
 }

@@ -29,10 +29,10 @@ interface WeightRecordCardProps {
 
 export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) {
   const { weightRecords, removeWeightRecord, profile, setProfile } = useApp();
+  const [isEditMode, setIsEditMode] = React.useState(false);
   const isImperial = profile.unitSystem === 'imperial';
   const weightUnit = isImperial ? 'lbs' : 'kg';
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
-  const [, setForceRender] = React.useState(0);
 
   const sortedWeights = React.useMemo(() => {
     return [...(weightRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -50,10 +50,6 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
     }
   }
 
-  const handleSuccess = () => {
-    setForceRender(c => c + 1);
-  }
-
   const Title = `Weight & BMI (${weightUnit})`;
   const Icon = <Weight className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
@@ -65,7 +61,7 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
             </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64" align="end">
-            <AddWeightRecordDialog onSuccess={handleSuccess}>
+            <AddWeightRecordDialog>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     Add New Record
                 </DropdownMenuItem>
@@ -74,6 +70,10 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
                 <Edit className="mr-2 h-4 w-4"/>
                 Edit Height
             </DropdownMenuItem>
+             <DropdownMenuItem onSelect={() => setIsEditMode(prev => !prev)} disabled={sortedWeights.length === 0}>
+                <Edit className="mr-2 h-4 w-4" />
+                {isEditMode ? 'Done Editing' : 'Edit Records'}
+              </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Unit System</DropdownMenuLabel>
             <div className="flex items-center justify-center space-x-2 py-2">
@@ -141,6 +141,8 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
         noRecordsMessage="No weight records yet."
         statusVariant={bmiStatus?.variant}
         isReadOnly={isReadOnly}
+        isEditMode={isEditMode}
+        setIsEditMode={setIsEditMode}
     />
   );
 }

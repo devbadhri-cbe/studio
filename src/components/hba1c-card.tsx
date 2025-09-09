@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Droplet, Settings } from 'lucide-react';
+import { Droplet, Settings, Edit } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { AddRecordDialog } from './add-record-dialog';
@@ -14,6 +14,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
 interface Hba1cCardProps {
@@ -22,6 +23,7 @@ interface Hba1cCardProps {
 
 export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
   const { hba1cRecords, removeHba1cRecord } = useApp();
+  const [isEditMode, setIsEditMode] = React.useState(false);
 
   const sortedRecords = React.useMemo(() => {
     return [...(hba1cRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
@@ -53,6 +55,11 @@ export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
             Add New Record
           </DropdownMenuItem>
         </AddRecordDialog>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={() => setIsEditMode(prev => !prev)} disabled={sortedRecords.length === 0}>
+            <Edit className="mr-2 h-4 w-4" />
+            {isEditMode ? 'Done Editing' : 'Edit Records'}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   ) : null;
@@ -90,6 +97,8 @@ export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
       hasRecords={(hba1cRecords || []).length > 0}
       statusVariant={currentStatus?.variant}
       isReadOnly={isReadOnly}
+      isEditMode={isEditMode}
+      setIsEditMode={setIsEditMode}
     />
   );
 }

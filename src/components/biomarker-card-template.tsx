@@ -32,6 +32,8 @@ interface BiomarkerCardTemplateProps {
   onDeleteRecord?: (id: string) => void;
   isReadOnly?: boolean;
   children?: React.ReactNode;
+  isEditMode: boolean;
+  setIsEditMode: (value: boolean) => void;
 }
 
 export function BiomarkerCardTemplate({
@@ -48,9 +50,10 @@ export function BiomarkerCardTemplate({
   records = [],
   onDeleteRecord = () => {},
   isReadOnly = false,
-  children
+  children,
+  isEditMode,
+  setIsEditMode,
 }: BiomarkerCardTemplateProps) {
-  const [isEditMode, setIsEditMode] = React.useState(false);
   const formatDate = useDateFormatter();
 
   const getBorderColorClass = () => {
@@ -118,16 +121,6 @@ export function BiomarkerCardTemplate({
                 </div>
               </div>
                <div className="flex items-center gap-1 shrink-0">
-                  {hasRecords && !isReadOnly && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsEditMode(prev => !prev)}>
-                          {isEditMode ? <X className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>{isEditMode ? 'Done' : 'Edit Records'}</TooltipContent>
-                    </Tooltip>
-                  )}
                   {actions}
               </div>
           </div>

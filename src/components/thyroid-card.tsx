@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Activity, Settings } from 'lucide-react';
+import { Activity, Settings, Edit } from 'lucide-react';
 import { AddThyroidRecordDialog } from './add-thyroid-record-dialog';
 import { ThyroidChart } from './thyroid-chart';
 import { Badge } from './ui/badge';
@@ -13,6 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 
@@ -22,6 +23,7 @@ interface ThyroidCardProps {
 
 export function ThyroidCard({ isReadOnly = false }: ThyroidCardProps) {
   const { thyroidRecords, removeThyroidRecord } = useApp();
+  const [isEditMode, setIsEditMode] = React.useState(false);
 
   const sortedRecords = React.useMemo(() => {
     return [...(thyroidRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -40,20 +42,25 @@ export function ThyroidCard({ isReadOnly = false }: ThyroidCardProps) {
   const Icon = <Activity className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = !isReadOnly ? (
-    <AddThyroidRecordDialog>
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-8 w-8">
-                    <Settings className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64" align="end">
+    <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-8 w-8">
+                <Settings className="h-4 w-4" />
+            </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-64" align="end">
+            <AddThyroidRecordDialog>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     Add New Record
                 </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    </AddThyroidRecordDialog>
+            </AddThyroidRecordDialog>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => setIsEditMode(prev => !prev)} disabled={sortedRecords.length === 0}>
+                <Edit className="mr-2 h-4 w-4" />
+                {isEditMode ? 'Done Editing' : 'Edit Records'}
+            </DropdownMenuItem>
+        </DropdownMenuContent>
+    </DropdownMenu>
   ) : null;
 
   const formattedRecords = sortedRecords.map(r => ({
@@ -90,6 +97,8 @@ export function ThyroidCard({ isReadOnly = false }: ThyroidCardProps) {
       noRecordsMessage="No thyroid records yet."
       statusVariant={currentStatus?.variant}
       isReadOnly={isReadOnly}
+      isEditMode={isEditMode}
+      setIsEditMode={setIsEditMode}
     />
   );
 }

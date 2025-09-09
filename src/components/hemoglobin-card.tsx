@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Droplet, Settings } from 'lucide-react';
+import { Droplet, Settings, Edit } from 'lucide-react';
 import { AddHemoglobinRecordDialog } from './add-hemoglobin-record-dialog';
 import { HemoglobinChart } from './hemoglobin-chart';
 import { Badge } from './ui/badge';
@@ -26,6 +26,7 @@ interface HemoglobinCardProps {
 
 export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
   const { hemoglobinRecords, removeHemoglobinRecord, profile, biomarkerUnit, setBiomarkerUnit, getDisplayHemoglobinValue } = useApp();
+  const [isEditMode, setIsEditMode] = React.useState(false);
 
   const sortedRecords = React.useMemo(() => {
     return [...(hemoglobinRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -64,6 +65,10 @@ export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
               <AddHemoglobinRecordDialog>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Add New Record</DropdownMenuItem>
               </AddHemoglobinRecordDialog>
+              <DropdownMenuItem onSelect={() => setIsEditMode(prev => !prev)} disabled={sortedRecords.length === 0}>
+                <Edit className="mr-2 h-4 w-4" />
+                {isEditMode ? 'Done Editing' : 'Edit Records'}
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel>Biomarker Units</DropdownMenuLabel>
               <div className="flex items-center justify-center space-x-2 py-2">
@@ -114,6 +119,8 @@ export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
       hasRecords={(hemoglobinRecords || []).length > 0}
       statusVariant={currentStatus?.variant}
       isReadOnly={isReadOnly}
+      isEditMode={isEditMode}
+      setIsEditMode={setIsEditMode}
     />
   );
 }

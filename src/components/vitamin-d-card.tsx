@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Sun, Settings } from 'lucide-react';
+import { Sun, Settings, Edit } from 'lucide-react';
 import { AddVitaminDRecordDialog } from './add-vitamin-d-record-dialog';
 import { VitaminDChart } from './vitamin-d-chart';
 import { Badge } from './ui/badge';
@@ -26,7 +26,7 @@ interface VitaminDCardProps {
 
 export function VitaminDCard({ isReadOnly = false }: VitaminDCardProps) {
   const { vitaminDRecords, removeVitaminDRecord, getDisplayVitaminDValue, biomarkerUnit, setBiomarkerUnit } = useApp();
-   const [, setForceRender] = React.useState(0);
+   const [isEditMode, setIsEditMode] = React.useState(false);
 
   const sortedRecords = React.useMemo(() => {
     return [...(vitaminDRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -38,10 +38,6 @@ export function VitaminDCard({ isReadOnly = false }: VitaminDCardProps) {
     if (value < 30) return { text: 'Insufficient', variant: 'secondary' as const };
     return { text: 'Sufficient', variant: 'outline' as const };
   };
-
-  const handleSuccess = () => {
-    setForceRender(c => c + 1);
-  }
 
   const latestRecord = sortedRecords[0];
   const currentStatus = latestRecord ? getStatus(latestRecord.value) : null;
@@ -58,11 +54,15 @@ export function VitaminDCard({ isReadOnly = false }: VitaminDCardProps) {
             </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64" align="end">
-            <AddVitaminDRecordDialog onSuccess={handleSuccess}>
+            <AddVitaminDRecordDialog>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     Add New Record
                 </DropdownMenuItem>
             </AddVitaminDRecordDialog>
+            <DropdownMenuItem onSelect={() => setIsEditMode(prev => !prev)} disabled={sortedRecords.length === 0}>
+                <Edit className="mr-2 h-4 w-4" />
+                {isEditMode ? 'Done Editing' : 'Edit Records'}
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Biomarker Units</DropdownMenuLabel>
             <div className="flex items-center justify-center space-x-2 py-2">
@@ -112,6 +112,8 @@ export function VitaminDCard({ isReadOnly = false }: VitaminDCardProps) {
       noRecordsMessage="No Vitamin D records yet."
       statusVariant={currentStatus?.variant}
       isReadOnly={isReadOnly}
+      isEditMode={isEditMode}
+      setIsEditMode={setIsEditMode}
     />
   );
 }

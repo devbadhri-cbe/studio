@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Heart, Settings } from 'lucide-react';
+import { Heart, Settings, Edit } from 'lucide-react';
 import { AddBloodPressureRecordDialog } from './add-blood-pressure-record-dialog';
 import { BloodPressureChart } from './blood-pressure-chart';
 import { Badge } from './ui/badge';
@@ -13,6 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 
@@ -22,6 +23,7 @@ interface BloodPressureCardProps {
 
 export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps) {
   const { bloodPressureRecords, removeBloodPressureRecord } = useApp();
+  const [isEditMode, setIsEditMode] = React.useState(false);
 
   const sortedRecords = React.useMemo(() => {
     return [...(bloodPressureRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -41,20 +43,25 @@ export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps
   const Icon = <Heart className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = !isReadOnly ? (
-    <AddBloodPressureRecordDialog>
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-8 w-8">
-                    <Settings className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64" align="end">
+    <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-8 w-8">
+                <Settings className="h-4 w-4" />
+            </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-64" align="end">
+            <AddBloodPressureRecordDialog>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     Add New Record
                 </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    </AddBloodPressureRecordDialog>
+            </AddBloodPressureRecordDialog>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => setIsEditMode(prev => !prev)} disabled={sortedRecords.length === 0}>
+                <Edit className="mr-2 h-4 w-4" />
+                {isEditMode ? 'Done Editing' : 'Edit Records'}
+            </DropdownMenuItem>
+        </DropdownMenuContent>
+    </DropdownMenu>
   ) : null;
 
   const formattedRecords = sortedRecords.map(r => ({
@@ -92,6 +99,8 @@ export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps
       noRecordsMessage="No blood pressure records yet."
       statusVariant={currentStatus?.variant}
       isReadOnly={isReadOnly}
+      isEditMode={isEditMode}
+      setIsEditMode={setIsEditMode}
     />
   );
 }
