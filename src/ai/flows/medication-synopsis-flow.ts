@@ -39,7 +39,8 @@ const getMedicationSynopsisFlow = ai.defineFlow(
     while (retries > 0) {
       try {
         const { output } = await prompt(input);
-        return output!;
+        if (!output) throw new Error("No output from AI");
+        return output;
       } catch (e: any) {
         if (e.message.includes('503')) {
           console.log("Service unavailable, retrying...");
@@ -51,8 +52,6 @@ const getMedicationSynopsisFlow = ai.defineFlow(
         }
       }
     }
-    // This part should not be reachable if retries are handled correctly,
-    // but it's here to satisfy TypeScript's requirement for a return value.
     throw new Error('Failed to get synopsis after multiple retries.');
   }
 );

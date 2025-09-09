@@ -2,9 +2,8 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
-import { Languages, Loader2, ShieldAlert } from 'lucide-react';
+import { Languages, ShieldAlert } from 'lucide-react';
 import * as React from 'react';
-import { Button } from './ui/button';
 import { SynopsisCardLayout } from './synopsis-card-layout';
 import { checkDrugInteractions } from '@/ai/flows/drug-interaction-flow';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -43,7 +42,9 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
       return;
     }
 
-    if(language === 'en') {
+    const isInitialLoad = !summary;
+
+    if (isInitialLoad) {
         setIsLoading(true);
     } else {
         setIsTranslating(true);
@@ -72,15 +73,19 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
         setIsTranslating(false);
     }
     
-  }, [medications, toast, onClose]);
+  }, [medications, toast, onClose, summary]);
 
   React.useEffect(() => {
-    fetchInteractionSummary(selectedLanguage);
-  }, [selectedLanguage, fetchInteractionSummary]);
+    // Only fetch on initial mount
+    if (!summary && !error) {
+        fetchInteractionSummary('en');
+    }
+  }, [fetchInteractionSummary, summary, error]);
   
   const handleLanguageChange = (languageCode: string) => {
-    if (!languageCode) return;
+    if (!languageCode || languageCode === selectedLanguage) return;
     setSelectedLanguage(languageCode);
+    fetchInteractionSummary(languageCode);
   };
 
   const footerContent = (
