@@ -15,6 +15,8 @@ import {
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
+import { Badge } from './ui/badge';
+import { cn } from '@/lib/utils';
 
 interface Record {
   id: string;
@@ -35,7 +37,7 @@ interface BiomarkerCardProps<T extends Record> {
   icon: React.ReactNode;
   records: T[];
   onRemoveRecord: (id: string) => void;
-  getStatus: (record?: T) => React.ReactNode;
+  getStatus: (record?: T) => { text: string; variant: 'destructive' | 'secondary' | 'outline' | 'default' } | React.ReactNode | null;
   formatRecord: (record: T) => { id: string; date: string; displayValue: string };
   addRecordDialog: React.ReactNode;
   chart: React.ReactNode;
@@ -64,7 +66,18 @@ export function BiomarkerCard<T extends Record>({
   }, [records]);
 
   const latestRecord = sortedRecords[0];
-  const statusContent = getStatus(latestRecord);
+  const statusResult = getStatus(latestRecord);
+
+  let statusContent: React.ReactNode = null;
+  if (statusResult) {
+      if (React.isValidElement(statusResult)) {
+          statusContent = statusResult;
+      } else if (typeof statusResult === 'object' && 'text' in statusResult && 'variant' in statusResult) {
+          const { text, variant } = statusResult;
+          statusContent = <Badge variant={variant} className={cn(variant === 'outline' && 'border-green-500 text-green-600')}>{text}</Badge>;
+      }
+  }
+
 
   const formattedRecords = sortedRecords.map(formatRecord);
 
@@ -99,12 +112,18 @@ export function BiomarkerCard<T extends Record>({
           {isEditMode ? 'Done Editing' : 'Edit Records'}
         </DropdownMenuItem>
         {editMenuItems}
-        {UnitSwitchComponent && (
+        {unitSwitch && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>{unitSwitch.unitSwitchLabel || 'Biomarker Units'}</DropdownMenuLabel>
-            <div onClick={(e) => e.stopPropagation()}>
-                {UnitSwitchComponent}
+             {unitSwitch.unitSwitchLabel && <DropdownMenuLabel>{unitSwitch.unitSwitchLabel}</DropdownMenuLabel>}
+            <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-center space-x-2 px-2 py-1">
+                <Label htmlFor={`unit-switch-${title}`} className="text-xs">{unitSwitch.labelA}</Label>
+                <Switch
+                    id={`unit-switch-${title}`}
+                    checked={unitSwitch.isChecked}
+                    onCheckedChange={unitSwitch.onCheckedChange}
+                />
+                <Label htmlFor={`unit-switch-${title}`} className="text-xs">{unitSwitch.labelB}</Label>
             </div>
           </>
         )}
