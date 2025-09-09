@@ -28,6 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 function capitalizeFirstLetter(string: string) {
     if (!string) return string;
@@ -35,10 +36,14 @@ function capitalizeFirstLetter(string: string) {
 }
 
 interface MedicalConditionFormValues {
-  condition: string;
+  userInput: string;
   date: Date;
-  icdCode?: string;
-  synopsis?: string;
+}
+
+interface ProcessedCondition {
+    standardizedName: string;
+    icdCode: string;
+    synopsis: string;
 }
 
 interface MedicalConditionFormProps {
@@ -54,7 +59,9 @@ function MedicalConditionForm({
 }: MedicalConditionFormProps) {
   const { profile } = useApp();
   const [isProcessing, setIsProcessing] = React.useState(false);
-  const [hasBeenProcessed, setHasBeenProcessed] = React.useState(!!initialData?.icdCode);
+  const [processedCondition, setProcessedCondition] = React.useState<ProcessedCondition | null>(
+    initialData?.icdCode ? { standardizedName: initialData.condition, icdCode: initialData.icdCode, synopsis: initialData.synopsis || '' } : null
+  );
   const inputRef = React.useRef<HTMLInputElement>(null);
   
   React.useEffect(() => {
@@ -65,80 +72,61 @@ function MedicalConditionForm({
 
   const form = useForm<MedicalConditionFormValues>({
     defaultValues: { 
-        condition: initialData?.userInput || initialData?.condition || '', 
+        userInput: initialData?.userInput || initialData?.condition || '', 
         date: initialData?.date ? parseISO(initialData.date) : new Date(),
-        icdCode: initialData?.icdCode || '',
-        synopsis: initialData?.synopsis || '',
     },
   });
   
   const handleProcessCondition = async () => {
-    const userInput = form.getValues('condition');
+    const userInput = form.getValues('userInput');
     if (!userInput) {
-        form.setError('condition', { type: 'manual', message: 'Condition name is required.' });
-        return false;
+        form.setError('userInput', { type: 'manual', message: 'Condition name is required.' });
+        return;
     }
     setIsProcessing(true);
+    setProcessedCondition(null);
     try {
       const result = await processMedicalCondition({ condition: userInput });
       if (result.isValid && result.standardizedName && result.icdCode) {
-        form.setValue('condition', result.standardizedName);
-        form.setValue('icdCode', result.icdCode);
-        form.setValue('synopsis', result.synopsis || '');
+        setProcessedCondition({
+            standardizedName: result.standardizedName,
+            icdCode: result.icdCode,
+            synopsis: result.synopsis || '',
+        });
         toast({ title: 'Condition Processed', description: `AI suggested: ${result.standardizedName} (${result.icdCode})` });
-        setHasBeenProcessed(true);
-        return true;
       } else {
         toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}` });
-        setHasBeenProcessed(false);
-        return false;
       }
     } catch(e) {
       console.error(e);
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
-      setHasBeenProcessed(false);
-      return false;
     } finally {
       setIsProcessing(false);
     }
   }
 
   const handleFormSubmit = async (data: MedicalConditionFormValues) => {
-    if (!hasBeenProcessed) {
-        const success = await handleProcessCondition();
-        if (!success) return; // Stop if processing fails
-        
-        // After successful processing, we need to get the updated data for the final save
-        const updatedData = form.getValues();
-        const isDuplicate = profile.presentMedicalConditions.some(c => c.id !== initialData?.id && c.icdCode === updatedData.icdCode);
-
-        if (isDuplicate) {
-            toast({ variant: 'destructive', title: 'Duplicate Condition', description: `A condition with ICD-11 code ${updatedData.icdCode} already exists.` });
-            return;
-        }
-    } else {
-         if (!data.icdCode) {
-            form.setError('icdCode', { type: 'manual', message: 'Please process the condition to get an ICD code before saving.' });
-            return;
-        }
-        
-        const isDuplicate = profile.presentMedicalConditions.some(c => c.id !== initialData?.id && c.icdCode === data.icdCode);
-        if (isDuplicate) {
-            toast({ variant: 'destructive', title: 'Duplicate Condition', description: `A condition with ICD-11 code ${data.icdCode} already exists.` });
-            return;
-        }
-        
-        onSave({
-          id: initialData?.id || `cond-${Date.now()}`,
-          condition: data.condition,
-          userInput: initialData?.userInput || form.getValues('condition'),
-          date: data.date.toISOString(),
-          icdCode: data.icdCode,
-          synopsis: data.synopsis,
-          status: 'pending_review',
-        });
-        onCancel();
+    if (!processedCondition) {
+        await handleProcessCondition();
+        return;
     }
+
+    const isDuplicate = profile.presentMedicalConditions.some(c => c.id !== initialData?.id && c.icdCode === processedCondition.icdCode);
+    if (isDuplicate) {
+        toast({ variant: 'destructive', title: 'Duplicate Condition', description: `A condition with ICD-11 code ${processedCondition.icdCode} already exists.` });
+        return;
+    }
+    
+    onSave({
+      id: initialData?.id || `cond-${Date.now()}`,
+      userInput: data.userInput,
+      condition: processedCondition.standardizedName,
+      icdCode: processedCondition.icdCode,
+      synopsis: processedCondition.synopsis,
+      date: data.date.toISOString(),
+      status: 'pending_review',
+    });
+    onCancel();
   };
 
   return (
@@ -146,31 +134,28 @@ function MedicalConditionForm({
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-4">
         <FormField
             control={form.control}
-            name="condition"
+            name="userInput"
             rules={{ required: "Condition name is required." }}
             render={({ field }) => (
                 <FormItem>
                     <FormLabel>Condition Name</FormLabel>
                     <FormControl>
-                        <Input {...field} ref={inputRef} placeholder="e.g., Type 2 Diabetes" autoComplete="off" />
+                        <Input {...field} ref={inputRef} placeholder="e.g., high blood pressure" autoComplete="off" />
                     </FormControl>
                     <FormMessage />
                 </FormItem>
             )}
         />
-         <FormField
-          control={form.control}
-          name="icdCode"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ICD-11 Code</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="AI will suggest a code" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+        {processedCondition && (
+          <Alert variant="default" className="bg-background">
+            <AlertTitle className="font-semibold">AI Suggestion</AlertTitle>
+            <AlertDescription>
+              <p><strong>Official Name:</strong> {processedCondition.standardizedName}</p>
+              <p><strong>ICD-11 Code:</strong> {processedCondition.icdCode}</p>
+            </AlertDescription>
+          </Alert>
+        )}
        
         <div className="flex justify-between items-end gap-4">
             <FormField
@@ -195,7 +180,7 @@ function MedicalConditionForm({
                 <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
                 <Button type="submit" size="sm" disabled={isProcessing}>
                     {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                    {hasBeenProcessed ? 'Confirm & Save' : 'Process & Review'}
+                    {processedCondition ? 'Confirm & Save' : 'Process & Review'}
                 </Button>
             </div>
         </div>
@@ -512,3 +497,4 @@ export function MedicalHistoryCard() {
     
 
     
+
