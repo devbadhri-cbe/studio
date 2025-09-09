@@ -22,7 +22,7 @@ interface AddBloodPressureRecordDialogProps {
 export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPressureRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addBloodPressureRecord, profile, bloodPressureRecords } = useApp();
+  const { addBloodPressureRecord, bloodPressureRecords } = useApp();
   const { toast } = useToast();
 
   const form = useForm({
@@ -47,25 +47,8 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
 
   const onSubmit = (data: any) => {
     setIsSubmitting(true);
-    const newDate = startOfDay(data.date);
-
-    const dateExists = bloodPressureRecords.some((record) => {
-        const storedDate = startOfDay(parseISO(record.date as string));
-        return storedDate.getTime() === newDate.getTime();
-    });
-
-    if (dateExists) {
-      toast({
-        variant: 'destructive',
-        title: 'Duplicate Entry',
-        description: 'A blood pressure record for this date already exists. Please choose a different date.',
-      });
-      setIsSubmitting(false);
-      return;
-    }
-    
     addBloodPressureRecord({
-      date: newDate.toISOString(),
+      date: startOfDay(data.date).toISOString(),
       systolic: Number(data.systolic),
       diastolic: Number(data.diastolic),
       heartRate: Number(data.heartRate),
@@ -78,19 +61,8 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
     setOpen(false);
     onSuccess?.();
   };
-  
-  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication || profile.medication.length === 0) {
-      e.preventDefault();
-      toast({
-        variant: 'destructive',
-        title: 'Medication Required',
-        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
-      });
-    }
-  };
 
-  const triggerButton = children || <AddRecordButton tooltipContent="Add Blood Pressure Record" onClick={handleTriggerClick} />;
+  const triggerButton = children || <AddRecordButton tooltipContent="Add Blood Pressure Record" />;
 
   return (
       <AddRecordDialogLayout
@@ -102,6 +74,7 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
+        existingRecords={bloodPressureRecords}
       >
         <FormField
             control={form.control}

@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { startOfDay, parseISO } from 'date-fns';
+import { startOfDay } from 'date-fns';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -28,7 +28,7 @@ interface AddRecordDialogProps {
 export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addHba1cRecord, hba1cRecords, profile } = useApp();
+  const { addHba1cRecord, hba1cRecords } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -50,59 +50,21 @@ export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
-    const newDate = startOfDay(data.date);
-    
-    const dateExists = (hba1cRecords || []).some((record) => {
-        const storedDate = startOfDay(parseISO(record.date as string));
-        return storedDate.getTime() === newDate.getTime();
+    addHba1cRecord({
+      date: startOfDay(data.date).toISOString(),
+      value: data.value,
     });
-
-    if (dateExists) {
-      toast({
-        variant: 'destructive',
-        title: 'Duplicate Entry',
-        description: 'A record for this date already exists. Please choose a different date.',
-      });
-      setIsSubmitting(false);
-      return;
-    }
-    
-    try {
-        addHba1cRecord({
-          date: newDate.toISOString(),
-          value: data.value,
-        });
-        toast({
-          title: 'Success!',
-          description: 'Your new HbA1c record has been added.',
-        });
-        setOpen(false);
-        onSuccess?.();
-    } catch (error) {
-        console.error("Failed to add record", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not save your record."
-        });
-    } finally {
-        setIsSubmitting(false);
-    }
-  };
-
-  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication || profile.medication.length === 0) {
-      e.preventDefault();
-      toast({
-        variant: 'destructive',
-        title: 'Medication Required',
-        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
-      });
-    }
+    toast({
+      title: 'Success!',
+      description: 'Your new HbA1c record has been added.',
+    });
+    setOpen(false);
+    setIsSubmitting(false);
+    onSuccess?.();
   };
 
   const triggerButton = children || (
-      <AddRecordButton tooltipContent="Add HbA1c Record" onClick={handleTriggerClick} />
+      <AddRecordButton tooltipContent="Add HbA1c Record" />
    );
 
   return (
@@ -115,6 +77,7 @@ export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
+        existingRecords={hba1cRecords}
       >
         <FormField
             control={form.control}

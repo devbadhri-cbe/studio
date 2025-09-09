@@ -7,10 +7,6 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { startOfDay } from 'date-fns';
 
-import {
-  Dialog,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
@@ -31,7 +27,7 @@ interface AddFastingBloodGlucoseRecordDialogProps {
 export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBloodGlucoseRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addFastingBloodGlucoseRecord, biomarkerUnit, getDbGlucoseValue, profile } = useApp();
+  const { addFastingBloodGlucoseRecord, biomarkerUnit, getDbGlucoseValue, fastingBloodGlucoseRecords } = useApp();
   const { toast } = useToast();
   const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
@@ -55,41 +51,20 @@ export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBlood
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
-    try {
-        addFastingBloodGlucoseRecord({
-            date: startOfDay(data.date).toISOString(),
-            value: getDbGlucoseValue(data.value),
-        });
-        toast({
-            title: 'Success!',
-            description: 'Your new Fasting Blood Glucose record has been added.',
-        });
-        setOpen(false);
-    } catch (error) {
-        console.error("Failed to add record", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not save your record."
-        });
-    } finally {
-        setIsSubmitting(false);
-    }
+    addFastingBloodGlucoseRecord({
+        date: startOfDay(data.date).toISOString(),
+        value: getDbGlucoseValue(data.value),
+    });
+    toast({
+        title: 'Success!',
+        description: 'Your new Fasting Blood Glucose record has been added.',
+    });
+    setOpen(false);
+    setIsSubmitting(false);
   };
   
-   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication || profile.medication.length === 0) {
-      e.preventDefault();
-      toast({
-        variant: 'destructive',
-        title: 'Medication Required',
-        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
-      });
-    }
-  };
-
    const triggerButton = children || (
-      <AddRecordButton tooltipContent="Add Fasting Blood Glucose Record" onClick={handleTriggerClick} />
+      <AddRecordButton tooltipContent="Add Fasting Blood Glucose Record" />
    );
 
 
@@ -103,6 +78,7 @@ export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBlood
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
+        existingRecords={fastingBloodGlucoseRecords}
       >
         <FormField
             control={form.control}

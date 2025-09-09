@@ -5,7 +5,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { startOfDay, parseISO } from 'date-fns';
+import { startOfDay } from 'date-fns';
 
 import {
   Form,
@@ -35,7 +35,7 @@ interface AddVitaminDRecordDialogProps {
 export function AddVitaminDRecordDialog({ children, onSuccess }: AddVitaminDRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addVitaminDRecord, vitaminDRecords, biomarkerUnit, getDbVitaminDValue, profile } = useApp();
+  const { addVitaminDRecord, vitaminDRecords, biomarkerUnit, getDbVitaminDValue } = useApp();
   const { toast } = useToast();
 
   const getUnitLabel = (unit: 'conventional' | 'si') => (unit === 'si' ? 'nmol/L' : 'ng/mL');
@@ -59,27 +59,11 @@ export function AddVitaminDRecordDialog({ children, onSuccess }: AddVitaminDReco
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
-    const newDate = startOfDay(data.date);
-    
-    const dateExists = vitaminDRecords.some((record) => {
-        const storedDate = startOfDay(parseISO(record.date as string));
-        return storedDate.getTime() === newDate.getTime();
-    });
-
-    if (dateExists) {
-      toast({
-        variant: 'destructive',
-        title: 'Duplicate Entry',
-        description: 'A Vitamin D record for this date already exists. Please choose a different date.',
-      });
-      setIsSubmitting(false);
-      return;
-    }
     
     const dbValue = getDbVitaminDValue(data.value);
 
     addVitaminDRecord({
-      date: newDate.toISOString(),
+      date: startOfDay(data.date).toISOString(),
       value: dbValue,
     });
     toast({
@@ -91,18 +75,7 @@ export function AddVitaminDRecordDialog({ children, onSuccess }: AddVitaminDReco
     onSuccess?.();
   };
 
-  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication || profile.medication.length === 0) {
-      e.preventDefault();
-      toast({
-        variant: 'destructive',
-        title: 'Medication Required',
-        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
-      });
-    }
-  };
-
-  const triggerButton = children || <AddRecordButton tooltipContent="Add Vitamin D Record" onClick={handleTriggerClick} />;
+  const triggerButton = children || <AddRecordButton tooltipContent="Add Vitamin D Record" />;
 
   return (
       <AddRecordDialogLayout
@@ -114,6 +87,7 @@ export function AddVitaminDRecordDialog({ children, onSuccess }: AddVitaminDReco
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
+        existingRecords={vitaminDRecords}
       >
         <FormField
             control={form.control}

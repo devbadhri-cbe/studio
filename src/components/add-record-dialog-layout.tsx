@@ -15,6 +15,9 @@ import {
 import { Form } from '@/components/ui/form';
 import { Loader2 } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
+import { startOfDay, parseISO } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
+import { useApp } from '@/context/app-context';
 
 interface AddRecordDialogLayoutProps {
   open: boolean;
@@ -26,6 +29,7 @@ interface AddRecordDialogLayoutProps {
   onSubmit: (data: any) => void;
   isSubmitting: boolean;
   children: React.ReactNode;
+  existingRecords?: { date: string | Date }[];
 }
 
 export function AddRecordDialogLayout({
@@ -38,7 +42,45 @@ export function AddRecordDialogLayout({
   onSubmit,
   isSubmitting,
   children,
+  existingRecords,
 }: AddRecordDialogLayoutProps) {
+  const { toast } = useToast();
+  const { profile } = useApp();
+
+  const handleFormSubmit = (data: any) => {
+    if (existingRecords) {
+      const newDate = startOfDay(data.date);
+      const dateExists = existingRecords.some((record) => {
+          const storedDate = startOfDay(parseISO(record.date as string));
+          return storedDate.getTime() === newDate.getTime();
+      });
+
+      if (dateExists) {
+        toast({
+          variant: 'destructive',
+          title: 'Duplicate Entry',
+          description: 'A record for this date already exists. Please choose a different date.',
+        });
+        return;
+      }
+    }
+    onSubmit(data);
+  };
+  
+  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!profile.medication || profile.medication.length === 0) {
+      e.preventDefault();
+      toast({
+        variant: 'destructive',
+        title: 'Medication Required',
+        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
+      });
+      onOpenChange(false); // Close the dialog if it was about to open
+    } else {
+      onOpenChange(true);
+    }
+  };
+
   const content = (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
@@ -46,7 +88,7 @@ export function AddRecordDialogLayout({
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 py-4">
           {children}
           <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>
@@ -60,9 +102,20 @@ export function AddRecordDialogLayout({
   );
   
   if (trigger) {
+    // Clone the trigger to attach the onClick event
+    const triggerWithClick = React.cloneElement(trigger as React.ReactElement, {
+      onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+        // Allow original onClick from button to fire if it exists
+        if ((trigger as React.ReactElement).props.onClick) {
+          (trigger as React.ReactElement).props.onClick(e);
+        }
+        handleTriggerClick(e);
+      },
+    });
+
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogTrigger asChild>{trigger}</DialogTrigger>
+        <DialogTrigger asChild>{triggerWithClick}</DialogTrigger>
         {content}
       </Dialog>
     );

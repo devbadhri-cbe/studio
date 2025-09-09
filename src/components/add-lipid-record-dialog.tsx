@@ -30,7 +30,7 @@ interface AddLipidRecordDialogProps {
 export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addLipidRecord, profile, lipidRecords } = useApp();
+  const { addLipidRecord, lipidRecords } = useApp();
   const { toast } = useToast();
 
   const form = useForm({
@@ -57,25 +57,8 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
 
   const onSubmit = (data: any) => {
     setIsSubmitting(true);
-    const newDate = startOfDay(data.date);
-
-    const dateExists = lipidRecords.some((record) => {
-        const storedDate = startOfDay(parseISO(record.date as string));
-        return storedDate.getTime() === newDate.getTime();
-    });
-
-    if (dateExists) {
-      toast({
-        variant: 'destructive',
-        title: 'Duplicate Entry',
-        description: 'A lipid record for this date already exists. Please choose a different date.',
-      });
-      setIsSubmitting(false);
-      return;
-    }
-    
     addLipidRecord({
-      date: newDate.toISOString(),
+      date: startOfDay(data.date).toISOString(),
       totalCholesterol: Number(data.totalCholesterol),
       ldl: Number(data.ldl),
       hdl: Number(data.hdl),
@@ -90,18 +73,7 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
     onSuccess?.();
   };
   
-  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication || profile.medication.length === 0) {
-      e.preventDefault();
-      toast({
-        variant: 'destructive',
-        title: 'Medication Required',
-        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
-      });
-    }
-  };
-
-  const triggerButton = children || <AddRecordButton tooltipContent="Add Lipid Panel Record" onClick={handleTriggerClick} />;
+  const triggerButton = children || <AddRecordButton tooltipContent="Add Lipid Panel Record" />;
 
 
   return (
@@ -114,6 +86,7 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
+        existingRecords={lipidRecords}
       >
         <FormField
             control={form.control}

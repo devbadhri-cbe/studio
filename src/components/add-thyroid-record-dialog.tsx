@@ -30,7 +30,7 @@ interface AddThyroidRecordDialogProps {
 export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addThyroidRecord, profile, thyroidRecords } = useApp();
+  const { addThyroidRecord, thyroidRecords } = useApp();
   const { toast } = useToast();
 
   const form = useForm({
@@ -55,25 +55,8 @@ export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecord
 
   const onSubmit = (data: any) => {
     setIsSubmitting(true);
-    const newDate = startOfDay(data.date);
-
-    const dateExists = thyroidRecords.some((record) => {
-        const storedDate = startOfDay(parseISO(record.date as string));
-        return storedDate.getTime() === newDate.getTime();
-    });
-
-    if (dateExists) {
-      toast({
-        variant: 'destructive',
-        title: 'Duplicate Entry',
-        description: 'A thyroid record for this date already exists. Please choose a different date.',
-      });
-      setIsSubmitting(false);
-      return;
-    }
-    
     addThyroidRecord({
-      date: newDate.toISOString(),
+      date: startOfDay(data.date).toISOString(),
       tsh: Number(data.tsh),
       t3: Number(data.t3),
       t4: Number(data.t4),
@@ -87,18 +70,7 @@ export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecord
     onSuccess?.();
   };
   
-  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication || profile.medication.length === 0) {
-      e.preventDefault();
-      toast({
-        variant: 'destructive',
-        title: 'Medication Required',
-        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
-      });
-    }
-  };
-
-  const triggerButton = children || <AddRecordButton tooltipContent="Add Thyroid Record" onClick={handleTriggerClick} />;
+  const triggerButton = children || <AddRecordButton tooltipContent="Add Thyroid Record" />;
 
 
   return (
@@ -111,6 +83,7 @@ export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecord
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
+        existingRecords={thyroidRecords}
       >
         <FormField
             control={form.control}
