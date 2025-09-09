@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { Button } from './ui/button';
@@ -19,32 +19,36 @@ interface RecordItem {
 
 interface BiomarkerCardTemplateProps {
   title: string;
+  description?: string;
   icon: React.ReactNode;
   actions?: React.ReactNode;
-  statusDisplay: React.ReactNode;
-  chart: React.ReactNode;
+  statusDisplay?: React.ReactNode;
+  chart?: React.ReactNode;
   className?: string;
-  hasRecords: boolean;
+  hasRecords?: boolean;
   noRecordsMessage?: string;
   statusVariant?: 'destructive' | 'secondary' | 'outline' | 'default';
-  records: RecordItem[];
-  onDeleteRecord: (id: string) => void;
+  records?: RecordItem[];
+  onDeleteRecord?: (id: string) => void;
   isReadOnly?: boolean;
+  children?: React.ReactNode;
 }
 
 export function BiomarkerCardTemplate({
   title,
+  description,
   icon,
   actions,
   statusDisplay,
   chart,
   className,
-  hasRecords,
+  hasRecords = false,
   noRecordsMessage = "No records yet.",
   statusVariant = 'default',
-  records,
-  onDeleteRecord,
+  records = [],
+  onDeleteRecord = () => {},
   isReadOnly = false,
+  children
 }: BiomarkerCardTemplateProps) {
   const [isEditMode, setIsEditMode] = React.useState(false);
   const formatDate = useDateFormatter();
@@ -88,31 +92,47 @@ export function BiomarkerCardTemplate({
         </ul>
     </ScrollArea>
   );
+  
+  if (children) {
+    return (
+        <Card className={cn("w-full h-full shadow-xl", className)}>
+            <CardContent className="p-4 flex items-center gap-4">
+                 <div className="flex-shrink-0">{icon}</div>
+                 <div className="flex-1">
+                    {children}
+                 </div>
+            </CardContent>
+        </Card>
+    )
+  }
 
   return (
     <Card className={cn("w-full flex flex-col h-full shadow-xl", className)}>
-      <CardContent className="flex flex-col h-full text-sm p-4 space-y-4">
-        {/* 1. Heading with action button */}
-        <div className="flex items-center justify-between">
-           <div className='flex items-center gap-3 flex-1'>
-             {icon}
-             <h3 className="font-medium">{title}</h3>
-           </div>
-          <div className="flex items-center gap-1 shrink-0">
-            {hasRecords && !isReadOnly && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsEditMode(prev => !prev)}>
-                    {isEditMode ? <X className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{isEditMode ? 'Done' : 'Edit Records'}</TooltipContent>
-              </Tooltip>
-            )}
-            {actions}
+      <CardHeader>
+          <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {icon}
+                <div>
+                  <CardTitle>{title}</CardTitle>
+                  {description && <CardDescription>{description}</CardDescription>}
+                </div>
+              </div>
+               <div className="flex items-center gap-1 shrink-0">
+                  {hasRecords && !isReadOnly && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsEditMode(prev => !prev)}>
+                          {isEditMode ? <X className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{isEditMode ? 'Done' : 'Edit Records'}</TooltipContent>
+                    </Tooltip>
+                  )}
+                  {actions}
+              </div>
           </div>
-        </div>
-
+        </CardHeader>
+      <CardContent className="flex flex-col flex-1 h-full text-sm p-4 pt-0 space-y-4">
         {hasRecords ? (
           <div className="flex-1 flex flex-col min-h-0">
               {/* Top Section: Records & Status */}
