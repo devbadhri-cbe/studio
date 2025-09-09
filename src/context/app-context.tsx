@@ -55,6 +55,7 @@ interface AppContextType {
   addMedicalCondition: (condition: Omit<MedicalCondition, 'id' | 'status'> & Partial<Pick<MedicalCondition, 'status'>>) => Promise<void>;
   updateMedicalCondition: (condition: MedicalCondition) => Promise<void>;
   removeMedicalCondition: (id: string) => void;
+  removeAllMedicalConditions: () => void;
   addMedication: (medication: Omit<Medication, 'id'>) => void;
   removeMedication: (id: string) => void;
   setMedicationNil: () => void;
@@ -346,6 +347,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProfileState(prevProfile => ({
       ...prevProfile,
       presentMedicalConditions: prevProfile.presentMedicalConditions.filter(c => c.id !== id)
+    }));
+    setHasUnsavedChanges(true);
+  }, []);
+
+  const removeAllMedicalConditions = useCallback(() => {
+    setProfileState(prevProfile => ({
+      ...prevProfile,
+      presentMedicalConditions: []
     }));
     setHasUnsavedChanges(true);
   }, []);
@@ -737,6 +746,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addMedicalCondition,
     updateMedicalCondition,
     removeMedicalCondition,
+    removeAllMedicalConditions,
     addMedication,
     removeMedication,
     setMedicationNil,
