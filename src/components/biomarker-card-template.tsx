@@ -131,8 +131,8 @@ export function BiomarkerCardTemplate({
         {hasRecords ? (
           <div className="flex-1 flex flex-col min-h-0">
               {/* Top Section: Records & Status */}
-              <div className={cn("flex-1 flex flex-row gap-4 min-h-0 border-2 rounded-lg p-2", getBorderColorClass())}>
-                  <div className="flex-1 w-full flex items-center justify-center">
+              <div className={cn("flex-1 flex flex-row gap-4 min-h-0 border-2 rounded-lg p-2 justify-around", getBorderColorClass())}>
+                  <div className="w-full flex items-center justify-center">
                       {RecordsList}
                   </div>
                   <div className="flex-1 w-full flex flex-col justify-around">
