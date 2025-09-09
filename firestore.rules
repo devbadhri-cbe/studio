@@ -1,20 +1,9 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow public read access to the patients collection for the doctor's dashboard
-    // In a production app with user authentication, you would restrict this to authenticated users.
-    match /patients/{patientId} {
+    match /patients/{document=**} {
       allow read: if true;
-      allow write: if false; // Keep writes restricted for this public rule
-    }
-
-    // You would add more specific rules for other collections here.
-    // For now, we will allow writes to the patient collection as well,
-    // which is needed for the app to function. A real-world app would
-    // have more granular security.
-    match /patients/{patientId}/{document=**} {
-       allow read, write: if true;
+      allow write: if false;
     }
   }
 }
