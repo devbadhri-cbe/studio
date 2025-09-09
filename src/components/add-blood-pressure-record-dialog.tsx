@@ -5,23 +5,13 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { startOfDay, parseISO } from 'date-fns';
 
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
-import { Loader2 } from 'lucide-react';
+import { AddRecordDialogLayout } from './add-record-dialog-layout';
 
 
 interface AddBloodPressureRecordDialogProps {
@@ -103,85 +93,75 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
   const triggerButton = children || <AddRecordButton tooltipContent="Add Blood Pressure Record" onClick={handleTriggerClick} />;
 
   return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-           {triggerButton}
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add New Blood Pressure Record</DialogTitle>
-            <DialogDescription>Enter your systolic, diastolic, and heart rate readings.</DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-              <FormField
+      <AddRecordDialogLayout
+        open={open}
+        onOpenChange={setOpen}
+        trigger={triggerButton}
+        title="Add New Blood Pressure Record"
+        description="Enter your systolic, diastolic, and heart rate readings."
+        form={form}
+        onSubmit={onSubmit}
+        isSubmitting={isSubmitting}
+      >
+        <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+                <FormItem className="flex flex-col">
+                <FormLabel>Test Date</FormLabel>
+                <FormControl>
+                    <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    fromYear={new Date().getFullYear() - 10}
+                    toYear={new Date().getFullYear()}
+                    />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+        />
+        <div className="grid grid-cols-2 gap-4">
+            <FormField
                 control={form.control}
-                name="date"
+                name="systolic"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Test Date</FormLabel>
+                <FormItem>
+                    <FormLabel>Systolic (mmHg)</FormLabel>
                     <FormControl>
-                      <DatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        fromYear={new Date().getFullYear() - 10}
-                        toYear={new Date().getFullYear()}
-                      />
+                    <Input type="number" placeholder="e.g., 120" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                </FormItem>
                 )}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="systolic"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Systolic (mmHg)</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="e.g., 120" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="diastolic"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Diastolic (mmHg)</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="e.g., 80" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                  control={form.control}
-                  name="heartRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Heart Rate (bpm)</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="e.g., 70" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              <DialogFooter>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Record
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+            />
+            <FormField
+                control={form.control}
+                name="diastolic"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Diastolic (mmHg)</FormLabel>
+                    <FormControl>
+                    <Input type="number" placeholder="e.g., 80" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
+        <FormField
+            control={form.control}
+            name="heartRate"
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Heart Rate (bpm)</FormLabel>
+                    <FormControl>
+                    <Input type="number" placeholder="e.g., 70" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+      </AddRecordDialogLayout>
   );
 }
