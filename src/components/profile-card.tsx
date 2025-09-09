@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake } from 'lucide-react';
