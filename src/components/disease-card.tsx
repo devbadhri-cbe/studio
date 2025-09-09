@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { MedicalCondition } from '@/lib/types';
@@ -34,11 +33,17 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
   const Icon = statusInfo.icon;
   const isIcdLoading = condition.icdCode === 'loading...';
   
-  const handleRemoveCondition = (id: string) => {
+  const handleRemoveCondition = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
     removeMedicalCondition(id);
     if (isActive) {
       onSynopsisToggle(id);
     }
+  };
+
+  const handleToggleSynopsis = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSynopsisToggle(condition.id);
   };
 
   return (
@@ -48,10 +53,10 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
           <div className="flex items-center gap-2">
             <p className="font-semibold text-foreground">{condition.condition}</p>
             <Tooltip>
-            <TooltipTrigger>
-                <Icon className={cn('h-3.5 w-3.5', statusInfo.color)} />
-            </TooltipTrigger>
-            <TooltipContent>{statusInfo.text}</TooltipContent>
+              <TooltipTrigger asChild>
+                  <Icon className={cn('h-3.5 w-3.5', statusInfo.color)} />
+              </TooltipTrigger>
+              <TooltipContent>{statusInfo.text}</TooltipContent>
             </Tooltip>
           </div>
           {isIcdLoading ? (
@@ -66,17 +71,14 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
           )}
           <p className="text-xs text-muted-foreground">{formatDate(condition.date)}</p>
         </div>
-        <div className="flex items-center shrink-0 gap-2">
+        <div className="flex items-center shrink-0 gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 size="icon"
                 variant="ghost"
                 className="h-8 w-8 shrink-0"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onSynopsisToggle(condition.id)
-                }}
+                onClick={handleToggleSynopsis}
                 disabled={!condition.synopsis}
               >
                 <Info className="h-5 w-5 text-blue-500" />
@@ -84,17 +86,19 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
             </TooltipTrigger>
             <TooltipContent>View Synopsis</TooltipContent>
           </Tooltip>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8 shrink-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRemoveCondition(condition.id);
-            }}
-          >
-            <Trash2 className="h-5 w-5 text-destructive" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 shrink-0"
+                onClick={(e) => handleRemoveCondition(e, condition.id)}
+              >
+                <Trash2 className="h-5 w-5 text-destructive" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Delete Condition</TooltipContent>
+          </Tooltip>
         </div>
       </li>
       {condition.status === 'needs_revision' && (
