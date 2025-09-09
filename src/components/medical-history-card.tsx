@@ -2,7 +2,7 @@
 
 'use client';
 
-import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X } from 'lucide-react';
+import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
@@ -23,6 +23,13 @@ import { processMedicalCondition } from '@/ai/flows/process-medical-condition-fl
 import type { MedicalConditionOutput } from '@/lib/ai-types';
 import { toast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 function capitalizeFirstLetter(string: string) {
     if (!string) return string;
@@ -93,7 +100,7 @@ function MedicalConditionForm({
                 <FormItem>
                     <FormLabel>Condition Name</FormLabel>
                     <FormControl>
-                        <Input ref={inputRef} placeholder="e.g., Type 2 Diabetes" {...field} autoComplete="off" />
+                        <Input ref={inputRef} placeholder="e.g., Type 2 Diabetes" autoComplete="off" />
                     </FormControl>
                     <FormMessage />
                 </FormItem>
@@ -276,6 +283,62 @@ export function MedicalHistoryCard() {
     setIsProcessingCondition(false);
   }
   
+  const conditionActions = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Settings className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={() => setEditingCondition({} as MedicalCondition)}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Condition
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={() => setIsEditingConditions(!isEditingConditions)}
+          disabled={profile.presentMedicalConditions.length === 0}
+        >
+          <Edit className="mr-2 h-4 w-4" />
+          {isEditingConditions ? 'Done Editing' : 'Edit List'}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  const medicationActions = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Settings className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {!isMedicationNil && (
+          <DropdownMenuItem onSelect={() => setIsAddingMedication(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Medication
+          </DropdownMenuItem>
+        )}
+        {!isMedicationNil && (
+          <DropdownMenuItem
+            onSelect={() => setIsEditingMedications(!isEditingMedications)}
+            disabled={profile.medication.length === 0}
+          >
+            <Edit className="mr-2 h-4 w-4" />
+            {isEditingMedications ? 'Done Editing' : 'Edit List'}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={handleSetMedicationNil}>
+            <X className="mr-2 h-4 w-4" />
+            Set to Nil
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+
   return (
     <>
     <Card className="shadow-xl">
@@ -283,30 +346,7 @@ export function MedicalHistoryCard() {
             <MedicalInfoSection
               title="Present Medical Conditions"
               icon={<Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />}
-              actions={!editingCondition && (
-                <>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setIsEditingConditions(prev => !prev)}>
-                        {isEditingConditions ? <X className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{isEditingConditions ? 'Done' : 'Edit Conditions'}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setEditingCondition({} as MedicalCondition)}>
-                        <PlusCircle className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Add Condition</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </>
-              )}
+              actions={!editingCondition && conditionActions}
             >
               {editingCondition && (
                     <MedicalConditionForm 
@@ -343,49 +383,7 @@ export function MedicalHistoryCard() {
             <MedicalInfoSection
               title="Current Medication"
               icon={<Pill className="h-5 w-5 shrink-0 text-muted-foreground" />}
-              actions={!isAddingMedication && (
-                <>
-                  {profile.medication.length === 0 ? (
-                      <Tooltip>
-                          <TooltipTrigger asChild>
-                              <Button size="sm" variant="outline" className="h-8" onClick={handleSetMedicationNil}>
-                                  Set to Nil
-                              </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>If no medication is being taken.</TooltipContent>
-                      </Tooltip>
-                  ) : !isMedicationNil && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setIsEditingMedications(prev => !prev)}>
-                          {isEditingMedications ? <X className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{isEditingMedications ? 'Done' : 'Edit Medications'}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-
-                  {!isMedicationNil && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8"
-                          onClick={() => {
-                            setIsAddingMedication(true);
-                          }}
-                        >
-                          <PlusCircle className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Add Medication</TooltipContent>
-                    </Tooltip>
-                  )}
-                </>
-              )}
+              actions={!isAddingMedication && medicationActions}
             >
               {isAddingMedication && (
                     <Form {...medicationForm}>
@@ -461,3 +459,6 @@ export function MedicalHistoryCard() {
   );
 }
 
+
+
+    
