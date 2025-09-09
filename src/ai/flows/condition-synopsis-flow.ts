@@ -4,22 +4,9 @@
  * @fileOverview An AI flow to generate and translate a synopsis for a medical condition.
  *
  * - getConditionSynopsis - Generates a synopsis for a given medical condition.
- * - ConditionSynopsisInput - The input type for the getConditionSynopsis function.
- * - ConditionSynopsisOutput - The return type for the getConditionSynopsis function.
  */
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-
-export const ConditionSynopsisInputSchema = z.object({
-  conditionName: z.string().describe('The name of the medical condition.'),
-  language: z.string().optional().default('English').describe('The target language for the synopsis (e.g., "Spanish", "French").'),
-});
-export type ConditionSynopsisInput = z.infer<typeof ConditionSynopsisInputSchema>;
-
-export const ConditionSynopsisOutputSchema = z.object({
-  synopsis: z.string().describe('The generated synopsis in the requested language.'),
-});
-export type ConditionSynopsisOutput = z.infer<typeof ConditionSynopsisOutputSchema>;
+import { ConditionSynopsisInputSchema, ConditionSynopsisOutputSchema, type ConditionSynopsisInput, type ConditionSynopsisOutput } from '@/lib/ai-types';
 
 export async function getConditionSynopsis(input: ConditionSynopsisInput): Promise<ConditionSynopsisOutput> {
   return getConditionSynopsisFlow(input);

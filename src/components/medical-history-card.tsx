@@ -19,7 +19,8 @@ import { DiseaseCard } from './disease-card';
 import { Separator } from './ui/separator';
 import type { MedicalCondition, Medication } from '@/lib/types';
 import { parseISO } from 'date-fns';
-import { processMedicalCondition, MedicalConditionOutput } from '@/ai/flows/process-medical-condition-flow';
+import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
+import type { MedicalConditionOutput } from '@/lib/ai-types';
 import { toast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 

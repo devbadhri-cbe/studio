@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { useApp } from '@/context/app-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Separator } from './ui/separator';
-import { getConditionSynopsis, ConditionSynopsisOutput } from '@/ai/flows/condition-synopsis-flow';
+import { getConditionSynopsis } from '@/ai/flows/condition-synopsis-flow';
+import type { ConditionSynopsisOutput } from '@/lib/ai-types';
 import { toast } from '@/hooks/use-toast';
 
 const supportedLanguages = [

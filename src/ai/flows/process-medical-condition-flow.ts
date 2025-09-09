@@ -4,27 +4,10 @@
  * @fileOverview An AI flow to process and standardize medical conditions.
  *
  * - processMedicalCondition - Analyzes user input for a medical condition.
- * - MedicalConditionInput - The input type for the processMedicalCondition function.
- * - MedicalConditionOutput - The return type for the processMedicalCondition function.
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-
-export const MedicalConditionInputSchema = z.object({
-  condition: z.string().describe('The medical condition entered by the user.'),
-  existingConditions: z.array(z.string()).optional().describe('A list of existing conditions the patient already has.'),
-});
-export type MedicalConditionInput = z.infer<typeof MedicalConditionInputSchema>;
-
-export const MedicalConditionOutputSchema = z.object({
-    isValid: z.boolean().describe('Whether the input is a recognized medical condition.'),
-    standardizedName: z.string().optional().describe('The standardized medical name for the condition.'),
-    icdCode: z.string().optional().describe('The ICD-11 code for the condition.'),
-    synopsis: z.string().optional().describe('A brief, easy-to-understand synopsis of the condition.'),
-    suggestions: z.array(z.string()).optional().describe('A list of suggested valid condition names if the input is ambiguous or not recognized.'),
-});
-export type MedicalConditionOutput = z.infer<typeof MedicalConditionOutputSchema>;
+import { MedicalConditionInputSchema, MedicalConditionOutputSchema, type MedicalConditionInput, type MedicalConditionOutput } from '@/lib/ai-types';
 
 export async function processMedicalCondition(input: MedicalConditionInput): Promise<MedicalConditionOutput> {
   return processMedicalConditionFlow(input);
