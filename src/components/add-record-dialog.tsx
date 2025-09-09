@@ -28,7 +28,7 @@ interface AddRecordDialogProps {
 export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addHba1cRecord, hba1cRecords } = useApp();
+  const { addHba1cRecord, hba1cRecords, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -90,8 +90,19 @@ export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
     }
   };
 
+  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!profile.medication || profile.medication.length === 0) {
+      e.preventDefault();
+      toast({
+        variant: 'destructive',
+        title: 'Medication Required',
+        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
+      });
+    }
+  };
+
   const triggerButton = children || (
-      <AddRecordButton tooltipContent="Add HbA1c Record" />
+      <AddRecordButton tooltipContent="Add HbA1c Record" onClick={handleTriggerClick} />
    );
 
   return (

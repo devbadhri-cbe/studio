@@ -22,7 +22,6 @@ interface BloodPressureCardProps {
 
 export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps) {
   const { bloodPressureRecords, removeBloodPressureRecord } = useApp();
-  const [, setForceRender] = React.useState(0);
 
   const sortedRecords = React.useMemo(() => {
     return [...(bloodPressureRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -35,10 +34,6 @@ export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps
     return { text: 'Normal', variant: 'outline' as const };
   }
   
-  const handleSuccess = () => {
-    setForceRender(c => c + 1);
-  }
-
   const latestRecord = sortedRecords[0];
   const currentStatus = latestRecord ? getStatus(latestRecord.systolic, latestRecord.diastolic) : null;
 
@@ -46,7 +41,7 @@ export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps
   const Icon = <Heart className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = !isReadOnly ? (
-     <AddBloodPressureRecordDialog onSuccess={handleSuccess}>
+     <AddBloodPressureRecordDialog>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="ghost" className="h-8 w-8">

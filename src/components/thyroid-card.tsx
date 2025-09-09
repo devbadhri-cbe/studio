@@ -22,8 +22,6 @@ interface ThyroidCardProps {
 
 export function ThyroidCard({ isReadOnly = false }: ThyroidCardProps) {
   const { thyroidRecords, removeThyroidRecord } = useApp();
-  const [, setForceRender] = React.useState(0);
-
 
   const sortedRecords = React.useMemo(() => {
     return [...(thyroidRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -35,10 +33,6 @@ export function ThyroidCard({ isReadOnly = false }: ThyroidCardProps) {
     return { text: 'Normal', variant: 'outline' as const };
   };
   
-  const handleSuccess = () => {
-    setForceRender(c => c + 1);
-  }
-
   const latestRecord = sortedRecords[0];
   const currentStatus = latestRecord ? getStatus(latestRecord.tsh) : null;
 
@@ -46,7 +40,7 @@ export function ThyroidCard({ isReadOnly = false }: ThyroidCardProps) {
   const Icon = <Activity className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = !isReadOnly ? (
-    <AddThyroidRecordDialog onSuccess={handleSuccess}>
+    <AddThyroidRecordDialog>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="ghost" className="h-8 w-8">

@@ -22,7 +22,6 @@ interface LipidCardProps {
 
 export function LipidCard({ isReadOnly = false }: LipidCardProps) {
   const { lipidRecords, removeLipidRecord } = useApp();
-  const [, setForceRender] = React.useState(0);
 
   const sortedRecords = React.useMemo(() => {
     return [...(lipidRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -36,10 +35,6 @@ export function LipidCard({ isReadOnly = false }: LipidCardProps) {
     return { text: 'Very High', variant: 'destructive' as const };
   }
   
-  const handleSuccess = () => {
-    setForceRender(c => c + 1);
-  }
-
   const latestRecord = sortedRecords[0];
   const currentStatus = latestRecord ? getStatus(latestRecord.ldl) : null;
 
@@ -47,7 +42,7 @@ export function LipidCard({ isReadOnly = false }: LipidCardProps) {
   const Icon = <Flame className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = !isReadOnly ? (
-     <AddLipidRecordDialog onSuccess={handleSuccess}>
+     <AddLipidRecordDialog>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="ghost" className="h-8 w-8">

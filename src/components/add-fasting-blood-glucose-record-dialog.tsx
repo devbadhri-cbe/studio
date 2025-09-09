@@ -37,7 +37,7 @@ interface AddFastingBloodGlucoseRecordDialogProps {
 export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBloodGlucoseRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addFastingBloodGlucoseRecord, biomarkerUnit, getDbGlucoseValue } = useApp();
+  const { addFastingBloodGlucoseRecord, biomarkerUnit, getDbGlucoseValue, profile } = useApp();
   const { toast } = useToast();
   const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
@@ -83,8 +83,19 @@ export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBlood
     }
   };
   
+   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!profile.medication || profile.medication.length === 0) {
+      e.preventDefault();
+      toast({
+        variant: 'destructive',
+        title: 'Medication Required',
+        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
+      });
+    }
+  };
+
    const triggerButton = children || (
-      <AddRecordButton tooltipContent="Add Fasting Blood Glucose Record" />
+      <AddRecordButton tooltipContent="Add Fasting Blood Glucose Record" onClick={handleTriggerClick} />
    );
 
 
