@@ -33,7 +33,8 @@ Medications:
 4.  If no significant interactions are found:
     - Set 'hasInteractions' to false.
     - Provide a 'summary' stating that no major interactions were detected among the listed medications, but remind the user to always consult their doctor or pharmacist.
-5.  Your summary should be concise and easy to understand. Avoid overly technical jargon.`,
+5.  Your summary should be concise and easy to understand. Avoid overly technical jargon.
+6.  Translate the final summary into the following language: {{language}}.`,
 });
 
 const checkDrugInteractionsFlow = ai.defineFlow(

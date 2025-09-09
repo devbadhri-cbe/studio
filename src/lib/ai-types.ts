@@ -141,6 +141,7 @@ export type MedicationInfoOutput = z.infer<typeof MedicationInfoOutputSchema>;
 
 export const DrugInteractionInputSchema = z.object({
     medications: z.array(z.string()).describe('A list of medications to check for interactions. Each string should contain the medication name and dosage, e.g., ["Lisinopril 10mg", "Aspirin 81mg"]').min(2, 'At least two medications are required.'),
+    language: z.string().optional().default('English').describe('The target language for the summary (e.g., "Spanish", "French").'),
 });
 export type DrugInteractionInput = z.infer<typeof DrugInteractionInputSchema>;
 

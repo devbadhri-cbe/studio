@@ -2,11 +2,22 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ShieldAlert } from 'lucide-react';
+import { Languages, Loader2, ShieldAlert } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { SynopsisCardLayout } from './synopsis-card-layout';
 import { checkDrugInteractions } from '@/ai/flows/drug-interaction-flow';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+
+const supportedLanguages = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'fr', name: 'French' },
+    { code: 'de', name: 'German' },
+    { code: 'hi', name: 'Hindi' },
+    { code: 'ta', name: 'Tamil' },
+    { code: 'zh', name: 'Chinese' },
+];
 
 interface DrugInteractionViewerProps {
   medications: string[];
@@ -15,11 +26,16 @@ interface DrugInteractionViewerProps {
 
 export function DrugInteractionViewer({ medications, onClose }: DrugInteractionViewerProps) {
   const [isLoading, setIsLoading] = React.useState(true);
-  const [result, setResult] = React.useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = React.useState(false);
+  const [originalSummary, setOriginalSummary] = React.useState<string | null>(null);
+  const [translatedSummary, setTranslatedSummary] = React.useState<string | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = React.useState('en');
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleInteractionCheck = React.useCallback(async () => {
+  const summaryToDisplay = translatedSummary || originalSummary;
+
+  const fetchInteractionSummary = React.useCallback(async (language: string) => {
     if (medications.length < 2) {
       toast({
         variant: 'destructive',
@@ -29,28 +45,74 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
       onClose();
       return;
     }
-    setIsLoading(true);
+
+    if(language === 'en') {
+        setIsLoading(true);
+    } else {
+        setIsTranslating(true);
+    }
     setError(null);
-    setResult(null);
+
     try {
-        const response = await checkDrugInteractions({ medications });
+        const response = await checkDrugInteractions({ 
+            medications, 
+            language: supportedLanguages.find(l => l.code === language)?.name || 'English'
+        });
         if (response.summary) {
-            setResult(response.summary);
+            if (language === 'en') {
+                setOriginalSummary(response.summary);
+                setTranslatedSummary(null);
+            } else {
+                setTranslatedSummary(response.summary);
+            }
         } else {
-            setError('The AI could not determine if there were any interactions. Please consult your doctor.');
+            const errorMessage = 'The AI could not determine if there were any interactions. Please consult your doctor.';
+            setError(errorMessage);
+            setOriginalSummary(errorMessage);
         }
     } catch (e) {
         console.error("Interaction check failed", e);
-        setError('An error occurred. Could not analyze interactions.');
+        const errorMessage = 'An error occurred. Could not analyze interactions.';
+        setError(errorMessage);
+        setOriginalSummary(errorMessage);
     } finally {
         setIsLoading(false);
+        setIsTranslating(false);
     }
     
   }, [medications, toast, onClose]);
 
   React.useEffect(() => {
-    handleInteractionCheck();
-  }, [handleInteractionCheck]);
+    fetchInteractionSummary('en');
+  }, [fetchInteractionSummary]);
+  
+  const handleLanguageChange = (languageCode: string) => {
+    if (!languageCode) return;
+    setSelectedLanguage(languageCode);
+    if (languageCode === 'en') {
+      setTranslatedSummary(null);
+    } else {
+      fetchInteractionSummary(languageCode);
+    }
+  };
+
+  const footerContent = (
+     <div className="flex items-center gap-2">
+        <Languages className="h-4 w-4 text-muted-foreground" />
+        <Select value={selectedLanguage} onValueChange={handleLanguageChange} disabled={isLoading || isTranslating || !!error || !originalSummary}>
+            <SelectTrigger className="w-[150px] h-9 text-sm">
+                <SelectValue placeholder="Translate..." />
+            </SelectTrigger>
+            <SelectContent>
+                {supportedLanguages.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code} className="text-sm">
+                        {lang.name}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
+    </div>
+  );
 
 
   return (
@@ -60,9 +122,10 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
         title="Interaction Summary"
         description="AI-generated drug interaction analysis"
         isLoading={isLoading}
+        isTranslating={isTranslating}
         error={error}
-        synopsis={result}
-        footer={<></>}
+        synopsis={summaryToDisplay}
+        footer={footerContent}
         onClose={onClose}
     />
   );
