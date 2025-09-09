@@ -20,7 +20,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', ...fontFamily.sans],
-        headline: ['Inter', 'sans-serif'],
+        headline: ['Poppins', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
