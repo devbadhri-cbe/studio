@@ -48,12 +48,12 @@ export function DiseasePanelCard({
 
   return (
     <Card className={cn("w-full flex flex-col h-full shadow-md border-2 border-primary/20", isPanelEnabledForPatient ? "border-primary/20" : "border-dashed", className)}>
-        <CardHeader className="flex-row items-center justify-between">
-            <div className="flex items-center gap-3">
+        <CardHeader className="flex-row items-center justify-between border-2 border-red-500">
+            <div className="flex items-center gap-3 border-2 border-red-500">
             {icon}
             <CardTitle>{title}</CardTitle>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 border-2 border-red-500">
                 <Button 
                     size="sm"
                     variant={isPanelEnabledForPatient ? 'secondary' : 'default'}
@@ -91,13 +91,13 @@ export function DiseasePanelCard({
                 </DropdownMenu>
             </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-4 pt-0">
+      <CardContent className="flex-1 flex flex-col p-4 pt-0 border-2 border-red-500">
         {isPanelEnabledForPatient ? (
           <InteractivePanelGrid>
             {children}
           </InteractivePanelGrid>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4 min-h-[200px] bg-muted/30 rounded-lg">
+          <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4 min-h-[200px] bg-muted/30 rounded-lg border-2 border-red-500">
             <p className="text-sm">This panel is currently disabled for the patient.</p>
           </div>
         )}
