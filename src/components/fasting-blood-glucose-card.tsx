@@ -1,24 +1,14 @@
-
 'use client';
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { Button } from './ui/button';
-import { Droplet, Settings, Edit } from 'lucide-react';
+import { Droplet } from 'lucide-react';
 import { AddFastingBloodGlucoseRecordDialog } from './add-fasting-blood-glucose-record-dialog';
 import { FastingBloodGlucoseChart } from './fasting-blood-glucose-chart';
-import { Badge } from './ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
-import { BiomarkerCardTemplate } from './biomarker-card-template';
+import { BiomarkerCard } from './biomarker-card';
+import type { FastingBloodGlucoseRecord } from '@/lib/types';
 
 interface FastingBloodGlucoseCardProps {
   isReadOnly?: boolean;
@@ -26,93 +16,46 @@ interface FastingBloodGlucoseCardProps {
 
 export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGlucoseCardProps) {
   const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord, getDisplayGlucoseValue, biomarkerUnit, setBiomarkerUnit } = useApp();
-  const [isEditMode, setIsEditMode] = React.useState(false);
 
-  const sortedRecords = React.useMemo(() => {
-    return [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
-  }, [fastingBloodGlucoseRecords]);
-  
-  const getStatus = (value: number) => {
+  const getStatus = (record: FastingBloodGlucoseRecord) => {
     // Status is always checked against the stored mg/dL value
-    if (value < 100) return { text: 'Normal', variant: 'outline' as const };
-    if (value <= 125) return { text: 'Prediabetes', variant: 'secondary' as const };
+    if (record.value < 100) return { text: 'Normal', variant: 'outline' as const };
+    if (record.value <= 125) return { text: 'Prediabetes', variant: 'secondary' as const };
     return { text: 'Diabetes', variant: 'destructive' as const };
   }
-
-  const latestRecord = sortedRecords[0];
-  const currentStatus = latestRecord ? getStatus(latestRecord.value) : null;
+  
   const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
+  
+  const formatRecord = (record: FastingBloodGlucoseRecord) => ({
+      id: record.id,
+      date: record.date as string,
+      displayValue: `${getDisplayGlucoseValue(record.value)}`
+  });
 
-  const Title = `Fasting Blood Glucose (${unitLabel})`;
-  const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
-
-  const Actions = !isReadOnly ? (
-    <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="ghost" className="h-8 w-8">
-                  <Settings className="h-4 w-4" />
-              </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-64" align="end">
-             <AddFastingBloodGlucoseRecordDialog>
-                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Add New Record</DropdownMenuItem>
-            </AddFastingBloodGlucoseRecordDialog>
-            <DropdownMenuItem onSelect={() => setIsEditMode(prev => !prev)} disabled={sortedRecords.length === 0}>
-                <Edit className="mr-2 h-4 w-4" />
-                {isEditMode ? 'Done Editing' : 'Edit Records'}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel>Biomarker Units</DropdownMenuLabel>
-            <div className="flex items-center justify-center space-x-2 py-2">
-                <Label htmlFor="unit-switch-fbg" className="text-xs">mg/dL</Label>
-                <Switch
-                    id="unit-switch-fbg"
-                    checked={biomarkerUnit === 'si'}
-                    onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
-                />
-                <Label htmlFor="unit-switch-fbg" className="text-xs">mmol/L</Label>
-            </div>
-        </DropdownMenuContent>
-    </DropdownMenu>
-  ) : null;
-
-  const formattedRecords = sortedRecords.map(r => ({
-      id: r.id,
-      date: r.date as string,
-      displayValue: `${getDisplayGlucoseValue(r.value)}`
-  }));
-
-  const StatusDisplay = (
-    <div className="text-center text-xs text-muted-foreground flex items-center justify-center h-full">
-      {currentStatus ? (
-        <div className="flex flex-col items-center gap-1">
-            <span>Current Status:</span>
-            <Badge variant={currentStatus.variant} className={currentStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
-            {currentStatus.text}
-            </Badge>
-        </div>
-      ): <p>No status</p>}
+  const UnitSwitch = (
+    <div className="flex items-center justify-center space-x-2 px-2 py-1">
+        <Label htmlFor="unit-switch-fbg" className="text-xs">mg/dL</Label>
+        <Switch
+            id="unit-switch-fbg"
+            checked={biomarkerUnit === 'si'}
+            onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
+        />
+        <Label htmlFor="unit-switch-fbg" className="text-xs">mmol/L</Label>
     </div>
   );
 
-  const Chart = (
-    <FastingBloodGlucoseChart />
-  );
-  
   return (
-    <BiomarkerCardTemplate
-      title={Title}
-      icon={Icon}
-      actions={Actions}
-      records={formattedRecords}
-      onDeleteRecord={removeFastingBloodGlucoseRecord}
-      statusDisplay={StatusDisplay}
-      chart={Chart}
-      hasRecords={(fastingBloodGlucoseRecords || []).length > 0}
-      statusVariant={currentStatus?.variant}
+    <BiomarkerCard<FastingBloodGlucoseRecord>
+      title={`Fasting Blood Glucose (${unitLabel})`}
+      icon={<Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />}
+      records={fastingBloodGlucoseRecords}
+      onRemoveRecord={removeFastingBloodGlucoseRecord}
+      getStatus={getStatus}
+      formatRecord={formatRecord}
+      addRecordDialog={<AddFastingBloodGlucoseRecordDialog />}
+      chart={<FastingBloodGlucoseChart />}
+      unitSwitch={UnitSwitch}
       isReadOnly={isReadOnly}
-      isEditMode={isEditMode}
-      setIsEditMode={setIsEditMode}
     />
   );
 }
