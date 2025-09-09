@@ -6,7 +6,6 @@ import { Flame } from 'lucide-react';
 import { useApp } from '@/context/app-context';
 import { DiseasePanelCard } from './disease-panel-card';
 import { type BiomarkerKey } from '@/lib/biomarker-cards';
-import { InteractivePanelGrid } from './interactive-panel-grid';
 import { LipidCard } from './lipid-card';
 
 
@@ -34,9 +33,9 @@ export function LipidsPanel() {
         allPanelBiomarkers={allLipidsBiomarkers}
     >
       {cardsToShow.length > 0 ? (
-        <InteractivePanelGrid>
+        <>
             {cardsToShow}
-        </InteractivePanelGrid>
+        </>
       ) : (
         <div className="flex h-full items-center justify-center">
             <p className="text-sm text-muted-foreground text-center">No lipid biomarkers enabled. <br/> Add a condition like 'Hyperlipidemia' to get started.</p>

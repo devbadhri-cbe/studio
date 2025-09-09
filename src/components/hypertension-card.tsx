@@ -6,7 +6,6 @@ import { Heart } from 'lucide-react';
 import { useApp } from '@/context/app-context';
 import { DiseasePanelCard } from './disease-panel-card';
 import { type BiomarkerKey } from '@/lib/biomarker-cards';
-import { InteractivePanelGrid } from './interactive-panel-grid';
 import { WeightRecordCard } from './weight-record-card';
 import { BloodPressureCard } from './blood-pressure-card';
 
@@ -28,10 +27,8 @@ export function HypertensionCard() {
         panelKey={HYPERTENSION_PANEL_KEY}
         allPanelBiomarkers={allHypertensionBiomarkers}
     >
-       <InteractivePanelGrid>
-          {enabledForPanel.includes('weight') && <WeightRecordCard key="weight" />}
-          {enabledForPanel.includes('bloodPressure') && <BloodPressureCard key="bloodPressure" />}
-       </InteractivePanelGrid>
+      {enabledForPanel.includes('weight') && <WeightRecordCard key="weight" />}
+      {enabledForPanel.includes('bloodPressure') && <BloodPressureCard key="bloodPressure" />}
     </DiseasePanelCard>
   );
 }

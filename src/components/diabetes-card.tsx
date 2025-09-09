@@ -9,7 +9,6 @@ import { type BiomarkerKey } from '@/lib/biomarker-cards';
 import { Hba1cCard } from './hba1c-card';
 import { FastingBloodGlucoseCard } from './fasting-blood-glucose-card';
 import { HemoglobinCard } from './hemoglobin-card';
-import { InteractivePanelGrid } from './interactive-panel-grid';
 
 const DIABETES_PANEL_KEY = 'diabetes';
 const allDiabetesBiomarkers: BiomarkerKey[] = ['hba1c', 'glucose', 'hemoglobin'];
@@ -28,11 +27,9 @@ export function DiabetesCard() {
         panelKey={DIABETES_PANEL_KEY}
         allPanelBiomarkers={allDiabetesBiomarkers}
     >
-       <InteractivePanelGrid>
-          {enabledForPanel.includes('hba1c') && <Hba1cCard key="hba1c" />}
-          {enabledForPanel.includes('glucose') && <FastingBloodGlucoseCard key="glucose" />}
-          {enabledForPanel.includes('hemoglobin') && <HemoglobinCard key="hemoglobin" />}
-       </InteractivePanelGrid>
+        {enabledForPanel.includes('hba1c') && <Hba1cCard key="hba1c" />}
+        {enabledForPanel.includes('glucose') && <FastingBloodGlucoseCard key="glucose" />}
+        {enabledForPanel.includes('hemoglobin') && <HemoglobinCard key="hemoglobin" />}
     </DiseasePanelCard>
   );
 }
