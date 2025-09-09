@@ -16,6 +16,8 @@ import { availableBiomarkerCards, type BiomarkerKey, DiseasePanelKey } from '@/l
 import { useApp } from '@/context/app-context';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
+import { Checkbox } from './ui/checkbox';
+import { Label } from './ui/label';
 
 interface DiseasePanelCardProps {
   title: string;
@@ -39,8 +41,7 @@ export function DiseasePanelCard({
   const enabledForPanel = profile.enabledBiomarkers?.[panelKey] || [];
   const isPanelEnabledForPatient = profile.enabledBiomarkers?.hasOwnProperty(panelKey);
   
-  const handlePanelToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handlePanelToggle = (checked: boolean) => {
     toggleDiseasePanel(panelKey);
   }
 
@@ -52,13 +53,16 @@ export function DiseasePanelCard({
           <CardTitle>{title}</CardTitle>
         </div>
         <div className="flex items-center gap-2">
-            <Button 
-                size="sm"
-                variant={isPanelEnabledForPatient ? 'secondary' : 'default'}
-                onClick={handlePanelToggle}
-            >
-                  {isPanelEnabledForPatient ? "Disable Panel" : "Enable Panel"}
-            </Button>
+            <div className="flex items-center space-x-2">
+                <Checkbox
+                    id={`enable-panel-${panelKey}`}
+                    checked={isPanelEnabledForPatient}
+                    onCheckedChange={handlePanelToggle}
+                />
+                <Label htmlFor={`enable-panel-${panelKey}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    {isPanelEnabledForPatient ? "Enabled" : "Disabled"}
+                </Label>
+            </div>
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient}>
