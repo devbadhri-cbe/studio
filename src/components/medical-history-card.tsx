@@ -22,17 +22,6 @@ import { processMedicalCondition } from '@/ai/flows/process-medical-condition-fl
 import type { MedicalConditionOutput } from '@/lib/ai-types';
 import { toast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
 
 function capitalizeFirstLetter(string: string) {
     if (!string) return string;
@@ -127,14 +116,13 @@ type ActiveSynopsis = {
 } | null;
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, updateMedicalCondition, addMedication, removeMedication, setMedicationNil, removeAllMedicalConditions } = useApp();
+  const { profile, addMedicalCondition, updateMedicalCondition, removeMedicalCondition, addMedication, removeMedication, setMedicationNil } = useApp();
   const [editingCondition, setEditingCondition] = React.useState<MedicalCondition | null>(null);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
   const [isSubmittingMedication, setIsSubmittingMedication] = React.useState(false);
   const [isProcessingCondition, setIsProcessingCondition] = React.useState(false);
-  const [isClearAllDialogOpen, setIsClearAllDialogOpen] = React.useState(false);
 
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -261,23 +249,6 @@ export function MedicalHistoryCard() {
     setIsProcessingCondition(false);
   }
   
-  const handleConfirmClearAll = async () => {
-    try {
-      await removeAllMedicalConditions();
-      setIsClearAllDialogOpen(false);
-      toast({
-        title: 'Conditions Cleared',
-        description: 'All medical conditions have been removed from your unsaved changes.',
-      });
-    } catch (e) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not remove conditions. Please try again.',
-      });
-    }
-  };
-
   return (
     <>
     <Card className="shadow-xl">
@@ -290,19 +261,6 @@ export function MedicalHistoryCard() {
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                         {!editingCondition && (
-                            <>
-                            {profile.presentMedicalConditions.length > 0 && (
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button size="icon" variant="destructive-outline" className="h-8 w-8" onClick={() => setIsClearAllDialogOpen(true)}>
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Remove All Conditions</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            )}
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setEditingCondition({} as MedicalCondition)}>
@@ -313,7 +271,6 @@ export function MedicalHistoryCard() {
                                     <p>Add Condition</p>
                                 </TooltipContent>
                             </Tooltip>
-                            </>
                         )}
                     </div>
                 </div>
@@ -456,22 +413,6 @@ export function MedicalHistoryCard() {
             </div>
         </CardContent>
     </Card>
-    <AlertDialog open={isClearAllDialogOpen} onOpenChange={setIsClearAllDialogOpen}>
-        <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                    This will remove all medical conditions. This action can be saved or undone from the "Unsaved Changes" bar.
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleConfirmClearAll} variant="destructive">
-                    Remove All
-                </AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-    </AlertDialog>
     </>
   );
 }
