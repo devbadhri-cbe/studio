@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings } from 'lucide-react';
@@ -164,12 +163,12 @@ function MedicalConditionForm({
           </Alert>
         )}
        
-        <div className="flex justify-between items-end gap-4 border border-blue-500">
+        <div className="flex justify-between items-end gap-4 border border-purple-500">
           <FormField
             control={form.control}
             name="date"
             render={({ field }) => (
-              <FormItem className="border border-green-500">
+              <FormItem>
                 <FormLabel>Date of Diagnosis</FormLabel>
                 <FormControl>
                   <DatePicker
@@ -183,7 +182,7 @@ function MedicalConditionForm({
               </FormItem>
             )}
           />
-          <div className="flex items-center gap-2 border border-purple-500">
+          <div className="flex items-center gap-2 border border-blue-500">
               <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
               <Button type="submit" size="sm" disabled={isProcessing}>
                   {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -207,12 +206,12 @@ function MedicalInfoSection({ title, icon, actions, children }: MedicalInfoSecti
   return (
     <Card className="shadow-xl h-full flex flex-col">
         <CardContent className="space-y-4 text-sm p-4 flex-1 flex flex-col">
-            <div className="flex items-center justify-between mb-2">
-                <div className='flex items-center gap-3 flex-1'>
+            <div className="flex items-center justify-between mb-2 border border-pink-500">
+                <div className='flex items-center gap-3 flex-1 border border-yellow-500'>
                     {icon}
                     <h3 className="font-medium">{title}</h3>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0 border border-orange-500">
                     {actions}
                 </div>
             </div>
