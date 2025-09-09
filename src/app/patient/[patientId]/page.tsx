@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/app-context';
 import { getPatient, updatePatient } from '@/lib/firestore';
 import { PatientDashboard } from '@/components/patient-dashboard';
@@ -12,6 +12,7 @@ import type { Patient } from '@/lib/types';
 
 export default function PatientPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const { setPatientData, isClient } = useApp();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -25,12 +26,14 @@ export default function PatientPage() {
           setIsLoading(false);
           return;
       };
+      
+      const isDoctorView = searchParams.get('view') === 'doctor';
 
       try {
         const rawPatientData = await getPatient(patientId);
         if (rawPatientData) {
           const patientData = processPatientData(rawPatientData);
-          setPatientData(patientData);
+          setPatientData(patientData, isDoctorView);
         } else {
           setError(`No patient found with ID: ${patientId}`);
         }
@@ -46,7 +49,7 @@ export default function PatientPage() {
         loadPatientData();
     }
     
-  }, [params.patientId, isClient, setPatientData, toast]);
+  }, [params.patientId, isClient, setPatientData, toast, searchParams]);
 
   if (isLoading || !isClient) {
     return (

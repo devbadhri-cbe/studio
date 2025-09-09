@@ -93,7 +93,7 @@ interface AppContextType {
   isClient: boolean;
   dashboardView: DashboardView;
   setDashboardView: (view: DashboardView) => void;
-  setPatientData: (patient: Patient) => void;
+  setPatientData: (patient: Patient, isDoctorView?: boolean) => void;
   biomarkerUnit: BiomarkerUnitSystem;
   setBiomarkerUnit: (unit: BiomarkerUnitSystem) => void;
   getDisplayVitaminDValue: (value: number) => number;
@@ -227,7 +227,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return value;
   }, [biomarkerUnit]);
   
-  const setPatientData = useCallback((patient: Patient) => {
+  const setPatientData = useCallback((patient: Patient, isDoctorView: boolean = false) => {
     const patientProfile: UserProfile = {
       id: patient.id,
       name: patient.name,
@@ -245,11 +245,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       bmi: patient.bmi,
       dashboardSuggestions: patient.dashboardSuggestions || [],
     };
-    if (document.referrer.includes('/doctor/dashboard')) {
-        setIsDoctorLoggedIn(true);
-    } else {
-        setIsDoctorLoggedIn(false);
-    }
+    setIsDoctorLoggedIn(isDoctorView);
     setProfileState(patientProfile);
     setHba1cRecordsState(patient.hba1cRecords || []);
     setFastingBloodGlucoseRecordsState(patient.fastingBloodGlucoseRecords || []);

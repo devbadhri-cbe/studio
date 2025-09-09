@@ -90,7 +90,7 @@ export default function DoctorDashboardPage() {
   }, [fetchPatients]);
 
   const handleViewPatient = (patient: Patient) => {
-    router.push(`/patient/${patient.id}`);
+    router.push(`/patient/${patient.id}?view=doctor`);
   };
 
   const handleEditPatient = (patient: Patient) => {
