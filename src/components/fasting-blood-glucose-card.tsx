@@ -5,8 +5,6 @@ import { useApp } from '@/context/app-context';
 import { Droplet } from 'lucide-react';
 import { AddFastingBloodGlucoseRecordDialog } from './add-fasting-blood-glucose-record-dialog';
 import { FastingBloodGlucoseChart } from './fasting-blood-glucose-chart';
-import { Label } from './ui/label';
-import { Switch } from './ui/switch';
 import { BiomarkerCard } from './biomarker-card';
 import type { FastingBloodGlucoseRecord } from '@/lib/types';
 
@@ -32,17 +30,12 @@ export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGluc
       displayValue: `${getDisplayGlucoseValue(record.value)}`
   });
 
-  const UnitSwitch = (
-    <div className="flex items-center justify-center space-x-2 px-2 py-1">
-        <Label htmlFor="unit-switch-fbg" className="text-xs">mg/dL</Label>
-        <Switch
-            id="unit-switch-fbg"
-            checked={biomarkerUnit === 'si'}
-            onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
-        />
-        <Label htmlFor="unit-switch-fbg" className="text-xs">mmol/L</Label>
-    </div>
-  );
+  const unitSwitchProps = {
+    labelA: 'mg/dL',
+    labelB: 'mmol/L',
+    isChecked: biomarkerUnit === 'si',
+    onCheckedChange: (checked: boolean) => setBiomarkerUnit(checked ? 'si' : 'conventional'),
+  };
 
   return (
     <BiomarkerCard<FastingBloodGlucoseRecord>
@@ -54,7 +47,7 @@ export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGluc
       formatRecord={formatRecord}
       addRecordDialog={<AddFastingBloodGlucoseRecordDialog />}
       chart={<FastingBloodGlucoseChart />}
-      unitSwitch={UnitSwitch}
+      unitSwitch={unitSwitchProps}
       isReadOnly={isReadOnly}
     />
   );

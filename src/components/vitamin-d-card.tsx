@@ -5,8 +5,6 @@ import { useApp } from '@/context/app-context';
 import { Sun } from 'lucide-react';
 import { AddVitaminDRecordDialog } from './add-vitamin-d-record-dialog';
 import { VitaminDChart } from './vitamin-d-chart';
-import { Label } from './ui/label';
-import { Switch } from './ui/switch';
 import { BiomarkerCard } from './biomarker-card';
 import type { VitaminDRecord } from '@/lib/types';
 
@@ -32,17 +30,12 @@ export function VitaminDCard({ isReadOnly = false }: VitaminDCardProps) {
       displayValue: `${getDisplayVitaminDValue(record.value)}`
   });
 
-  const UnitSwitch = (
-    <div className="flex items-center justify-center space-x-2 px-2 py-1">
-        <Label htmlFor="unit-switch-vitd" className="text-xs">ng/mL</Label>
-        <Switch
-            id="unit-switch-vitd"
-            checked={biomarkerUnit === 'si'}
-            onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
-        />
-        <Label htmlFor="unit-switch-vitd" className="text-xs">nmol/L</Label>
-    </div>
-  );
+  const unitSwitchProps = {
+    labelA: 'ng/mL',
+    labelB: 'nmol/L',
+    isChecked: biomarkerUnit === 'si',
+    onCheckedChange: (checked: boolean) => setBiomarkerUnit(checked ? 'si' : 'conventional'),
+  };
 
   return (
     <BiomarkerCard<VitaminDRecord>
@@ -54,7 +47,7 @@ export function VitaminDCard({ isReadOnly = false }: VitaminDCardProps) {
       formatRecord={formatRecord}
       addRecordDialog={<AddVitaminDRecordDialog />}
       chart={<VitaminDChart />}
-      unitSwitch={UnitSwitch}
+      unitSwitch={unitSwitchProps}
       isReadOnly={isReadOnly}
     />
   );

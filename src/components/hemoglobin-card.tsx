@@ -5,8 +5,6 @@ import { useApp } from '@/context/app-context';
 import { Droplet } from 'lucide-react';
 import { AddHemoglobinRecordDialog } from './add-hemoglobin-record-dialog';
 import { HemoglobinChart } from './hemoglobin-chart';
-import { Label } from './ui/label';
-import { Switch } from './ui/switch';
 import { BiomarkerCard } from './biomarker-card';
 import type { HemoglobinRecord } from '@/lib/types';
 
@@ -40,17 +38,12 @@ export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
       displayValue: `${getDisplayHemoglobinValue(record.hemoglobin)}`
   });
 
-  const UnitSwitch = (
-    <div className="flex items-center justify-center space-x-2 px-2 py-1">
-        <Label htmlFor="unit-switch-anemia" className="text-xs">g/dL</Label>
-        <Switch
-            id="unit-switch-anemia"
-            checked={biomarkerUnit === 'si'}
-            onCheckedChange={(checked) => setBiomarkerUnit(checked ? 'si' : 'conventional')}
-        />
-        <Label htmlFor="unit-switch-anemia" className="text-xs">g/L</Label>
-    </div>
-  );
+  const unitSwitchProps = {
+    labelA: 'g/dL',
+    labelB: 'g/L',
+    isChecked: biomarkerUnit === 'si',
+    onCheckedChange: (checked: boolean) => setBiomarkerUnit(checked ? 'si' : 'conventional'),
+  };
   
   return (
     <BiomarkerCard<HemoglobinRecord>
@@ -62,7 +55,7 @@ export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
       formatRecord={formatRecord}
       addRecordDialog={<AddHemoglobinRecordDialog />}
       chart={<HemoglobinChart />}
-      unitSwitch={UnitSwitch}
+      unitSwitch={unitSwitchProps}
       isReadOnly={isReadOnly}
     />
   );

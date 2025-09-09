@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
 
 interface Record {
   id: string;
@@ -25,6 +27,13 @@ interface Status {
   variant: 'destructive' | 'secondary' | 'outline' | 'default';
 }
 
+interface UnitSwitchProps {
+  labelA: string;
+  labelB: string;
+  isChecked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}
+
 interface BiomarkerCardProps<T extends Record> {
   title: string;
   icon: React.ReactNode;
@@ -34,7 +43,7 @@ interface BiomarkerCardProps<T extends Record> {
   formatRecord: (record: T) => { id: string; date: string; displayValue: string };
   addRecordDialog: React.ReactNode;
   chart: React.ReactNode;
-  unitSwitch?: React.ReactNode;
+  unitSwitch?: UnitSwitchProps;
   isReadOnly?: boolean;
 }
 
@@ -61,6 +70,19 @@ export function BiomarkerCard<T extends Record>({
 
   const formattedRecords = sortedRecords.map(formatRecord);
 
+  const UnitSwitchComponent = unitSwitch ? (
+    <div className="flex items-center justify-between space-x-2 px-2 py-1">
+        <Label htmlFor={`unit-switch-${title}`} className="text-xs">{unitSwitch.labelA}</Label>
+        <Switch
+            id={`unit-switch-${title}`}
+            checked={unitSwitch.isChecked}
+            onCheckedChange={unitSwitch.onCheckedChange}
+            onSelect={(e) => e.preventDefault()}
+        />
+        <Label htmlFor={`unit-switch-${title}`} className="text-xs">{unitSwitch.labelB}</Label>
+    </div>
+  ) : null;
+
   const Actions = !isReadOnly ? (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -78,11 +100,13 @@ export function BiomarkerCard<T extends Record>({
           <Edit className="mr-2 h-4 w-4" />
           {isEditMode ? 'Done Editing' : 'Edit Records'}
         </DropdownMenuItem>
-        {unitSwitch && (
+        {UnitSwitchComponent && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Biomarker Units</DropdownMenuLabel>
-            {unitSwitch}
+            <div onClick={(e) => e.stopPropagation()}>
+                {UnitSwitchComponent}
+            </div>
           </>
         )}
       </DropdownMenuContent>
