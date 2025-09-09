@@ -35,10 +35,11 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#A1C9F7" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body>
         <AppProvider>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen pt-[env(safe-area-inset-top)]">
             {children}
           </div>
           <Toaster />
