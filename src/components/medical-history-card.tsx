@@ -169,7 +169,7 @@ function MedicalConditionForm({
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel>Date of Diagnosis</FormLabel>
                   <FormControl>
                     <DatePicker
