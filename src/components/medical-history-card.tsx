@@ -168,7 +168,7 @@ export function MedicalHistoryCard() {
 
       const result = await processMedicalCondition({ 
         condition: data.condition,
-        existingConditions: conditionsForCheck.map(c => c.condition)
+        existingConditions: conditionsForCheck.map(c => ({ condition: c.condition, icdCode: c.icdCode || '' }))
       });
       
       if(result.isValid && result.standardizedName && result.icdCode && result.synopsis) {

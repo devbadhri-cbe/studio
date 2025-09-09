@@ -22,9 +22,16 @@ const prompt = ai.definePrompt({
     prompt: `You are a medical data validation expert. Your task is to analyze a user-provided medical condition.
 
 User Input: "{{condition}}"
-Existing Conditions: {{#if existingConditions}}{{#each existingConditions}}- {{this}}\n{{/each}}{{else}}None{{/if}}
+Existing Conditions:
+{{#if existingConditions}}
+  {{#each existingConditions}}
+- Name: {{this.condition}}, ICD-11: {{this.icdCode}}
+  {{/each}}
+{{else}}
+  None
+{{/if}}
 
-1.  First, check if the user's input is effectively the same as any of the 'Existing Conditions'. If it is, immediately set 'isValid' to false and provide no suggestions. This is the most important step.
+1.  First, check if the user's input, after being standardized, would be a duplicate of any of the 'Existing Conditions'. A duplicate is defined as having the same standardized name OR the same ICD-11 code. If it is a duplicate, immediately set 'isValid' to false and provide no suggestions. This is the most important step.
 2.  If it is not a duplicate, determine if the input is a valid, specific medical condition. "Feeling tired" is not specific, but "Chronic Fatigue Syndrome" is.
 3.  If the input is a valid condition and not a duplicate:
     - Set 'isValid' to true.
