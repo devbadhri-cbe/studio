@@ -98,7 +98,7 @@ export function PatientDashboard() {
                 <div className="lg:col-span-1 flex flex-col gap-6">
                     <ProfileCard />
                 </div>
-                 <div className="lg:col-span-2 grid grid-cols-1 gap-6">
+                 <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                      <MedicalHistoryCard />
                 </div>
             </div>
@@ -129,28 +129,30 @@ export function PatientDashboard() {
                     </CollapsibleContent>
                 </Collapsible>
                 
-                <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
-                    <DashboardSectionToggle
-                        title="Biomarker Cards"
-                        icon={<Shapes className="h-5 w-5" />}
-                        isOpen={isBiomarkersOpen}
-                    >
-                         {isBiomarkersOpen && (
-                            <div className="relative">
-                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search biomarkers..."
-                                    value={biomarkerSearchQuery}
-                                    onChange={(e) => setBiomarkerSearchQuery(e.target.value)}
-                                    className="pl-8 h-full"
-                                />
-                            </div>
-                        )}
-                    </DashboardSectionToggle>
-                    <CollapsibleContent className="mt-4">
-                        <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
-                    </CollapsibleContent>
-                </Collapsible>
+                {isDoctorLoggedIn && (
+                  <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
+                      <DashboardSectionToggle
+                          title="Biomarker Cards"
+                          icon={<Shapes className="h-5 w-5" />}
+                          isOpen={isBiomarkersOpen}
+                      >
+                          {isBiomarkersOpen && (
+                              <div className="relative">
+                                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                  <Input
+                                      placeholder="Search biomarkers..."
+                                      value={biomarkerSearchQuery}
+                                      onChange={(e) => setBiomarkerSearchQuery(e.target.value)}
+                                      className="pl-8 h-full"
+                                  />
+                              </div>
+                          )}
+                      </DashboardSectionToggle>
+                      <CollapsibleContent className="mt-4">
+                          <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
+                      </CollapsibleContent>
+                  </Collapsible>
+                )}
             </div>
 
             
