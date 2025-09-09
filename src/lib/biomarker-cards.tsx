@@ -16,7 +16,6 @@ import { AddVitaminDRecordDialog } from '@/components/add-vitamin-d-record-dialo
 import { AddWeightRecordDialog } from '@/components/add-weight-record-dialog';
 import { DiabetesCard } from '@/components/diabetes-card';
 import { HypertensionCard } from '@/components/hypertension-card';
-import { LipidsPanel } from '@/components/lipids-panel';
 import { BiomarkerKey, DiseasePanelKey } from './types';
 import { AddLipidRecordDialog } from '@/components/add-lipid-record-dialog';
 import { LipidCard } from '@/components/lipid-card';
@@ -78,5 +77,4 @@ export const availableBiomarkerCards = {
 export const availableDiseasePanels = [
     { key: 'diabetes' as DiseasePanelKey, label: 'Diabetes Panel', component: <DiabetesCard /> },
     { key: 'hypertension' as DiseasePanelKey, label: 'Hypertension Panel', component: <HypertensionCard /> },
-    { key: 'lipids' as DiseasePanelKey, label: 'Lipids Panel', component: <LipidsPanel /> },
 ];

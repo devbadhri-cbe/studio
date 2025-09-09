@@ -221,4 +221,4 @@ export type BiomarkerKey =
   | 'hdl' 
   | 'triglycerides';
 
-export type DiseasePanelKey = 'diabetes' | 'hypertension' | 'lipids';
+export type DiseasePanelKey = 'diabetes' | 'hypertension';
