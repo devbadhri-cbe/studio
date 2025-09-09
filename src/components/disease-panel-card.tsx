@@ -16,7 +16,6 @@ import { availableBiomarkerCards, type BiomarkerKey, DiseasePanelKey } from '@/l
 import { useApp } from '@/context/app-context';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
-import { InteractivePanelGrid } from './interactive-panel-grid';
 
 interface DiseasePanelCardProps {
   title: string;
@@ -92,10 +91,8 @@ export function DiseasePanelCard({
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-4 pt-0">
         {isPanelEnabledForPatient ? (
-          <div className="border-2 border-red-500">
-            <InteractivePanelGrid>
-              {children}
-            </InteractivePanelGrid>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-start">
+            {children}
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4 min-h-[200px] bg-muted/30 rounded-lg">

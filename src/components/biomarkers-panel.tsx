@@ -6,7 +6,6 @@ import { useApp } from '@/context/app-context';
 import { availableBiomarkerCards, type BiomarkerKey } from '@/lib/biomarker-cards';
 import { Card, CardContent } from './ui/card';
 import * as React from 'react';
-import { InteractivePanelGrid } from './interactive-panel-grid';
 
 interface BiomarkersPanelProps {
     searchQuery?: string;
@@ -44,9 +43,9 @@ export function BiomarkersPanel({ searchQuery = '' }: BiomarkersPanelProps) {
     return (
         <Card>
             <CardContent className="p-4">
-                 <InteractivePanelGrid>
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-start">
                     {sortedAndFilteredCards.map(cardInfo => cardInfo.component)}
-                </InteractivePanelGrid>
+                </div>
                 {sortedAndFilteredCards.length === 0 && (
                     <div className="text-center text-muted-foreground py-12">
                         <p>No biomarker cards match your search.</p>
