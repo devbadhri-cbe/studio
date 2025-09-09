@@ -137,7 +137,7 @@ function MedicalConditionForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 border border-red-500">
         <FormField
             control={form.control}
             name="userInput"
@@ -164,24 +164,26 @@ function MedicalConditionForm({
         )}
        
         <div className="flex justify-between items-end gap-4 border border-purple-500">
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date of Diagnosis</FormLabel>
-                <FormControl>
-                  <DatePicker
-                    value={field.value}
-                    onChange={field.onChange}
-                    fromYear={new Date().getFullYear() - 50}
-                    toYear={new Date().getFullYear()}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex-1 border border-green-500">
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem className="flex flex-col border border-yellow-500">
+                  <FormLabel>Date of Diagnosis</FormLabel>
+                  <FormControl>
+                    <DatePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      fromYear={new Date().getFullYear() - 50}
+                      toYear={new Date().getFullYear()}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <div className="flex items-center gap-2 border border-blue-500">
               <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
               <Button type="submit" size="sm" disabled={isProcessing}>
