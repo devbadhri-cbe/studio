@@ -304,6 +304,7 @@ export function MedicalHistoryCard() {
   const [isEditingConditions, setIsEditingConditions] = React.useState(false);
   const [isEditingMedications, setIsEditingMedications] = React.useState(false);
   const [isConditionDialogOpen, setIsConditionDialogOpen] = React.useState(false);
+  const [isAddingMedication, setIsAddingMedication] = React.useState(false);
 
 
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
@@ -372,37 +373,35 @@ export function MedicalHistoryCard() {
   );
 
   const medicationActions = (
-    <AddMedicationDialog>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Settings className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {!isMedicationNil && (
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Medication
-            </DropdownMenuItem>
-          )}
-          {!isMedicationNil && (
-            <DropdownMenuItem
-              onSelect={() => setIsEditingMedications(!isEditingMedications)}
-              disabled={profile.medication.length === 0}
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              {isEditingMedications ? 'Done Editing' : 'Edit List'}
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={handleSetMedicationNil}>
-              <X className="mr-2 h-4 w-4" />
-              Set to Nil
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Settings className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {!isMedicationNil && (
+          <DropdownMenuItem onSelect={() => setIsAddingMedication(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Medication
           </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </AddMedicationDialog>
+        )}
+        {!isMedicationNil && (
+          <DropdownMenuItem
+            onSelect={() => setIsEditingMedications(!isEditingMedications)}
+            disabled={profile.medication.length === 0}
+          >
+            <Edit className="mr-2 h-4 w-4" />
+            {isEditingMedications ? 'Done Editing' : 'Edit List'}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={handleSetMedicationNil}>
+            <X className="mr-2 h-4 w-4" />
+            Set to Nil
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 
 
@@ -480,6 +479,9 @@ export function MedicalHistoryCard() {
               />
           </DialogContent>
       </Dialog>
+      <AddMedicationDialog open={isAddingMedication} onOpenChange={setIsAddingMedication}>
+        {/* This component manages its own trigger, so no children are needed here when opening programmatically */}
+      </AddMedicationDialog>
     </>
   );
 }

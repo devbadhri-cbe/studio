@@ -19,7 +19,7 @@ import { UseFormReturn } from 'react-hook-form';
 interface AddRecordDialogLayoutProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
   title: string;
   description: string;
   form: UseFormReturn<any>;
@@ -39,26 +39,38 @@ export function AddRecordDialogLayout({
   isSubmitting,
   children,
 }: AddRecordDialogLayoutProps) {
+  const content = (
+    <DialogContent className="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
+      </DialogHeader>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+          {children}
+          <DialogFooter>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Record
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
+    </DialogContent>
+  );
+  
+  if (trigger) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
+        {content}
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-            {children}
-            <DialogFooter>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Record
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
+      {content}
     </Dialog>
-  );
+  )
 }

@@ -10,12 +10,13 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/f
 import { Input } from './ui/input';
 
 interface AddMedicationDialogProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   onSuccess?: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function AddMedicationDialog({ children, onSuccess }: AddMedicationDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }: AddMedicationDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addMedication } = useApp();
   const { toast } = useToast();
@@ -51,14 +52,14 @@ export function AddMedicationDialog({ children, onSuccess }: AddMedicationDialog
         description: `${data.medicationName} has been added to your list.`
     });
     setIsSubmitting(false);
-    setOpen(false);
+    onOpenChange(false);
     onSuccess?.();
   };
 
   return (
     <AddRecordDialogLayout
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={onOpenChange}
       trigger={children}
       title="Add New Medication"
       description="Enter the details of your new medication."
