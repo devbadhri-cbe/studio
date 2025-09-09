@@ -18,6 +18,7 @@ interface DiseaseCardProps {
   onRevise: (condition: MedicalCondition) => void;
   onSynopsisToggle: (id: string) => void;
   isActive: boolean;
+  isEditMode: boolean;
 }
 
 const statusConfig = {
@@ -26,7 +27,7 @@ const statusConfig = {
   needs_revision: { icon: AlertTriangle, text: 'Doctor requested revision', color: 'text-destructive' },
 };
 
-export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }: DiseaseCardProps) {
+export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive, isEditMode }: DiseaseCardProps) {
   const { removeMedicalCondition } = useApp();
   const formatDate = useDateFormatter();
 
@@ -90,20 +91,22 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
                     </TooltipTrigger>
                     <TooltipContent>View Synopsis</TooltipContent>
                 </Tooltip>
-
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 shrink-0"
-                            onClick={handleRemoveCondition}
-                        >
-                            <Trash2 className="h-5 w-5 text-destructive" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Delete Condition</TooltipContent>
-                </Tooltip>
+                
+                {isEditMode && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 shrink-0"
+                                onClick={handleRemoveCondition}
+                            >
+                                <Trash2 className="h-5 w-5 text-destructive" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Delete Condition</TooltipContent>
+                    </Tooltip>
+                )}
             </div>
         </div>
          {condition.status === 'needs_revision' && (

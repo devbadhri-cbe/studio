@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit } from 'lucide-react';
+import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
@@ -123,6 +124,7 @@ export function MedicalHistoryCard() {
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
   const [isSubmittingMedication, setIsSubmittingMedication] = React.useState(false);
   const [isProcessingCondition, setIsProcessingCondition] = React.useState(false);
+  const [isEditMode, setIsEditMode] = React.useState(false);
 
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -261,16 +263,28 @@ export function MedicalHistoryCard() {
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                         {!editingCondition && (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setEditingCondition({} as MedicalCondition)}>
-                                        <PlusCircle className="h-4 w-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Add Condition</p>
-                                </TooltipContent>
-                            </Tooltip>
+                            <>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setIsEditMode(prev => !prev)}>
+                                            {isEditMode ? <X className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{isEditMode ? 'Done' : 'Edit Conditions'}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setEditingCondition({} as MedicalCondition)}>
+                                            <PlusCircle className="h-4 w-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Add Condition</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </>
                         )}
                     </div>
                 </div>
@@ -293,6 +307,7 @@ export function MedicalHistoryCard() {
                                     onRevise={handleReviseCondition}
                                     onSynopsisToggle={() => handleSynopsisToggle('condition', condition.id)}
                                     isActive={activeSynopsis?.type === 'condition' && activeSynopsis?.id === condition.id}
+                                    isEditMode={isEditMode}
                                 />
                             )
                         })}
