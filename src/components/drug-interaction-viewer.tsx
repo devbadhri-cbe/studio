@@ -27,13 +27,10 @@ interface DrugInteractionViewerProps {
 export function DrugInteractionViewer({ medications, onClose }: DrugInteractionViewerProps) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isTranslating, setIsTranslating] = React.useState(false);
-  const [originalSummary, setOriginalSummary] = React.useState<string | null>(null);
-  const [translatedSummary, setTranslatedSummary] = React.useState<string | null>(null);
+  const [summary, setSummary] = React.useState<string | null>(null);
   const [selectedLanguage, setSelectedLanguage] = React.useState('en');
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
-
-  const summaryToDisplay = translatedSummary || originalSummary;
 
   const fetchInteractionSummary = React.useCallback(async (language: string) => {
     if (medications.length < 2) {
@@ -59,22 +56,17 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
             language: supportedLanguages.find(l => l.code === language)?.name || 'English'
         });
         if (response.summary) {
-            if (language === 'en') {
-                setOriginalSummary(response.summary);
-                setTranslatedSummary(null);
-            } else {
-                setTranslatedSummary(response.summary);
-            }
+           setSummary(response.summary);
         } else {
             const errorMessage = 'The AI could not determine if there were any interactions. Please consult your doctor.';
             setError(errorMessage);
-            setOriginalSummary(errorMessage);
+            setSummary(errorMessage);
         }
     } catch (e) {
         console.error("Interaction check failed", e);
         const errorMessage = 'An error occurred. Could not analyze interactions.';
         setError(errorMessage);
-        setOriginalSummary(errorMessage);
+        setSummary(errorMessage);
     } finally {
         setIsLoading(false);
         setIsTranslating(false);
@@ -83,23 +75,18 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
   }, [medications, toast, onClose]);
 
   React.useEffect(() => {
-    fetchInteractionSummary('en');
-  }, [fetchInteractionSummary]);
+    fetchInteractionSummary(selectedLanguage);
+  }, [selectedLanguage, fetchInteractionSummary]);
   
   const handleLanguageChange = (languageCode: string) => {
     if (!languageCode) return;
     setSelectedLanguage(languageCode);
-    if (languageCode === 'en') {
-      setTranslatedSummary(null);
-    } else {
-      fetchInteractionSummary(languageCode);
-    }
   };
 
   const footerContent = (
      <div className="flex items-center gap-2">
         <Languages className="h-4 w-4 text-muted-foreground" />
-        <Select value={selectedLanguage} onValueChange={handleLanguageChange} disabled={isLoading || isTranslating || !!error || !originalSummary}>
+        <Select value={selectedLanguage} onValueChange={handleLanguageChange} disabled={isLoading || isTranslating || !!error || !summary}>
             <SelectTrigger className="w-[150px] h-9 text-sm">
                 <SelectValue placeholder="Translate..." />
             </SelectTrigger>
@@ -124,7 +111,7 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
         isLoading={isLoading}
         isTranslating={isTranslating}
         error={error}
-        synopsis={summaryToDisplay}
+        synopsis={summary}
         footer={footerContent}
         onClose={onClose}
     />
