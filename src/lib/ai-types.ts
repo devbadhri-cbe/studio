@@ -133,3 +133,18 @@ export const MedicationInfoOutputSchema = z.object({
   foodInstructionSuggestion: z.string().optional().describe('A brief explanation if the user\'s food instruction was incorrect and why it was corrected.'),
 });
 export type MedicationInfoOutput = z.infer<typeof MedicationInfoOutputSchema>;
+
+//-================================================================----------
+//- Drug Interaction Flow Types
+//-================================================================----------
+
+export const DrugInteractionInputSchema = z.object({
+    medications: z.array(z.string()).describe('A list of medications to check for interactions. Each string should contain the medication name and dosage, e.g., ["Lisinopril 10mg", "Aspirin 81mg"]').min(2, 'At least two medications are required.'),
+});
+export type DrugInteractionInput = z.infer<typeof DrugInteractionInputSchema>;
+
+export const DrugInteractionOutputSchema = z.object({
+    hasInteractions: z.boolean().describe('Whether any significant drug-drug interactions were found.'),
+    summary: z.string().describe('A concise, easy-to-understand summary of the findings. If no interactions are found, it should state that clearly. If interactions are found, it should list each interacting pair and the potential effect.'),
+});
+export type DrugInteractionOutput = z.infer<typeof DrugInteractionOutputSchema>;

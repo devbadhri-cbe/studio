@@ -7,6 +7,7 @@ import * as React from 'react';
 import { Button } from './ui/button';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Card, CardContent } from './ui/card';
+import { checkDrugInteractions } from '@/ai/flows/drug-interaction-flow';
 
 interface DrugInteractionViewerProps {
   medications: string[];
@@ -30,11 +31,24 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
     }
     setIsLoading(true);
     setResult(null);
-    // Placeholder for AI check
-    setTimeout(() => {
-        setResult('AI-powered drug interaction checks are temporarily disabled.');
+    try {
+        const response = await checkDrugInteractions({ medications });
+        if (response.summary) {
+            setResult(response.summary);
+        } else {
+            setResult('The AI could not determine if there were any interactions. Please consult your doctor.');
+        }
+    } catch (e) {
+        console.error("Interaction check failed", e);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not perform interaction analysis at this time.',
+        });
+        setResult('An error occurred. Could not analyze interactions.');
+    } finally {
         setIsLoading(false);
-    }, 1000);
+    }
     
   }, [medications, toast, onClose]);
 
@@ -48,8 +62,8 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
           </div>
         )}
         {!result && !isLoading && (
-            <Button onClick={handleInteractionCheck} className="w-full" disabled>
-                Analyze Interactions (Disabled)
+            <Button onClick={handleInteractionCheck} className="w-full">
+                Analyze Interactions
             </Button>
         )}
         {result && (
