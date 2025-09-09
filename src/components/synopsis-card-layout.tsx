@@ -53,7 +53,7 @@ export function SynopsisCardLayout({
         )}
 
         {!isLoading && !isTranslating && (
-          <Alert className="bg-muted/50">
+          <Alert>
             <AlertDescription className="whitespace-pre-wrap leading-relaxed">
               {error || synopsis || 'No information available.'}
             </AlertDescription>
