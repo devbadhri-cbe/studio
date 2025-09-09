@@ -80,7 +80,6 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
                             variant="ghost"
                             className="h-8 w-8 shrink-0"
                             onClick={handleToggleSynopsis}
-                            disabled={!condition.synopsis}
                         >
                             <Info className="h-5 w-5 text-blue-500" />
                         </Button>
@@ -118,7 +117,7 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
             </div>
           )}
       </li>
-      {isActive && condition.synopsis && (
+      {isActive && (
         <li className="pl-5 pb-2">
           <ConditionSynopsisDialog
             conditionName={condition.condition}
