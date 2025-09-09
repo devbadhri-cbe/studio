@@ -1,8 +1,9 @@
 
+
 'use client';
 
 import * as React from 'react';
-import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, type CustomBiomarker, BiomarkerKey, DiseasePanelKey } from '@/lib/types';
+import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, type CustomBiomarker, BiomarkerKey, DiseasePanelKey, FoodInstruction } from '@/lib/types';
 import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -369,7 +370,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setMedicationNil = useCallback(() => {
-      const nilMedication = [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }];
+      const nilMedication: Medication[] = [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }];
       setProfileState(prevProfile => ({ ...prevProfile, medication: nilMedication }));
       setHasUnsavedChanges(true);
   }, []);
@@ -552,7 +553,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     setProfileState(prevProfile => ({
       ...prevProfile,
-      enabledBiomarkers: updatedEnabledEnabledBiomarkers,
+      enabledBiomarkers: updatedEnabledBiomarkers,
     }));
     setHasUnsavedChanges(true);
     

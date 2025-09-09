@@ -345,7 +345,7 @@ export function MedicalHistoryCard() {
   }
   
   const formatMedicationDetails = (med: Medication) => {
-    const details = [med.dosage, med.frequency].filter(Boolean).join(', ');
+    const details = [med.dosage, med.frequency, med.foodInstructions ? `${med.foodInstructions} food` : ''].filter(Boolean).join(', ');
     return details ? `(${details})` : '';
   }
   

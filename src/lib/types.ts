@@ -21,12 +21,15 @@ export interface MedicalCondition {
   status: 'verified' | 'pending_review' | 'needs_revision';
 }
 
+export type FoodInstruction = 'before' | 'after' | 'with';
+
 export interface Medication {
   id: string;
   name: string;
   brandName: string;
   dosage: string;
   frequency: string;
+  foodInstructions?: FoodInstruction;
 }
 
 export interface WeightRecord {

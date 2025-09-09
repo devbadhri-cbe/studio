@@ -13,6 +13,8 @@ import { Loader2 } from 'lucide-react';
 import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import type { MedicationInfoOutput } from '@/lib/ai-types';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import type { FoodInstruction } from '@/lib/types';
 
 interface AddMedicationDialogProps {
   children?: React.ReactNode;
@@ -32,6 +34,7 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
       medicationName: '',
       dosage: '',
       frequency: '',
+      foodInstructions: undefined as FoodInstruction | undefined,
     },
   });
 
@@ -41,6 +44,7 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
         medicationName: '',
         dosage: '',
         frequency: '',
+        foodInstructions: undefined,
       });
       setProcessedMed(null);
     }
@@ -78,7 +82,7 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
     }
   };
 
-  const onSubmit = async (data: {medicationName: string, dosage: string, frequency: string}) => {
+  const onSubmit = async (data: {medicationName: string, dosage: string, frequency: string, foodInstructions?: FoodInstruction}) => {
     if (!processedMed) {
       await handleProcessMedication();
       return;
@@ -88,6 +92,7 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
         brandName: data.medicationName,
         dosage: data.dosage,
         frequency: data.frequency,
+        foodInstructions: data.foodInstructions,
     });
     toast({
         title: 'Medication Added',
@@ -153,6 +158,43 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
               />
             </div>
             
+            <FormField
+              control={form.control}
+              name="foodInstructions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Instructions</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="flex items-center space-x-4 pt-2"
+                    >
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="before" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Before Food</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="after" />
+                        </FormControl>
+                        <FormLabel className="font-normal">After Food</FormLabel>
+                      </FormItem>
+                       <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="with" />
+                        </FormControl>
+                        <FormLabel className="font-normal">With Food</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {processedMed && (
               <Alert variant="default" className="bg-background">
                 <AlertTitle className="font-semibold">AI Processed Information</AlertTitle>
