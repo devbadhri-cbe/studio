@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -6,6 +7,32 @@ import { Alert, AlertDescription } from './ui/alert';
 import { Loader2, XCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Separator } from './ui/separator';
+import { cn } from '@/lib/utils';
+import { cva } from 'class-variance-authority';
+
+const synopsisCardVariants = cva("mt-2 border-2", {
+    variants: {
+        variant: {
+            default: "border-primary",
+            destructive: "border-destructive",
+        },
+    },
+    defaultVariants: {
+        variant: "default",
+    },
+});
+
+const synopsisIconVariants = cva("flex h-10 w-10 items-center justify-center rounded-lg", {
+    variants: {
+        variant: {
+            default: "bg-primary/10",
+            destructive: "bg-destructive/10",
+        },
+    },
+    defaultVariants: {
+        variant: "default",
+    },
+})
 
 interface SynopsisCardLayoutProps {
   icon: React.ReactNode;
@@ -17,6 +44,7 @@ interface SynopsisCardLayoutProps {
   synopsis: string | null;
   footer: React.ReactNode;
   onClose: () => void;
+  variant?: "default" | "destructive";
 }
 
 export function SynopsisCardLayout({
@@ -29,12 +57,13 @@ export function SynopsisCardLayout({
   synopsis,
   footer,
   onClose,
+  variant = 'default'
 }: SynopsisCardLayoutProps) {
   return (
-    <Card className="mt-2 border-2 border-primary">
+    <Card className={cn(synopsisCardVariants({ variant }))}>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <div className={cn(synopsisIconVariants({ variant }))}>
             {icon}
           </div>
           <div>
@@ -53,19 +82,19 @@ export function SynopsisCardLayout({
         )}
 
         {!isLoading && !isTranslating && (
-          <Alert>
-            <AlertDescription className="whitespace-pre-wrap leading-relaxed">
+           <Alert variant={variant === 'destructive' ? 'destructive' : 'default'} className="bg-transparent border-0 p-0">
+            <AlertDescription className="whitespace-pre-wrap leading-relaxed px-1">
               {error || synopsis || 'No information available.'}
             </AlertDescription>
           </Alert>
         )}
 
         <div className="flex justify-between items-center gap-2 pt-4">
-          <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onClose}>
+            {footer}
+          <Button variant="ghost" size="sm" className="text-muted-foreground ml-auto" onClick={onClose}>
             <XCircle className="mr-2 h-4 w-4" />
             Close
           </Button>
-          {footer}
         </div>
       </CardContent>
     </Card>
