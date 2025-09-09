@@ -239,15 +239,13 @@ function MedicationListItem({ med, isEditing, onRemove, formatDetails }: Medicat
             {med.name.toLowerCase() === 'nil' ? (
                     <span className="font-semibold text-foreground">Nil - No medication</span>
             ) : (
-                <div>
-                    {med.brandName && med.brandName.toLowerCase() !== med.name.toLowerCase() && (
-                        <p className="font-semibold text-foreground">{med.brandName}</p>
+                <p className="text-foreground">
+                    <span className="font-semibold">{med.brandName}</span>
+                    {med.name.toLowerCase() !== med.brandName.toLowerCase() && (
+                        <span className="text-muted-foreground text-xs ml-1">({med.name})</span>
                     )}
-                    <p className={cn("text-foreground", med.brandName && "text-muted-foreground text-xs")}>
-                        <span className="font-semibold">{med.name}</span>
-                        <span className="text-muted-foreground text-xs ml-2">{formatDetails(med)}</span>
-                    </p>
-                </div>
+                    <span className="text-muted-foreground text-xs ml-2">{formatDetails(med)}</span>
+                </p>
             )}
             </div>
                 <div className="flex items-center shrink-0">
