@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings } from 'lucide-react';
@@ -432,6 +433,7 @@ export function MedicalHistoryCard() {
 
   return (
     <>
+      <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
         <MedicalInfoSection
             title="Present Medical Conditions"
             icon={<Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />}
@@ -457,23 +459,6 @@ export function MedicalHistoryCard() {
             )}
         </MedicalInfoSection>
         
-        <Dialog open={isConditionDialogOpen} onOpenChange={setIsConditionDialogOpen}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>{editingCondition?.id ? "Edit" : "Add"} Medical Condition</DialogTitle>
-                    <DialogDescription>
-                        Enter a condition and our AI will help standardize it.
-                    </DialogDescription>
-                </DialogHeader>
-                <MedicalConditionForm 
-                    onSave={handleSaveCondition} 
-                    onCancel={() => setIsConditionDialogOpen(false)} 
-                    initialData={editingCondition?.id ? editingCondition : undefined}
-                />
-            </DialogContent>
-        </Dialog>
-        
-
         <MedicalInfoSection
             title="Current Medication"
             icon={<Pill className="h-5 w-5 shrink-0 text-muted-foreground" />}
@@ -520,6 +505,23 @@ export function MedicalHistoryCard() {
                 </div>
             )}
         </MedicalInfoSection>
+      </div>
+        
+      <Dialog open={isConditionDialogOpen} onOpenChange={setIsConditionDialogOpen}>
+          <DialogContent>
+              <DialogHeader>
+                  <DialogTitle>{editingCondition?.id ? "Edit" : "Add"} Medical Condition</DialogTitle>
+                  <DialogDescription>
+                      Enter a condition and our AI will help standardize it.
+                  </DialogDescription>
+              </DialogHeader>
+              <MedicalConditionForm 
+                  onSave={handleSaveCondition} 
+                  onCancel={() => setIsConditionDialogOpen(false)} 
+                  initialData={editingCondition?.id ? editingCondition : undefined}
+              />
+          </DialogContent>
+      </Dialog>
     </>
   );
 }
