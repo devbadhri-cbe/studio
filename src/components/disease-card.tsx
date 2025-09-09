@@ -67,18 +67,23 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
           <p className="text-xs text-muted-foreground">{formatDate(condition.date)}</p>
         </div>
         <div className="flex items-center shrink-0 gap-2">
-           <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8 shrink-0"
-            onClick={(e) => {
-                e.stopPropagation();
-                onSynopsisToggle(condition.id)
-            }}
-            disabled={!condition.synopsis}
-          >
-            <Info className="h-5 w-5 text-blue-500" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 shrink-0"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onSynopsisToggle(condition.id)
+                }}
+                disabled={!condition.synopsis}
+              >
+                <Info className="h-5 w-5 text-blue-500" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>View Synopsis</TooltipContent>
+          </Tooltip>
           <Button
             size="icon"
             variant="ghost"
