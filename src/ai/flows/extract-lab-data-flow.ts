@@ -39,7 +39,24 @@ const extractLabDataFlow = ai.defineFlow(
     outputSchema: LabDataExtractionOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    return output!;
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        const { output } = await prompt(input);
+        return output!;
+      } catch (e: any) {
+        if (e.message.includes('503')) {
+          console.log("Service unavailable, retrying...");
+          retries--;
+          if (retries === 0) throw e;
+          await new Promise(resolve => setTimeout(resolve, 1000)); // wait 1s
+        } else {
+          throw e;
+        }
+      }
+    }
+    // This part should not be reachable if retries are handled correctly,
+    // but it's here to satisfy TypeScript's requirement for a return value.
+    throw new Error('Failed to extract lab data after multiple retries.');
   }
 );
