@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -54,7 +55,7 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
 
   const getStatus = () => {
     return (
-        <div className="flex items-center justify-around gap-2 text-xs w-full">
+        <div className="flex items-center justify-between gap-2 text-xs w-full">
             <div className="text-center">
                 <div className="text-muted-foreground">Height</div>
                 <div className="font-semibold text-foreground">{heightDisplay}</div>
