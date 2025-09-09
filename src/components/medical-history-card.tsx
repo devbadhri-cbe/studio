@@ -164,33 +164,37 @@ function MedicalConditionForm({
         )}
        
         <div className="flex justify-between items-end gap-4">
-          <div>
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Date of Diagnosis</FormLabel>
-                  <FormControl>
-                    <DatePicker
-                      value={field.value}
-                      onChange={field.onChange}
-                      fromYear={new Date().getFullYear() - 50}
-                      toYear={new Date().getFullYear()}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date of Diagnosis</FormLabel>
+                    <FormControl>
+                      <DatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        fromYear={new Date().getFullYear() - 50}
+                        toYear={new Date().getFullYear()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="flex-1 flex justify-center">
               <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+            </div>
+            
+            <div className="flex-1 flex justify-end">
               <Button type="submit" size="sm" disabled={isProcessing}>
-                  {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {processedCondition ? 'Confirm & Save' : 'Process & Review'}
+                    {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                    {processedCondition ? 'Confirm & Save' : 'Process & Review'}
               </Button>
-          </div>
+            </div>
         </div>
       </form>
     </Form>
