@@ -73,7 +73,7 @@ export function BiomarkerCardTemplate({
   const RecordsList = (
     <ScrollArea className="h-full max-h-[100px] w-full">
         <ul className="space-y-1 mt-2">
-          {records.map((record) => (
+          {records.slice(0, 5).map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
                   <p className="flex-1">
                       <span className="font-semibold text-foreground">{record.displayValue}</span>
@@ -130,12 +130,14 @@ export function BiomarkerCardTemplate({
         {hasRecords ? (
           <div className="flex-1 flex flex-col min-h-0">
               {/* Top Section: Records & Status */}
-              <div className={cn("flex-1 flex flex-col gap-4 min-h-0 border-2 rounded-lg p-2", getBorderColorClass())}>
+              <div className={cn("flex-1 flex flex-row gap-4 min-h-0 border-2 rounded-lg p-2", getBorderColorClass())}>
                   <div className="flex-1 w-full flex items-center justify-center">
                       {RecordsList}
                   </div>
                   <div className="flex-1 w-full flex items-center justify-center">
-                      {statusDisplay}
+                      <div className="flex flex-col items-center justify-center gap-2">
+                          {statusDisplay}
+                      </div>
                   </div>
               </div>
               
