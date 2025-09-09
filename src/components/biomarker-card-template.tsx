@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -71,7 +72,7 @@ export function BiomarkerCardTemplate({
   }
 
   const RecordsList = (
-    <ScrollArea className="h-full max-h-[100px] w-full">
+    <ScrollArea className="h-full max-h-[150px] w-full">
         <ul className="space-y-1 mt-2">
           {records.slice(0, 5).map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
@@ -134,17 +135,15 @@ export function BiomarkerCardTemplate({
                   <div className="flex-1 w-full flex items-center justify-center">
                       {RecordsList}
                   </div>
-                  <div className="flex-1 w-full flex items-center justify-center">
-                      <div className="flex flex-col items-center justify-center gap-2">
-                          {statusDisplay}
-                      </div>
+                  <div className="flex-1 w-full flex flex-col justify-around">
+                      {statusDisplay}
                   </div>
               </div>
               
               <Separator className="my-4" />
 
               {/* Bottom Section: Chart */}
-              <div className="h-[250px] w-full rounded-lg p-2 flex flex-col">
+              <div className="h-[200px] w-full rounded-lg p-2 flex flex-col">
                   {chart}
               </div>
           </div>
