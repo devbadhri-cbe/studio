@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -52,46 +53,13 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
         : `${record.value.toFixed(1)} kg`
   });
   
-  const UnitSwitch = (
-    <div className="flex items-center justify-center space-x-2 px-2 py-1">
-        <Label htmlFor="unit-switch-weight" className="text-xs">kg</Label>
-        <Switch
-            id="unit-switch-weight"
-            checked={isImperial}
-            onCheckedChange={(checked) => setProfile({...profile, unitSystem: checked ? 'imperial' : 'metric'})}
-        />
-        <Label htmlFor="unit-switch-weight" className="text-xs">lbs</Label>
-    </div>
-  );
-
-  const StatusDisplay = (
-    <div className="flex flex-col items-center justify-center flex-1 gap-2 text-sm text-muted-foreground text-center h-full">
-        <span>Height: <span className="font-bold text-foreground">{heightDisplay}</span></span>
-        {bmiStatus ? (
-            <div className="flex flex-col items-center gap-1">
-                <span>Current BMI: <span className="font-bold text-foreground">{profile.bmi?.toFixed(1)}</span></span>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Badge variant={bmiStatus.variant} className={`cursor-pointer ${bmiStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}`}>
-                            {bmiStatus.text}
-                        </Badge>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-64 text-sm">
-                    <div className="space-y-1 text-left">
-                        <h4 className="font-bold">BMI Categories</h4>
-                        {BMI_CATEGORIES.map(category => (
-                        <p key={category.text}>
-                            {category.min === 40 ? '≥ 40' : (category.max === 18.4 ? `< 18.5` : `${category.min} - ${category.max}`)}: {category.text}
-                        </p>
-                        ))}
-                    </div>
-                    </PopoverContent>
-                </Popover>
-            </div>
-        ) : <p>No status</p>}
-    </div>
-  );
-
+  const unitSwitchProps = {
+    unitSwitchLabel: 'Weight Units',
+    labelA: 'kg',
+    labelB: 'lbs',
+    isChecked: isImperial,
+    onCheckedChange: (checked: boolean) => setProfile({...profile, unitSystem: checked ? 'imperial' : 'metric'})
+  };
 
   const AddRecordDialogWithProps = React.cloneElement(<AddWeightRecordDialog />, {
     children: <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Add New Record</DropdownMenuItem>
@@ -114,7 +82,7 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
         formatRecord={formatRecord}
         addRecordDialog={<AddWeightRecordDialog />}
         chart={<WeightChart />}
-        unitSwitch={UnitSwitch}
+        unitSwitch={unitSwitchProps}
         isReadOnly={isReadOnly}
     />
   );
