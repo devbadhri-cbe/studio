@@ -34,9 +34,18 @@ export default function DoctorDashboardPage() {
   const [editingPatient, setEditingPatient] = React.useState<Patient | null>(null);
   const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
   const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
+  const [isScrolled, setIsScrolled] = React.useState(false);
 
   const router = useRouter();
   const { toast } = useToast();
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+        setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const fetchPatients = React.useCallback(async () => {
     setIsLoading(true);
@@ -189,6 +198,7 @@ export default function DoctorDashboardPage() {
           title={['Health', 'Guardian']}
           subtitle={doctorDetails.name}
           onSubtitleClick={() => setIsEditingDoctor(true)}
+          isScrolled={isScrolled}
         />
         <main className="flex-1 p-4 md:p-6">
             <div className="mx-auto w-full max-w-7xl">
