@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -36,13 +35,12 @@ export function DashboardSectionToggle({
                     <h3 className="font-semibold text-lg">{title}</h3>
                     <p className="text-sm text-muted-foreground">{subtitle}</p>
                 </div>
-                <ChevronDown className={cn("h-5 w-5 transition-transform ml-auto", isOpen && "rotate-180")} />
             </div>
         </CollapsibleTrigger>
         
-        <div className="flex items-center gap-4 w-full md:w-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-4 w-full md:w-auto">
           {isOpen && (
-            <div className="relative flex-1 md:flex-none">
+            <div className="relative flex-1 md:flex-none" onClick={(e) => e.stopPropagation()}>
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={searchPlaceholder}
@@ -52,6 +50,9 @@ export function DashboardSectionToggle({
               />
             </div>
           )}
+          <CollapsibleTrigger asChild>
+             <ChevronDown className={cn("h-5 w-5 transition-transform cursor-pointer", isOpen && "rotate-180")} />
+          </CollapsibleTrigger>
         </div>
       </div>
   );
