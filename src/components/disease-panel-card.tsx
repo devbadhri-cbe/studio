@@ -59,9 +59,6 @@ export function DiseasePanelCard({
                     checked={isPanelEnabledForPatient}
                     onCheckedChange={handlePanelToggle}
                 />
-                <Label htmlFor={`enable-panel-${panelKey}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    {isPanelEnabledForPatient ? "Enabled" : "Disabled"}
-                </Label>
             </div>
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
