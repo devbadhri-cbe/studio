@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -55,26 +54,22 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
 
   const getStatus = () => {
     return (
-        <div className="flex flex-col items-center justify-center gap-2 text-xs w-full">
-            <div className="flex justify-around w-full">
-                <div className="text-center">
-                    <div className="text-muted-foreground">Height</div>
-                    <div className="font-semibold text-foreground">{heightDisplay}</div>
-                </div>
-                <div className="text-center">
-                    <div className="text-muted-foreground">BMI</div>
-                    <div className="font-semibold text-foreground">{profile.bmi || 'N/A'}</div>
-                </div>
+        <div className="flex items-center justify-around gap-2 text-xs w-full">
+            <div className="text-center">
+                <div className="text-muted-foreground">Height</div>
+                <div className="font-semibold text-foreground">{heightDisplay}</div>
             </div>
             {bmiStatus && (
-                <div className="w-full flex flex-col items-center gap-1">
-                    <Separator className="my-1" />
-                    <span className="text-muted-foreground">Current Status:</span>
+                <div className="flex flex-col items-center">
                     <Badge variant={bmiStatus.variant} className={bmiStatus.variant === 'outline' ? 'border-green-500 text-green-600' : ''}>
                         {bmiStatus.text}
                     </Badge>
                 </div>
             )}
+             <div className="text-center">
+                <div className="text-muted-foreground">BMI</div>
+                <div className="font-semibold text-foreground">{profile.bmi || 'N/A'}</div>
+            </div>
         </div>
     );
   };
