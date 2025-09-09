@@ -36,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { AddMedicationDialog } from './add-medication-dialog';
 
 function capitalizeFirstLetter(string: string) {
     if (!string) return string;
@@ -297,20 +298,13 @@ interface MedicationListItemProps {
 }
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, updateMedicalCondition, addMedication, removeMedication, setMedicationNil, removeMedicalCondition: removeMedicalConditionFromContext } = useApp();
+  const { profile, addMedicalCondition, updateMedicalCondition, removeMedication, setMedicationNil, removeMedicalCondition: removeMedicalConditionFromContext } = useApp();
   const [editingCondition, setEditingCondition] = React.useState<MedicalCondition | null>(null);
-  const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
-  const [isSubmittingMedication, setIsSubmittingMedication] = React.useState(false);
   const [isEditingConditions, setIsEditingConditions] = React.useState(false);
   const [isEditingMedications, setIsEditingMedications] = React.useState(false);
   const [isConditionDialogOpen, setIsConditionDialogOpen] = React.useState(false);
 
-  const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
-
-  const medicationForm = useForm<{medicationName: string, dosage: string, frequency: string}>({
-    defaultValues: { medicationName: '', dosage: '', frequency: '' },
-  });
 
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
@@ -340,28 +334,7 @@ export function MedicalHistoryCard() {
     setEditingCondition(null);
     setIsConditionDialogOpen(true);
   };
-
-  const handleSaveMedication = async (data: {medicationName: string, dosage: string, frequency: string}) => {
-    setIsSubmittingMedication(true);
-    addMedication({
-        name: data.medicationName,
-        brandName: data.medicationName,
-        dosage: data.dosage,
-        frequency: data.frequency,
-    });
-    medicationForm.reset();
-    medicationNameInputRef.current?.focus();
-    setIsSubmittingMedication(false);
-  };
   
-  React.useEffect(() => {
-    if (isAddingMedication) {
-        setTimeout(() => {
-            medicationNameInputRef.current?.focus();
-        }, 100);
-    }
-  }, [isAddingMedication]);
-
   const handleRemoveMedication = (id: string) => {
     removeMedication(id);
   };
@@ -399,35 +372,37 @@ export function MedicalHistoryCard() {
   );
 
   const medicationActions = (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Settings className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {!isMedicationNil && (
-          <DropdownMenuItem onSelect={() => setIsAddingMedication(true)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Medication
+    <AddMedicationDialog>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Settings className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {!isMedicationNil && (
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Medication
+            </DropdownMenuItem>
+          )}
+          {!isMedicationNil && (
+            <DropdownMenuItem
+              onSelect={() => setIsEditingMedications(!isEditingMedications)}
+              disabled={profile.medication.length === 0}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              {isEditingMedications ? 'Done Editing' : 'Edit List'}
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={handleSetMedicationNil}>
+              <X className="mr-2 h-4 w-4" />
+              Set to Nil
           </DropdownMenuItem>
-        )}
-        {!isMedicationNil && (
-          <DropdownMenuItem
-            onSelect={() => setIsEditingMedications(!isEditingMedications)}
-            disabled={profile.medication.length === 0}
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            {isEditingMedications ? 'Done Editing' : 'Edit List'}
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={handleSetMedicationNil}>
-            <X className="mr-2 h-4 w-4" />
-            Set to Nil
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </AddMedicationDialog>
   );
 
 
@@ -462,25 +437,8 @@ export function MedicalHistoryCard() {
         <MedicalInfoSection
             title="Current Medication"
             icon={<Pill className="h-5 w-5 shrink-0 text-muted-foreground" />}
-            actions={!isAddingMedication && medicationActions}
+            actions={medicationActions}
         >
-            {isAddingMedication && (
-                <Form {...medicationForm}>
-                    <form onSubmit={medicationForm.handleSubmit(handleSaveMedication)} className="mt-2 space-y-2 rounded-lg border bg-muted/50 p-2">
-                        <FormField control={medicationForm.control} name="medicationName" render={({ field }) => (<FormItem><FormControl><Input ref={medicationNameInputRef} placeholder="Medication Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <div className="grid grid-cols-2 gap-2">
-                            <FormField control={medicationForm.control} name="dosage" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Dosage (e.g., 500mg)" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                            <FormField control={medicationForm.control} name="frequency" render={({ field }) => ( <FormItem><FormControl><Input placeholder="Frequency (e.g., Daily)" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                        </div>
-                        <div className="flex justify-end gap-2">
-                            <Button type="button" size="sm" variant="ghost" onClick={() => setIsAddingMedication(false)}>Close</Button>
-                            <Button type="submit" size="sm" disabled={isSubmittingMedication}>
-                                {isSubmittingMedication ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
-                            </Button>
-                        </div>
-                    </form>
-                </Form>
-            )}
             {profile.medication.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
@@ -494,7 +452,7 @@ export function MedicalHistoryCard() {
                     ))}
                 </ul>
             ) : (
-                !isAddingMedication && <p className="text-xs text-muted-foreground pl-8 pt-2">No medication recorded.</p>
+                <p className="text-xs text-muted-foreground pl-8 pt-2">No medication recorded.</p>
             )}
             {profile.medication.length > 1 && !isMedicationNil && (
                 <div className="pt-2">
