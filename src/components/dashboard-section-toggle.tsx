@@ -29,9 +29,9 @@ export function DashboardSectionToggle({
 }: DashboardSectionToggleProps) {
 
   const content = (
-      <div className="flex flex-col md:flex-row items-start md:items-center w-full gap-4 border-2 border-red-500">
+      <div className="flex flex-col md:flex-row items-start md:items-center w-full gap-4">
         <CollapsibleTrigger asChild>
-            <div className="flex-1 flex items-center gap-4 cursor-pointer border-2 border-blue-500">
+            <div className="flex-1 flex items-center gap-4 cursor-pointer">
                 <div className="flex-1">
                     <h3 className="font-semibold text-lg">{title}</h3>
                     <p className="text-sm text-muted-foreground">{subtitle}</p>
@@ -39,15 +39,16 @@ export function DashboardSectionToggle({
             </div>
         </CollapsibleTrigger>
         
-        <div className="flex items-center justify-end gap-2 w-full md:w-auto border-2 border-green-500">
+        <div className="flex items-center justify-end gap-2 w-full md:w-auto">
              {isOpen && (
-              <div className="relative flex-1 md:flex-none" onClick={(e) => e.stopPropagation()}>
+              <div className="relative flex-1 md:flex-none">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   className="pl-8 h-9 w-full md:w-48"
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
             )}
