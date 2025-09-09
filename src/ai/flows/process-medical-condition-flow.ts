@@ -31,12 +31,12 @@ Existing Conditions:
   None
 {{/if}}
 
-1.  First, check if the user's input, after being standardized, would be a duplicate of any of the 'Existing Conditions'. A duplicate is defined as having the same standardized name OR the same ICD-11 code. If it is a duplicate, immediately set 'isValid' to false and provide no suggestions. This is the most important step.
-2.  If it is not a duplicate, determine if the input is a valid, specific medical condition. "Feeling tired" is not specific, but "Chronic Fatigue Syndrome" is.
+1.  First, determine the most likely ICD-11 code for the user's input. Then, check if this resulting ICD-11 code would be a duplicate of any of the 'Existing Conditions'. A duplicate is defined as having the exact same ICD-11 code. Do not use the user-provided text or the standardized name for the duplicate check, only the ICD-11 code. If it is a duplicate, immediately set 'isValid' to false and provide no suggestions. This is the most important step.
+2.  If the resulting ICD-11 code is not a duplicate, determine if the input is a valid, specific medical condition. "Feeling tired" is not specific, but "Chronic Fatigue Syndrome" is.
 3.  If the input is a valid condition and not a duplicate:
     - Set 'isValid' to true.
     - Provide the 'standardizedName' (e.g., for "high blood pressure," return "Hypertension").
-    - Find and provide the most likely 'icdCode' from the ICD-11 classification.
+    - Provide the 'icdCode' you determined earlier from the ICD-11 classification.
     - YOU MUST provide a brief, one-paragraph 'synopsis' of the condition, suitable for a patient to read.
 4.  If the input is ambiguous, a symptom, or not a recognized medical condition:
     - Set 'isValid' to false.
