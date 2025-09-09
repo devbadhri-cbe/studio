@@ -46,20 +46,23 @@ const checkDrugInteractionsFlow = ai.defineFlow(
   async (input) => {
     let retries = 3;
     while (retries > 0) {
-      try {
+       try {
         const { output } = await prompt(input);
-        return output!;
+        if (output) return output;
+
+        // If output is null, it's an error and should be retried.
+        throw new Error('AI returned no output.');
+
       } catch (e: any) {
+        retries--;
         const errorMessage = e.message || '';
-        if (errorMessage.includes('429') || errorMessage.includes('503')) {
-          console.log(`Service unavailable or rate limited (${errorMessage.includes('429') ? '429' : '503'}), retrying...`);
-          retries--;
-          if (retries === 0) throw e;
-          // Wait longer for rate limit errors
-          const delay = errorMessage.includes('429') ? 1000 : 0;
-          await new Promise(resolve => setTimeout(resolve, delay));
-        } else {
-          throw e; // Re-throw other errors immediately
+        console.log(`Error checking interactions. Retries left: ${retries}. Error: ${errorMessage}`);
+        
+        if (retries === 0) throw e;
+
+        // Wait longer for rate limit errors
+        if (errorMessage.includes('429')) {
+           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
     }
