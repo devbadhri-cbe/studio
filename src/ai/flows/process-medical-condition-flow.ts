@@ -24,17 +24,17 @@ const prompt = ai.definePrompt({
 User Input: "{{condition}}"
 Existing Conditions: {{#if existingConditions}}{{#each existingConditions}}- {{this}}\n{{/each}}{{else}}None{{/if}}
 
-1.  Determine if the input is a valid, specific medical condition. "Feeling tired" is not specific, but "Chronic Fatigue Syndrome" is.
-2.  If the input is a valid condition:
+1.  First, check if the user's input is effectively the same as any of the 'Existing Conditions'. If it is, immediately set 'isValid' to false and provide no suggestions. This is the most important step.
+2.  If it is not a duplicate, determine if the input is a valid, specific medical condition. "Feeling tired" is not specific, but "Chronic Fatigue Syndrome" is.
+3.  If the input is a valid condition and not a duplicate:
     - Set 'isValid' to true.
     - Provide the 'standardizedName' (e.g., for "high blood pressure," return "Hypertension").
     - Find and provide the most likely 'icdCode' from the ICD-11 classification.
     - YOU MUST provide a brief, one-paragraph 'synopsis' of the condition, suitable for a patient to read.
-3.  If the input is ambiguous, a symptom, or not a recognized medical condition:
+4.  If the input is ambiguous, a symptom, or not a recognized medical condition:
     - Set 'isValid' to false.
     - Provide a list of up to 3 'suggestions' for more specific, valid medical conditions the user might have meant. For example, if the user enters "sugar problems", suggest "Type 2 Diabetes", "Hypoglycemia", "Hyperglycemia".
-    - Do not provide icdCode or synopsis.
-4. If the condition is already in the 'Existing Conditions' list, set isValid to false and provide no suggestions.`,
+    - Do not provide icdCode or synopsis.`,
 });
 
 const processMedicalConditionFlow = ai.defineFlow(

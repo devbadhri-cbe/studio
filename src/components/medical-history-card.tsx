@@ -185,7 +185,7 @@ export function MedicalHistoryCard() {
           toast({ title: 'Condition Saved', description: `${result.standardizedName} has been added.` });
       } else {
         setAiResult(result);
-        if (result.suggestions && result.suggestions.length === 0) {
+        if (!result.suggestions || result.suggestions.length === 0) {
            toast({ variant: 'destructive', title: 'Condition Exists', description: `This condition is already in your profile.` });
         }
       }
@@ -427,4 +427,3 @@ export function MedicalHistoryCard() {
     </Card>
   );
 }
-
