@@ -83,6 +83,9 @@ interface AppContextType {
   lipidRecords: (TotalCholesterolRecord & {ldl: number, hdl: number, triglycerides: number})[];
   addLipidRecord: (data: LipidRecordData) => void;
   removeLipidRecord: (id: string) => void;
+  totalCholesterolRecords: TotalCholesterolRecord[];
+  addTotalCholesterolRecord: (record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => void;
+  removeTotalCholesterolRecord: (id: string) => void;
   customBiomarkers: CustomBiomarker[];
   addCustomBiomarker: (name: string, description?: string) => void;
   removeCustomBiomarker: (id: string) => void;
@@ -485,6 +488,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setHasUnsavedChanges(true);
   }, []);
 
+  const addTotalCholesterolRecord = useCallback((record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    setTotalCholesterolRecordsState(prev => [...prev, newRecord]);
+    setHasUnsavedChanges(true);
+  }, [profile.medication, getMedicationForRecord]);
+
+  const removeTotalCholesterolRecord = useCallback((id: string) => {
+    setTotalCholesterolRecordsState(prev => prev.filter(r => r.id !== id));
+    setHasUnsavedChanges(true);
+  }, []);
+
   const addCustomBiomarker = useCallback((name: string, description?: string) => {
     const newBiomarker: CustomBiomarker = {
       id: `custom-${Date.now()}`,
@@ -789,6 +803,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     lipidRecords,
     addLipidRecord,
     removeLipidRecord,
+    totalCholesterolRecords,
+    addTotalCholesterolRecord,
+    removeTotalCholesterolRecord,
     customBiomarkers,
     addCustomBiomarker,
     removeCustomBiomarker,

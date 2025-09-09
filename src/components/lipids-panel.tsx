@@ -7,6 +7,7 @@ import { useApp } from '@/context/app-context';
 import { DiseasePanelCard } from './disease-panel-card';
 import { type BiomarkerKey } from '@/lib/biomarker-cards';
 import { LipidCard } from './lipid-card';
+import { TotalCholesterolCard } from './total-cholesterol-card';
 
 
 const LIPIDS_PANEL_KEY = 'lipids';
@@ -31,15 +32,16 @@ export function LipidsPanel() {
         panelKey={LIPIDS_PANEL_KEY}
         allPanelBiomarkers={allLipidsBiomarkers}
     >
-      {cardsToShow.length > 0 ? (
-        <>
-            {cardsToShow}
-        </>
-      ) : (
-        <div className="flex h-full items-center justify-center">
-            <p className="text-sm text-muted-foreground text-center">No lipid biomarkers enabled. <br/> Add a condition like 'Hyperlipidemia' to get started.</p>
-        </div>
-      )}
+        {enabledForPanel.includes('totalCholesterol') && <TotalCholesterolCard />}
+        {enabledForPanel.includes('ldl') && <div />}
+        {enabledForPanel.includes('hdl') && <div />}
+        {enabledForPanel.includes('triglycerides') && <div />}
+
+        {enabledForPanel.length === 0 && (
+            <div className="col-span-full flex h-full items-center justify-center min-h-[150px]">
+                <p className="text-sm text-muted-foreground text-center">No lipid biomarkers enabled. <br/> Add a condition like 'Hyperlipidemia' to get started.</p>
+            </div>
+        )}
     </DiseasePanelCard>
   );
 }

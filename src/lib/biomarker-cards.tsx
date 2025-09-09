@@ -20,6 +20,8 @@ import { LipidsPanel } from '@/components/lipids-panel';
 import { BiomarkerKey, DiseasePanelKey } from './types';
 import { AddLipidRecordDialog } from '@/components/add-lipid-record-dialog';
 import { LipidCard } from '@/components/lipid-card';
+import { TotalCholesterolCard } from '@/components/total-cholesterol-card';
+import { AddTotalCholesterolRecordDialog } from '@/components/add-total-cholesterol-record-dialog';
 
 
 export const availableBiomarkerCards = {
@@ -64,6 +66,12 @@ export const availableBiomarkerCards = {
     component: <WeightRecordCard />,
     addRecordLabel: 'New Weight Record',
     addRecordDialog: <AddWeightRecordDialog />,
+  },
+  totalCholesterol: {
+    label: 'Total Cholesterol',
+    component: <TotalCholesterolCard />,
+    addRecordLabel: 'New Total Cholesterol Record',
+    addRecordDialog: <AddTotalCholesterolRecordDialog />,
   },
 };
 
