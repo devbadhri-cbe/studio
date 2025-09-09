@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -32,6 +33,7 @@ interface UnitSwitchProps {
   labelB: string;
   isChecked: boolean;
   onCheckedChange: (checked: boolean) => void;
+  unitSwitchLabel?: string;
 }
 
 interface BiomarkerCardProps<T extends Record> {
@@ -71,7 +73,7 @@ export function BiomarkerCard<T extends Record>({
   const formattedRecords = sortedRecords.map(formatRecord);
 
   const UnitSwitchComponent = unitSwitch ? (
-    <div className="flex items-center justify-between space-x-2 px-2 py-1">
+    <div className="flex items-center justify-center space-x-2 px-2 py-1">
         <Label htmlFor={`unit-switch-${title}`} className="text-xs">{unitSwitch.labelA}</Label>
         <Switch
             id={`unit-switch-${title}`}
@@ -103,7 +105,7 @@ export function BiomarkerCard<T extends Record>({
         {UnitSwitchComponent && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Biomarker Units</DropdownMenuLabel>
+            <DropdownMenuLabel>{unitSwitch.unitSwitchLabel || 'Biomarker Units'}</DropdownMenuLabel>
             <div onClick={(e) => e.stopPropagation()}>
                 {UnitSwitchComponent}
             </div>
