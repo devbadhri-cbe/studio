@@ -12,13 +12,20 @@ interface DiseasePanelProps {
 }
 
 export function DiseasePanel({ searchQuery = '' }: DiseasePanelProps) {
-    const { profile } = useApp();
+    const { profile, isDoctorLoggedIn } = useApp();
 
     const panelsToShow = React.useMemo(() => {
         const enabledPanelKeys = Object.keys(profile.enabledBiomarkers || {});
         const lowercasedQuery = searchQuery.toLowerCase();
+
+        let panels = availableDiseasePanels;
+
+        // If it's not a doctor, filter to only show enabled panels.
+        if (!isDoctorLoggedIn) {
+            panels = panels.filter(p => enabledPanelKeys.includes(p.key));
+        }
         
-        const filteredPanels = availableDiseasePanels.filter(p => 
+        const filteredPanels = panels.filter(p => 
             searchQuery ? p.label.toLowerCase().includes(lowercasedQuery) : true
         );
 
@@ -31,9 +38,9 @@ export function DiseasePanel({ searchQuery = '' }: DiseasePanelProps) {
         });
         return sortedPanels.map(p => React.cloneElement(p.component, { key: p.key }));
 
-    }, [profile.enabledBiomarkers, searchQuery]);
+    }, [profile.enabledBiomarkers, searchQuery, isDoctorLoggedIn]);
 
-    if (panelsToShow.length === 0) {
+    if (panelsToShow.length === 0 && isDoctorLoggedIn) {
         return (
             <Card>
                 <CardContent className="p-6 text-center text-muted-foreground">
@@ -42,6 +49,11 @@ export function DiseasePanel({ searchQuery = '' }: DiseasePanelProps) {
             </Card>
         );
     }
+    
+    if (panelsToShow.length === 0 && !isDoctorLoggedIn) {
+        return null;
+    }
+
 
     return (
         <Card>
