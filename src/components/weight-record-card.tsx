@@ -4,10 +4,8 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Trash2, Weight, Settings, Edit } from 'lucide-react';
-import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { Weight, Settings, Edit } from 'lucide-react';
 import { AddWeightRecordDialog } from './add-weight-record-dialog';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { kgToLbs, getBmiStatus, BMI_CATEGORIES, cmToFtIn } from '@/lib/utils';
 import { WeightChart } from './weight-chart';
 import { Badge } from './ui/badge';
@@ -19,7 +17,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ScrollArea } from './ui/scroll-area';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import type { EditHeightDialogHandles } from './edit-height-dialog';
@@ -32,7 +29,6 @@ interface WeightRecordCardProps {
 
 export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) {
   const { weightRecords, removeWeightRecord, profile, setProfile } = useApp();
-  const formatDate = useDateFormatter();
   const isImperial = profile.unitSystem === 'imperial';
   const weightUnit = isImperial ? 'lbs' : 'kg';
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
@@ -93,44 +89,13 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
     </DropdownMenu>
   ) : null;
 
-  const RecordsList = (
-     <ScrollArea className="h-full max-h-[100px] w-full">
-        {sortedWeights.length > 0 ? (
-            <ul className="space-y-1 mt-2">
-            {sortedWeights.map((weight) => {
-                const displayWeight = isImperial
-                ? `${kgToLbs(weight.value).toFixed(1)} lbs`
-                : `${weight.value.toFixed(1)} kg`;
-
-                return (
-                <li key={weight.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                    <p className="flex-1">
-                    <span className="font-semibold text-foreground">{displayWeight}</span>
-                    <span className="text-xs text-muted-foreground"> on {formatDate(weight.date)}</span>
-                    </p>
-                    <div className="flex items-center shrink-0">
-                    {!isReadOnly && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeWeightRecord(weight.id)}>
-                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                            </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Delete record</TooltipContent>
-                        </Tooltip>
-                    )}
-                    </div>
-                </li>
-                );
-            })}
-            </ul>
-        ) : (
-            <div className="flex h-full items-center justify-center">
-            <p className="text-xs text-muted-foreground text-center">No records.</p>
-            </div>
-        )}
-    </ScrollArea>
-  );
+  const formattedRecords = sortedWeights.map(r => ({
+      id: r.id,
+      date: r.date as string,
+      displayValue: isImperial
+        ? `${kgToLbs(r.value).toFixed(1)} lbs`
+        : `${r.value.toFixed(1)} kg`
+  }));
 
   const StatusDisplay = (
     <div className="flex flex-col items-center justify-center flex-1 gap-2 text-sm text-muted-foreground text-center h-full">
@@ -167,13 +132,15 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
         title={Title}
         icon={Icon}
         actions={Actions}
-        recordsList={RecordsList}
+        records={formattedRecords}
+        onDeleteRecord={removeWeightRecord}
         statusDisplay={StatusDisplay}
         chart={Chart}
         className="shadow-xl"
         hasRecords={(weightRecords || []).length > 0}
         noRecordsMessage="No weight records yet."
         statusVariant={bmiStatus?.variant}
+        isReadOnly={isReadOnly}
     />
   );
 }

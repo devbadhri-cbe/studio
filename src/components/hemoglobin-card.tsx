@@ -4,15 +4,11 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Trash2, Droplet, Settings } from 'lucide-react';
-import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { Droplet, Settings } from 'lucide-react';
 import { AddHemoglobinRecordDialog } from './add-hemoglobin-record-dialog';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { HemoglobinChart } from './hemoglobin-chart';
 import { Badge } from './ui/badge';
-import { ScrollArea } from './ui/scroll-area';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
-import { Separator } from './ui/separator';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import {
@@ -30,7 +26,6 @@ interface HemoglobinCardProps {
 
 export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
   const { hemoglobinRecords, removeHemoglobinRecord, profile, biomarkerUnit, setBiomarkerUnit, getDisplayHemoglobinValue } = useApp();
-  const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
     return [...(hemoglobinRecords || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -84,32 +79,11 @@ export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
     </DropdownMenu>
   ) : null;
 
-  const RecordsList = (
-    <ScrollArea className="h-full max-h-[100px] w-full">
-        <ul className="space-y-1 mt-2">
-          {sortedRecords.map((record) => (
-              <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                  <p className="flex-1">
-                      <span className="font-semibold text-foreground">{getDisplayHemoglobinValue(record.hemoglobin)}</span>
-                      <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
-                  </p>
-                  <div className="flex items-center shrink-0">
-                  {!isReadOnly && (
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeHemoglobinRecord(record.id)}>
-                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete record</TooltipContent>
-                    </Tooltip>
-                  )}
-                  </div>
-              </li>
-            ))}
-        </ul>
-    </ScrollArea>
-  );
+  const formattedRecords = sortedRecords.map(r => ({
+      id: r.id,
+      date: r.date as string,
+      displayValue: `${getDisplayHemoglobinValue(r.hemoglobin)}`
+  }));
 
   const StatusDisplay = (
     <div className="text-center text-xs text-muted-foreground flex items-center justify-center h-full">
@@ -133,11 +107,13 @@ export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
       title={Title}
       icon={Icon}
       actions={Actions}
-      recordsList={RecordsList}
+      records={formattedRecords}
+      onDeleteRecord={removeHemoglobinRecord}
       statusDisplay={StatusDisplay}
       chart={Chart}
       hasRecords={(hemoglobinRecords || []).length > 0}
       statusVariant={currentStatus?.variant}
+      isReadOnly={isReadOnly}
     />
   );
 }

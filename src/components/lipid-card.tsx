@@ -4,12 +4,9 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Trash2, Flame, Settings } from 'lucide-react';
-import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { Flame, Settings } from 'lucide-react';
 import { AddLipidRecordDialog } from './add-lipid-record-dialog';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { LipidChart } from './lipid-chart';
-import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
 import {
   DropdownMenu,
@@ -25,7 +22,6 @@ interface LipidCardProps {
 
 export function LipidCard({ isReadOnly = false }: LipidCardProps) {
   const { lipidRecords, removeLipidRecord } = useApp();
-  const formatDate = useDateFormatter();
   const [, setForceRender] = React.useState(0);
 
   const sortedRecords = React.useMemo(() => {
@@ -67,32 +63,11 @@ export function LipidCard({ isReadOnly = false }: LipidCardProps) {
      </AddLipidRecordDialog>
   ) : null;
 
-  const RecordsList = (
-    <ScrollArea className="h-full max-h-[100px] w-full">
-        <ul className="space-y-1 mt-2">
-          {sortedRecords.map((record) => (
-              <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                  <p className="flex-1">
-                      <span className="font-semibold text-foreground">TC: {record.totalCholesterol}</span>
-                      <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
-                  </p>
-                  <div className="flex items-center shrink-0">
-                  {!isReadOnly && (
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeLipidRecord(record.id)}>
-                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete record</TooltipContent>
-                    </Tooltip>
-                  )}
-                  </div>
-              </li>
-            ))}
-        </ul>
-    </ScrollArea>
-  );
+  const formattedRecords = sortedRecords.map(r => ({
+      id: r.id,
+      date: r.date as string,
+      displayValue: `TC: ${r.totalCholesterol}`
+  }));
 
   const StatusDisplay = (
     <div className="text-center text-xs text-muted-foreground flex items-center justify-center h-full">
@@ -114,13 +89,15 @@ export function LipidCard({ isReadOnly = false }: LipidCardProps) {
       title={Title}
       icon={Icon}
       actions={Actions}
-      recordsList={RecordsList}
+      records={formattedRecords}
+      onDeleteRecord={removeLipidRecord}
       statusDisplay={StatusDisplay}
       chart={Chart}
       className="shadow-xl"
       hasRecords={(lipidRecords || []).length > 0}
       noRecordsMessage="No lipid panel records yet."
       statusVariant={currentStatus?.variant}
+      isReadOnly={isReadOnly}
     />
   );
 }

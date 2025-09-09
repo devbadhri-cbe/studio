@@ -4,12 +4,9 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
-import { Trash2, Droplet, Settings } from 'lucide-react';
-import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { Droplet, Settings } from 'lucide-react';
 import { AddFastingBloodGlucoseRecordDialog } from './add-fasting-blood-glucose-record-dialog';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { FastingBloodGlucoseChart } from './fasting-blood-glucose-chart';
-import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
 import {
   DropdownMenu,
@@ -19,7 +16,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Separator } from './ui/separator';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
@@ -30,7 +26,6 @@ interface FastingBloodGlucoseCardProps {
 
 export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGlucoseCardProps) {
   const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord, getDisplayGlucoseValue, biomarkerUnit, setBiomarkerUnit } = useApp();
-  const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
     return [...(fastingBloodGlucoseRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
@@ -76,42 +71,11 @@ export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGluc
     </DropdownMenu>
   ) : null;
 
-  const RecordsList = (
-    <ScrollArea className="h-full max-h-[100px] w-full">
-        <ul className="space-y-1 mt-2">
-          {sortedRecords.map((record) => {
-            const status = getStatus(record.value);
-            return (
-              <Tooltip key={record.id}>
-                <TooltipTrigger asChild>
-                  <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                    <p className="flex-1">
-                      <span className="font-semibold text-foreground">{getDisplayGlucoseValue(record.value)}</span>
-                      <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
-                    </p>
-                    <div className="flex items-center shrink-0">
-                      {!isReadOnly && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100" onClick={() => removeFastingBloodGlucoseRecord(record.id)}>
-                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                            </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Delete record</TooltipContent>
-                        </Tooltip>
-                      )}
-                    </div>
-                  </li>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{status.text}</p>
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
-        </ul>
-    </ScrollArea>
-  );
+  const formattedRecords = sortedRecords.map(r => ({
+      id: r.id,
+      date: r.date as string,
+      displayValue: `${getDisplayGlucoseValue(r.value)}`
+  }));
 
   const StatusDisplay = (
     <div className="text-center text-xs text-muted-foreground flex items-center justify-center h-full">
@@ -135,11 +99,13 @@ export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGluc
       title={Title}
       icon={Icon}
       actions={Actions}
-      recordsList={RecordsList}
+      records={formattedRecords}
+      onDeleteRecord={removeFastingBloodGlucoseRecord}
       statusDisplay={StatusDisplay}
       chart={Chart}
       hasRecords={(fastingBloodGlucoseRecords || []).length > 0}
       statusVariant={currentStatus?.variant}
+      isReadOnly={isReadOnly}
     />
   );
 }
