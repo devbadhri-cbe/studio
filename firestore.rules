@@ -1,8 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // A user can create a patient document if they are authenticated.
+    // The doctorUid in the document must match the user's UID.
     match /patients/{patientId} {
-      allow read, write: if true;
+      allow create: if request.auth != null && request.resource.data.doctorUid == request.auth.uid;
+      
+      // A user can read, update, or delete a patient document if they are the doctor
+      // associated with that patient.
+      allow read, update, delete: if request.auth != null && resource.data.doctorUid == request.auth.uid;
     }
   }
 }
