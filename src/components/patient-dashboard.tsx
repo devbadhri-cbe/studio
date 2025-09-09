@@ -18,7 +18,7 @@ import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Input } from './ui/input';
 import { UnsavedChangesBar } from './unsaved-changes-bar';
 import { DashboardSectionToggle } from './dashboard-section-toggle';
-import { TooltipProvider } from './ui/tooltip';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
 
@@ -40,10 +40,17 @@ export function PatientDashboard() {
   }
 
   const BackButton = (
-    <Button variant="outline" size="sm" onClick={() => router.push('/doctor/dashboard')}>
-      <ArrowLeft className="mr-2 h-4 w-4" />
-      Back
-    </Button>
+    <Tooltip>
+        <TooltipTrigger asChild>
+            <Button variant="outline" size="icon" onClick={() => router.push('/doctor/dashboard')}>
+                <ArrowLeft className="h-4 w-4" />
+                <span className="sr-only">Back to Dashboard</span>
+            </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+            <p>Back to Dashboard</p>
+        </TooltipContent>
+    </Tooltip>
   );
 
   return (
