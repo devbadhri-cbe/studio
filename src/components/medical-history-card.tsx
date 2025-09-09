@@ -169,6 +169,7 @@ export function MedicalHistoryCard() {
       if(result.isValid && result.standardizedName && result.icdCode && result.synopsis) {
           const newConditionData = {
               condition: result.standardizedName,
+              userInput: data.condition,
               date: data.date.toISOString(),
               icdCode: result.icdCode,
               synopsis: result.synopsis,
@@ -197,11 +198,8 @@ export function MedicalHistoryCard() {
   }
 
   const handleSuggestionClick = async (suggestion: string) => {
-      // Re-run the process with the refined suggestion
       if (editingCondition) {
-        // Here, we assume the user is still in the "add/edit" flow, so we can get the date from the form.
-        // A more robust implementation might store the date in the state.
-        const date = new Date(); // This is a fallback. The form should hold the date.
+        const date = new Date(); 
         handleProcessCondition({ condition: suggestion, date });
       }
   };
@@ -429,3 +427,4 @@ export function MedicalHistoryCard() {
     </Card>
   );
 }
+

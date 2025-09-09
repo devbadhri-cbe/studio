@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { MedicalCondition } from '@/lib/types';
@@ -60,6 +61,9 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
                   <TooltipContent>{statusInfo.text}</TooltipContent>
                 </Tooltip>
               </div>
+              {condition.userInput && condition.userInput.toLowerCase() !== condition.condition.toLowerCase() && (
+                <p className="text-xs text-muted-foreground italic">Patient Input: "{condition.userInput}"</p>
+              )}
               {isIcdLoading ? (
                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -129,3 +133,4 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
     </>
   );
 }
+
