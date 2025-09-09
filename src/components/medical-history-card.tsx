@@ -164,7 +164,7 @@ function MedicalConditionForm({
           </Alert>
         )}
        
-        <div className="flex justify-between items-end gap-4">
+        <div className="flex justify-between items-center gap-4">
             <FormField
             control={form.control}
             name="date"
