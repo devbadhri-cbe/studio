@@ -22,6 +22,13 @@ import { parseISO } from 'date-fns';
 import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
 import { toast } from '@/hooks/use-toast';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -131,7 +138,7 @@ function MedicalConditionForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormField
             control={form.control}
             name="userInput"
@@ -291,6 +298,7 @@ export function MedicalHistoryCard() {
   const [isSubmittingMedication, setIsSubmittingMedication] = React.useState(false);
   const [isEditingConditions, setIsEditingConditions] = React.useState(false);
   const [isEditingMedications, setIsEditingMedications] = React.useState(false);
+  const [isConditionDialogOpen, setIsConditionDialogOpen] = React.useState(false);
 
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -300,6 +308,12 @@ export function MedicalHistoryCard() {
 
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
+  React.useEffect(() => {
+    if (!isConditionDialogOpen) {
+        setEditingCondition(null);
+    }
+  }, [isConditionDialogOpen]);
+  
   const handleSaveCondition = (condition: MedicalCondition) => {
     const isUpdate = !!editingCondition?.id;
     if (isUpdate) {
@@ -313,7 +327,13 @@ export function MedicalHistoryCard() {
 
   const handleReviseCondition = (conditionToEdit: MedicalCondition) => {
       setEditingCondition(conditionToEdit);
+      setIsConditionDialogOpen(true);
   }
+
+  const handleAddConditionClick = () => {
+    setEditingCondition(null);
+    setIsConditionDialogOpen(true);
+  };
 
   const handleSaveMedication = async (data: {medicationName: string, dosage: string, frequency: string}) => {
     setIsSubmittingMedication(true);
@@ -349,10 +369,6 @@ export function MedicalHistoryCard() {
     return details ? `(${details})` : '';
   }
   
-  const handleCancelCondition = () => {
-    setEditingCondition(null);
-  }
-  
   const conditionActions = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -361,7 +377,7 @@ export function MedicalHistoryCard() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => setEditingCondition({} as MedicalCondition)}>
+        <DropdownMenuItem onSelect={handleAddConditionClick}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Condition
         </DropdownMenuItem>
@@ -414,15 +430,8 @@ export function MedicalHistoryCard() {
         <MedicalInfoSection
             title="Present Medical Conditions"
             icon={<Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />}
-            actions={!editingCondition && conditionActions}
+            actions={conditionActions}
         >
-            {editingCondition && (
-                <MedicalConditionForm 
-                    onSave={handleSaveCondition} 
-                    onCancel={handleCancelCondition} 
-                    initialData={editingCondition.id ? editingCondition : undefined}
-                />
-            )}
             {profile.presentMedicalConditions.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.presentMedicalConditions.map((condition) => {
@@ -439,9 +448,25 @@ export function MedicalHistoryCard() {
                     })}
                 </ul>
             ) : (
-                !editingCondition && <p className="text-xs text-muted-foreground pl-8 pt-2">No conditions recorded.</p>
+                <p className="text-xs text-muted-foreground pl-8 pt-2">No conditions recorded.</p>
             )}
         </MedicalInfoSection>
+        
+        <Dialog open={isConditionDialogOpen} onOpenChange={setIsConditionDialogOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{editingCondition?.id ? "Edit" : "Add"} Medical Condition</DialogTitle>
+                    <DialogDescription>
+                        Enter a condition and our AI will help standardize it.
+                    </DialogDescription>
+                </DialogHeader>
+                <MedicalConditionForm 
+                    onSave={handleSaveCondition} 
+                    onCancel={() => setIsConditionDialogOpen(false)} 
+                    initialData={editingCondition?.id ? editingCondition : undefined}
+                />
+            </DialogContent>
+        </Dialog>
         
 
         <MedicalInfoSection
@@ -479,7 +504,7 @@ export function MedicalHistoryCard() {
                     ))}
                 </ul>
             ) : (
-                !isAddingMedication && !editingCondition && <p className="text-xs text-muted-foreground pl-8 pt-2">No medication recorded.</p>
+                !isAddingMedication && <p className="text-xs text-muted-foreground pl-8 pt-2">No medication recorded.</p>
             )}
             {profile.medication.length > 1 && !isMedicationNil && (
                 <div className="pt-2">
