@@ -8,7 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { MedicalConditionInputSchema, MedicalConditionOutputSchema, type MedicalConditionInput, type MedicalConditionOutput } from '@/lib/ai-types';
-import { gemini15Flash } from 'genkit/models';
+import { gemini15Flash } from '@genkit-ai/googleai';
 
 export async function processMedicalCondition(input: MedicalConditionInput): Promise<MedicalConditionOutput> {
   return processMedicalConditionFlow(input);

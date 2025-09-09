@@ -7,7 +7,7 @@
  */
 import { ai } from '@/ai/genkit';
 import { ConditionSynopsisInputSchema, ConditionSynopsisOutputSchema, type ConditionSynopsisInput, type ConditionSynopsisOutput } from '@/lib/ai-types';
-import { gemini15Flash } from 'genkit/models';
+import { gemini15Flash } from '@genkit-ai/googleai';
 
 export async function getConditionSynopsis(input: ConditionSynopsisInput): Promise<ConditionSynopsisOutput> {
   return getConditionSynopsisFlow(input);
