@@ -96,9 +96,12 @@ function MedicalConditionForm({
   }
 
   const handleFormSubmit = (data: MedicalConditionFormValues) => {
-    const isUpdate = !!initialData?.id;
-    const isDuplicate = profile.presentMedicalConditions.some(c => c.id !== initialData?.id && c.icdCode === data.icdCode);
+    if (!data.icdCode) {
+        form.setError('icdCode', { type: 'manual', message: 'Please process the condition to get an ICD code before saving.' });
+        return;
+    }
 
+    const isDuplicate = profile.presentMedicalConditions.some(c => c.id !== initialData?.id && c.icdCode === data.icdCode);
     if (isDuplicate) {
         toast({ variant: 'destructive', title: 'Duplicate Condition', description: `A condition with ICD-11 code ${data.icdCode} already exists.` });
         return;
