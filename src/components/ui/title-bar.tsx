@@ -60,14 +60,12 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, backButto
                                 {renderTitle()}
                             </div>
                         </div>
-                        {subtitle && (
-                             <div className={cn(
-                                "text-center text-xs text-muted-foreground mt-2 flex items-center gap-1 transition-all duration-300",
-                                isScrolled ? "opacity-0 h-0" : "opacity-100 h-auto"
-                             )}>
-                                <button onClick={onSubtitleClick} className={cn("hover:underline", onSubtitleClick && "cursor-pointer")}>{subtitle}</button>
-                            </div>
-                        )}
+                         <div className={cn(
+                            "text-center text-xs text-muted-foreground mt-2 flex items-center gap-1 transition-all duration-300",
+                            isScrolled ? "opacity-0 h-0" : "opacity-100 h-auto"
+                         )}>
+                           {subtitle && <button onClick={onSubtitleClick} className={cn("hover:underline", onSubtitleClick && "cursor-pointer")}>{subtitle}</button>}
+                        </div>
                     </div>
                 </div>
                 <div className="flex justify-end w-24">
