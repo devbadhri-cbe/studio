@@ -46,7 +46,7 @@ export function DiseasePanelCard({
   }
 
   return (
-    <Card className={cn("w-full flex flex-col h-full shadow-md border-2", isPanelEnabledForPatient ? "border-primary/20" : "border-dashed", className)}>
+    <Card className={cn("w-full flex flex-col h-full shadow-md border-2 border-primary/20", isPanelEnabledForPatient ? "border-primary/20" : "border-dashed", className)}>
         <CardHeader className="flex-row items-center justify-between">
             <div className="flex items-center gap-3">
             {icon}
