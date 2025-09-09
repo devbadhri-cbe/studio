@@ -51,8 +51,8 @@ interface LipidRecordData {
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
-  addMedicalCondition: (condition: Omit<MedicalCondition, 'id' | 'status'> & Partial<Pick<MedicalCondition, 'status'>>) => Promise<void>;
-  updateMedicalCondition: (condition: MedicalCondition) => Promise<void>;
+  addMedicalCondition: (condition: MedicalCondition) => void;
+  updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
   removeAllMedicalConditions: () => Promise<void>;
   addMedication: (medication: Omit<Medication, 'id'>) => void;
@@ -319,22 +319,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setHasUnsavedChanges(true);
   }, []);
   
-  const addMedicalCondition = useCallback(async (condition: Omit<MedicalCondition, 'id' | 'status'> & Partial<Pick<MedicalCondition, 'status'>>) => {
-    const tempId = `cond-${Date.now()}`;
-    const newCondition: MedicalCondition = {
-      id: tempId,
-      ...condition,
-      status: condition.status || 'verified'
-    };
-
+  const addMedicalCondition = useCallback((condition: MedicalCondition) => {
     setProfileState(prev => ({
       ...prev,
-      presentMedicalConditions: [...prev.presentMedicalConditions, newCondition]
+      presentMedicalConditions: [...prev.presentMedicalConditions, condition]
     }));
     setHasUnsavedChanges(true);
   }, []);
 
-  const updateMedicalCondition = useCallback(async (condition: MedicalCondition) => {
+  const updateMedicalCondition = useCallback((condition: MedicalCondition) => {
     setProfileState(prevProfile => ({
       ...prevProfile,
       presentMedicalConditions: prevProfile.presentMedicalConditions.map(c => c.id === condition.id ? condition : c)
@@ -816,5 +809,3 @@ export function useApp() {
   }
   return context;
 }
-
-    

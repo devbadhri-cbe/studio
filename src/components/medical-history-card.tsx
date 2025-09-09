@@ -43,20 +43,14 @@ interface MedicalConditionFormProps {
     onSave: (data: { condition: string; date: Date }) => Promise<void>;
     onCancel: () => void;
     initialData?: MedicalCondition;
-    aiResult: MedicalConditionOutput | null;
     isProcessing: boolean;
-    setAiResult: (result: MedicalConditionOutput | null) => void;
-    onSuggestionClick: (suggestion: string) => void;
 }
 
 function MedicalConditionForm({ 
     onSave, 
     onCancel,
     initialData,
-    aiResult,
-    setAiResult,
     isProcessing,
-    onSuggestionClick,
 }: MedicalConditionFormProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   
@@ -68,7 +62,7 @@ function MedicalConditionForm({
 
   const form = useForm<{ condition: string; date: Date }>({
     defaultValues: { 
-        condition: initialData?.condition || '', 
+        condition: initialData?.userInput || initialData?.condition || '', 
         date: initialData?.date ? parseISO(initialData.date) : new Date() 
     },
   });
@@ -83,22 +77,6 @@ function MedicalConditionForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-4">
-        {aiResult && !aiResult.isValid && aiResult.suggestions && aiResult.suggestions.length > 0 && (
-          <Alert>
-            <AlertTitle>Refine Your Input</AlertTitle>
-            <AlertDescription>
-              The AI couldn't recognize "{form.getValues('condition')}". Did you mean one of these?
-              <div className="flex flex-wrap gap-2 mt-2">
-                {aiResult.suggestions.map((suggestion) => (
-                  <Button key={suggestion} size="sm" variant="outline" onClick={() => onSuggestionClick(suggestion)}>
-                    {suggestion}
-                  </Button>
-                ))}
-              </div>
-            </AlertDescription>
-          </Alert>
-        )}
-
         <FormField
           control={form.control}
           name="date"
@@ -156,7 +134,6 @@ export function MedicalHistoryCard() {
   const [activeSynopsis, setActiveSynopsis] = React.useState<ActiveSynopsis>(null);
   const [isSubmittingMedication, setIsSubmittingMedication] = React.useState(false);
   const [isProcessingCondition, setIsProcessingCondition] = React.useState(false);
-  const [aiResult, setAiResult] = React.useState<MedicalConditionOutput | null>(null);
   const [isClearAllDialogOpen, setIsClearAllDialogOpen] = React.useState(false);
 
   const medicationNameInputRef = React.useRef<HTMLInputElement>(null);
@@ -167,13 +144,33 @@ export function MedicalHistoryCard() {
 
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
-  const handleProcessCondition = async (data: { condition: string; date: Date }, isUpdate = false) => {
+  const handleProcessCondition = async (data: { condition: string; date: Date }) => {
     setIsProcessingCondition(true);
-    setAiResult(null);
+
+    const isUpdate = !!editingCondition?.id;
+    const tempId = editingCondition?.id || `cond-${Date.now()}`;
+
+    // Immediately add/update the condition in the UI with a loading state
+    const optimisticCondition: MedicalCondition = {
+      id: tempId,
+      condition: data.condition,
+      userInput: data.condition,
+      date: data.date.toISOString(),
+      icdCode: 'loading...',
+      status: 'pending_review',
+    };
+    
+    if (isUpdate) {
+        updateMedicalCondition(optimisticCondition);
+    } else {
+        addMedicalCondition(optimisticCondition);
+    }
+    setEditingCondition(null);
+    setIsProcessingCondition(false);
+
     try {
-      // If updating, exclude the current condition from the list sent to AI to avoid self-duplication checks.
-      const conditionsForCheck = isUpdate && editingCondition
-          ? profile.presentMedicalConditions.filter(c => c.id !== editingCondition.id)
+      const conditionsForCheck = isUpdate
+          ? profile.presentMedicalConditions.filter(c => c.id !== tempId)
           : profile.presentMedicalConditions;
 
       const result = await processMedicalCondition({ 
@@ -181,44 +178,34 @@ export function MedicalHistoryCard() {
         existingConditions: conditionsForCheck.map(c => ({ condition: c.condition, icdCode: c.icdCode || '' }))
       });
       
-      if(result.isValid && result.standardizedName && result.icdCode && result.synopsis) {
-          const newConditionData = {
-              condition: result.standardizedName,
-              userInput: data.condition,
-              date: data.date.toISOString(),
-              icdCode: result.icdCode,
-              synopsis: result.synopsis,
-              status: 'verified' as const
+      if(result.isValid && result.standardizedName && result.icdCode) {
+          const finalCondition: MedicalCondition = {
+            ...optimisticCondition,
+            condition: result.standardizedName,
+            icdCode: result.icdCode,
+            synopsis: result.synopsis,
+            status: 'verified',
           };
-
-          if (isUpdate && editingCondition) {
-            await updateMedicalCondition({ ...editingCondition, ...newConditionData });
-          } else {
-            await addMedicalCondition(newConditionData);
-          }
-          setEditingCondition(null);
-          toast({ title: 'Condition Saved', description: `${result.standardizedName} has been added.` });
+          updateMedicalCondition(finalCondition);
+          toast({ title: 'Condition Verified', description: `${result.standardizedName} has been processed.` });
       } else {
-        setAiResult(result);
-        if (!result.suggestions || result.suggestions.length === 0) {
-           toast({ variant: 'destructive', title: 'Condition Exists', description: `This condition is already in your profile.` });
-        }
+        // If not valid, remove the optimistic entry and show toast
+        removeMedicalCondition(tempId);
+        toast({ variant: 'destructive', title: 'Condition Invalid', description: `"${data.condition}" is not a recognized condition or already exists.` });
       }
     } catch (e) {
       console.error(e);
+      // If AI fails, update the optimistic entry to show an error state
+      const failedCondition: MedicalCondition = {
+        ...optimisticCondition,
+        icdCode: 'error',
+        synopsis: 'Failed to process condition.',
+      };
+      updateMedicalCondition(failedCondition);
       toast({ variant: 'destructive', title: 'Error', description: "Could not process the medical condition." });
-    } finally {
-      setIsProcessingCondition(false);
     }
   }
 
-  const handleSuggestionClick = async (suggestion: string) => {
-    const isUpdate = !!editingCondition?.id;
-    if (editingCondition) {
-      const date = editingCondition.date ? parseISO(editingCondition.date) : new Date(); 
-      handleProcessCondition({ condition: suggestion, date }, isUpdate);
-    }
-  };
 
   const handleReviseCondition = (conditionToEdit: MedicalCondition) => {
       setEditingCondition(conditionToEdit);
@@ -271,7 +258,6 @@ export function MedicalHistoryCard() {
   
   const handleCancelCondition = () => {
     setEditingCondition(null);
-    setAiResult(null);
     setIsProcessingCondition(false);
   }
   
@@ -333,13 +319,10 @@ export function MedicalHistoryCard() {
                 </div>
                 {editingCondition && (
                     <MedicalConditionForm 
-                        onSave={(data) => handleProcessCondition(data, !!editingCondition.id)} 
+                        onSave={handleProcessCondition} 
                         onCancel={handleCancelCondition} 
                         initialData={editingCondition.id ? editingCondition : undefined}
-                        aiResult={aiResult}
-                        setAiResult={setAiResult}
                         isProcessing={isProcessingCondition}
-                        onSuggestionClick={handleSuggestionClick}
                     />
                 )}
                 {profile.presentMedicalConditions.length > 0 ? (
@@ -492,5 +475,3 @@ export function MedicalHistoryCard() {
     </>
   );
 }
-
-    
