@@ -24,14 +24,14 @@ interface DrugInteractionViewerProps {
 }
 
 export function DrugInteractionViewer({ medications, onClose }: DrugInteractionViewerProps) {
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [isTranslating, setIsTranslating] = React.useState(false);
   const [summary, setSummary] = React.useState<string | null>(null);
   const [selectedLanguage, setSelectedLanguage] = React.useState('en');
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchInteractionSummary = React.useCallback(async (language: string) => {
+  const fetchInteractionSummary = React.useCallback(async (language: string, isTranslation: boolean) => {
     if (medications.length < 2) {
       toast({
         variant: 'destructive',
@@ -42,12 +42,10 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
       return;
     }
 
-    const isInitialLoad = !summary;
-
-    if (isInitialLoad) {
-        setIsLoading(true);
+    if (isTranslation) {
+      setIsTranslating(true);
     } else {
-        setIsTranslating(true);
+      setIsLoading(true);
     }
     setError(null);
 
@@ -73,19 +71,18 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
         setIsTranslating(false);
     }
     
-  }, [medications, toast, onClose, summary]);
+  }, [medications, toast, onClose]);
 
   React.useEffect(() => {
     // Only fetch on initial mount
-    if (!summary && !error) {
-        fetchInteractionSummary('en');
-    }
-  }, [fetchInteractionSummary, summary, error]);
+    fetchInteractionSummary('en', false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const handleLanguageChange = (languageCode: string) => {
     if (!languageCode || languageCode === selectedLanguage) return;
     setSelectedLanguage(languageCode);
-    fetchInteractionSummary(languageCode);
+    fetchInteractionSummary(languageCode, true);
   };
 
   const footerContent = (

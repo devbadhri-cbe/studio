@@ -10,13 +10,13 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from './ui/alert';
 import { Loader2, Info, Trash2, CheckCircle, AlertTriangle, Edit } from 'lucide-react';
 import * as React from 'react';
-import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 
 interface DiseaseCardProps {
   condition: MedicalCondition;
   onRevise: (condition: MedicalCondition) => void;
   isEditMode: boolean;
   onRemove: (id: string) => void;
+  onShowSynopsis: (id: string) => void;
 }
 
 const statusConfig = {
@@ -25,9 +25,8 @@ const statusConfig = {
   needs_revision: { icon: AlertTriangle, text: 'Doctor requested revision', color: 'text-destructive' },
 };
 
-export function DiseaseCard({ condition, onRevise, isEditMode, onRemove }: DiseaseCardProps) {
+export function DiseaseCard({ condition, onRevise, isEditMode, onRemove, onShowSynopsis }: DiseaseCardProps) {
   const formatDate = useDateFormatter();
-  const [isActive, setIsActive] = React.useState(false);
 
   const statusInfo = statusConfig[condition.status] || statusConfig.pending_review;
   const Icon = statusInfo.icon;
@@ -40,7 +39,7 @@ export function DiseaseCard({ condition, onRevise, isEditMode, onRemove }: Disea
 
   const handleToggleSynopsis = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsActive(prev => !prev);
+    onShowSynopsis(condition.id);
   };
 
   return (
@@ -119,15 +118,6 @@ export function DiseaseCard({ condition, onRevise, isEditMode, onRemove }: Disea
             </div>
           )}
       </li>
-      {isActive && (
-        <li className="pl-5 pb-2">
-          <ConditionSynopsisDialog
-            conditionName={condition.condition}
-            initialSynopsis={condition.synopsis}
-            onClose={() => setIsActive(false)}
-          />
-        </li>
-      )}
     </>
   );
 }

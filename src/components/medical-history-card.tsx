@@ -6,7 +6,7 @@ import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
@@ -22,13 +22,6 @@ import { parseISO } from 'date-fns';
 import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
 import { toast } from '@/hooks/use-toast';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -36,12 +29,9 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { AddMedicationDialog } from './add-medication-dialog';
+import { AddMedicationForm } from './add-medication-dialog';
 
-function capitalizeFirstLetter(string: string) {
-    if (!string) return string;
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
+type ActiveView = 'none' | 'addCondition' | 'editCondition' | 'addMedication' | 'interaction' | `synopsis_${string}`;
 
 interface MedicalConditionFormValues {
   userInput: string;
@@ -138,68 +128,69 @@ function MedicalConditionForm({
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-        <FormField
-            control={form.control}
-            name="userInput"
-            rules={{ required: "Condition name is required." }}
-            render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Condition Name</FormLabel>
-                    <FormControl>
-                        <Input {...field} ref={inputRef} placeholder="e.g., high blood pressure" autoComplete="off" />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            )}
-        />
+    <Card className="mt-2 border-primary border-2">
+      <CardHeader>
+        <CardTitle>{initialData ? 'Edit' : 'Add'} Medical Condition</CardTitle>
+        <CardDescription>Enter a condition and our AI will help standardize it.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+            <FormField
+                control={form.control}
+                name="userInput"
+                rules={{ required: "Condition name is required." }}
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Condition Name</FormLabel>
+                        <FormControl>
+                            <Input {...field} ref={inputRef} placeholder="e.g., high blood pressure" autoComplete="off" />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
 
-        {processedCondition && (
-          <Alert variant="default" className="bg-background">
-            <AlertTitle className="font-semibold">AI Suggestion</AlertTitle>
-            <AlertDescription>
-              <p><strong>Official Name:</strong> {processedCondition.standardizedName}</p>
-              <p><strong>ICD-11 Code:</strong> {processedCondition.icdCode}</p>
-            </AlertDescription>
-          </Alert>
-        )}
-       
-        <div className="flex justify-between items-end gap-4">
-            <div className="flex-1">
-              <FormField
+            {processedCondition && (
+            <Alert variant="default" className="bg-background">
+                <AlertTitle className="font-semibold">AI Suggestion</AlertTitle>
+                <AlertDescription>
+                <p><strong>Official Name:</strong> {processedCondition.standardizedName}</p>
+                <p><strong>ICD-11 Code:</strong> {processedCondition.icdCode}</p>
+                </AlertDescription>
+            </Alert>
+            )}
+        
+            <FormField
                 control={form.control}
                 name="date"
                 render={({ field }) => (
-                  <FormItem>
+                    <FormItem>
                     <FormLabel>Date of Diagnosis</FormLabel>
                     <FormControl>
-                      <DatePicker
+                        <DatePicker
                         value={field.value}
                         onChange={field.onChange}
                         fromYear={new Date().getFullYear() - 50}
                         toYear={new Date().getFullYear()}
-                      />
+                        />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                    </FormItem>
                 )}
-              />
-            </div>
-
-            <div className="flex-1 flex justify-center">
-              <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
-            </div>
+                />
             
-            <div className="flex-1 flex justify-end">
-              <Button type="submit" size="sm" disabled={isProcessing}>
+            <div className="flex justify-end items-center gap-2 pt-4">
+                <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
+                <Button type="submit" disabled={isProcessing}>
                     {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                     {processedCondition ? 'Confirm & Save' : 'Process & Review'}
-              </Button>
+                </Button>
             </div>
-        </div>
-      </form>
-    </Form>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -229,15 +220,20 @@ function MedicalInfoSection({ title, icon, actions, children }: MedicalInfoSecti
   )
 }
 
-function MedicationListItem({ med, isEditing, onRemove, formatDetails }: MedicationListItemProps) {
-    const [isSynopsisOpen, setIsSynopsisOpen] = React.useState(false);
+interface MedicationListItemProps {
+    med: Medication;
+    isEditing: boolean;
+    onRemove: (id: string) => void;
+    onShowSynopsis: (id: string) => void;
+    formatDetails: (med: Medication) => string;
+}
 
+function MedicationListItem({ med, isEditing, onRemove, onShowSynopsis, formatDetails }: MedicationListItemProps) {
     return (
-        <React.Fragment>
-            <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+        <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
             <div className="flex-1">
             {med.name.toLowerCase() === 'nil' ? (
-                    <span className="font-semibold text-foreground">Nil - No medication</span>
+                <span className="font-semibold text-foreground">Nil - No medication</span>
             ) : (
                 <div>
                     <p className="font-semibold text-foreground">{med.name}</p>
@@ -258,7 +254,7 @@ function MedicationListItem({ med, isEditing, onRemove, formatDetails }: Medicat
                                     size="icon"
                                     variant="ghost"
                                     className="h-8 w-8 shrink-0"
-                                    onClick={(e) => { e.stopPropagation(); setIsSynopsisOpen(prev => !prev); }}
+                                    onClick={(e) => { e.stopPropagation(); onShowSynopsis(med.id); }}
                                 >
                                     <Info className="h-5 w-5 text-blue-500" />
                                 </Button>
@@ -277,63 +273,40 @@ function MedicationListItem({ med, isEditing, onRemove, formatDetails }: Medicat
                         </Tooltip>
                     )}
                 </div>
-            </li>
-            {isSynopsisOpen && (
-                <li className="pl-5 pb-2">
-                    <MedicationSynopsisDialog
-                        medicationName={med.name}
-                        onClose={() => setIsSynopsisOpen(false)}
-                    />
-                </li>
-            )}
-        </React.Fragment>
+        </li>
     )
-}
-
-interface MedicationListItemProps {
-    med: Medication;
-    isEditing: boolean;
-    onRemove: (id: string) => void;
-    formatDetails: (med: Medication) => string;
 }
 
 export function MedicalHistoryCard() {
   const { profile, addMedicalCondition, updateMedicalCondition, removeMedication, setMedicationNil, removeMedicalCondition: removeMedicalConditionFromContext } = useApp();
-  const [editingCondition, setEditingCondition] = React.useState<MedicalCondition | null>(null);
-  const [showInteraction, setShowInteraction] = React.useState(false);
+  const [activeView, setActiveView] = React.useState<ActiveView>('none');
+  const [activeData, setActiveData] = React.useState<any>(null);
+
   const [isEditingConditions, setIsEditingConditions] = React.useState(false);
   const [isEditingMedications, setIsEditingMedications] = React.useState(false);
-  const [isConditionDialogOpen, setIsConditionDialogOpen] = React.useState(false);
-  const [isAddingMedication, setIsAddingMedication] = React.useState(false);
-
-
+  
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
-
-  React.useEffect(() => {
-    if (!isConditionDialogOpen) {
-        setEditingCondition(null);
-    }
-  }, [isConditionDialogOpen]);
   
   const handleSaveCondition = (condition: MedicalCondition) => {
-    const isUpdate = !!editingCondition?.id;
-    if (isUpdate) {
+    if (activeView === 'editCondition') {
         updateMedicalCondition(condition);
     } else {
         const optimisticId = `cond-${Date.now()}`;
         const newCondition = { ...condition, id: optimisticId, status: 'pending_review' as const };
         addMedicalCondition(newCondition);
     }
+    setActiveView('none');
+    setActiveData(null);
   }
 
   const handleReviseCondition = (conditionToEdit: MedicalCondition) => {
-      setEditingCondition(conditionToEdit);
-      setIsConditionDialogOpen(true);
+      setActiveData(conditionToEdit);
+      setActiveView('editCondition');
   }
 
   const handleAddConditionClick = () => {
-    setEditingCondition(null);
-    setIsConditionDialogOpen(true);
+    setActiveView('addCondition');
+    setActiveData(null);
   };
   
   const handleRemoveMedication = (id: string) => {
@@ -381,7 +354,7 @@ export function MedicalHistoryCard() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {!isMedicationNil && (
-          <DropdownMenuItem onSelect={() => setIsAddingMedication(true)}>
+          <DropdownMenuItem onSelect={() => setActiveView('addMedication')}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Medication
           </DropdownMenuItem>
@@ -404,6 +377,43 @@ export function MedicalHistoryCard() {
     </DropdownMenu>
   );
 
+  const closeActiveView = () => {
+    setActiveView('none');
+    setActiveData(null);
+  }
+
+  const renderActiveView = () => {
+    if (activeView === 'addCondition' || activeView === 'editCondition') {
+        return (
+            <MedicalConditionForm 
+                onSave={handleSaveCondition} 
+                onCancel={closeActiveView} 
+                initialData={activeData}
+            />
+        );
+    }
+    if (activeView === 'addMedication') {
+        return <AddMedicationForm onCancel={closeActiveView} onSuccess={closeActiveView} />;
+    }
+    if (activeView === 'interaction') {
+        return <DrugInteractionViewer medications={profile.medication.map(m => `${m.name} ${m.dosage}`)} onClose={closeActiveView} />;
+    }
+    if (activeView.startsWith('synopsis_')) {
+        const type = activeData?.condition ? 'condition' : 'medication';
+        if (type === 'condition') {
+            return <ConditionSynopsisDialog conditionName={activeData.condition} initialSynopsis={activeData.synopsis} onClose={closeActiveView} />;
+        }
+        if (type === 'medication') {
+            return <MedicationSynopsisDialog medicationName={activeData.name} onClose={closeActiveView} />;
+        }
+    }
+    return null;
+  }
+  
+  const showSynopsis = (type: 'condition' | 'medication', data: any) => {
+    setActiveView(`synopsis_${type}_${data.id}`);
+    setActiveData(data);
+  }
 
   return (
     <>
@@ -418,19 +428,31 @@ export function MedicalHistoryCard() {
                     {profile.presentMedicalConditions.map((condition) => {
                         if (!condition || !condition.id) return null;
                         return (
-                            <DiseaseCard 
-                                key={condition.id}
-                                condition={condition}
-                                onRevise={handleReviseCondition}
-                                isEditMode={isEditingConditions}
-                                onRemove={() => removeMedicalConditionFromContext(condition.id)}
-                            />
+                            <React.Fragment key={condition.id}>
+                                <DiseaseCard 
+                                    condition={condition}
+                                    onRevise={handleReviseCondition}
+                                    isEditMode={isEditingConditions}
+                                    onRemove={() => removeMedicalConditionFromContext(condition.id)}
+                                    onShowSynopsis={() => showSynopsis('condition', condition)}
+                                />
+                                {activeView === `synopsis_condition_${condition.id}` && (
+                                    <li className="pl-5 pb-2">
+                                        <ConditionSynopsisDialog
+                                            conditionName={condition.condition}
+                                            initialSynopsis={condition.synopsis}
+                                            onClose={closeActiveView}
+                                        />
+                                    </li>
+                                )}
+                            </React.Fragment>
                         )
                     })}
                 </ul>
             ) : (
                 <p className="text-xs text-muted-foreground pl-8 pt-2">No conditions recorded.</p>
             )}
+            {activeView === 'addCondition' && renderActiveView()}
         </MedicalInfoSection>
         
         <MedicalInfoSection
@@ -439,29 +461,42 @@ export function MedicalHistoryCard() {
             actions={medicationActions}
         >
             {profile.medication.length > 0 ? (
-                <ul className="space-y-1 mt-2">
+                 <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
-                       <MedicationListItem
-                            key={med.id}
-                            med={med}
-                            isEditing={isEditingMedications}
-                            onRemove={handleRemoveMedication}
-                            formatDetails={formatMedicationDetails}
-                        />
+                       <React.Fragment key={med.id}>
+                            <MedicationListItem
+                                med={med}
+                                isEditing={isEditingMedications}
+                                onRemove={handleRemoveMedication}
+                                onShowSynopsis={() => showSynopsis('medication', med)}
+                                formatDetails={formatMedicationDetails}
+                            />
+                            {activeView === `synopsis_medication_${med.id}` && (
+                                <li className="pl-5 pb-2">
+                                     <MedicationSynopsisDialog
+                                        medicationName={med.name}
+                                        onClose={closeActiveView}
+                                    />
+                                </li>
+                            )}
+                       </React.Fragment>
                     ))}
                 </ul>
             ) : (
                 <p className="text-xs text-muted-foreground pl-8 pt-2">No medication recorded.</p>
             )}
+
+            {activeView === 'addMedication' && renderActiveView()}
+
             {profile.medication.length > 1 && !isMedicationNil && (
                 <div className="pt-2">
-                    {showInteraction ? (
+                    {activeView === 'interaction' ? (
                         <DrugInteractionViewer
                             medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                            onClose={() => setShowInteraction(false)}
+                            onClose={closeActiveView}
                         />
                     ) : (
-                        <Button variant="outline" size="sm" className="w-full" onClick={() => setShowInteraction(true)}>
+                        <Button variant="outline" size="sm" className="w-full" onClick={() => setActiveView('interaction')}>
                             <ShieldAlert className="mr-2 h-4 w-4" />
                             Analyze Drug Interactions
                         </Button>
@@ -470,25 +505,6 @@ export function MedicalHistoryCard() {
             )}
         </MedicalInfoSection>
       </div>
-        
-      <Dialog open={isConditionDialogOpen} onOpenChange={setIsConditionDialogOpen}>
-          <DialogContent>
-              <DialogHeader>
-                  <DialogTitle>{editingCondition?.id ? "Edit" : "Add"} Medical Condition</DialogTitle>
-                  <DialogDescription>
-                      Enter a condition and our AI will help standardize it.
-                  </DialogDescription>
-              </DialogHeader>
-              <MedicalConditionForm 
-                  onSave={handleSaveCondition} 
-                  onCancel={() => setIsConditionDialogOpen(false)} 
-                  initialData={editingCondition?.id ? editingCondition : undefined}
-              />
-          </DialogContent>
-      </Dialog>
-      <AddMedicationDialog open={isAddingMedication} onOpenChange={setIsAddingMedication}>
-        {/* This component manages its own trigger, so no children are needed here when opening programmatically */}
-      </AddMedicationDialog>
     </>
   );
 }

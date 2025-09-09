@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from './ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
 import { Loader2 } from 'lucide-react';
@@ -15,15 +14,14 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import type { MedicationInfoOutput } from '@/lib/ai-types';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import type { FoodInstruction } from '@/lib/types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 
-interface AddMedicationDialogProps {
-  children?: React.ReactNode;
+interface AddMedicationFormProps {
   onSuccess?: () => void;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onCancel: () => void;
 }
 
-export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }: AddMedicationDialogProps) {
+export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProps) {
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [processedMed, setProcessedMed] = React.useState<MedicationInfoOutput | null>(null);
   const { addMedication } = useApp();
@@ -37,18 +35,6 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
       foodInstructions: undefined as FoodInstruction | undefined,
     },
   });
-
-  React.useEffect(() => {
-    if (open) {
-      form.reset({
-        medicationName: '',
-        dosage: '',
-        frequency: '',
-        foodInstructions: undefined,
-      });
-      setProcessedMed(null);
-    }
-  }, [open, form]);
 
   const handleProcessMedication = async () => {
     const values = form.getValues();
@@ -99,126 +85,121 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
         title: 'Medication Added',
         description: `${data.medicationName} has been added to your list.`
     });
-    onOpenChange(false);
+    onCancel();
     onSuccess?.();
   };
 
-  const handleCancel = () => {
-    onOpenChange(false);
-  }
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      {children && <div style={{display: 'contents'}}>{children}</div>}
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add New Medication</DialogTitle>
-          <DialogDescription>Enter the medication details below. The AI will identify the active ingredient and standardize the dosage.</DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-            <FormField
-              control={form.control}
-              name="medicationName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Medication Name (Brand or Generic)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Rosuvas 20 or Metformin" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
+    <Card className="mt-2 border-primary border-2">
+        <CardHeader>
+          <CardTitle>Add New Medication</CardTitle>
+          <CardDescription>Enter the medication details below. The AI will identify the active ingredient and standardize the dosage.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
                 control={form.control}
-                name="dosage"
+                name="medicationName"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Dosage</FormLabel>
+                    <FormItem>
+                    <FormLabel>Medication Name (Brand or Generic)</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., 500mg" {...field} />
+                        <Input placeholder="e.g., Rosuvas 20 or Metformin" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                    </FormItem>
                 )}
-              />
-              <FormField
+                />
+                <div className="grid grid-cols-2 gap-4">
+                <FormField
+                    control={form.control}
+                    name="dosage"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Dosage</FormLabel>
+                        <FormControl>
+                        <Input placeholder="e.g., 500mg" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="frequency"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Frequency</FormLabel>
+                        <FormControl>
+                        <Input placeholder="e.g., Twice daily" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                </div>
+                
+                <FormField
                 control={form.control}
-                name="frequency"
+                name="foodInstructions"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Frequency</FormLabel>
+                    <FormItem>
+                    <FormLabel>Instructions</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Twice daily" {...field} />
+                        <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex items-center space-x-4 pt-2"
+                        >
+                        <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                            <RadioGroupItem value="before" />
+                            </FormControl>
+                            <FormLabel className="font-normal">Before Food</FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                            <RadioGroupItem value="after" />
+                            </FormControl>
+                            <FormLabel className="font-normal">After Food</FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                            <RadioGroupItem value="with" />
+                            </FormControl>
+                            <FormLabel className="font-normal">With Food</FormLabel>
+                        </FormItem>
+                        </RadioGroup>
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                    </FormItem>
                 )}
-              />
-            </div>
-            
-            <FormField
-              control={form.control}
-              name="foodInstructions"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Instructions</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      className="flex items-center space-x-4 pt-2"
-                    >
-                      <FormItem className="flex items-center space-x-2 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="before" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Before Food</FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-2 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="after" />
-                        </FormControl>
-                        <FormLabel className="font-normal">After Food</FormLabel>
-                      </FormItem>
-                       <FormItem className="flex items-center space-x-2 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="with" />
-                        </FormControl>
-                        <FormLabel className="font-normal">With Food</FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                />
 
-            {processedMed && (
-              <Alert variant="default" className="bg-background">
-                <AlertTitle className="font-semibold">AI Processed Information</AlertTitle>
-                <AlertDescription>
-                  {processedMed.correctedMedicationName && <p><strong>Spelling Suggestion:</strong> {processedMed.correctedMedicationName}</p>}
-                  <p><strong>Active Ingredient:</strong> {processedMed.activeIngredient}</p>
-                   {processedMed.dosage && <p><strong>Standardized Dosage:</strong> {processedMed.dosage}</p>}
-                   {processedMed.frequency && <p><strong>Standardized Frequency:</strong> {processedMed.frequency}</p>}
-                   {processedMed.foodInstructionSuggestion && <p className="text-destructive"><strong>Suggestion:</strong> {processedMed.foodInstructionSuggestion}</p>}
-                </AlertDescription>
-              </Alert>
-            )}
+                {processedMed && (
+                <Alert variant="default" className="bg-background">
+                    <AlertTitle className="font-semibold">AI Processed Information</AlertTitle>
+                    <AlertDescription>
+                    {processedMed.correctedMedicationName && <p><strong>Spelling Suggestion:</strong> {processedMed.correctedMedicationName}</p>}
+                    <p><strong>Active Ingredient:</strong> {processedMed.activeIngredient}</p>
+                    {processedMed.dosage && <p><strong>Standardized Dosage:</strong> {processedMed.dosage}</p>}
+                    {processedMed.frequency && <p><strong>Standardized Frequency:</strong> {processedMed.frequency}</p>}
+                    {processedMed.foodInstructionSuggestion && <p className="text-destructive"><strong>Suggestion:</strong> {processedMed.foodInstructionSuggestion}</p>}
+                    </AlertDescription>
+                </Alert>
+                )}
 
-            <DialogFooter>
-              <Button type="button" variant="ghost" onClick={handleCancel}>Cancel</Button>
-              <Button type="submit" disabled={isProcessing}>
-                {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {processedMed ? 'Save Medication' : 'Check & Confirm'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
+                  <Button type="submit" disabled={isProcessing}>
+                    {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {processedMed ? 'Save Medication' : 'Check & Confirm'}
+                  </Button>
+                </div>
+            </form>
+            </Form>
+        </CardContent>
+    </Card>
   );
 }
