@@ -73,6 +73,9 @@
       opacity: .5;
     }
   }
+  .flex {
+    border: 1px solid red;
+  }
 }
 
 @media print {

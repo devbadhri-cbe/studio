@@ -165,31 +165,31 @@ function MedicalConditionForm({
         )}
        
         <div className="flex justify-between items-end gap-4">
-            <FormField
+          <FormField
             control={form.control}
             name="date"
             render={({ field }) => (
-                <FormItem>
+              <FormItem>
                 <FormLabel>Date of Diagnosis</FormLabel>
                 <FormControl>
-                    <DatePicker
+                  <DatePicker
                     value={field.value}
                     onChange={field.onChange}
                     fromYear={new Date().getFullYear() - 50}
                     toYear={new Date().getFullYear()}
-                    />
+                  />
                 </FormControl>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
-            <div className="flex items-center gap-2">
-                <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
-                <Button type="submit" size="sm" disabled={isProcessing}>
-                    {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                    {processedCondition ? 'Confirm & Save' : 'Process & Review'}
-                </Button>
-            </div>
+          />
+          <div className="flex items-center gap-2">
+              <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+              <Button type="submit" size="sm" disabled={isProcessing}>
+                  {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {processedCondition ? 'Confirm & Save' : 'Process & Review'}
+              </Button>
+          </div>
         </div>
       </form>
     </Form>
