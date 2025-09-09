@@ -149,3 +149,19 @@ export const DrugInteractionOutputSchema = z.object({
     summary: z.string().describe('A concise, easy-to-understand summary of the findings. If no interactions are found, it should state that clearly. If interactions are found, it should list each interacting pair and the potential effect.'),
 });
 export type DrugInteractionOutput = z.infer<typeof DrugInteractionOutputSchema>;
+
+
+//-================================================================----------
+//- Medication Synopsis Flow Types
+//-================================================================----------
+
+export const MedicationSynopsisInputSchema = z.object({
+  medicationName: z.string().describe('The name of the medication.'),
+  language: z.string().optional().default('English').describe('The target language for the synopsis (e.g., "Spanish", "French").'),
+});
+export type MedicationSynopsisInput = z.infer<typeof MedicationSynopsisInputSchema>;
+
+export const MedicationSynopsisOutputSchema = z.object({
+  synopsis: z.string().describe('The generated synopsis in the requested language.'),
+});
+export type MedicationSynopsisOutput = z.infer<typeof MedicationSynopsisOutputSchema>;
