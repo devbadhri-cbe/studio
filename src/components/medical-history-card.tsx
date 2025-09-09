@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings } from 'lucide-react';
@@ -20,9 +19,7 @@ import { Separator } from './ui/separator';
 import type { MedicalCondition, Medication } from '@/lib/types';
 import { parseISO } from 'date-fns';
 import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
-import type { MedicalConditionOutput } from '@/lib/ai-types';
 import { toast } from '@/hooks/use-toast';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,19 +33,26 @@ function capitalizeFirstLetter(string: string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+interface MedicalConditionFormValues {
+  condition: string;
+  date: Date;
+  icdCode?: string;
+  synopsis?: string;
+}
+
 interface MedicalConditionFormProps {
-    onSave: (data: { condition: string; date: Date }) => Promise<void>;
+    onSave: (data: MedicalCondition) => void;
     onCancel: () => void;
     initialData?: MedicalCondition;
-    isProcessing: boolean;
 }
 
 function MedicalConditionForm({ 
     onSave, 
     onCancel,
     initialData,
-    isProcessing,
 }: MedicalConditionFormProps) {
+  const { profile } = useApp();
+  const [isProcessing, setIsProcessing] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   
   React.useEffect(() => {
@@ -57,23 +61,96 @@ function MedicalConditionForm({
     }, 100);
   }, []);
 
-  const form = useForm<{ condition: string; date: Date }>({
+  const form = useForm<MedicalConditionFormValues>({
     defaultValues: { 
         condition: initialData?.userInput || initialData?.condition || '', 
-        date: initialData?.date ? parseISO(initialData.date) : new Date() 
+        date: initialData?.date ? parseISO(initialData.date) : new Date(),
+        icdCode: initialData?.icdCode || '',
+        synopsis: initialData?.synopsis || '',
     },
   });
   
-  const handleFormSubmit = async (data: { condition: string; date: Date }) => {
-    await onSave({
-        ...data,
-        condition: capitalizeFirstLetter(data.condition),
+  const handleProcessCondition = async () => {
+    const userInput = form.getValues('condition');
+    if (!userInput) {
+        form.setError('condition', { type: 'manual', message: 'Condition name is required.' });
+        return;
+    }
+    setIsProcessing(true);
+    try {
+      const result = await processMedicalCondition({ condition: userInput });
+      if (result.isValid && result.standardizedName && result.icdCode) {
+        form.setValue('condition', result.standardizedName);
+        form.setValue('icdCode', result.icdCode);
+        form.setValue('synopsis', result.synopsis || '');
+        toast({ title: 'Condition Processed', description: `AI suggested: ${result.standardizedName} (${result.icdCode})` });
+      } else {
+        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}` });
+      }
+    } catch(e) {
+      console.error(e);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  const handleFormSubmit = (data: MedicalConditionFormValues) => {
+    const isUpdate = !!initialData?.id;
+    const isDuplicate = profile.presentMedicalConditions.some(c => c.id !== initialData?.id && c.icdCode === data.icdCode);
+
+    if (isDuplicate) {
+        toast({ variant: 'destructive', title: 'Duplicate Condition', description: `A condition with ICD-11 code ${data.icdCode} already exists.` });
+        return;
+    }
+    
+    onSave({
+      id: initialData?.id || `cond-${Date.now()}`,
+      condition: data.condition,
+      userInput: initialData?.userInput || data.condition,
+      date: data.date.toISOString(),
+      icdCode: data.icdCode,
+      synopsis: data.synopsis,
+      status: 'verified',
     });
+    onCancel();
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-4">
+        <FormField
+            control={form.control}
+            name="condition"
+            rules={{ required: "Condition name is required." }}
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Condition Name</FormLabel>
+                     <div className="flex gap-2">
+                        <FormControl>
+                            <Input {...field} ref={inputRef} placeholder="e.g., Type 2 Diabetes" autoComplete="off" />
+                        </FormControl>
+                        <Button type="button" onClick={handleProcessCondition} disabled={isProcessing} variant="secondary">
+                           {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Process'}
+                        </Button>
+                    </div>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+         <FormField
+          control={form.control}
+          name="icdCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>ICD-11 Code</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="AI will suggest a code" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="date"
@@ -92,26 +169,10 @@ function MedicalConditionForm({
             </FormItem>
           )}
         />
-        <FormField
-            control={form.control}
-            name="condition"
-            rules={{ required: "Condition name is required." }}
-            render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Condition Name</FormLabel>
-                    <FormControl>
-                        <Input {...field} ref={inputRef} placeholder="e.g., Type 2 Diabetes" autoComplete="off" />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            )}
-        />
-
+       
         <div className="flex justify-end gap-2">
-          <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isProcessing}>Cancel</Button>
-          <Button type="submit" size="sm" disabled={isProcessing}>
-             {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
-          </Button>
+          <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+          <Button type="submit" size="sm">Save</Button>
         </div>
       </form>
     </Form>
@@ -218,7 +279,6 @@ export function MedicalHistoryCard() {
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
   const [isSubmittingMedication, setIsSubmittingMedication] = React.useState(false);
-  const [isProcessingCondition, setIsProcessingCondition] = React.useState(false);
   const [isEditingConditions, setIsEditingConditions] = React.useState(false);
   const [isEditingMedications, setIsEditingMedications] = React.useState(false);
 
@@ -230,70 +290,14 @@ export function MedicalHistoryCard() {
 
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
-  const handleProcessCondition = async (data: { condition: string; date: Date }) => {
-    setIsProcessingCondition(true);
-
+  const handleSaveCondition = (condition: MedicalCondition) => {
     const isUpdate = !!editingCondition?.id;
-    const tempId = editingCondition?.id || `cond-${Date.now()}`;
-
-    const optimisticCondition: MedicalCondition = {
-      id: tempId,
-      condition: data.condition,
-      userInput: data.condition,
-      date: data.date.toISOString(),
-      icdCode: 'loading...',
-      status: 'pending_review',
-    };
-    
     if (isUpdate) {
-        updateMedicalCondition(optimisticCondition);
+        updateMedicalCondition(condition);
     } else {
-        addMedicalCondition(optimisticCondition);
-    }
-    setEditingCondition(null);
-    setIsProcessingCondition(false);
-
-    try {
-      const result = await processMedicalCondition({ condition: data.condition });
-      
-      const conditionsForCheck = isUpdate
-        ? profile.presentMedicalConditions.filter(c => c.id !== tempId)
-        : [...profile.presentMedicalConditions, optimisticCondition];
-
-      if(result.isValid && result.standardizedName && result.icdCode) {
-          const isDuplicate = conditionsForCheck.some(c => c.id !== tempId && c.icdCode === result.icdCode);
-
-          if (isDuplicate) {
-            removeMedicalCondition(tempId);
-            toast({ variant: 'destructive', title: 'Duplicate Condition', description: `This condition (ICD-11: ${result.icdCode}) already exists in the patient's record.` });
-            return;
-          }
-
-          const finalCondition: MedicalCondition = {
-            ...optimisticCondition,
-            condition: result.standardizedName,
-            icdCode: result.icdCode,
-            synopsis: result.synopsis,
-            status: 'verified',
-          };
-          updateMedicalCondition(finalCondition);
-          toast({ title: 'Condition Verified', description: `${result.standardizedName} has been processed.` });
-      } else {
-        removeMedicalCondition(tempId);
-        toast({ variant: 'destructive', title: 'Condition Invalid', description: `"${data.condition}" is not a recognized condition. Suggestions: ${result.suggestions?.join(', ')}` });
-      }
-    } catch (e) {
-      console.error(e);
-      const failedCondition: MedicalCondition = {
-        ...optimisticCondition,
-        icdCode: 'error',
-        synopsis: 'Failed to process condition.',
-      };
-      updateMedicalCondition(failedCondition);
-      toast({ variant: 'destructive', title: 'Error', description: "Could not process the medical condition." });
+        addMedicalCondition(condition);
     }
   }
-
 
   const handleReviseCondition = (conditionToEdit: MedicalCondition) => {
       setEditingCondition(conditionToEdit);
@@ -335,7 +339,6 @@ export function MedicalHistoryCard() {
   
   const handleCancelCondition = () => {
     setEditingCondition(null);
-    setIsProcessingCondition(false);
   }
   
   const conditionActions = (
@@ -403,10 +406,9 @@ export function MedicalHistoryCard() {
         >
             {editingCondition && (
                 <MedicalConditionForm 
-                    onSave={handleProcessCondition} 
+                    onSave={handleSaveCondition} 
                     onCancel={handleCancelCondition} 
                     initialData={editingCondition.id ? editingCondition : undefined}
-                    isProcessing={isProcessingCondition}
                 />
             )}
             {profile.presentMedicalConditions.length > 0 ? (
