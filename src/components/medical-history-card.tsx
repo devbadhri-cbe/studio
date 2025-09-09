@@ -493,8 +493,3 @@ export function MedicalHistoryCard() {
     </>
   );
 }
-
-    
-
-    
-
