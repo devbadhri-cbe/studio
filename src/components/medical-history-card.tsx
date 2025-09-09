@@ -163,8 +163,8 @@ function MedicalConditionForm({
           </Alert>
         )}
        
-        <div className="flex justify-between items-end gap-4 border border-purple-500">
-          <div className="border border-green-500">
+        <div className="flex justify-between items-end gap-4">
+          <div>
             <FormField
               control={form.control}
               name="date"
@@ -184,7 +184,7 @@ function MedicalConditionForm({
               )}
             />
           </div>
-          <div className="flex items-center gap-2 border border-blue-500">
+          <div className="flex items-center gap-2">
               <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
               <Button type="submit" size="sm" disabled={isProcessing}>
                   {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

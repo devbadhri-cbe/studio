@@ -98,7 +98,3 @@
       display: none;
   }
 }
-
-.flex, .flex > * {
-  border: 1px solid red;
-}

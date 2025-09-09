@@ -125,7 +125,7 @@ export function DatePicker({
 
   return (
     <div className="flex items-center rounded-md border border-input h-10 w-fit px-2 space-x-1 text-sm">
-      <div className="w-[3rem]">
+      <div className="w-auto">
         <Select value={day} onValueChange={handleDayChange}>
           <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Day" />
@@ -142,7 +142,7 @@ export function DatePicker({
 
       <span className="text-muted-foreground">/</span>
 
-      <div className="w-[4rem]">
+      <div className="w-auto">
         <Select value={month} onValueChange={handleMonthChange}>
             <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Month" />
@@ -159,7 +159,7 @@ export function DatePicker({
 
       <span className="text-muted-foreground">/</span>
       
-      <div className="w-[4.5rem]">
+      <div className="w-auto">
         <Select value={year} onValueChange={handleYearChange}>
             <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
             <SelectValue placeholder="Year" />
