@@ -55,7 +55,7 @@ interface AppContextType {
   addMedicalCondition: (condition: Omit<MedicalCondition, 'id' | 'status'> & Partial<Pick<MedicalCondition, 'status'>>) => Promise<void>;
   updateMedicalCondition: (condition: MedicalCondition) => Promise<void>;
   removeMedicalCondition: (id: string) => void;
-  removeAllMedicalConditions: () => void;
+  removeAllMedicalConditions: () => Promise<void>;
   addMedication: (medication: Omit<Medication, 'id'>) => void;
   removeMedication: (id: string) => void;
   setMedicationNil: () => void;
@@ -351,13 +351,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setHasUnsavedChanges(true);
   }, []);
 
-  const removeAllMedicalConditions = useCallback(() => {
+  const removeAllMedicalConditions = useCallback(async () => {
+    await updatePatient(profile.id, { presentMedicalConditions: [] });
     setProfileState(prevProfile => ({
       ...prevProfile,
       presentMedicalConditions: []
     }));
-    setHasUnsavedChanges(true);
-  }, []);
+  }, [profile.id]);
   
    const addMedication = useCallback((medication: Omit<Medication, 'id'>) => {
     const newMedication = { ...medication, id: Date.now().toString() };

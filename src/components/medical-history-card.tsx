@@ -276,13 +276,21 @@ export function MedicalHistoryCard() {
     setIsProcessingCondition(false);
   }
   
-  const handleConfirmClearAll = () => {
-    removeAllMedicalConditions();
-    setIsClearAllDialogOpen(false);
-    toast({
+  const handleConfirmClearAll = async () => {
+    try {
+      await removeAllMedicalConditions();
+      setIsClearAllDialogOpen(false);
+      toast({
         title: 'Conditions Cleared',
         description: 'All medical conditions have been removed.',
-    });
+      });
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not remove conditions. Please try again.',
+      });
+    }
   };
 
   return (
