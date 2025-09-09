@@ -2,33 +2,57 @@
 'use client';
 
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
+import { Input } from './ui/input';
 
 interface DashboardSectionToggleProps {
   title: string;
+  subtitle: string;
   icon: React.ReactNode;
   isOpen: boolean;
-  children: React.ReactNode;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  searchPlaceholder: string;
 }
 
-export function DashboardSectionToggle({ title, icon, isOpen, children }: DashboardSectionToggleProps) {
+export function DashboardSectionToggle({ 
+  title, 
+  subtitle,
+  icon, 
+  isOpen,
+  searchQuery,
+  onSearchChange,
+  searchPlaceholder
+}: DashboardSectionToggleProps) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border p-3">
-        <div className="flex items-center gap-3 flex-1">
-            {icon}
-            <h3 className="font-semibold text-lg">{title}</h3>
+    <CollapsibleTrigger asChild>
+      <Card 
+        className="w-full p-4 flex items-center gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
+        role="button"
+      >
+        <div className="flex-shrink-0">{icon}</div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-lg">{title}</h3>
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-2">
-            {isOpen && children}
-            <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
-                </Button>
-            </CollapsibleTrigger>
+        <div className="flex items-center gap-4 ml-auto">
+          {isOpen && (
+            <div className="relative" onClick={(e) => e.stopPropagation()}>
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={searchPlaceholder}
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="pl-8 h-9 w-48"
+              />
+            </div>
+          )}
+          <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
         </div>
-    </div>
+      </Card>
+    </CollapsibleTrigger>
   );
 }
