@@ -47,57 +47,57 @@ export function DiseasePanelCard({
   }
 
   return (
-    <Card className={cn("w-full flex flex-col h-full shadow-md border-2 border-primary/20", isPanelEnabledForPatient ? "border-primary/20" : "border-dashed", className)}>
-        <CardHeader className="flex-row items-center justify-between border-2 border-red-500">
-            <div className="flex items-center gap-3 border-2 border-red-500">
-            {icon}
-            <CardTitle>{title}</CardTitle>
-            </div>
-            <div className="flex items-center gap-2 border-2 border-red-500">
-                <Button 
-                    size="sm"
-                    variant={isPanelEnabledForPatient ? 'secondary' : 'default'}
-                    onClick={handlePanelToggle}
-                >
-                     {isPanelEnabledForPatient ? "Disable Panel" : "Enable Panel"}
+    <Card className={cn("w-full flex flex-col h-full shadow-md border-2", isPanelEnabledForPatient ? "border-primary/20" : "border-dashed", className)}>
+      <CardHeader className="flex-row items-center justify-between">
+        <div className="flex items-center gap-3">
+          {icon}
+          <CardTitle>{title}</CardTitle>
+        </div>
+        <div className="flex items-center gap-2">
+            <Button 
+                size="sm"
+                variant={isPanelEnabledForPatient ? 'secondary' : 'default'}
+                onClick={handlePanelToggle}
+            >
+                  {isPanelEnabledForPatient ? "Disable Panel" : "Enable Panel"}
+            </Button>
+            <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient}>
+                    <Settings className="h-4 w-4" />
                 </Button>
-                <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient}>
-                        <Settings className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64" align="end" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenuLabel>Visible Biomarkers</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {allPanelBiomarkers.map((key) => {
-                        const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
-                        if (!biomarkerInfo) return null;
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64" align="end" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuLabel>Visible Biomarkers</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {allPanelBiomarkers.map((key) => {
+                    const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
+                    if (!biomarkerInfo) return null;
 
-                        const isChecked = enabledForPanel.includes(key);
+                    const isChecked = enabledForPanel.includes(key);
 
-                        return (
-                            <DropdownMenuCheckboxItem
-                            key={key}
-                            checked={isChecked}
-                            onSelect={(e) => e.preventDefault()}
-                            onClick={() => toggleDiseaseBiomarker(panelKey, key)}
-                            >
-                            {biomarkerInfo.label}
-                            </DropdownMenuCheckboxItem>
-                        );
-                    })}
-                </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
+                    return (
+                        <DropdownMenuCheckboxItem
+                        key={key}
+                        checked={isChecked}
+                        onSelect={(e) => e.preventDefault()}
+                        onClick={() => toggleDiseaseBiomarker(panelKey, key)}
+                        >
+                        {biomarkerInfo.label}
+                        </DropdownMenuCheckboxItem>
+                    );
+                })}
+            </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-4 pt-0 border-2 border-red-500">
+      <CardContent className="flex-1 flex flex-col p-4 pt-0">
         {isPanelEnabledForPatient ? (
           <InteractivePanelGrid>
             {children}
           </InteractivePanelGrid>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4 min-h-[200px] bg-muted/30 rounded-lg border-2 border-red-500">
+          <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4 min-h-[200px] bg-muted/30 rounded-lg">
             <p className="text-sm">This panel is currently disabled for the patient.</p>
           </div>
         )}

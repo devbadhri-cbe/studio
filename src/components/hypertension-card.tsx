@@ -14,7 +14,7 @@ const HYPERTENSION_PANEL_KEY = 'hypertension';
 const allHypertensionBiomarkers: BiomarkerKey[] = ['weight', 'bloodPressure'];
 
 export function HypertensionCard() {
-  const { isDoctorLoggedIn, profile } = useApp();
+  const { profile } = useApp();
   const icon = <Heart className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const enabledForPanel = profile.enabledBiomarkers?.[HYPERTENSION_PANEL_KEY] || [];
@@ -23,7 +23,6 @@ export function HypertensionCard() {
     <DiseasePanelCard 
         title="Hypertension Panel" 
         icon={icon}
-        isDoctorLoggedIn={isDoctorLoggedIn}
         panelKey={HYPERTENSION_PANEL_KEY}
         allPanelBiomarkers={allHypertensionBiomarkers}
     >

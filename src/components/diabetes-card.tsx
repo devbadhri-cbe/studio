@@ -23,7 +23,6 @@ export function DiabetesCard() {
     <DiseasePanelCard 
         title="Diabetes Panel" 
         icon={icon}
-        isDoctorLoggedIn={isDoctorLoggedIn}
         panelKey={DIABETES_PANEL_KEY}
         allPanelBiomarkers={allDiabetesBiomarkers}
     >
