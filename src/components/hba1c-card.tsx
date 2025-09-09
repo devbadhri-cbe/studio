@@ -41,20 +41,20 @@ export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
   const Icon = <Droplet className="h-5 w-5 shrink-0 text-muted-foreground" />;
 
   const Actions = !isReadOnly ? (
-    <AddRecordDialog>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="ghost" className="h-8 w-8">
-                  <Settings className="h-4 w-4" />
-              </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-64" align="end">
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                Add New Record
-            </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </AddRecordDialog>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-8 w-8">
+          <Settings className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-64" align="end">
+        <AddRecordDialog>
+          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+            Add New Record
+          </DropdownMenuItem>
+        </AddRecordDialog>
+      </DropdownMenuContent>
+    </DropdownMenu>
   ) : null;
   
   const formattedRecords = sortedRecords.map(r => ({
