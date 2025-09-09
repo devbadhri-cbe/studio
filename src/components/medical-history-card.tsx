@@ -126,7 +126,7 @@ function MedicalConditionForm({
                 <FormItem>
                     <FormLabel>Condition Name</FormLabel>
                     <FormControl>
-                        <Input ref={inputRef} placeholder="e.g., Type 2 Diabetes" {...field} />
+                        <Input ref={inputRef} placeholder="e.g., Type 2 Diabetes" {...field} autoComplete="off" />
                     </FormControl>
                     <FormMessage />
                 </FormItem>
