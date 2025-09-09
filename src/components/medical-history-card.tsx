@@ -2,7 +2,7 @@
 
 'use client';
 
-import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings } from 'lucide-react';
+import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
@@ -455,10 +455,17 @@ export function MedicalHistoryCard() {
             )}
             {profile.medication.length > 1 && !isMedicationNil && (
                 <div className="pt-2">
+                    {showInteraction ? (
                         <DrugInteractionViewer
-                        medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                        onClose={() => setShowInteraction(false)}
-                    />
+                            medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
+                            onClose={() => setShowInteraction(false)}
+                        />
+                    ) : (
+                        <Button variant="outline" size="sm" className="w-full" onClick={() => setShowInteraction(true)}>
+                            <ShieldAlert className="mr-2 h-4 w-4" />
+                            Analyze Drug Interactions
+                        </Button>
+                    )}
                 </div>
             )}
         </MedicalInfoSection>
