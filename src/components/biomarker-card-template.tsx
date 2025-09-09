@@ -101,7 +101,7 @@ export function BiomarkerCardTemplate({
   if (children) {
     return (
         <Card className={cn("w-full h-full shadow-xl", className)}>
-            <CardContent className="p-4 flex items-center gap-4 border-2 border-blue-500">
+            <CardContent className="p-4 flex items-center gap-4">
                  <div className="flex-shrink-0">{icon}</div>
                  <div className="flex-1">
                     {children}
@@ -112,7 +112,7 @@ export function BiomarkerCardTemplate({
   }
 
   return (
-    <Card className={cn("w-full flex flex-col h-full shadow-xl border-2 border-red-500", className)}>
+    <Card className={cn("w-full flex flex-col h-full shadow-xl", className)}>
       <CardHeader>
           <div className="flex items-center justify-between border-2 border-green-500">
               <div className="flex items-center gap-3 border-2 border-yellow-500">
@@ -141,7 +141,7 @@ export function BiomarkerCardTemplate({
             
             <Separator className="my-4" />
 
-            <div className="w-full rounded-lg p-2 min-h-[200px]">
+            <div className="flex w-full rounded-lg p-2 min-h-[200px] border-2 border-blue-500">
                 {chart}
             </div>
           </>
