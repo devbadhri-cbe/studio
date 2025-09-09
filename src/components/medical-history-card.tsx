@@ -161,9 +161,14 @@ export function MedicalHistoryCard() {
     setIsProcessingCondition(true);
     setAiResult(null);
     try {
+      // If updating, exclude the current condition from the list sent to AI to avoid self-duplication checks.
+      const conditionsForCheck = isUpdate && editingCondition
+          ? profile.presentMedicalConditions.filter(c => c.id !== editingCondition.id)
+          : profile.presentMedicalConditions;
+
       const result = await processMedicalCondition({ 
         condition: data.condition,
-        existingConditions: profile.presentMedicalConditions.map(c => c.condition)
+        existingConditions: conditionsForCheck.map(c => c.condition)
       });
       
       if(result.isValid && result.standardizedName && result.icdCode && result.synopsis) {
@@ -198,10 +203,11 @@ export function MedicalHistoryCard() {
   }
 
   const handleSuggestionClick = async (suggestion: string) => {
-      if (editingCondition) {
-        const date = new Date(); 
-        handleProcessCondition({ condition: suggestion, date });
-      }
+    const isUpdate = !!editingCondition?.id;
+    if (editingCondition) {
+      const date = editingCondition.date ? parseISO(editingCondition.date) : new Date(); 
+      handleProcessCondition({ condition: suggestion, date }, isUpdate);
+    }
   };
 
   const handleReviseCondition = (conditionToEdit: MedicalCondition) => {
