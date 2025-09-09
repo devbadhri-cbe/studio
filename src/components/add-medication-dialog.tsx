@@ -51,11 +51,8 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
   }, [open, form]);
 
   const handleProcessMedication = async () => {
-    const brandName = form.getValues('medicationName');
-    const dosage = form.getValues('dosage');
-    const frequency = form.getValues('frequency');
-
-    if (!brandName) {
+    const values = form.getValues();
+    if (!values.medicationName) {
       form.setError('medicationName', { type: 'manual', message: 'Medication name is required.' });
       return;
     }
@@ -63,14 +60,18 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
     setProcessedMed(null);
     try {
       const result = await getMedicationInfo({ 
-        medicationName: brandName,
-        dosage,
-        frequency
+        medicationName: values.medicationName,
+        dosage: values.dosage,
+        frequency: values.frequency,
+        foodInstructions: values.foodInstructions
       });
       if (result.activeIngredient) {
         setProcessedMed(result);
         form.setValue('dosage', result.dosage || '');
         form.setValue('frequency', result.frequency || '');
+        if (result.foodInstructions) {
+            form.setValue('foodInstructions', result.foodInstructions);
+        }
       } else {
         toast({ variant: 'destructive', title: 'Could not identify medication.' });
       }
@@ -202,6 +203,7 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
                   <p><strong>Active Ingredient:</strong> {processedMed.activeIngredient}</p>
                    {processedMed.dosage && <p><strong>Standardized Dosage:</strong> {processedMed.dosage}</p>}
                    {processedMed.frequency && <p><strong>Standardized Frequency:</strong> {processedMed.frequency}</p>}
+                   {processedMed.foodInstructionSuggestion && <p className="text-destructive"><strong>Suggestion:</strong> {processedMed.foodInstructionSuggestion}</p>}
                 </AlertDescription>
               </Alert>
             )}

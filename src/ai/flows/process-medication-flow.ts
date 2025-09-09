@@ -19,18 +19,21 @@ const prompt = ai.definePrompt({
   input: { schema: MedicationInfoInputSchema },
   output: { schema: MedicationInfoOutputSchema },
   model: gemini15Flash,
-  prompt: `You are a pharmaceutical information expert. Your task is to identify the active pharmaceutical ingredient (API) and standardize dosage instructions for a given medication.
+  prompt: `You are a pharmaceutical information expert. Your task is to identify the active pharmaceutical ingredient (API), standardize dosage, and validate food instructions for a given medication.
 
 Medication Name: "{{medicationName}}"
 User-provided Dosage: "{{dosage}}"
 User-provided Frequency: "{{frequency}}"
+User-provided Food Instruction: "{{foodInstructions}}"
 
 1.  Analyze the input "medicationName". Determine the primary active ingredient (generic name).
 2.  Set 'isBrandName' to true if the input is a commercial brand name, and false if it's a generic name.
 3.  Analyze the 'dosage' and 'frequency' inputs.
 4.  Standardize the dosage (e.g., "500 mg" becomes "500mg").
 5.  Standardize the frequency (e.g., "twice a day" or "BD" becomes "twice daily"; "at night" becomes "once daily at bedtime").
-6.  Return the identified active ingredient in 'activeIngredient', and the standardized dosage and frequency in their respective fields.`,
+6.  Determine the standard food instruction for the 'activeIngredient' (before, after, or with food). Set this in the 'foodInstructions' output field.
+7.  Compare the standard food instruction with the '{{foodInstructions}}'. If they differ, provide a brief explanation in 'foodInstructionSuggestion'. For example: "Rosuvastatin can be taken with or without food. Changed from 'before food' to 'with food' for better tolerance."
+8.  Return the identified active ingredient in 'activeIngredient', and the standardized information in their respective fields.`,
 });
 
 
