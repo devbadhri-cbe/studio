@@ -61,7 +61,7 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
                   <TooltipContent>{statusInfo.text}</TooltipContent>
                 </Tooltip>
               </div>
-              {condition.userInput && condition.userInput.toLowerCase() !== condition.condition.toLowerCase() && (
+              {condition.userInput && condition.condition && condition.userInput.toLowerCase() !== condition.condition.toLowerCase() && (
                 <p className="text-xs text-muted-foreground italic">Patient Input: "{condition.userInput}"</p>
               )}
               {isIcdLoading ? (
@@ -133,4 +133,3 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
     </>
   );
 }
-
