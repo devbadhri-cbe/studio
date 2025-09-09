@@ -42,7 +42,7 @@ export function PatientDashboard() {
   const BackButton = (
     <Tooltip>
         <TooltipTrigger asChild>
-            <Button variant="outline" size="icon" onClick={() => router.push('/doctor/dashboard')}>
+            <Button variant="ghost" size="icon" onClick={() => router.push('/doctor/dashboard')}>
                 <ArrowLeft className="h-4 w-4" />
                 <span className="sr-only">Back to Dashboard</span>
             </Button>
