@@ -12,19 +12,10 @@ interface TitleBarProps {
     onSubtitleClick?: () => void;
     children?: React.ReactNode;
     backButton?: React.ReactNode;
+    isScrolled: boolean;
 }
 
-export function TitleBar({ title, subtitle, onSubtitleClick, children, backButton }: TitleBarProps) {
-    const [isScrolled, setIsScrolled] = React.useState(false);
-
-    React.useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 50);
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+export function TitleBar({ title, subtitle, onSubtitleClick, children, backButton, isScrolled }: TitleBarProps) {
     
     const renderTitle = () => {
         if(title.length === 1) {
@@ -39,8 +30,10 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, backButto
         <header className={cn(
             "sticky top-0 z-50 border-b transition-all duration-300",
             isScrolled 
-                ? "bg-background/90 backdrop-blur-sm shadow-md p-2 md:p-3" 
-                : "p-4 md:p-6"
+                ? "bg-background/90 backdrop-blur-sm shadow-md border-border" 
+                : "bg-background border-transparent",
+            "p-4 md:p-6",
+            isScrolled && "py-2 md:py-3"
         )}>
             <div className="mx-auto w-full max-w-7xl flex items-center justify-between">
                  <div className="flex justify-start items-center gap-2 w-24">

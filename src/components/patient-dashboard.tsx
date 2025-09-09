@@ -33,6 +33,25 @@ export function PatientDashboard() {
   const [diseasePanelSearchQuery, setDiseasePanelSearchQuery] = React.useState('');
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
+  const [isScrolled, setIsScrolled] = React.useState(false);
+
+  const headerSeparatorRef = React.useRef<HTMLDivElement>(null);
+  
+   React.useEffect(() => {
+    const handleScroll = () => {
+      if (headerSeparatorRef.current) {
+        // The point at which the glass effect should start.
+        // 100 is an approximation of the initial TitleBar height.
+        const triggerPoint = headerSeparatorRef.current.offsetTop - 100;
+        setIsScrolled(window.scrollY > triggerPoint);
+      } else {
+        // Fallback for when the separator isn't rendered
+        setIsScrolled(window.scrollY > 50);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   
   if (!isClient) {
     return (
@@ -63,14 +82,17 @@ export function PatientDashboard() {
             title={['Health', 'Guardian']}
             subtitle={doctorDetails.name}
             onSubtitleClick={() => isDoctorLoggedIn && setIsEditingDoctor(true)}
-            backButton={BackButton} 
+            backButton={BackButton}
+            isScrolled={isScrolled}
          />
         <main className="flex-1 p-4 md:pt-10 md:p-6 pb-24">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              
             <PatientHeader />
             
-            <Separator />
+            <div ref={headerSeparatorRef}>
+                <Separator />
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1 flex flex-col gap-6">
