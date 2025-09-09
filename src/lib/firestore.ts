@@ -17,7 +17,7 @@ import {
   startAfter,
   where,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { getFirebaseDb } from './firebase';
 import type { Patient } from './types';
 import { doctorDetails } from './doctor-data';
 
@@ -78,6 +78,7 @@ const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
 
 
 export async function getPatient(id: string): Promise<any | null> {
+  const db = getFirebaseDb();
   const docRef = doc(db, PATIENTS_COLLECTION, id);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
@@ -94,6 +95,7 @@ export async function getPatient(id: string): Promise<any | null> {
 }
 
 export async function getAllPatients(): Promise<Patient[]> {
+  const db = getFirebaseDb();
   const q = query(collection(db, PATIENTS_COLLECTION), orderBy('name'));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => {
@@ -105,6 +107,7 @@ export async function getAllPatients(): Promise<Patient[]> {
 
 
 export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'doctorUid' | 'doctorName' | 'doctorEmail'>): Promise<Patient> {
+    const db = getFirebaseDb();
     const docData = {
         ...patientData,
         doctorUid: doctorDetails.uid,
@@ -146,6 +149,7 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
 }
 
 export async function updatePatient(id: string, updates: Partial<Patient>): Promise<Patient> {
+    const db = getFirebaseDb();
     const docRef = doc(db, PATIENTS_COLLECTION, id);
 
     // Fetch the existing document to ensure the summary is based on the full data.
@@ -173,6 +177,7 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
 }
 
 export async function deletePatient(id: string): Promise<void> {
+  const db = getFirebaseDb();
   const docRef = doc(db, PATIENTS_COLLECTION, id);
   await deleteDoc(docRef);
 }
@@ -183,6 +188,7 @@ export async function getPatientsPaginated(
   lastVisible: any | null,
   pageSize: number
 ): Promise<{ patients: Patient[]; lastVisible: any | null }> {
+  const db = getFirebaseDb();
   let q;
   const patientsCollection = collection(db, PATIENTS_COLLECTION);
   const baseQuery = [

@@ -4,8 +4,6 @@ import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
-// This is a placeholder for your Firebase configuration.
-// In a real application, you should use environment variables to store your config.
 const firebaseConfig = {
   "projectId": "glycemic-guardian-6uxyg",
   "appId": "1:1023747133263:web:fc7ad4f2a467dad6c9ff3a",
@@ -15,19 +13,27 @@ const firebaseConfig = {
   "messagingSenderId": "1023747133263"
 };
 
-let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
-let storage: FirebaseStorage;
-
-if (getApps().length === 0) {
-    app = initializeApp(firebaseConfig);
-} else {
-    app = getApp();
+function getFirebaseApp(): FirebaseApp {
+    if (getApps().length === 0) {
+        return initializeApp(firebaseConfig);
+    }
+    return getApp();
 }
 
-auth = getAuth(app);
-db = getFirestore(app);
-storage = getStorage(app);
+export function getFirebaseAuth(): Auth {
+    return getAuth(getFirebaseApp());
+}
 
-export { app, auth, db, storage };
+export function getFirebaseDb(): Firestore {
+    return getFirestore(getFirebaseApp());
+}
+
+export function getFirebaseStorage(): FirebaseStorage {
+    return getStorage(getFirebaseApp());
+}
+
+// For direct use in client-side components that are guaranteed to run after initialization
+export const app = getFirebaseApp();
+export const auth = getFirebaseAuth();
+export const db = getFirebaseDb();
+export const storage = getFirebaseStorage();

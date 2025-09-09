@@ -8,11 +8,12 @@ import {
   onAuthStateChanged,
   type User,
 } from 'firebase/auth';
-import { auth } from './firebase';
+import { getFirebaseAuth } from './firebase';
 
 // Sign up a new user
 export const signup = async (email: string, password: string): Promise<User> => {
   try {
+    const auth = getFirebaseAuth();
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   } catch (error: any) {
@@ -27,6 +28,7 @@ export const signup = async (email: string, password: string): Promise<User> => 
 // Log in an existing user
 export const login = async (email: string, password: string): Promise<User> => {
   try {
+    const auth = getFirebaseAuth();
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   } catch (error: any) {
@@ -41,6 +43,7 @@ export const login = async (email: string, password: string): Promise<User> => {
 // Log out the current user
 export const logout = async (): Promise<void> => {
   try {
+    const auth = getFirebaseAuth();
     await signOut(auth);
   } catch (error) {
     console.error('Error logging out:', error);
@@ -50,7 +53,8 @@ export const logout = async (): Promise<void> => {
 
 // Listen for auth state changes
 export const listenForAuthChanges = (callback: (user: User | null) => void) => {
+  const auth = getFirebaseAuth();
   return onAuthStateChanged(auth, callback);
 };
 
-export { auth };
+export const auth = getFirebaseAuth();
