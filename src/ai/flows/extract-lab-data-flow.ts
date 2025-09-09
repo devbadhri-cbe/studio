@@ -45,11 +45,14 @@ const extractLabDataFlow = ai.defineFlow(
         const { output } = await prompt(input);
         return output!;
       } catch (e: any) {
-        if (e.message.includes('503')) {
-          console.log("Service unavailable, retrying...");
+        const errorMessage = e.message || '';
+        if (errorMessage.includes('429') || errorMessage.includes('503')) {
+          console.log(`Service unavailable or rate limited (${errorMessage.includes('429') ? '429' : '503'}), retrying...`);
           retries--;
           if (retries === 0) throw e;
-          await new Promise(resolve => setTimeout(resolve, 1000)); // wait 1s
+          // Wait longer for rate limit errors
+          const delay = errorMessage.includes('429') ? 1000 : 0;
+          await new Promise(resolve => setTimeout(resolve, delay));
         } else {
           throw e; // Re-throw other errors immediately
         }
