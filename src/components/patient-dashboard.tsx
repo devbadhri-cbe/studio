@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { Stethoscope, Shapes, Search } from 'lucide-react';
+import { Stethoscope, Shapes, Search, ArrowLeft } from 'lucide-react';
 import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
@@ -19,10 +19,13 @@ import { Input } from './ui/input';
 import { UnsavedChangesBar } from './unsaved-changes-bar';
 import { DashboardSectionToggle } from './dashboard-section-toggle';
 import { TooltipProvider } from './ui/tooltip';
+import { Button } from './ui/button';
+import { useRouter } from 'next/navigation';
 
 
 export function PatientDashboard() {
   const { isClient } = useApp();
+  const router = useRouter();
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(false);
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
   const [diseasePanelSearchQuery, setDiseasePanelSearchQuery] = React.useState('');
@@ -36,10 +39,17 @@ export function PatientDashboard() {
     );
   }
 
+  const BackButton = (
+    <Button variant="outline" size="sm" onClick={() => router.push('/doctor/dashboard')}>
+      <ArrowLeft className="mr-2 h-4 w-4" />
+      Back
+    </Button>
+  );
+
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
-         <TitleBar />
+         <TitleBar backButton={BackButton} />
 
         <main className="flex-1 p-4 md:pt-10 md:p-6 pb-24">
           <div className="mx-auto grid w-full max-w-7xl gap-6">

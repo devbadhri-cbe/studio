@@ -8,16 +8,17 @@ import { doctorDetails } from '@/lib/doctor-data';
 
 interface TitleBarProps {
     children?: React.ReactNode;
+    backButton?: React.ReactNode;
 }
 
-export function TitleBar({ children }: TitleBarProps) {
+export function TitleBar({ children, backButton }: TitleBarProps) {
     
     return (
         <>
         <header className="border-b px-4 py-2 md:px-6">
             <div className="mx-auto w-full max-w-7xl flex items-center justify-between">
                  <div className="flex justify-start items-center gap-2 w-24">
-                    {children}
+                    {backButton || children}
                 </div>
                 <div className="flex-1 flex justify-center">
                     <div className="flex flex-col items-center">
