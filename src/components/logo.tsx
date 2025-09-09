@@ -12,6 +12,11 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+        <defs>
+            <filter id="logo-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="1" dy="2" stdDeviation="1" floodColor="hsl(var(--primary))" floodOpacity="0.3" />
+            </filter>
+        </defs>
         <path 
             d="M16 30C16 30 30 24 30 16V6L16 2L2 6V16C2 24 16 30 16 30Z" 
             stroke="currentColor" 
@@ -20,6 +25,7 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
             strokeLinejoin="round" 
             fill="currentColor" 
             fillOpacity="0.1" 
+            style={{ filter: 'url(#logo-shadow)' }}
         />
         <polyline
             className="animate-pulse-trace text-destructive"
