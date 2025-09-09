@@ -71,7 +71,10 @@ export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }:
             size="icon"
             variant="ghost"
             className="h-8 w-8 shrink-0"
-            onClick={() => onSynopsisToggle(condition.id)}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSynopsisToggle(condition.id)
+            }}
             disabled={!condition.synopsis}
           >
             <Info className="h-5 w-5 text-blue-500" />
