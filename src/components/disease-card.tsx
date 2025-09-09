@@ -16,6 +16,8 @@ import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 interface DiseaseCardProps {
   condition: MedicalCondition;
   onRevise: (condition: MedicalCondition) => void;
+  onSynopsisToggle: (id: string) => void;
+  isActive: boolean;
 }
 
 const statusConfig = {
@@ -24,27 +26,18 @@ const statusConfig = {
   needs_revision: { icon: AlertTriangle, text: 'Doctor requested revision', color: 'text-destructive' },
 };
 
-export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
-  const [activeSynopsis, setActiveSynopsis] = React.useState<string | null>(null);
+export function DiseaseCard({ condition, onRevise, onSynopsisToggle, isActive }: DiseaseCardProps) {
   const { removeMedicalCondition } = useApp();
   const formatDate = useDateFormatter();
 
   const statusInfo = statusConfig[condition.status] || statusConfig.pending_review;
   const Icon = statusInfo.icon;
   const isIcdLoading = condition.icdCode === 'loading...';
-
-  const handleSynopsisToggle = (id: string) => {
-    if (activeSynopsis === id) {
-      setActiveSynopsis(null);
-    } else {
-      setActiveSynopsis(id);
-    }
-  };
-
+  
   const handleRemoveCondition = (id: string) => {
     removeMedicalCondition(id);
-    if (activeSynopsis === id) {
-      setActiveSynopsis(null);
+    if (isActive) {
+      onSynopsisToggle(id);
     }
   };
 
@@ -78,7 +71,7 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
             size="icon"
             variant="ghost"
             className="h-8 w-8 shrink-0"
-            onClick={() => handleSynopsisToggle(condition.id)}
+            onClick={() => onSynopsisToggle(condition.id)}
             disabled={!condition.synopsis}
           >
             <Info className="h-5 w-5 text-blue-500" />
@@ -110,12 +103,12 @@ export function DiseaseCard({ condition, onRevise }: DiseaseCardProps) {
           </Alert>
         </li>
       )}
-      {activeSynopsis === condition.id && condition.synopsis && (
+      {isActive && condition.synopsis && (
         <li className="pl-5 pb-2">
           <ConditionSynopsisDialog
             conditionName={condition.condition}
             initialSynopsis={condition.synopsis}
-            onClose={() => setActiveSynopsis(null)}
+            onClose={() => onSynopsisToggle(condition.id)}
           />
         </li>
       )}
