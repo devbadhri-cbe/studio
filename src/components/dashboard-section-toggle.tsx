@@ -30,10 +30,16 @@ export function DashboardSectionToggle({
 
   const content = (
       <div className="flex flex-col md:flex-row items-start md:items-center w-full gap-4">
-        <div className="flex-1">
-          <h3 className="font-semibold text-lg">{title}</h3>
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
-        </div>
+        <CollapsibleTrigger asChild>
+            <div className="flex-1 flex items-center gap-4 cursor-pointer">
+                <div className="flex-1">
+                    <h3 className="font-semibold text-lg">{title}</h3>
+                    <p className="text-sm text-muted-foreground">{subtitle}</p>
+                </div>
+                <ChevronDown className={cn("h-5 w-5 transition-transform ml-auto", isOpen && "rotate-180")} />
+            </div>
+        </CollapsibleTrigger>
+        
         <div className="flex items-center gap-4 w-full md:w-auto" onClick={(e) => e.stopPropagation()}>
           {isOpen && (
             <div className="relative flex-1 md:flex-none">
@@ -46,27 +52,24 @@ export function DashboardSectionToggle({
               />
             </div>
           )}
-           <ChevronDown className={cn("h-5 w-5 transition-transform ml-auto", isOpen && "rotate-180")} />
         </div>
       </div>
   );
 
   return (
-    <CollapsibleTrigger asChild>
-      <div role="button" className="cursor-pointer hover:bg-muted/50 transition-colors rounded-lg">
-        <BiomarkerCardTemplate
-          title=""
-          icon={icon}
-          hasRecords={true}
-          records={[]}
-          onDeleteRecord={() => {}}
-          statusDisplay={<></>}
-          chart={<></>}
-          className="shadow-xl"
-        >
-          {content}
-        </BiomarkerCardTemplate>
-      </div>
-    </CollapsibleTrigger>
+    <div role="button" className="hover:bg-muted/50 transition-colors rounded-lg">
+    <BiomarkerCardTemplate
+        title=""
+        icon={icon}
+        hasRecords={true}
+        records={[]}
+        onDeleteRecord={() => {}}
+        statusDisplay={<></>}
+        chart={<></>}
+        className="shadow-xl"
+    >
+        {content}
+    </BiomarkerCardTemplate>
+    </div>
   );
 }
