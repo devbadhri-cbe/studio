@@ -66,7 +66,7 @@ export const LabDataExtractionOutputSchema = z.object({
     .describe('Thyroid panel results.'),
   bloodPressure: z
     .object({
-      date: z.string().describe('The date of the test in YYYY-MM-DD format.'),
+      date: z.string().describe('The date of the test in YYYY-MM-D format.'),
       systolic: z.number().describe('The systolic blood pressure value.'),
       diastolic: z.number().describe('The diastolic blood pressure value.'),
       heartRate: z.number().optional().describe('The heart rate in beats per minute.'),
@@ -131,6 +131,7 @@ export const MedicationInfoOutputSchema = z.object({
   frequency: z.string().optional().describe('The standardized frequency (e.g., "twice daily").'),
   foodInstructions: z.enum(['before', 'after', 'with']).optional().describe('The standard food instruction for this medication.'),
   foodInstructionSuggestion: z.string().optional().describe('A brief explanation if the user\'s food instruction was incorrect and why it was corrected.'),
+  correctedMedicationName: z.string().optional().describe('The corrected spelling of the medication name if a mistake was detected.'),
 });
 export type MedicationInfoOutput = z.infer<typeof MedicationInfoOutputSchema>;
 

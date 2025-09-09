@@ -90,7 +90,7 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
     }
     addMedication({
         name: processedMed.activeIngredient,
-        brandName: data.medicationName,
+        brandName: processedMed.correctedMedicationName || data.medicationName,
         dosage: data.dosage,
         frequency: data.frequency,
         foodInstructions: data.foodInstructions,
@@ -200,6 +200,7 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
               <Alert variant="default" className="bg-background">
                 <AlertTitle className="font-semibold">AI Processed Information</AlertTitle>
                 <AlertDescription>
+                  {processedMed.correctedMedicationName && <p><strong>Spelling Suggestion:</strong> {processedMed.correctedMedicationName}</p>}
                   <p><strong>Active Ingredient:</strong> {processedMed.activeIngredient}</p>
                    {processedMed.dosage && <p><strong>Standardized Dosage:</strong> {processedMed.dosage}</p>}
                    {processedMed.frequency && <p><strong>Standardized Frequency:</strong> {processedMed.frequency}</p>}
