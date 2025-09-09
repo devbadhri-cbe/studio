@@ -407,7 +407,7 @@ export function MedicalHistoryCard() {
                         {profile.medication.map((med) => (
                             <React.Fragment key={med.id}>
                                 <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                                <div className="flex-1 cursor-pointer" onClick={() => med.name.toLowerCase() !== 'nil' && handleSynopsisToggle('medication', med.id)}>
+                                <div className="flex-1">
                                 {med.name.toLowerCase() === 'nil' ? (
                                         <span className="font-semibold text-foreground">Nil - No medication</span>
                                 ) : (
@@ -423,10 +423,30 @@ export function MedicalHistoryCard() {
                                 )}
                                 </div>
                                     <div className="flex items-center shrink-0">
+                                         {med.name.toLowerCase() !== 'nil' && (
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="h-8 w-8 shrink-0"
+                                                        onClick={(e) => { e.stopPropagation(); handleSynopsisToggle('medication', med.id); }}
+                                                    >
+                                                        <Info className="h-5 w-5 text-blue-500" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>View Synopsis</TooltipContent>
+                                            </Tooltip>
+                                        )}
                                         {isEditingMedications && med.name.toLowerCase() !== 'nil' && (
-                                           <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
-                                                <Trash2 className="h-5 w-5 text-destructive" />
-                                            </Button>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleRemoveMedication(med.id); }}>
+                                                        <Trash2 className="h-5 w-5 text-destructive" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>Delete Medication</TooltipContent>
+                                            </Tooltip>
                                         )}
                                     </div>
                                 </li>
