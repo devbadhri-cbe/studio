@@ -126,7 +126,7 @@ function MedicalConditionForm({
       date: data.date.toISOString(),
       icdCode: data.icdCode,
       synopsis: data.synopsis,
-      status: 'verified',
+      status: 'pending_review',
     });
     onCancel();
   };
@@ -183,7 +183,8 @@ function MedicalConditionForm({
         <div className="flex justify-end gap-2">
           <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
           <Button type="submit" size="sm" disabled={isProcessing}>
-            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+            {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />}
+            {hasBeenProcessed ? 'Confirm & Save' : 'Process & Review'}
           </Button>
         </div>
       </form>
@@ -286,7 +287,7 @@ interface MedicationListItemProps {
 }
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, updateMedicalCondition, removeMedicalCondition, addMedication, removeMedication, setMedicationNil } = useApp();
+  const { profile, addMedicalCondition, updateMedicalCondition, addMedication, removeMedication, setMedicationNil } = useApp();
   const [editingCondition, setEditingCondition] = React.useState<MedicalCondition | null>(null);
   const [isAddingMedication, setIsAddingMedication] = React.useState(false);
   const [showInteraction, setShowInteraction] = React.useState(false);
@@ -492,5 +493,7 @@ export function MedicalHistoryCard() {
     </>
   );
 }
+
+    
 
     

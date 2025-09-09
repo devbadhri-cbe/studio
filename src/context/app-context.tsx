@@ -552,7 +552,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     setProfileState(prevProfile => ({
       ...prevProfile,
-      enabledBiomarkers: updatedEnabledBiomarkers,
+      enabledBiomarkers: updatedEnabledEnabledBiomarkers,
     }));
     setHasUnsavedChanges(true);
     
@@ -731,7 +731,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return combined;
   }, [totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
 
-  // Removed approveMedicalCondition, dismissSuggestion, setIsDoctorLoggedIn
+  const approveMedicalCondition = useCallback((conditionId: string) => {
+    setProfileState(prev => ({
+        ...prev,
+        presentMedicalConditions: prev.presentMedicalConditions.map(c => 
+            c.id === conditionId ? { ...c, status: 'verified' } : c
+        ),
+    }));
+    setHasUnsavedChanges(true);
+    toast({ title: 'Condition Approved', description: 'The medical condition has been marked as verified.' });
+  }, []);
+
+  const dismissSuggestion = useCallback((suggestionId: string, isPermanent: boolean = true) => {
+    setProfileState(prev => ({
+      ...prev,
+      presentMedicalConditions: prev.presentMedicalConditions.map(c => 
+        c.id === suggestionId ? { ...c, status: isPermanent ? 'verified' : 'needs_revision' } : c
+      ),
+      dashboardSuggestions: prev.dashboardSuggestions?.filter(s => s.id !== suggestionId)
+    }));
+    setHasUnsavedChanges(true);
+    toast({ title: 'Suggestion Handled', description: 'The suggestion has been updated.' });
+  }, []);
+
   const value: AppContextType = {
     profile,
     setProfile,
@@ -795,8 +817,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     saveChanges,
     isSaving,
     isDoctorLoggedIn,
-    approveMedicalCondition: () => {}, // No-op
-    dismissSuggestion: () => {}, // No-op
+    approveMedicalCondition,
+    dismissSuggestion,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -809,3 +831,5 @@ export function useApp() {
   }
   return context;
 }
+
+    
