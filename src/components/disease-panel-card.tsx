@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -93,9 +92,11 @@ export function DiseasePanelCard({
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-4 pt-0">
         {isPanelEnabledForPatient ? (
-          <InteractivePanelGrid>
-            {children}
-          </InteractivePanelGrid>
+          <div className="border-2 border-red-500">
+            <InteractivePanelGrid>
+              {children}
+            </InteractivePanelGrid>
+          </div>
         ) : (
           <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4 min-h-[200px] bg-muted/30 rounded-lg">
             <p className="text-sm">This panel is currently disabled for the patient.</p>
