@@ -74,7 +74,7 @@ function MedicalConditionForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="mt-2 space-y-4 rounded-lg border bg-muted/50 p-4">
-        {aiResult && !aiResult.isValid && aiResult.suggestions && (
+        {aiResult && !aiResult.isValid && aiResult.suggestions && aiResult.suggestions.length > 0 && (
           <Alert>
             <AlertTitle>Refine Your Input</AlertTitle>
             <AlertDescription>
