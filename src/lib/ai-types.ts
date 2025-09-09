@@ -118,11 +118,15 @@ export type MedicalConditionOutput = z.infer<typeof MedicalConditionOutputSchema
 
 export const MedicationInfoInputSchema = z.object({
   medicationName: z.string().describe('The brand or generic name of the medication provided by the user.'),
+  dosage: z.string().optional().describe('The user-provided dosage (e.g., "500 mg", "1 tablet").'),
+  frequency: z.string().optional().describe('The user-provided frequency (e.g., "twice a day", "at bedtime").'),
 });
 export type MedicationInfoInput = z.infer<typeof MedicationInfoInputSchema>;
 
 export const MedicationInfoOutputSchema = z.object({
   activeIngredient: z.string().describe('The active pharmaceutical ingredient (API) or generic name of the medication.'),
   isBrandName: z.boolean().describe('Whether the user input was identified as a brand name.'),
+  dosage: z.string().optional().describe('The standardized dosage (e.g., "500mg").'),
+  frequency: z.string().optional().describe('The standardized frequency (e.g., "twice daily").'),
 });
 export type MedicationInfoOutput = z.infer<typeof MedicationInfoOutputSchema>;

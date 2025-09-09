@@ -48,6 +48,9 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
 
   const handleProcessMedication = async () => {
     const brandName = form.getValues('medicationName');
+    const dosage = form.getValues('dosage');
+    const frequency = form.getValues('frequency');
+
     if (!brandName) {
       form.setError('medicationName', { type: 'manual', message: 'Medication name is required.' });
       return;
@@ -55,9 +58,15 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
     setIsProcessing(true);
     setProcessedMed(null);
     try {
-      const result = await getMedicationInfo({ medicationName: brandName });
+      const result = await getMedicationInfo({ 
+        medicationName: brandName,
+        dosage,
+        frequency
+      });
       if (result.activeIngredient) {
         setProcessedMed(result);
+        form.setValue('dosage', result.dosage || '');
+        form.setValue('frequency', result.frequency || '');
       } else {
         toast({ variant: 'destructive', title: 'Could not identify medication.' });
       }
@@ -98,7 +107,7 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Medication</DialogTitle>
-          <DialogDescription>Enter the medication details below. The AI will identify the active ingredient.</DialogDescription>
+          <DialogDescription>Enter the medication details below. The AI will identify the active ingredient and standardize the dosage.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -115,16 +124,6 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
                 </FormItem>
               )}
             />
-
-            {processedMed && (
-              <Alert variant="default" className="bg-background">
-                <AlertTitle className="font-semibold">AI Identified Ingredient</AlertTitle>
-                <AlertDescription>
-                  <p><strong>Active Ingredient:</strong> {processedMed.activeIngredient}</p>
-                </AlertDescription>
-              </Alert>
-            )}
-
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -153,6 +152,18 @@ export function AddMedicationDialog({ children, onSuccess, open, onOpenChange }:
                 )}
               />
             </div>
+            
+            {processedMed && (
+              <Alert variant="default" className="bg-background">
+                <AlertTitle className="font-semibold">AI Processed Information</AlertTitle>
+                <AlertDescription>
+                  <p><strong>Active Ingredient:</strong> {processedMed.activeIngredient}</p>
+                   {processedMed.dosage && <p><strong>Standardized Dosage:</strong> {processedMed.dosage}</p>}
+                   {processedMed.frequency && <p><strong>Standardized Frequency:</strong> {processedMed.frequency}</p>}
+                </AlertDescription>
+              </Alert>
+            )}
+
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={handleCancel}>Cancel</Button>
               <Button type="submit" disabled={isProcessing}>

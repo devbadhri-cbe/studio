@@ -19,14 +19,18 @@ const prompt = ai.definePrompt({
   input: { schema: MedicationInfoInputSchema },
   output: { schema: MedicationInfoOutputSchema },
   model: gemini15Flash,
-  prompt: `You are a pharmaceutical information expert. Your task is to identify the active pharmaceutical ingredient (API), also known as the generic name, for a given medication name.
+  prompt: `You are a pharmaceutical information expert. Your task is to identify the active pharmaceutical ingredient (API) and standardize dosage instructions for a given medication.
 
 Medication Name: "{{medicationName}}"
+User-provided Dosage: "{{dosage}}"
+User-provided Frequency: "{{frequency}}"
 
-1.  Analyze the input "medicationName".
-2.  Determine the primary active ingredient. For example, for "Tylenol Extra Strength" or "Paracetamol", the active ingredient is "Acetaminophen". For "Rosuvas 20", it's "Rosuvastatin".
-3.  Set 'isBrandName' to true if the input is a commercial brand name, and false if it's a generic name.
-4.  Return the identified active ingredient in the 'activeIngredient' field.`,
+1.  Analyze the input "medicationName". Determine the primary active ingredient (generic name).
+2.  Set 'isBrandName' to true if the input is a commercial brand name, and false if it's a generic name.
+3.  Analyze the 'dosage' and 'frequency' inputs.
+4.  Standardize the dosage (e.g., "500 mg" becomes "500mg").
+5.  Standardize the frequency (e.g., "twice a day" or "BD" becomes "twice daily"; "at night" becomes "once daily at bedtime").
+6.  Return the identified active ingredient in 'activeIngredient', and the standardized dosage and frequency in their respective fields.`,
 });
 
 
