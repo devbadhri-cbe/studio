@@ -39,21 +39,21 @@ export function DashboardSectionToggle({
             </div>
         </CollapsibleTrigger>
         
-        <div className="flex items-center gap-4 w-full md:w-auto">
-          {isOpen && (
-            <div className="relative flex-1 md:flex-none" onClick={(e) => e.stopPropagation()}>
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={searchPlaceholder}
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-8 h-9 w-full md:w-48"
-              />
-            </div>
-          )}
-          <CollapsibleTrigger asChild>
-             <ChevronDown className={cn("h-5 w-5 transition-transform cursor-pointer", isOpen && "rotate-180")} />
-          </CollapsibleTrigger>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+            {isOpen && (
+              <div className="relative flex-1 md:flex-none" onClick={(e) => e.stopPropagation()}>
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder={searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="pl-8 h-9 w-full md:w-48"
+                />
+              </div>
+            )}
+            <CollapsibleTrigger asChild>
+               <ChevronDown className={cn("h-5 w-5 transition-transform cursor-pointer", isOpen && "rotate-180")} />
+            </CollapsibleTrigger>
         </div>
       </div>
   );
