@@ -30,6 +30,8 @@ import { AddHdlRecordDialog } from '@/components/add-hdl-record-dialog';
 import { TriglyceridesCard } from '@/components/triglycerides-card';
 import { AddTriglyceridesRecordDialog } from '@/components/add-triglycerides-record-dialog';
 import { LipidPanelCard } from '@/components/lipid-panel-card';
+import { SerumCreatinineCard } from '@/components/serum-creatinine-card';
+import { AddSerumCreatinineRecordDialog } from '@/components/add-serum-creatinine-record-dialog';
 
 
 export const availableBiomarkerCards = {
@@ -104,6 +106,12 @@ export const availableBiomarkerCards = {
     component: <TriglyceridesCard />,
     addRecordLabel: 'New Triglycerides Record',
     addRecordDialog: <AddTriglyceridesRecordDialog />,
+  },
+  serumCreatinine: {
+    label: 'Serum Creatinine',
+    component: <SerumCreatinineCard />,
+    addRecordLabel: 'New Serum Creatinine Record',
+    addRecordDialog: <AddSerumCreatinineRecordDialog />,
   },
 };
 

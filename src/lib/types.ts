@@ -107,6 +107,13 @@ export interface ThyroxineRecord {
   medication?: string;
 }
 
+export interface SerumCreatinineRecord {
+  id: string;
+  date: Date | string;
+  value: number; // in mg/dL
+  medication?: string;
+}
+
 
 export interface BloodPressureRecord {
   id: string;
@@ -200,6 +207,7 @@ export interface Patient {
   vitaminDRecords: VitaminDRecord[];
   thyroidRecords: ThyroidRecord[];
   thyroxineRecords: ThyroxineRecord[];
+  serumCreatinineRecords: SerumCreatinineRecord[];
   hemoglobinRecords: HemoglobinRecord[];
   weightRecords: WeightRecord[];
   bloodPressureRecords: BloodPressureRecord[];
@@ -229,6 +237,7 @@ export type BiomarkerKey =
   | 'totalCholesterol' 
   | 'ldl' 
   | 'hdl' 
-  | 'triglycerides';
+  | 'triglycerides'
+  | 'serumCreatinine';
 
 export type DiseasePanelKey = 'diabetes' | 'hypertension' | 'lipidPanel';
