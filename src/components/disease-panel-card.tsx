@@ -24,7 +24,7 @@ import { Label } from './ui/label';
 import { ScrollArea } from './ui/scroll-area';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { useForm } from 'react-hook-form';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from './ui/form';
 import { DatePicker } from './ui/date-picker';
 import { Input } from './ui/input';
 import { startOfDay } from 'date-fns';
@@ -66,13 +66,22 @@ interface AddPanelRecordDialogProps {
     enabledBiomarkers: (BiomarkerKey | string)[];
     panelKey: DiseasePanelKey;
     form: ReturnType<typeof useForm>;
+    defaultFormValues: any;
 }
 
-function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey, form }: AddPanelRecordDialogProps) {
+function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey, form, defaultFormValues }: AddPanelRecordDialogProps) {
     const { addHba1cRecord, addFastingBloodGlucoseRecord, addHemoglobinRecord, addBloodPressureRecord, addWeightRecord, addThyroidRecord, addLipidRecord, profile, getDbGlucoseValue, getDbHemoglobinValue, biomarkerUnit, addSerumCreatinineRecord, addUricAcidRecord, addThyroxineRecord, addTotalCholesterolRecord, addLdlRecord, addHdlRecord, addTriglyceridesRecord } = useApp();
     
     const isImperial = profile.unitSystem === 'imperial';
     
+    const handleCancel = () => {
+        onOpenChange(false);
+        // Defer form reset to avoid race condition with dialog closing animation
+        requestAnimationFrame(() => {
+            form.reset(defaultFormValues);
+        });
+    }
+
     const onSubmit = (data: any) => {
         let recordsAdded = 0;
         const recordDate = data.date ? startOfDay(data.date).toISOString() : new Date().toISOString();
@@ -195,7 +204,7 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey,
                 <FormItem>
                     <FormLabel>{fieldLabel}</FormLabel>
                     <FormControl>
-                        <Input type={config.type} step={config.step} placeholder={config.placeholder} {...field} />
+                        <Input type={config.type} step={config.step} placeholder={config.placeholder} {...field} value={field.value || ''} />
                     </FormControl>
                 </FormItem>
             )}
@@ -236,7 +245,7 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey,
                             </div>
                         </ScrollArea>
                         <DialogFooter className="pt-4 px-6 pb-6">
-                           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+                           <Button type="button" variant="ghost" onClick={handleCancel}>Cancel</Button>
                            <Button type="submit">Save Records</Button>
                         </DialogFooter>
                     </form>
@@ -269,7 +278,7 @@ export function DiseasePanelCard({
   const defaultFormValues = React.useMemo(() => {
       const defaults: { [key: string]: any } = { date: new Date() };
       Object.keys(biomarkerFieldsConfig).forEach(key => {
-          const config = biomarkerFieldsConfig[key];
+          const config = biomarkerFieldsConfig[key as keyof typeof biomarkerFieldsConfig];
           if (config.fields) {
               Object.keys(config.fields).forEach(subKey => {
                   defaults[subKey] = '';
@@ -387,6 +396,7 @@ export function DiseasePanelCard({
         enabledBiomarkers={enabledForPanel}
         panelKey={panelKey}
         form={form}
+        defaultFormValues={defaultFormValues}
     />
     </>
   );
@@ -394,3 +404,6 @@ export function DiseasePanelCard({
 
 
 
+
+
+    
