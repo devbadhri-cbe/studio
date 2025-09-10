@@ -116,8 +116,8 @@ export function PatientDashboard() {
                           searchPlaceholder="Search biomarkers..."
                       />
                       <CollapsibleContent className="mt-4 space-y-4">
-                          <AddBiomarkerCard />
                           <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
+                          <AddBiomarkerCard />
                       </CollapsibleContent>
                   </Collapsible>
                 )}
