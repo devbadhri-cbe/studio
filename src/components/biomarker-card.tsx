@@ -4,19 +4,16 @@ import * as React from 'react';
 import { Button } from './ui/button';
 import { Settings, Edit } from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
-import { ActionIcon } from './ui/action-icon';
+import { ActionMenu } from './ui/action-menu';
 
 interface Record {
   id: string;
@@ -81,52 +78,34 @@ export function BiomarkerCard<T extends Record>({
 
   const formattedRecords = sortedRecords.map(formatRecord);
 
-  const UnitSwitchComponent = unitSwitch ? (
-    <div className="flex items-center justify-center space-x-2 px-2 py-1">
-        <Label htmlFor={`unit-switch-${title}`} className="text-xs">{unitSwitch.labelA}</Label>
-        <Switch
-            id={`unit-switch-${title}`}
-            checked={unitSwitch.isChecked}
-            onCheckedChange={unitSwitch.onCheckedChange}
-            onSelect={(e) => e.preventDefault()}
-        />
-        <Label htmlFor={`unit-switch-${title}`} className="text-xs">{unitSwitch.labelB}</Label>
-    </div>
-  ) : null;
-
   const Actions = !isReadOnly ? (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <ActionIcon tooltip="Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64" align="end">
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-            {React.cloneElement(addRecordDialog as React.ReactElement, {
-                children: <div className="w-full">Add New Record</div>
-            })}
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setIsEditMode((prev) => !prev)} disabled={sortedRecords.length === 0}>
-          <Edit className="mr-2 h-4 w-4" />
-          {isEditMode ? 'Done Editing' : 'Edit Records'}
-        </DropdownMenuItem>
-        {editMenuItems}
-        {unitSwitch && (
-          <>
-            <DropdownMenuSeparator />
-             {unitSwitch.unitSwitchLabel && <DropdownMenuLabel>{unitSwitch.unitSwitchLabel}</DropdownMenuLabel>}
-            <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-center space-x-2 px-2 py-1">
-                <Label htmlFor={`unit-switch-${title}`} className="text-xs">{unitSwitch.labelA}</Label>
-                <Switch
-                    id={`unit-switch-${title}`}
-                    checked={unitSwitch.isChecked}
-                    onCheckedChange={unitSwitch.onCheckedChange}
-                />
-                <Label htmlFor={`unit-switch-${title}`} className="text-xs">{unitSwitch.labelB}</Label>
-            </div>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <ActionMenu tooltip="Settings" icon={<Settings className="h-4 w-4" />}>
+      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        {React.cloneElement(addRecordDialog as React.ReactElement, {
+          children: <div className="w-full">Add New Record</div>
+        })}
+      </DropdownMenuItem>
+      <DropdownMenuItem onSelect={() => setIsEditMode((prev) => !prev)} disabled={sortedRecords.length === 0}>
+        <Edit className="mr-2 h-4 w-4" />
+        {isEditMode ? 'Done Editing' : 'Edit Records'}
+      </DropdownMenuItem>
+      {editMenuItems}
+      {unitSwitch && (
+        <>
+          <DropdownMenuSeparator />
+           {unitSwitch.unitSwitchLabel && <DropdownMenuLabel>{unitSwitch.unitSwitchLabel}</DropdownMenuLabel>}
+          <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-center space-x-2 px-2 py-1">
+              <Label htmlFor={`unit-switch-${title}`} className="text-xs">{unitSwitch.labelA}</Label>
+              <Switch
+                  id={`unit-switch-${title}`}
+                  checked={unitSwitch.isChecked}
+                  onCheckedChange={unitSwitch.onCheckedChange}
+              />
+              <Label htmlFor={`unit-switch-${title}`} className="text-xs">{unitSwitch.labelB}</Label>
+          </div>
+        </>
+      )}
+    </ActionMenu>
   ) : null;
 
   const StatusDisplay = (

@@ -17,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { cn } from '@/lib/utils';
 import { SharePatientAccessDialog } from './share-patient-access-dialog';
 import { ActionIcon } from './ui/action-icon';
+import { ActionMenu } from './ui/action-menu';
 
 interface PatientCardProps {
   patient: Patient;
@@ -135,34 +136,29 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                     </div>
                 </div>
                 <div className="shrink-0">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <ActionIcon tooltip="More options" icon={<MoreHorizontal className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onView(patient))}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Dashboard
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onEdit(patient))}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Edit Patient
-                            </DropdownMenuItem>
-                             <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => setIsShareOpen(true))}>
-                                <Share2 className="mr-2 h-4 w-4" />
-                                Share Access
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                                onSelect={(e) => handleDropdownSelect(e, () => onDelete(patient))}
-                                className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                            >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Patient
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <ActionMenu tooltip="More options" icon={<MoreHorizontal className="h-4 w-4" />}>
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onView(patient))}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Dashboard
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onEdit(patient))}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit Patient
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => setIsShareOpen(true))}>
+                            <Share2 className="mr-2 h-4 w-4" />
+                            Share Access
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            onSelect={(e) => handleDropdownSelect(e, () => onDelete(patient))}
+                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Patient
+                        </DropdownMenuItem>
+                    </ActionMenu>
                 </div>
             </div>
         </CardHeader>

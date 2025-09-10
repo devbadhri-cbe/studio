@@ -22,16 +22,14 @@ import { parseISO } from 'date-fns';
 import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
 import { toast } from '@/hooks/use-toast';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AddMedicationForm } from './add-medication-dialog';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 import { ActionIcon } from './ui/action-icon';
+import { ActionMenu } from './ui/action-menu';
 
 type ActiveView = 'none' | 'addCondition' | 'editCondition' | 'addMedication' | 'interaction' | `synopsis_condition_${string}` | `synopsis_medication_${string}`;
 
@@ -314,54 +312,44 @@ export function MedicalHistoryCard() {
   }
   
   const conditionActions = (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <ActionIcon tooltip="Condition Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={handleAddConditionClick}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Condition
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onSelect={() => setIsEditingConditions(!isEditingConditions)}
-          disabled={profile.presentMedicalConditions.length === 0}
-        >
-          <Edit className="mr-2 h-4 w-4" />
-          {isEditingConditions ? 'Done Editing' : 'Edit List'}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <ActionMenu tooltip="Condition Settings" icon={<Settings className="h-4 w-4" />}>
+      <DropdownMenuItem onSelect={handleAddConditionClick}>
+        <PlusCircle className="mr-2 h-4 w-4" />
+        Add Condition
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        onSelect={() => setIsEditingConditions(!isEditingConditions)}
+        disabled={profile.presentMedicalConditions.length === 0}
+      >
+        <Edit className="mr-2 h-4 w-4" />
+        {isEditingConditions ? 'Done Editing' : 'Edit List'}
+      </DropdownMenuItem>
+    </ActionMenu>
   );
 
   const medicationActions = (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <ActionIcon tooltip="Medication Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {!isMedicationNil && (
-          <DropdownMenuItem onSelect={() => setActiveView('addMedication')}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Medication
-          </DropdownMenuItem>
-        )}
-        {!isMedicationNil && (
-          <DropdownMenuItem
-            onSelect={() => setIsEditingMedications(!isEditingMedications)}
-            disabled={profile.medication.length === 0}
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            {isEditingMedications ? 'Done Editing' : 'Edit List'}
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={handleSetMedicationNil}>
-            <X className="mr-2 h-4 w-4" />
-            Set to Nil
+    <ActionMenu tooltip="Medication Settings" icon={<Settings className="h-4 w-4" />}>
+      {!isMedicationNil && (
+        <DropdownMenuItem onSelect={() => setActiveView('addMedication')}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Medication
         </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      )}
+      {!isMedicationNil && (
+        <DropdownMenuItem
+          onSelect={() => setIsEditingMedications(!isEditingMedications)}
+          disabled={profile.medication.length === 0}
+        >
+          <Edit className="mr-2 h-4 w-4" />
+          {isEditingMedications ? 'Done Editing' : 'Edit List'}
+        </DropdownMenuItem>
+      )}
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onSelect={handleSetMedicationNil}>
+        <X className="mr-2 h-4 w-4" />
+        Set to Nil
+      </DropdownMenuItem>
+    </ActionMenu>
   );
 
   const closeActiveView = () => {
