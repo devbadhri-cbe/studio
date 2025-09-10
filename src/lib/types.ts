@@ -48,11 +48,6 @@ export interface DashboardSuggestion {
   status: 'pending' | 'dismissed' | 'completed';
 }
 
-export interface PendingBiomarker {
-    name: string;
-    key: string;
-}
-
 export interface UserProfile {
   id: string; // Add patient ID to profile for easier lookup
   name: string;
@@ -73,7 +68,6 @@ export interface UserProfile {
   doctorEmail?: string;
   doctorPhone?: string;
   dashboardSuggestions?: DashboardSuggestion[];
-  pendingBiomarkers?: PendingBiomarker[];
 }
 
 export interface Hba1cRecord {
@@ -237,7 +231,6 @@ export interface Patient {
   doctorEmail?: string;
   doctorPhone?: string;
   dashboardSuggestions?: DashboardSuggestion[];
-  pendingBiomarkers?: PendingBiomarker[];
 }
 
 export type BiomarkerKey = 

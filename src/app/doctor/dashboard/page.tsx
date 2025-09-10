@@ -52,12 +52,6 @@ export default function DoctorDashboardPage() {
     try {
       const allPatients = await getAllPatients();
       
-      const patientNeedsAction = (patient: Patient) => {
-        const needsReview = patient.presentMedicalConditions?.some(c => c.status === 'pending_review') || patient.dashboardSuggestions?.some(s => s.status === 'pending');
-        const needsIntegration = patient.pendingBiomarkers && patient.pendingBiomarkers.length > 0;
-        return needsReview || needsIntegration;
-      }
-
       const statusPriority: { [key in Patient['status']]: number } = {
         'Urgent': 1,
         'Needs Review': 2,
@@ -65,24 +59,18 @@ export default function DoctorDashboardPage() {
       };
 
       const sortedPatients = allPatients.sort((a, b) => {
-        const aNeedsAction = patientNeedsAction(a);
-        const bNeedsAction = patientNeedsAction(b);
-
-        if (aNeedsAction && !bNeedsAction) return -1;
-        if (!aNeedsAction && bNeedsAction) return 1;
-        
-        const aDate = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
-        const bDate = b.lastLogin ? new Date(b.lastLogin).getTime() : 0;
-        if (aDate !== bDate) {
-          return bDate - aDate;
-        }
-
         const priorityA = statusPriority[a.status] || 4;
         const priorityB = statusPriority[b.status] || 4;
         if (priorityA !== priorityB) {
             return priorityA - priorityB;
         }
 
+        const aDate = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
+        const bDate = b.lastLogin ? new Date(b.lastLogin).getTime() : 0;
+        if (aDate !== bDate) {
+          return bDate - aDate;
+        }
+        
         return a.name.localeCompare(b.name);
       });
 

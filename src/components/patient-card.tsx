@@ -6,7 +6,7 @@ import type { Patient } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Sun, Zap, Globe, Clock, Bell, Share2, Droplet, Wrench } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, Mail, Phone, Sun, Zap, Globe, Clock, Bell, Share2, Droplet } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
@@ -55,9 +55,8 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const nameRef = React.useRef<HTMLHeadingElement>(null);
   const [isNameOverflowing, setIsNameOverflowing] = React.useState(false);
 
-  const needsReview = patient.presentMedicalConditions?.some(c => c.status === 'pending_review') || patient.dashboardSuggestions?.some(s => s.status === 'pending');
-  const hasPendingBiomarkers = patient.pendingBiomarkers && patient.pendingBiomarkers.length > 0;
-  
+  const needsReview = patient.presentMedicalConditions?.some(c => c.status === 'pending_review');
+
   React.useEffect(() => {
     if (nameRef.current) {
         setIsNameOverflowing(nameRef.current.scrollWidth > nameRef.current.clientWidth);
@@ -125,16 +124,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                                     </TooltipTrigger>
                                     <TooltipContent>
                                         <p>Needs doctor's review</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            )}
-                             {hasPendingBiomarkers && (
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Wrench className="h-4 w-4 text-amber-500" />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>New biomarker "{patient.pendingBiomarkers?.[0].name}" needs integration.</p>
                                     </TooltipContent>
                                 </Tooltip>
                             )}
