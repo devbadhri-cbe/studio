@@ -38,7 +38,8 @@ export function InsightsCard() {
     if (tips.length === 0 && !isGeneratingInsights && !insightsError) {
       regenerateInsights(selectedInsightsLanguage);
     }
-  }, [tips.length, isGeneratingInsights, insightsError, regenerateInsights, selectedInsightsLanguage]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLanguageChange = async (languageCode: string) => {
     if (!languageCode) return;
