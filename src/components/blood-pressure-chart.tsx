@@ -49,6 +49,7 @@ export function BloodPressureChart() {
               axisLine={false}
               tick={{ fontSize: 10 }}
               padding={{ left: 20, right: 20 }}
+              interval={0}
             />
             <YAxis
               yAxisId="left"
