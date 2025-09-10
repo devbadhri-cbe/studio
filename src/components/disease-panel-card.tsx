@@ -325,7 +325,7 @@ export function DiseasePanelCard({
 
   const childrenWithReadOnly = React.Children.map(children, child => {
     if (React.isValidElement(child)) {
-        return React.cloneElement(child as React.ReactElement<any>, { isReadOnly: true });
+        return React.cloneElement(child as React.ReactElement<any>, { isReadOnly: true, className: 'biomarker-emboss' });
     }
     return child;
   });

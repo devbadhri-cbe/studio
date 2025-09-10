@@ -79,6 +79,17 @@
   .placeholder\:text-muted-foreground::placeholder {
     @apply text-muted-foreground/50;
   }
+  .biomarker-emboss {
+    @apply rounded-lg border-transparent transition-all duration-200;
+    background-color: hsl(var(--muted));
+    box-shadow: inset 4px 4px 8px hsl(var(--muted) / 0.7), 
+                inset -4px -4px 8px hsl(var(--card) / 0.8);
+  }
+  .dark .biomarker-emboss {
+    background-color: hsl(var(--muted) / 0.2);
+     box-shadow: inset 4px 4px 8px hsl(var(--background) / 0.2), 
+                inset -4px -4px 8px hsl(var(--secondary) / 0.2);
+  }
 }
 
 @media print {
