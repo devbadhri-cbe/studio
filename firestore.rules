@@ -1,13 +1,12 @@
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /patients/{patientId} {
-      // Allow read access for the collection to any authenticated user (the doctor)
-      allow get, list: if request.auth != null;
-      
-      // Allow create, update, delete only for authenticated users.
-      // A more secure rule would check if request.auth.uid == resource.data.doctorUid
-      allow create, update, delete: if request.auth != null;
+    // Allow read/write access to all documents for development
+    // WARNING: This is insecure for production.
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }
