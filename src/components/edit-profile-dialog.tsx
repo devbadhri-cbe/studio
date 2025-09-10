@@ -134,47 +134,51 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
           <form onSubmit={form.handleSubmit(onProfileSubmit)} className="space-y-6">
               
               <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled /></FormControl><FormMessage /></FormItem> )} />
-              <div className="flex border-2 border-red-500 p-2 gap-4">
-                <FormField
-                    control={form.control}
-                    name="dob"
-                    render={({ field }) => (
-                        <FormItem className="flex flex-col border-2 border-blue-500 p-2">
-                            <FormLabel>Date of Birth</FormLabel>
-                            <FormControl>
-                                <DatePicker
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    fromYear={new Date().getFullYear() - 100}
-                                    toYear={new Date().getFullYear()}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="gender"
-                    render={({ field }) => (
-                        <FormItem className="border-2 border-green-500 p-2">
-                            <FormLabel>Gender</FormLabel>
-                            <FormControl>
-                                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2">
-                                    <FormItem className="flex items-center space-x-2 space-y-0">
-                                        <FormControl><RadioGroupItem value="male" /></FormControl>
-                                        <FormLabel className="font-normal">Male</FormLabel>
-                                    </FormItem>
-                                    <FormItem className="flex items-center space-x-2 space-y-0">
-                                        <FormControl><RadioGroupItem value="female" /></FormControl>
-                                        <FormLabel className="font-normal">Female</FormLabel>
-                                    </FormItem>
-                                </RadioGroup>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+              <div className="flex border-2 border-red-500 gap-4">
+                <div className="border-2 border-blue-500">
+                    <FormField
+                        control={form.control}
+                        name="dob"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Date of Birth</FormLabel>
+                                <FormControl>
+                                    <DatePicker
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        fromYear={new Date().getFullYear() - 100}
+                                        toYear={new Date().getFullYear()}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+                <div className="border-2 border-green-500">
+                    <FormField
+                        control={form.control}
+                        name="gender"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Gender</FormLabel>
+                                <FormControl>
+                                    <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2">
+                                        <FormItem className="flex items-center space-x-2 space-y-0">
+                                            <FormControl><RadioGroupItem value="male" /></FormControl>
+                                            <FormLabel className="font-normal">Male</FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-2 space-y-0">
+                                            <FormControl><RadioGroupItem value="female" /></FormControl>
+                                            <FormLabel className="font-normal">Female</FormLabel>
+                                        </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
               </div>
 
               {isImperial ? (
