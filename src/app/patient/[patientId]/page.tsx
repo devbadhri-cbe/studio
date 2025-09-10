@@ -34,6 +34,11 @@ export default function PatientPage() {
         if (rawPatientData) {
           const patientData = processPatientData(rawPatientData);
           setPatientData(patientData, isDoctorView);
+
+          // Only update lastLogin if it's the patient viewing their own dashboard
+          if (!isDoctorView) {
+            await updatePatient(patientId, { lastLogin: new Date().toISOString() });
+          }
         } else {
           setError(`No patient found with ID: ${patientId}`);
         }
