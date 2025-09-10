@@ -33,7 +33,7 @@ export function InsightsCard() {
 
   const tipsToDisplay = translatedTips || originalTips;
 
-  const handleGenerateInsights = React.useCallback(async (languageCode: string = 'en', isTranslation = false) => {
+  const handleGenerateInsights = React.useCallback(async (languageCode: string, isTranslation = false) => {
     if (isTranslation) {
         setIsTranslating(true);
     } else {
@@ -73,6 +73,11 @@ export function InsightsCard() {
                 setTranslatedTips(result.tips);
             } else {
                 setOriginalTips(result.tips);
+                 if (languageCode !== 'en') {
+                    setTranslatedTips(result.tips);
+                } else {
+                    setTranslatedTips(null);
+                }
             }
         } else {
             throw new Error("No tips returned from AI.");
@@ -98,15 +103,16 @@ export function InsightsCard() {
   ]);
 
   const handleLanguageChange = async (languageCode: string) => {
-    if (!languageCode || originalTips.length === 0) return;
+    if (!languageCode) return;
     setSelectedLanguage(languageCode);
-    
-    if (languageCode === 'en') {
-        setTranslatedTips(null);
-        return;
+
+    if (originalTips.length > 0) {
+        if (languageCode === 'en') {
+            setTranslatedTips(null);
+            return;
+        }
+        await handleGenerateInsights(languageCode, true);
     }
-    
-    handleGenerateInsights(languageCode, true);
   }
 
   return (
@@ -126,7 +132,7 @@ export function InsightsCard() {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-6 pt-0">
         <Separator className="mb-6" />
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col items-center justify-center">
             {(isLoading || isTranslating) && (
                 <div className="flex justify-center items-center flex-1">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -142,11 +148,11 @@ export function InsightsCard() {
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>
                     ) : tipsToDisplay.length > 0 ? (
-                        <ul className="space-y-3 text-sm list-disc pl-5">
+                        <ul className="space-y-3 text-sm list-disc pl-5 self-start">
                             {tipsToDisplay.map((tip, index) => <li key={index}>{tip}</li>)}
                         </ul>
                     ) : (
-                        <div className="text-center text-sm text-muted-foreground flex-1 flex flex-col items-center justify-center">
+                        <div className="text-center text-sm text-muted-foreground">
                             <p>Click the button to generate personalized health insights based on your data.</p>
                         </div>
                     )}
@@ -157,7 +163,7 @@ export function InsightsCard() {
         <div className="flex flex-col md:flex-row justify-center items-center gap-4 pt-6 mt-auto">
             <div className="flex items-center gap-2">
                 <Languages className="h-4 w-4 text-muted-foreground" />
-                <Select value={selectedLanguage} onValueChange={handleLanguageChange} disabled={isLoading || isTranslating || originalTips.length === 0}>
+                <Select value={selectedLanguage} onValueChange={handleLanguageChange} disabled={isLoading || isTranslating}>
                     <SelectTrigger className="w-[150px] h-9 text-sm">
                         <SelectValue placeholder="Translate..." />
                     </SelectTrigger>
@@ -170,7 +176,7 @@ export function InsightsCard() {
                     </SelectContent>
                 </Select>
             </div>
-            <Button onClick={() => handleGenerateInsights()} disabled={isLoading || isTranslating}>
+            <Button onClick={() => handleGenerateInsights(selectedLanguage)} disabled={isLoading || isTranslating}>
                 <RotateCw className="mr-2 h-4 w-4" />
                 Generate New Insights
             </Button>
