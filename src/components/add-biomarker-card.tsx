@@ -24,6 +24,8 @@ export function AddBiomarkerCard() {
                 onSearchChange={() => {}}
                 searchPlaceholder=""
                 isCollapsible={false}
+                showCreateButton={true}
+                onCreateClick={() => setIsAdding(true)}
             />
         </div>
     );

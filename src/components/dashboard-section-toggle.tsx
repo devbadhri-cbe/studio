@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { ChevronDown, Search, PlusCircle } from 'lucide-react';
 import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
+import { Button } from './ui/button';
 
 interface DashboardSectionToggleProps {
   title: string;
@@ -44,6 +45,12 @@ export function DashboardSectionToggle({
         <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
       <div className="flex items-center justify-end gap-2 shrink-0">
+        {isOpen && showCreateButton && (
+            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onCreateClick?.(); }}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Create
+            </Button>
+        )}
         {isOpen && (
           <div className="relative flex-1 md:flex-none">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

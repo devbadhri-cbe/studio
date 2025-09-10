@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation';
 import { doctorDetails } from '@/lib/doctor-data';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { TitleBar } from '@/components/ui/title-bar';
-import { AddBiomarkerCard } from './add-biomarker-card';
+import { AddNewBiomarker } from './add-new-biomarker';
 
 export function PatientDashboard() {
   const { isClient, isDoctorLoggedIn } = useApp();
@@ -32,6 +32,7 @@ export function PatientDashboard() {
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [isAddingBiomarker, setIsAddingBiomarker] = React.useState(false);
   
   const handleDiseasePanelToggle = (isOpen: boolean) => {
     setIsDiseasePanelOpen(isOpen);
@@ -133,10 +134,12 @@ export function PatientDashboard() {
                         searchQuery={biomarkerSearchQuery}
                         onSearchChange={setBiomarkerSearchQuery}
                         searchPlaceholder="Search biomarkers..."
+                        showCreateButton={true}
+                        onCreateClick={() => setIsAddingBiomarker(true)}
                       />
                       <CollapsibleContent className="mt-4 space-y-4">
+                        {isAddingBiomarker && <AddNewBiomarker onCancel={() => setIsAddingBiomarker(false)} />}
                         <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
-                        <AddBiomarkerCard />
                       </CollapsibleContent>
                     </Collapsible>
                 </div>

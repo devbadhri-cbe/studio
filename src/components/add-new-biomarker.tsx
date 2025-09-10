@@ -27,7 +27,7 @@ export function AddNewBiomarker({ onCancel }: AddNewBiomarkerProps) {
     };
 
     return (
-        <Card className="border-primary border-2">
+        <Card className="border-primary border-2 mb-4">
             <CardHeader>
                 <CardTitle>Create New Biomarker</CardTitle>
                 <CardDescription>
