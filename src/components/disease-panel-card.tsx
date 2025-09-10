@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -27,6 +26,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { DatePicker } from './ui/date-picker';
 import { Input } from './ui/input';
 import { startOfDay } from 'date-fns';
+import { AddRecordDialog as AddHba1cRecordDialog } from './add-record-dialog';
+import { AddTriglyceridesRecordDialog } from './add-triglycerides-record-dialog';
+import { AddVitaminDRecordDialog } from './add-vitamin-d-record-dialog';
+import { AddWeightRecordDialog } from './add-weight-record-dialog';
+import { AddBloodPressureRecordDialog } from './add-blood-pressure-record-dialog';
+import { AddFastingBloodGlucoseRecordDialog } from './add-fasting-blood-glucose-record-dialog';
+import { AddThyroidRecordDialog } from './add-thyroid-record-dialog';
 
 const biomarkerFieldsConfig: { [key: string]: any } = {
   hba1c: { label: 'HbA1c (%)', type: 'number', step: '0.1', placeholder: 'e.g., 5.7', unit: '%' },
