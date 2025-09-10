@@ -50,7 +50,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
   const form = useForm({
     defaultValues: {
       name: '',
-      gender: undefined as 'male' | 'female' | 'other' | undefined,
+      gender: undefined as 'male' | 'female' | undefined,
       email: '',
       country: '',
       phone: '',
@@ -134,7 +134,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
           <form onSubmit={form.handleSubmit(onProfileSubmit)} className="space-y-6">
               
               <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled /></FormControl><FormMessage /></FormItem> )} />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <div className="flex border-2 border-red-500 p-2 gap-4">
                 <FormField
                     control={form.control}
                     name="dob"
