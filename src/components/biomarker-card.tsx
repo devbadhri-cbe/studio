@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { Button } from './ui/button';
 import { Settings, Edit, PlusCircle } from 'lucide-react';
 import {
   DropdownMenuItem,
@@ -79,10 +78,15 @@ export function BiomarkerCard<T extends Record>({
   const formattedRecords = sortedRecords.map(formatRecord);
 
   const Actions = !isReadOnly ? (
-    <ActionMenu tooltip="Settings" icon={<Settings className="h-4 w-4" />}>
+    <ActionMenu tooltip="Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()}>
       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
         {React.cloneElement(addRecordDialog as React.ReactElement, {
-          children: <div className="w-full">Add New Record</div>
+          children: (
+             <div className="flex items-center gap-2">
+                <PlusCircle className="h-4 w-4" />
+                <span>Add New Record</span>
+             </div>
+          )
         })}
       </DropdownMenuItem>
       <DropdownMenuItem onSelect={() => setIsEditMode((prev) => !prev)} disabled={sortedRecords.length === 0}>
