@@ -47,6 +47,8 @@ export function DiseasePanelCard({
   const handlePanelToggle = (checked: boolean) => {
     toggleDiseasePanel(panelKey);
   }
+  
+  const allAvailableBiomarkers = Object.keys(availableBiomarkerCards);
 
   return (
     <Card className={cn("w-full flex flex-col h-full shadow-md border-2", isPanelEnabledForPatient ? "border-primary/20" : "border-dashed", className)}>
@@ -75,7 +77,7 @@ export function DiseasePanelCard({
                     <DropdownMenuSeparator />
                     <ScrollArea className="h-[200px]">
                         <div className="p-1">
-                            {allPanelBiomarkers.map((key) => {
+                            {allAvailableBiomarkers.map((key) => {
                                 const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
                                 if (!biomarkerInfo) return null;
 
