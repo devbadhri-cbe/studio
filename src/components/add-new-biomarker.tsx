@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -11,6 +12,7 @@ import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormMessage } from './ui/form';
 import { toast } from '@/hooks/use-toast';
 import { createBiomarkerFiles } from '@/ai/flows/create-biomarker-flow';
+import { useApp } from '@/context/app-context';
 
 interface AddNewBiomarkerProps {
     onCancel: () => void;
@@ -24,6 +26,7 @@ const toCamelCase = (str: string) => {
 
 export function AddNewBiomarker({ onCancel }: AddNewBiomarkerProps) {
     const [isCreating, setIsCreating] = React.useState(false);
+    const { profile } = useApp();
 
     const form = useForm({
         defaultValues: {
@@ -39,6 +42,7 @@ export function AddNewBiomarker({ onCancel }: AddNewBiomarkerProps) {
                 name: data.name,
                 unit: data.unit,
                 key: toCamelCase(data.name),
+                patientId: profile.id,
             });
 
             if (result.success) {

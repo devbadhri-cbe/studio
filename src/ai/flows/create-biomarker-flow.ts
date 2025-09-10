@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to generate the necessary code for a new biomarker card.
@@ -9,6 +10,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { gemini15Flash } from '@genkit-ai/googleai';
 import { writeFile } from '@/lib/services/file-writer';
+import { getPatient, updatePatient } from '@/lib/firestore';
 
 //-======================================================================
 //- Input and Output Schemas
@@ -18,6 +20,7 @@ const CreateBiomarkerInputSchema = z.object({
     name: z.string().describe('The name of the new biomarker (e.g., "Uric Acid").'),
     unit: z.string().describe('The unit of measurement for the biomarker (e.g., "mg/dL").'),
     key: z.string().describe('A camelCase key for the biomarker (e.g., "uricAcid").'),
+    patientId: z.string().describe('The ID of the patient for whom this biomarker is being created.'),
 });
 export type CreateBiomarkerInput = z.infer<typeof CreateBiomarkerInputSchema>;
 
@@ -52,6 +55,14 @@ export async function createBiomarkerFiles(input: CreateBiomarkerInput): Promise
         console.error('Some files failed to write:', failedWrites);
         return { success: false };
     }
+    
+    // Add a pending reminder to the patient's record
+    const patient = await getPatient(input.patientId);
+    if (patient) {
+        const updatedPending = [...(patient.pendingBiomarkers || []), { name: input.name, key: input.key }];
+        await updatePatient(input.patientId, { pendingBiomarkers: updatedPending });
+    }
+
 
     return { success: true, files: result.files.map(f => ({ path: f.path })) };
 }
@@ -93,7 +104,7 @@ You MUST generate three separate files:
 -   Use 'zod' for basic form validation (e.g., required date, positive number).
 -   Call the appropriate 'add...Record' function from the 'useApp' context on submit.
 
-Generate the complete code for all three files. Ensure all paths are relative to the 'src/' directory.
+Generate the complete code for all three files. Ensure all paths are relative to the 'src/directory.
 `,
 });
 
