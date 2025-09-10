@@ -85,7 +85,7 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
   };
 
   const footerContent = (
-     <div className="flex items-center gap-2 border-2 border-blue-500 w-full">
+     <div className="flex items-center gap-2 w-full">
         <Languages className="h-4 w-4 text-muted-foreground" />
         <Select value={selectedLanguage} onValueChange={handleLanguageChange} disabled={isLoading || isTranslating || !!error || !summary}>
             <SelectTrigger className="h-9 text-sm w-full">
