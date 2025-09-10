@@ -26,6 +26,7 @@ export function DiabetesCard() {
   const enabledForPanel = profile.enabledBiomarkers?.[DIABETES_PANEL_KEY] || [];
 
   const sortedEnabledCards = enabledForPanel
+    .filter(key => availableBiomarkerCards[key as BiomarkerKey]) // Filter out keys that don't exist
     .map(key => ({ key, ...availableBiomarkerCards[key as BiomarkerKey] }))
     .sort((a, b) => a.label.localeCompare(b.label))
     .map(cardInfo => cardComponents[cardInfo.key as BiomarkerKey]);
