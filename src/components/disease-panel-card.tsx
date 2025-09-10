@@ -372,7 +372,6 @@ export function DiseasePanelCard({
             <ActionMenu
                 tooltip="Settings"
                 icon={<Settings className="h-4 w-4" />}
-                onOpenChange={(open) => open && e.stopPropagation()}
             >
                 <DropdownMenuItem onSelect={handleOpenAddRecordDialog} disabled={!isPanelEnabledForPatient || enabledForPanel.length === 0}>
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -442,3 +441,5 @@ export function DiseasePanelCard({
     </>
   );
 }
+
+    
