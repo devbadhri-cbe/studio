@@ -89,10 +89,10 @@ export function DatePicker({
     setMonth(newMonth);
     handleDateChange(day, newMonth, year);
   };
-
+  
   const handleYearChange = (newYear: string) => {
     setYear(newYear);
-    handleDateChange(day, month, year);
+    handleDateChange(day, month, newYear);
   };
   
   const handleOpenChange = (select: OpenSelect) => (isOpen: boolean) => {
