@@ -185,11 +185,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     let effectiveTheme = theme;
     if (theme === 'system') {
-      effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      effectiveTheme = systemTheme;
     }
-
+    
     root.classList.add(effectiveTheme);
     localStorage.setItem('theme', theme);
   }, [theme]);
