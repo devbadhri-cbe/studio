@@ -40,14 +40,15 @@ export function BloodPressureChart() {
     <div className="h-full w-full flex flex-col">
       <ResponsiveContainer width="100%" height="100%">
         {bloodPressureRecords && bloodPressureRecords.length > 0 ? (
-          <ComposedChart data={chartData} margin={{ top: 5, right: 20, bottom: 20, left: 0 }}>
+          <ComposedChart data={chartData} margin={{ top: 5, right: 0, bottom: 0, left: -20 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
               tickFormatter={formatShortDate}
-              tickLine={true}
-              axisLine={true}
+              tickLine={false}
+              axisLine={false}
               tick={{ fontSize: 10 }}
+              padding={{ left: 20, right: 20 }}
             />
             <YAxis
               yAxisId="left"
@@ -55,8 +56,8 @@ export function BloodPressureChart() {
               domain={[40, yAxisMax]}
               ticks={yAxisTicks}
               allowDecimals={false}
-              tickLine={true}
-              axisLine={true}
+              tickLine={false}
+              axisLine={false}
             >
                 <Label value="mmHg" position="top" offset={10} fontSize={10} />
             </YAxis>
@@ -65,8 +66,8 @@ export function BloodPressureChart() {
                 dataKey="heartRate" 
                 orientation="right" 
                 domain={[40, 120]} 
-                tickLine={true} 
-                axisLine={true} 
+                tickLine={false} 
+                axisLine={false}
             >
                 <Label value="bpm" position="top" offset={10} fontSize={10} />
             </YAxis>
