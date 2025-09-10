@@ -1,7 +1,7 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import { getFirestore, type Firestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -13,27 +13,61 @@ const firebaseConfig = {
   "messagingSenderId": "1023747133263"
 };
 
-function getFirebaseApp(): FirebaseApp {
-    if (getApps().length === 0) {
-        return initializeApp(firebaseConfig);
-    }
-    return getApp();
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
+let storage: FirebaseStorage;
+let persistenceEnabled = false;
+
+function initializeFirebase() {
+  if (getApps().length === 0) {
+    app = initializeApp(firebaseConfig);
+  } else {
+    app = getApp();
+  }
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
+
+  if (typeof window !== 'undefined' && !persistenceEnabled) {
+    enableIndexedDbPersistence(db)
+      .then(() => {
+        persistenceEnabled = true;
+        console.log("Firestore offline persistence enabled");
+      })
+      .catch((err) => {
+        if (err.code === 'failed-precondition') {
+          console.warn("Firestore persistence failed: Multiple tabs open?");
+        } else if (err.code === 'unimplemented') {
+          console.log("Firestore persistence not available in this browser.");
+        }
+      });
+  }
+}
+
+// Initialize on first import
+initializeFirebase();
+
+
+export function getFirebaseApp(): FirebaseApp {
+    if (!app) initializeFirebase();
+    return app;
 }
 
 export function getFirebaseAuth(): Auth {
-    return getAuth(getFirebaseApp());
+    if (!auth) initializeFirebase();
+    return auth;
 }
 
 export function getFirebaseDb(): Firestore {
-    return getFirestore(getFirebaseApp());
+    if (!db) initializeFirebase();
+    return db;
 }
 
 export function getFirebaseStorage(): FirebaseStorage {
-    return getStorage(getFirebaseApp());
+    if (!storage) initializeFirebase();
+    return storage;
 }
 
 // For direct use in client-side components that are guaranteed to run after initialization
-export const app = getFirebaseApp();
-export const auth = getFirebaseAuth();
-export const db = getFirebaseDb();
-export const storage = getFirebaseStorage();
+export { app, auth, db, storage };
