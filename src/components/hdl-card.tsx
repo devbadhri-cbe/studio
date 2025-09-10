@@ -25,7 +25,7 @@ export function HdlCard({ isReadOnly = false }: HdlCardProps) {
         if (record.value < 50) return { text: 'Low', variant: 'destructive' as const };
     }
     if (record.value >= 60) return { text: 'Optimal', variant: 'outline' as const };
-    return { text: 'Normal', variant: 'default' as const };
+    return { text: 'Normal', variant: 'outline' as const };
   }
   
   const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
