@@ -4,7 +4,7 @@
 import { doc, getDoc, setDoc, collection } from 'firebase/firestore';
 import { getFirebaseDb } from './firebase';
 
-const AI_CACHE_COLLECTION = 'ai_cache';
+const AI_CACHE_COLLECTION = 'AiCache';
 
 const db = getFirebaseDb();
 
@@ -32,6 +32,10 @@ function createCacheKey(input: any): string {
  * @returns The cached data or null if it's not in the cache.
  */
 export async function getFromCache<T>(flowName: string, input: any): Promise<T | null> {
+  if (!flowName) {
+    console.error("getFromCache called with no flowName.");
+    return null;
+  }
   try {
     const cacheKey = createCacheKey(input);
     const docRef = doc(db, AI_CACHE_COLLECTION, flowName, 'entries', cacheKey);
@@ -57,6 +61,10 @@ export async function getFromCache<T>(flowName: string, input: any): Promise<T |
  * @param output The output data received from the AI.
  */
 export async function storeInCache<T>(flowName: string, input: any, output: T): Promise<void> {
+   if (!flowName) {
+    console.error("storeInCache called with no flowName.");
+    return;
+  }
   try {
     const cacheKey = createCacheKey(input);
     const docRef = doc(db, AI_CACHE_COLLECTION, flowName, 'entries', cacheKey);
