@@ -19,6 +19,7 @@ interface DashboardSectionToggleProps {
   searchPlaceholder: string;
   showCreateButton?: boolean;
   onCreateClick?: () => void;
+  isCollapsible?: boolean;
 }
 
 export function DashboardSectionToggle({ 
@@ -30,19 +31,18 @@ export function DashboardSectionToggle({
   onSearchChange,
   searchPlaceholder,
   showCreateButton = false,
-  onCreateClick
+  onCreateClick,
+  isCollapsible = true,
 }: DashboardSectionToggleProps) {
 
   const content = (
       <div className="flex flex-col md:flex-row items-start md:items-center w-full gap-4">
-        <CollapsibleTrigger asChild>
-            <div className="flex-1 flex items-center gap-4 cursor-pointer">
-                <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{title}</h3>
-                    <p className="text-sm text-muted-foreground">{subtitle}</p>
-                </div>
+        <div className="flex-1 flex items-center gap-4 cursor-pointer">
+            <div className="flex-1">
+                <h3 className="font-semibold text-lg">{title}</h3>
+                <p className="text-sm text-muted-foreground">{subtitle}</p>
             </div>
-        </CollapsibleTrigger>
+        </div>
         
         <div className="flex items-center justify-end gap-2 w-full md:w-auto">
              {isOpen && (
@@ -57,12 +57,12 @@ export function DashboardSectionToggle({
                 />
               </div>
             )}
-             <CollapsibleTrigger asChild>
-                <ChevronDown className={cn("h-5 w-5 transition-transform cursor-pointer", isOpen && "rotate-180")} />
-            </CollapsibleTrigger>
+             {isCollapsible && <ChevronDown className={cn("h-5 w-5 transition-transform cursor-pointer", isOpen && "rotate-180")} />}
         </div>
       </div>
   );
+  
+  const Wrapper = isCollapsible ? CollapsibleTrigger : 'div';
 
   return (
     <div role="button" className="hover:bg-muted/50 transition-colors rounded-lg">
@@ -76,7 +76,9 @@ export function DashboardSectionToggle({
         chart={<></>}
         className="shadow-xl"
     >
-        {content}
+        <Wrapper className={cn("w-full", isCollapsible && "block")}>
+            {content}
+        </Wrapper>
     </BiomarkerCardTemplate>
     </div>
   );

@@ -2,10 +2,9 @@
 'use client';
 
 import * as React from 'react';
-import { Button } from './ui/button';
 import { PlusCircle } from 'lucide-react';
 import { AddNewBiomarker } from './add-new-biomarker';
-import { Card, CardContent } from './ui/card';
+import { DashboardSectionToggle } from './dashboard-section-toggle';
 
 export function AddBiomarkerCard() {
     const [isAdding, setIsAdding] = React.useState(false);
@@ -15,17 +14,17 @@ export function AddBiomarkerCard() {
     }
 
     return (
-        <Card className="border-2 border-dashed bg-muted/20 hover:bg-muted/50 transition-colors">
-            <CardContent className="p-0">
-                <Button
-                    variant="ghost"
-                    className="w-full h-full justify-center items-center py-8"
-                    onClick={() => setIsAdding(true)}
-                >
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Create New Biomarker
-                </Button>
-            </CardContent>
-        </Card>
+        <div role="button" onClick={() => setIsAdding(true)} className="w-full">
+            <DashboardSectionToggle
+                title="Create New Biomarker"
+                subtitle="Define a new biomarker to track in the dashboard"
+                icon={<PlusCircle className="h-6 w-6 text-primary" />}
+                isOpen={false}
+                searchQuery=""
+                onSearchChange={() => {}}
+                searchPlaceholder=""
+                isCollapsible={false}
+            />
+        </div>
     );
 }
