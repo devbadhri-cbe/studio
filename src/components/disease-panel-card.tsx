@@ -48,7 +48,19 @@ export function DiseasePanelCard({
     toggleDiseasePanel(panelKey);
   }
   
-  const allAvailableBiomarkers = Object.keys(availableBiomarkerCards);
+  const sortedBiomarkerKeys = React.useMemo(() => {
+    return Object.keys(availableBiomarkerCards).sort((a, b) => {
+      const aIsEnabled = enabledForPanel.includes(a);
+      const bIsEnabled = enabledForPanel.includes(b);
+      const aInfo = availableBiomarkerCards[a as BiomarkerKey];
+      const bInfo = availableBiomarkerCards[b as BiomarkerKey];
+      
+      if (aIsEnabled && !bIsEnabled) return -1;
+      if (!aIsEnabled && bIsEnabled) return 1;
+      
+      return aInfo.label.localeCompare(bInfo.label);
+    });
+  }, [enabledForPanel]);
 
   return (
     <Card className={cn("w-full flex flex-col h-full shadow-md border-2", isPanelEnabledForPatient ? "border-primary/20" : "border-dashed", className)}>
@@ -77,7 +89,7 @@ export function DiseasePanelCard({
                     <DropdownMenuSeparator />
                     <ScrollArea className="h-[200px]">
                         <div className="p-1">
-                            {allAvailableBiomarkers.map((key) => {
+                            {sortedBiomarkerKeys.map((key) => {
                                 const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
                                 if (!biomarkerInfo) return null;
 
