@@ -7,23 +7,59 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from './ui/form';
+import { toast } from '@/hooks/use-toast';
+import { createBiomarkerFiles } from '@/ai/flows/create-biomarker-flow';
 
 interface AddNewBiomarkerProps {
     onCancel: () => void;
 }
 
+const toCamelCase = (str: string) => {
+    return str.replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => {
+        return index === 0 ? word.toLowerCase() : word.toUpperCase();
+    }).replace(/\s+/g, '');
+};
+
 export function AddNewBiomarker({ onCancel }: AddNewBiomarkerProps) {
-    const [biomarkerName, setBiomarkerName] = React.useState('');
     const [isCreating, setIsCreating] = React.useState(false);
 
-    const handleCreate = () => {
-        // Placeholder for creation logic
+    const form = useForm({
+        defaultValues: {
+            name: '',
+            unit: '',
+        }
+    });
+
+    const handleCreate = async (data: { name: string, unit: string }) => {
         setIsCreating(true);
-        console.log("Creating biomarker:", biomarkerName);
-        setTimeout(() => {
+        try {
+            const result = await createBiomarkerFiles({
+                name: data.name,
+                unit: data.unit,
+                key: toCamelCase(data.name),
+            });
+
+            if (result.success) {
+                toast({
+                    title: 'Biomarker Files Created!',
+                    description: `The basic files for ${data.name} have been generated. Further integration is required.`,
+                });
+                onCancel();
+            } else {
+                throw new Error('Failed to create biomarker files.');
+            }
+        } catch (error) {
+            console.error("Failed to create biomarker:", error);
+            toast({
+                variant: 'destructive',
+                title: 'Creation Failed',
+                description: 'Could not generate the biomarker files. Please try again.',
+            });
+        } finally {
             setIsCreating(false);
-            onCancel(); // Close form after "creation"
-        }, 1500);
+        }
     };
 
     return (
@@ -31,27 +67,57 @@ export function AddNewBiomarker({ onCancel }: AddNewBiomarkerProps) {
             <CardHeader>
                 <CardTitle>Create New Biomarker</CardTitle>
                 <CardDescription>
-                    Define a new biomarker to track. This will generate the necessary card, chart, and dialogs.
+                    Define a new biomarker. The AI will generate the necessary card, chart, and dialog components.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="biomarkerName">Biomarker Name</Label>
-                    <Input
-                        id="biomarkerName"
-                        placeholder="e.g., Uric Acid"
-                        value={biomarkerName}
-                        onChange={(e) => setBiomarkerName(e.target.value)}
-                    />
-                </div>
-                {/* More fields for units, ranges, etc. would go here */}
-                <div className="flex justify-end gap-2">
-                    <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-                    <Button onClick={handleCreate} disabled={isCreating || !biomarkerName}>
-                        {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Create
-                    </Button>
-                </div>
+            <CardContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            rules={{ required: "Biomarker name is required." }}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <Label htmlFor="biomarkerName">Biomarker Name</Label>
+                                    <FormControl>
+                                        <Input
+                                            id="biomarkerName"
+                                            placeholder="e.g., Uric Acid"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                         <FormField
+                            control={form.control}
+                            name="unit"
+                            rules={{ required: "Unit is required." }}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <Label htmlFor="biomarkerUnit">Unit of Measurement</Label>
+                                    <FormControl>
+                                        <Input
+                                            id="biomarkerUnit"
+                                            placeholder="e.g., mg/dL"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <div className="flex justify-end gap-2">
+                            <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
+                            <Button type="submit" disabled={isCreating}>
+                                {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Create
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
             </CardContent>
         </Card>
     );
