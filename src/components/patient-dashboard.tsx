@@ -23,6 +23,7 @@ import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { TitleBar } from '@/components/ui/title-bar';
 import { AddNewBiomarker } from './add-new-biomarker';
 import { WeightRecordCard } from './weight-record-card';
+import { BloodPressureCard } from './blood-pressure-card';
 
 export function PatientDashboard() {
   const { isClient, isDoctorLoggedIn } = useApp();
@@ -97,10 +98,11 @@ export function PatientDashboard() {
             
             <Separator />
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <ProfileCard />
                 <MedicalHistoryCard />
                 <WeightRecordCard />
+                <BloodPressureCard />
             </div>
             
             <Separator />
