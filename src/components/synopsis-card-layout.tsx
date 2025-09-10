@@ -89,12 +89,12 @@ export function SynopsisCardLayout({
           </Alert>
         )}
 
-        <div className="flex justify-between items-center gap-2 pt-4">
-            {footer}
-          <Button variant="ghost" size="sm" className="text-muted-foreground ml-auto" onClick={onClose}>
-            <XCircle className="mr-2 h-4 w-4" />
-            Close
-          </Button>
+        <div className="flex justify-between items-center gap-4 pt-4">
+            <div className="flex-1">{footer}</div>
+            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onClose}>
+                <XCircle className="mr-2 h-4 w-4" />
+                Close
+            </Button>
         </div>
       </CardContent>
     </Card>
