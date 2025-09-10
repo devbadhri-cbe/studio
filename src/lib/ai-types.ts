@@ -166,3 +166,38 @@ export const MedicationSynopsisOutputSchema = z.object({
   synopsis: z.string().describe('The generated synopsis in the requested language.'),
 });
 export type MedicationSynopsisOutput = z.infer<typeof MedicationSynopsisOutputSchema>;
+
+//-================================================================----------
+//- Health Insights Flow Types
+//-================================================================----------
+
+const patientContextSchema = z.object({
+    age: z.number().optional().describe('The age of the patient in years.'),
+    gender: z.enum(['male', 'female', 'other']).optional().describe('The gender of the patient.'),
+    bmi: z.number().optional().describe('The Body Mass Index of the patient.'),
+    conditions: z.array(z.string()).optional().describe('A list of the patient\'s existing medical conditions.'),
+    medications: z.array(z.string()).optional().describe('A list of the patient\'s current medications.'),
+});
+
+const latestReadingsSchema = z.object({
+    hba1c: z.number().optional().describe('The latest HbA1c reading (%).'),
+    fastingBloodGlucose: z.number().optional().describe('The latest fasting blood glucose reading in mg/dL.'),
+    vitaminD: z.number().optional().describe('The latest Vitamin D (25-OH) reading in ng/mL.'),
+    weight: z.number().optional().describe('The latest weight reading in kg.'),
+    bloodPressure: z.object({
+        systolic: z.number(),
+        diastolic: z.number(),
+    }).optional().describe('The latest blood pressure reading.'),
+});
+
+export const HealthInsightsInputSchema = z.object({
+    language: z.string().optional().default('English').describe('The target language for the insights (e.g., "Spanish", "French").'),
+    patient: patientContextSchema,
+    latestReadings: latestReadingsSchema,
+});
+export type HealthInsightsInput = z.infer<typeof HealthInsightsInputSchema>;
+
+export const HealthInsightsOutputSchema = z.object({
+    tips: z.array(z.string()).describe('An array of 3-5 personalized, actionable health tips.'),
+});
+export type HealthInsightsOutput = z.infer<typeof HealthInsightsOutputSchema>;
