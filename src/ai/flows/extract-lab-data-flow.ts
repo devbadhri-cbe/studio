@@ -28,7 +28,6 @@ You MUST also extract the full name of the patient from the report.
 - Patient Name
 - HbA1c (%)
 - Fasting Blood Glucose (mg/dL)
-- Vitamin D (25-OH) (value and units)
 - Thyroid Panel (TSH, T3, T4)
 - Blood Pressure (Systolic, Diastolic, Heart Rate)
 - Hemoglobin (g/dL)
@@ -71,4 +70,3 @@ const extractLabDataFlow = ai.defineFlow(
     throw new Error('Failed to extract lab data after multiple retries.');
   }
 );
-

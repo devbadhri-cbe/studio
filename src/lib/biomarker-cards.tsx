@@ -6,7 +6,6 @@ import { HemoglobinCard } from '@/components/hemoglobin-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
 import { ThyroidCard } from '@/components/thyroid-card';
 import { ThyroxineCard } from '@/components/thyroxine-card';
-import { VitaminDCard } from '@/components/vitamin-d-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { AddRecordDialog } from '@/components/add-record-dialog';
 import { AddFastingBloodGlucoseRecordDialog } from '@/components/add-fasting-blood-glucose-record-dialog';
@@ -14,7 +13,6 @@ import { AddHemoglobinRecordDialog } from '@/components/add-hemoglobin-record-di
 import { AddBloodPressureRecordDialog } from '@/components/add-blood-pressure-record-dialog';
 import { AddThyroidRecordDialog } from '@/components/add-thyroid-record-dialog';
 import { AddThyroxineRecordDialog } from '@/components/add-thyroxine-record-dialog';
-import { AddVitaminDRecordDialog } from '@/components/add-vitamin-d-record-dialog';
 import { AddWeightRecordDialog } from '@/components/add-weight-record-dialog';
 import { DiabetesCard } from '@/components/diabetes-card';
 import { HypertensionCard } from '@/components/hypertension-card';
@@ -72,12 +70,6 @@ export const availableBiomarkerCards = {
     component: <ThyroxineCard />,
     addRecordLabel: 'New Thyroxine (T4) Record',
     addRecordDialog: <AddThyroxineRecordDialog />,
-  },
-  vitaminD: {
-    label: 'Vitamin D',
-    component: <VitaminDCard />,
-    addRecordLabel: 'New Vitamin D Record',
-    addRecordDialog: <AddVitaminDRecordDialog />,
   },
   weight: {
     label: 'Weight & BMI',

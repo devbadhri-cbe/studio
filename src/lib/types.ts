@@ -84,13 +84,6 @@ export interface FastingBloodGlucoseRecord {
   medication?: string;
 }
 
-export interface VitaminDRecord {
-  id: string;
-  date: Date | string;
-  value: number; // in ng/mL
-  medication?: string;
-}
-
 export interface ThyroidRecord {
   id: string;
   date: Date | string;
@@ -185,10 +178,6 @@ export interface Patient {
       value: number;
       date: string;
   } | null;
-  lastVitaminD?: {
-    value: number;
-    date: string;
-  } | null;
   lastThyroid?: {
     tsh: number;
     date: string;
@@ -211,7 +200,6 @@ export interface Patient {
   // Add full record history to the patient object
   hba1cRecords: Hba1cRecord[];
   fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
-  vitaminDRecords: VitaminDRecord[];
   thyroidRecords: ThyroidRecord[];
   thyroxineRecords: ThyroxineRecord[];
   serumCreatinineRecords: SerumCreatinineRecord[];
@@ -240,7 +228,6 @@ export type BiomarkerKey =
   | 'bloodPressure' 
   | 'thyroid'
   | 'thyroxine'
-  | 'vitaminD' 
   | 'weight' 
   | 'totalCholesterol' 
   | 'ldl' 

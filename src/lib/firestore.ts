@@ -56,7 +56,6 @@ const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
     };
 
     summary.lastHba1c = getLatestRecord(patientData.hba1cRecords) || null;
-    summary.lastVitaminD = getLatestRecord(patientData.vitaminDRecords) || null;
     summary.lastThyroid = getLatestRecord(patientData.thyroidRecords) || null;
     summary.lastBloodPressure = getLatestRecord(patientData.bloodPressureRecords) || null;
     summary.lastHemoglobin = getLatestRecord(patientData.hemoglobinRecords) || null;
@@ -118,7 +117,6 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         lastLogin: null,
         hba1cRecords: [],
         fastingBloodGlucoseRecords: [],
-        vitaminDRecords: [],
         thyroidRecords: [],
         thyroxineRecords: [],
         serumCreatinineRecords: [],
@@ -136,7 +134,6 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         // Initialize summary fields
         bmi: null,
         lastHba1c: null,
-        lastVitaminD: null,
         lastThyroid: null,
         lastBloodPressure: null,
         lastHemoglobin: null,

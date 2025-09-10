@@ -48,14 +48,6 @@ export const LabDataExtractionOutputSchema = z.object({
     })
     .optional()
     .describe('Fasting Blood Glucose test result.'),
-  vitaminD: z
-    .object({
-      date: z.string().describe('The date of the test in YYYY-MM-DD format.'),
-      value: z.number().describe('The Vitamin D (25-OH) value.'),
-      units: z.string().describe('The units for the Vitamin D value (e.g., ng/mL or nmol/L).'),
-    })
-    .optional()
-    .describe('Vitamin D test result.'),
   thyroid: z
     .object({
       date: z.string().describe('The date of the test in YYYY-MM-DD format.'),
@@ -183,7 +175,6 @@ const patientContextSchema = z.object({
 const latestReadingsSchema = z.object({
     hba1c: z.number().optional().describe('The latest HbA1c reading (%).'),
     fastingBloodGlucose: z.number().optional().describe('The latest fasting blood glucose reading in mg/dL.'),
-    vitaminD: z.number().optional().describe('The latest Vitamin D (25-OH) reading in ng/mL.'),
     weight: z.number().optional().describe('The latest weight reading in kg.'),
     bloodPressure: z.object({
         systolic: z.number(),

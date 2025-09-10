@@ -191,7 +191,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 text-center text-xs p-1 border rounded-md">
+            <div className="grid grid-cols-2 gap-2 text-center text-xs p-1 border rounded-md">
                 <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
                     <Droplet className="h-4 w-4 mb-1 text-primary" />
                     <span className="font-semibold">{patient.lastFastingBloodGlucose ? patient.lastFastingBloodGlucose.value.toFixed(0) : 'N/A'}</span>
@@ -201,11 +201,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                     <Zap className="h-4 w-4 mb-1 text-primary" />
                     <span className="font-semibold">{patient.lastBloodPressure ? `${patient.lastBloodPressure.systolic}/${patient.lastBloodPressure.diastolic}` : 'N/A'}</span>
                     <span className="text-muted-foreground text-[10px]">BP</span>
-                </div>
-                <div className="flex flex-col items-center justify-center p-1 rounded-md bg-muted/50">
-                    <Sun className="h-4 w-4 mb-1 text-primary" />
-                    <span className="font-semibold">{patient.lastVitaminD ? `${patient.lastVitaminD.value}` : 'N/A'}</span>
-                    <span className="text-muted-foreground text-[10px]">Vit D</span>
                 </div>
             </div>
         </CardContent>

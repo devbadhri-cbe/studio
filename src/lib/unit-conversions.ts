@@ -1,6 +1,5 @@
 
 // Conversion Factors
-const VITAMIN_D_CONVERSION_FACTOR = 2.496;
 const GLUCOSE_CONVERSION_FACTOR = 18.018;
 const HEMOGLOBIN_CONVERSION_FACTOR = 10;
 const LDL_HDL_TOTAL_CHOLESTEROL_CONVERSION_FACTOR = 38.67;
@@ -49,24 +48,6 @@ export function toMgDl(value: number, type: LipidType): number {
     default:
       return value;
   }
-}
-
-/**
- * Converts Vitamin D values from ng/mL to nmol/L.
- * @param value The value in ng/mL.
- * @returns The value in nmol/L.
- */
-export function toNmolL(value: number): number {
-    return value * VITAMIN_D_CONVERSION_FACTOR;
-}
-
-/**
- * Converts Vitamin D values from nmol/L to ng/mL.
- * @param value The value in nmol/L.
- * @returns The value in ng/mL.
- */
-export function toNgDl(value: number): number {
-    return value / VITAMIN_D_CONVERSION_FACTOR;
 }
 
 /**

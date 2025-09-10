@@ -40,7 +40,6 @@ Analyze the following patient data. Generate 3-5 concise, practical, and encoura
 **Latest Lab Readings:**
 - HbA1c: {{latestReadings.hba1c}}%
 - Fasting Glucose: {{latestReadings.fastingBloodGlucose}} mg/dL
-- Vitamin D: {{latestReadings.vitaminD}} ng/mL
 - Weight: {{latestReadings.weight}} kg
 - Blood Pressure: {{latestReadings.bloodPressure.systolic}}/{{latestReadings.bloodPressure.diastolic}} mmHg
 

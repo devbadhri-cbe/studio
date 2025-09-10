@@ -3,13 +3,13 @@
 'use client';
 
 import * as React from 'react';
-import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, BiomarkerKey, DiseasePanelKey, FoodInstruction, ThyroxineRecord, SerumCreatinineRecord, UricAcidRecord } from '@/lib/types';
+import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, BiomarkerKey, DiseasePanelKey, FoodInstruction, ThyroxineRecord, SerumCreatinineRecord, UricAcidRecord } from '@/lib/types';
 import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
-import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
+import { toMmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
 import { availableDiseasePanels } from '@/lib/biomarker-cards';
 import { getHealthInsights } from '@/ai/flows/health-insights-flow';
@@ -17,7 +17,7 @@ import { LabDataExtractionOutput } from '@/lib/ai-types';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
 
-type DashboardView = 'vitaminD' | 'thyroid' | 'hypertension' | 'report' | 'none';
+type DashboardView = 'thyroid' | 'hypertension' | 'report' | 'none';
 type Theme = 'dark' | 'light' | 'system';
 
 export type BatchRecords = Partial<LabDataExtractionOutput>;
@@ -69,9 +69,6 @@ interface AppContextType {
   fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
   addFastingBloodGlucoseRecord: (record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => void;
   removeFastingBloodGlucoseRecord: (id: string) => void;
-  vitaminDRecords: VitaminDRecord[];
-  addVitaminDRecord: (record: Omit<VitaminDRecord, 'id' | 'medication'>) => void;
-  removeVitaminDRecord: (id: string) => void;
   thyroidRecords: ThyroidRecord[];
   addThyroidRecord: (record: Omit<ThyroidRecord, 'id' | 'medication'>) => void;
   removeThyroidRecord: (id: string) => void;
@@ -123,11 +120,9 @@ interface AppContextType {
   setPatientData: (patient: Patient, isDoctorView?: boolean) => void;
   biomarkerUnit: BiomarkerUnitSystem;
   setBiomarkerUnit: (unit: BiomarkerUnitSystem) => void;
-  getDisplayVitaminDValue: (value: number) => number;
   getDisplayGlucoseValue: (value: number) => number;
   getDisplayHemoglobinValue: (value: number) => number;
   getDisplayLipidValue: (value: number, type: 'total' | 'ldl' | 'hdl' | 'triglycerides') => number;
-  getDbVitaminDValue: (value: number) => number;
   getDbGlucoseValue: (value: number) => number;
   getDbHemoglobinValue: (value: number) => number;
   theme: Theme;
@@ -149,7 +144,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [profile, setProfileState] = useState<UserProfile>(initialProfile);
   const [hba1cRecords, setHba1cRecordsState] = useState<Hba1cRecord[]>([]);
   const [fastingBloodGlucoseRecords, setFastingBloodGlucoseRecordsState] = useState<FastingBloodGlucoseRecord[]>([]);
-  const [vitaminDRecords, setVitaminDRecordsState] = useState<VitaminDRecord[]>([]);
   const [thyroidRecords, setThyroidRecordsState] = useState<ThyroidRecord[]>([]);
   const [thyroxineRecords, setThyroxineRecordsState] = useState<ThyroxineRecord[]>([]);
   const [serumCreatinineRecords, setSerumCreatinineRecordsState] = useState<SerumCreatinineRecord[]>([]);
@@ -220,13 +214,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBiomarkerUnitState(unit);
   }, []);
 
-  const getDisplayVitaminDValue = useCallback((value: number): number => {
-      if (biomarkerUnit === 'si') {
-          return parseFloat(toNmolL(value).toFixed(2));
-      }
-      return Math.round(value);
-  }, [biomarkerUnit]);
-
   const getDisplayGlucoseValue = useCallback((value: number): number => {
       if (biomarkerUnit === 'si') {
           return parseFloat(toMmolL(value, 'glucose').toFixed(1));
@@ -248,13 +235,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return Math.round(value);
   }, [biomarkerUnit]);
 
-  const getDbVitaminDValue = useCallback((value: number): number => {
-    if (biomarkerUnit === 'si') {
-        return toNgDl(value);
-    }
-    return value;
-  }, [biomarkerUnit]);
-
   const getDbGlucoseValue = useCallback((value: number): number => {
       if (biomarkerUnit === 'si') {
         return toMgDl(value, 'glucose');
@@ -274,11 +254,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return {
         hba1c: getLatest(hba1cRecords)?.value,
         fastingBloodGlucose: getLatest(fastingBloodGlucoseRecords) ? getDisplayGlucoseValue(getLatest(fastingBloodGlucoseRecords)!.value) : undefined,
-        vitaminD: getLatest(vitaminDRecords) ? getDisplayVitaminDValue(getLatest(vitaminDRecords)!.value) : undefined,
         weight: getLatest(weightRecords)?.value,
         bloodPressure: getLatest(bloodPressureRecords) ? { systolic: getLatest(bloodPressureRecords)!.systolic, diastolic: getLatest(bloodPressureRecords)!.diastolic } : undefined,
     }
-  }, [hba1cRecords, fastingBloodGlucoseRecords, vitaminDRecords, weightRecords, bloodPressureRecords, getDisplayGlucoseValue, getDisplayVitaminDValue]);
+  }, [hba1cRecords, fastingBloodGlucoseRecords, weightRecords, bloodPressureRecords, getDisplayGlucoseValue]);
 
 
   const regenerateInsights = useCallback(async (languageCode: string) => {
@@ -362,7 +341,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProfileState(patientProfile);
     setHba1cRecordsState(patient.hba1cRecords || []);
     setFastingBloodGlucoseRecordsState(patient.fastingBloodGlucoseRecords || []);
-    setVitaminDRecordsState(patient.vitaminDRecords || []);
     setThyroidRecordsState(patient.thyroidRecords || []);
     setThyroxineRecordsState(patient.thyroxineRecords || []);
     setSerumCreatinineRecordsState(patient.serumCreatinineRecords || []);
@@ -394,7 +372,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...profile,
         hba1cRecords,
         fastingBloodGlucoseRecords,
-        vitaminDRecords,
         thyroidRecords,
         thyroxineRecords,
         serumCreatinineRecords,
@@ -424,7 +401,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSaving(false);
     }
-  }, [profile, hasUnsavedChanges, hba1cRecords, fastingBloodGlucoseRecords, vitaminDRecords, thyroidRecords, thyroxineRecords, serumCreatinineRecords, uricAcidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords, regenerateInsights, selectedInsightsLanguage]);
+  }, [profile, hasUnsavedChanges, hba1cRecords, fastingBloodGlucoseRecords, thyroidRecords, thyroxineRecords, serumCreatinineRecords, uricAcidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords, regenerateInsights, selectedInsightsLanguage]);
   
   const getMedicationForRecord = useCallback((medication: Medication[]): string => {
     if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
@@ -516,17 +493,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const removeFastingBloodGlucoseRecord = useCallback((id: string) => {
     setFastingBloodGlucoseRecordsState(prev => prev.filter(r => r.id !== id));
-    setHasUnsavedChanges(true);
-  }, []);
-
-  const addVitaminDRecord = useCallback((record: Omit<VitaminDRecord, 'id' | 'medication'>) => {
-    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    setVitaminDRecordsState(prev => [...prev, newRecord]);
-    setHasUnsavedChanges(true);
-  }, [profile.medication, getMedicationForRecord]);
-
-  const removeVitaminDRecord = useCallback((id: string) => {
-    setVitaminDRecordsState(prev => prev.filter(r => r.id !== id));
     setHasUnsavedChanges(true);
   }, []);
 
@@ -730,7 +696,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addBatchRecords = useCallback(async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
-    const date = batch.hba1c?.date || batch.fastingBloodGlucose?.date || batch.vitaminD?.date || batch.thyroid?.date || batch.bloodPressure?.date || batch.hemoglobin?.date || batch.lipidPanel?.date;
+    const date = batch.hba1c?.date || batch.fastingBloodGlucose?.date || batch.thyroid?.date || batch.bloodPressure?.date || batch.hemoglobin?.date || batch.lipidPanel?.date;
 
     const result: AddBatchRecordsResult = { added: [], duplicates: [] };
 
@@ -763,22 +729,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 result.added.push('Fasting Blood Glucose');
                 return [...prev, { ...batch.fastingBloodGlucose, id: `fbg-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
             } else { result.duplicates.push('Fasting Blood Glucose'); }
-        }
-        return prev;
-    });
-
-    setVitaminDRecordsState(prev => {
-        if (batch.vitaminD && batch.vitaminD.value) {
-          let vitDRecordForDb = { ...batch.vitaminD };
-          if(batch.vitaminD.units && batch.vitaminD.units.toLowerCase().includes('nmol')) {
-            vitDRecordForDb.value = toNgDl(batch.vitaminD.value);
-          }
-          
-          const dateExists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === newRecordDate.getTime() && r.value === vitDRecordForDb.value);
-          if (!dateExists) {
-            result.added.push('Vitamin D');
-            return [...prev, { ...vitDRecordForDb, value: vitDRecordForDb.value, id: `vitd-${Date.now()}`, medication: newMedication, date: newRecordDate.toISOString() }];
-          } else { result.duplicates.push('Vitamin D'); }
         }
         return prev;
     });
@@ -924,9 +874,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     fastingBloodGlucoseRecords,
     addFastingBloodGlucoseRecord,
     removeFastingBloodGlucoseRecord,
-    vitaminDRecords,
-    addVitaminDRecord,
-    removeVitaminDRecord,
     thyroidRecords,
     addThyroidRecord,
     removeThyroidRecord,
@@ -978,11 +925,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPatientData,
     biomarkerUnit,
     setBiomarkerUnit,
-    getDisplayVitaminDValue,
     getDisplayGlucoseValue,
     getDisplayHemoglobinValue,
     getDisplayLipidValue,
-    getDbVitaminDValue,
     getDbGlucoseValue,
     getDbHemoglobinValue,
     theme,
