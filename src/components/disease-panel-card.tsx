@@ -245,7 +245,7 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <ScrollArea className="h-96 w-full">
-                            <div className="space-y-4 py-4 pr-6">
+                            <div className="space-y-4 py-4 px-6">
                                 <FormField
                                     control={form.control}
                                     name="date"
@@ -398,3 +398,4 @@ export function DiseasePanelCard({
     </>
   );
 }
+
