@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, PlusCircle } from 'lucide-react';
 import { availableBiomarkerCards, type BiomarkerKey, DiseasePanelKey } from '@/lib/biomarker-cards';
 import { useApp } from '@/context/app-context';
 import { cn } from '@/lib/utils';
@@ -69,6 +69,13 @@ export function DiseasePanelCard({
     return child;
   });
 
+  const enabledBiomarkerActions = React.useMemo(() => {
+    return allPanelBiomarkers
+        .filter(key => enabledForPanel.includes(key))
+        .map(key => availableBiomarkerCards[key as BiomarkerKey])
+        .filter(Boolean); // Ensure no undefined entries
+  }, [enabledForPanel, allPanelBiomarkers]);
+
   return (
     <Card className={cn("w-full flex flex-col h-full shadow-md border-2", isPanelEnabledForPatient ? "border-primary/20" : "border-dashed", className)}>
       <CardHeader className="flex-row items-center justify-between">
@@ -76,8 +83,8 @@ export function DiseasePanelCard({
           {icon}
           <CardTitle>{title}</CardTitle>
         </div>
-        {isDoctorLoggedIn && (
-            <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+            {isDoctorLoggedIn && (
                 <div className="flex items-center space-x-2">
                     <Checkbox
                         id={`enable-panel-${panelKey}`}
@@ -85,6 +92,26 @@ export function DiseasePanelCard({
                         onCheckedChange={handlePanelToggle}
                     />
                 </div>
+            )}
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient || enabledForPanel.length === 0}>
+                        <PlusCircle className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64" align="end">
+                    <DropdownMenuLabel>Add New Record</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {enabledBiomarkerActions.map(action => (
+                        <DropdownMenuItem key={action.label} onSelect={(e) => e.preventDefault()}>
+                            {React.cloneElement(action.addRecordDialog as React.ReactElement, {
+                                children: <div className="w-full">{action.addRecordLabel}</div>
+                            })}
+                        </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
+            {isDoctorLoggedIn && (
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient}>
@@ -119,8 +146,8 @@ export function DiseasePanelCard({
                     </ScrollArea>
                 </DropdownMenuContent>
                 </DropdownMenu>
-            </div>
-        )}
+            )}
+        </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-4 pt-0">
         {isPanelEnabledForPatient ? (
