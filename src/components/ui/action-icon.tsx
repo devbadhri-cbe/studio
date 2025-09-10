@@ -17,7 +17,7 @@ export const ActionIcon = React.forwardRef<HTMLButtonElement, ActionIconProps>(
       <Tooltip>
         <TooltipTrigger asChild>
           <Button ref={ref} size="icon" variant="ghost" className={cn("h-8 w-8", className)} {...props}>
-            {icon}
+            <span className="text-shadow-3d">{icon}</span>
             <span className="sr-only">{tooltip}</span>
           </Button>
         </TooltipTrigger>
