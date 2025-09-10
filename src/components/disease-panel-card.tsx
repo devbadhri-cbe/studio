@@ -66,7 +66,6 @@ interface AddPanelRecordDialogProps {
     enabledBiomarkers: (BiomarkerKey | string)[];
     panelKey: DiseasePanelKey;
     form: ReturnType<typeof useForm>;
-    defaultFormValues: any;
 }
 
 function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey, form }: AddPanelRecordDialogProps) {
@@ -235,7 +234,7 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey,
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <ScrollArea className="h-96 w-full">
-                            <div className="space-y-4 py-4 px-6">
+                            <div className="space-y-4 py-4 px-2 md:px-6">
                                 <FormField
                                     control={form.control}
                                     name="date"
@@ -287,23 +286,21 @@ export function DiseasePanelCard({
   const [isAddRecordOpen, setIsAddRecordOpen] = React.useState(false);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  const defaultFormValues = React.useMemo(() => {
-      const defaults: { [key: string]: any } = { date: new Date() };
-      Object.keys(biomarkerFieldsConfig).forEach(key => {
-          const config = biomarkerFieldsConfig[key as keyof typeof biomarkerFieldsConfig];
-          if (config.fields) {
-              Object.keys(config.fields).forEach(subKey => {
-                  defaults[subKey] = '';
-              });
-          } else {
-              defaults[key] = '';
-          }
-      });
-      return defaults;
-  }, []);
-
   const form = useForm({
-      defaultValues: defaultFormValues,
+      defaultValues: React.useMemo(() => {
+        const defaults: { [key: string]: any } = { date: new Date() };
+        Object.keys(biomarkerFieldsConfig).forEach(key => {
+            const config = biomarkerFieldsConfig[key as keyof typeof biomarkerFieldsConfig];
+            if (config.fields) {
+                Object.keys(config.fields).forEach(subKey => {
+                    defaults[subKey] = '';
+                });
+            } else {
+                defaults[key] = '';
+            }
+        });
+        return defaults;
+      }, []),
   });
 
   const enabledForPanel = profile.enabledBiomarkers?.[panelKey] || [];
@@ -314,7 +311,8 @@ export function DiseasePanelCard({
   }
   
   const handleOpenAddRecordDialog = () => {
-    form.reset(defaultFormValues);
+    // Reset form to default values before opening
+    form.reset();
     setIsAddRecordOpen(true);
   }
 
@@ -357,7 +355,7 @@ export function DiseasePanelCard({
                     <DropdownMenuLabel>Manage Biomarkers</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <ScrollArea className="h-[200px]">
-                        <div className="p-1">
+                        <div className="p-1" onClick={(e) => e.stopPropagation()}>
                             {allPanelBiomarkers.map((key) => {
                                 const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
                                 if (!biomarkerInfo) return null;
@@ -408,14 +406,7 @@ export function DiseasePanelCard({
         enabledBiomarkers={enabledForPanel}
         panelKey={panelKey}
         form={form}
-        defaultFormValues={defaultFormValues}
     />
     </>
   );
 }
-
-
-
-
-
-    
