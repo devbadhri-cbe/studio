@@ -412,7 +412,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     // Auto-fetch insights on patient load
     regenerateInsights('en');
-  }, [regenerateInsights]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const saveChanges = useCallback(async () => {
     if (!profile.id || !hasUnsavedChanges) return;
