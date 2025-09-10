@@ -405,7 +405,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLdlRecordsState(patient.ldlRecords || []);
     setHdlRecordsState(patient.hdlRecords || []);
     setTriglyceridesRecordsState(patient.triglyceridesRecords || []);
-    setTipsState([]); 
+    
+    // Reset all insight-related state when patient changes
+    setTipsState([]);
+    setOriginalTips([]);
+    setTranslatedTips(null);
+    setInsightsError(null);
+    setIsGeneratingInsights(false);
+    setIsTranslatingInsights(false);
+    setSelectedInsightsLanguage('en');
+
     setDashboardViewState('report');
     setBiomarkerUnitState(countries.find(c => c.code === patient.country)?.biomarkerUnit || 'conventional');
     setHasUnsavedChanges(false);
