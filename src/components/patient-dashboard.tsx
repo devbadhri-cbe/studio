@@ -25,6 +25,7 @@ import { TitleBar } from '@/components/ui/title-bar';
 import { AddNewBiomarker } from './add-new-biomarker';
 import { WeightRecordCard } from './weight-record-card';
 import { BloodPressureCard } from './blood-pressure-card';
+import { DoctorReviewCard } from './doctor-review-card';
 
 export function PatientDashboard() {
   const { isClient, isDoctorLoggedIn } = useApp();
@@ -99,6 +100,8 @@ export function PatientDashboard() {
             
             <Separator />
             
+            {isDoctorLoggedIn && <DoctorReviewCard />}
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <ProfileCard />
                 <MedicalHistoryCard />

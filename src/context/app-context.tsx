@@ -135,7 +135,7 @@ interface AppContextType {
   isSaving: boolean;
   isDoctorLoggedIn: boolean;
   approveMedicalCondition: (conditionId: string) => void;
-  dismissSuggestion: (suggestionId: string, isPermanent: boolean) => void;
+  dismissSuggestion: (conditionId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -846,16 +846,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     toast({ title: 'Condition Approved', description: 'The medical condition has been marked as verified.' });
   }, []);
 
-  const dismissSuggestion = useCallback((suggestionId: string, isPermanent: boolean = true) => {
+  const dismissSuggestion = useCallback((conditionId: string) => {
     setProfileState(prev => ({
       ...prev,
       presentMedicalConditions: prev.presentMedicalConditions.map(c => 
-        c.id === suggestionId ? { ...c, status: isPermanent ? 'verified' : 'needs_revision' } : c
+        c.id === conditionId ? { ...c, status: 'needs_revision' } : c
       ),
-      dashboardSuggestions: prev.dashboardSuggestions?.filter(s => s.id !== suggestionId)
     }));
     setHasUnsavedChanges(true);
-    toast({ title: 'Suggestion Handled', description: 'The suggestion has been updated.' });
+    toast({ title: 'Condition Dismissed', description: 'The condition has been marked for patient revision.' });
   }, []);
 
   const value: AppContextType = {

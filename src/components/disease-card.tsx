@@ -107,11 +107,11 @@ export function DiseaseCard({ condition, onRevise, isEditMode, onRemove, onShowS
             <div className="mt-2 w-full">
               <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive text-xs p-2">
                 <AlertTriangle className="h-4 w-4 !text-destructive" />
-                <AlertDescription>
-                  Your doctor has requested a revision. Please update the condition name.
+                <AlertDescription className="flex items-center justify-between">
+                  Your doctor has requested a revision.
                   <Button size="xs" className="ml-2" onClick={() => onRevise(condition)}>
                     <Edit className="mr-1 h-3 w-3" />
-                    Revise & Resubmit
+                    Revise
                   </Button>
                 </AlertDescription>
               </Alert>
