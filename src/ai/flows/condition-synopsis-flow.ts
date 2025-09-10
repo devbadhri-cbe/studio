@@ -7,10 +7,18 @@
  */
 import { ai } from '@/ai/genkit';
 import { ConditionSynopsisInputSchema, ConditionSynopsisOutputSchema, type ConditionSynopsisInput, type ConditionSynopsisOutput } from '@/lib/ai-types';
+import { getFromCache, storeInCache } from '@/lib/ai-cache';
 import { gemini15Flash } from '@genkit-ai/googleai';
 
+const FLOW_NAME = 'getConditionSynopsis';
+
 export async function getConditionSynopsis(input: ConditionSynopsisInput): Promise<ConditionSynopsisOutput> {
-  return getConditionSynopsisFlow(input);
+  const cached = await getFromCache<ConditionSynopsisOutput>(FLOW_NAME, input);
+  if (cached) return cached;
+
+  const result = await getConditionSynopsisFlow(input);
+  await storeInCache(FLOW_NAME, input, result);
+  return result;
 }
 
 const prompt = ai.definePrompt({
