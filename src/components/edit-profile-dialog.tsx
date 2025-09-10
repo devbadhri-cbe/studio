@@ -134,7 +134,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
           <form onSubmit={form.handleSubmit(onProfileSubmit)} className="space-y-6">
               
               <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled /></FormControl><FormMessage /></FormItem> )} />
-              <div className="flex border-2 border-red-500 gap-4">
+              <div className="grid grid-cols-2 border-2 border-red-500 gap-4">
                 <div className="border-2 border-blue-500">
                     <FormField
                         control={form.control}
