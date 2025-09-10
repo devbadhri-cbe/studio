@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -26,6 +27,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '
 import { DatePicker } from './ui/date-picker';
 import { Input } from './ui/input';
 import { startOfDay } from 'date-fns';
+import { ActionMenu } from './ui/action-menu';
 
 const biomarkerFieldsConfig: { [key: string]: any } = {
   hba1c: { label: 'HbA1c (%)', type: 'number', step: '0.1', placeholder: 'e.g., 5.7', unit: '%' },
@@ -348,19 +350,18 @@ export function DiseasePanelCard({
                     />
                 </div>
             )}
-            <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient || enabledForPanel.length === 0} onClick={handleOpenAddRecordDialog}>
-                <PlusCircle className="h-4 w-4" />
-            </Button>
+            
             {isDoctorLoggedIn && (
-                <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient}>
-                        <Settings className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64" align="end">
-                    <DropdownMenuLabel>Manage Biomarkers</DropdownMenuLabel>
+                <ActionMenu
+                    tooltip="Settings"
+                    icon={<Settings className="h-4 w-4" />}
+                >
+                    <DropdownMenuItem onSelect={handleOpenAddRecordDialog} disabled={!isPanelEnabledForPatient || enabledForPanel.length === 0}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add Panel Records
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <DropdownMenuLabel>Manage Biomarkers</DropdownMenuLabel>
                     <ScrollArea className="h-[200px]">
                         <div className="p-1">
                             {allPanelBiomarkers.map((key) => {
@@ -384,8 +385,7 @@ export function DiseasePanelCard({
                             })}
                         </div>
                     </ScrollArea>
-                </DropdownMenuContent>
-                </DropdownMenu>
+                </ActionMenu>
             )}
         </div>
       </CardHeader>
