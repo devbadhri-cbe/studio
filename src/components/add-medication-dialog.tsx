@@ -119,7 +119,7 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
                     <FormItem>
                         <FormLabel>Dosage</FormLabel>
                         <FormControl>
-                        <Input placeholder="e.g., 500mg" {...field} />
+                        <Input placeholder="500 mg" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>

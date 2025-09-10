@@ -75,6 +75,12 @@
   }
 }
 
+@layer components {
+  .placeholder\:text-muted-foreground::placeholder {
+    @apply text-muted-foreground/50;
+  }
+}
+
 @media print {
   body {
     background-color: white !important;
