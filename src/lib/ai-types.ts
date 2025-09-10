@@ -33,6 +33,7 @@ export const LabDataExtractionInputSchema = z.object({
 export type LabDataExtractionInput = z.infer<typeof LabDataExtractionInputSchema>;
 
 export const LabDataExtractionOutputSchema = z.object({
+  patientName: z.string().optional().describe("The full name of the patient as it appears on the lab report."),
   hba1c: z
     .object({
       date: z.string().describe('The date of the test in YYYY-MM-DD format.'),

@@ -2,84 +2,192 @@
 'use client';
 
 import { BatchRecords, useApp } from '@/context/app-context';
-import { format, isValid, parseISO } from 'date-fns';
+import { format, isValid, parse, parseISO } from 'date-fns';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Check, Edit, Save } from 'lucide-react';
+import { Check, Edit, Save, AlertTriangle } from 'lucide-react';
 import * as React from 'react';
 import { Separator } from './ui/separator';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Alert, AlertDescription } from './ui/alert';
+import { DatePicker } from './ui/date-picker';
+import { toNgDl } from '@/lib/unit-conversions';
 
 interface ExtractedRecordReviewProps {
   data: BatchRecords;
-  onSave: () => void;
+  onSave: (editedData: BatchRecords) => void;
   onCancel: () => void;
 }
 
-const RecordRow: React.FC<{ label: string; value?: string | number | null; unit?: string }> = ({ label, value, unit }) => {
-  if (value === null || value === undefined || value === '') return null;
+const RecordRow: React.FC<{ label: string; value?: string | number | null; unit?: string; onValueChange: (value: string) => void; onUnitChange?: (value: string) => void; isDate?: boolean; dateValue?: Date; onDateChange?: (date?: Date) => void; }> = ({ label, value, unit, onValueChange, onUnitChange, isDate, dateValue, onDateChange }) => {
+  if (isDate) {
+    return (
+       <div className="flex justify-between items-center py-2">
+            <Label className="text-muted-foreground font-normal">{label}</Label>
+            <DatePicker
+                value={dateValue}
+                onChange={onDateChange!}
+            />
+        </div>
+    )
+  }
+  
+  if (value === null || value === undefined) return null;
+  
   return (
-    <div className="flex justify-between items-center text-sm py-2">
-      <p className="text-muted-foreground">{label}</p>
-      <p className="font-semibold">{value} {unit}</p>
+    <div className="flex justify-between items-center py-2">
+      <Label htmlFor={label} className="text-muted-foreground font-normal">{label}</Label>
+      <div className="flex items-center gap-2">
+        <Input
+          id={label}
+          type="text"
+          value={String(value)}
+          onChange={(e) => onValueChange(e.target.value)}
+          className="w-24 h-8 text-right"
+        />
+        {unit && (
+             <Input
+                type="text"
+                value={unit}
+                onChange={(e) => onUnitChange?.(e.target.value)}
+                className="w-20 h-8 text-left"
+                disabled={!onUnitChange}
+            />
+        )}
+      </div>
     </div>
   );
 };
 
 export function ExtractedRecordReview({ data, onSave, onCancel }: ExtractedRecordReviewProps) {
-  const { getDisplayVitaminDValue, biomarkerUnit } = useApp();
-  const date = data.hba1c?.date || data.fastingBloodGlucose?.date || data.vitaminD?.date || data.thyroid?.date;
-  const formattedDate = date && isValid(new Date(date)) ? format(new Date(date), 'PPP') : 'N/A';
+  const { getDisplayVitaminDValue, biomarkerUnit, profile } = useApp();
+  const [editedData, setEditedData] = React.useState<BatchRecords>(data);
+
+  React.useEffect(() => {
+    setEditedData(data);
+  }, [data]);
+  
+  const handleValueChange = (field: keyof BatchRecords, subField?: string) => (value: string) => {
+    setEditedData(prev => {
+        const newData = { ...prev };
+        const record = newData[field];
+        if (record && subField) {
+            (record as any)[subField] = value;
+        } else if (record) {
+             (record as any).value = value;
+        }
+        return newData;
+    });
+  }
+  
+  const handleDateChange = (newDate?: Date) => {
+    if (newDate && isValid(newDate)) {
+        const isoDate = newDate.toISOString();
+        setEditedData(prev => {
+            const updated: BatchRecords = {};
+            for (const key in prev) {
+                if (key !== 'patientName' && prev[key as keyof BatchRecords]) {
+                   (updated as any)[key] = { ...(prev[key as keyof BatchRecords] as object), date: isoDate };
+                } else {
+                   (updated as any)[key] = prev[key as keyof BatchRecords];
+                }
+            }
+            return updated;
+        });
+    }
+  }
+  
+  const handleUnitChange = (field: keyof Pick<BatchRecords, 'vitaminD'>, subField: 'units') => (value: string) => {
+     setEditedData(prev => {
+        const newData = { ...prev };
+        const record = newData[field];
+        if (record && subField) {
+           (record as any)[subField] = value;
+        }
+        return newData;
+    });
+  }
+
+  const nameMismatch = !!(editedData.patientName && profile.name.toLowerCase() !== editedData.patientName.toLowerCase());
+
+  const getRecordDate = () => {
+    for (const key in editedData) {
+        if (key !== 'patientName') {
+            const record = editedData[key as keyof Omit<BatchRecords, 'patientName'>];
+            if (record && 'date' in record && record.date) {
+                const parsedDate = parseISO(record.date);
+                if (isValid(parsedDate)) {
+                    return parsedDate;
+                }
+            }
+        }
+    }
+    return new Date();
+  }
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Review Extracted Data</CardTitle>
-          <CardDescription>Please confirm that the AI extracted the correct information from your document.</CardDescription>
+          <CardDescription>Please confirm or edit the information the AI extracted from your document.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex justify-between items-center p-3 bg-muted rounded-md">
-            <p className="font-semibold">Test Date</p>
-            <p className="font-bold text-primary">{formattedDate}</p>
-          </div>
 
-          <Separator />
-          
+          {nameMismatch && (
+            <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                    Warning: The name on the report (<strong>{editedData.patientName}</strong>) does not match the current patient profile (<strong>{profile.name}</strong>).
+                </AlertDescription>
+            </Alert>
+          )}
+
           <div className="divide-y">
-            <RecordRow label="HbA1c" value={data.hba1c?.value} unit="%" />
-            <RecordRow label="Fasting Blood Glucose" value={data.fastingBloodGlucose?.value} unit="mg/dL" />
-            <RecordRow label="Hemoglobin" value={data.hemoglobin?.hemoglobin} unit="g/dL" />
+             <RecordRow 
+                label="Test Date" 
+                isDate 
+                dateValue={getRecordDate()} 
+                onDateChange={handleDateChange}
+             />
             
-            {data.vitaminD?.value && (
+            <RecordRow label="HbA1c (%)" value={editedData.hba1c?.value} onValueChange={handleValueChange('hba1c', 'value')} />
+            <RecordRow label="Fasting Blood Glucose (mg/dL)" value={editedData.fastingBloodGlucose?.value} onValueChange={handleValueChange('fastingBloodGlucose', 'value')} />
+            <RecordRow label="Hemoglobin (g/dL)" value={editedData.hemoglobin?.hemoglobin} onValueChange={handleValueChange('hemoglobin', 'hemoglobin')} />
+            
+            {editedData.vitaminD?.value !== undefined && (
               <RecordRow 
                 label="Vitamin D" 
-                value={getDisplayVitaminDValue(data.vitaminD.value)} 
-                unit={biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL'} 
+                value={editedData.vitaminD.value} 
+                unit={editedData.vitaminD.units}
+                onValueChange={handleValueChange('vitaminD', 'value')}
+                onUnitChange={handleUnitChange('vitaminD', 'units')}
               />
             )}
 
-            {data.bloodPressure && (
+            {editedData.bloodPressure && (
               <>
-                <RecordRow label="Systolic BP" value={data.bloodPressure.systolic} unit="mmHg" />
-                <RecordRow label="Diastolic BP" value={data.bloodPressure.diastolic} unit="mmHg" />
-                <RecordRow label="Heart Rate" value={data.bloodPressure.heartRate} unit="bpm" />
+                <RecordRow label="Systolic BP (mmHg)" value={editedData.bloodPressure.systolic} onValueChange={handleValueChange('bloodPressure', 'systolic')} />
+                <RecordRow label="Diastolic BP (mmHg)" value={editedData.bloodPressure.diastolic} onValueChange={handleValueChange('bloodPressure', 'diastolic')} />
+                <RecordRow label="Heart Rate (bpm)" value={editedData.bloodPressure.heartRate} onValueChange={handleValueChange('bloodPressure', 'heartRate')} />
               </>
             )}
 
-            {data.thyroid && (
+            {editedData.thyroid && (
               <>
-                <RecordRow label="TSH" value={data.thyroid.tsh} unit="µIU/mL" />
-                <RecordRow label="T3" value={data.thyroid.t3} unit="pg/mL" />
-                <RecordRow label="T4" value={data.thyroid.t4} unit="ng/dL" />
+                <RecordRow label="TSH (µIU/mL)" value={editedData.thyroid.tsh} onValueChange={handleValueChange('thyroid', 'tsh')} />
+                <RecordRow label="T3 (pg/mL)" value={editedData.thyroid.t3} onValueChange={handleValueChange('thyroid', 't3')} />
+                <RecordRow label="T4 (ng/dL)" value={editedData.thyroid.t4} onValueChange={handleValueChange('thyroid', 't4')} />
               </>
             )}
 
-            {data.lipidPanel && (
+            {editedData.lipidPanel && (
               <>
-                <RecordRow label="Total Cholesterol" value={data.lipidPanel.totalCholesterol} unit="mg/dL" />
-                <RecordRow label="LDL" value={data.lipidPanel.ldl} unit="mg/dL" />
-                <RecordRow label="HDL" value={data.lipidPanel.hdl} unit="mg/dL" />
-                <RecordRow label="Triglycerides" value={data.lipidPanel.triglycerides} unit="mg/dL" />
+                <RecordRow label="Total Cholesterol (mg/dL)" value={editedData.lipidPanel.totalCholesterol} onValueChange={handleValueChange('lipidPanel', 'totalCholesterol')} />
+                <RecordRow label="LDL (mg/dL)" value={editedData.lipidPanel.ldl} onValueChange={handleValueChange('lipidPanel', 'ldl')} />
+                <RecordRow label="HDL (mg/dL)" value={editedData.lipidPanel.hdl} onValueChange={handleValueChange('lipidPanel', 'hdl')} />
+                <RecordRow label="Triglycerides (mg/dL)" value={editedData.lipidPanel.triglycerides} onValueChange={handleValueChange('lipidPanel', 'triglycerides')} />
               </>
             )}
           </div>
@@ -91,7 +199,7 @@ export function ExtractedRecordReview({ data, onSave, onCancel }: ExtractedRecor
         <Button variant="ghost" onClick={onCancel}>
           <Edit className="mr-2 h-4 w-4" /> Re-upload
         </Button>
-        <Button onClick={onSave}>
+        <Button onClick={() => onSave(editedData)}>
           <Check className="mr-2 h-4 w-4" /> Confirm and Save
         </Button>
       </div>

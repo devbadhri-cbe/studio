@@ -11,7 +11,7 @@ import { extractLabData } from '@/ai/flows/extract-lab-data-flow';
 import type { BatchRecords } from '@/context/app-context';
 import { useApp } from '@/context/app-context';
 import { ExtractedRecordReview } from './extracted-record-review';
-import { isValid } from 'date-fns';
+import { isValid, parseISO } from 'date-fns';
 
 
 type Step = 'initial' | 'loading' | 'review' | 'error';
@@ -60,13 +60,7 @@ export function UploadRecordDialog() {
     try {
       const result = await extractLabData({ photoDataUri: dataUri });
       
-      const hasAnyData = Object.values(result).some(value => {
-        if (value === null || value === undefined) return false;
-        if (typeof value === 'object') {
-          return Object.values(value).some(v => v !== null && v !== undefined);
-        }
-        return true;
-      });
+      const hasAnyData = Object.keys(result).some(key => key !== 'patientName' && result[key as keyof Omit<BatchRecords, 'patientName'>] !== null);
 
       if (!hasAnyData) {
         setStep('error');
@@ -75,7 +69,7 @@ export function UploadRecordDialog() {
       }
       
       const reportDate = result.hba1c?.date || result.fastingBloodGlucose?.date || result.vitaminD?.date || result.thyroid?.date;
-      if (!reportDate || !isValid(new Date(reportDate))) {
+      if (!reportDate || !isValid(parseISO(reportDate))) {
         setStep('error');
         setErrorMessage('The AI could not determine the date of the test from the report. Please ensure the date is visible and clear.');
         return;
@@ -139,10 +133,9 @@ export function UploadRecordDialog() {
     processImage(dataUri);
   };
   
-  const handleSave = async () => {
-    if (!extractedData) return;
+  const handleSave = async (dataToSave: BatchRecords) => {
     setStep('loading');
-    const { added, duplicates } = await addBatchRecords(extractedData);
+    const { added, duplicates } = await addBatchRecords(dataToSave);
     
     let description = '';
     if (added.length > 0) {
