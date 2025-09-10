@@ -409,10 +409,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDashboardViewState('report');
     setBiomarkerUnitState(countries.find(c => c.code === patient.country)?.biomarkerUnit || 'conventional');
     setHasUnsavedChanges(false);
-    
-    // Auto-fetch insights on patient load
-    regenerateInsights('en');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const saveChanges = useCallback(async () => {

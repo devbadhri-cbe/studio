@@ -33,6 +33,13 @@ export function InsightsCard() {
     setSelectedInsightsLanguage,
   } = useApp();
   
+  React.useEffect(() => {
+    // Only generate insights if the card is completely empty (no tips, no error, not already loading)
+    if (tips.length === 0 && !isGeneratingInsights && !insightsError) {
+      regenerateInsights(selectedInsightsLanguage);
+    }
+  }, [tips.length, isGeneratingInsights, insightsError, regenerateInsights, selectedInsightsLanguage]);
+
   const handleLanguageChange = async (languageCode: string) => {
     if (!languageCode) return;
     setSelectedInsightsLanguage(languageCode);
