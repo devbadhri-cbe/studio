@@ -16,7 +16,8 @@ interface ThyroxineCardProps {
 export function ThyroxineCard({ isReadOnly = false }: ThyroxineCardProps) {
   const { thyroxineRecords, removeThyroxineRecord } = useApp();
 
-  const getStatus = (record: ThyroxineRecord) => {
+  const getStatus = (record?: ThyroxineRecord) => {
+    if (!record) return null;
     if (record.value < 4.5) return { text: 'Low', variant: 'secondary' as const };
     if (record.value > 11.7) return { text: 'High', variant: 'destructive' as const };
     return { text: 'Normal', variant: 'outline' as const };
