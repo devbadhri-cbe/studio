@@ -27,6 +27,7 @@ import { HdlCard } from '@/components/hdl-card';
 import { AddHdlRecordDialog } from '@/components/add-hdl-record-dialog';
 import { TriglyceridesCard } from '@/components/triglycerides-card';
 import { AddTriglyceridesRecordDialog } from '@/components/add-triglycerides-record-dialog';
+import { LipidPanelCard } from '@/components/lipid-panel-card';
 
 
 export const availableBiomarkerCards = {
@@ -101,4 +102,5 @@ export const availableBiomarkerCards = {
 export const availableDiseasePanels = [
     { key: 'diabetes' as DiseasePanelKey, label: 'Diabetes Panel', component: <DiabetesCard /> },
     { key: 'hypertension' as DiseasePanelKey, label: 'Hypertension Panel', component: <HypertensionCard /> },
+    { key: 'lipidPanel' as DiseasePanelKey, label: 'Lipid Panel', component: <LipidPanelCard /> },
 ];
