@@ -25,7 +25,7 @@ const supportedLanguages = [
 
 export function InsightsCard() {
   const { profile, hba1cRecords, fastingBloodGlucoseRecords, vitaminDRecords, bloodPressureRecords, weightRecords, getDisplayGlucoseValue, getDisplayVitaminDValue } = useApp();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true); // Start with loading true
   const [isTranslating, setIsTranslating] = React.useState(false);
   const [originalTips, setOriginalTips] = React.useState<string[]>([]);
   const [translatedTips, setTranslatedTips] = React.useState<string[] | null>(null);
@@ -102,6 +102,11 @@ export function InsightsCard() {
       getDisplayGlucoseValue, 
       getDisplayVitaminDValue
   ]);
+  
+  React.useEffect(() => {
+    handleGenerateInsights('en');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLanguageChange = async (languageCode: string) => {
     if (!languageCode) return;
