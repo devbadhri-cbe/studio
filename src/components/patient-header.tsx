@@ -21,7 +21,7 @@ export function PatientHeader() {
             Your health overview. Consult your doctor before making any decisions.
         </p>
       </div>
-      <div className="w-full md:w-auto flex items-center justify-start md:justify-end gap-2 md:gap-4 shrink-0">
+      <div className="w-full md:w-auto flex items-center justify-center md:justify-end gap-2 md:gap-4 shrink-0">
         <UploadRecordDialog />
       </div>
     </div>
