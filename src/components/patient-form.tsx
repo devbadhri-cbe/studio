@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -20,7 +21,7 @@ import { DatePicker } from './ui/date-picker';
 export type PatientFormData = {
   name: string;
   dob: Date;
-  gender: 'male' | 'female' | 'other';
+  gender: 'male' | 'female';
   email?: string;
   country: string;
   phone?: string;
@@ -39,7 +40,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
     defaultValues: {
       name: patient?.name || '',
       dob: patient?.dob ? parseISO(patient.dob) : new Date(),
-      gender: patient?.gender,
+      gender: patient?.gender as 'male' | 'female' | undefined,
       email: patient?.email || '',
       country: patient?.country || '',
       phone: patient?.phone || '',
@@ -64,7 +65,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
         form.reset({
             name: patient.name || '',
             dob: patient.dob ? parseISO(patient.dob) : new Date(),
-            gender: patient.gender || undefined,
+            gender: patient.gender as 'male' | 'female' | undefined,
             email: patient.email || '',
             country: countryCode,
             phone: patient.phone || '',
@@ -143,7 +144,6 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                                     <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center justify-start md:justify-end space-x-4 h-10 w-full">
                                         <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem>
                                         <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem>
-                                        <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem>
                                     </RadioGroup>
                                 </FormControl>
                                 <FormMessage />

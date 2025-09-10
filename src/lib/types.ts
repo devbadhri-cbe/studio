@@ -52,7 +52,7 @@ export interface UserProfile {
   id: string; // Add patient ID to profile for easier lookup
   name: string;
   dob: string; // Stored as 'YYYY-MM-DD' string
-  gender: 'male' | 'female' | 'other';
+  gender: 'male' | 'female';
   email?: string;
   country: string;
   phone?: string;
