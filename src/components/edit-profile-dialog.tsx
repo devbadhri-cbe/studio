@@ -33,7 +33,7 @@ import { parseISO } from 'date-fns';
 import { updatePatient } from '@/lib/firestore';
 import { DatePicker } from './ui/date-picker';
 import { cmToFtIn, ftInToCm } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 
 interface EditProfileDialogProps {
@@ -134,25 +134,28 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
           <form onSubmit={form.handleSubmit(onProfileSubmit)} className="space-y-6">
               
               <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled /></FormControl><FormMessage /></FormItem> )} />
-              <FormField
-                  control={form.control}
-                  name="dob"
-                  render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                          <FormLabel>Date of Birth</FormLabel>
-                          <FormControl>
-                              <DatePicker
-                                  value={field.value}
-                                  onChange={field.onChange}
-                                  fromYear={new Date().getFullYear() - 100}
-                                  toYear={new Date().getFullYear()}
-                              />
-                          </FormControl>
-                          <FormMessage />
-                      </FormItem>
-                  )}
-              />
-              <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                    control={form.control}
+                    name="dob"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                            <FormLabel>Date of Birth</FormLabel>
+                            <FormControl>
+                                <DatePicker
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    fromYear={new Date().getFullYear() - 100}
+                                    toYear={new Date().getFullYear()}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
+              </div>
+
               {isImperial ? (
                   <div className="grid grid-cols-2 gap-4">
                       <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem><FormLabel>Height (ft)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
