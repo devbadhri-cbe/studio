@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -28,7 +29,6 @@ import { Input } from './ui/input';
 import { startOfDay } from 'date-fns';
 import { AddRecordDialog as AddHba1cRecordDialog } from './add-record-dialog';
 import { AddTriglyceridesRecordDialog } from './add-triglycerides-record-dialog';
-import { AddVitaminDRecordDialog } from './add-vitamin-d-record-dialog';
 import { AddWeightRecordDialog } from './add-weight-record-dialog';
 import { AddBloodPressureRecordDialog } from './add-blood-pressure-record-dialog';
 import { AddFastingBloodGlucoseRecordDialog } from './add-fasting-blood-glucose-record-dialog';
@@ -59,7 +59,6 @@ const biomarkerFieldsConfig: { [key: string]: any } = {
       t4: { label: 'T4 (ng/dL)', type: 'number', step: '0.1', placeholder: 'e.g., 1.2' },
     }
   },
-  vitaminD: { label: 'Vitamin D', type: 'number', unit: 'ng/mL or nmol/L' }, // Unit handled in label
   thyroxine: { label: 'Thyroxine (T4)', type: 'number', step: '0.1', placeholder: 'e.g., 8.0', unit: 'ng/dL' },
   serumCreatinine: { label: 'Serum Creatinine', type: 'number', step: '0.01', placeholder: 'e.g., 0.9', unit: 'mg/dL' },
   uricAcid: { label: 'Uric Acid', type: 'number', step: '0.1', placeholder: 'e.g., 6.5', unit: 'mg/dL' },
@@ -74,7 +73,7 @@ interface AddPanelRecordDialogProps {
 }
 
 function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey }: AddPanelRecordDialogProps) {
-    const { addHba1cRecord, addFastingBloodGlucoseRecord, addHemoglobinRecord, addBloodPressureRecord, addWeightRecord, addThyroidRecord, addLipidRecord, profile, getDbGlucoseValue, getDbHemoglobinValue, biomarkerUnit, addVitaminDRecord, getDbVitaminDValue, addSerumCreatinineRecord, addUricAcidRecord, addThyroxineRecord, addTotalCholesterolRecord, addLdlRecord, addHdlRecord, addTriglyceridesRecord } = useApp();
+    const { addHba1cRecord, addFastingBloodGlucoseRecord, addHemoglobinRecord, addBloodPressureRecord, addWeightRecord, addThyroidRecord, addLipidRecord, profile, getDbGlucoseValue, getDbHemoglobinValue, biomarkerUnit, addSerumCreatinineRecord, addUricAcidRecord, addThyroxineRecord, addTotalCholesterolRecord, addLdlRecord, addHdlRecord, addTriglyceridesRecord } = useApp();
     
     const isImperial = profile.unitSystem === 'imperial';
 
@@ -134,10 +133,6 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey 
                             recordsAdded++;
                             data.ldl = ''; data.hdl = ''; data.triglycerides = ''; // prevent double counting
                         }
-                        break;
-                    case 'vitaminD':
-                        addVitaminDRecord({ date: recordDate, value: getDbVitaminDValue(Number(data.vitaminD)) });
-                        recordsAdded++;
                         break;
                     case 'serumCreatinine':
                         addSerumCreatinineRecord({ date: recordDate, value: Number(data.serumCreatinine) });
@@ -202,7 +197,6 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey 
       if (key === 'glucose') fieldLabel = `Fasting Glucose (${biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL'})`;
       if (key === 'hemoglobin') fieldLabel = `Hemoglobin (${biomarkerUnit === 'si' ? 'g/L' : 'g/dL'})`;
       if (key === 'weight') fieldLabel = `Weight (${isImperial ? 'lbs' : 'kg'})`;
-      if (key === 'vitaminD') fieldLabel = `Vitamin D (${biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL'})`;
 
       return (
         <FormField
