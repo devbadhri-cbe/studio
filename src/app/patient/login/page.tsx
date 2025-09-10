@@ -16,6 +16,8 @@ import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ftInToCm } from '@/lib/utils';
+import { countries } from '@/lib/countries';
 
 export default function PatientLoginPage() {
   const router = useRouter();
@@ -49,6 +51,17 @@ export default function PatientLoginPage() {
 
   const handleFormSubmit = async (data: PatientFormData) => {
       setIsSubmitting(true);
+      const isImperial = countries.find(c => c.code === data.country)?.unitSystem === 'imperial';
+      
+      let heightInCm: number | undefined;
+      if (isImperial) {
+          const ft = data.height_ft ? Number(data.height_ft) : 0;
+          const inches = data.height_in ? Number(data.height_in) : 0;
+          heightInCm = ft > 0 || inches > 0 ? ftInToCm(ft, inches) : undefined;
+      } else {
+          heightInCm = data.height ? Number(data.height) : undefined;
+      }
+
       const patientData = {
           name: data.name,
           dob: data.dob.toISOString(),
@@ -56,6 +69,7 @@ export default function PatientLoginPage() {
           email: data.email || '',
           country: data.country,
           phone: data.phone || '',
+          height: heightInCm,
       };
 
       try {

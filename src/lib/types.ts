@@ -165,7 +165,7 @@ export interface Patient {
   id: string;
   name: string;
   dob: string;
-  gender: 'male' | 'female' | 'other';
+  gender: 'male' | 'female';
   email: string;
   country: string;
   phone: string;
