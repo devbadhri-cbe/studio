@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -8,14 +7,12 @@ import { Stethoscope, Shapes, Search, ArrowLeft } from 'lucide-react';
 import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
-import { TitleBar } from '@/components/ui/title-bar';
 import { DiseasePanel } from '@/components/disease-panel';
 import { BiomarkersPanel } from '@/components/biomarkers-panel';
 import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { ProfileCard } from '@/components/profile-card';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
-import { Input } from './ui/input';
 import { UnsavedChangesBar } from './unsaved-changes-bar';
 import { DashboardSectionToggle } from './dashboard-section-toggle';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
@@ -23,7 +20,7 @@ import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
 import { doctorDetails } from '@/lib/doctor-data';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
-
+import { TitleBar } from '@/components/ui/title-bar';
 
 export function PatientDashboard() {
   const { isClient, isDoctorLoggedIn } = useApp();
@@ -35,19 +32,10 @@ export function PatientDashboard() {
   const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
 
-  const headerSeparatorRef = React.useRef<HTMLDivElement>(null);
-  
-   React.useEffect(() => {
+  React.useEffect(() => {
     const handleScroll = () => {
-      if (headerSeparatorRef.current) {
-        // The point at which the glass effect should start.
-        // 100 is an approximation of the initial TitleBar height.
-        const triggerPoint = headerSeparatorRef.current.offsetTop - 100;
-        setIsScrolled(window.scrollY > triggerPoint);
-      } else {
-        // Fallback for when the separator isn't rendered
-        setIsScrolled(window.scrollY > 50);
-      }
+      const offset = window.scrollY;
+      setIsScrolled(offset > 20);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -85,14 +73,12 @@ export function PatientDashboard() {
             backButton={BackButton}
             isScrolled={isScrolled}
          />
-        <main className="flex-1 p-4 md:pt-10 md:p-6 pb-24">
+        <main className="flex-1 p-4 md:p-6 pb-24">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              
             <PatientHeader />
             
-            <div ref={headerSeparatorRef}>
-                <Separator />
-            </div>
+            <Separator />
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <ProfileCard />
