@@ -22,7 +22,7 @@ import { Checkbox } from './ui/checkbox';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { ScrollArea } from './ui/scroll-area';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { DatePicker } from './ui/date-picker';
@@ -65,31 +65,13 @@ interface AddPanelRecordDialogProps {
     onOpenChange: (open: boolean) => void;
     enabledBiomarkers: (BiomarkerKey | string)[];
     panelKey: DiseasePanelKey;
+    form: ReturnType<typeof useForm>;
 }
 
-function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey }: AddPanelRecordDialogProps) {
+function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey, form }: AddPanelRecordDialogProps) {
     const { addHba1cRecord, addFastingBloodGlucoseRecord, addHemoglobinRecord, addBloodPressureRecord, addWeightRecord, addThyroidRecord, addLipidRecord, profile, getDbGlucoseValue, getDbHemoglobinValue, biomarkerUnit, addSerumCreatinineRecord, addUricAcidRecord, addThyroxineRecord, addTotalCholesterolRecord, addLdlRecord, addHdlRecord, addTriglyceridesRecord } = useApp();
     
     const isImperial = profile.unitSystem === 'imperial';
-    
-    const defaultFormValues = React.useMemo(() => {
-        const defaults: { [key: string]: any } = { date: new Date() };
-        Object.keys(biomarkerFieldsConfig).forEach(key => {
-            const config = biomarkerFieldsConfig[key];
-            if (config.fields) {
-                Object.keys(config.fields).forEach(subKey => {
-                    defaults[subKey] = '';
-                });
-            } else {
-                defaults[key] = '';
-            }
-        });
-        return defaults;
-    }, []);
-
-    const form = useForm({
-        defaultValues: defaultFormValues,
-    });
     
     const onSubmit = (data: any) => {
         let recordsAdded = 0;
@@ -168,12 +150,6 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey 
         })
         onOpenChange(false);
     };
-
-    React.useEffect(() => {
-        if (open) {
-            form.reset(defaultFormValues);
-        }
-    }, [open, form, defaultFormValues]);
 
     const renderField = (key: BiomarkerKey | string) => {
       const config = biomarkerFieldsConfig[key as keyof typeof biomarkerFieldsConfig];
@@ -259,7 +235,7 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey 
                                 {enabledBiomarkers.map(renderField)}
                             </div>
                         </ScrollArea>
-                        <DialogFooter className="pt-4">
+                        <DialogFooter className="pt-4 px-6 pb-6">
                            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
                            <Button type="submit">Save Records</Button>
                         </DialogFooter>
@@ -290,11 +266,35 @@ export function DiseasePanelCard({
   const { profile, toggleDiseaseBiomarker, toggleDiseasePanel, isDoctorLoggedIn } = useApp();
   const [isAddRecordOpen, setIsAddRecordOpen] = React.useState(false);
 
+  const defaultFormValues = React.useMemo(() => {
+      const defaults: { [key: string]: any } = { date: new Date() };
+      Object.keys(biomarkerFieldsConfig).forEach(key => {
+          const config = biomarkerFieldsConfig[key];
+          if (config.fields) {
+              Object.keys(config.fields).forEach(subKey => {
+                  defaults[subKey] = '';
+              });
+          } else {
+              defaults[key] = '';
+          }
+      });
+      return defaults;
+  }, []);
+
+  const form = useForm({
+      defaultValues: defaultFormValues,
+  });
+
   const enabledForPanel = profile.enabledBiomarkers?.[panelKey] || [];
   const isPanelEnabledForPatient = profile.enabledBiomarkers?.hasOwnProperty(panelKey);
   
   const handlePanelToggle = (checked: boolean) => {
     toggleDiseasePanel(panelKey);
+  }
+  
+  const handleOpenAddRecordDialog = () => {
+    form.reset(defaultFormValues);
+    setIsAddRecordOpen(true);
   }
 
   const childrenWithReadOnly = React.Children.map(children, child => {
@@ -322,7 +322,7 @@ export function DiseasePanelCard({
                     />
                 </div>
             )}
-            <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient || enabledForPanel.length === 0} onClick={() => setIsAddRecordOpen(true)}>
+            <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient || enabledForPanel.length === 0} onClick={handleOpenAddRecordDialog}>
                 <PlusCircle className="h-4 w-4" />
             </Button>
             {isDoctorLoggedIn && (
@@ -386,9 +386,11 @@ export function DiseasePanelCard({
         onOpenChange={setIsAddRecordOpen}
         enabledBiomarkers={enabledForPanel}
         panelKey={panelKey}
+        form={form}
     />
     </>
   );
 }
+
 
 
