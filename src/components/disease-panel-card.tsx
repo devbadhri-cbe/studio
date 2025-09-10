@@ -28,6 +28,7 @@ import { DatePicker } from './ui/date-picker';
 import { Input } from './ui/input';
 import { startOfDay } from 'date-fns';
 import { ActionMenu } from './ui/action-menu';
+import { Separator } from './ui/separator';
 
 const biomarkerFieldsConfig: { [key: string]: any } = {
   hba1c: { label: 'HbA1c (%)', type: 'number', step: '0.1', placeholder: 'e.g., 5.7', unit: '%' },
@@ -332,6 +333,21 @@ export function DiseasePanelCard({
     return child;
   });
 
+  const sortedBiomarkers = React.useMemo(() => {
+    const enabled = allPanelBiomarkers
+      .filter(key => enabledForPanel.includes(key))
+      .map(key => ({ key, ...availableBiomarkerCards[key as BiomarkerKey] }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+
+    const disabled = allPanelBiomarkers
+      .filter(key => !enabledForPanel.includes(key))
+      .map(key => ({ key, ...availableBiomarkerCards[key as BiomarkerKey] }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+
+    return { enabled, disabled };
+  }, [allPanelBiomarkers, enabledForPanel]);
+
+
   return (
     <>
     <Card className={cn("w-full flex flex-col h-full shadow-md border-2", isPanelEnabledForPatient ? "border-primary/20" : "border-dashed", className)}>
@@ -364,25 +380,33 @@ export function DiseasePanelCard({
                     <DropdownMenuLabel>Manage Biomarkers</DropdownMenuLabel>
                     <ScrollArea className="h-[200px]">
                         <div className="p-1">
-                            {allPanelBiomarkers.map((key) => {
-                                const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
-                                if (!biomarkerInfo) return null;
+                             {sortedBiomarkers.enabled.map((biomarkerInfo) => (
+                                <DropdownMenuItem key={biomarkerInfo.key} onSelect={(e) => e.preventDefault()}>
+                                    <Label htmlFor={`switch-${panelKey}-${biomarkerInfo.key}`} className="flex items-center justify-between w-full cursor-pointer px-2 py-1.5 font-normal">
+                                        <span>{biomarkerInfo.label}</span>
+                                        <Switch
+                                            id={`switch-${panelKey}-${biomarkerInfo.key}`}
+                                            checked={true}
+                                            onCheckedChange={() => toggleDiseaseBiomarker(panelKey, biomarkerInfo.key)}
+                                        />
+                                    </Label>
+                                </DropdownMenuItem>
+                            ))}
 
-                                const isChecked = enabledForPanel.includes(key);
+                            {sortedBiomarkers.enabled.length > 0 && sortedBiomarkers.disabled.length > 0 && <Separator className="my-1" />}
 
-                                return (
-                                    <DropdownMenuItem key={key} onSelect={(e) => e.preventDefault()}>
-                                        <Label htmlFor={`switch-${panelKey}-${key}`} className="flex items-center justify-between w-full cursor-pointer px-2 py-1.5 font-normal">
-                                            <span>{biomarkerInfo.label}</span>
-                                            <Switch
-                                                id={`switch-${panelKey}-${key}`}
-                                                checked={isChecked}
-                                                onCheckedChange={() => toggleDiseaseBiomarker(panelKey, key)}
-                                            />
-                                        </Label>
-                                    </DropdownMenuItem>
-                                );
-                            })}
+                            {sortedBiomarkers.disabled.map((biomarkerInfo) => (
+                                <DropdownMenuItem key={biomarkerInfo.key} onSelect={(e) => e.preventDefault()}>
+                                    <Label htmlFor={`switch-${panelKey}-${biomarkerInfo.key}`} className="flex items-center justify-between w-full cursor-pointer px-2 py-1.5 font-normal">
+                                        <span>{biomarkerInfo.label}</span>
+                                        <Switch
+                                            id={`switch-${panelKey}-${biomarkerInfo.key}`}
+                                            checked={false}
+                                            onCheckedChange={() => toggleDiseaseBiomarker(panelKey, biomarkerInfo.key)}
+                                        />
+                                    </Label>
+                                </DropdownMenuItem>
+                            ))}
                         </div>
                     </ScrollArea>
                 </ActionMenu>
@@ -417,3 +441,4 @@ export function DiseasePanelCard({
     </>
   );
 }
+
