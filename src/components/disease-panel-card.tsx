@@ -68,7 +68,7 @@ export function DiseasePanelCard({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64" align="end" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenuLabel>Visible Biomarkers</DropdownMenuLabel>
+                    <DropdownMenuLabel>Manage Biomarkers</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {allPanelBiomarkers.map((key) => {
                         const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
