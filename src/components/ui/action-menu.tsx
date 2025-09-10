@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -7,17 +8,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ActionIcon } from './action-icon';
+import { DropdownMenuContentProps, DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
-interface ActionMenuProps {
+interface ActionMenuProps extends DropdownMenuProps {
   tooltip: string;
   icon: React.ReactNode;
   children: React.ReactNode;
-  align?: 'start' | 'center' | 'end';
+  align?: DropdownMenuContentProps['align'];
 }
 
-export function ActionMenu({ tooltip, icon, children, align = 'end' }: ActionMenuProps) {
+export function ActionMenu({ tooltip, icon, children, align = 'end', ...props }: ActionMenuProps) {
   return (
-    <DropdownMenu>
+    <DropdownMenu {...props}>
       <DropdownMenuTrigger asChild>
         <ActionIcon
           tooltip={tooltip}
