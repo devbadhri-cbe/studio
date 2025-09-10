@@ -22,6 +22,7 @@ export default {
       fontFamily: {
         sans: ['Inter', ...fontFamily.sans],
         headline: ['Poppins', 'sans-serif'],
+        special: ['Playfair Display', 'serif'],
         code: ['monospace'],
       },
       colors: {

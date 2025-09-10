@@ -114,13 +114,13 @@ export function BiomarkerCardTemplate({
   const hasMultipleRecords = records.length > 1;
 
   return (
-    <Card className={cn("w-full flex flex-col h-full shadow-xl", className)}>
+    <Card className={cn("w-full flex flex-col h-full shadow-xl border-2 border-primary/50", className)}>
       <CardHeader>
           <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {icon}
                 <div>
-                  <CardTitle>{title}</CardTitle>
+                  <CardTitle className="font-special">{title}</CardTitle>
                   {description && <CardDescription>{description}</CardDescription>}
                 </div>
               </div>

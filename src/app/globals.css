@@ -5,53 +5,53 @@
 
 @layer base {
   :root {
-    --background: 220 50% 98%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 207 82% 67%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 125 47% 64%;
-    --accent-foreground: 24 9.8% 10%;
-    --destructive: 0 84.2% 60.2%;
+    --background: 220 10% 10%;
+    --foreground: 210 40% 98%;
+    --card: 220 10% 15%;
+    --card-foreground: 210 40% 98%;
+    --popover: 220 10% 10%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 20% 75%; /* Silver */
+    --primary-foreground: 220 10% 10%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 25%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217 91% 60%; /* Cool Blue */
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 207 82% 67%;
-    --chart-1: 207 82% 67%;
-    --chart-2: 125 47% 64%;
+    --border: 217.2 32.6% 30%;
+    --input: 217.2 32.6% 25%;
+    --ring: 217 91% 60%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 175 75% 45%;
     --chart-3: 25 85% 65%;
     --chart-4: 285 75% 65%;
-    --chart-5: 175 75% 45%;
+    --chart-5: 207 82% 67%;
     --radius: 0.5rem;
   }
  
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 220 10% 10%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 220 10% 15%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 220 10% 10%;
     --popover-foreground: 210 40% 98%;
-    --primary: 207 82% 67%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 210 20% 75%; /* Silver */
+    --primary-foreground: 220 10% 10%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 217.2 32.6% 25%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 125 47% 64%;
+    --accent: 217 91% 60%; /* Cool Blue */
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 207 82% 67%;
+    --border: 217.2 32.6% 30%;
+    --input: 217.2 32.6% 25%;
+    --ring: 217 91% 60%;
   }
 }
 
@@ -81,9 +81,9 @@
   }
   .biomarker-emboss {
     @apply rounded-lg border-transparent transition-all duration-200;
-    background-color: hsl(var(--muted));
-    box-shadow: inset 4px 4px 8px hsl(var(--muted) / 0.7), 
-                inset -4px -4px 8px hsl(var(--card) / 0.8);
+    background-color: hsl(var(--muted) / 0.2);
+     box-shadow: inset 4px 4px 8px hsl(var(--background) / 0.2), 
+                inset -4px -4px 8px hsl(var(--secondary) / 0.2);
   }
   .dark .biomarker-emboss {
     background-color: hsl(var(--muted) / 0.2);
