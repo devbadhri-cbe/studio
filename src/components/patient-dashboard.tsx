@@ -27,11 +27,22 @@ export function PatientDashboard() {
   const { isClient, isDoctorLoggedIn } = useApp();
   const router = useRouter();
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(false);
-  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
+  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
   const [diseasePanelSearchQuery, setDiseasePanelSearchQuery] = React.useState('');
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
+  
+  const handleDiseasePanelToggle = (isOpen: boolean) => {
+    setIsDiseasePanelOpen(isOpen);
+    if (isOpen) setIsBiomarkersOpen(false);
+  }
+  
+  const handleBiomarkersToggle = (isOpen: boolean) => {
+    setIsBiomarkersOpen(isOpen);
+    if (isOpen) setIsDiseasePanelOpen(false);
+  }
+
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -64,6 +75,9 @@ export function PatientDashboard() {
     </Tooltip>
   ) : null;
 
+  const showDiseasePanel = !isBiomarkersOpen;
+  const showBiomarkersPanel = !isDiseasePanelOpen && isDoctorLoggedIn;
+
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-background">
@@ -88,39 +102,45 @@ export function PatientDashboard() {
             
             <Separator />
             
-            <div className="flex flex-col gap-4">
-                <Collapsible open={isDiseasePanelOpen} onOpenChange={setIsDiseasePanelOpen}>
-                     <DashboardSectionToggle
-                        title="Disease Panels"
-                        subtitle="View and manage panels like Diabetes and Hypertension."
-                        icon={<Stethoscope className="h-6 w-6 text-primary" />}
-                        isOpen={isDiseasePanelOpen}
-                        searchQuery={diseasePanelSearchQuery}
-                        onSearchChange={setDiseasePanelSearchQuery}
-                        searchPlaceholder="Search panels..."
+            <div className="flex flex-col md:flex-row gap-4">
+              {showDiseasePanel && (
+                <div className="flex-1">
+                  <Collapsible open={isDiseasePanelOpen} onOpenChange={handleDiseasePanelToggle}>
+                    <DashboardSectionToggle
+                      title="Disease Panels"
+                      subtitle="View and manage panels like Diabetes and Hypertension."
+                      icon={<Stethoscope className="h-6 w-6 text-primary" />}
+                      isOpen={isDiseasePanelOpen}
+                      searchQuery={diseasePanelSearchQuery}
+                      onSearchChange={setDiseasePanelSearchQuery}
+                      searchPlaceholder="Search panels..."
                     />
                     <CollapsibleContent className="mt-4">
-                        <DiseasePanel searchQuery={diseasePanelSearchQuery} />
+                      <DiseasePanel searchQuery={diseasePanelSearchQuery} />
                     </CollapsibleContent>
-                </Collapsible>
-                
-                {isDoctorLoggedIn && (
-                  <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
-                       <DashboardSectionToggle
-                          title="Biomarker Management"
-                          subtitle="Enable or disable individual biomarker tracking cards."
-                          icon={<Shapes className="h-6 w-6 text-primary" />}
-                          isOpen={isBiomarkersOpen}
-                          searchQuery={biomarkerSearchQuery}
-                          onSearchChange={setBiomarkerSearchQuery}
-                          searchPlaceholder="Search biomarkers..."
+                  </Collapsible>
+                </div>
+              )}
+
+              {showBiomarkersPanel && (
+                 <div className="flex-1">
+                    <Collapsible open={isBiomarkersOpen} onOpenChange={handleBiomarkersToggle}>
+                      <DashboardSectionToggle
+                        title="Biomarker Management"
+                        subtitle="Enable or disable individual biomarker tracking cards."
+                        icon={<Shapes className="h-6 w-6 text-primary" />}
+                        isOpen={isBiomarkersOpen}
+                        searchQuery={biomarkerSearchQuery}
+                        onSearchChange={setBiomarkerSearchQuery}
+                        searchPlaceholder="Search biomarkers..."
                       />
                       <CollapsibleContent className="mt-4 space-y-4">
-                          <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
-                          <AddBiomarkerCard />
+                        <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
+                        <AddBiomarkerCard />
                       </CollapsibleContent>
-                  </Collapsible>
-                )}
+                    </Collapsible>
+                </div>
+              )}
             </div>
 
             
