@@ -110,6 +110,8 @@ export function BiomarkerCardTemplate({
         </Card>
     )
   }
+  
+  const hasMultipleRecords = records.length > 1;
 
   return (
     <Card className={cn("w-full flex flex-col h-full shadow-xl", className)}>
@@ -131,11 +133,11 @@ export function BiomarkerCardTemplate({
         {hasRecords ? (
           <>
             <div className="flex-1 flex flex-col justify-center">
-              <div className={cn("flex flex-row gap-4")}>
-                  <div className="shrink-0">
+               <div className={cn("flex gap-4", hasMultipleRecords ? "flex-row" : "flex-col items-center")}>
+                  <div className={cn(hasMultipleRecords ? "shrink-0" : "text-center")}>
                       {RecordsList}
                   </div>
-                  <div className="flex-1 w-full flex items-center justify-center">
+                  <div className={cn(hasMultipleRecords ? "flex-1 w-full flex items-center justify-center" : "mt-2")}>
                       {statusDisplay}
                   </div>
               </div>
