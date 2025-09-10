@@ -91,7 +91,7 @@ export function SynopsisCardLayout({
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-2 border-red-500">
             <div className="flex-1 w-full sm:w-auto border-2 border-red-500">{footer}</div>
-            <Button variant="ghost" size="sm" className="text-muted-foreground w-full sm:w-auto" onClick={onClose}>
+            <Button variant="ghost" size="sm" className="text-muted-foreground w-full sm:w-auto border-2 border-green-500" onClick={onClose}>
                 <XCircle className="mr-2 h-4 w-4" />
                 Close
             </Button>
