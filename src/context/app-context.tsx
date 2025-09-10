@@ -1,8 +1,9 @@
 
+
 'use client';
 
 import * as React from 'react';
-import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, BiomarkerKey, DiseasePanelKey, FoodInstruction } from '@/lib/types';
+import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type VitaminDRecord, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, BiomarkerKey, DiseasePanelKey, FoodInstruction, ThyroxineRecord } from '@/lib/types';
 import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
 import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
@@ -70,6 +71,9 @@ interface AppContextType {
   thyroidRecords: ThyroidRecord[];
   addThyroidRecord: (record: Omit<ThyroidRecord, 'id' | 'medication'>) => void;
   removeThyroidRecord: (id: string) => void;
+  thyroxineRecords: ThyroxineRecord[];
+  addThyroxineRecord: (record: Omit<ThyroxineRecord, 'id' | 'medication'>) => void;
+  removeThyroxineRecord: (id: string) => void;
   hemoglobinRecords: HemoglobinRecord[];
   addHemoglobinRecord: (record: Omit<HemoglobinRecord, 'id' | 'medication'>) => void;
   removeHemoglobinRecord: (id: string) => void;
@@ -131,6 +135,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [fastingBloodGlucoseRecords, setFastingBloodGlucoseRecordsState] = useState<FastingBloodGlucoseRecord[]>([]);
   const [vitaminDRecords, setVitaminDRecordsState] = useState<VitaminDRecord[]>([]);
   const [thyroidRecords, setThyroidRecordsState] = useState<ThyroidRecord[]>([]);
+  const [thyroxineRecords, setThyroxineRecordsState] = useState<ThyroxineRecord[]>([]);
   const [hemoglobinRecords, setHemoglobinRecordsState] = useState<HemoglobinRecord[]>([]);
   const [weightRecords, setWeightRecordsState] = useState<WeightRecord[]>([]);
   const [bloodPressureRecords, setBloodPressureRecordsState] = useState<BloodPressureRecord[]>([]);
@@ -265,6 +270,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setFastingBloodGlucoseRecordsState(patient.fastingBloodGlucoseRecords || []);
     setVitaminDRecordsState(patient.vitaminDRecords || []);
     setThyroidRecordsState(patient.thyroidRecords || []);
+    setThyroxineRecordsState(patient.thyroxineRecords || []);
     setHemoglobinRecordsState(patient.hemoglobinRecords || []);
     setWeightRecordsState(patient.weightRecords || []);
     setBloodPressureRecordsState(patient.bloodPressureRecords || []);
@@ -289,6 +295,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         fastingBloodGlucoseRecords,
         vitaminDRecords,
         thyroidRecords,
+        thyroxineRecords,
         hemoglobinRecords,
         weightRecords,
         bloodPressureRecords,
@@ -313,7 +320,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSaving(false);
     }
-  }, [profile, hasUnsavedChanges, hba1cRecords, fastingBloodGlucoseRecords, vitaminDRecords, thyroidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
+  }, [profile, hasUnsavedChanges, hba1cRecords, fastingBloodGlucoseRecords, vitaminDRecords, thyroidRecords, thyroxineRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
   
   const getMedicationForRecord = useCallback((medication: Medication[]): string => {
     if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
@@ -430,6 +437,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setHasUnsavedChanges(true);
   }, []);
   
+  const addThyroxineRecord = useCallback((record: Omit<ThyroxineRecord, 'id' | 'medication'>) => {
+    const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
+    setThyroxineRecordsState(prev => [...prev, newRecord]);
+    setHasUnsavedChanges(true);
+  }, [profile.medication, getMedicationForRecord]);
+
+  const removeThyroxineRecord = useCallback((id: string) => {
+    setThyroxineRecordsState(prev => prev.filter(r => r.id !== id));
+    setHasUnsavedChanges(true);
+  }, []);
+
   const addHemoglobinRecord = useCallback((record: Omit<HemoglobinRecord, 'id' | 'medication'>) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setHemoglobinRecordsState(prev => [...prev, newRecord]);
@@ -794,6 +812,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     thyroidRecords,
     addThyroidRecord,
     removeThyroidRecord,
+    thyroxineRecords,
+    addThyroxineRecord,
+    removeThyroxineRecord,
     hemoglobinRecords,
     addHemoglobinRecord,
     removeHemoglobinRecord,

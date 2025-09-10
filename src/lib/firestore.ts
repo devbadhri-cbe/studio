@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -106,7 +107,7 @@ export async function getAllPatients(): Promise<Patient[]> {
 }
 
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'doctorUid' | 'doctorName' | 'doctorEmail'>): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'doctorUid' | 'doctorName' | 'doctorEmail' | 'thyroxineRecords'>): Promise<Patient> {
     const db = getFirebaseDb();
     const docData = {
         ...patientData,
@@ -119,6 +120,7 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         fastingBloodGlucoseRecords: [],
         vitaminDRecords: [],
         thyroidRecords: [],
+        thyroxineRecords: [],
         hemoglobinRecords: [],
         weightRecords: [],
         bloodPressureRecords: [],

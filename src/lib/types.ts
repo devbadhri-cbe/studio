@@ -100,6 +100,14 @@ export interface ThyroidRecord {
   medication?: string;
 }
 
+export interface ThyroxineRecord {
+  id: string;
+  date: Date | string;
+  value: number; // in ng/dL
+  medication?: string;
+}
+
+
 export interface BloodPressureRecord {
   id: string;
   date: Date | string;
@@ -191,6 +199,7 @@ export interface Patient {
   fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
   vitaminDRecords: VitaminDRecord[];
   thyroidRecords: ThyroidRecord[];
+  thyroxineRecords: ThyroxineRecord[];
   hemoglobinRecords: HemoglobinRecord[];
   weightRecords: WeightRecord[];
   bloodPressureRecords: BloodPressureRecord[];
@@ -213,7 +222,8 @@ export type BiomarkerKey =
   | 'glucose' 
   | 'hemoglobin' 
   | 'bloodPressure' 
-  | 'thyroid' 
+  | 'thyroid'
+  | 'thyroxine'
   | 'vitaminD' 
   | 'weight' 
   | 'totalCholesterol' 
