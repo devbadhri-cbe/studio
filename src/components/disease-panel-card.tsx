@@ -36,8 +36,8 @@ import { AddThyroidRecordDialog } from './add-thyroid-record-dialog';
 
 const biomarkerFieldsConfig: { [key: string]: any } = {
   hba1c: { label: 'HbA1c (%)', type: 'number', step: '0.1', placeholder: 'e.g., 5.7', unit: '%' },
-  glucose: { label: 'Fasting Glucose', type: 'number', unit: 'mg/dL' }, // Unit handled in label
-  hemoglobin: { label: 'Hemoglobin', type: 'number', step: '0.1', unit: 'g/dL' }, // Unit handled in label
+  glucose: { label: 'Fasting Glucose', type: 'number', placeholder: 'e.g., 95', unit: 'mg/dL' }, // Unit handled in label
+  hemoglobin: { label: 'Hemoglobin', type: 'number', step: '0.1', placeholder: 'e.g., 13.5', unit: 'g/dL' }, // Unit handled in label
   bloodPressure: {
     label: 'Blood Pressure',
     fields: {
