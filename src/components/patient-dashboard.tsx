@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { Stethoscope, Shapes, Search, ArrowLeft } from 'lucide-react';
+import { Stethoscope, Shapes, Search, ArrowLeft, PlusCircle } from 'lucide-react';
 import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
@@ -21,12 +21,13 @@ import { useRouter } from 'next/navigation';
 import { doctorDetails } from '@/lib/doctor-data';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { TitleBar } from '@/components/ui/title-bar';
+import { AddBiomarkerCard } from './add-biomarker-card';
 
 export function PatientDashboard() {
   const { isClient, isDoctorLoggedIn } = useApp();
   const router = useRouter();
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(false);
-  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
+  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
   const [diseasePanelSearchQuery, setDiseasePanelSearchQuery] = React.useState('');
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
@@ -106,7 +107,7 @@ export function PatientDashboard() {
                 {isDoctorLoggedIn && (
                   <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
                        <DashboardSectionToggle
-                          title="Biomarker Cards"
+                          title="Biomarker Management"
                           subtitle="Enable or disable individual biomarker tracking cards."
                           icon={<Shapes className="h-6 w-6 text-primary" />}
                           isOpen={isBiomarkersOpen}
@@ -114,7 +115,8 @@ export function PatientDashboard() {
                           onSearchChange={setBiomarkerSearchQuery}
                           searchPlaceholder="Search biomarkers..."
                       />
-                      <CollapsibleContent className="mt-4">
+                      <CollapsibleContent className="mt-4 space-y-4">
+                          <AddBiomarkerCard />
                           <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
                       </CollapsibleContent>
                   </Collapsible>
