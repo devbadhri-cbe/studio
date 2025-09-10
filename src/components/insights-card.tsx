@@ -126,33 +126,35 @@ export function InsightsCard() {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-6 pt-0">
         <Separator className="mb-6" />
-        {(isLoading || isTranslating) && (
-            <div className="flex justify-center items-center flex-1">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="ml-2">{isTranslating ? 'Translating...' : 'Generating...'}</p>
-            </div>
-        )}
-        
-        {!isLoading && !isTranslating && (
-             <>
-                {error ? (
-                    <Alert variant="destructive" className="bg-destructive/5 text-center">
-                        <AlertTitle>Error</AlertTitle>
-                        <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                ) : tipsToDisplay.length > 0 ? (
-                    <ul className="space-y-3 text-sm list-disc pl-5">
-                        {tipsToDisplay.map((tip, index) => <li key={index}>{tip}</li>)}
-                    </ul>
-                ) : (
-                    <div className="text-center text-sm text-muted-foreground flex-1 flex flex-col items-center justify-center">
-                        <p>Click the button to generate personalized health insights based on your data.</p>
-                    </div>
-                )}
-             </>
-        )}
+        <div className="flex-1 flex flex-col">
+            {(isLoading || isTranslating) && (
+                <div className="flex justify-center items-center flex-1">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="ml-2">{isTranslating ? 'Translating...' : 'Generating...'}</p>
+                </div>
+            )}
+            
+            {!isLoading && !isTranslating && (
+                <>
+                    {error ? (
+                        <Alert variant="destructive" className="bg-destructive/5 text-center">
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    ) : tipsToDisplay.length > 0 ? (
+                        <ul className="space-y-3 text-sm list-disc pl-5">
+                            {tipsToDisplay.map((tip, index) => <li key={index}>{tip}</li>)}
+                        </ul>
+                    ) : (
+                        <div className="text-center text-sm text-muted-foreground flex-1 flex flex-col items-center justify-center">
+                            <p>Click the button to generate personalized health insights based on your data.</p>
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
 
-        <div className="flex justify-between items-center gap-2 pt-6 mt-auto">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-4 pt-6 mt-auto">
             <div className="flex items-center gap-2">
                 <Languages className="h-4 w-4 text-muted-foreground" />
                 <Select value={selectedLanguage} onValueChange={handleLanguageChange} disabled={isLoading || isTranslating || originalTips.length === 0}>
