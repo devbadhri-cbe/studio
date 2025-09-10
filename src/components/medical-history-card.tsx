@@ -316,7 +316,7 @@ export function MedicalHistoryCard() {
   const conditionActions = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <ActionIcon tooltip="Condition Settings" icon={<Settings className="h-4 w-4" />} />
+        <ActionIcon tooltip="Condition Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onSelect={handleAddConditionClick}>
@@ -337,7 +337,7 @@ export function MedicalHistoryCard() {
   const medicationActions = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <ActionIcon tooltip="Medication Settings" icon={<Settings className="h-4 w-4" />} />
+        <ActionIcon tooltip="Medication Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {!isMedicationNil && (

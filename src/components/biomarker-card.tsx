@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -98,7 +97,7 @@ export function BiomarkerCard<T extends Record>({
   const Actions = !isReadOnly ? (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <ActionIcon tooltip="Settings" icon={<Settings className="h-4 w-4" />} />
+        <ActionIcon tooltip="Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64" align="end">
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>

@@ -29,7 +29,7 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
   return (
     <Popover>
         <PopoverTrigger asChild>
-            <ActionIcon tooltip="Display Settings" icon={<Settings className="h-4 w-4" />} />
+            <ActionIcon tooltip="Display Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
         </PopoverTrigger>
         <PopoverContent className="w-64" align="end">
             <div className="grid gap-4">
