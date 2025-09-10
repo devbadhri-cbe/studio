@@ -33,7 +33,7 @@ import { parseISO } from 'date-fns';
 import { updatePatient } from '@/lib/firestore';
 import { DatePicker } from './ui/date-picker';
 import { cmToFtIn, ftInToCm } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 
 interface EditProfileDialogProps {
