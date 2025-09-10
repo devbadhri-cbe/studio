@@ -10,6 +10,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { useForm } from 'react-hook-form';
 import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
@@ -26,6 +33,7 @@ import { parseISO } from 'date-fns';
 import { updatePatient } from '@/lib/firestore';
 import { DatePicker } from './ui/date-picker';
 import { cmToFtIn, ftInToCm } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 
 interface EditProfileDialogProps {
@@ -37,11 +45,12 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { profile, setProfile } = useApp();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const form = useForm({
     defaultValues: {
       name: '',
-      gender: undefined,
+      gender: undefined as 'male' | 'female' | 'other' | undefined,
       email: '',
       country: '',
       phone: '',
@@ -71,7 +80,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
             email: profile?.email || '',
             country: profile?.country || '',
             phone: profile?.phone || '',
-            height: !isImperial ? profile?.height || '' : '',
+            height: !isImperial ? (profile?.height?.toString() || '') : '',
             height_ft: isImperial ? height_ft : '',
             height_in: isImperial ? height_in : '',
         });
@@ -120,6 +129,72 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
     }
   };
 
+  const formContent = (
+      <Form {...form}>
+          <form onSubmit={form.handleSubmit(onProfileSubmit)} className="space-y-6">
+              
+              <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled /></FormControl><FormMessage /></FormItem> )} />
+              <FormField
+                  control={form.control}
+                  name="dob"
+                  render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                          <FormLabel>Date of Birth</FormLabel>
+                          <FormControl>
+                              <DatePicker
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  fromYear={new Date().getFullYear() - 100}
+                                  toYear={new Date().getFullYear()}
+                              />
+                          </FormControl>
+                          <FormMessage />
+                      </FormItem>
+                  )}
+              />
+              <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
+              {isImperial ? (
+                  <div className="grid grid-cols-2 gap-4">
+                      <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem><FormLabel>Height (ft)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                      <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem><FormLabel>Height (in)</FormLabel><FormControl><Input type="number" placeholder="e.g., 9" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                  </div>
+              ) : (
+                  <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+              )}
+              
+              <Separator />
+                <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                      Save Changes
+                  </Button>
+              </div>
+          </form>
+      </Form>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="bottom" className="h-[90vh] p-0">
+           <SheetHeader className="p-6 border-b">
+            <SheetTitle>Edit Profile</SheetTitle>
+            <SheetDescription>
+              Update your personal details below. Your name cannot be changed.
+            </SheetDescription>
+          </SheetHeader>
+          <ScrollArea className="h-[calc(90vh-80px)]">
+            <div className="p-6">{formContent}</div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -134,52 +209,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
         <div className="flex-1 min-h-0">
             <ScrollArea className="h-full">
                 <div className="p-6">
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onProfileSubmit)} className="space-y-6">
-                           
-                            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled /></FormControl><FormMessage /></FormItem> )} />
-                            <FormField
-                                control={form.control}
-                                name="dob"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col">
-                                        <FormLabel>Date of Birth</FormLabel>
-                                        <FormControl>
-                                            <DatePicker
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                                fromYear={new Date().getFullYear() - 100}
-                                                toYear={new Date().getFullYear()}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem><FormLabel>Gender</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2"><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem><FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem> )} />
-                            {isImperial ? (
-                                <div className="grid grid-cols-2 gap-4">
-                                    <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem><FormLabel>Height (ft)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-                                    <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem><FormLabel>Height (in)</FormLabel><FormControl><Input type="number" placeholder="e.g., 9" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-                                </div>
-                            ) : (
-                                <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-                            )}
-                            
-                            <Separator />
-                             <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
-                             <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-                             <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-
-                             <div className="flex justify-end gap-2 pt-4">
-                                <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-                                <Button type="submit" disabled={isSubmitting}>
-                                     {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                    Save Changes
-                                </Button>
-                            </div>
-                        </form>
-                    </Form>
+                    {formContent}
                 </div>
             </ScrollArea>
         </div>
