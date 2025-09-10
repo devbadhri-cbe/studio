@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import * as React from 'react';
@@ -284,7 +282,6 @@ export function DiseasePanelCard({
 }: DiseasePanelCardProps) {
   const { profile, toggleDiseaseBiomarker, toggleDiseasePanel, isDoctorLoggedIn } = useApp();
   const [isAddRecordOpen, setIsAddRecordOpen] = React.useState(false);
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const form = useForm({
       defaultValues: React.useMemo(() => {
@@ -311,8 +308,18 @@ export function DiseasePanelCard({
   }
   
   const handleOpenAddRecordDialog = () => {
-    // Reset form to default values before opening
-    form.reset();
+    const defaultFormValues: { [key: string]: any } = { date: new Date() };
+    Object.keys(biomarkerFieldsConfig).forEach(key => {
+        const config = biomarkerFieldsConfig[key as keyof typeof biomarkerFieldsConfig];
+        if (config.fields) {
+            Object.keys(config.fields).forEach(subKey => {
+                defaultFormValues[subKey] = '';
+            });
+        } else {
+            defaultFormValues[key] = '';
+        }
+    });
+    form.reset(defaultFormValues);
     setIsAddRecordOpen(true);
   }
 
@@ -345,7 +352,7 @@ export function DiseasePanelCard({
                 <PlusCircle className="h-4 w-4" />
             </Button>
             {isDoctorLoggedIn && (
-                <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient}>
                         <Settings className="h-4 w-4" />
@@ -355,7 +362,7 @@ export function DiseasePanelCard({
                     <DropdownMenuLabel>Manage Biomarkers</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <ScrollArea className="h-[200px]">
-                        <div className="p-1" onClick={(e) => e.stopPropagation()}>
+                        <div className="p-1">
                             {allPanelBiomarkers.map((key) => {
                                 const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
                                 if (!biomarkerInfo) return null;
@@ -363,9 +370,9 @@ export function DiseasePanelCard({
                                 const isChecked = enabledForPanel.includes(key);
 
                                 return (
-                                    <DropdownMenuItem key={key} onSelect={(e) => e.preventDefault()} className="p-0">
-                                        <Label htmlFor={`switch-${panelKey}-${key}`} className="flex items-center justify-between w-full cursor-pointer px-2 py-1.5">
-                                            <span className="font-normal">{biomarkerInfo.label}</span>
+                                    <DropdownMenuItem key={key} onSelect={(e) => e.preventDefault()}>
+                                        <Label htmlFor={`switch-${panelKey}-${key}`} className="flex items-center justify-between w-full cursor-pointer px-2 py-1.5 font-normal">
+                                            <span>{biomarkerInfo.label}</span>
                                             <Switch
                                                 id={`switch-${panelKey}-${key}`}
                                                 checked={isChecked}
