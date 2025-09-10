@@ -443,7 +443,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         description: "Your changes have been saved."
       });
       // After saving, regenerate insights with the new data
-      regenerateInsights(selectedInsightsLanguage);
+      await regenerateInsights(selectedInsightsLanguage);
     } catch(e) {
       console.error("Failed to save changes", e);
       toast({
