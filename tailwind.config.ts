@@ -137,8 +137,8 @@ export default {
     require('tailwindcss-animate'),
     plugin(function({ addUtilities, theme }: { addUtilities: any, theme: any }) {
       const newUtilities = {
-        '.text-shadow-3d': {
-          textShadow: '0 1px 0 hsl(var(--primary) / 0.4), 0 2px 0 hsl(var(--primary) / 0.3), 0 3px 0 hsl(var(--primary) / 0.2), 0 4px 0 hsl(var(--primary) / 0.1), 0 5px 10px hsla(0, 0%, 0%, 0.2)',
+        '.filter-drop-shadow': {
+          filter: 'drop-shadow(0 2px 2px hsl(var(--primary) / 0.4))',
         },
       }
       addUtilities(newUtilities)
