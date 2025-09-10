@@ -32,6 +32,8 @@ import { AddTriglyceridesRecordDialog } from '@/components/add-triglycerides-rec
 import { LipidPanelCard } from '@/components/lipid-panel-card';
 import { SerumCreatinineCard } from '@/components/serum-creatinine-card';
 import { AddSerumCreatinineRecordDialog } from '@/components/add-serum-creatinine-record-dialog';
+import { UricAcidCard } from '@/components/uric-acid-card';
+import { AddUricAcidRecordDialog } from '@/components/add-uric-acid-record-dialog';
 
 
 export const availableBiomarkerCards = {
@@ -112,6 +114,12 @@ export const availableBiomarkerCards = {
     component: <SerumCreatinineCard />,
     addRecordLabel: 'New Serum Creatinine Record',
     addRecordDialog: <AddSerumCreatinineRecordDialog />,
+  },
+  uricAcid: {
+    label: 'Uric Acid',
+    component: <UricAcidCard />,
+    addRecordLabel: 'New Uric Acid Record',
+    addRecordDialog: <AddUricAcidRecordDialog />,
   },
 };
 
