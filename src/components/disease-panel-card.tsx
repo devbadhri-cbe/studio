@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -36,8 +37,8 @@ import { AddThyroidRecordDialog } from './add-thyroid-record-dialog';
 
 const biomarkerFieldsConfig: { [key: string]: any } = {
   hba1c: { label: 'HbA1c (%)', type: 'number', step: '0.1', placeholder: 'e.g., 5.7', unit: '%' },
-  glucose: { label: 'Fasting Glucose', type: 'number', placeholder: 'e.g., 95', unit: 'mg/dL' }, // Unit handled in label
-  hemoglobin: { label: 'Hemoglobin', type: 'number', step: '0.1', placeholder: 'e.g., 13.5', unit: 'g/dL' }, // Unit handled in label
+  glucose: { label: 'Fasting Glucose', type: 'number', placeholder: 'e.g., 95', unit: 'mg/dL' },
+  hemoglobin: { label: 'Hemoglobin', type: 'number', step: '0.1', placeholder: 'e.g., 13.5', unit: 'g/dL' },
   bloodPressure: {
     label: 'Blood Pressure',
     fields: {
@@ -76,8 +77,25 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey 
     const { addHba1cRecord, addFastingBloodGlucoseRecord, addHemoglobinRecord, addBloodPressureRecord, addWeightRecord, addThyroidRecord, addLipidRecord, profile, getDbGlucoseValue, getDbHemoglobinValue, biomarkerUnit, addSerumCreatinineRecord, addUricAcidRecord, addThyroxineRecord, addTotalCholesterolRecord, addLdlRecord, addHdlRecord, addTriglyceridesRecord } = useApp();
     
     const isImperial = profile.unitSystem === 'imperial';
+    
+    const defaultFormValues = React.useMemo(() => {
+        const defaults: { [key: string]: any } = { date: new Date() };
+        Object.keys(biomarkerFieldsConfig).forEach(key => {
+            const config = biomarkerFieldsConfig[key];
+            if (config.fields) {
+                Object.keys(config.fields).forEach(subKey => {
+                    defaults[subKey] = '';
+                });
+            } else {
+                defaults[key] = '';
+            }
+        });
+        return defaults;
+    }, []);
 
-    const form = useForm();
+    const form = useForm({
+        defaultValues: defaultFormValues,
+    });
     
     const onSubmit = (data: any) => {
         let recordsAdded = 0;
@@ -159,9 +177,9 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey 
 
     React.useEffect(() => {
         if (open) {
-            form.reset();
+            form.reset(defaultFormValues);
         }
-    }, [open, form]);
+    }, [open, form, defaultFormValues]);
 
     const renderField = (key: BiomarkerKey | string) => {
       const config = biomarkerFieldsConfig[key as keyof typeof biomarkerFieldsConfig];
@@ -231,7 +249,6 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey 
                                 <FormField
                                     control={form.control}
                                     name="date"
-                                    defaultValue={new Date()}
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col">
                                             <FormLabel>Test Date</FormLabel>
