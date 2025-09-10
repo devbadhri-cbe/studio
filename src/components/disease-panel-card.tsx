@@ -69,7 +69,7 @@ interface AddPanelRecordDialogProps {
     defaultFormValues: any;
 }
 
-function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey, form, defaultFormValues }: AddPanelRecordDialogProps) {
+function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey, form }: AddPanelRecordDialogProps) {
     const { addHba1cRecord, addFastingBloodGlucoseRecord, addHemoglobinRecord, addBloodPressureRecord, addWeightRecord, addThyroidRecord, addLipidRecord, profile, getDbGlucoseValue, getDbHemoglobinValue, biomarkerUnit, addSerumCreatinineRecord, addUricAcidRecord, addThyroxineRecord, addTotalCholesterolRecord, addLdlRecord, addHdlRecord, addTriglyceridesRecord } = useApp();
     
     const isImperial = profile.unitSystem === 'imperial';
@@ -78,6 +78,17 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey,
         onOpenChange(false);
         // Defer form reset to avoid race condition with dialog closing animation
         requestAnimationFrame(() => {
+            const defaultFormValues: { [key: string]: any } = { date: new Date() };
+            Object.keys(biomarkerFieldsConfig).forEach(key => {
+                const config = biomarkerFieldsConfig[key as keyof typeof biomarkerFieldsConfig];
+                if (config.fields) {
+                    Object.keys(config.fields).forEach(subKey => {
+                        defaultFormValues[subKey] = '';
+                    });
+                } else {
+                    defaultFormValues[key] = '';
+                }
+            });
             form.reset(defaultFormValues);
         });
     }
@@ -224,7 +235,7 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey,
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <ScrollArea className="h-96 w-full">
-                            <div className="space-y-4 py-4 px-6">
+                            <div className="space-y-4 py-4 px-2 md:px-6">
                                 <FormField
                                     control={form.control}
                                     name="date"
