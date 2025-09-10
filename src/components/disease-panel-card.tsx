@@ -20,6 +20,7 @@ import { toast } from '@/hooks/use-toast';
 import { Checkbox } from './ui/checkbox';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
+import { ScrollArea } from './ui/scroll-area';
 
 interface DiseasePanelCardProps {
   title: string;
@@ -72,25 +73,29 @@ export function DiseasePanelCard({
                 <DropdownMenuContent className="w-64" align="end">
                     <DropdownMenuLabel>Manage Biomarkers</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <div className="max-h-60 overflow-y-auto">
-                        {allPanelBiomarkers.map((key) => {
-                            const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
-                            if (!biomarkerInfo) return null;
+                    <ScrollArea className="h-[200px]">
+                        <div className="p-1">
+                            {allPanelBiomarkers.map((key) => {
+                                const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
+                                if (!biomarkerInfo) return null;
 
-                            const isChecked = enabledForPanel.includes(key);
+                                const isChecked = enabledForPanel.includes(key);
 
-                            return (
-                                <DropdownMenuItem key={key} onSelect={(e) => e.preventDefault()}>
-                                    <Label htmlFor={`switch-${panelKey}-${key}`} className="flex-1 font-normal">{biomarkerInfo.label}</Label>
-                                    <Switch
-                                        id={`switch-${panelKey}-${key}`}
-                                        checked={isChecked}
-                                        onCheckedChange={() => toggleDiseaseBiomarker(panelKey, key)}
-                                    />
-                                </DropdownMenuItem>
-                            );
-                        })}
-                    </div>
+                                return (
+                                    <DropdownMenuItem key={key} onSelect={(e) => e.preventDefault()} className="p-0">
+                                        <Label htmlFor={`switch-${panelKey}-${key}`} className="flex items-center justify-between w-full cursor-pointer px-2 py-1.5">
+                                            <span className="font-normal">{biomarkerInfo.label}</span>
+                                            <Switch
+                                                id={`switch-${panelKey}-${key}`}
+                                                checked={isChecked}
+                                                onCheckedChange={() => toggleDiseaseBiomarker(panelKey, key)}
+                                            />
+                                        </Label>
+                                    </DropdownMenuItem>
+                                );
+                            })}
+                        </div>
+                    </ScrollArea>
                 </DropdownMenuContent>
                 </DropdownMenu>
             </div>
@@ -98,9 +103,15 @@ export function DiseasePanelCard({
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-4 pt-0">
         {isPanelEnabledForPatient ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-start">
-            {children}
-          </div>
+          enabledForPanel.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-start">
+              {children}
+            </div>
+          ) : (
+             <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4 min-h-[200px] bg-muted/30 rounded-lg">
+                <p className="text-sm">No biomarkers enabled for this panel. Enable them in the settings.</p>
+            </div>
+          )
         ) : (
           <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4 min-h-[200px] bg-muted/30 rounded-lg">
             <p className="text-sm">This panel is currently disabled for the patient.</p>
