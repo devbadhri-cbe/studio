@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Button } from './ui/button';
-import { Settings, Edit } from 'lucide-react';
+import { Settings, Edit, PlusCircle } from 'lucide-react';
 import {
   DropdownMenuItem,
   DropdownMenuLabel,
