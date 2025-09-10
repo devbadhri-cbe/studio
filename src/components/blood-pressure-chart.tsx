@@ -57,8 +57,9 @@ export function BloodPressureChart() {
               allowDecimals={false}
               tickLine={true}
               axisLine={true}
-              label={{ value: 'BP mmHg', angle: -90, position: 'insideLeft' }}
-            />
+            >
+                <Label value="mmHg" position="top" offset={10} fontSize={10} />
+            </YAxis>
             <YAxis 
                 yAxisId="right" 
                 dataKey="heartRate" 
@@ -66,8 +67,9 @@ export function BloodPressureChart() {
                 domain={[40, 120]} 
                 tickLine={true} 
                 axisLine={true} 
-                label={{ value: 'bpm', angle: 90, position: 'insideRight' }}
-            />
+            >
+                <Label value="bpm" position="top" offset={10} fontSize={10} />
+            </YAxis>
             <Tooltip
               cursor={<Rectangle fill="hsl(var(--muted))" opacity="0.5" />}
               content={({ active, payload, label }) => {
