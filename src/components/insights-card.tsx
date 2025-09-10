@@ -8,8 +8,6 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Separator } from './ui/separator';
 import { useApp } from '@/context/app-context';
-import { getHealthInsights } from '@/ai/flows/health-insights-flow';
-import { toast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
@@ -24,101 +22,21 @@ const supportedLanguages = [
 ];
 
 export function InsightsCard() {
-  const { profile, hba1cRecords, fastingBloodGlucoseRecords, vitaminDRecords, bloodPressureRecords, weightRecords, getDisplayGlucoseValue, getDisplayVitaminDValue } = useApp();
-  const [isLoading, setIsLoading] = React.useState(true); // Start with loading true
-  const [isTranslating, setIsTranslating] = React.useState(false);
-  const [originalTips, setOriginalTips] = React.useState<string[]>([]);
-  const [translatedTips, setTranslatedTips] = React.useState<string[] | null>(null);
-  const [selectedLanguage, setSelectedLanguage] = React.useState('en');
-  const [error, setError] = React.useState<string | null>(null);
-
-  const tipsToDisplay = translatedTips || originalTips;
-
-  const handleGenerateInsights = React.useCallback(async (languageCode: string, isTranslation = false) => {
-    if (isTranslation) {
-        setIsTranslating(true);
-    } else {
-        setIsLoading(true);
-        setOriginalTips([]);
-        setTranslatedTips(null);
-    }
-    setError(null);
-    
-    try {
-        const latestFastingBloodGlucose = fastingBloodGlucoseRecords.sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
-        const latestHba1c = hba1cRecords.sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
-        const latestVitaminD = vitaminDRecords.sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
-        const latestWeight = weightRecords.sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
-        const latestBloodPressure = bloodPressureRecords.sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
-
-        const result = await getHealthInsights({
-            language: supportedLanguages.find(l => l.code === languageCode)?.name || 'English',
-            patient: {
-                age: profile.dob ? new Date().getFullYear() - new Date(profile.dob).getFullYear() : undefined,
-                gender: profile.gender,
-                bmi: profile.bmi,
-                conditions: profile.presentMedicalConditions.map(c => c.condition),
-                medications: profile.medication.map(m => m.name),
-            },
-            latestReadings: {
-                hba1c: latestHba1c?.value,
-                fastingBloodGlucose: latestFastingBloodGlucose ? getDisplayGlucoseValue(latestFastingBloodGlucose.value) : undefined,
-                vitaminD: latestVitaminD ? getDisplayVitaminDValue(latestVitaminD.value) : undefined,
-                weight: latestWeight?.value,
-                bloodPressure: latestBloodPressure ? { systolic: latestBloodPressure.systolic, diastolic: latestBloodPressure.diastolic } : undefined,
-            }
-        });
-        
-        if (result.tips) {
-            if(isTranslation) {
-                setTranslatedTips(result.tips);
-            } else {
-                setOriginalTips(result.tips);
-                 if (languageCode !== 'en') {
-                    setTranslatedTips(result.tips);
-                } else {
-                    setTranslatedTips(null);
-                }
-            }
-        } else {
-            throw new Error("No tips returned from AI.");
-        }
-
-    } catch(e) {
-        console.error(e);
-        setError('Failed to generate insights. Please try again.');
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not generate AI insights.' });
-    } finally {
-        setIsLoading(false);
-        setIsTranslating(false);
-    }
-  }, [
-      profile, 
-      hba1cRecords, 
-      fastingBloodGlucoseRecords, 
-      vitaminDRecords, 
-      bloodPressureRecords, 
-      weightRecords, 
-      getDisplayGlucoseValue, 
-      getDisplayVitaminDValue
-  ]);
+  const { 
+    tips,
+    isGeneratingInsights,
+    isTranslatingInsights,
+    insightsError,
+    regenerateInsights,
+    translateInsights,
+    selectedInsightsLanguage,
+    setSelectedInsightsLanguage,
+  } = useApp();
   
-  React.useEffect(() => {
-    handleGenerateInsights('en');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const handleLanguageChange = async (languageCode: string) => {
     if (!languageCode) return;
-    setSelectedLanguage(languageCode);
-
-    if (originalTips.length > 0) {
-        if (languageCode === 'en') {
-            setTranslatedTips(null);
-            return;
-        }
-        await handleGenerateInsights(languageCode, true);
-    }
+    setSelectedInsightsLanguage(languageCode);
+    await translateInsights(languageCode);
   }
 
   return (
@@ -139,23 +57,23 @@ export function InsightsCard() {
       <CardContent className="flex-1 flex flex-col p-6 pt-0">
         <Separator className="mb-6" />
         <div className="flex-1 flex flex-col items-center justify-center">
-            {(isLoading || isTranslating) && (
+            {(isGeneratingInsights || isTranslatingInsights) && (
                 <div className="flex justify-center items-center flex-1">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="ml-2">{isTranslating ? 'Translating...' : 'Generating...'}</p>
+                    <p className="ml-2">{isTranslatingInsights ? 'Translating...' : 'Generating...'}</p>
                 </div>
             )}
             
-            {!isLoading && !isTranslating && (
+            {!isGeneratingInsights && !isTranslatingInsights && (
                 <>
-                    {error ? (
+                    {insightsError ? (
                         <Alert variant="destructive" className="bg-destructive/5 text-center">
                             <AlertTitle>Error</AlertTitle>
-                            <AlertDescription>{error}</AlertDescription>
+                            <AlertDescription>{insightsError}</AlertDescription>
                         </Alert>
-                    ) : tipsToDisplay.length > 0 ? (
+                    ) : tips.length > 0 ? (
                         <ul className="space-y-3 text-sm list-disc pl-5 self-start">
-                            {tipsToDisplay.map((tip, index) => <li key={index}>{tip}</li>)}
+                            {tips.map((tip, index) => <li key={index}>{tip}</li>)}
                         </ul>
                     ) : (
                         <div className="text-center text-sm text-muted-foreground">
@@ -169,7 +87,7 @@ export function InsightsCard() {
         <div className="flex flex-col md:flex-row justify-center items-center gap-4 pt-6 mt-auto">
             <div className="flex items-center gap-2">
                 <Languages className="h-4 w-4 text-muted-foreground" />
-                <Select value={selectedLanguage} onValueChange={handleLanguageChange} disabled={isLoading || isTranslating}>
+                <Select value={selectedInsightsLanguage} onValueChange={handleLanguageChange} disabled={isGeneratingInsights || isTranslatingInsights}>
                     <SelectTrigger className="w-[150px] h-9 text-sm">
                         <SelectValue placeholder="Translate..." />
                     </SelectTrigger>
@@ -182,7 +100,7 @@ export function InsightsCard() {
                     </SelectContent>
                 </Select>
             </div>
-            <Button onClick={() => handleGenerateInsights(selectedLanguage)} disabled={isLoading || isTranslating}>
+            <Button onClick={() => regenerateInsights(selectedInsightsLanguage)} disabled={isGeneratingInsights || isTranslatingInsights}>
                 <RotateCw className="mr-2 h-4 w-4" />
                 Generate New Insights
             </Button>

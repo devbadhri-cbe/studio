@@ -12,6 +12,7 @@ import { countries } from '@/lib/countries';
 import { toMmolL, toNgDl, toNmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
 import { calculateBmi } from '@/lib/utils';
 import { availableDiseasePanels } from '@/lib/biomarker-cards';
+import { getHealthInsights } from '@/ai/flows/health-insights-flow';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
 
@@ -48,6 +49,16 @@ interface LipidRecordData {
     hdl: number;
     triglycerides: number;
 }
+
+const supportedLanguages = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'fr', name: 'French' },
+    { code: 'de', name: 'German' },
+    { code: 'hi', name: 'Hindi' },
+    { code: 'ta', name: 'Tamil' },
+    { code: 'zh', name: 'Chinese' },
+];
 
 interface AppContextType {
   profile: UserProfile;
@@ -106,7 +117,13 @@ interface AppContextType {
   removeTriglyceridesRecord: (id: string) => void;
   addBatchRecords: (records: BatchRecords) => Promise<AddBatchRecordsResult>;
   tips: string[];
-  setTips: (tips: string[]) => void;
+  isGeneratingInsights: boolean;
+  isTranslatingInsights: boolean;
+  insightsError: string | null;
+  selectedInsightsLanguage: string;
+  setSelectedInsightsLanguage: (lang: string) => void;
+  regenerateInsights: (langCode: string) => Promise<void>;
+  translateInsights: (langCode: string) => Promise<void>;
   isClient: boolean;
   dashboardView: DashboardView;
   setDashboardView: (view: DashboardView) => void;
@@ -159,6 +176,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDoctorLoggedIn, setIsDoctorLoggedIn] = React.useState(false);
+  
+  // State for insights card
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const [isTranslatingInsights, setIsTranslatingInsights] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [originalTips, setOriginalTips] = React.useState<string[]>([]);
+  const [translatedTips, setTranslatedTips] = React.useState<string[] | null>(null);
+  const [selectedInsightsLanguage, setSelectedInsightsLanguage] = React.useState('en');
+  
+  const tipsToDisplay = translatedTips || originalTips;
   
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
@@ -253,6 +280,96 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     return value;
   }, [biomarkerUnit]);
+
+  const regenerateInsights = useCallback(async (languageCode: string) => {
+    setIsGeneratingInsights(true);
+    setInsightsError(null);
+    setOriginalTips([]);
+    setTranslatedTips(null);
+
+    const latestFastingBloodGlucose = [...fastingBloodGlucoseRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+    const latestHba1c = [...hba1cRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+    const latestVitaminD = [...vitaminDRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+    const latestWeight = [...weightRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+    const latestBloodPressure = [...bloodPressureRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+
+    try {
+      const result = await getHealthInsights({
+            language: supportedLanguages.find(l => l.code === languageCode)?.name || 'English',
+            patient: {
+                age: profile.dob ? new Date().getFullYear() - new Date(profile.dob).getFullYear() : undefined,
+                gender: profile.gender,
+                bmi: profile.bmi,
+                conditions: profile.presentMedicalConditions.map(c => c.condition),
+                medications: profile.medication.map(m => m.name),
+            },
+            latestReadings: {
+                hba1c: latestHba1c?.value,
+                fastingBloodGlucose: latestFastingBloodGlucose ? getDisplayGlucoseValue(latestFastingBloodGlucose.value) : undefined,
+                vitaminD: latestVitaminD ? getDisplayVitaminDValue(latestVitaminD.value) : undefined,
+                weight: latestWeight?.value,
+                bloodPressure: latestBloodPressure ? { systolic: latestBloodPressure.systolic, diastolic: latestBloodPressure.diastolic } : undefined,
+            }
+        });
+        if (result.tips) {
+          setOriginalTips(result.tips);
+          if (languageCode !== 'en') {
+            setTranslatedTips(result.tips);
+          } else {
+            setTranslatedTips(null);
+          }
+        } else {
+          throw new Error("No tips returned from AI.");
+        }
+    } catch(e) {
+        console.error(e);
+        setInsightsError('Failed to generate insights. Please try again.');
+    } finally {
+        setIsGeneratingInsights(false);
+    }
+  }, [profile, hba1cRecords, fastingBloodGlucoseRecords, vitaminDRecords, bloodPressureRecords, weightRecords, getDisplayGlucoseValue, getDisplayVitaminDValue]);
+  
+  const translateInsights = useCallback(async (languageCode: string) => {
+    if (languageCode === 'en') {
+      setTranslatedTips(null);
+      return;
+    }
+    if (originalTips.length === 0) return; // Can't translate if there's nothing to translate
+
+    setIsTranslatingInsights(true);
+    setInsightsError(null);
+    try {
+      // Re-use the existing logic, but flag it as a translation
+      const result = await getHealthInsights({
+            language: supportedLanguages.find(l => l.code === languageCode)?.name || 'English',
+            // Note: We are re-sending the same patient data, the caching layer should handle this
+            patient: {
+                age: profile.dob ? new Date().getFullYear() - new Date(profile.dob).getFullYear() : undefined,
+                gender: profile.gender,
+                bmi: profile.bmi,
+                conditions: profile.presentMedicalConditions.map(c => c.condition),
+                medications: profile.medication.map(m => m.name),
+            },
+            latestReadings: {
+                hba1c: [...hba1cRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0]?.value,
+                fastingBloodGlucose: getDisplayGlucoseValue([...fastingBloodGlucoseRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0]?.value),
+                vitaminD: getDisplayVitaminDValue([...vitaminDRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0]?.value),
+                weight: [...weightRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0]?.value,
+                bloodPressure: [...bloodPressureRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0],
+            }
+        });
+        if (result.tips) {
+            setTranslatedTips(result.tips);
+        } else {
+            throw new Error("No translated tips returned from AI.");
+        }
+    } catch(e) {
+        console.error(e);
+        setInsightsError('Failed to translate insights.');
+    } finally {
+        setIsTranslatingInsights(false);
+    }
+  }, [originalTips, profile, hba1cRecords, fastingBloodGlucoseRecords, vitaminDRecords, weightRecords, bloodPressureRecords, getDisplayGlucoseValue, getDisplayVitaminDValue]);
   
   const setPatientData = useCallback((patient: Patient, isDoctorView: boolean = false) => {
     const patientProfile: UserProfile = {
@@ -292,7 +409,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDashboardViewState('report');
     setBiomarkerUnitState(countries.find(c => c.code === patient.country)?.biomarkerUnit || 'conventional');
     setHasUnsavedChanges(false);
-  }, []);
+    
+    // Auto-fetch insights on patient load
+    regenerateInsights('en');
+  }, [regenerateInsights]);
 
   const saveChanges = useCallback(async () => {
     if (!profile.id || !hasUnsavedChanges) return;
@@ -322,6 +442,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         title: "Success!",
         description: "Your changes have been saved."
       });
+      // After saving, regenerate insights with the new data
+      regenerateInsights(selectedInsightsLanguage);
     } catch(e) {
       console.error("Failed to save changes", e);
       toast({
@@ -332,7 +454,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSaving(false);
     }
-  }, [profile, hasUnsavedChanges, hba1cRecords, fastingBloodGlucoseRecords, vitaminDRecords, thyroidRecords, thyroxineRecords, serumCreatinineRecords, uricAcidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
+  }, [profile, hasUnsavedChanges, hba1cRecords, fastingBloodGlucoseRecords, vitaminDRecords, thyroidRecords, thyroxineRecords, serumCreatinineRecords, uricAcidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords, regenerateInsights, selectedInsightsLanguage]);
   
   const getMedicationForRecord = useCallback((medication: Medication[]): string => {
     if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
@@ -774,10 +896,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return result;
   }, [profile.medication, getMedicationForRecord]);
 
-  const setTips = useCallback((newTips: string[]) => {
-    setTipsState(newTips);
-  }, []);
-
   const setDashboardView = useCallback((view: DashboardView) => {
     setDashboardViewState(view);
   }, []);
@@ -880,8 +998,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addTriglyceridesRecord,
     removeTriglyceridesRecord,
     addBatchRecords,
-    tips,
-    setTips,
+    tips: tipsToDisplay,
+    isGeneratingInsights,
+    isTranslatingInsights,
+    insightsError,
+    selectedInsightsLanguage,
+    setSelectedInsightsLanguage,
+    regenerateInsights,
+    translateInsights,
     isClient,
     dashboardView,
     setDashboardView,
