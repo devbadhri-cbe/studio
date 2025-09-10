@@ -16,7 +16,7 @@ import { ProfileCard } from '@/components/profile-card';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { UnsavedChangesBar } from './unsaved-changes-bar';
 import { DashboardSectionToggle } from './dashboard-section-toggle';
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
+import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
 import { doctorDetails } from '@/lib/doctor-data';
@@ -30,7 +30,7 @@ import { DoctorReviewCard } from './doctor-review-card';
 export function PatientDashboard() {
   const { isClient, isDoctorLoggedIn } = useApp();
   const router = useRouter();
-  const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(false);
+  const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(true);
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
   const [diseasePanelSearchQuery, setDiseasePanelSearchQuery] = React.useState('');
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
@@ -40,12 +40,10 @@ export function PatientDashboard() {
   
   const handleDiseasePanelToggle = (isOpen: boolean) => {
     setIsDiseasePanelOpen(isOpen);
-    if (isOpen) setIsBiomarkersOpen(false);
   }
   
   const handleBiomarkersToggle = (isOpen: boolean) => {
     setIsBiomarkersOpen(isOpen);
-    if (isOpen) setIsDiseasePanelOpen(false);
   }
 
 
@@ -80,11 +78,8 @@ export function PatientDashboard() {
     </Tooltip>
   ) : null;
 
-  const showDiseasePanel = !isBiomarkersOpen;
-  const showBiomarkersPanel = !isDiseasePanelOpen && isDoctorLoggedIn;
-
   return (
-    <TooltipProvider>
+    <>
       <div className="flex min-h-screen w-full flex-col bg-background">
          <TitleBar
             title={['Health', 'Guardian']}
@@ -114,46 +109,40 @@ export function PatientDashboard() {
             
             <Separator />
             
-            <div className="flex flex-col md:flex-row gap-4">
-              {showDiseasePanel && (
-                <div className="flex-1">
-                  <Collapsible open={isDiseasePanelOpen} onOpenChange={handleDiseasePanelToggle}>
+            <div className="space-y-4">
+                <Collapsible open={isDiseasePanelOpen} onOpenChange={handleDiseasePanelToggle}>
+                  <DashboardSectionToggle
+                    title="Disease Panels"
+                    subtitle="View and manage panels like Diabetes and Hypertension."
+                    icon={<Stethoscope className="h-6 w-6 text-primary" />}
+                    isOpen={isDiseasePanelOpen}
+                    searchQuery={diseasePanelSearchQuery}
+                    onSearchChange={setDiseasePanelSearchQuery}
+                    searchPlaceholder="Search panels..."
+                  />
+                  <CollapsibleContent className="mt-4">
+                    <DiseasePanel searchQuery={diseasePanelSearchQuery} />
+                  </CollapsibleContent>
+                </Collapsible>
+
+              {isDoctorLoggedIn && (
+                  <Collapsible open={isBiomarkersOpen} onOpenChange={handleBiomarkersToggle}>
                     <DashboardSectionToggle
-                      title="Disease Panels"
-                      subtitle="View and manage panels like Diabetes and Hypertension."
-                      icon={<Stethoscope className="h-6 w-6 text-primary" />}
-                      isOpen={isDiseasePanelOpen}
-                      searchQuery={diseasePanelSearchQuery}
-                      onSearchChange={setDiseasePanelSearchQuery}
-                      searchPlaceholder="Search panels..."
+                      title="Biomarker Management"
+                      subtitle="Enable or disable individual biomarker tracking cards."
+                      icon={<Shapes className="h-6 w-6 text-primary" />}
+                      isOpen={isBiomarkersOpen}
+                      searchQuery={biomarkerSearchQuery}
+                      onSearchChange={setBiomarkerSearchQuery}
+                      searchPlaceholder="Search biomarkers..."
+                      showCreateButton={true}
+                      onCreateClick={() => setIsAddingBiomarker(true)}
                     />
-                    <CollapsibleContent className="mt-4">
-                      <DiseasePanel searchQuery={diseasePanelSearchQuery} />
+                    <CollapsibleContent className="mt-4 space-y-4">
+                      {isAddingBiomarker && <AddNewBiomarker onCancel={() => setIsAddingBiomarker(false)} />}
+                      <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
                     </CollapsibleContent>
                   </Collapsible>
-                </div>
-              )}
-
-              {showBiomarkersPanel && (
-                 <div className="flex-1">
-                    <Collapsible open={isBiomarkersOpen} onOpenChange={handleBiomarkersToggle}>
-                      <DashboardSectionToggle
-                        title="Biomarker Management"
-                        subtitle="Enable or disable individual biomarker tracking cards."
-                        icon={<Shapes className="h-6 w-6 text-primary" />}
-                        isOpen={isBiomarkersOpen}
-                        searchQuery={biomarkerSearchQuery}
-                        onSearchChange={setBiomarkerSearchQuery}
-                        searchPlaceholder="Search biomarkers..."
-                        showCreateButton={true}
-                        onCreateClick={() => setIsAddingBiomarker(true)}
-                      />
-                      <CollapsibleContent className="mt-4 space-y-4">
-                        {isAddingBiomarker && <AddNewBiomarker onCancel={() => setIsAddingBiomarker(false)} />}
-                        <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
-                      </CollapsibleContent>
-                    </Collapsible>
-                </div>
               )}
             </div>
 
@@ -170,6 +159,6 @@ export function PatientDashboard() {
         <UnsavedChangesBar />
       </div>
       <EditDoctorDetailsDialog open={isEditingDoctor} onOpenChange={setIsEditingDoctor} />
-    </TooltipProvider>
+    </>
   );
 }

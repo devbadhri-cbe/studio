@@ -22,7 +22,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { TitleBar } from '@/components/ui/title-bar';
-import { TooltipProvider } from '@/components/ui/tooltip';
 import { doctorDetails } from '@/lib/doctor-data';
 import { EditDoctorDetailsDialog } from '@/components/edit-doctor-details-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -225,7 +224,7 @@ export default function DoctorDashboardPage() {
   }
 
   return (
-    <TooltipProvider>
+    <>
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <TitleBar
           title={['Health', 'Guardian']}
@@ -283,6 +282,6 @@ export default function DoctorDashboardPage() {
         </main>
       </div>
       <EditDoctorDetailsDialog open={isEditingDoctor} onOpenChange={setIsEditingDoctor} />
-    </TooltipProvider>
+    </>
   );
 }

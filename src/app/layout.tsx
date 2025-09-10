@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AppProvider } from '@/context/app-context';
 import { Toaster } from '@/components/ui/toaster';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 
 export const metadata: Metadata = {
@@ -39,10 +40,12 @@ export default function RootLayout({
       </head>
       <body>
         <AppProvider>
-          <div className="flex flex-col min-h-screen pt-[env(safe-area-inset-top)]">
-            {children}
-          </div>
-          <Toaster />
+            <TooltipProvider>
+              <div className="flex flex-col min-h-screen pt-[env(safe-area-inset-top)]">
+                {children}
+              </div>
+              <Toaster />
+            </TooltipProvider>
         </AppProvider>
       </body>
     </html>
