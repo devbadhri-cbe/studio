@@ -215,7 +215,7 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey,
                 <FormItem>
                     <FormLabel>{fieldLabel}</FormLabel>
                     <FormControl>
-                        <Input type={config.type} step={config.step} placeholder={config.placeholder} {...field} value={field.value || ''} />
+                        <Input type={config.type} step={config.step} placeholder={config.placeholder} {...field} />
                     </FormControl>
                 </FormItem>
             )}
@@ -235,7 +235,7 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey,
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <ScrollArea className="h-96 w-full">
-                            <div className="space-y-4 py-4 px-2 md:px-6">
+                            <div className="space-y-4 py-4 px-6">
                                 <FormField
                                     control={form.control}
                                     name="date"
@@ -285,6 +285,7 @@ export function DiseasePanelCard({
 }: DiseasePanelCardProps) {
   const { profile, toggleDiseaseBiomarker, toggleDiseasePanel, isDoctorLoggedIn } = useApp();
   const [isAddRecordOpen, setIsAddRecordOpen] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const defaultFormValues = React.useMemo(() => {
       const defaults: { [key: string]: any } = { date: new Date() };
@@ -346,7 +347,7 @@ export function DiseasePanelCard({
                 <PlusCircle className="h-4 w-4" />
             </Button>
             {isDoctorLoggedIn && (
-                <DropdownMenu>
+                <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
                 <DropdownMenuTrigger asChild>
                     <Button size="icon" variant="ghost" className="h-8 w-8" disabled={!isPanelEnabledForPatient}>
                         <Settings className="h-4 w-4" />
