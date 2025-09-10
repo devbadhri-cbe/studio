@@ -2,7 +2,7 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, Camera, FileUp } from 'lucide-react';
+import { Loader2, UploadCloud, Camera, FileUp, UserCheck, AlertTriangle } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
@@ -14,7 +14,7 @@ import { ExtractedRecordReview } from './extracted-record-review';
 import { isValid, parseISO } from 'date-fns';
 
 
-type Step = 'initial' | 'loading' | 'review' | 'error';
+type Step = 'initial' | 'loading' | 'confirmName' | 'review' | 'error';
 
 export function UploadRecordDialog() {
   const [open, setOpen] = React.useState(false);
@@ -28,7 +28,7 @@ export function UploadRecordDialog() {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { addBatchRecords } = useApp();
+  const { addBatchRecords, profile } = useApp();
   
   const stopCameraStream = React.useCallback(() => {
     if (videoRef.current && videoRef.current.srcObject) {
@@ -76,7 +76,7 @@ export function UploadRecordDialog() {
       }
       
       setExtractedData(result);
-      setStep('review');
+      setStep('confirmName');
 
     } catch (e) {
       console.error(e);
@@ -183,6 +183,42 @@ export function UploadRecordDialog() {
         );
       case 'loading':
         return <div className="flex justify-center items-center h-40"><Loader2 className="h-12 w-12 animate-spin text-primary" /><p className="ml-4">AI is analyzing...</p></div>;
+      case 'confirmName':
+        const nameOnReport = extractedData?.patientName || "Not Found";
+        const nameOnProfile = profile.name;
+        const namesMatch = nameOnReport.toLowerCase() === nameOnProfile.toLowerCase();
+
+        return (
+            <div className="space-y-4 text-center">
+                <UserCheck className="mx-auto h-12 w-12 text-primary" />
+                <h3 className="text-lg font-semibold">Confirm Patient Name</h3>
+                <p className="text-sm text-muted-foreground">
+                    Please confirm the name on the lab report matches the patient profile.
+                </p>
+                <div className="space-y-2 rounded-lg border p-4">
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Name on Report:</span>
+                        <span className="font-semibold">{nameOnReport}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Patient Profile:</span>
+                        <span className="font-semibold">{nameOnProfile}</span>
+                    </div>
+                </div>
+                {!namesMatch && (
+                     <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription>
+                            Warning: The names do not match. Proceeding will add these records to <strong>{nameOnProfile}</strong>'s profile.
+                        </AlertDescription>
+                    </Alert>
+                )}
+                <div className="flex justify-end gap-2 pt-4">
+                    <Button variant="ghost" onClick={resetState}>Cancel</Button>
+                    <Button onClick={() => setStep('review')}>Confirm & Proceed</Button>
+                </div>
+            </div>
+        );
       case 'review':
         return extractedData ? (
           <ExtractedRecordReview
