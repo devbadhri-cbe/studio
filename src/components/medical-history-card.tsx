@@ -30,8 +30,9 @@ import {
 } from './ui/dropdown-menu';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AddMedicationForm } from './add-medication-dialog';
+import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 
-type ActiveView = 'none' | 'addCondition' | 'editCondition' | 'addMedication' | 'interaction' | `synopsis_${string}`;
+type ActiveView = 'none' | 'addCondition' | 'editCondition' | 'addMedication' | 'interaction' | `synopsis_condition_${string}` | `synopsis_medication_${string}`;
 
 interface MedicalConditionFormValues {
   userInput: string;
@@ -381,16 +382,15 @@ export function MedicalHistoryCard() {
     setActiveView('none');
     setActiveData(null);
   }
+  
+  const showSynopsis = (type: 'condition' | 'medication', data: any) => {
+    setActiveView(`synopsis_${type}_${data.id}`);
+    setActiveData(data);
+  }
 
-  const renderActiveView = () => {
+  const renderActiveViewContent = () => {
     if (activeView === 'addCondition' || activeView === 'editCondition') {
-        return (
-            <MedicalConditionForm 
-                onSave={handleSaveCondition} 
-                onCancel={closeActiveView} 
-                initialData={activeData}
-            />
-        );
+        return <MedicalConditionForm onSave={handleSaveCondition} onCancel={closeActiveView} initialData={activeData} />;
     }
     if (activeView === 'addMedication') {
         return <AddMedicationForm onCancel={closeActiveView} onSuccess={closeActiveView} />;
@@ -398,22 +398,31 @@ export function MedicalHistoryCard() {
     if (activeView === 'interaction') {
         return <DrugInteractionViewer medications={profile.medication.map(m => `${m.name} ${m.dosage}`)} onClose={closeActiveView} />;
     }
-    if (activeView.startsWith('synopsis_')) {
-        const type = activeData?.condition ? 'condition' : 'medication';
-        if (type === 'condition') {
-            return <ConditionSynopsisDialog conditionName={activeData.condition} initialSynopsis={activeData.synopsis} onClose={closeActiveView} />;
-        }
-        if (type === 'medication') {
-            return <MedicationSynopsisDialog medicationName={activeData.name} onClose={closeActiveView} />;
-        }
+    if (activeView.startsWith('synopsis_condition_')) {
+      return (
+        <div className="pl-5 pb-2">
+            <ConditionSynopsisDialog
+                conditionName={activeData.condition}
+                initialSynopsis={activeData.synopsis}
+                onClose={closeActiveView}
+            />
+        </div>
+      )
+    }
+     if (activeView.startsWith('synopsis_medication_')) {
+      return (
+         <div className="pl-5 pb-2">
+            <MedicationSynopsisDialog
+                medicationName={activeData.name}
+                onClose={closeActiveView}
+            />
+        </div>
+      )
     }
     return null;
   }
-  
-  const showSynopsis = (type: 'condition' | 'medication', data: any) => {
-    setActiveView(`synopsis_${type}_${data.id}`);
-    setActiveData(data);
-  }
+
+  const activeViewContent = renderActiveViewContent();
 
   return (
     <>
@@ -428,31 +437,22 @@ export function MedicalHistoryCard() {
                     {profile.presentMedicalConditions.map((condition) => {
                         if (!condition || !condition.id) return null;
                         return (
-                            <React.Fragment key={condition.id}>
-                                <DiseaseCard 
-                                    condition={condition}
-                                    onRevise={handleReviseCondition}
-                                    isEditMode={isEditingConditions}
-                                    onRemove={() => removeMedicalConditionFromContext(condition.id)}
-                                    onShowSynopsis={() => showSynopsis('condition', condition)}
-                                />
-                                {activeView === `synopsis_condition_${condition.id}` && (
-                                    <li className="pl-5 pb-2">
-                                        <ConditionSynopsisDialog
-                                            conditionName={condition.condition}
-                                            initialSynopsis={condition.synopsis}
-                                            onClose={closeActiveView}
-                                        />
-                                    </li>
-                                )}
-                            </React.Fragment>
+                            <DiseaseCard 
+                                key={condition.id}
+                                condition={condition}
+                                onRevise={handleReviseCondition}
+                                isEditMode={isEditingConditions}
+                                onRemove={() => removeMedicalConditionFromContext(condition.id)}
+                                onShowSynopsis={() => showSynopsis('condition', condition)}
+                            />
                         )
                     })}
                 </ul>
             ) : (
                 <p className="text-xs text-muted-foreground pl-8 pt-2">No conditions recorded.</p>
             )}
-            {activeView === 'addCondition' && renderActiveView()}
+            {activeView === 'addCondition' || activeView === 'editCondition' ? activeViewContent : null}
+            {activeView.startsWith('synopsis_condition_') ? activeViewContent : null}
         </MedicalInfoSection>
         
         <MedicalInfoSection
@@ -463,38 +463,27 @@ export function MedicalHistoryCard() {
             {profile.medication.length > 0 ? (
                  <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
-                       <React.Fragment key={med.id}>
-                            <MedicationListItem
-                                med={med}
-                                isEditing={isEditingMedications}
-                                onRemove={handleRemoveMedication}
-                                onShowSynopsis={() => showSynopsis('medication', med)}
-                                formatDetails={formatMedicationDetails}
-                            />
-                            {activeView === `synopsis_medication_${med.id}` && (
-                                <li className="pl-5 pb-2">
-                                     <MedicationSynopsisDialog
-                                        medicationName={med.name}
-                                        onClose={closeActiveView}
-                                    />
-                                </li>
-                            )}
-                       </React.Fragment>
+                       <MedicationListItem
+                            key={med.id}
+                            med={med}
+                            isEditing={isEditingMedications}
+                            onRemove={handleRemoveMedication}
+                            onShowSynopsis={() => showSynopsis('medication', med)}
+                            formatDetails={formatMedicationDetails}
+                        />
                     ))}
                 </ul>
             ) : (
                 <p className="text-xs text-muted-foreground pl-8 pt-2">No medication recorded.</p>
             )}
 
-            {activeView === 'addMedication' && renderActiveView()}
-
+            {activeView === 'addMedication' ? activeViewContent : null}
+            {activeView.startsWith('synopsis_medication_') ? activeViewContent : null}
+            
             {profile.medication.length > 1 && !isMedicationNil && (
                 <div className="pt-2">
                     {activeView === 'interaction' ? (
-                        <DrugInteractionViewer
-                            medications={profile.medication.map(m => `${m.name} ${m.dosage}`)}
-                            onClose={closeActiveView}
-                        />
+                        activeViewContent
                     ) : (
                         <Button variant="outline" size="sm" className="w-full" onClick={() => setActiveView('interaction')}>
                             <ShieldAlert className="mr-2 h-4 w-4" />
