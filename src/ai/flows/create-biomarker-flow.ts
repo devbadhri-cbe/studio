@@ -19,6 +19,7 @@ const CreateBiomarkerInputSchema = z.object({
     name: z.string().describe('The name of the new biomarker (e.g., "Uric Acid").'),
     unit: z.string().describe('The unit of measurement for the biomarker (e.g., "mg/dL").'),
     key: z.string().describe('A camelCase key for the biomarker (e.g., "uricAcid").'),
+    patientId: z.string().describe('The ID of the patient for whom the biomarker is being created.'),
 });
 export type CreateBiomarkerInput = z.infer<typeof CreateBiomarkerInputSchema>;
 
