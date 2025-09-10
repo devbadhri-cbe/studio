@@ -7,7 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
@@ -18,6 +18,8 @@ import { useApp } from '@/context/app-context';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { Checkbox } from './ui/checkbox';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
 
 interface DiseasePanelCardProps {
   title: string;
@@ -67,26 +69,28 @@ export function DiseasePanelCard({
                         <Settings className="h-4 w-4" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64" align="end" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuContent className="w-64" align="end">
                     <DropdownMenuLabel>Manage Biomarkers</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {allPanelBiomarkers.map((key) => {
-                        const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
-                        if (!biomarkerInfo) return null;
+                    <div className="max-h-60 overflow-y-auto">
+                        {allPanelBiomarkers.map((key) => {
+                            const biomarkerInfo = availableBiomarkerCards[key as BiomarkerKey];
+                            if (!biomarkerInfo) return null;
 
-                        const isChecked = enabledForPanel.includes(key);
+                            const isChecked = enabledForPanel.includes(key);
 
-                        return (
-                            <DropdownMenuCheckboxItem
-                            key={key}
-                            checked={isChecked}
-                            onSelect={(e) => e.preventDefault()}
-                            onClick={() => toggleDiseaseBiomarker(panelKey, key)}
-                            >
-                            {biomarkerInfo.label}
-                            </DropdownMenuCheckboxItem>
-                        );
-                    })}
+                            return (
+                                <DropdownMenuItem key={key} onSelect={(e) => e.preventDefault()}>
+                                    <Label htmlFor={`switch-${panelKey}-${key}`} className="flex-1 font-normal">{biomarkerInfo.label}</Label>
+                                    <Switch
+                                        id={`switch-${panelKey}-${key}`}
+                                        checked={isChecked}
+                                        onCheckedChange={() => toggleDiseaseBiomarker(panelKey, key)}
+                                    />
+                                </DropdownMenuItem>
+                            );
+                        })}
+                    </div>
                 </DropdownMenuContent>
                 </DropdownMenu>
             </div>
