@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -101,8 +102,10 @@ export function PatientDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <ProfileCard />
                 <MedicalHistoryCard />
-                <WeightRecordCard />
-                <BloodPressureCard />
+                <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <WeightRecordCard />
+                    <BloodPressureCard />
+                </div>
             </div>
             
             <Separator />
