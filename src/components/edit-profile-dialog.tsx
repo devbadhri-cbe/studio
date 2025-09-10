@@ -134,66 +134,68 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
           <form onSubmit={form.handleSubmit(onProfileSubmit)} className="space-y-6">
               
               <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled /></FormControl><FormMessage /></FormItem> )} />
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <FormField
-                        control={form.control}
-                        name="dob"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Date of Birth</FormLabel>
-                                <FormControl>
-                                    <DatePicker
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        fromYear={new Date().getFullYear() - 100}
-                                        toYear={new Date().getFullYear()}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-                <div>
-                    <FormField
-                        control={form.control}
-                        name="gender"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Gender</FormLabel>
-                                <FormControl>
-                                    <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2">
-                                        <FormItem className="flex items-center space-x-2 space-y-0">
-                                            <FormControl><RadioGroupItem value="male" /></FormControl>
-                                            <FormLabel className="font-normal">Male</FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-2 space-y-0">
-                                            <FormControl><RadioGroupItem value="female" /></FormControl>
-                                            <FormLabel className="font-normal">Female</FormLabel>
-                                        </FormItem>
-                                    </RadioGroup>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-              </div>
-
-              {isImperial ? (
-                  <div className="grid grid-cols-2 gap-4">
-                      <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem><FormLabel>Height (ft)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-                      <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem><FormLabel>Height (in)</FormLabel><FormControl><Input type="number" placeholder="e.g., 9" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-                  </div>
-              ) : (
-                  <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-              )}
               
-              <Separator />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                <FormField
+                    control={form.control}
+                    name="dob"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Date of Birth</FormLabel>
+                            <FormControl>
+                                <DatePicker
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    fromYear={new Date().getFullYear() - 100}
+                                    toYear={new Date().getFullYear()}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Gender</FormLabel>
+                            <FormControl>
+                                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2">
+                                    <FormItem className="flex items-center space-x-2 space-y-0">
+                                        <FormControl><RadioGroupItem value="male" /></FormControl>
+                                        <FormLabel className="font-normal">Male</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-2 space-y-0">
+                                        <FormControl><RadioGroupItem value="female" /></FormControl>
+                                        <FormLabel className="font-normal">Female</FormLabel>
+                                    </FormItem>
+                                </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                
+                <div className="md:col-span-2">
+                    {isImperial ? (
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem><FormLabel>Height (ft)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem><FormLabel>Height (in)</FormLabel><FormControl><Input type="number" placeholder="e.g., 9" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                        </div>
+                    ) : (
+                        <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                    )}
+                </div>
+
+                <Separator className="md:col-span-2" />
+
                 <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-                <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                <div className="md:col-span-2">
+                    <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                </div>
+              </div>
 
                 <div className="flex justify-end gap-2 pt-4">
                   <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
