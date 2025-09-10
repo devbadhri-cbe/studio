@@ -17,6 +17,7 @@ import type { UnitSystem } from '@/lib/types';
 import { Settings, Edit } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Separator } from './ui/separator';
+import { ActionIcon } from './ui/action-icon';
 
 interface ProfileSettingsPopoverProps {
     onEdit: () => void;
@@ -27,19 +28,9 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
 
   return (
     <Popover>
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <PopoverTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-8 w-8">
-                        <Settings className="h-4 w-4" />
-                        <span className="sr-only">Settings</span>
-                    </Button>
-                </PopoverTrigger>
-            </TooltipTrigger>
-            <TooltipContent>
-                <p>Display Settings</p>
-            </TooltipContent>
-        </Tooltip>
+        <PopoverTrigger asChild>
+            <ActionIcon tooltip="Display Settings" icon={<Settings className="h-4 w-4" />} />
+        </PopoverTrigger>
         <PopoverContent className="w-64" align="end">
             <div className="grid gap-4">
                  <div className="space-y-2">

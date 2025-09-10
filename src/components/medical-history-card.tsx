@@ -31,6 +31,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AddMedicationForm } from './add-medication-dialog';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
+import { ActionIcon } from './ui/action-icon';
 
 type ActiveView = 'none' | 'addCondition' | 'editCondition' | 'addMedication' | 'interaction' | `synopsis_condition_${string}` | `synopsis_medication_${string}`;
 
@@ -249,29 +250,18 @@ function MedicationListItem({ med, isEditing, onRemove, onShowSynopsis, formatDe
             </div>
                 <div className="flex items-center shrink-0">
                     {med.name.toLowerCase() !== 'nil' && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 shrink-0"
-                                    onClick={(e) => { e.stopPropagation(); onShowSynopsis(med.id); }}
-                                >
-                                    <Info className="h-5 w-5 text-blue-500" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>View Synopsis</TooltipContent>
-                        </Tooltip>
+                        <ActionIcon 
+                            tooltip="View Synopsis"
+                            icon={<Info className="h-5 w-5 text-blue-500" />}
+                            onClick={(e) => { e.stopPropagation(); onShowSynopsis(med.id); }}
+                        />
                     )}
                     {isEditing && med.name.toLowerCase() !== 'nil' && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onRemove(med.id); }}>
-                                    <Trash2 className="h-5 w-5 text-destructive" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Delete Medication</TooltipContent>
-                        </Tooltip>
+                         <ActionIcon 
+                            tooltip="Delete Medication"
+                            icon={<Trash2 className="h-5 w-5 text-destructive" />}
+                            onClick={(e) => { e.stopPropagation(); onRemove(med.id); }}
+                        />
                     )}
                 </div>
         </li>
@@ -326,9 +316,7 @@ export function MedicalHistoryCard() {
   const conditionActions = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Settings className="h-4 w-4" />
-        </Button>
+        <ActionIcon tooltip="Condition Settings" icon={<Settings className="h-4 w-4" />} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onSelect={handleAddConditionClick}>
@@ -349,9 +337,7 @@ export function MedicalHistoryCard() {
   const medicationActions = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Settings className="h-4 w-4" />
-        </Button>
+        <ActionIcon tooltip="Medication Settings" icon={<Settings className="h-4 w-4" />} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {!isMedicationNil && (

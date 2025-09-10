@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { cn } from '@/lib/utils';
 import { SharePatientAccessDialog } from './share-patient-access-dialog';
+import { ActionIcon } from './ui/action-icon';
 
 interface PatientCardProps {
   patient: Patient;
@@ -136,10 +137,7 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                 <div className="shrink-0">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
+                            <ActionIcon tooltip="More options" icon={<MoreHorizontal className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>

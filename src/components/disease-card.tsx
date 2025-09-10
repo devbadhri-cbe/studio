@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from './ui/alert';
 import { Loader2, Info, Trash2, CheckCircle, AlertTriangle, Edit } from 'lucide-react';
 import * as React from 'react';
+import { ActionIcon } from './ui/action-icon';
 
 interface DiseaseCardProps {
   condition: MedicalCondition;
@@ -72,34 +73,18 @@ export function DiseaseCard({ condition, onRevise, isEditMode, onRemove, onShowS
               <p className="text-xs text-muted-foreground">{formatDate(condition.date)}</p>
             </div>
             <div className="flex items-center shrink-0 gap-1">
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 shrink-0"
-                            onClick={handleToggleSynopsis}
-                        >
-                            <Info className="h-5 w-5 text-blue-500" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>View Synopsis</TooltipContent>
-                </Tooltip>
+                <ActionIcon 
+                    tooltip="View Synopsis"
+                    icon={<Info className="h-5 w-5 text-blue-500" />}
+                    onClick={handleToggleSynopsis}
+                />
                 
                 {isEditMode && (
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8 shrink-0"
-                                onClick={handleRemoveCondition}
-                            >
-                                <Trash2 className="h-5 w-5 text-destructive" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete Condition</TooltipContent>
-                    </Tooltip>
+                    <ActionIcon 
+                        tooltip="Delete Condition"
+                        icon={<Trash2 className="h-5 w-5 text-destructive" />}
+                        onClick={handleRemoveCondition}
+                    />
                 )}
             </div>
         </div>

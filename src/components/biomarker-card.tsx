@@ -17,6 +17,7 @@ import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
+import { ActionIcon } from './ui/action-icon';
 
 interface Record {
   id: string;
@@ -97,9 +98,7 @@ export function BiomarkerCard<T extends Record>({
   const Actions = !isReadOnly ? (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="icon" variant="ghost" className="h-8 w-8">
-          <Settings className="h-4 w-4" />
-        </Button>
+        <ActionIcon tooltip="Settings" icon={<Settings className="h-4 w-4" />} />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64" align="end">
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
