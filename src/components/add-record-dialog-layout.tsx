@@ -13,11 +13,13 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { startOfDay, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useApp } from '@/context/app-context';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 
 interface AddRecordDialogLayoutProps {
   open: boolean;
@@ -46,6 +48,7 @@ export function AddRecordDialogLayout({
 }: AddRecordDialogLayoutProps) {
   const { toast } = useToast();
   const { profile } = useApp();
+  const isMobile = useIsMobile();
 
   const handleFormSubmit = (data: any) => {
     if (existingRecords) {
@@ -68,18 +71,64 @@ export function AddRecordDialogLayout({
   };
   
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!profile.medication || profile.medication.length === 0) {
+    if (profile.medication.length === 0) {
       e.preventDefault();
       toast({
         variant: 'destructive',
         title: 'Medication Required',
         description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
       });
-      onOpenChange(false); // Close the dialog if it was about to open
+      onOpenChange(false);
     } else {
       onOpenChange(true);
     }
   };
+
+  const formContent = (
+    <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 py-4">
+          {children}
+          <div className="flex justify-end gap-2">
+            {!isMobile && <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Record
+            </Button>
+          </div>
+        </form>
+    </Form>
+  );
+
+  if (isMobile) {
+    if (!open) {
+      return trigger ? React.cloneElement(trigger as React.ReactElement, {
+        onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+          if ((trigger as React.ReactElement).props.onClick) {
+            (trigger as React.ReactElement).props.onClick(e);
+          }
+          handleTriggerClick(e);
+        },
+      }) : null;
+    }
+    return (
+        <Card className="mt-4 border-primary">
+            <CardHeader>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle>{title}</CardTitle>
+                        <CardDescription>{description}</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
+                        <X className="h-4 w-4" />
+                    </Button>
+                </div>
+            </CardHeader>
+            <CardContent>
+                {formContent}
+            </CardContent>
+        </Card>
+    );
+  }
 
   const content = (
     <DialogContent className="sm:max-w-[425px]">
@@ -87,25 +136,13 @@ export function AddRecordDialogLayout({
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 py-4">
-          {children}
-          <DialogFooter>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Record
-            </Button>
-          </DialogFooter>
-        </form>
-      </Form>
+      {formContent}
     </DialogContent>
   );
   
   if (trigger) {
-    // Clone the trigger to attach the onClick event
     const triggerWithClick = React.cloneElement(trigger as React.ReactElement, {
       onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
-        // Allow original onClick from button to fire if it exists
         if ((trigger as React.ReactElement).props.onClick) {
           (trigger as React.ReactElement).props.onClick(e);
         }

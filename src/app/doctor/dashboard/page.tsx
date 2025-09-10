@@ -25,6 +25,8 @@ import { TitleBar } from '@/components/ui/title-bar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { doctorDetails } from '@/lib/doctor-data';
 import { EditDoctorDetailsDialog } from '@/components/edit-doctor-details-dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 
 export default function DoctorDashboardPage() {
   const [patients, setPatients] = React.useState<Patient[]>([]);
@@ -35,6 +37,7 @@ export default function DoctorDashboardPage() {
   const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
   const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const isMobile = useIsMobile();
 
   const router = useRouter();
   const { toast } = useToast();
@@ -171,6 +174,46 @@ export default function DoctorDashboardPage() {
       setIsSubmitting(false);
     }, 1000);
   };
+
+  const renderPatientForm = (isEditing: boolean) => {
+    const props = {
+      patient: isEditing ? editingPatient! : undefined,
+      onSubmit: isEditing ? handleEditFormSubmit : handleFormSubmit,
+      isSubmitting: isSubmitting,
+      onCancel: () => isEditing ? setEditingPatient(null) : setIsCreating(false),
+    };
+    
+    const title = isEditing ? "Edit Patient Profile" : "Create New Patient Profile";
+    const description = isEditing ? "Update the patient's details." : "Enter the patient's details to create their health dashboard.";
+
+    if (isMobile) {
+      return (
+        <Sheet open={isEditing ? !!editingPatient : isCreating} onOpenChange={isEditing ? (open) => !open && setEditingPatient(null) : setIsCreating}>
+            <SheetContent side="bottom" className="h-[90vh] p-0">
+                 <SheetHeader className="p-6">
+                    <SheetTitle>{title}</SheetTitle>
+                    <SheetDescription>{description}</SheetDescription>
+                </SheetHeader>
+                <div className="p-6 overflow-y-auto h-[calc(90vh-100px)]">
+                    <PatientForm {...props} />
+                </div>
+            </SheetContent>
+        </Sheet>
+      )
+    }
+
+    return (
+        <Dialog open={isEditing ? !!editingPatient : isCreating} onOpenChange={isEditing ? (open) => !open && setEditingPatient(null) : setIsCreating}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{title}</DialogTitle>
+                    <DialogDescription>{description}</DialogDescription>
+                </DialogHeader>
+                <PatientForm {...props} />
+            </DialogContent>
+        </Dialog>
+    )
+  }
   
   if (isLoading) {
     return (
@@ -218,26 +261,9 @@ export default function DoctorDashboardPage() {
                 </div>
               )}
 
-              {/* Dialogs */}
-              <Dialog open={isCreating} onOpenChange={setIsCreating}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create New Patient Profile</DialogTitle>
-                    <DialogDescription>Enter the patient's details to create their health dashboard.</DialogDescription>
-                  </DialogHeader>
-                  <PatientForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} onCancel={() => setIsCreating(false)} />
-                </DialogContent>
-              </Dialog>
-
-              <Dialog open={!!editingPatient} onOpenChange={(open) => !open && setEditingPatient(null)}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Edit Patient Profile</DialogTitle>
-                    <DialogDescription>Update the patient's details.</DialogDescription>
-                  </DialogHeader>
-                  <PatientForm patient={editingPatient!} onSubmit={handleEditFormSubmit} isSubmitting={isSubmitting} onCancel={() => setEditingPatient(null)} />
-                </DialogContent>
-              </Dialog>
+              {/* Dialogs / Sheets */}
+              {renderPatientForm(false)}
+              {renderPatientForm(true)}
 
               <AlertDialog open={!!patientToDelete} onOpenChange={(open) => !open && setPatientToDelete(null)}>
                 <AlertDialogContent>

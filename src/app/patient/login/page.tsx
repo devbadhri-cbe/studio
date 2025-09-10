@@ -13,7 +13,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { addPatient } from '@/lib/firestore';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
-
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function PatientLoginPage() {
   const router = useRouter();
@@ -22,6 +24,7 @@ export default function PatientLoginPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isCreating, setIsCreating] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const isMobile = useIsMobile();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +78,28 @@ export default function PatientLoginPage() {
   };
 
   if (isCreating) {
+    const formContent = (
+      <PatientForm 
+          onSubmit={handleFormSubmit}
+          isSubmitting={isSubmitting}
+          onCancel={() => setIsCreating(false)}
+      />
+    );
+    if (isMobile) {
+        return (
+            <Sheet open={isCreating} onOpenChange={setIsCreating}>
+                <SheetContent side="bottom" className="h-[90vh] p-0">
+                    <SheetHeader className="p-6">
+                        <SheetTitle>Create New Patient Profile</SheetTitle>
+                        <SheetDescription>Enter your details to create a health dashboard.</SheetDescription>
+                    </SheetHeader>
+                    <ScrollArea className="h-[calc(90vh-100px)]">
+                        <div className="p-6 pt-0">{formContent}</div>
+                    </ScrollArea>
+                </SheetContent>
+            </Sheet>
+        )
+    }
     return (
        <div className="flex min-h-screen items-center justify-center bg-background p-4">
           <Card className="w-full max-w-2xl">
@@ -83,11 +108,7 @@ export default function PatientLoginPage() {
                   <CardDescription>Enter your details to create a health dashboard.</CardDescription>
               </CardHeader>
               <CardContent>
-                  <PatientForm 
-                      onSubmit={handleFormSubmit}
-                      isSubmitting={isSubmitting}
-                      onCancel={() => setIsCreating(false)}
-                  />
+                  {formContent}
               </CardContent>
           </Card>
       </div>
