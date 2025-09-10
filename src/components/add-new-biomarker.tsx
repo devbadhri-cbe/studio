@@ -38,6 +38,9 @@ export function AddNewBiomarker({ onCancel }: AddNewBiomarkerProps) {
     const handleCreate = async (data: { name: string, unit: string }) => {
         setIsCreating(true);
         try {
+            if (!profile.id) {
+                throw new Error('Patient ID is not available.');
+            }
             const result = await createBiomarkerFiles({
                 name: data.name,
                 unit: data.unit,
