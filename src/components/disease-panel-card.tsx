@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -11,7 +12,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Settings, PlusCircle, Calendar as CalendarIcon, Droplet, Heart, Activity, Flame, Weight, XCircle } from 'lucide-react';
+import { Settings, PlusCircle } from 'lucide-react';
 import { availableBiomarkerCards, type BiomarkerKey, DiseasePanelKey } from '@/lib/biomarker-cards';
 import { useApp } from '@/context/app-context';
 import { cn } from '@/lib/utils';
@@ -22,12 +23,12 @@ import { Label } from './ui/label';
 import { ScrollArea } from './ui/scroll-area';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { useForm } from 'react-hook-form';
-import { Form, FormControl, FormField, FormItem, FormMessage } from './ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { DatePicker } from './ui/date-picker';
 import { Input } from './ui/input';
 import { startOfDay } from 'date-fns';
 
-const biomarkerFieldsConfig = {
+const biomarkerFieldsConfig: { [key: string]: any } = {
   hba1c: { label: 'HbA1c (%)', type: 'number', step: '0.1', placeholder: 'e.g., 5.7', unit: '%' },
   glucose: { label: 'Fasting Glucose', type: 'number', unit: 'mg/dL' }, // Unit handled in label
   hemoglobin: { label: 'Hemoglobin', type: 'number', step: '0.1', unit: 'g/dL' }, // Unit handled in label
@@ -53,6 +54,9 @@ const biomarkerFieldsConfig = {
     }
   },
   vitaminD: { label: 'Vitamin D', type: 'number', unit: 'ng/mL or nmol/L' }, // Unit handled in label
+  thyroxine: { label: 'Thyroxine (T4)', type: 'number', step: '0.1', placeholder: 'e.g., 8.0', unit: 'ng/dL' },
+  serumCreatinine: { label: 'Serum Creatinine', type: 'number', step: '0.01', placeholder: 'e.g., 0.9', unit: 'mg/dL' },
+  uricAcid: { label: 'Uric Acid', type: 'number', step: '0.1', placeholder: 'e.g., 6.5', unit: 'mg/dL' },
 };
 
 
@@ -64,7 +68,7 @@ interface AddPanelRecordDialogProps {
 }
 
 function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey }: AddPanelRecordDialogProps) {
-    const { addHba1cRecord, addFastingBloodGlucoseRecord, addHemoglobinRecord, addBloodPressureRecord, addWeightRecord, addThyroidRecord, addLipidRecord, profile, getDbGlucoseValue, getDbHemoglobinValue, biomarkerUnit } = useApp();
+    const { addHba1cRecord, addFastingBloodGlucoseRecord, addHemoglobinRecord, addBloodPressureRecord, addWeightRecord, addThyroidRecord, addLipidRecord, profile, getDbGlucoseValue, getDbHemoglobinValue, biomarkerUnit, addVitaminDRecord, getDbVitaminDValue, addSerumCreatinineRecord, addUricAcidRecord, addThyroxineRecord, addTotalCholesterolRecord, addLdlRecord, addHdlRecord, addTriglyceridesRecord } = useApp();
     
     const isImperial = profile.unitSystem === 'imperial';
 
@@ -74,34 +78,76 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey 
         let recordsAdded = 0;
         const recordDate = data.date ? startOfDay(data.date).toISOString() : new Date().toISOString();
 
-        if (data.hba1c) {
-            addHba1cRecord({ date: recordDate, value: Number(data.hba1c) });
-            recordsAdded++;
-        }
-        if (data.glucose) {
-            addFastingBloodGlucoseRecord({ date: recordDate, value: getDbGlucoseValue(Number(data.glucose)) });
-            recordsAdded++;
-        }
-        if (data.hemoglobin) {
-            addHemoglobinRecord({ date: recordDate, hemoglobin: getDbHemoglobinValue(Number(data.hemoglobin)) });
-            recordsAdded++;
-        }
-        if (data.systolic && data.diastolic) {
-            addBloodPressureRecord({ date: recordDate, systolic: Number(data.systolic), diastolic: Number(data.diastolic), heartRate: data.heartRate ? Number(data.heartRate) : undefined });
-            recordsAdded++;
-        }
-        if (data.weight) {
-            addWeightRecord({ date: recordDate, value: Number(data.weight) });
-            recordsAdded++;
-        }
-        if (data.tsh || data.t3 || data.t4) {
-            addThyroidRecord({ date: recordDate, tsh: Number(data.tsh || 0), t3: Number(data.t3 || 0), t4: Number(data.t4 || 0) });
-            recordsAdded++;
-        }
-        if (data.totalCholesterol || data.ldl || data.hdl || data.triglycerides) {
-            addLipidRecord({ date: recordDate, totalCholesterol: Number(data.totalCholesterol || 0), ldl: Number(data.ldl || 0), hdl: Number(data.hdl || 0), triglycerides: Number(data.triglycerides || 0) });
-            recordsAdded++;
-        }
+        Object.keys(data).forEach(key => {
+            if (key !== 'date' && (data[key] !== '' && data[key] !== undefined && data[key] !== null)) {
+                switch(key) {
+                    case 'hba1c': 
+                        addHba1cRecord({ date: recordDate, value: Number(data.hba1c) });
+                        recordsAdded++;
+                        break;
+                    case 'glucose':
+                        addFastingBloodGlucoseRecord({ date: recordDate, value: getDbGlucoseValue(Number(data.glucose)) });
+                        recordsAdded++;
+                        break;
+                    case 'hemoglobin':
+                        addHemoglobinRecord({ date: recordDate, hemoglobin: getDbHemoglobinValue(Number(data.hemoglobin)) });
+                        recordsAdded++;
+                        break;
+                    case 'systolic': // Part of blood pressure
+                    case 'diastolic':
+                        if (data.systolic && data.diastolic) {
+                            addBloodPressureRecord({ date: recordDate, systolic: Number(data.systolic), diastolic: Number(data.diastolic), heartRate: data.heartRate ? Number(data.heartRate) : undefined });
+                            recordsAdded++;
+                            // prevent double counting
+                            data.diastolic = ''; 
+                        }
+                        break;
+                    case 'weight':
+                        addWeightRecord({ date: recordDate, value: Number(data.weight) });
+                        recordsAdded++;
+                        break;
+                    case 'tsh': // Part of thyroid
+                    case 't3':
+                    case 't4':
+                         if (data.tsh || data.t3 || data.t4) {
+                            addThyroidRecord({ date: recordDate, tsh: Number(data.tsh || 0), t3: Number(data.t3 || 0), t4: Number(data.t4 || 0) });
+                            recordsAdded++;
+                            data.t3 = ''; data.t4 = ''; // prevent double counting
+                         }
+                        break;
+                    case 'totalCholesterol':
+                    case 'ldl':
+                    case 'hdl':
+                    case 'triglycerides':
+                        if (data.totalCholesterol) addTotalCholesterolRecord({ date: recordDate, value: Number(data.totalCholesterol) });
+                        if (data.ldl) addLdlRecord({ date: recordDate, value: Number(data.ldl) });
+                        if (data.hdl) addHdlRecord({ date: recordDate, value: Number(data.hdl) });
+                        if (data.triglycerides) addTriglyceridesRecord({ date: recordDate, value: Number(data.triglycerides) });
+                        
+                        if (data.totalCholesterol || data.ldl || data.hdl || data.triglycerides) {
+                            recordsAdded++;
+                            data.ldl = ''; data.hdl = ''; data.triglycerides = ''; // prevent double counting
+                        }
+                        break;
+                    case 'vitaminD':
+                        addVitaminDRecord({ date: recordDate, value: getDbVitaminDValue(Number(data.vitaminD)) });
+                        recordsAdded++;
+                        break;
+                    case 'serumCreatinine':
+                        addSerumCreatinineRecord({ date: recordDate, value: Number(data.serumCreatinine) });
+                        recordsAdded++;
+                        break;
+                    case 'uricAcid':
+                        addUricAcidRecord({ date: recordDate, value: Number(data.uricAcid) });
+                        recordsAdded++;
+                        break;
+                    case 'thyroxine':
+                        addThyroxineRecord({ date: recordDate, value: Number(data.thyroxine) });
+                        recordsAdded++;
+                        break;
+                }
+            }
+        });
         
         toast({
             title: "Records Saved",
@@ -126,7 +172,7 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey 
               <div key={key}>
                   <Label className="font-semibold">{config.label}</Label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 border p-3 rounded-md mt-1">
-                      {Object.entries(config.fields).map(([subKey, subConfig]) => (
+                      {Object.entries(config.fields).map(([subKey, subConfig]: [string, any]) => (
                           <FormField
                               key={subKey}
                               control={form.control}
@@ -150,6 +196,7 @@ function AddPanelRecordDialog({ open, onOpenChange, enabledBiomarkers, panelKey 
       if (key === 'glucose') fieldLabel = `Fasting Glucose (${biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL'})`;
       if (key === 'hemoglobin') fieldLabel = `Hemoglobin (${biomarkerUnit === 'si' ? 'g/L' : 'g/dL'})`;
       if (key === 'weight') fieldLabel = `Weight (${isImperial ? 'lbs' : 'kg'})`;
+      if (key === 'vitaminD') fieldLabel = `Vitamin D (${biomarkerUnit === 'si' ? 'nmol/L' : 'ng/mL'})`;
 
       return (
         <FormField
@@ -240,20 +287,6 @@ export function DiseasePanelCard({
   const handlePanelToggle = (checked: boolean) => {
     toggleDiseasePanel(panelKey);
   }
-  
-  const sortedBiomarkerKeys = React.useMemo(() => {
-    return Object.keys(availableBiomarkerCards).sort((a, b) => {
-      const aIsEnabled = enabledForPanel.includes(a);
-      const bIsEnabled = enabledForPanel.includes(b);
-      const aInfo = availableBiomarkerCards[a as BiomarkerKey];
-      const bInfo = availableBiomarkerCards[b as BiomarkerKey];
-      
-      if (aIsEnabled && !bIsEnabled) return -1;
-      if (!aIsEnabled && bIsEnabled) return 1;
-      
-      return aInfo.label.localeCompare(bInfo.label);
-    });
-  }, [enabledForPanel]);
 
   const childrenWithReadOnly = React.Children.map(children, child => {
     if (React.isValidElement(child)) {
