@@ -105,7 +105,7 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
                     <FormItem>
                     <FormLabel>Medication Name (Brand or Generic)</FormLabel>
                     <FormControl>
-                        <Input placeholder="e.g., Rosuvas 20 or Metformin" {...field} />
+                        <Input placeholder="e.g., Tylenol PM or Metformin" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
