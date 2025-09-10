@@ -62,6 +62,13 @@ export function DiseasePanelCard({
     });
   }, [enabledForPanel]);
 
+  const childrenWithReadOnly = React.Children.map(children, child => {
+    if (React.isValidElement(child)) {
+        return React.cloneElement(child as React.ReactElement<any>, { isReadOnly: true });
+    }
+    return child;
+  });
+
   return (
     <Card className={cn("w-full flex flex-col h-full shadow-md border-2", isPanelEnabledForPatient ? "border-primary/20" : "border-dashed", className)}>
       <CardHeader className="flex-row items-center justify-between">
@@ -119,7 +126,7 @@ export function DiseasePanelCard({
         {isPanelEnabledForPatient ? (
           enabledForPanel.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-start">
-              {children}
+              {childrenWithReadOnly}
             </div>
           ) : (
              <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4 min-h-[200px] bg-muted/30 rounded-lg">
