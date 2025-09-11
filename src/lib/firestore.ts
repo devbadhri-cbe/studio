@@ -70,6 +70,44 @@ export async function getAllPatients(): Promise<Patient[]> {
   });
 }
 
+export async function getPatientsPaginated(
+  pageParam: { lastVisible: Patient | null; limit: number },
+  doctorUid: string
+): Promise<{ patients: Patient[]; nextCursor: Patient | null }> {
+  const db = getFirebaseDb();
+  const patients: Patient[] = [];
+  let q;
+
+  if (pageParam.lastVisible) {
+    const lastVisibleDoc = await getDoc(doc(db, PATIENTS_COLLECTION, pageParam.lastVisible.id));
+    q = query(
+      collection(db, PATIENTS_COLLECTION),
+      where('doctorUid', '==', doctorUid),
+      orderBy('name'),
+      startAfter(lastVisibleDoc),
+      limit(pageParam.limit)
+    );
+  } else {
+    q = query(
+      collection(db, PATIENTS_COLLECTION),
+      where('doctorUid', '==', doctorUid),
+      orderBy('name'),
+      limit(pageParam.limit)
+    );
+  }
+
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((doc) => {
+    patients.push({ id: doc.id, ...convertTimestamps(doc.data()) } as Patient);
+  });
+
+  const nextCursor = querySnapshot.docs.length === pageParam.limit
+    ? patients[patients.length - 1]
+    : null;
+
+  return { patients, nextCursor };
+}
+
 
 export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'doctorUid' | 'doctorName' | 'doctorEmail' | 'thyroxineRecords' | 'serumCreatinineRecords' | 'uricAcidRecords'>): Promise<Patient> {
     const db = getFirebaseDb();
