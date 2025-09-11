@@ -45,7 +45,7 @@ const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
 
     // Status Calculation Logic
     const lastBP = summary.lastBloodPressure;
-    const needsReview = patientData.presentMedicalConditions?.some(c => c.status === 'pending_review');
+    const needsReview = Array.isArray(patientData.presentMedicalConditions) && patientData.presentMedicalConditions.some(c => c.status === 'pending_review');
 
     if (lastBP && (lastBP.systolic >= 140 || lastBP.diastolic >= 90)) {
         summary.status = 'Urgent';
