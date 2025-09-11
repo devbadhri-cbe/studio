@@ -18,21 +18,41 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
           <stop offset="50%" stopColor="#9CA3AF" />
           <stop offset="100%" stopColor="#D1D5DB" />
         </linearGradient>
+         <linearGradient id="solidMetalDark" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#4B5563" />
+          <stop offset="50%" stopColor="#374151" />
+          <stop offset="100%" stopColor="#4B5563" />
+        </linearGradient>
       </defs>
       
-      {/* Solid Metal Border */}
-      <path
-        d="M16 2 L2 6 V16 C2 24 16 30 16 30 C16 30 30 24 30 16 V6 L16 2 Z"
-        fill="url(#solidMetal)"
-        stroke="#6B7280"
-        strokeWidth="0.5"
-      />
+      {/* Light Mode Logo */}
+      <g className="dark:hidden">
+        <path
+          d="M16 2 L2 6 V16 C2 24 16 30 16 30 C16 30 30 24 30 16 V6 L16 2 Z"
+          fill="url(#solidMetal)"
+          stroke="#6B7280"
+          strokeWidth="0.5"
+        />
+        <path
+          d="M16 4.1 L4.5 7.6 V16 C4.5 22.5 16 27.5 16 27.5 C16 27.5 27.5 22.5 27.5 16 V7.6 L16 4.1 Z"
+          fill="#F9FAFB"
+        />
+      </g>
+
+      {/* Dark Mode Logo */}
+       <g className="hidden dark:block">
+         <path
+          d="M16 2 L2 6 V16 C2 24 16 30 16 30 C16 30 30 24 30 16 V6 L16 2 Z"
+          fill="url(#solidMetalDark)"
+          stroke="#9CA3AF"
+          strokeWidth="0.5"
+        />
+         <path
+          d="M16 4.1 L4.5 7.6 V16 C4.5 22.5 16 27.5 16 27.5 C16 27.5 27.5 22.5 27.5 16 V7.6 L16 4.1 Z"
+          fill="hsl(var(--card))"
+        />
+      </g>
       
-      {/* Inner Subtle Fill */}
-      <path
-        d="M16 4.1 L4.5 7.6 V16 C4.5 22.5 16 27.5 16 27.5 C16 27.5 27.5 22.5 27.5 16 V7.6 L16 4.1 Z"
-        fill="#F9FAFB"
-      />
       
       {/* Pulsating Graph */}
       <style>
