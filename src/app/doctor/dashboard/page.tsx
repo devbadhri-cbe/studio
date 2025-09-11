@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 
-export default function DoctorDashboard() {
+export default function HomeDashboard() {
   const router = useRouter();
   const [isScrolled, setIsScrolled] = React.useState(false);
 
@@ -32,7 +32,7 @@ export default function DoctorDashboard() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <TitleBar
-        title={['Doctor', 'Dashboard']}
+        title={['Home', 'Dashboard']}
         isScrolled={isScrolled}
       />
       <main className="flex-1 p-4 md:p-6">
