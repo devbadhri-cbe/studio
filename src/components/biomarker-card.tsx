@@ -8,18 +8,30 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { BiomarkerCardTemplate } from './biomarker-card-template';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
 import { ActionMenu } from './ui/action-menu';
+import { UniversalCard } from './universal-card';
+import { ScrollArea } from './ui/scroll-area';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { Trash2 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { Separator } from './ui/separator';
 
 interface Record {
   id: string;
   date: string | Date;
   [key: string]: any;
 }
+
+interface FormattedRecord {
+  id: string;
+  date: string;
+  displayValue: string;
+}
+
 
 interface UnitSwitchProps {
   labelA: string;
@@ -35,12 +47,13 @@ interface BiomarkerCardProps<T extends Record> {
   records: T[];
   onRemoveRecord: (id: string) => void;
   getStatus: (record?: T) => { text: string; variant: 'destructive' | 'secondary' | 'outline' | 'default' } | React.ReactNode | null;
-  formatRecord: (record: T) => { id: string; date: string; displayValue: string };
+  formatRecord: (record: T) => FormattedRecord;
   addRecordDialog: React.ReactNode;
   chart: React.ReactNode;
   unitSwitch?: UnitSwitchProps;
   isReadOnly?: boolean;
   editMenuItems?: React.ReactNode;
+  className?: string;
 }
 
 export function BiomarkerCard<T extends Record>({
@@ -55,8 +68,10 @@ export function BiomarkerCard<T extends Record>({
   unitSwitch,
   isReadOnly = false,
   editMenuItems,
+  className,
 }: BiomarkerCardProps<T>) {
   const [isEditMode, setIsEditMode] = React.useState(false);
+  const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
     return [...(records || [])].sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime());
@@ -77,6 +92,8 @@ export function BiomarkerCard<T extends Record>({
 
 
   const formattedRecords = sortedRecords.map(formatRecord);
+  const hasRecords = records && records.length > 0;
+  const hasMultipleRecords = records && records.length > 1;
 
   const Actions = !isReadOnly ? (
     <ActionMenu tooltip="Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()}>
@@ -113,25 +130,65 @@ export function BiomarkerCard<T extends Record>({
     </ActionMenu>
   ) : null;
 
-  const StatusDisplay = (
-    <div className="text-center text-xs text-muted-foreground flex items-center justify-center h-full w-full">
-      {statusContent}
-    </div>
+  const RecordsList = (
+    <ScrollArea className="h-full max-h-[150px] w-full">
+        <ul className="space-y-1 mt-2">
+          {formattedRecords.map((record) => (
+              <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                  <p className="flex-1">
+                      <span className="font-semibold text-foreground">{record.displayValue}</span>
+                      <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
+                  </p>
+                  <div className="flex items-center shrink-0">
+                  {isEditMode && !isReadOnly && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => onRemoveRecord(record.id)}>
+                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Delete record</TooltipContent>
+                    </Tooltip>
+                  )}
+                  </div>
+              </li>
+            ))}
+        </ul>
+    </ScrollArea>
   );
 
   return (
-    <BiomarkerCardTemplate
+    <UniversalCard
       title={title}
       icon={icon}
       actions={Actions}
-      records={formattedRecords}
-      onDeleteRecord={onRemoveRecord}
-      statusDisplay={StatusDisplay}
-      chart={chart}
-      hasRecords={(records || []).length > 0}
-      isReadOnly={isReadOnly}
-      isEditMode={isEditMode}
-      setIsEditMode={setIsEditMode}
-    />
+      className={cn("border-primary/50", className)}
+      contentClassName="text-sm p-4 pt-0"
+    >
+       {hasRecords ? (
+          <div className="flex flex-col flex-1 h-full">
+            <div className="flex-1 flex flex-col justify-center">
+               <div className={cn("flex gap-4", hasMultipleRecords ? "flex-row" : "flex-col items-center")}>
+                  <div className={cn(hasMultipleRecords ? "shrink-0" : "text-center")}>
+                      {RecordsList}
+                  </div>
+                  <div className={cn("flex-1 w-full flex items-center justify-center", hasMultipleRecords ? "" : "mt-2")}>
+                      {statusContent}
+                  </div>
+              </div>
+            </div>
+
+            <Separator className="my-4" />
+
+            <div className="flex-1 flex w-full rounded-lg p-2 min-h-[200px]">
+                {chart}
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px]">
+              <p className="text-sm">No records yet.</p>
+          </div>
+        )}
+    </UniversalCard>
   );
 }
