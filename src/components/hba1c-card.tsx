@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -15,7 +16,8 @@ interface Hba1cCardProps {
 export function Hba1cCard({ isReadOnly = false }: Hba1cCardProps) {
   const { hba1cRecords, removeHba1cRecord } = useApp();
   
-  const getStatus = (record: Hba1cRecord) => {
+  const getStatus = (record?: Hba1cRecord) => {
+    if (!record) return null;
     if (record.value < 4.0) return { text: 'Low', variant: 'default' as const };
     if (record.value <= 5.6) return { text: 'Healthy', variant: 'outline' as const };
     if (record.value <= 6.4) return { text: 'Prediabetes', variant: 'secondary' as const };
