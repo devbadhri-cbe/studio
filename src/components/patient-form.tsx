@@ -192,7 +192,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
                 <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Changes
+                    Save
                 </Button>
             </div>
         </form>
