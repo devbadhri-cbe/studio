@@ -13,7 +13,7 @@ import { availableDiseasePanels } from '@/lib/biomarker-cards';
 import { getHealthInsights } from '@/ai/flows/health-insights-flow';
 import { LabDataExtractionOutput } from '@/lib/ai-types';
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'female', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'female', country: 'IN', dateFormat: 'dd-MM-yyyy', unitSystem: 'metric', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
 
 type DashboardView = 'thyroid' | 'hypertension' | 'report' | 'none';
 type Theme = 'dark' | 'light' | 'system';
@@ -407,8 +407,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsGeneratingInsights(false);
     setIsTranslatingInsights(false);
     setSelectedInsightsLanguage('en');
-
-    setBiomarkerUnitState(countries.find(c => c.code === patient.country)?.biomarkerUnit || 'conventional');
+    
+    const countryInfo = countries.find(c => c.code === patient.country);
+    setBiomarkerUnitState(countryInfo?.biomarkerUnit || 'conventional');
+    
     setHasUnsavedChanges(false);
   }, []);
 

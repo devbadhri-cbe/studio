@@ -42,7 +42,8 @@ export default function PatientLoginPage() {
 
   const handleFormSubmit = (data: PatientFormData) => {
     setIsSubmitting(true);
-    const isImperial = countries.find(c => c.code === data.country)?.unitSystem === 'imperial';
+    const countryInfo = countries.find(c => c.code === data.country);
+    const isImperial = countryInfo?.unitSystem === 'imperial';
     
     let heightInCm: number | undefined;
     if (isImperial) {
@@ -62,8 +63,8 @@ export default function PatientLoginPage() {
         country: data.country,
         phone: data.phone || '',
         height: heightInCm,
-        dateFormat: 'MM-dd-yyyy',
-        unitSystem: isImperial ? 'imperial' : 'metric',
+        dateFormat: countryInfo?.dateFormat || 'MM-dd-yyyy',
+        unitSystem: countryInfo?.unitSystem || 'metric',
         status: 'On Track',
         hba1cRecords: [],
         fastingBloodGlucoseRecords: [],

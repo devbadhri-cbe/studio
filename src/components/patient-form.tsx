@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -38,7 +39,7 @@ interface PatientFormProps {
 
 export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: PatientFormProps) {
   const { profile } = useApp();
-  const [selectedCountry, setSelectedCountry] = React.useState(patient?.country || 'US');
+  const [selectedCountry, setSelectedCountry] = React.useState(patient?.country || 'IN');
   const isImperial = countries.find(c => c.code === selectedCountry)?.unitSystem === 'imperial';
   
   const form = useForm<PatientFormData>({
@@ -56,7 +57,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             dob: patient?.dob ? parseISO(patient.dob) : new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
             gender: patient?.gender as 'male' | 'female' | undefined,
             email: patient?.email || '',
-            country: patient?.country || 'US',
+            country: patient?.country || 'IN',
             phone: patient?.phone || '',
             height: !isImperial ? (patient?.height?.toString() || '') : '',
             height_ft: isImperial ? height_ft : '',
@@ -79,7 +80,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
         dob: patient?.dob ? parseISO(patient.dob) : new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
         gender: patient?.gender as 'male' | 'female' | undefined,
         email: patient?.email || '',
-        country: patient?.country || 'US',
+        country: patient?.country || 'IN',
         phone: patient?.phone || '',
         height: !isImperial ? (patient?.height?.toString() || '') : '',
         height_ft: isImperial ? (patient?.height ? cmToFtIn(patient.height).feet.toString() : '') : '',
@@ -93,6 +94,8 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled={!!patient} /></FormControl><FormMessage /></FormItem> )} />
             
+            <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+
             {patient?.id && (
                 <FormItem>
                     <FormLabel>Patient ID</FormLabel>
@@ -149,7 +152,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
 
                 <Separator className="md:col-span-2" />
 
-                <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+                
                 <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
                 <div className="md:col-span-2">
                     <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} value={field.value || ''} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
