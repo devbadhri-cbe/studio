@@ -2,51 +2,52 @@
 'use client';
 
 import * as React from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/app-context';
-import { getPatient, updatePatient } from '@/lib/firestore';
 import { PatientDashboard } from '@/components/patient-dashboard';
-import { processPatientData } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import type { Patient } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
+import { Patient } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 
 export default function PatientPage() {
-  const params = useParams();
   const searchParams = useSearchParams();
-  const { setPatientData, isClient } = useApp();
+  const { setPatientData, isClient, hasLocalData, loadLocalPatientData } = useApp();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
   
   React.useEffect(() => {
     const loadPatientData = async () => {
-      const patientId = params.patientId as string;
-      if (!patientId) {
-          setError("No patient ID provided.");
-          setIsLoading(false);
-          return;
-      };
-      
+      // Logic for loading shared data for doctor view
+      const sharedData = searchParams.get('data');
       const isDoctorView = searchParams.get('view') === 'doctor';
 
-      try {
-        const rawPatientData = await getPatient(patientId);
-        if (rawPatientData) {
-          const patientData = processPatientData(rawPatientData);
-          setPatientData(patientData, isDoctorView);
-
-          // Only update lastLogin if it's the patient viewing their own dashboard
-          if (!isDoctorView) {
-            await updatePatient(patientId, { lastLogin: new Date().toISOString() });
-          }
-        } else {
-          setError(`No patient found with ID: ${patientId}`);
+      if (isDoctorView && sharedData) {
+        try {
+          const patientData: Patient = JSON.parse(atob(sharedData));
+          setPatientData(patientData, true);
+        } catch (e) {
+          console.error("Failed to parse shared data", e);
+          setError("The shared patient data is invalid or corrupted.");
+        } finally {
+            setIsLoading(false);
         }
-      } catch (err) {
-        console.error("Failed to fetch or update patient data", err);
-        setError("Failed to load patient data. Please try again.");
-      } finally {
-        setIsLoading(false);
+        return;
+      }
+      
+      // Default logic for patient's own view
+      if (hasLocalData()) {
+          loadLocalPatientData();
+          setIsLoading(false);
+      } else {
+          toast({
+              title: "No Patient Data Found",
+              description: "Create a new profile to get started.",
+              variant: "destructive"
+          });
+          router.replace('/patient/login');
       }
     };
     
@@ -54,12 +55,12 @@ export default function PatientPage() {
         loadPatientData();
     }
     
-  }, [params.patientId, isClient, setPatientData, toast, searchParams]);
+  }, [isClient, setPatientData, toast, searchParams, hasLocalData, loadLocalPatientData, router]);
 
   if (isLoading || !isClient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
          <p className="ml-4">Loading patient data...</p>
       </div>
     );
@@ -74,6 +75,12 @@ export default function PatientPage() {
         </div>
       </div>
     );
+  }
+
+  // Redirect old patientId routes to the generic dashboard route
+  if (window.location.pathname.includes('/patient/') && window.location.pathname !== '/patient/dashboard') {
+    router.replace('/patient/dashboard');
+    return null;
   }
 
   return <PatientDashboard />;

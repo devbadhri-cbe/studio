@@ -5,91 +5,112 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/logo';
-import { getPatient } from '@/lib/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { addPatient } from '@/lib/firestore';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ftInToCm } from '@/lib/utils';
 import { countries } from '@/lib/countries';
+import { useApp } from '@/context/app-context';
+import type { Patient } from '@/lib/types';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function PatientLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [patientId, setPatientId] = React.useState('');
-  const [isLoading, setIsLoading] = React.useState(false);
+  const { loadLocalPatientData, hasLocalData } = useApp();
   const [isCreating, setIsCreating] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const isMobile = useIsMobile();
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!patientId) {
-      toast({ variant: 'destructive', title: 'Patient ID is required' });
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const patient = await getPatient(patientId);
-      if (patient) {
-        router.push(`/patient/${patientId}`);
-      } else {
-        toast({ variant: 'destructive', title: 'Invalid Patient ID', description: 'No patient found with that ID.' });
-      }
-    } catch (error) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not verify Patient ID.' });
-    } finally {
+  React.useEffect(() => {
+    if (hasLocalData()) {
+      loadLocalPatientData();
+      router.replace(`/patient/dashboard`);
+    } else {
       setIsLoading(false);
     }
+  }, [hasLocalData, loadLocalPatientData, router]);
+
+  const handleCreateNewProfile = () => {
+    setIsCreating(true);
   };
 
-  const handleFormSubmit = async (data: PatientFormData) => {
-      setIsSubmitting(true);
-      const isImperial = countries.find(c => c.code === data.country)?.unitSystem === 'imperial';
-      
-      let heightInCm: number | undefined;
-      if (isImperial) {
-          const ft = data.height_ft ? Number(data.height_ft) : 0;
-          const inches = data.height_in ? Number(data.height_in) : 0;
-          heightInCm = ft > 0 || inches > 0 ? ftInToCm(ft, inches) : undefined;
-      } else {
-          heightInCm = data.height ? Number(data.height) : undefined;
-      }
+  const handleFormSubmit = (data: PatientFormData) => {
+    setIsSubmitting(true);
+    const isImperial = countries.find(c => c.code === data.country)?.unitSystem === 'imperial';
+    
+    let heightInCm: number | undefined;
+    if (isImperial) {
+        const ft = data.height_ft ? Number(data.height_ft) : 0;
+        const inches = data.height_in ? Number(data.height_in) : 0;
+        heightInCm = ft > 0 || inches > 0 ? ftInToCm(ft, inches) : undefined;
+    } else {
+        heightInCm = data.height ? Number(data.height) : undefined;
+    }
 
-      const patientData = {
-          name: data.name,
-          dob: data.dob.toISOString(),
-          gender: data.gender,
-          email: data.email || '',
-          country: data.country,
-          phone: data.phone || '',
-          height: heightInCm,
-      };
+    const patientData: Patient = {
+        id: uuidv4(),
+        name: data.name,
+        dob: data.dob.toISOString(),
+        gender: data.gender,
+        email: data.email || '',
+        country: data.country,
+        phone: data.phone || '',
+        height: heightInCm,
+        dateFormat: 'MM-dd-yyyy',
+        unitSystem: 'imperial',
+        status: 'On Track',
+        hba1cRecords: [],
+        fastingBloodGlucoseRecords: [],
+        thyroidRecords: [],
+        thyroxineRecords: [],
+        serumCreatinineRecords: [],
+        uricAcidRecords: [],
+        hemoglobinRecords: [],
+        weightRecords: [],
+        bloodPressureRecords: [],
+        totalCholesterolRecords: [],
+        ldlRecords: [],
+        hdlRecords: [],
+        triglyceridesRecords: [],
+        medication: [],
+        presentMedicalConditions: [],
+        enabledBiomarkers: {},
+    };
 
-      try {
-          const newPatient = await addPatient(patientData);
-          toast({
-              title: 'Profile Created',
-              description: `Your patient profile has been created successfully.`,
-          });
-          router.push(`/patient/${newPatient.id}`);
-      } catch (error) {
-          console.error("Failed to save patient", error);
-          toast({
-              variant: 'destructive',
-              title: 'Error',
-              description: 'Could not create your profile. Please try again.',
-          });
-      } finally {
-          setIsSubmitting(false);
-      }
+    try {
+        localStorage.setItem('patientData', JSON.stringify(patientData));
+        toast({
+            title: 'Profile Created',
+            description: `Your patient profile has been created successfully.`,
+        });
+        router.push(`/patient/dashboard`);
+    } catch (error) {
+        console.error("Failed to save patient", error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not create your profile. Please try again.',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
+  
+  if (isLoading) {
+    return (
+        <div className="flex h-screen items-center justify-center bg-background">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="ml-4">Loading Health Guardian...</p>
+        </div>
+    );
+  }
+
 
   if (isCreating) {
     const formContent = (
@@ -136,30 +157,16 @@ export default function PatientLoginPage() {
           <div className="flex justify-center mb-4">
             <Logo className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Patient Dashboard Access</CardTitle>
-          <CardDescription>Enter your Patient ID to view your dashboard.</CardDescription>
+          <CardTitle className="text-2xl">Health Guardian</CardTitle>
+          <CardDescription>Your Patient-Centric Health Dashboard</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="grid w-full items-center gap-1.5">
-              <Label htmlFor="patientId">Patient ID</Label>
-              <Input
-                id="patientId"
-                type="text"
-                placeholder="Enter your unique Patient ID"
-                value={patientId}
-                onChange={(e) => setPatientId(e.target.value)}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Access Dashboard
-            </Button>
-          </form>
-           <div className="mt-4 pt-4 border-t text-center text-sm">
-            Don&apos;t have a profile?{' '}
-            <Button variant="link" onClick={() => setIsCreating(true)}>
-              Create one now
+          <div className="space-y-4">
+            <p className="text-sm text-center text-muted-foreground">
+                No local data found. Create a new profile to get started.
+            </p>
+            <Button onClick={handleCreateNewProfile} className="w-full">
+                Create New Profile
             </Button>
           </div>
         </CardContent>
@@ -167,3 +174,4 @@ export default function PatientLoginPage() {
     </div>
   );
 }
+

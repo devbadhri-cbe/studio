@@ -2,5 +2,6 @@
 import { redirect } from 'next/navigation';
 
 export default function AppRootPage() {
-  redirect('/doctor/dashboard');
+  // Redirect to the patient login/home page, as the doctor dashboard is removed.
+  redirect('/patient/login');
 }

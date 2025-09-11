@@ -22,6 +22,10 @@ import { getFirebaseDb } from './firebase';
 import type { Patient } from './types';
 import { doctorDetails } from './doctor-data';
 
+// Note: This file's functions for patient data are no longer used for the primary
+// patient-centric workflow and are being kept for potential future administrative features
+// or for a separate doctor-facing application. The main app now uses local storage.
+
 const PATIENTS_COLLECTION = 'patients';
 
 const convertTimestamps = (data: any): any => {
@@ -46,6 +50,7 @@ const convertTimestamps = (data: any): any => {
   return convertedData;
 };
 
+// These functions are no longer called in the patient-facing app flow.
 export async function getPatient(id: string): Promise<any | null> {
   const db = getFirebaseDb();
   const docRef = doc(db, PATIENTS_COLLECTION, id);
@@ -69,45 +74,6 @@ export async function getAllPatients(): Promise<Patient[]> {
       return { id: doc.id, ...convertTimestamps(doc.data()) } as Patient;
   });
 }
-
-export async function getPatientsPaginated(
-  pageParam: { lastVisible: Patient | null; limit: number },
-  doctorUid: string
-): Promise<{ patients: Patient[]; nextCursor: Patient | null }> {
-  const db = getFirebaseDb();
-  const patients: Patient[] = [];
-  let q;
-
-  if (pageParam.lastVisible) {
-    const lastVisibleDoc = await getDoc(doc(db, PATIENTS_COLLECTION, pageParam.lastVisible.id));
-    q = query(
-      collection(db, PATIENTS_COLLECTION),
-      where('doctorUid', '==', doctorUid),
-      orderBy('name'),
-      startAfter(lastVisibleDoc),
-      limit(pageParam.limit)
-    );
-  } else {
-    q = query(
-      collection(db, PATIENTS_COLLECTION),
-      where('doctorUid', '==', doctorUid),
-      orderBy('name'),
-      limit(pageParam.limit)
-    );
-  }
-
-  const querySnapshot = await getDocs(q);
-  querySnapshot.forEach((doc) => {
-    patients.push({ id: doc.id, ...convertTimestamps(doc.data()) } as Patient);
-  });
-
-  const nextCursor = querySnapshot.docs.length === pageParam.limit
-    ? patients[patients.length - 1]
-    : null;
-
-  return { patients, nextCursor };
-}
-
 
 export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'doctorUid' | 'doctorName' | 'doctorEmail' | 'thyroxineRecords' | 'serumCreatinineRecords' | 'uricAcidRecords' | 'hba1cRecords' | 'fastingBloodGlucoseRecords' | 'thyroidRecords' | 'hemoglobinRecords' | 'weightRecords' | 'bloodPressureRecords' | 'medication' | 'presentMedicalConditions' | 'enabledBiomarkers' | 'dashboardSuggestions'>): Promise<Patient> {
     const db = getFirebaseDb();
