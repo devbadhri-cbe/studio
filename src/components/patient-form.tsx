@@ -109,7 +109,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 <FormItem>
                     <FormLabel>Patient ID</FormLabel>
                     <FormControl>
-                        <Input readOnly value={patient.id} />
+                        <Input readOnly value={patient.id} autoComplete="off" />
                     </FormControl>
                 </FormItem>
             )}
