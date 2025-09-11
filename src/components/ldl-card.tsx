@@ -16,7 +16,8 @@ interface LdlCardProps {
 export function LdlCard({ isReadOnly = false }: LdlCardProps) {
   const { ldlRecords, removeLdlRecord, getDisplayLipidValue, biomarkerUnit, setBiomarkerUnit } = useApp();
 
-  const getStatus = (record: LdlRecord) => {
+  const getStatus = (record?: LdlRecord) => {
+    if (!record) return null;
     // Status logic is always based on the stored mg/dL value
     if (record.value < 100) return { text: 'Optimal', variant: 'outline' as const };
     if (record.value < 130) return { text: 'Near Optimal', variant: 'default' as const };

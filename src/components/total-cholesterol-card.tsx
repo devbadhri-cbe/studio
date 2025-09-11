@@ -16,7 +16,8 @@ interface TotalCholesterolCardProps {
 export function TotalCholesterolCard({ isReadOnly = false }: TotalCholesterolCardProps) {
   const { totalCholesterolRecords, removeTotalCholesterolRecord, getDisplayLipidValue, biomarkerUnit, setBiomarkerUnit } = useApp();
   
-  const getStatus = (record: TotalCholesterolRecord) => {
+  const getStatus = (record?: TotalCholesterolRecord) => {
+    if (!record) return null;
     // Status logic is always based on the stored mg/dL value
     if (record.value < 200) return { text: 'Desirable', variant: 'outline' as const };
     if (record.value < 240) return { text: 'Borderline High', variant: 'secondary' as const };

@@ -16,7 +16,7 @@ interface UricAcidCardProps {
 export function UricAcidCard({ isReadOnly = false }: UricAcidCardProps) {
   const { uricAcidRecords, removeUricAcidRecord, profile } = useApp();
 
-  const getStatus = (record: UricAcidRecord) => {
+  const getStatus = (record?: UricAcidRecord) => {
     if (!record) return null;
     const isMale = profile.gender === 'male';
     

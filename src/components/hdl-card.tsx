@@ -16,7 +16,8 @@ interface HdlCardProps {
 export function HdlCard({ isReadOnly = false }: HdlCardProps) {
   const { hdlRecords, removeHdlRecord, profile, getDisplayLipidValue, biomarkerUnit, setBiomarkerUnit } = useApp();
 
-  const getStatus = (record: HdlRecord) => {
+  const getStatus = (record?: HdlRecord) => {
+    if (!record) return null;
     // Status logic is always based on the stored mg/dL value
     const isMale = profile.gender === 'male';
     if (isMale) {

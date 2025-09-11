@@ -16,7 +16,8 @@ interface TriglyceridesCardProps {
 export function TriglyceridesCard({ isReadOnly = false }: TriglyceridesCardProps) {
   const { triglyceridesRecords, removeTriglyceridesRecord, getDisplayLipidValue, biomarkerUnit, setBiomarkerUnit } = useApp();
 
-  const getStatus = (record: TriglyceridesRecord) => {
+  const getStatus = (record?: TriglyceridesRecord) => {
+    if (!record) return null;
     // Status logic is always based on the stored mg/dL value
     if (record.value < 150) return { text: 'Normal', variant: 'outline' as const };
     if (record.value < 200) return { text: 'Borderline High', variant: 'secondary' as const };

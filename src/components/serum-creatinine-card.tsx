@@ -16,7 +16,7 @@ interface SerumCreatinineCardProps {
 export function SerumCreatinineCard({ isReadOnly = false }: SerumCreatinineCardProps) {
   const { serumCreatinineRecords, removeSerumCreatinineRecord, profile } = useApp();
 
-  const getStatus = (record: SerumCreatinineRecord) => {
+  const getStatus = (record?: SerumCreatinineRecord) => {
     if (!record) return null;
     const isMale = profile.gender === 'male';
     const upperNormal = isMale ? 1.2 : 1.0;
