@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import * as React from 'react';
@@ -28,7 +26,7 @@ import { BloodPressureCard } from './blood-pressure-card';
 import { DoctorReviewCard } from './doctor-review-card';
 
 export function PatientDashboard() {
-  const { isClient, isDoctorLoggedIn } = useApp();
+  const { isClient, isReadOnlyView } = useApp();
   const router = useRouter();
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(true);
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
@@ -64,16 +62,16 @@ export function PatientDashboard() {
     );
   }
 
-  const BackButton = isDoctorLoggedIn ? (
+  const BackButton = isReadOnlyView ? (
     <Tooltip>
         <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => router.push('/doctor/dashboard')}>
+            <Button variant="ghost" size="icon" onClick={() => router.push('/patient/login')}>
                 <ArrowLeft className="h-4 w-4" />
-                <span className="sr-only">Back to Dashboard</span>
+                <span className="sr-only">Back to Login</span>
             </Button>
         </TooltipTrigger>
         <TooltipContent>
-            <p>Back to Dashboard</p>
+            <p>Back to Login</p>
         </TooltipContent>
     </Tooltip>
   ) : null;
@@ -84,7 +82,7 @@ export function PatientDashboard() {
          <TitleBar
             title={['Health', 'Guardian']}
             subtitle={doctorDetails.name}
-            onSubtitleClick={() => isDoctorLoggedIn && setIsEditingDoctor(true)}
+            onSubtitleClick={() => setIsEditingDoctor(true)}
             backButton={BackButton}
             isScrolled={isScrolled}
          />
@@ -95,7 +93,7 @@ export function PatientDashboard() {
             
             <Separator />
             
-            {isDoctorLoggedIn && <DoctorReviewCard />}
+            {!isReadOnlyView && <DoctorReviewCard />}
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <ProfileCard />
@@ -125,7 +123,7 @@ export function PatientDashboard() {
                   </CollapsibleContent>
                 </Collapsible>
 
-              {isDoctorLoggedIn && (
+              {!isReadOnlyView && (
                   <Collapsible open={isBiomarkersOpen} onOpenChange={handleBiomarkersToggle}>
                     <DashboardSectionToggle
                       title="Biomarker Management"

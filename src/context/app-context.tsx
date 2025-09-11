@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -118,7 +117,7 @@ interface AppContextType {
   isClient: boolean;
   dashboardView: DashboardView;
   setDashboardView: (view: DashboardView) => void;
-  setPatientData: (patient: Patient, isDoctorView?: boolean) => void;
+  setPatientData: (patient: Patient, isReadOnly?: boolean) => void;
   biomarkerUnit: BiomarkerUnitSystem;
   setBiomarkerUnit: (unit: BiomarkerUnitSystem) => void;
   getDisplayGlucoseValue: (value: number) => number;
@@ -134,7 +133,7 @@ interface AppContextType {
   hasUnsavedChanges: boolean;
   saveChanges: () => Promise<void>;
   isSaving: boolean;
-  isDoctorLoggedIn: boolean;
+  isReadOnlyView: boolean;
   approveMedicalCondition: (conditionId: string) => void;
   dismissSuggestion: (conditionId: string) => void;
 }
@@ -161,7 +160,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [biomarkerUnit, setBiomarkerUnitState] = useState<BiomarkerUnitSystem>('conventional');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isDoctorLoggedIn, setIsDoctorLoggedIn] = React.useState(false);
+  const [isReadOnlyView, setIsReadOnlyView] = React.useState(false);
   
   // State for insights card
   const [tips, setTips] = useState<string[]>([]);
@@ -368,7 +367,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [profile, getLatestReadings]);
   
-  const setPatientData = useCallback((patient: Patient, isDoctorView: boolean = false) => {
+  const setPatientData = useCallback((patient: Patient, isReadOnly: boolean = false) => {
     const patientProfile: UserProfile = {
       id: patient.id,
       name: patient.name,
@@ -386,7 +385,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       bmi: patient.bmi,
       dashboardSuggestions: patient.dashboardSuggestions || [],
     };
-    setIsDoctorLoggedIn(isDoctorView);
+    setIsReadOnlyView(isReadOnly);
     setProfileState(patientProfile);
     setHba1cRecordsState(patient.hba1cRecords || []);
     setFastingBloodGlucoseRecordsState(patient.fastingBloodGlucoseRecords || []);
@@ -976,7 +975,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     hasUnsavedChanges,
     saveChanges,
     isSaving,
-    isDoctorLoggedIn,
+    isReadOnlyView,
     approveMedicalCondition,
     dismissSuggestion,
   };

@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -43,7 +42,7 @@ export default function SharedPatientPage() {
              setError("The shared link is invalid. The patient ID does not match the provided data.");
              return;
           }
-          setPatientData(patientData, true); // Set for doctor view (isDoctorView = true)
+          setPatientData(patientData, true); // Set for read-only view
         } catch (e) {
           console.error("Failed to parse shared data", e);
           setError("The shared patient data is invalid or corrupted.");
