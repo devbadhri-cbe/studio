@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -67,7 +68,11 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
   const watchDob = form.watch('dob');
   const watchCountry = form.watch('country');
   const age = React.useMemo(() => watchDob ? calculateAge(watchDob.toISOString()) : null, [watchDob]);
-  const isImperial = countries.find(c => c.code === watchCountry)?.unitSystem === 'imperial';
+  
+  const countryInfo = React.useMemo(() => countries.find(c => c.code === watchCountry), [watchCountry]);
+  const isImperial = countryInfo?.unitSystem === 'imperial';
+  const phoneCode = countryInfo?.phoneCode;
+
 
   const handleFormSubmit = (data: PatientFormData) => {
     onSubmit(data);
@@ -77,7 +82,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
     <>
     <Form {...form}>
         <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled={!!patient} /></FormControl><FormMessage /></FormItem> )} />
+            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled={!!patient} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
             
              <FormField
               control={form.control}
@@ -150,11 +155,11 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 <div className="md:col-span-2">
                      {isImperial ? (
                         <div className="grid grid-cols-2 gap-4">
-                            <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem><FormLabel>Height (ft)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-                            <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem><FormLabel>Height (in)</FormLabel><FormControl><Input type="number" placeholder="e.g., 9" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem><FormLabel>Height (ft)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} value={field.value || ''} autoComplete="off"/></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem><FormLabel>Height (in)</FormLabel><FormControl><Input type="number" placeholder="e.g., 9" {...field} value={field.value || ''} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
                         </div>
                     ) : (
-                        <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
                     )}
                 </div>
 
@@ -162,8 +167,33 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
 
                 
                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                    <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
-                    <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <div className="flex items-center">
+                                {phoneCode && (
+                                <span className="inline-flex items-center px-3 h-10 rounded-l-md border border-r-0 border-input bg-muted text-sm text-muted-foreground">
+                                    {phoneCode}
+                                </span>
+                                )}
+                                <FormControl>
+                                <Input
+                                    type="tel"
+                                    {...field}
+                                    value={field.value || ''}
+                                    autoComplete="off"
+                                    className={phoneCode ? 'rounded-l-none' : ''}
+                                />
+                                </FormControl>
+                            </div>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} value={field.value || ''} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
                 </div>
             </div>
 
