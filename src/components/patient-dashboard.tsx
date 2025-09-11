@@ -92,8 +92,6 @@ export function PatientDashboard() {
             <PatientHeader />
             
             <Separator />
-            
-            {!isReadOnlyView && <DoctorReviewCard />}
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <ProfileCard />
