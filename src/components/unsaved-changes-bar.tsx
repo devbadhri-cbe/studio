@@ -17,7 +17,7 @@ export function UnsavedChangesBar() {
         hasUnsavedChanges ? 'translate-y-0' : 'translate-y-full'
       )}
     >
-      <div className="bg-background/95 backdrop-blur-sm p-4 border-t shadow-lg pb-[calc(1rem+env(safe-area-inset-bottom))]">
+      <div className="bg-background/95 backdrop-blur-sm p-4 border-t shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
              <Info className="h-5 w-5 text-primary" />
