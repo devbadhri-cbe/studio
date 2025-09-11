@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, Code, DollarSign, Rocket, Users } from 'lucide-react';
+import { CheckCircle, Code, DollarSign, Rocket, Users, ShieldCheck } from 'lucide-react';
 
 const PlanItem = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <div className="flex items-start gap-4">
@@ -50,6 +50,32 @@ export default function ProjectPlanPage() {
                     </PlanItem>
                     <PlanItem title="Monetization Logic">
                         Implementing the technical infrastructure for a subscription model to unlock premium features for paying users.
+                    </PlanItem>
+                </CardContent>
+            </Card>
+
+             <Card className="shadow-lg">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-3 text-2xl">
+                        <ShieldCheck className="h-6 w-6 text-green-500" />
+                        Privacy, Security & GDPR Compliance
+                    </CardTitle>
+                    <CardDescription>
+                       Our local-first architecture is designed with privacy as its foundation, aligning perfectly with modern data protection regulations.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <PlanItem title="Patient Data Sovereignty">
+                        All patient health data is stored exclusively on the user's device. We do not have a central database of patient information, virtually eliminating the risk of a large-scale data breach.
+                    </PlanItem>
+                    <PlanItem title="GDPR 'Privacy by Design'">
+                        The application is built to be inherently compliant with GDPR principles. Patients have direct access (Article 15), the ability to erase data by clearing browser storage (Article 17), and the ability to export their data (Article 20).
+                    </PlanItem>
+                    <PlanItem title="No Centralized Tracking">
+                        The app does not track user behavior or collect analytics. The user is in complete control of their data and how it is used.
+                    </PlanItem>
+                     <PlanItem title="Secure Sharing">
+                        Data is only shared when a patient explicitly generates a temporary, read-only link. There is no persistent doctor access or central directory of users.
                     </PlanItem>
                 </CardContent>
             </Card>
