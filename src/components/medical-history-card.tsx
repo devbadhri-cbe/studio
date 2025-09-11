@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert } from 'lucide-react';
@@ -180,14 +179,12 @@ function MedicalConditionForm({
             </Alert>
             )}
         
-            <div className="w-full pt-4">
-                <div className="flex flex-col gap-2">
-                    <Button type="submit" disabled={isProcessing}>
-                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        {processedCondition ? 'Confirm & Save' : 'Process & Review'}
-                    </Button>
-                    <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-                </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
+              <Button type="submit" disabled={isProcessing}>
+                {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {processedCondition ? 'Confirm & Save' : 'Process & Review'}
+              </Button>
             </div>
           </form>
         </Form>

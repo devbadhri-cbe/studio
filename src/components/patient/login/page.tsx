@@ -42,7 +42,8 @@ export default function PatientLoginPage() {
 
   const handleFormSubmit = (data: PatientFormData) => {
     setIsSubmitting(true);
-    const isImperial = countries.find(c => c.code === data.country)?.unitSystem === 'imperial';
+    const countryInfo = countries.find(c => c.code === data.country);
+    const isImperial = countryInfo?.unitSystem === 'imperial';
     
     let heightInCm: number | undefined;
     if (isImperial) {
@@ -62,8 +63,8 @@ export default function PatientLoginPage() {
         country: data.country,
         phone: data.phone || '',
         height: heightInCm,
-        dateFormat: 'MM-dd-yyyy',
-        unitSystem: isImperial ? 'imperial' : 'metric',
+        dateFormat: countryInfo?.dateFormat || 'MM-dd-yyyy',
+        unitSystem: countryInfo?.unitSystem || 'metric',
         status: 'On Track',
         hba1cRecords: [],
         fastingBloodGlucoseRecords: [],
@@ -151,11 +152,11 @@ export default function PatientLoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm text-center">
         <UniversalCard 
+            icon={<Logo className="h-16 w-16 mx-auto" />}
             title="Health Guardian"
             description="Your Patient-Centric Health Dashboard"
-            icon={<Logo className="h-12 w-12 text-primary" />}
         >
           <div className="space-y-4 text-center">
             <p className="text-sm text-muted-foreground">
