@@ -17,9 +17,9 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Skeleton } from './ui/skeleton';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Separator } from './ui/separator';
 
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -43,7 +43,6 @@ export function SharePatientAccessDialog({
   const { toast } = useToast();
   const [dashboardLink, setDashboardLink] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(true);
-  const [isShareOpen, setIsShareOpen] = React.useState(false);
   const qrCodeRef = React.useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
@@ -118,8 +117,8 @@ export function SharePatientAccessDialog({
         </div>
       </DialogHeader>
 
-      <div className="space-y-6 py-4">
-        <div className="flex flex-col items-center gap-4 rounded-lg border p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+        <div className="flex flex-col items-center justify-center gap-4 rounded-lg border p-4">
           <h3 className="text-sm font-medium">Direct Access via QR Code</h3>
           <div className="rounded-lg bg-white p-3" ref={qrCodeRef}>
             {isLoading ? (
@@ -129,57 +128,50 @@ export function SharePatientAccessDialog({
             )}
           </div>
           <p className="text-center text-xs text-muted-foreground">
-            Patient can scan this code with their phone camera to instantly
-            access their dashboard.
+            Patient can scan this code with their phone camera to instantly access their dashboard.
           </p>
         </div>
-        
-         <Collapsible open={isShareOpen} onOpenChange={setIsShareOpen} className="w-full">
-          <div className="flex items-center justify-center">
-            <CollapsibleTrigger asChild>
-              <Button>
-                <Share2 className="mr-2 h-4 w-4" />
-                Share Options
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-          <CollapsibleContent className="space-y-2 mt-4">
-              <Button variant="outline" className="w-full" onClick={() => handleContact('whatsapp')}>
-                  <WhatsAppIcon className="mr-2 h-4 w-4" />
-                  Share via WhatsApp
-              </Button>
-              <Button variant="outline" className="w-full" onClick={() => handleContact('email')}>
-                  <Mail className="mr-2 h-4 w-4" />
-                  Share via Email
-              </Button>
-              <Button variant="outline" className="w-full" onClick={() => copyToClipboard(getShareText(false), 'Dashboard Link')}>
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy Link
-              </Button>
-          </CollapsibleContent>
-         </Collapsible>
-        
 
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-center">Manual Copy</h3>
-          <div className="space-y-2">
-            <Label htmlFor="login-link">Dashboard Link</Label>
-            <div className="flex gap-2">
-              <Input id="login-link" value={dashboardLink} readOnly />
-              <Button variant="outline" size="icon" onClick={() => copyToClipboard(dashboardLink, 'Dashboard Link')}>
-                <Copy className="h-4 w-4" />
-              </Button>
+            <div>
+                 <h3 className="text-sm font-medium mb-2">Share via...</h3>
+                 <div className="space-y-2">
+                    <Button variant="outline" className="w-full" onClick={() => handleContact('whatsapp')}>
+                        <WhatsAppIcon className="mr-2 h-4 w-4" />
+                        WhatsApp
+                    </Button>
+                    <Button variant="outline" className="w-full" onClick={() => handleContact('email')}>
+                        <Mail className="mr-2 h-4 w-4" />
+                        Email
+                    </Button>
+                 </div>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="patient-id">Patient ID</Label>
-            <div className="flex gap-2">
-              <Input id="patient-id" value={patient.id} readOnly />
-              <Button variant="outline" size="icon" onClick={() => copyToClipboard(patient.id, 'Patient ID')}>
-                <Copy className="h-4 w-4" />
-              </Button>
+
+            <Separator />
+            
+            <div>
+                 <h3 className="text-sm font-medium mb-2">Manual Copy</h3>
+                 <div className="space-y-3">
+                    <div className="space-y-1">
+                        <Label htmlFor="login-link">Dashboard Link</Label>
+                        <div className="flex gap-2">
+                        <Input id="login-link" value={dashboardLink} readOnly />
+                        <Button variant="outline" size="icon" onClick={() => copyToClipboard(dashboardLink, 'Dashboard Link')}>
+                            <Copy className="h-4 w-4" />
+                        </Button>
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <Label htmlFor="patient-id">Patient ID</Label>
+                        <div className="flex gap-2">
+                        <Input id="patient-id" value={patient.id} readOnly />
+                        <Button variant="outline" size="icon" onClick={() => copyToClipboard(patient.id, 'Patient ID')}>
+                            <Copy className="h-4 w-4" />
+                        </Button>
+                        </div>
+                    </div>
+                 </div>
             </div>
-          </div>
         </div>
       </div>
     </>
@@ -199,7 +191,7 @@ export function SharePatientAccessDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl">
         <DialogContentComponent />
       </DialogContent>
     </Dialog>
