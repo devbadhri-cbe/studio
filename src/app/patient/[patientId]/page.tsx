@@ -24,15 +24,11 @@ export default function SharedPatientPage() {
     // This effect should only run on the client side.
     if (!isClient) return;
 
-    // This page is for shared views, not for direct navigation by the primary user.
-    // If a user with local data lands here, they should be redirected to their main dashboard.
-    if (patientId === 'dashboard' || patientId === 'login') {
-       if(hasLocalData()) {
-            router.replace('/patient/dashboard');
-       } else {
-            router.replace('/patient/login');
-       }
-       return;
+    // If the user has local data, they should be on their main dashboard, not a shared page.
+    if (hasLocalData()) {
+        loadLocalPatientData();
+        router.replace('/patient/dashboard');
+        return;
     }
     
     const loadSharedData = () => {
@@ -57,15 +53,10 @@ export default function SharedPatientPage() {
         return;
       }
 
-      // If no shared data, but the user has local data, redirect them.
-      if (hasLocalData()) {
-          loadLocalPatientData();
-          router.replace('/patient/dashboard');
-      } else {
-          // If no shared data and no local data, show an error.
-          setError("No patient data found. Please create a profile or use a valid shared link.");
-          setIsLoading(false);
-      }
+      // If no shared data and no local data, redirect to the login page to create a profile.
+      setError("No patient data found. Please create a profile or use a valid shared link.");
+      setIsLoading(false);
+      router.replace('/patient/login');
     };
     
     loadSharedData();

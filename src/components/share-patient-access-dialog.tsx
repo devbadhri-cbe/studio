@@ -50,13 +50,19 @@ export function SharePatientAccessDialog({
   React.useEffect(() => {
     if (open) {
       setIsLoading(true);
-      const origin = window.location.origin;
-      const fullPatientData = getFullPatientData();
-      const encodedData = btoa(JSON.stringify(fullPatientData));
-      setShareLink(`${origin}/patient/${patient.id}?data=${encodedData}`);
-      setIsLoading(false);
+      try {
+        const origin = window.location.origin;
+        const fullPatientData = getFullPatientData();
+        const encodedData = btoa(JSON.stringify(fullPatientData));
+        setShareLink(`${origin}/patient/${patient.id}?data=${encodedData}`);
+      } catch (error) {
+          console.error("Failed to create share link:", error);
+          toast({ variant: 'destructive', title: 'Error', description: 'Could not create a shareable link.' });
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [open, patient.id, getFullPatientData]);
+  }, [open, patient.id, getFullPatientData, toast]);
 
   const getShareText = (includeTitle: boolean = true) => {
     const title = `Hello ${patient.name},\n\nHere is the link to your Health Guardian dashboard:\n`;
