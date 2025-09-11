@@ -39,6 +39,7 @@ export function AddMedicalConditionForm({
     initialData,
 }: AddMedicalConditionFormProps) {
   const { profile } = useApp();
+  const { toast } = useToast();
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [processedCondition, setProcessedCondition] = React.useState<ProcessedCondition | null>(
     initialData?.icdCode ? { standardizedName: initialData.condition, icdCode: initialData.icdCode, synopsis: initialData.synopsis || '' } : null
