@@ -14,11 +14,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { dateFormats } from '@/lib/countries';
 import { useApp } from '@/context/app-context';
 import type { UnitSystem } from '@/lib/types';
-import { Settings, Edit, Download } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { Settings, Edit, Download, Copy } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { ActionIcon } from './ui/action-icon';
 import { toast } from '@/hooks/use-toast';
+import { Input } from './ui/input';
 
 interface ProfileSettingsPopoverProps {
     onEdit: () => void;
@@ -54,12 +54,21 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
     }
   };
 
+  const handleCopyId = () => {
+    navigator.clipboard.writeText(profile.id).then(() => {
+        toast({ title: "Patient ID Copied" });
+    }).catch(err => {
+        console.error("Failed to copy ID: ", err);
+        toast({ variant: "destructive", title: "Copy Failed" });
+    });
+  }
+
   return (
     <Popover>
         <PopoverTrigger asChild>
             <ActionIcon tooltip="Display Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
         </PopoverTrigger>
-        <PopoverContent className="w-64" align="end">
+        <PopoverContent className="w-80" align="end">
             <div className="grid gap-4">
                  <div className="space-y-2">
                     <h4 className="font-medium leading-none">Profile</h4>
@@ -115,13 +124,21 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
                  <div className="space-y-2">
                     <h4 className="font-medium leading-none">Data Management</h4>
                     <p className="text-sm text-muted-foreground">
-                       Save your data to a file.
+                       Save your data to a file or copy your unique ID.
                     </p>
                 </div>
-                 <Button variant="outline" size="sm" onClick={handleExportData}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Export Data
-                </Button>
+                <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input id="patient-id" value={profile.id} readOnly className="h-8 text-xs" />
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleCopyId}>
+                          <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={handleExportData} className="w-full">
+                        <Download className="mr-2 h-4 w-4" />
+                        Export Data
+                    </Button>
+                </div>
             </div>
         </PopoverContent>
     </Popover>
