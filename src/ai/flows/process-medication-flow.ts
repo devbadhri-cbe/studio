@@ -14,12 +14,7 @@ import { gemini15Flash } from '@genkit-ai/googleai';
 const FLOW_NAME = 'getMedicationInfo';
 
 export async function getMedicationInfo(input: MedicationInfoInput): Promise<MedicationInfoOutput> {
-  const cached = await getFromCache<MedicationInfoOutput>(FLOW_NAME, input);
-  if (cached) return cached;
-
-  const result = await processMedicationFlow(input);
-  await storeInCache(FLOW_NAME, input, result);
-  return result;
+  return processMedicationFlow(input);
 }
 
 const prompt = ai.definePrompt({
