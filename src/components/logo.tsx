@@ -24,8 +24,6 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
         <path
             d="M16 2 L2 6 V16 C2 24 16 30 16 30 C16 30 30 24 30 16 V6 L16 2 Z"
             fill="url(#shieldGradient)"
-            stroke="#FFFFFF"
-            strokeWidth="0.5"
         />
         <path
             d="M16 4.1 L4.5 7.6 V16 C4.5 22.5 16 27.5 16 27.5 C16 27.5 27.5 22.5 27.5 16 V7.6 L16 4.1 Z"
