@@ -39,7 +39,7 @@ interface PatientFormProps {
 
 export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: PatientFormProps) {
   const { profile } = useApp();
-  const [selectedCountry, setSelectedCountry] = React.useState(patient?.country || 'IN');
+  const [selectedCountry, setSelectedCountry] = React.useState(patient?.country || '');
   const isImperial = countries.find(c => c.code === selectedCountry)?.unitSystem === 'imperial';
   
   const form = useForm<PatientFormData>({
@@ -57,7 +57,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             dob: patient?.dob ? parseISO(patient.dob) : new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
             gender: patient?.gender as 'male' | 'female' | undefined,
             email: patient?.email || '',
-            country: patient?.country || 'IN',
+            country: patient?.country || '',
             phone: patient?.phone || '',
             height: !isImperial ? (patient?.height?.toString() || '') : '',
             height_ft: isImperial ? height_ft : '',
@@ -80,7 +80,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
         dob: patient?.dob ? parseISO(patient.dob) : new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
         gender: patient?.gender as 'male' | 'female' | undefined,
         email: patient?.email || '',
-        country: patient?.country || 'IN',
+        country: patient?.country || '',
         phone: patient?.phone || '',
         height: !isImperial ? (patient?.height?.toString() || '') : '',
         height_ft: isImperial ? (patient?.height ? cmToFtIn(patient.height).feet.toString() : '') : '',
