@@ -3,7 +3,6 @@
 
 import { Logo } from '@/components/logo';
 import * as React from 'react';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
 
 interface TitleBarProps {
@@ -62,7 +61,7 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, backButto
                     </div>
                 </div>
                 <div className="flex justify-end w-24">
-                    <ThemeToggle />
+                    {/* ThemeToggle has been moved to the ProfileSettingsPopover */}
                 </div>
             </div>
         </header>

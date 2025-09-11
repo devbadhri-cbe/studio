@@ -19,6 +19,7 @@ import { Separator } from './ui/separator';
 import { ActionIcon } from './ui/action-icon';
 import { toast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
+import { ThemeToggle } from './theme-toggle';
 
 interface ProfileSettingsPopoverProps {
     onEdit: () => void;
@@ -88,6 +89,12 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
                     </p>
                 </div>
                 <div className="grid gap-2">
+                    <div className="grid grid-cols-3 items-center gap-4">
+                        <Label>Theme</Label>
+                        <div className="col-span-2 flex justify-end">
+                            <ThemeToggle />
+                        </div>
+                    </div>
                     <div className="grid grid-cols-3 items-center gap-4">
                         <Label htmlFor="date-format">Date Format</Label>
                         <Select
