@@ -352,16 +352,6 @@ export function DiseasePanelCard({
 
   const Actions = (
     <div className="flex items-center gap-2">
-        {isDoctorLoggedIn && (
-            <div className="flex items-center space-x-2">
-                <Checkbox
-                    id={`enable-panel-${panelKey}`}
-                    checked={isPanelEnabledForPatient}
-                    onCheckedChange={handlePanelToggle}
-                />
-            </div>
-        )}
-        
         <ActionMenu
             tooltip="Settings"
             icon={<Settings className="h-4 w-4" />}
@@ -370,18 +360,34 @@ export function DiseasePanelCard({
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Panel Records
             </DropdownMenuItem>
+             {isDoctorLoggedIn && (
+                <>
+                <DropdownMenuSeparator />
+                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <Label htmlFor={`enable-panel-${panelKey}`} className="flex items-center justify-between w-full cursor-pointer font-normal">
+                        <span>Enable Panel</span>
+                         <Switch
+                            id={`enable-panel-${panelKey}`}
+                            checked={isPanelEnabledForPatient}
+                            onCheckedChange={handlePanelToggle}
+                        />
+                    </Label>
+                </DropdownMenuItem>
+                </>
+             )}
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Manage Biomarkers</DropdownMenuLabel>
             <ScrollArea className="h-[200px]">
                 <div className="p-1">
                       {sortedBiomarkers.enabled.map((biomarkerInfo) => (
-                        <DropdownMenuItem key={biomarkerInfo.key} onSelect={(e) => e.preventDefault()}>
-                            <Label htmlFor={`switch-${panelKey}-${biomarkerInfo.key}`} className="flex items-center justify-between w-full cursor-pointer px-2 py-1.5 font-normal">
+                        <DropdownMenuItem key={biomarkerInfo.key} onSelect={(e) => e.preventDefault()} disabled={!isDoctorLoggedIn}>
+                            <Label htmlFor={`switch-${panelKey}-${biomarkerInfo.key}`} className={cn("flex items-center justify-between w-full px-2 py-1.5 font-normal", isDoctorLoggedIn ? "cursor-pointer" : "cursor-not-allowed")}>
                                 <span>{biomarkerInfo.label}</span>
                                 <Switch
                                     id={`switch-${panelKey}-${biomarkerInfo.key}`}
                                     checked={true}
                                     onCheckedChange={() => toggleDiseaseBiomarker(panelKey, biomarkerInfo.key)}
+                                    disabled={!isDoctorLoggedIn}
                                 />
                             </Label>
                         </DropdownMenuItem>
@@ -390,13 +396,14 @@ export function DiseasePanelCard({
                     {sortedBiomarkers.enabled.length > 0 && sortedBiomarkers.disabled.length > 0 && <Separator className="my-1" />}
 
                     {sortedBiomarkers.disabled.map((biomarkerInfo) => (
-                        <DropdownMenuItem key={biomarkerInfo.key} onSelect={(e) => e.preventDefault()}>
-                            <Label htmlFor={`switch-${panelKey}-${biomarkerInfo.key}`} className="flex items-center justify-between w-full cursor-pointer px-2 py-1.5 font-normal">
+                        <DropdownMenuItem key={biomarkerInfo.key} onSelect={(e) => e.preventDefault()} disabled={!isDoctorLoggedIn}>
+                            <Label htmlFor={`switch-${panelKey}-${biomarkerInfo.key}`} className={cn("flex items-center justify-between w-full px-2 py-1.5 font-normal", isDoctorLoggedIn ? "cursor-pointer" : "cursor-not-allowed")}>
                                 <span>{biomarkerInfo.label}</span>
                                 <Switch
                                     id={`switch-${panelKey}-${biomarkerInfo.key}`}
                                     checked={false}
                                     onCheckedChange={() => toggleDiseaseBiomarker(panelKey, biomarkerInfo.key)}
+                                    disabled={!isDoctorLoggedIn}
                                 />
                             </Label>
                         </DropdownMenuItem>
