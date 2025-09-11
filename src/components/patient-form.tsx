@@ -82,17 +82,6 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
         height_in: isImperial ? (patient?.height ? Math.round(cmToFtIn(patient.height).inches).toString() : '') : '',
     });
   }, [patient, form, isImperial]);
-
-
-  React.useEffect(() => {
-    const currentPhoneValue = form.getValues('phone');
-    if (watchCountry && !patient?.phone && !currentPhoneValue) {
-      const selectedCountry = countries.find(c => c.code === watchCountry);
-      if (selectedCountry) {
-        form.setValue('phone', selectedCountry.phoneCode, { shouldValidate: true });
-      }
-    }
-  }, [watchCountry, form, patient?.phone]);
   
   return (
     <>
