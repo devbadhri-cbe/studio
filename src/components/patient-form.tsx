@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -13,7 +12,7 @@ import { Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import type { Patient } from '@/lib/types';
 import { parseISO } from 'date-fns';
-import { calculateAge, formatDisplayPhoneNumber, cmToFtIn, ftInToCm } from '@/lib/utils';
+import { calculateAge, cmToFtIn } from '@/lib/utils';
 import { DatePicker } from './ui/date-picker';
 import { useApp } from '@/context/app-context';
 
@@ -39,7 +38,8 @@ interface PatientFormProps {
 
 export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: PatientFormProps) {
   const { profile } = useApp();
-  const isImperial = (profile.id ? profile.unitSystem : countries.find(c => c.code === 'US')?.unitSystem) === 'imperial';
+  const [selectedCountry, setSelectedCountry] = React.useState(patient?.country || 'US');
+  const isImperial = countries.find(c => c.code === selectedCountry)?.unitSystem === 'imperial';
   
   const form = useForm<PatientFormData>({
     defaultValues: React.useMemo(() => {
@@ -53,7 +53,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
 
         return {
             name: patient?.name || '',
-            dob: patient?.dob ? parseISO(patient.dob) : new Date(),
+            dob: patient?.dob ? parseISO(patient.dob) : new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
             gender: patient?.gender as 'male' | 'female' | undefined,
             email: patient?.email || '',
             country: patient?.country || 'US',
@@ -68,11 +68,15 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
   const watchDob = form.watch('dob');
   const watchCountry = form.watch('country');
   const age = React.useMemo(() => watchDob ? calculateAge(watchDob.toISOString()) : null, [watchDob]);
+  
+  React.useEffect(() => {
+    setSelectedCountry(watchCountry);
+  }, [watchCountry]);
 
   React.useEffect(() => {
     form.reset({
         name: patient?.name || '',
-        dob: patient?.dob ? parseISO(patient.dob) : new Date(),
+        dob: patient?.dob ? parseISO(patient.dob) : new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
         gender: patient?.gender as 'male' | 'female' | undefined,
         email: patient?.email || '',
         country: patient?.country || 'US',
@@ -103,7 +107,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                     control={form.control}
                     name="dob"
                     render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                             <FormLabel>Date of Birth</FormLabel>
                             <FormControl>
                                 <DatePicker

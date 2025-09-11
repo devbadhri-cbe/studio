@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -63,7 +62,7 @@ export default function PatientLoginPage() {
         phone: data.phone || '',
         height: heightInCm,
         dateFormat: 'MM-dd-yyyy',
-        unitSystem: 'imperial',
+        unitSystem: isImperial ? 'imperial' : 'metric',
         status: 'On Track',
         hba1cRecords: [],
         fastingBloodGlucoseRecords: [],
