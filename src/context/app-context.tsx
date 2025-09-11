@@ -1,11 +1,9 @@
 
-
 'use client';
 
 import * as React from 'react';
 import { type Doctor, type UserProfile, type MedicalCondition, type Patient, type Medication, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, UnitSystem, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, BiomarkerKey, DiseasePanelKey, FoodInstruction, ThyroxineRecord, SerumCreatinineRecord, UricAcidRecord } from '@/lib/types';
 import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
-import { updatePatient } from '@/lib/firestore';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
@@ -15,7 +13,7 @@ import { availableDiseasePanels } from '@/lib/biomarker-cards';
 import { getHealthInsights } from '@/ai/flows/health-insights-flow';
 import { LabDataExtractionOutput } from '@/lib/ai-types';
 
-const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'other', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
+const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'female', country: 'US', dateFormat: 'MM-dd-yyyy', unitSystem: 'imperial', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
 
 type DashboardView = 'thyroid' | 'hypertension' | 'report' | 'none';
 type Theme = 'dark' | 'light' | 'system';
@@ -56,6 +54,8 @@ const supportedLanguages = [
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
+  hasLocalData: () => boolean;
+  loadLocalPatientData: () => void;
   addMedicalCondition: (condition: MedicalCondition) => void;
   updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
@@ -193,6 +193,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
   
+  const hasLocalData = useCallback(() => {
+    return typeof window !== 'undefined' && localStorage.getItem('patientData') !== null;
+  }, []);
+
+  const loadLocalPatientData = useCallback(() => {
+    const localDataString = localStorage.getItem('patientData');
+    if (localDataString) {
+        try {
+            const patientData: Patient = JSON.parse(localDataString);
+            setPatientData(patientData, false);
+        } catch (e) {
+            console.error("Failed to parse local patient data", e);
+            localStorage.removeItem('patientData');
+        }
+    }
+  }, []);
+
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
@@ -366,8 +383,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!profile.id || !hasUnsavedChanges) return;
 
     setIsSaving(true);
-    try {
-      const updates: Partial<Patient> = {
+    const patientDataToSave: Patient = {
         ...profile,
         hba1cRecords,
         fastingBloodGlucoseRecords,
@@ -382,8 +398,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ldlRecords,
         hdlRecords,
         triglyceridesRecords,
-      };
-      await updatePatient(profile.id, updates);
+    };
+    try {
+      localStorage.setItem('patientData', JSON.stringify(patientDataToSave));
       setHasUnsavedChanges(false);
       toast({
         title: "Success!",
@@ -859,6 +876,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value: AppContextType = {
     profile,
     setProfile,
+    hasLocalData,
+    loadLocalPatientData,
     addMedicalCondition,
     updateMedicalCondition,
     removeMedicalCondition,
@@ -951,3 +970,5 @@ export function useApp() {
   }
   return context;
 }
+
+    
