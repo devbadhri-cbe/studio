@@ -94,7 +94,30 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled={!!patient} /></FormControl><FormMessage /></FormItem> )} />
             
-            <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+            <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a country" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        {countries.map((c) => (
+                            <SelectItem key={c.code} value={c.code}>
+                            {c.name}
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
 
             {patient?.id && (
                 <FormItem>
