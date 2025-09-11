@@ -2,32 +2,39 @@
 'use client';
 
 import * as React from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { useApp } from '@/context/app-context';
 import { PatientDashboard } from '@/components/patient-dashboard';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Patient } from '@/lib/types';
-import { useRouter } from 'next/navigation';
 
-export default function PatientPage() {
+export default function SharedPatientPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const params = useParams();
   const { setPatientData, isClient, hasLocalData, loadLocalPatientData } = useApp();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
-  const router = useRouter();
   
+  const patientId = params.patientId;
+
   React.useEffect(() => {
-    const loadPatientData = async () => {
-      // Logic for loading shared data for doctor view
+    if (patientId === 'dashboard' || patientId === 'login') {
+      // This page is not for the main dashboard or login, let their respective pages handle it.
+      setIsLoading(false);
+      return;
+    }
+    
+    const loadSharedData = async () => {
       const sharedData = searchParams.get('data');
       const isDoctorView = searchParams.get('view') === 'doctor';
 
       if (isDoctorView && sharedData) {
         try {
           const patientData: Patient = JSON.parse(atob(sharedData));
-          setPatientData(patientData, true);
+          setPatientData(patientData, true); // Set for doctor view
         } catch (e) {
           console.error("Failed to parse shared data", e);
           setError("The shared patient data is invalid or corrupted.");
@@ -36,51 +43,46 @@ export default function PatientPage() {
         }
         return;
       }
-      
-      // Default logic for patient's own view
+
+      // If it's a patient viewing their own shared link, redirect to their main dashboard.
       if (hasLocalData()) {
           loadLocalPatientData();
-          setIsLoading(false);
+          router.replace('/patient/dashboard');
       } else {
-          toast({
-              title: "No Patient Data Found",
-              description: "Create a new profile to get started.",
-              variant: "destructive"
-          });
-          router.replace('/patient/login');
+          setError("No patient data found. Please create a profile to view this information.");
+          setIsLoading(false);
       }
     };
     
     if (isClient) {
-        loadPatientData();
+        loadSharedData();
     }
     
-  }, [isClient, setPatientData, toast, searchParams, hasLocalData, loadLocalPatientData, router]);
+  }, [isClient, setPatientData, toast, searchParams, hasLocalData, loadLocalPatientData, router, patientId]);
+  
+  if (patientId === 'dashboard' || patientId === 'login') {
+      // Should be handled by next router, but as a fallback, show nothing.
+      return null;
+  }
 
   if (isLoading || !isClient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-         <p className="ml-4">Loading patient data...</p>
+         <p className="ml-4">Loading shared patient data...</p>
       </div>
     );
   }
 
   if (error) {
      return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="text-center text-destructive">
+      <div className="flex h-screen items-center justify-center bg-background text-center p-4">
+        <div className="text-destructive">
             <h1 className="text-xl font-bold">Error</h1>
             <p>{error}</p>
         </div>
       </div>
     );
-  }
-
-  // Redirect old patientId routes to the generic dashboard route
-  if (window.location.pathname.includes('/patient/') && window.location.pathname !== '/patient/dashboard') {
-    router.replace('/patient/dashboard');
-    return null;
   }
 
   return <PatientDashboard />;
