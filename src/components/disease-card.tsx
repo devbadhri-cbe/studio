@@ -29,8 +29,6 @@ const statusConfig = {
 export function DiseaseCard({ condition, onRevise, isEditMode, onRemove, onShowSynopsis }: DiseaseCardProps) {
   const formatDate = useDateFormatter();
 
-  const statusInfo = statusConfig[condition.status] || statusConfig.pending_review;
-  const Icon = statusInfo.icon;
   const isIcdLoading = condition.icdCode === 'loading...';
   
   const handleRemoveCondition = (e: React.MouseEvent) => {
@@ -50,12 +48,6 @@ export function DiseaseCard({ condition, onRevise, isEditMode, onRemove, onShowS
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <p className="font-semibold text-foreground">{condition.condition}</p>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                      <Icon className={cn('h-3.5 w-3.5', statusInfo.color)} />
-                  </TooltipTrigger>
-                  <TooltipContent>{statusInfo.text}</TooltipContent>
-                </Tooltip>
               </div>
               {condition.userInput && condition.condition && condition.userInput.toLowerCase() !== condition.condition.toLowerCase() && (
                 <p className="text-xs text-muted-foreground italic">Patient Input: "{condition.userInput}"</p>
@@ -106,3 +98,4 @@ export function DiseaseCard({ condition, onRevise, isEditMode, onRemove, onShowS
     </>
   );
 }
+
