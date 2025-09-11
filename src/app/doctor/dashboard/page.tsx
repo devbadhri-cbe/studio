@@ -26,6 +26,45 @@ import { doctorDetails } from '@/lib/doctor-data';
 import { EditDoctorDetailsDialog } from '@/components/edit-doctor-details-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { getBmiStatus } from '@/lib/utils';
+
+// Helper function to calculate patient status and latest records
+const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
+    const summary: Partial<Patient> = {};
+
+    const getLatestRecord = <T extends { date: string | Date }>(records?: T[]): T | null => {
+        if (!records || records.length === 0) return null;
+        return [...records].sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+    };
+
+    summary.lastHba1c = getLatestRecord(patientData.hba1cRecords) || null;
+    summary.lastThyroid = getLatestRecord(patientData.thyroidRecords) || null;
+    summary.lastBloodPressure = getLatestRecord(patientData.bloodPressureRecords) || null;
+    summary.lastHemoglobin = getLatestRecord(patientData.hemoglobinRecords) || null;
+    summary.lastFastingBloodGlucose = getLatestRecord(patientData.fastingBloodGlucoseRecords) || null;
+
+    // Status Calculation Logic
+    const lastBP = summary.lastBloodPressure;
+    const needsReview = patientData.presentMedicalConditions?.some(c => c.status === 'pending_review');
+
+    if (lastBP && (lastBP.systolic >= 140 || lastBP.diastolic >= 90)) {
+        summary.status = 'Urgent';
+    } else if (needsReview) {
+        summary.status = 'Needs Review';
+    } else {
+        const bmiStatus = getBmiStatus(patientData.bmi ?? null);
+        if (summary.lastHba1c && summary.lastHba1c.value > 6.4) {
+            summary.status = 'Needs Review';
+        } else if (bmiStatus?.variant === 'destructive' || bmiStatus?.variant === 'secondary') {
+            summary.status = 'Needs Review';
+        } else {
+            summary.status = 'On Track';
+        }
+    }
+
+    return summary;
+}
+
 
 export default function DoctorDashboardPage() {
   const [patients, setPatients] = React.useState<Patient[]>([]);
@@ -37,7 +76,6 @@ export default function DoctorDashboardPage() {
   const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const isMobile = useIsMobile();
-
   const router = useRouter();
   const { toast } = useToast();
 
@@ -52,15 +90,20 @@ export default function DoctorDashboardPage() {
   const fetchPatients = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      const allPatients = await getAllPatients();
+      const allPatientsData = await getAllPatients();
       
+      const processedPatients = allPatientsData.map(p => ({
+          ...p,
+          ...getPatientSummary(p)
+      }));
+
       const statusPriority: { [key in Patient['status']]: number } = {
         'Urgent': 1,
         'Needs Review': 2,
         'On Track': 3,
       };
 
-      const sortedPatients = allPatients.sort((a, b) => {
+      const sortedPatients = processedPatients.sort((a, b) => {
         const priorityA = statusPriority[a.status] || 4;
         const priorityB = statusPriority[b.status] || 4;
         if (priorityA !== priorityB) {
@@ -285,3 +328,5 @@ export default function DoctorDashboardPage() {
     </>
   );
 }
+
+    
