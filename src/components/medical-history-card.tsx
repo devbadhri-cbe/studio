@@ -150,17 +150,7 @@ function MedicalConditionForm({
                     </FormItem>
                 )}
             />
-
-            {processedCondition && (
-            <Alert variant="default" className="bg-background">
-                <AlertTitle className="font-semibold">AI Suggestion</AlertTitle>
-                <AlertDescription>
-                <p><strong>Official Name:</strong> {processedCondition.standardizedName}</p>
-                <p><strong>ICD-11 Code:</strong> {processedCondition.icdCode}</p>
-                </AlertDescription>
-            </Alert>
-            )}
-        
+            
             <FormField
                 control={form.control}
                 name="date"
@@ -179,7 +169,17 @@ function MedicalConditionForm({
                     </FormItem>
                 )}
                 />
-            
+
+            {processedCondition && (
+            <Alert variant="default" className="bg-background">
+                <AlertTitle className="font-semibold">AI Suggestion</AlertTitle>
+                <AlertDescription>
+                <p><strong>Official Name:</strong> {processedCondition.standardizedName}</p>
+                <p><strong>ICD-11 Code:</strong> {processedCondition.icdCode}</p>
+                </AlertDescription>
+            </Alert>
+            )}
+        
             <div className="flex justify-end items-center gap-2 pt-4">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
                 <Button type="submit" disabled={isProcessing}>
