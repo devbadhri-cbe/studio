@@ -14,17 +14,45 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { dateFormats } from '@/lib/countries';
 import { useApp } from '@/context/app-context';
 import type { UnitSystem } from '@/lib/types';
-import { Settings, Edit } from 'lucide-react';
+import { Settings, Edit, Download } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Separator } from './ui/separator';
 import { ActionIcon } from './ui/action-icon';
+import { toast } from '@/hooks/use-toast';
 
 interface ProfileSettingsPopoverProps {
     onEdit: () => void;
 }
 
 export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) {
-  const { profile, setProfile } = useApp();
+  const { profile, setProfile, getFullPatientData } = useApp();
+  
+  const handleExportData = () => {
+    try {
+        const fullData = getFullPatientData();
+        const jsonString = JSON.stringify(fullData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'health-guardian-backup.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast({
+            title: "Data Exported",
+            description: "Your backup file has been downloaded."
+        });
+    } catch (e) {
+        console.error("Failed to export data", e);
+        toast({
+            variant: "destructive",
+            title: "Export Failed",
+            description: "Could not export your data."
+        })
+    }
+  };
 
   return (
     <Popover>
@@ -83,6 +111,17 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
                         </Select>
                     </div>
                 </div>
+                <Separator />
+                 <div className="space-y-2">
+                    <h4 className="font-medium leading-none">Data Management</h4>
+                    <p className="text-sm text-muted-foreground">
+                       Save your data to a file.
+                    </p>
+                </div>
+                 <Button variant="outline" size="sm" onClick={handleExportData}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Export Data
+                </Button>
             </div>
         </PopoverContent>
     </Popover>
