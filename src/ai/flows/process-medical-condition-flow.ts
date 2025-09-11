@@ -14,16 +14,7 @@ import { gemini15Flash } from '@genkit-ai/googleai';
 const FLOW_NAME = 'processMedicalCondition';
 
 export async function processMedicalCondition(input: MedicalConditionInput): Promise<MedicalConditionOutput> {
-  const cached = await getFromCache<MedicalConditionOutput>(FLOW_NAME, input);
-  if (cached) return cached;
-
-  const result = await processMedicalConditionFlow(input);
-  
-  if (result.isValid) {
-    await storeInCache(FLOW_NAME, input, result);
-  }
-  
-  return result;
+  return processMedicalConditionFlow(input);
 }
 
 const prompt = ai.definePrompt({
