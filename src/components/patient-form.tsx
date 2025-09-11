@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -108,15 +107,6 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 </FormItem>
               )}
             />
-
-            {patient?.id && (
-                <FormItem>
-                    <FormLabel>Patient ID</FormLabel>
-                    <FormControl>
-                        <Input readOnly value={patient.id} />
-                    </FormControl>
-                </FormItem>
-            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                 <FormField
