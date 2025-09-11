@@ -131,7 +131,7 @@ export function DatePicker({
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex items-center rounded-md border border-input h-10 w-fit px-2 space-x-1 text-sm">
+    <div className="flex items-center rounded-md border border-input h-10 w-full px-2 space-x-1 text-sm justify-start">
       <div className="w-auto">
         <Select 
             value={day} 
