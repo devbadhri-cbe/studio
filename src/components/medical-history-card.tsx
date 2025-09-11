@@ -180,14 +180,12 @@ function MedicalConditionForm({
             </Alert>
             )}
         
-            <div className="border border-purple-500 pt-4">
-                <div className="flex flex-col gap-2 border border-red-500">
-                    <Button type="submit" disabled={isProcessing} className="border border-green-500">
-                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        {processedCondition ? 'Confirm & Save' : 'Process & Review'}
-                    </Button>
-                    <Button type="button" variant="ghost" onClick={onCancel} className="border border-blue-500">Cancel</Button>
-                </div>
+            <div className="flex flex-col gap-2 border border-red-500 pt-4">
+                <Button type="submit" disabled={isProcessing} className="border border-green-500">
+                    {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {processedCondition ? 'Confirm & Save' : 'Process & Review'}
+                </Button>
+                <Button type="button" variant="ghost" onClick={onCancel} className="border border-blue-500">Cancel</Button>
             </div>
           </form>
         </Form>
