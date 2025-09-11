@@ -13,61 +13,70 @@ const firebaseConfig = {
   "messagingSenderId": "1026685254929"
 };
 
+
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 let storage: FirebaseStorage;
 let persistenceEnabled = false;
 
-function initializeFirebase() {
-  if (getApps().length === 0) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApp();
-  }
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
+// Singleton pattern to initialize Firebase only once.
+function getFirebaseInstances() {
+  if (!app) {
+    if (getApps().length === 0) {
+      app = initializeApp(firebaseConfig);
+    } else {
+      app = getApp();
+    }
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
 
-  if (typeof window !== 'undefined' && !persistenceEnabled) {
-    enableIndexedDbPersistence(db)
-      .then(() => {
-        persistenceEnabled = true;
-        console.log("Firestore offline persistence enabled");
-      })
-      .catch((err) => {
-        if (err.code === 'failed-precondition') {
-          console.warn("Firestore persistence failed: Multiple tabs open?");
-        } else if (err.code === 'unimplemented') {
-          console.log("Firestore persistence not available in this browser.");
-        }
-      });
+    if (typeof window !== 'undefined' && !persistenceEnabled) {
+      enableIndexedDbPersistence(db)
+        .then(() => {
+          persistenceEnabled = true;
+          console.log("Firestore offline persistence enabled");
+        })
+        .catch((err) => {
+          if (err.code === 'failed-precondition') {
+            console.warn("Firestore persistence failed: Multiple tabs open?");
+          } else if (err.code === 'unimplemented') {
+            console.log("Firestore persistence not available in this browser.");
+          }
+        });
+    }
   }
+  return { app, auth, db, storage };
 }
-
-// Initialize on first import
-initializeFirebase();
 
 
 export function getFirebaseApp(): FirebaseApp {
-    if (!app) initializeFirebase();
-    return app;
+    return getFirebaseInstances().app;
 }
 
 export function getFirebaseAuth(): Auth {
-    if (!auth) initializeFirebase();
-    return auth;
+    return getFirebaseInstances().auth;
 }
 
 export function getFirebaseDb(): Firestore {
-    if (!db) initializeFirebase();
-    return db;
+    return getFirebaseInstances().db;
 }
 
 export function getFirebaseStorage(): FirebaseStorage {
-    if (!storage) initializeFirebase();
-    return storage;
+    return getFirebaseInstances().storage;
 }
 
 // For direct use in client-side components that are guaranteed to run after initialization
-export { app, auth, db, storage };
+// Note: Direct exports are discouraged in favor of the getter functions to ensure initialization.
+const getDirectExports = () => {
+    const instances = getFirebaseInstances();
+    return {
+        app: instances.app,
+        auth: instances.auth,
+        db: instances.db,
+        storage: instances.storage
+    };
+}
+
+export { getDirectExports as getFirebaseInstances };
