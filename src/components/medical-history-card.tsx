@@ -181,11 +181,11 @@ function MedicalConditionForm({
             )}
         
             <div className="flex justify-end items-center gap-2 pt-4">
-                <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-                <Button type="submit" disabled={isProcessing}>
-                    {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                    {processedCondition ? 'Confirm & Save' : 'Process & Review'}
-                </Button>
+              <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
+              <Button type="submit" disabled={isProcessing}>
+                {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {processedCondition ? 'Confirm & Save' : 'Process & Review'}
+              </Button>
             </div>
           </form>
         </Form>
