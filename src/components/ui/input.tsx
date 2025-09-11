@@ -13,7 +13,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className
         )}
         ref={ref}
-        autoComplete="off"
+        autoComplete="new-password"
         {...props}
       />
     )
