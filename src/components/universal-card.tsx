@@ -31,7 +31,7 @@ export function UniversalCard({
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               {icon}
-              <div>
+              <div className="space-y-1">
                 {title && <CardTitle>{title}</CardTitle>}
                 {description && <CardDescription>{description}</CardDescription>}
               </div>
