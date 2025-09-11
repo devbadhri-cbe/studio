@@ -137,37 +137,4 @@ export async function deletePatient(id: string): Promise<void> {
   const docRef = doc(db, PATIENTS_COLLECTION, id);
   await deleteDoc(docRef);
 }
-
-// This function is no longer needed in the single-doctor model but is kept for potential future use.
-export async function getPatientsPaginated(
-  doctorUid: string,
-  lastVisible: any | null,
-  pageSize: number
-): Promise<{ patients: Patient[]; lastVisible: any | null }> {
-  const db = getFirebaseDb();
-  let q;
-  const patientsCollection = collection(db, PATIENTS_COLLECTION);
-  const baseQuery = [
-    where('doctorUid', '==', doctorUid),
-    orderBy('name'), 
-    limit(pageSize)
-];
-
-  if (lastVisible) {
-    q = query(patientsCollection, ...baseQuery, startAfter(lastVisible));
-  } else {
-    q = query(patientsCollection, ...baseQuery);
-  }
-
-  const documentSnapshots = await getDocs(q);
-  
-  const patients = documentSnapshots.docs.map(doc => {
-    return { id: doc.id, ...convertTimestamps(doc.data()) } as Patient;
-  });
-
-  const newLastVisible = documentSnapshots.docs.length === pageSize ? documentSnapshots.docs[documentSnapshots.docs.length - 1] : null;
-
-  return { patients, lastVisible: newLastVisible };
-}
-
     
