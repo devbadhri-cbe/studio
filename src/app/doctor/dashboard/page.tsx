@@ -27,6 +27,9 @@ import { EditDoctorDetailsDialog } from '@/components/edit-doctor-details-dialog
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { getBmiStatus } from '@/lib/utils';
+import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
 // Helper function to calculate patient status and latest records
 const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
@@ -60,6 +63,18 @@ const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
 
     return summary;
 }
+
+const patientFormSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  dob: z.date({ required_error: "Date of birth is required" }),
+  gender: z.enum(["male", "female"], { required_error: "Gender is required" }),
+  email: z.string().email({ message: "Invalid email address" }).optional().or(z.literal('')),
+  country: z.string().min(1, { message: "Country is required" }),
+  phone: z.string().optional(),
+  height: z.string().optional(),
+  height_ft: z.string().optional(),
+  height_in: z.string().optional(),
+});
 
 
 export default function DoctorDashboardPage() {
@@ -170,7 +185,7 @@ export default function DoctorDashboardPage() {
   const handleFormSubmit = async (data: PatientFormData) => {
     setIsSubmitting(true);
     try {
-      const newPatient = await addPatient({
+      await addPatient({
         name: data.name,
         dob: data.dob.toISOString(),
         gender: data.gender,
@@ -183,7 +198,7 @@ export default function DoctorDashboardPage() {
       });
       toast({
         title: 'Patient Created',
-        description: `${newPatient.name}'s profile has been created successfully.`,
+        description: `${data.name}'s profile has been created successfully.`,
       });
       setIsCreating(false);
       fetchPatients();
