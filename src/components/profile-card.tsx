@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake } from 'lucide-react';
@@ -43,35 +42,29 @@ export function ProfileCard() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
-        <div className="space-y-3 rounded-lg border bg-card p-4">
-            <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <Cake className="h-5 w-5 shrink-0" />
-                    <p>
-                        {profile.dob ? formatDate(profile.dob) : 'N/A'}
-                        {calculatedAge !== null && ` (${calculatedAge} yrs)`}
-                    </p>
-                </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <VenetianMask className="h-5 w-5 shrink-0" />
-                    <p><span className="capitalize">{profile.gender || 'N/A'}</span></p>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 rounded-lg border bg-card p-4">
+            <div className="flex items-center gap-3 text-muted-foreground">
+                <Cake className="h-5 w-5 shrink-0" />
+                <p>
+                    {profile.dob ? formatDate(profile.dob) : 'N/A'}
+                    {calculatedAge !== null && ` (${calculatedAge} yrs)`}
+                </p>
             </div>
-
-            <Separator className="my-2" />
-             <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <Globe className="h-5 w-5 shrink-0" />
-                    <p>{countryName}</p>
-                </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <Mail className="h-5 w-5 shrink-0" />
-                    <p>{profile.email || 'N/A'}</p>
-                </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <Phone className="h-5 w-5 shrink-0" />
-                    <p>{formattedPhone}</p>
-                </div>
+            <div className="flex items-center gap-3 text-muted-foreground">
+                <Globe className="h-5 w-5 shrink-0" />
+                <p>{countryName}</p>
+            </div>
+            <div className="flex items-center gap-3 text-muted-foreground">
+                <VenetianMask className="h-5 w-5 shrink-0" />
+                <p><span className="capitalize">{profile.gender || 'N/A'}</span></p>
+            </div>
+             <div className="flex items-center gap-3 text-muted-foreground">
+                <Mail className="h-5 w-5 shrink-0" />
+                <p>{profile.email || 'N/A'}</p>
+            </div>
+            <div className="md:col-span-2 flex items-center gap-3 text-muted-foreground">
+                <Phone className="h-5 w-5 shrink-0" />
+                <p>{formattedPhone}</p>
             </div>
         </div>
       </CardContent>
