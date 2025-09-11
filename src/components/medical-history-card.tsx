@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert } from 'lucide-react';
@@ -180,7 +179,7 @@ function MedicalConditionForm({
             </Alert>
             )}
         
-            <div className="flex flex-col gap-2 border border-red-500 pt-4">
+            <div className="ml-auto w-fit flex flex-col gap-2 border border-red-500">
                 <Button type="submit" disabled={isProcessing} className="border border-green-500">
                     {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     {processedCondition ? 'Confirm & Save' : 'Process & Review'}
@@ -471,3 +470,5 @@ export function MedicalHistoryCard() {
     </>
   );
 }
+
+    
