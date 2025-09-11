@@ -1,4 +1,3 @@
-
 import type {Config} from 'tailwindcss';
 const { fontFamily } = require('tailwindcss/defaultTheme')
 const plugin = require('tailwindcss/plugin')
@@ -137,8 +136,8 @@ export default {
     require('tailwindcss-animate'),
     plugin(function({ addUtilities, theme }: { addUtilities: any, theme: any }) {
       const newUtilities = {
-        '.filter-drop-shadow': {
-          filter: 'drop-shadow(0 2px 2px hsl(var(--primary) / 0.4))',
+        '.text-shadow-3d': {
+          'text-shadow': '0px 1px 0px hsl(var(--card)), 0px 2px 0px hsl(var(--border)), 0px 3px 0px hsl(var(--border)), 0px 4px 5px hsla(var(--foreground), 0.2)',
         },
       }
       addUtilities(newUtilities)
