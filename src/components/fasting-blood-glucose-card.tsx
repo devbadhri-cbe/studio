@@ -15,7 +15,8 @@ interface FastingBloodGlucoseCardProps {
 export function FastingBloodGlucoseCard({ isReadOnly = false }: FastingBloodGlucoseCardProps) {
   const { fastingBloodGlucoseRecords, removeFastingBloodGlucoseRecord, getDisplayGlucoseValue, biomarkerUnit, setBiomarkerUnit } = useApp();
 
-  const getStatus = (record: FastingBloodGlucoseRecord) => {
+  const getStatus = (record?: FastingBloodGlucoseRecord) => {
+    if (!record) return null;
     // Status is always checked against the stored mg/dL value
     if (record.value < 100) return { text: 'Normal', variant: 'outline' as const };
     if (record.value <= 125) return { text: 'Prediabetes', variant: 'secondary' as const };
