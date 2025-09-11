@@ -124,7 +124,7 @@ export default function PatientLoginPage() {
     if (isMobile) {
         return (
             <Sheet open={isCreating} onOpenChange={setIsCreating}>
-                <SheetContent side="bottom" className="h-[90vh] p-0">
+                <SheetContent side="bottom" className="h-[90vh] p-0 bg-background">
                     <SheetHeader className="p-6">
                         <SheetTitle>Create New Patient Profile</SheetTitle>
                         <SheetDescription>Enter your details to create a health dashboard.</SheetDescription>
