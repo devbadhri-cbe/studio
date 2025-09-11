@@ -15,8 +15,8 @@ interface HemoglobinCardProps {
 export function HemoglobinCard({ isReadOnly = false }: HemoglobinCardProps) {
   const { hemoglobinRecords, removeHemoglobinRecord, profile, biomarkerUnit, setBiomarkerUnit, getDisplayHemoglobinValue } = useApp();
   
-  const getStatus = (record: HemoglobinRecord) => {
-    if (record.hemoglobin === undefined || profile.gender === undefined) return null;
+  const getStatus = (record?: HemoglobinRecord) => {
+    if (!record || record.hemoglobin === undefined || profile.gender === undefined) return null;
 
     let isAnemic = false;
     if (profile.gender === 'male' && record.hemoglobin < 13.5) {

@@ -15,7 +15,8 @@ interface ThyroidCardProps {
 export function ThyroidCard({ isReadOnly = false }: ThyroidCardProps) {
   const { thyroidRecords, removeThyroidRecord } = useApp();
 
-  const getStatus = (record: ThyroidRecord) => {
+  const getStatus = (record?: ThyroidRecord) => {
+    if (!record) return null;
     if (record.tsh < 0.4) return { text: 'Low (Hyper)', variant: 'secondary' as const };
     if (record.tsh > 4.0) return { text: 'High (Hypo)', variant: 'destructive' as const };
     return { text: 'Normal', variant: 'outline' as const };
