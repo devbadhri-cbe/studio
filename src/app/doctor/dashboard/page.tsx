@@ -173,17 +173,18 @@ export default function DoctorDashboardPage() {
   
   const handleFormSubmit = async (data: PatientFormData) => {
     setIsSubmitting(true);
-    const patientData = {
-      name: data.name,
-      dob: data.dob.toISOString(),
-      gender: data.gender,
-      email: data.email || '',
-      country: data.country,
-      phone: data.phone || '',
-    };
-
     try {
-      const newPatient = await addPatient(patientData);
+      const newPatient = await addPatient({
+        name: data.name,
+        dob: data.dob.toISOString(),
+        gender: data.gender,
+        email: data.email || '',
+        country: data.country,
+        phone: data.phone || '',
+        height: data.height ? parseFloat(data.height) : undefined,
+        unitSystem: 'imperial',
+        dateFormat: 'MM-dd-yyyy'
+      });
       toast({
         title: 'Patient Created',
         description: `${newPatient.name}'s profile has been created successfully.`,
@@ -328,5 +329,3 @@ export default function DoctorDashboardPage() {
     </>
   );
 }
-
-    

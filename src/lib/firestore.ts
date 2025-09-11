@@ -109,7 +109,7 @@ export async function getPatientsPaginated(
 }
 
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'doctorUid' | 'doctorName' | 'doctorEmail' | 'thyroxineRecords' | 'serumCreatinineRecords' | 'uricAcidRecords'>): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'doctorUid' | 'doctorName' | 'doctorEmail' | 'thyroxineRecords' | 'serumCreatinineRecords' | 'uricAcidRecords' | 'hba1cRecords' | 'fastingBloodGlucoseRecords' | 'thyroidRecords' | 'hemoglobinRecords' | 'weightRecords' | 'bloodPressureRecords' | 'medication' | 'presentMedicalConditions' | 'enabledBiomarkers' | 'dashboardSuggestions'>): Promise<Patient> {
     const db = getFirebaseDb();
     const docData = {
         ...patientData,
@@ -175,4 +175,3 @@ export async function deletePatient(id: string): Promise<void> {
   const docRef = doc(db, PATIENTS_COLLECTION, id);
   await deleteDoc(docRef);
 }
-    
