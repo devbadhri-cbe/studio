@@ -88,7 +88,7 @@ export function PatientDashboard() {
             backButton={BackButton}
             isScrolled={isScrolled}
          />
-        <main className="flex-1 p-4 md:p-6 pb-24">
+        <main className="flex-1 p-4 md:p-6 pb-4">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
              
             <PatientHeader />
@@ -156,7 +156,6 @@ export function PatientDashboard() {
             </div>
           </div>
         </main>
-        <UnsavedChangesBar />
       </div>
       <EditDoctorDetailsDialog open={isEditingDoctor} onOpenChange={setIsEditingDoctor} />
     </>

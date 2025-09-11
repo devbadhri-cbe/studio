@@ -4,6 +4,7 @@ import './globals.css';
 import { AppProvider } from '@/context/app-context';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { UnsavedChangesBar } from '@/components/unsaved-changes-bar';
 
 
 export const metadata: Metadata = {
@@ -41,10 +42,11 @@ export default function RootLayout({
       <body>
         <AppProvider>
             <TooltipProvider>
-              <div className="flex flex-col min-h-screen pt-[env(safe-area-inset-top)]">
+              <div className="flex flex-col min-h-screen pt-[env(safe-area-inset-top)] pb-20">
                 {children}
               </div>
               <Toaster />
+              <UnsavedChangesBar />
             </TooltipProvider>
         </AppProvider>
       </body>
