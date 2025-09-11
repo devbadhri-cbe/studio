@@ -4,9 +4,11 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { UploadRecordDialog } from './upload-record-dialog';
+import { Button } from './ui/button';
+import { FileText } from 'lucide-react';
 
 export function PatientHeader() {
-  const { profile } = useApp();
+  const { profile, isDoctorLoggedIn } = useApp();
 
   const pageTitle = `Welcome, ${profile.name || 'User'}!`;
   
@@ -22,6 +24,16 @@ export function PatientHeader() {
         </p>
       </div>
       <div className="w-full md:w-auto flex items-center justify-center md:justify-end gap-2 md:gap-4 shrink-0">
+        {isDoctorLoggedIn && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.open('/project-plan.html', '_blank')}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Project Plan
+          </Button>
+        )}
         <UploadRecordDialog />
       </div>
     </div>
