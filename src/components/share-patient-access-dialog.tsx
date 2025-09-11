@@ -59,7 +59,6 @@ export function SharePatientAccessDialog({
   }, [open, patient.id, getFullPatientData]);
 
   const getShareText = (includeTitle: boolean = true) => {
-    const doctorName = patient.doctorName || "your doctor";
     const title = `Hello ${patient.name},\n\nHere is the link to your Health Guardian dashboard:\n`;
     return `${includeTitle ? title : ''}${shareLink}`;
   }
