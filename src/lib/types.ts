@@ -203,7 +203,7 @@ export interface Patient {
   thyroidRecords: ThyroidRecord[];
   thyroxineRecords: ThyroxineRecord[];
   serumCreatinineRecords: SerumCreatinineRecord[];
-  uricAcidRecords?: UricAcidRecord[];
+  uricAcidRecords: UricAcidRecord[];
   hemoglobinRecords: HemoglobinRecord[];
   weightRecords: WeightRecord[];
   bloodPressureRecords: BloodPressureRecord[];

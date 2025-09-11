@@ -5,7 +5,7 @@ import * as React from "react"
 import { format, isValid, parse } from "date-fns"
 
 import { cn } from "@/lib/utils"
-import { useIsMobile } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/hooks/use-is-mobile"
 import { Input } from "./input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
 

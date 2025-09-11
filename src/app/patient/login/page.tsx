@@ -81,6 +81,7 @@ export default function PatientLoginPage() {
         medication: [],
         presentMedicalConditions: [],
         enabledBiomarkers: {},
+        doctorUid: 'doc_12345'
     };
 
     try {
@@ -174,4 +175,3 @@ export default function PatientLoginPage() {
     </div>
   );
 }
-
