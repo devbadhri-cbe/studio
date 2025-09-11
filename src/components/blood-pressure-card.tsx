@@ -15,7 +15,8 @@ interface BloodPressureCardProps {
 export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps) {
   const { bloodPressureRecords, removeBloodPressureRecord } = useApp();
   
-  const getStatus = (record: BloodPressureRecord) => {
+  const getStatus = (record?: BloodPressureRecord) => {
+    if (!record) return null;
     if (record.systolic >= 140 || record.diastolic >= 90) return { text: 'Stage 2 HTN', variant: 'destructive' as const };
     if (record.systolic >= 130 || record.diastolic >= 80) return { text: 'Stage 1 HTN', variant: 'secondary' as const };
     if (record.systolic >= 120) return { text: 'Elevated', variant: 'secondary' as const };
