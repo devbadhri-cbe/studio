@@ -1,9 +1,10 @@
+
 'use client';
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { UniversalCard } from '@/components/universal-card';
 import { Logo } from '@/components/logo';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -137,40 +138,35 @@ export default function PatientLoginPage() {
     }
     return (
        <div className="flex min-h-screen items-center justify-center bg-background p-4">
-          <Card className="w-full max-w-2xl">
-              <CardHeader>
-                  <CardTitle>Create New Patient Profile</CardTitle>
-                  <CardDescription>Enter your details to create a health dashboard.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                  {formContent}
-              </CardContent>
-          </Card>
+            <UniversalCard 
+                title="Create New Patient Profile"
+                description="Enter your details to create a health dashboard."
+                className="w-full max-w-2xl"
+            >
+                {formContent}
+            </UniversalCard>
       </div>
     )
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Logo className="h-12 w-12 text-primary" />
-          </div>
-          <CardTitle className="text-2xl">Health Guardian</CardTitle>
-          <CardDescription>Your Patient-Centric Health Dashboard</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-center text-muted-foreground">
+      <div className="w-full max-w-sm">
+        <UniversalCard 
+            title="Health Guardian"
+            description="Your Patient-Centric Health Dashboard"
+            icon={<Logo className="h-12 w-12 text-primary" />}
+        >
+          <div className="space-y-4 text-center">
+            <p className="text-sm text-muted-foreground">
                 No local data found. Create a new profile to get started.
             </p>
             <Button onClick={handleCreateNewProfile} className="w-full">
                 Create New Profile
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </UniversalCard>
+      </div>
     </div>
   );
 }
