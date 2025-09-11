@@ -151,11 +151,11 @@ export default function PatientLoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm text-center">
         <UniversalCard 
+            icon={<Logo className="h-16 w-16 mx-auto" />}
             title="Health Guardian"
             description="Your Patient-Centric Health Dashboard"
-            icon={<Logo className="h-12 w-12 text-primary" />}
         >
           <div className="space-y-4 text-center">
             <p className="text-sm text-muted-foreground">
