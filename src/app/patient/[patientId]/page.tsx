@@ -18,23 +18,36 @@ export default function SharedPatientPage() {
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
   
-  const patientId = params.patientId;
+  const patientId = params.patientId as string;
 
   React.useEffect(() => {
+    // This effect should only run on the client side.
+    if (!isClient) return;
+
+    // This page is for shared views, not for direct navigation by the primary user.
+    // If a user with local data lands here, they should be redirected to their main dashboard.
     if (patientId === 'dashboard' || patientId === 'login') {
-      // This page is not for the main dashboard or login, let their respective pages handle it.
-      setIsLoading(false);
-      return;
+       if(hasLocalData()) {
+            router.replace('/patient/dashboard');
+       } else {
+            router.replace('/patient/login');
+       }
+       return;
     }
     
-    const loadSharedData = async () => {
+    const loadSharedData = () => {
       const sharedData = searchParams.get('data');
-      const isDoctorView = searchParams.get('view') === 'doctor';
-
-      if (isDoctorView && sharedData) {
+      
+      // If there's shared data in the URL, it's a doctor's or shared view.
+      if (sharedData) {
         try {
           const patientData: Patient = JSON.parse(atob(sharedData));
-          setPatientData(patientData, true); // Set for doctor view
+          // Check if the ID in the URL matches the ID in the data payload.
+          if (patientData.id !== patientId) {
+             setError("The shared link is invalid. The patient ID does not match the provided data.");
+             return;
+          }
+          setPatientData(patientData, true); // Set for doctor view (isDoctorView = true)
         } catch (e) {
           console.error("Failed to parse shared data", e);
           setError("The shared patient data is invalid or corrupted.");
@@ -44,27 +57,21 @@ export default function SharedPatientPage() {
         return;
       }
 
-      // If it's a patient viewing their own shared link, redirect to their main dashboard.
+      // If no shared data, but the user has local data, redirect them.
       if (hasLocalData()) {
           loadLocalPatientData();
           router.replace('/patient/dashboard');
       } else {
-          setError("No patient data found. Please create a profile to view this information.");
+          // If no shared data and no local data, show an error.
+          setError("No patient data found. Please create a profile or use a valid shared link.");
           setIsLoading(false);
       }
     };
     
-    if (isClient) {
-        loadSharedData();
-    }
+    loadSharedData();
     
   }, [isClient, setPatientData, toast, searchParams, hasLocalData, loadLocalPatientData, router, patientId]);
   
-  if (patientId === 'dashboard' || patientId === 'login') {
-      // Should be handled by next router, but as a fallback, show nothing.
-      return null;
-  }
-
   if (isLoading || !isClient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
@@ -85,5 +92,6 @@ export default function SharedPatientPage() {
     );
   }
 
+  // Only render the dashboard if there is no error and loading is complete.
   return <PatientDashboard />;
 }

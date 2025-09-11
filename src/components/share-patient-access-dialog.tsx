@@ -17,9 +17,10 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Skeleton } from './ui/skeleton';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Separator } from './ui/separator';
+import { useApp } from '@/context/app-context';
 
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -41,27 +42,26 @@ export function SharePatientAccessDialog({
   patient,
 }: SharePatientAccessDialogProps) {
   const { toast } = useToast();
-  const [dashboardLink, setDashboardLink] = React.useState('');
+  const [shareLink, setShareLink] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(true);
-  const qrCodeRef = React.useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const { getFullPatientData } = useApp();
 
   React.useEffect(() => {
     if (open) {
       setIsLoading(true);
-      let origin = window.location.origin;
-       if (origin.includes('6000-')) {
-          origin = origin.replace('6000-', '9000-');
-      }
-      setDashboardLink(`${origin}/patient/${patient.id}`);
+      const origin = window.location.origin;
+      const fullPatientData = getFullPatientData();
+      const encodedData = btoa(JSON.stringify(fullPatientData));
+      setShareLink(`${origin}/patient/${patient.id}?data=${encodedData}`);
       setIsLoading(false);
     }
-  }, [open, patient.id]);
+  }, [open, patient.id, getFullPatientData]);
 
   const getShareText = (includeTitle: boolean = true) => {
     const doctorName = patient.doctorName || "your doctor";
-    const title = `Hello ${patient.name},\n\nThis is a message from ${doctorName} regarding your Health Guardian dashboard. You can access it here:\n`;
-    return `${includeTitle ? title : ''}${dashboardLink}`;
+    const title = `Hello ${patient.name},\n\nHere is the link to your Health Guardian dashboard:\n`;
+    return `${includeTitle ? title : ''}${shareLink}`;
   }
 
   const copyToClipboard = (text: string, label: string) => {
@@ -111,7 +111,7 @@ export function SharePatientAccessDialog({
           <div>
             <DialogTitle>Share Patient Access</DialogTitle>
             <DialogDescription>
-              Provide the patient with their unique link or QR code.
+              Share a secure, read-only link to this dashboard.
             </DialogDescription>
           </div>
         </div>
@@ -119,28 +119,28 @@ export function SharePatientAccessDialog({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
         <div className="flex flex-col items-center justify-center gap-4 rounded-lg border p-4">
-          <h3 className="text-sm font-medium">Direct Access via QR Code</h3>
-          <div className="rounded-lg bg-white p-3" ref={qrCodeRef}>
+          <h3 className="text-sm font-medium">Scan QR Code</h3>
+          <div className="rounded-lg bg-white p-3">
             {isLoading ? (
               <Skeleton className="h-32 w-32" />
             ) : (
-              <QRCode value={dashboardLink} size={128} />
+              <QRCode value={shareLink} size={128} />
             )}
           </div>
           <p className="text-center text-xs text-muted-foreground">
-            Patient can scan this code with their phone camera to instantly access their dashboard.
+            The patient can scan this with their phone to view their dashboard.
           </p>
         </div>
 
         <div className="space-y-4">
             <div>
-                 <h3 className="text-sm font-medium mb-2">Share via...</h3>
+                 <h3 className="text-sm font-medium mb-2">Send Link via...</h3>
                  <div className="space-y-2">
-                    <Button variant="outline" className="w-full" onClick={() => handleContact('whatsapp')}>
+                    <Button variant="outline" className="w-full" onClick={() => handleContact('whatsapp')} disabled={isLoading}>
                         <WhatsAppIcon className="mr-2 h-4 w-4" />
                         WhatsApp
                     </Button>
-                    <Button variant="outline" className="w-full" onClick={() => handleContact('email')}>
+                    <Button variant="outline" className="w-full" onClick={() => handleContact('email')} disabled={isLoading}>
                         <Mail className="mr-2 h-4 w-4" />
                         Email
                     </Button>
@@ -150,22 +150,13 @@ export function SharePatientAccessDialog({
             <Separator />
             
             <div>
-                 <h3 className="text-sm font-medium mb-2">Manual Copy</h3>
+                 <h3 className="text-sm font-medium mb-2">Copy Link</h3>
                  <div className="space-y-3">
                     <div className="space-y-1">
-                        <Label htmlFor="login-link">Dashboard Link</Label>
+                        <Label htmlFor="share-link">Dashboard Link</Label>
                         <div className="flex gap-2">
-                        <Input id="login-link" value={dashboardLink} readOnly />
-                        <Button variant="outline" size="icon" onClick={() => copyToClipboard(dashboardLink, 'Dashboard Link')}>
-                            <Copy className="h-4 w-4" />
-                        </Button>
-                        </div>
-                    </div>
-                    <div className="space-y-1">
-                        <Label htmlFor="patient-id">Patient ID</Label>
-                        <div className="flex gap-2">
-                        <Input id="patient-id" value={patient.id} readOnly />
-                        <Button variant="outline" size="icon" onClick={() => copyToClipboard(patient.id, 'Patient ID')}>
+                        <Input id="share-link" value={shareLink} readOnly />
+                        <Button variant="outline" size="icon" onClick={() => copyToClipboard(shareLink, 'Link')} disabled={isLoading}>
                             <Copy className="h-4 w-4" />
                         </Button>
                         </div>

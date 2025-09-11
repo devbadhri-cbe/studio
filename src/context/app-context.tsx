@@ -56,6 +56,7 @@ interface AppContextType {
   setProfile: (profile: UserProfile) => void;
   hasLocalData: () => boolean;
   loadLocalPatientData: () => void;
+  getFullPatientData: () => Patient;
   addMedicalCondition: (condition: MedicalCondition) => void;
   updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
@@ -194,21 +195,53 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [theme]);
   
   const hasLocalData = useCallback(() => {
-    return typeof window !== 'undefined' && localStorage.getItem('patientData') !== null;
+    if (typeof window !== 'undefined') {
+        try {
+            const data = localStorage.getItem('patientData');
+            return data !== null && data.length > 0;
+        } catch (e) {
+            console.error("Could not access local storage:", e);
+            return false;
+        }
+    }
+    return false;
   }, []);
 
+
   const loadLocalPatientData = useCallback(() => {
-    const localDataString = localStorage.getItem('patientData');
-    if (localDataString) {
-        try {
-            const patientData: Patient = JSON.parse(localDataString);
-            setPatientData(patientData, false);
-        } catch (e) {
-            console.error("Failed to parse local patient data", e);
-            localStorage.removeItem('patientData');
+    if (typeof window !== 'undefined') {
+        const localDataString = localStorage.getItem('patientData');
+        if (localDataString) {
+            try {
+                const patientData: Patient = JSON.parse(localDataString);
+                setPatientData(patientData, false);
+            } catch (e) {
+                console.error("Failed to parse local patient data", e);
+                localStorage.removeItem('patientData');
+            }
         }
     }
   }, []);
+
+  const getFullPatientData = useCallback((): Patient => {
+    return {
+      ...profile,
+      hba1cRecords,
+      fastingBloodGlucoseRecords,
+      thyroidRecords,
+      thyroxineRecords,
+      serumCreatinineRecords,
+      uricAcidRecords,
+      hemoglobinRecords,
+      weightRecords,
+      bloodPressureRecords,
+      totalCholesterolRecords,
+      ldlRecords,
+      hdlRecords,
+      triglyceridesRecords,
+    };
+  }, [profile, hba1cRecords, fastingBloodGlucoseRecords, thyroidRecords, thyroxineRecords, serumCreatinineRecords, uricAcidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
+
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -383,22 +416,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!profile.id || !hasUnsavedChanges) return;
 
     setIsSaving(true);
-    const patientDataToSave: Patient = {
-        ...profile,
-        hba1cRecords,
-        fastingBloodGlucoseRecords,
-        thyroidRecords,
-        thyroxineRecords,
-        serumCreatinineRecords,
-        uricAcidRecords,
-        hemoglobinRecords,
-        weightRecords,
-        bloodPressureRecords,
-        totalCholesterolRecords,
-        ldlRecords,
-        hdlRecords,
-        triglyceridesRecords,
-    };
+    const patientDataToSave = getFullPatientData();
     try {
       localStorage.setItem('patientData', JSON.stringify(patientDataToSave));
       setHasUnsavedChanges(false);
@@ -417,7 +435,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSaving(false);
     }
-  }, [profile, hasUnsavedChanges, hba1cRecords, fastingBloodGlucoseRecords, thyroidRecords, thyroxineRecords, serumCreatinineRecords, uricAcidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords, regenerateInsights, selectedInsightsLanguage]);
+  }, [profile, hasUnsavedChanges, getFullPatientData, regenerateInsights, selectedInsightsLanguage]);
   
   const getMedicationForRecord = useCallback((medication: Medication[]): string => {
     if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
@@ -878,6 +896,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProfile,
     hasLocalData,
     loadLocalPatientData,
+    getFullPatientData,
     addMedicalCondition,
     updateMedicalCondition,
     removeMedicalCondition,
@@ -970,5 +989,3 @@ export function useApp() {
   }
   return context;
 }
-
-    
