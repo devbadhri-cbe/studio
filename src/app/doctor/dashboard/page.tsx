@@ -32,16 +32,12 @@ import { getBmiStatus } from '@/lib/utils';
 const getPatientSummary = (patientData: Partial<Patient>): Partial<Patient> => {
     const summary: Partial<Patient> = {};
 
-    const getLatestRecord = <T extends { date: string | Date }>(records?: T[]): T | null => {
-        if (!records || records.length === 0) return null;
-        return [...records].sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
-    };
+    summary.lastHba1c = patientData.lastHba1c || null;
+    summary.lastThyroid = patientData.lastThyroid || null;
+    summary.lastBloodPressure = patientData.lastBloodPressure || null;
+    summary.lastHemoglobin = patientData.lastHemoglobin || null;
+    summary.lastFastingBloodGlucose = patientData.lastFastingBloodGlucose || null;
 
-    summary.lastHba1c = getLatestRecord(patientData.hba1cRecords) || null;
-    summary.lastThyroid = getLatestRecord(patientData.thyroidRecords) || null;
-    summary.lastBloodPressure = getLatestRecord(patientData.bloodPressureRecords) || null;
-    summary.lastHemoglobin = getLatestRecord(patientData.hemoglobinRecords) || null;
-    summary.lastFastingBloodGlucose = getLatestRecord(patientData.fastingBloodGlucoseRecords) || null;
 
     // Status Calculation Logic
     const lastBP = summary.lastBloodPressure;
