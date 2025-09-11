@@ -75,8 +75,8 @@ const getHealthInsightsFlow = ai.defineFlow(
         
         if (retries === 0) throw e;
 
-        // Wait longer for rate limit errors
-        if (errorMessage.includes('429')) {
+        // Wait longer for rate limit or server unavailable errors
+        if (errorMessage.includes('429') || errorMessage.includes('503')) {
            await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
