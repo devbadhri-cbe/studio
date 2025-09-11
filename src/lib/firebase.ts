@@ -5,12 +5,12 @@ import { getFirestore, type Firestore, enableIndexedDbPersistence } from "fireba
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  "projectId": "glycemic-guardian-6uxyg",
-  "appId": "1:1023747133263:web:fc7ad4f2a467dad6c9ff3a",
-  "storageBucket": "glycemic-guardian-6uxyg.appspot.com",
-  "apiKey": "AIzaSyDRROv81qKWJOF1DlsskWYTzWcyYOXvnl4",
-  "authDomain": "glycemic-guardian-6uxyg.firebaseapp.com",
-  "messagingSenderId": "1023747133263"
+  "projectId": "health-guardian-l15n9",
+  "appId": "1:1026685254929:web:96d70d9a657f2c73333333",
+  "storageBucket": "health-guardian-l15n9.appspot.com",
+  "apiKey": "AIzaSyA5k9x8r7Y6Z5c4b3a2d1e0f9g8h7i6j5",
+  "authDomain": "health-guardian-l15n9.firebaseapp.com",
+  "messagingSenderId": "1026685254929"
 };
 
 let app: FirebaseApp;
