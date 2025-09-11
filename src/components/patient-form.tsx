@@ -39,11 +39,10 @@ interface PatientFormProps {
 
 export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: PatientFormProps) {
   const { profile } = useApp();
-  const [selectedCountry, setSelectedCountry] = React.useState(patient?.country || '');
-  const isImperial = countries.find(c => c.code === selectedCountry)?.unitSystem === 'imperial';
   
   const form = useForm<PatientFormData>({
     defaultValues: React.useMemo(() => {
+        const isImperial = countries.find(c => c.code === patient?.country)?.unitSystem === 'imperial';
         let height_ft = '';
         let height_in = '';
         if(patient?.height && isImperial) {
@@ -63,30 +62,13 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
             height_ft: isImperial ? height_ft : '',
             height_in: isImperial ? height_in : '',
         }
-    }, [patient, isImperial])
+    }, [patient])
   });
 
   const watchDob = form.watch('dob');
   const watchCountry = form.watch('country');
   const age = React.useMemo(() => watchDob ? calculateAge(watchDob.toISOString()) : null, [watchDob]);
-  
-  React.useEffect(() => {
-    setSelectedCountry(watchCountry);
-  }, [watchCountry]);
-
-  React.useEffect(() => {
-    form.reset({
-        name: patient?.name || '',
-        dob: patient?.dob ? parseISO(patient.dob) : new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
-        gender: patient?.gender as 'male' | 'female' | undefined,
-        email: patient?.email || '',
-        country: patient?.country || '',
-        phone: patient?.phone || '',
-        height: !isImperial ? (patient?.height?.toString() || '') : '',
-        height_ft: isImperial ? (patient?.height ? cmToFtIn(patient.height).feet.toString() : '') : '',
-        height_in: isImperial ? (patient?.height ? Math.round(cmToFtIn(patient.height).inches).toString() : '') : '',
-    });
-  }, [patient, form, isImperial]);
+  const isImperial = countries.find(c => c.code === watchCountry)?.unitSystem === 'imperial';
   
   return (
     <>
@@ -100,7 +82,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Country</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a country" />
