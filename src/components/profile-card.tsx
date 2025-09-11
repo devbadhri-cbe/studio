@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useApp } from '@/context/app-context';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
 import { countries } from '@/lib/countries';
-import { Separator } from './ui/separator';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { ProfileSettingsPopover } from './profile-settings-popover';
 import { EditProfileDialog } from './edit-profile-dialog';
@@ -51,14 +50,14 @@ export function ProfileCard() {
                 </p>
             </div>
             <div className="flex items-center gap-3 text-muted-foreground">
+                <VenetianMask className="h-5 w-5 shrink-0" />
+                <p><span className="capitalize">{profile.gender || 'N/A'}</span></p>
+            </div>
+            <div className="flex items-center gap-3 text-muted-foreground">
                 <Globe className="h-5 w-5 shrink-0" />
                 <p>{countryName}</p>
             </div>
             <div className="flex items-center gap-3 text-muted-foreground">
-                <VenetianMask className="h-5 w-5 shrink-0" />
-                <p><span className="capitalize">{profile.gender || 'N/A'}</span></p>
-            </div>
-             <div className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="h-5 w-5 shrink-0" />
                 <p>{profile.email || 'N/A'}</p>
             </div>
