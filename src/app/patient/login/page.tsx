@@ -21,7 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 export default function PatientLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { loadLocalPatientData, hasLocalData } = useApp();
+  const { loadLocalPatientData, hasLocalData, setPatient: setPatientInContext } = useApp();
   const [isCreating, setIsCreating] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const isMobile = useIsMobile();
@@ -91,7 +91,7 @@ export default function PatientLoginPage() {
             title: 'Profile Created',
             description: `Your patient profile has been created successfully.`,
         });
-        loadLocalPatientData();
+        setPatientInContext(patientData);
         router.push(`/patient/dashboard`);
     } catch (error) {
         console.error("Failed to save patient", error);

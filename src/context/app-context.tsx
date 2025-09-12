@@ -1,8 +1,9 @@
+
 'use client';
 
 import * as React from 'react';
 import { type Patient, type MedicalCondition, type Medication, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, BiomarkerKey, DiseasePanelKey, ThyroxineRecord, SerumCreatinineRecord, UricAcidRecord } from '@/lib/types';
-import { useState, useEffect, createContext, useContext, useCallback, ReactNode, useMemo } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, ReactNode, useMemo, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
@@ -60,8 +61,8 @@ const supportedLanguages = [
 ];
 
 interface AppContextType {
-  profile: Patient | null;
-  setProfile: (profile: Patient) => void;
+  patient: Patient | null;
+  setPatient: (patient: Patient) => void;
   hasLocalData: () => boolean;
   loadLocalPatientData: () => void;
   addMedicalCondition: (condition: MedicalCondition) => void;
@@ -121,12 +122,16 @@ interface AppContextType {
   isReadOnlyView: boolean;
   approveMedicalCondition: (conditionId: string) => void;
   dismissSuggestion: (conditionId: string) => void;
+  getFullPatientData: () => Patient | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [patient, setPatient] = useState<Patient | null>(null);
+  const patientRef = useRef(patient);
+  patientRef.current = patient;
+
   const [isClient, setIsClient] = useState(false);
   const [theme, setThemeState] = useState<Theme>('system');
   const [biomarkerUnit, setBiomarkerUnitState] = useState<BiomarkerUnitSystem>('conventional');
@@ -140,7 +145,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const profile = patient;
 
-  // Centralized saving logic
   useEffect(() => {
     if (isClient && !isReadOnlyView && patient) {
       try {
@@ -165,6 +169,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBiomarkerUnitState(countryUnit);
     setIsClient(true);
   }, [profile?.country]);
+  
+   useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isReadOnlyView && patientRef.current) {
+        try {
+          localStorage.setItem('patientData', JSON.stringify(patientRef.current));
+        } catch (error) {
+          console.error('Failed to save data on unload:', error);
+        }
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isReadOnlyView]);
+
 
   useEffect(() => {
     if (!isClient) return;
@@ -198,7 +219,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPatient(patientData);
     setIsReadOnlyView(isReadOnly);
     
-    // Reset any session-specific state
     setTips([]);
     setInsightsError(null);
     setIsGeneratingInsights(false);
@@ -555,7 +575,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!prev) return null;
       const newPatient: Patient = { ...prev };
 
-      // Helper to check for duplicates
       const checkAndAdd = <T extends { date: string | Date }>(
           records: T[],
           newRecordData: Omit<T, 'id' | 'date'> & { date: string },
@@ -625,10 +644,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return { ...prev, presentMedicalConditions: newConditions };
     });
   }, []);
+  
+  const getFullPatientData = useCallback(() => {
+    return patientRef.current;
+  }, []);
 
   const value: AppContextType = {
-    profile,
-    setProfile: setPatient,
+    patient,
+    setPatient,
     hasLocalData,
     loadLocalPatientData,
     addMedicalCondition,
@@ -688,6 +711,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     isReadOnlyView,
     approveMedicalCondition,
     dismissSuggestion,
+    getFullPatientData,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
