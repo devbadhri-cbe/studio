@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { Stethoscope, Shapes, ArrowLeft, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Share2 } from 'lucide-react';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
@@ -14,12 +14,14 @@ import { TitleBar } from '@/components/ui/title-bar';
 import { Logo } from './logo';
 import { ProfileCard } from './profile-card';
 import { MedicalHistoryCard } from './medical-history-card';
+import { SharePatientAccessDialog } from './share-patient-access-dialog';
 
 export function PatientDashboard() {
   const { isClient, isReadOnlyView, patient } = useApp();
   const router = useRouter();
   const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [isShareOpen, setIsShareOpen] = React.useState(false);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -54,6 +56,20 @@ export function PatientDashboard() {
       </TooltipContent>
     </Tooltip>
   ) : null;
+  
+  const ShareButton = !isReadOnlyView ? (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon" onClick={() => setIsShareOpen(true)}>
+          <Share2 className="h-4 w-4" />
+          <span className="sr-only">Share or Sync Data</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Share or Sync Data</p>
+      </TooltipContent>
+    </Tooltip>
+  ) : null;
 
   return (
     <>
@@ -64,7 +80,9 @@ export function PatientDashboard() {
           onSubtitleClick={() => setIsEditingDoctor(true)}
           backButton={BackButton}
           isScrolled={isScrolled}
-        />
+        >
+            {ShareButton}
+        </TitleBar>
         <main className="flex-1 p-4 md:p-6 pb-4">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
             <PatientHeader />
@@ -78,6 +96,7 @@ export function PatientDashboard() {
         </main>
       </div>
       <EditDoctorDetailsDialog open={isEditingDoctor} onOpenChange={setIsEditingDoctor} />
+      {patient && <SharePatientAccessDialog open={isShareOpen} onOpenChange={setIsShareOpen} patient={patient} />}
     </>
   );
 }

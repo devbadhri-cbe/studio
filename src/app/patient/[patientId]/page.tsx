@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -8,11 +7,12 @@ import { PatientDashboard } from '@/components/patient-dashboard';
 import { Loader2 } from 'lucide-react';
 import { Patient } from '@/lib/types';
 import { Logo } from '@/components/logo';
+import { produce } from 'immer';
 
 export default function SharedPatientPage() {
   const searchParams = useSearchParams();
   const params = useParams();
-  const { setPatientData, isClient } = useApp();
+  const { setPatientData, isClient, setPatient } = useApp();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   
@@ -29,7 +29,13 @@ export default function SharedPatientPage() {
         if (patientData.id !== patientId) {
           setError("The shared link is invalid. The patient ID does not match the provided data.");
         } else {
-          setPatientData(patientData, true); // Set for read-only view
+            // This is a full data import, so we set it as the primary patient data
+            // and clear the read-only flag.
+            const newPatientData = produce(patientData, draft => {
+                draft.lastLogin = new Date().toISOString();
+            });
+            setPatient(newPatientData);
+            setPatientData(newPatientData, false);
         }
       } catch (e) {
         console.error("Failed to parse shared data", e);
@@ -41,7 +47,7 @@ export default function SharedPatientPage() {
       setError("No shared patient data found in the link.");
       setIsLoading(false);
     }
-  }, [isClient, patientId, searchParams, setPatientData]);
+  }, [isClient, patientId, searchParams, setPatientData, setPatient]);
   
   if (isLoading || !isClient) {
     return (
@@ -65,5 +71,6 @@ export default function SharedPatientPage() {
     );
   }
 
+  // The context now holds the imported data, so we can just render the main dashboard
   return <PatientDashboard />;
 }
