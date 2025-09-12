@@ -18,11 +18,11 @@ export function FormActions({
     cancelText = 'Cancel'
 }: FormActionsProps) {
     return (
-        <div className="flex flex-col-reverse gap-2 pt-4 border border-green-500 p-2 rounded-md">
-            <Button type="button" variant="ghost" onClick={onCancel} className="w-full border border-destructive">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+            <Button type="button" variant="ghost" onClick={onCancel} className="w-full sm:w-auto">
                 {cancelText}
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="w-full border border-accent">
+            <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {submitText}
             </Button>
