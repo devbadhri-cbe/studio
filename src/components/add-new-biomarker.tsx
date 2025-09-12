@@ -4,15 +4,14 @@
 
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
-import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormMessage } from './ui/form';
 import { toast } from '@/hooks/use-toast';
 import { createBiomarkerFiles } from '@/ai/flows/create-biomarker-flow';
 import { useApp } from '@/context/app-context';
+import { FormActions } from './form-actions';
 
 interface AddNewBiomarkerProps {
     onCancel: () => void;
@@ -116,13 +115,11 @@ export function AddNewBiomarker({ onCancel }: AddNewBiomarkerProps) {
                                 </FormItem>
                             )}
                         />
-                        <div className="flex justify-end gap-2">
-                            <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-                            <Button type="submit" disabled={isCreating}>
-                                {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Create
-                            </Button>
-                        </div>
+                        <FormActions
+                            onCancel={onCancel}
+                            isSubmitting={isCreating}
+                            submitText="Create"
+                        />
                     </form>
                 </Form>
             </CardContent>
