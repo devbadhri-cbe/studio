@@ -4,12 +4,11 @@
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { Button } from './ui/button';
 import { DrugInteractionViewer } from './drug-interaction-viewer';
 import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
-import { DiseaseCard } from './disease-card';
 import type { MedicalCondition, Medication } from '@/lib/types';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -23,6 +22,8 @@ import { ActionIcon } from './ui/action-icon';
 import { ActionMenu } from './ui/action-menu';
 import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
 import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
+import { useDateFormatter } from '@/hooks/use-date-formatter';
+import { Alert, AlertDescription } from './ui/alert';
 
 type ActiveView = 'none' | 'addCondition' | 'editCondition' | 'addMedication' | 'interaction' | `synopsis_condition_${string}` | `synopsis_medication_${string}`;
 
@@ -52,76 +53,113 @@ function MedicalInfoSection({ title, icon, actions, children }: MedicalInfoSecti
   )
 }
 
-interface MedicationListItemProps {
-    med: Medication;
+// Unified List Item Component
+interface ListItemProps {
+    item: MedicalCondition | Medication;
+    type: 'condition' | 'medication';
     isEditing: boolean;
     onRemove: (id: string) => void;
     onShowSynopsis: (id: string) => void;
-    onProcess: (med: Medication) => void;
-    formatDetails: (med: Medication) => string;
+    onProcess: (item: any) => void;
+    onRevise?: (item: any) => void;
 }
 
-function MedicationListItem({ med, isEditing, onRemove, onShowSynopsis, onProcess, formatDetails }: MedicationListItemProps) {
-    const isPending = med.name === 'pending...';
+function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, onRevise }: ListItemProps) {
+    const formatDate = useDateFormatter();
+    
+    let isPending = false;
+    let title = '';
+    let details: string | null = null;
+    let icdCode: string | undefined = undefined;
+    let date: string | undefined = undefined;
+    let isNil = false;
 
-    const handleItemClick = () => {
-        if (isPending) {
-            onProcess(med);
+    if (type === 'condition') {
+        const cond = item as MedicalCondition;
+        isPending = cond.icdCode === 'loading...';
+        title = cond.condition;
+        icdCode = cond.icdCode;
+        date = cond.date;
+    } else {
+        const med = item as Medication;
+        isPending = med.name === 'pending...';
+        isNil = med.name.toLowerCase() === 'nil';
+        title = isPending || isNil ? med.brandName : med.name;
+        if (!isPending && !isNil) {
+            details = [med.dosage, med.frequency, med.foodInstructions ? `${med.foodInstructions} food` : ''].filter(Boolean).join(', ');
         }
+    }
+    
+    const handleItemClick = () => {
+        if (isPending) onProcess(item);
     }
 
     return (
         <li
             className={cn(
-                "group flex items-center gap-2 text-xs text-muted-foreground border-l-2 pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md",
+                "group flex flex-col text-xs text-muted-foreground border-l-2 pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md",
                 isPending ? "border-yellow-500 cursor-pointer" : "border-primary"
             )}
             onClick={handleItemClick}
         >
-            <div className="flex-1">
-            {med.name.toLowerCase() === 'nil' ? (
-                <span className="font-semibold text-foreground">Nil - No medication</span>
-            ) : (
-                <div>
-                    <p className="font-semibold text-foreground">{isPending ? med.brandName : med.name}</p>
-                    {isPending ? (
-                       <p className="text-muted-foreground text-xs italic">Click to process with AI</p>
+            <div className="flex items-start gap-2 w-full">
+                <div className="flex-1">
+                    {isNil ? (
+                         <span className="font-semibold text-foreground">Nil - No medication</span>
                     ) : (
-                      <>
-                        <p className="text-muted-foreground text-xs italic">
-                            Patient Input: "{med.brandName}"
-                        </p>
-                        <p className="text-muted-foreground text-xs">{formatDetails(med)}</p>
-                      </>
+                        <p className="font-semibold text-foreground">{title}</p>
+                    )}
+
+                    {isPending ? (
+                        <div className="flex items-center gap-1.5 mt-1">
+                            <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
+                            <p className="text-muted-foreground text-xs italic">AI is processing...</p>
+                        </div>
+                    ) : (
+                        <>
+                            {details && <p className="text-muted-foreground text-xs">{`(${details})`}</p>}
+                            {icdCode && icdCode !== 'failed' && <p className="text-xs text-muted-foreground">ICD-11: {icdCode}</p>}
+                            {date && <p className="text-xs text-muted-foreground">{formatDate(date)}</p>}
+                        </>
                     )}
                 </div>
-            )}
-            </div>
-                <div className="flex items-center shrink-0">
-                     {isPending ? (
-                       <Loader2 className="h-4 w-4 animate-spin text-yellow-500" />
-                     ) : (
-                       <>
-                        {med.name.toLowerCase() !== 'nil' && (
+
+                {!isPending && !isNil && (
+                    <div className="flex items-center shrink-0">
+                         <ActionIcon 
+                            tooltip="View Synopsis"
+                            icon={<Info className="h-5 w-5 text-blue-500" />}
+                            onClick={(e) => { e.stopPropagation(); onShowSynopsis(item.id); }}
+                        />
+                        {isEditing && (
                             <ActionIcon 
-                                tooltip="View Synopsis"
-                                icon={<Info className="h-5 w-5 text-blue-500" />}
-                                onClick={(e) => { e.stopPropagation(); onShowSynopsis(med.id); }}
-                            />
-                        )}
-                        {isEditing && med.name.toLowerCase() !== 'nil' && (
-                            <ActionIcon 
-                                tooltip="Delete Medication"
+                                tooltip={`Delete ${type}`}
                                 icon={<Trash2 className="h-5 w-5 text-destructive" />}
-                                onClick={(e) => { e.stopPropagation(); onRemove(med.id); }}
+                                onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
                             />
                         )}
-                       </>
-                     )}
+                    </div>
+                )}
+            </div>
+
+            {(item as MedicalCondition).status === 'needs_revision' && onRevise && (
+                <div className="mt-2 w-full">
+                <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive text-xs p-2">
+                    <AlertTriangle className="h-4 w-4 !text-destructive" />
+                    <AlertDescription className="flex items-center justify-between">
+                    Doctor requested revision.
+                    <Button size="xs" className="ml-2" onClick={() => onRevise(item)}>
+                        <Edit className="mr-1 h-3 w-3" />
+                        Revise
+                    </Button>
+                    </AlertDescription>
+                </Alert>
                 </div>
+            )}
         </li>
-    )
+    );
 }
+
 
 export function MedicalHistoryCard() {
   const { profile, addMedicalCondition, updateMedicalCondition, removeMedication, setMedicationNil, removeMedicalCondition: removeMedicalConditionFromContext, updateMedication } = useApp();
@@ -212,11 +250,6 @@ export function MedicalHistoryCard() {
       setMedicationNil();
   }
   
-  const formatMedicationDetails = (med: Medication) => {
-    const details = [med.dosage, med.frequency, med.foodInstructions ? `${med.foodInstructions} food` : ''].filter(Boolean).join(', ');
-    return details ? `(${details})` : '';
-  }
-  
   const conditionActions = (
     <ActionMenu tooltip="Condition Settings" icon={<Settings className="h-4 w-4" />}>
       <DropdownMenuItem onSelect={handleAddConditionClick}>
@@ -235,10 +268,12 @@ export function MedicalHistoryCard() {
 
   const medicationActions = (
     <ActionMenu tooltip="Medication Settings" icon={<Settings className="h-4 w-4" />}>
-      <DropdownMenuItem onSelect={() => setActiveView('addMedication')}>
-        <PlusCircle className="mr-2 h-4 w-4" />
-        Add Medication
-      </DropdownMenuItem>
+       {!isMedicationNil && (
+         <DropdownMenuItem onSelect={() => setActiveView('addMedication')}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Medication
+        </DropdownMenuItem>
+       )}
       {!isMedicationNil && (
         <DropdownMenuItem
           onSelect={() => setIsEditingMedications(!isEditingMedications)}
@@ -315,14 +350,15 @@ export function MedicalHistoryCard() {
                     {profile.presentMedicalConditions.map((condition) => {
                         if (!condition || !condition.id) return null;
                         return (
-                            <DiseaseCard 
+                            <ListItem
                                 key={condition.id}
-                                condition={condition}
-                                onRevise={handleReviseCondition}
-                                isEditMode={isEditingConditions}
+                                item={condition}
+                                type="condition"
+                                isEditing={isEditingConditions}
                                 onRemove={() => removeMedicalConditionFromContext(condition.id)}
                                 onShowSynopsis={() => showSynopsis('condition', condition)}
                                 onProcess={handleProcessCondition}
+                                onRevise={handleReviseCondition}
                             />
                         )
                     })}
@@ -342,14 +378,14 @@ export function MedicalHistoryCard() {
             {profile.medication.length > 0 ? (
                  <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
-                       <MedicationListItem
+                       <ListItem
                             key={med.id}
-                            med={med}
+                            item={med}
+                            type="medication"
                             isEditing={isEditingMedications}
                             onRemove={handleRemoveMedication}
                             onShowSynopsis={() => showSynopsis('medication', med)}
                             onProcess={handleProcessMedication}
-                            formatDetails={formatMedicationDetails}
                         />
                     ))}
                 </ul>

@@ -25,6 +25,8 @@ const statusConfig = {
   needs_revision: { icon: AlertTriangle, text: 'Doctor requested revision', color: 'text-destructive' },
 };
 
+// THIS COMPONENT IS DEPRECATED AND WILL BE REMOVED.
+// The logic has been moved into a unified ListItem in medical-history-card.tsx.
 export function DiseaseCard({ condition, onRevise, isEditMode, onRemove, onShowSynopsis, onProcess }: DiseaseCardProps) {
   const formatDate = useDateFormatter();
 
@@ -59,7 +61,10 @@ export function DiseaseCard({ condition, onRevise, isEditMode, onRemove, onShowS
             <div className="flex-1">
               <p className="font-semibold text-foreground">{condition.condition}</p>
               {isIcdLoading ? (
-                 <p className="text-muted-foreground text-xs italic">Click to process with AI</p>
+                 <div className="flex items-center gap-1.5">
+                    <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
+                    <p className="text-muted-foreground text-xs italic">AI is processing...</p>
+                 </div>
               ) : (
                 condition.icdCode && condition.icdCode !== 'failed' && (
                     <p className="text-xs text-muted-foreground">ICD-11: {condition.icdCode}</p>
@@ -69,7 +74,7 @@ export function DiseaseCard({ condition, onRevise, isEditMode, onRemove, onShowS
             </div>
             <div className="flex items-center shrink-0 gap-1">
                 {isIcdLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-yellow-500" />
+                    null // Spinner is now inline
                 ) : (
                   <>
                     <ActionIcon 
