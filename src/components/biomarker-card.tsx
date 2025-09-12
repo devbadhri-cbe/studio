@@ -19,6 +19,7 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Separator } from './ui/separator';
+import { Button } from './ui/button';
 
 interface Record {
   id: string;
@@ -101,7 +102,7 @@ export function BiomarkerCard<T extends Record>({
         {React.cloneElement(addRecordDialog as React.ReactElement, {
           children: (
              <div className="flex items-center gap-2">
-                <PlusCircle className="h-4 w-4" />
+                <PlusCircle className="mr-2 h-4 w-4" />
                 <span>Add New Record</span>
              </div>
           )
@@ -163,7 +164,6 @@ export function BiomarkerCard<T extends Record>({
       icon={icon}
       actions={Actions}
       className={cn("border-primary/50", className)}
-      contentClassName="text-sm p-4 pt-0"
     >
        {hasRecords ? (
           <div className="flex flex-col flex-1 h-full">
@@ -187,6 +187,14 @@ export function BiomarkerCard<T extends Record>({
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px]">
               <p className="text-sm">No records yet.</p>
+              {React.cloneElement(addRecordDialog as React.ReactElement, {
+                children: (
+                  <Button variant="outline" size="sm" className="mt-4">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add First Record
+                  </Button>
+                )
+              })}
           </div>
         )}
     </UniversalCard>

@@ -40,7 +40,7 @@ export function UniversalCard({
           </div>
         </CardHeader>
       )}
-      <CardContent className={cn("flex-1 flex flex-col", contentClassName)}>
+      <CardContent className={cn("flex-1 flex flex-col p-4 pt-0", contentClassName)}>
         {children}
       </CardContent>
     </Card>
