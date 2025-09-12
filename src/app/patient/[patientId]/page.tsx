@@ -33,6 +33,8 @@ export default function SharedPatientPage() {
             // and clear the read-only flag.
             const newPatientData = produce(patientData, draft => {
                 draft.lastLogin = new Date().toISOString();
+                // Ensure all record arrays exist to prevent spread errors
+                draft.weightRecords = draft.weightRecords || [];
             });
             setPatient(newPatientData);
             setPatientData(newPatientData, false);
