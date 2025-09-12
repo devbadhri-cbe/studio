@@ -88,7 +88,7 @@ export function AddMedicalConditionForm({
       </CardHeader>
       <CardContent>
         <FormProvider {...formMethods}>
-          <form onSubmit={formMethods.handleSubmit(handleFormSubmit)} className="space-y-4 border-2 border-red-500 p-2">
+          <form onSubmit={formMethods.handleSubmit(handleFormSubmit)} className="space-y-4">
             <FormField
                 control={formMethods.control}
                 name="userInput"
