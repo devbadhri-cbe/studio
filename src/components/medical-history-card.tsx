@@ -68,12 +68,12 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
     
     const isPending = item.status === 'pending_review';
     const isFailed = item.status === 'failed';
-    const isNil = 'name' in item && item.name.toLowerCase() === 'nil';
 
     let title: string;
     let details: string | null = null;
     let originalInput: string | undefined;
     let date: string | undefined;
+    let isNil = false;
 
     if (type === 'condition') {
         const cond = item as MedicalCondition;
@@ -82,6 +82,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
         date = cond.date;
     } else {
         const med = item as Medication;
+        isNil = med.name.toLowerCase() === 'nil';
         title = isNil ? 'Nil - No medication taken' : med.name;
         originalInput = med.brandName;
         if (!isNil && med.status !== 'failed') {
@@ -110,7 +111,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
             <div className="flex items-start gap-2 w-full">
                 <div className="flex-1">
                     <p className="font-semibold text-foreground">{title}</p>
-                    {showOriginalInput && <p className="text-muted-foreground text-xs">({originalInput})</p>}
+                     {showOriginalInput && <p className="text-muted-foreground text-xs">({originalInput})</p>}
                     
                     {isPending ? (
                         <div className="flex items-center gap-1.5 mt-1">
