@@ -32,31 +32,42 @@ export function MedicationSynopsisDialog({ medicationName, onClose }: Medication
 
   const synopsisToDisplay = translatedSynopsis || originalSynopsis;
 
-  const fetchSynopsis = React.useCallback(async () => {
-    setIsLoading(true);
+  const fetchSynopsis = React.useCallback(async (language: string) => {
+    if (language === 'en') {
+      setIsLoading(true);
+    } else {
+      setIsTranslating(true);
+    }
     setError(null);
     try {
       const result = await getMedicationSynopsis({
         medicationName,
-        language: 'English',
+        language,
       });
       if (result.synopsis) {
-        setOriginalSynopsis(result.synopsis);
+        if (language === 'English') {
+          setOriginalSynopsis(result.synopsis);
+        } else {
+          setTranslatedSynopsis(result.synopsis);
+        }
       } else {
         throw new Error("No synopsis returned from AI.");
       }
     } catch (e) {
       console.error("Synopsis fetch failed", e);
-      setError("Failed to load the synopsis. Please try again.");
-      toast({ variant: 'destructive', title: 'Error Loading Synopsis' });
+      const errorMessage = "The AI failed to generate a synopsis for this medication. You can close this and try again later.";
+      setError(errorMessage);
+      toast({ variant: 'destructive', title: 'Error Loading Synopsis', description: errorMessage });
     } finally {
       setIsLoading(false);
+      setIsTranslating(false);
     }
   }, [medicationName]);
 
   React.useEffect(() => {
-    fetchSynopsis();
-  }, [fetchSynopsis]);
+    fetchSynopsis('English');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLanguageChange = async (languageCode: string) => {
     if (!languageCode || !originalSynopsis) return;
@@ -68,25 +79,8 @@ export function MedicationSynopsisDialog({ medicationName, onClose }: Medication
         return;
     }
     
-    setIsTranslating(true);
-    setError(null);
-    try {
-        const result = await getMedicationSynopsis({
-            medicationName,
-            language: supportedLanguages.find(l => l.code === languageCode)?.name || 'English'
-        });
-        if (result.synopsis) {
-            setTranslatedSynopsis(result.synopsis);
-        } else {
-            throw new Error("No translated synopsis returned from AI.");
-        }
-    } catch (e) {
-        console.error("Translation failed", e);
-        setError("Failed to translate the synopsis. Please try again.");
-        toast({ variant: 'destructive', title: 'Translation Error' });
-    } finally {
-        setIsTranslating(false);
-    }
+    const languageName = supportedLanguages.find(l => l.code === languageCode)?.name || 'English';
+    fetchSynopsis(languageName);
   }
 
 
