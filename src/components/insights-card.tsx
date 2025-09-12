@@ -23,6 +23,11 @@ const supportedLanguages = [
 
 export function InsightsCard() {
   const { 
+    profile,
+    hba1cRecords,
+    fastingBloodGlucoseRecords,
+    weightRecords,
+    bloodPressureRecords,
     tips,
     isGeneratingInsights,
     isTranslatingInsights,
@@ -38,6 +43,15 @@ export function InsightsCard() {
     setSelectedInsightsLanguage(languageCode);
     await translateInsights(languageCode);
   }
+  
+  const hasNoRecords = [
+    hba1cRecords,
+    fastingBloodGlucoseRecords,
+    weightRecords,
+    bloodPressureRecords,
+  ].every(records => records.length === 0);
+
+  const isButtonDisabled = isGeneratingInsights || isTranslatingInsights || hasNoRecords || !profile.name || !profile.dob;
 
   return (
     <Card className="h-full shadow-xl flex flex-col">
@@ -87,7 +101,7 @@ export function InsightsCard() {
         <div className="flex flex-col md:flex-row justify-center items-center gap-4 pt-6 mt-auto">
             <div className="flex items-center gap-2">
                 <Languages className="h-4 w-4 text-muted-foreground" />
-                <Select value={selectedInsightsLanguage} onValueChange={handleLanguageChange} disabled={isGeneratingInsights || isTranslatingInsights}>
+                <Select value={selectedInsightsLanguage} onValueChange={handleLanguageChange} disabled={isButtonDisabled}>
                     <SelectTrigger className="w-[150px] h-9 text-sm">
                         <SelectValue placeholder="Translate..." />
                     </SelectTrigger>
@@ -100,7 +114,7 @@ export function InsightsCard() {
                     </SelectContent>
                 </Select>
             </div>
-            <Button onClick={() => regenerateInsights(selectedInsightsLanguage)} disabled={isGeneratingInsights || isTranslatingInsights}>
+            <Button onClick={() => regenerateInsights(selectedInsightsLanguage)} disabled={isButtonDisabled}>
                 <RotateCw className="mr-2 h-4 w-4" />
                 Generate New Insights
             </Button>
