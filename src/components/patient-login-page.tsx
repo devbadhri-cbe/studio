@@ -15,19 +15,30 @@ import { countries } from '@/lib/countries';
 import { useApp } from '@/context/app-context';
 import type { Patient } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
+import { Loader2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 
 export function PatientLoginPage() {
   const { toast } = useToast();
-  const { setPatient } = useApp();
+  const { setPatient, deleteProfile, isClient } = useApp();
   const [isCreating, setIsCreating] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSuccess, setIsSuccess] = React.useState(false);
   const isMobile = useIsMobile();
+  const [hasExistingData, setHasExistingData] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isClient) {
+      const localData = localStorage.getItem('patientData');
+      setHasExistingData(!!localData);
+    }
+  }, [isClient]);
 
   const handleCreateNewProfile = () => {
     setIsCreating(true);
   };
 
-  const handleFormSubmit = (data: PatientFormData) => {
+  const handleFormSubmit = async (data: PatientFormData) => {
     setIsSubmitting(true);
     const countryInfo = countries.find(c => c.code === data.country);
     const isImperial = countryInfo?.unitSystem === 'imperial';
@@ -75,12 +86,19 @@ export function PatientLoginPage() {
     };
 
     try {
-        // This now correctly triggers the context update AND the automatic save.
         setPatient(patientData);
+        setIsSuccess(true);
         toast({
             title: 'Profile Created',
             description: `Your patient profile has been created successfully.`,
         });
+        
+        // The context useEffect will handle saving, and the dashboard will load automatically.
+        // We just need to keep the success UI showing for a moment.
+        setTimeout(() => {
+          // The main page will detect the new patient state and show the dashboard
+        }, 2000);
+
     } catch (error) {
         console.error("Failed to save patient", error);
         toast({
@@ -88,23 +106,29 @@ export function PatientLoginPage() {
             title: 'Error',
             description: 'Could not create your profile. Please try again.',
         });
-    } finally {
         setIsSubmitting(false);
-        setIsCreating(false);
     }
   };
   
-  if (isCreating) {
+  if (isCreating || isSuccess) {
     const formContent = (
-      <PatientForm 
-          onSubmit={handleFormSubmit}
-          isSubmitting={isSubmitting}
-          onCancel={() => setIsCreating(false)}
-      />
+      isSuccess ? (
+        <div className="flex flex-col items-center justify-center h-48 text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+            <h3 className="text-xl font-bold">Profile Created!</h3>
+            <p className="text-muted-foreground">Entering your dashboard...</p>
+        </div>
+      ) : (
+        <PatientForm 
+            onSubmit={handleFormSubmit}
+            isSubmitting={isSubmitting}
+            onCancel={() => setIsCreating(false)}
+        />
+      )
     );
     if (isMobile) {
         return (
-            <Sheet open={isCreating} onOpenChange={setIsCreating}>
+            <Sheet open={isCreating} onOpenChange={(open) => { if (!open) setIsCreating(false); }}>
                 <SheetContent side="bottom" className="h-[90vh] p-0 bg-background">
                     <SheetHeader className="p-6">
                         <SheetTitle>Create New Patient Profile</SheetTitle>
@@ -120,8 +144,8 @@ export function PatientLoginPage() {
     return (
        <div className="flex min-h-screen items-center justify-center bg-background p-4">
             <UniversalCard 
-                title="Create New Patient Profile"
-                description="Enter your details to create a health dashboard."
+                title={isSuccess ? "Success" : "Create New Patient Profile"}
+                description={isSuccess ? undefined : "Enter your details to create a health dashboard."}
                 className="w-full max-w-2xl"
             >
                 {formContent}
@@ -145,6 +169,32 @@ export function PatientLoginPage() {
             <Button onClick={handleCreateNewProfile} className="w-full">
                 Create New Profile
             </Button>
+             {hasExistingData && (
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive-outline" size="sm" className="w-full">
+                           Clear Existing Profile
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will permanently delete your existing profile from this device and cannot be undone.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={deleteProfile}
+                                className="bg-destructive hover:bg-destructive/90"
+                            >
+                                Delete and Start Over
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            )}
           </div>
         </UniversalCard>
       </div>
