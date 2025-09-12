@@ -19,10 +19,10 @@ import { Hba1cCard } from './hba1c-card';
 import { ReminderCard } from './reminder-card';
 import { InsightsCard } from './insights-card';
 import { BiomarkersPanel } from './biomarkers-panel';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { DashboardSectionToggle } from './dashboard-section-toggle';
 import { DiseasePanel } from './disease-panel';
 import { AddBiomarkerCard } from './add-biomarker-card';
+import { Collapsible, CollapsibleContent } from './ui/collapsible';
 
 export function PatientDashboard() {
   const { isClient, isReadOnlyView, patient } = useApp();
@@ -113,30 +113,38 @@ export function PatientDashboard() {
             </div>
             <Separator />
             <div className="space-y-6">
-                <DashboardSectionToggle
-                    title="Disease Panels"
-                    subtitle="Manage multi-biomarker panels for specific conditions"
-                    icon={<Hba1cCard />} // Placeholder icon
-                    isOpen={isPanelsOpen}
-                    searchQuery={panelSearchQuery}
-                    onSearchChange={setPanelSearchQuery}
-                    searchPlaceholder="Search panels..."
-                    onCreateClick={() => {}}
-                    isCollapsible={true}
-                />
-                {isPanelsOpen && <DiseasePanel searchQuery={panelSearchQuery} />}
+                <Collapsible open={isPanelsOpen} onOpenChange={setIsPanelsOpen}>
+                    <DashboardSectionToggle
+                        title="Disease Panels"
+                        subtitle="Manage multi-biomarker panels for specific conditions"
+                        icon={<Hba1cCard />} // Placeholder icon
+                        isOpen={isPanelsOpen}
+                        searchQuery={panelSearchQuery}
+                        onSearchChange={setPanelSearchQuery}
+                        searchPlaceholder="Search panels..."
+                        onCreateClick={() => {}}
+                        isCollapsible={true}
+                    />
+                    <CollapsibleContent>
+                        <DiseasePanel searchQuery={panelSearchQuery} />
+                    </CollapsibleContent>
+                </Collapsible>
                 
-                <DashboardSectionToggle
-                    title="All Biomarkers"
-                    subtitle="View and manage individual biomarker cards"
-                    icon={<Hba1cCard />} // Placeholder icon
-                    isOpen={isBiomarkersOpen}
-                    searchQuery={biomarkerSearchQuery}
-                    onSearchChange={setBiomarkerSearchQuery}
-                    searchPlaceholder="Search biomarkers..."
-                    isCollapsible={true}
-                />
-                {isBiomarkersOpen && <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>}
+                <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
+                    <DashboardSectionToggle
+                        title="All Biomarkers"
+                        subtitle="View and manage individual biomarker cards"
+                        icon={<Hba1cCard />} // Placeholder icon
+                        isOpen={isBiomarkersOpen}
+                        searchQuery={biomarkerSearchQuery}
+                        onSearchChange={setBiomarkerSearchQuery}
+                        searchPlaceholder="Search biomarkers..."
+                        isCollapsible={true}
+                    />
+                     <CollapsibleContent>
+                        <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>
+                     </CollapsibleContent>
+                </Collapsible>
 
                 <AddBiomarkerCard />
             </div>
