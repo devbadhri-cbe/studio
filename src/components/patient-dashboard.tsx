@@ -62,7 +62,6 @@ export function PatientDashboard() {
         <TitleBar
           title={['Health', 'Guardian']}
           subtitle={doctorDetails.name}
-          onSubtitleClick={() => setIsEditingDoctor(true)}
           isScrolled={isScrolled}
           rightChildren={
             !isReadOnlyView ? (

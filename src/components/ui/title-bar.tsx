@@ -7,13 +7,12 @@ import { cn } from '@/lib/utils';
 interface TitleBarProps {
     title: string[];
     subtitle?: string;
-    onSubtitleClick?: () => void;
     children?: React.ReactNode;
     rightChildren?: React.ReactNode;
     isScrolled: boolean;
 }
 
-export function TitleBar({ title, subtitle, onSubtitleClick, children, rightChildren, isScrolled }: TitleBarProps) {
+export function TitleBar({ title, subtitle, children, rightChildren, isScrolled }: TitleBarProps) {
     
     const renderTitle = () => {
         if(title.length === 1) {
@@ -57,8 +56,7 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, rightChil
                          )}>
                            {subtitle && (
                             <span 
-                                onClick={onSubtitleClick} 
-                                className={cn("hover:underline", onSubtitleClick && "cursor-pointer")}
+                                className="hover:underline"
                             >
                                 {subtitle}
                             </span>
