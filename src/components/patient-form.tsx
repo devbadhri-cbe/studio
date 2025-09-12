@@ -71,7 +71,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
   
   return (
     <FormProvider {...formMethods}>
-      <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-6 border-2 border-red-500 p-2">
+      <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={formMethods.control}
           name="name"

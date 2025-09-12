@@ -1,4 +1,3 @@
-
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake } from 'lucide-react';
@@ -9,18 +8,75 @@ import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
 import { countries } from '@/lib/countries';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { ProfileSettingsPopover } from './profile-settings-popover';
-import { EditProfileDialog } from './edit-profile-dialog';
+import { PatientForm, type PatientFormData } from './patient-form';
+import { ftInToCm } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
+import type { Patient } from '@/lib/types';
 
 
 export function ProfileCard() {
-  const { profile } = useApp();
+  const { profile, setPatient } = useApp();
   const [isEditing, setIsEditing] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const formatDate = useDateFormatter();
   
   const calculatedAge = calculateAge(profile.dob);
   const country = countries.find(c => c.code === profile.country);
   const countryName = country?.name || profile.country;
   const formattedPhone = formatDisplayPhoneNumber(profile.phone, profile.country);
+
+  const onProfileSubmit = async (data: PatientFormData) => {
+    if (!profile) return;
+    setIsSubmitting(true);
+    
+    const countryInfo = countries.find(c => c.code === data.country);
+    const isImperial = countryInfo?.unitSystem === 'imperial';
+
+    let heightInCm: number | undefined;
+    if (isImperial) {
+        const ft = data.height_ft ? Number(data.height_ft) : 0;
+        const inches = data.height_in ? Number(data.height_in) : 0;
+        heightInCm = ft > 0 || inches > 0 ? ftInToCm(ft, inches) : undefined;
+    } else {
+        heightInCm = data.height ? Number(data.height) : undefined;
+    }
+
+    try {
+        const latestWeight = [...(profile.weightRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+        const newBmi = calculateBmi(latestWeight?.value, heightInCm);
+
+        const updatedProfile: Patient = {
+            ...profile,
+            name: data.name,
+            dob: data.dob.toISOString(),
+            gender: data.gender,
+            email: data.email,
+            country: data.country,
+            phone: data.phone || '',
+            height: heightInCm,
+            dateFormat: countryInfo?.dateFormat || profile.dateFormat,
+            unitSystem: countryInfo?.unitSystem || profile.unitSystem,
+            bmi: newBmi,
+        };
+        
+        setPatient(updatedProfile);
+
+        toast({
+            title: 'Profile Updated',
+            description: 'Your details have been successfully saved.',
+        });
+        setIsEditing(false);
+    } catch (error) {
+        console.error("Failed to update profile", error);
+        toast({
+            variant: 'destructive',
+            title: 'Update Failed',
+            description: 'Could not update profile. Please try again.',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
 
 
   return (
@@ -31,8 +87,8 @@ export function ProfileCard() {
             <div className="flex items-center gap-3">
               <UserCircle className="h-10 w-10 shrink-0 text-muted-foreground" />
               <div>
-                <CardTitle>My Profile</CardTitle>
-                <CardDescription>Your personal and medical information.</CardDescription>
+                <CardTitle>{isEditing ? 'Edit Profile' : 'My Profile'}</CardTitle>
+                <CardDescription>{isEditing ? 'Update your personal details below.' : 'Your personal and medical information.'}</CardDescription>
               </div>
             </div>
              <div className="flex items-center gap-1">
@@ -41,34 +97,42 @@ export function ProfileCard() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 rounded-lg border bg-card p-4">
-            <div className="flex items-center gap-3 text-muted-foreground">
-                <Cake className="h-5 w-5 shrink-0" />
-                <p>
-                    {profile.dob ? formatDate(profile.dob) : 'N/A'}
-                    {calculatedAge !== null && ` (${calculatedAge} yrs)`}
-                </p>
+        {isEditing ? (
+            <PatientForm
+                onSubmit={onProfileSubmit}
+                onCancel={() => setIsEditing(false)}
+                isSubmitting={isSubmitting}
+                initialData={profile}
+            />
+        ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 rounded-lg border bg-card p-4">
+                <div className="flex items-center gap-3 text-muted-foreground">
+                    <Cake className="h-5 w-5 shrink-0" />
+                    <p>
+                        {profile.dob ? formatDate(profile.dob) : 'N/A'}
+                        {calculatedAge !== null && ` (${calculatedAge} yrs)`}
+                    </p>
+                </div>
+                <div className="flex items-center gap-3 text-muted-foreground">
+                    <VenetianMask className="h-5 w-5 shrink-0" />
+                    <p><span className="capitalize">{profile.gender || 'N/A'}</span></p>
+                </div>
+                <div className="flex items-center gap-3 text-muted-foreground">
+                    <Globe className="h-5 w-5 shrink-0" />
+                    <p>{countryName}</p>
+                </div>
+                <div className="flex items-center gap-3 text-muted-foreground">
+                    <Mail className="h-5 w-5 shrink-0" />
+                    <p>{profile.email || 'N/A'}</p>
+                </div>
+                <div className="md:col-span-2 flex items-center gap-3 text-muted-foreground">
+                    <Phone className="h-5 w-5 shrink-0" />
+                    <p>{formattedPhone}</p>
+                </div>
             </div>
-            <div className="flex items-center gap-3 text-muted-foreground">
-                <VenetianMask className="h-5 w-5 shrink-0" />
-                <p><span className="capitalize">{profile.gender || 'N/A'}</span></p>
-            </div>
-            <div className="flex items-center gap-3 text-muted-foreground">
-                <Globe className="h-5 w-5 shrink-0" />
-                <p>{countryName}</p>
-            </div>
-            <div className="flex items-center gap-3 text-muted-foreground">
-                <Mail className="h-5 w-5 shrink-0" />
-                <p>{profile.email || 'N/A'}</p>
-            </div>
-            <div className="md:col-span-2 flex items-center gap-3 text-muted-foreground">
-                <Phone className="h-5 w-5 shrink-0" />
-                <p>{formattedPhone}</p>
-            </div>
-        </div>
+        )}
       </CardContent>
     </Card>
-    <EditProfileDialog open={isEditing} onOpenChange={setIsEditing} />
     </>
   );
 }
