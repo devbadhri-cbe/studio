@@ -26,6 +26,7 @@ import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { Alert, AlertDescription } from './ui/alert';
 import { produce } from 'immer';
 import { EditMedicationForm } from './edit-medication-form';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 type ActiveView = 'none' | `add_${'condition' | 'medication'}` | `edit_${'condition' | 'medication'}_${string}` | 'interaction' | `synopsis_${'condition' | 'medication'}_${string}`;
 
@@ -75,6 +76,7 @@ interface ListItemProps {
 
 function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis, onProcess, onRevise, form }: ListItemProps) {
     const formatDate = useDateFormatter();
+    const isMobile = useIsMobile();
     
     const isPending = item.status === 'pending_review';
     const isFailed = item.status === 'failed';
@@ -102,12 +104,16 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
     
     const handleItemClick = () => {
         if (isFailed) onProcess(item);
+        if (isMobile && !isNil && !isFailed && !isPending && type === 'medication') {
+            onShowSynopsis(item.id);
+        }
     }
     
     const showOriginalInput = originalInput && originalInput.toLowerCase() !== title.toLowerCase() && !isNil;
 
     const itemBorderColor = isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
-    const itemCursor = isFailed ? "cursor-pointer" : "";
+    const itemCursor = isFailed || (isMobile && type === 'medication' && !isNil && !isFailed && !isPending) ? "cursor-pointer" : "";
+
 
     return (
         <li>
@@ -142,29 +148,39 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                     )}
                 </div>
 
-                {!isPending && !isNil && !isFailed && (
-                    <div className="flex items-center shrink-0">
+                <div className="flex items-center shrink-0">
+                    {isFailed && (
                          <ActionIcon 
-                            tooltip="View Synopsis"
-                            icon={<Info className="h-5 w-5 text-blue-500" />}
-                            onClick={(e) => { e.stopPropagation(); onShowSynopsis(item.id); }}
+                            tooltip={`Delete Failed Record`}
+                            icon={<Trash2 className="h-5 w-5 text-destructive" />}
+                            onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
                         />
-                        {isEditing && onRevise && (
+                    )}
+                    {!isPending && !isNil && !isFailed && (
+                        <>
                             <ActionIcon 
-                                tooltip={`Edit ${type}`}
-                                icon={<Edit className="h-5 w-5 text-gray-500" />}
-                                onClick={(e) => { e.stopPropagation(); onRevise(item); }}
+                                tooltip="View Synopsis"
+                                icon={<Info className="h-5 w-5 text-blue-500" />}
+                                onClick={(e) => { e.stopPropagation(); onShowSynopsis(item.id); }}
+                                className={isMobile ? 'hidden' : 'flex'}
                             />
-                        )}
-                        {isEditing && (
-                            <ActionIcon 
-                                tooltip={`Delete ${type}`}
-                                icon={<Trash2 className="h-5 w-5 text-destructive" />}
-                                onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
-                            />
-                        )}
-                    </div>
-                )}
+                            {isEditing && onRevise && (
+                                <ActionIcon 
+                                    tooltip={`Edit ${type}`}
+                                    icon={<Edit className="h-5 w-5 text-gray-500" />}
+                                    onClick={(e) => { e.stopPropagation(); onRevise(item); }}
+                                />
+                            )}
+                            {isEditing && (
+                                <ActionIcon 
+                                    tooltip={`Delete ${type}`}
+                                    icon={<Trash2 className="h-5 w-5 text-destructive" />}
+                                    onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
+                                />
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
 
             {(item as MedicalCondition).status === 'needs_revision' && onRevise && (
@@ -428,5 +444,3 @@ export function MedicalHistoryCard() {
     </>
   );
 }
-
-    

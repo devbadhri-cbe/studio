@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -88,8 +89,8 @@ export function SynopsisCardLayout({
           </Alert>
         )}
 
-        <div className="flex flex-col items-stretch gap-4">
-            <div className="w-full">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="w-full sm:w-auto">
                 {footer}
             </div>
             <Button variant="ghost" size="sm" className="text-muted-foreground w-full sm:w-auto" onClick={onClose}>
