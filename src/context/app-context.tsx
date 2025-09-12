@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { type UserProfile, type MedicalCondition, type Patient, type Medication, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, DashboardSuggestion, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, BiomarkerKey, DiseasePanelKey, ThyroxineRecord, SerumCreatinineRecord, UricAcidRecord } from '@/lib/types';
-import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, ReactNode, useMemo } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
@@ -41,8 +41,9 @@ const supportedLanguages = [
 interface AppContextType {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
+  getFullPatientData: () => Patient;
   hasLocalData: () => boolean;
-  loadLocalPatientData: () => void;
+  loadLocalPatientData: () => Patient | null;
   addMedicalCondition: (condition: MedicalCondition) => void;
   updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
@@ -144,27 +145,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [insightsError, setInsightsError] = useState<string | null>(null);
   const [selectedInsightsLanguage, setSelectedInsightsLanguage] = React.useState('en');
   
-  const fullPatientData: Patient = {
-    ...profile,
-    hba1cRecords,
-    fastingBloodGlucoseRecords,
-    thyroidRecords,
-    thyroxineRecords,
-    serumCreatinineRecords,
-    uricAcidRecords,
-    hemoglobinRecords,
-    weightRecords,
-    bloodPressureRecords,
-    totalCholesterolRecords,
-    ldlRecords,
-    hdlRecords,
-    triglyceridesRecords,
-  };
+  const getFullPatientData = useCallback((): Patient => {
+    return {
+        ...profile,
+        hba1cRecords,
+        fastingBloodGlucoseRecords,
+        thyroidRecords,
+        thyroxineRecords,
+        serumCreatinineRecords,
+        uricAcidRecords,
+        hemoglobinRecords,
+        weightRecords,
+        bloodPressureRecords,
+        totalCholesterolRecords,
+        ldlRecords,
+        hdlRecords,
+        triglyceridesRecords,
+    };
+  }, [profile, hba1cRecords, fastingBloodGlucoseRecords, thyroidRecords, thyroxineRecords, serumCreatinineRecords, uricAcidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
 
   useEffect(() => {
     if (isClient && !isReadOnlyView && profile.id) {
       try {
-        localStorage.setItem('patientData', JSON.stringify(fullPatientData));
+        const dataToSave = getFullPatientData();
+        localStorage.setItem('patientData', JSON.stringify(dataToSave));
       } catch (e) {
         console.error("Failed to save data to local storage", e);
         toast({
@@ -174,8 +178,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         });
       }
     }
-  }, [fullPatientData, isClient, isReadOnlyView, profile.id]);
-
+  }, [profile, hba1cRecords, fastingBloodGlucoseRecords, thyroidRecords, thyroxineRecords, serumCreatinineRecords, uricAcidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords, isClient, isReadOnlyView, getFullPatientData]);
+  
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
     if (storedTheme) {
@@ -214,6 +218,49 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return false;
   }, []);
 
+  const setPatientData = useCallback((patient: Patient, isReadOnly: boolean = false) => {
+    setProfileState({
+      id: patient.id,
+      name: patient.name,
+      dob: patient.dob,
+      gender: patient.gender,
+      email: patient.email,
+      country: patient.country,
+      phone: patient.phone,
+      height: patient.height,
+      dateFormat: patient.dateFormat || 'MM-dd-yyyy',
+      unitSystem: patient.unitSystem || countries.find(c => c.code === patient.country)?.unitSystem || 'metric',
+      medication: Array.isArray(patient.medication) ? patient.medication : [],
+      presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
+      enabledBiomarkers: patient.enabledBiomarkers || {},
+      bmi: patient.bmi,
+      dashboardSuggestions: patient.dashboardSuggestions || [],
+    });
+    setIsReadOnlyView(isReadOnly);
+    setHba1cRecordsState(patient.hba1cRecords || []);
+    setFastingBloodGlucoseRecordsState(patient.fastingBloodGlucoseRecords || []);
+    setThyroidRecordsState(patient.thyroidRecords || []);
+    setThyroxineRecordsState(patient.thyroxineRecords || []);
+    setSerumCreatinineRecordsState(patient.serumCreatinineRecords || []);
+    setUricAcidRecordsState(patient.uricAcidRecords || []);
+    setHemoglobinRecordsState(patient.hemoglobinRecords || []);
+    setWeightRecordsState(patient.weightRecords || []);
+    setBloodPressureRecordsState(patient.bloodPressureRecords || []);
+    setTotalCholesterolRecordsState(patient.totalCholesterolRecords || []);
+    setLdlRecordsState(patient.ldlRecords || []);
+    setHdlRecordsState(patient.hdlRecords || []);
+    setTriglyceridesRecordsState(patient.triglyceridesRecords || []);
+    
+    setTips([]);
+    setInsightsError(null);
+    setIsGeneratingInsights(false);
+    setIsTranslatingInsights(false);
+    setSelectedInsightsLanguage('en');
+    
+    const countryInfo = countries.find(c => c.code === patient.country);
+    setBiomarkerUnitState(countryInfo?.biomarkerUnit || 'conventional');
+  }, []);
+
   const loadLocalPatientData = useCallback(() => {
     if (typeof window !== 'undefined') {
         const localDataString = localStorage.getItem('patientData');
@@ -221,13 +268,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
             try {
                 const patientData: Patient = JSON.parse(localDataString);
                 setPatientData(patientData, false);
+                return patientData;
             } catch (e) {
                 console.error("Failed to parse local patient data", e);
                 localStorage.removeItem('patientData');
             }
         }
     }
-  }, []);
+    return null;
+  }, [setPatientData]);
 
   const setBiomarkerUnit = useCallback((unit: BiomarkerUnitSystem) => {
     setBiomarkerUnitState(unit);
@@ -338,48 +387,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [profile, getLatestReadings]);
   
-  const setPatientData = useCallback((patient: Patient, isReadOnly: boolean = false) => {
-    setProfileState({
-      id: patient.id,
-      name: patient.name,
-      dob: patient.dob,
-      gender: patient.gender,
-      email: patient.email,
-      country: patient.country,
-      phone: patient.phone,
-      height: patient.height,
-      dateFormat: patient.dateFormat || 'MM-dd-yyyy',
-      unitSystem: patient.unitSystem || countries.find(c => c.code === patient.country)?.unitSystem || 'metric',
-      medication: Array.isArray(patient.medication) ? patient.medication : [],
-      presentMedicalConditions: Array.isArray(patient.presentMedicalConditions) ? patient.presentMedicalConditions : [],
-      enabledBiomarkers: patient.enabledBiomarkers || {},
-      bmi: patient.bmi,
-      dashboardSuggestions: patient.dashboardSuggestions || [],
-    });
-    setIsReadOnlyView(isReadOnly);
-    setHba1cRecordsState(patient.hba1cRecords || []);
-    setFastingBloodGlucoseRecordsState(patient.fastingBloodGlucoseRecords || []);
-    setThyroidRecordsState(patient.thyroidRecords || []);
-    setThyroxineRecordsState(patient.thyroxineRecords || []);
-    setSerumCreatinineRecordsState(patient.serumCreatinineRecords || []);
-    setUricAcidRecordsState(patient.uricAcidRecords || []);
-    setHemoglobinRecordsState(patient.hemoglobinRecords || []);
-    setWeightRecordsState(patient.weightRecords || []);
-    setBloodPressureRecordsState(patient.bloodPressureRecords || []);
-    setTotalCholesterolRecordsState(patient.totalCholesterolRecords || []);
-    setLdlRecordsState(patient.ldlRecords || []);
-    setHdlRecordsState(patient.hdlRecords || []);
-    setTriglyceridesRecordsState(patient.triglyceridesRecords || []);
-    
-    setTips([]);
-    setInsightsError(null);
-    setIsGeneratingInsights(false);
-    setIsTranslatingInsights(false);
-    setSelectedInsightsLanguage('en');
-    
-    const countryInfo = countries.find(c => c.code === patient.country);
-    setBiomarkerUnitState(countryInfo?.biomarkerUnit || 'conventional');
-  }, []);
 
   const getMedicationForRecord = useCallback((medication: Medication[]): string => {
     if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
@@ -633,7 +640,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
     
     if (batch.lipidPanel) {
-        // Lipid panel parts are added individually
+        setTotalCholesterolRecordsState(prev => {
+            if (batch.lipidPanel?.totalCholesterol) {
+                const exists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === recordDate.getTime());
+                if (!exists) { result.added.push('Total Cholesterol'); return [...prev, { value: batch.lipidPanel.totalCholesterol, id: `tc-${Date.now()}`, date: recordDate.toISOString() }]; } 
+                else { result.duplicates.push('Total Cholesterol'); }
+            }
+            return prev;
+        });
+        setLdlRecordsState(prev => {
+            if (batch.lipidPanel?.ldl) {
+                const exists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === recordDate.getTime());
+                if (!exists) { result.added.push('LDL'); return [...prev, { value: batch.lipidPanel.ldl, id: `ldl-${Date.now()}`, date: recordDate.toISOString() }]; } 
+                else { result.duplicates.push('LDL'); }
+            }
+            return prev;
+        });
+        setHdlRecordsState(prev => {
+            if (batch.lipidPanel?.hdl) {
+                const exists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === recordDate.getTime());
+                if (!exists) { result.added.push('HDL'); return [...prev, { value: batch.lipidPanel.hdl, id: `hdl-${Date.now()}`, date: recordDate.toISOString() }]; } 
+                else { result.duplicates.push('HDL'); }
+            }
+            return prev;
+        });
+        setTriglyceridesRecordsState(prev => {
+            if (batch.lipidPanel?.triglycerides) {
+                const exists = prev.some(r => startOfDay(parseISO(r.date as string)).getTime() === recordDate.getTime());
+                if (!exists) { result.added.push('Triglycerides'); return [...prev, { value: batch.lipidPanel.triglycerides, id: `trig-${Date.now()}`, date: recordDate.toISOString() }]; } 
+                else { result.duplicates.push('Triglycerides'); }
+            }
+            return prev;
+        });
     }
     
     return result;
@@ -662,6 +700,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value: AppContextType = {
     profile,
     setProfile,
+    getFullPatientData,
     hasLocalData,
     loadLocalPatientData,
     addMedicalCondition,
