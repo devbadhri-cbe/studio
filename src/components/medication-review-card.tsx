@@ -120,7 +120,7 @@ export function MedicationReviewCard({ userInput, aiResult, onConfirm, onEdit, o
                     </div>
                 </div>
 
-                <div className="flex flex-wrap justify-end gap-2 pt-4">
+                <div className="grid grid-cols-2 gap-2 pt-4">
                     <Button type="button" variant="ghost" onClick={onCancel}>
                         Cancel
                     </Button>
@@ -128,7 +128,7 @@ export function MedicationReviewCard({ userInput, aiResult, onConfirm, onEdit, o
                         <Edit className="mr-2 h-4 w-4" />
                         Edit
                     </Button>
-                    <Button type="button" onClick={() => onConfirm({ aiResult: currentAiResult, userInput: currentUserInput })}>
+                    <Button type="button" onClick={() => onConfirm({ aiResult: currentAiResult, userInput: currentUserInput })} className="col-span-2">
                         <Check className="mr-2 h-4 w-4" />
                         Confirm & Save
                     </Button>
