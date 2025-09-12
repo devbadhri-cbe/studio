@@ -12,11 +12,13 @@ import { Separator } from './ui/separator';
 export function ReminderCard() {
   const { fastingBloodGlucoseRecords, thyroidRecords, bloodPressureRecords, profile } = useApp();
 
+  if (!profile) return null;
+
   const hasMedicalConditions = profile.presentMedicalConditions && profile.presentMedicalConditions.length > 0;
   const age = calculateAge(profile.dob);
 
   // FBG Logic
-  const sortedFastingBloodGlucoseRecords = [...fastingBloodGlucoseRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sortedFastingBloodGlucoseRecords = [...(fastingBloodGlucoseRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const lastFastingBloodGlucoseRecord = sortedFastingBloodGlucoseRecords[0];
   let fastingBloodGlucoseContent;
 
