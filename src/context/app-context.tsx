@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { type Patient, type MedicalCondition, type Medication, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, BiomarkerKey, DiseasePanelKey, ThyroxineRecord, SerumCreatinineRecord, UricAcidRecord } from '@/lib/types';
-import { useState, useEffect, createContext, useContext, useCallback, ReactNode, useRef } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
@@ -78,7 +78,6 @@ interface AppContextType {
   regenerateInsights: (langCode: string) => Promise<void>;
   translateInsights: (langCode: string) => Promise<void>;
   isClient: boolean;
-  setPatientData: (patient: Patient, isReadOnly?: boolean) => void;
   biomarkerUnit: BiomarkerUnitSystem;
   setBiomarkerUnit: (unit: BiomarkerUnitSystem) => void;
   getDisplayGlucoseValue: (value: number) => number;
@@ -94,6 +93,7 @@ interface AppContextType {
   approveMedicalCondition: (conditionId: string) => void;
   dismissSuggestion: (conditionId: string) => void;
   getFullPatientData: () => Patient | null;
+  profile: Patient | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -114,21 +114,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const profile = patient;
 
-  // Centralized data saving
+  // Centralized data saving to local storage
   useEffect(() => {
     if (isClient && !isReadOnlyView && patient) {
-      try {
-        localStorage.setItem('patientData', JSON.stringify(patient));
-      } catch (e) {
-        console.error("Failed to save data to local storage", e);
-        toast({
-          variant: "destructive",
-          title: "Save Error",
-          description: "Could not save changes to your device."
-        });
-      }
+      localStorage.setItem('patientData', JSON.stringify(patient));
     }
   }, [patient, isClient, isReadOnlyView]);
+  
+  // Foolproof save on exit
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (!isReadOnlyView && patient) {
+        localStorage.setItem('patientData', JSON.stringify(patient));
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [patient, isReadOnlyView]);
+
 
   // Initial data load from local storage
   useEffect(() => {
@@ -136,9 +141,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const localDataString = localStorage.getItem('patientData');
       if (localDataString) {
-        const patientData: Patient = JSON.parse(localDataString);
-        setPatient(patientData);
-        const countryInfo = countries.find(c => c.code === patientData.country);
+        const localPatientData: Patient = JSON.parse(localDataString);
+        setPatient(localPatientData);
+        const countryInfo = countries.find(c => c.code === localPatientData.country);
         setBiomarkerUnitState(countryInfo?.biomarkerUnit || 'conventional');
       }
     } catch (e) {
@@ -173,20 +178,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [theme, isClient]);
 
-  const setPatientData = useCallback((patientData: Patient, isReadOnly: boolean = false) => {
-    setPatient(patientData);
-    setIsReadOnlyView(isReadOnly);
-    
-    setTips([]);
-    setInsightsError(null);
-    setIsGeneratingInsights(false);
-    setIsTranslatingInsights(false);
-    setSelectedInsightsLanguage('en');
-    
-    const countryInfo = countries.find(c => c.code === patientData.country);
-    setBiomarkerUnitState(countryInfo?.biomarkerUnit || 'conventional');
-  }, []);
-  
   const setBiomarkerUnit = useCallback((unit: BiomarkerUnitSystem) => {
     setBiomarkerUnitState(unit);
   }, []);
@@ -643,7 +634,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     regenerateInsights,
     translateInsights,
     isClient,
-    setPatientData,
     biomarkerUnit,
     setBiomarkerUnit,
     getDisplayGlucoseValue,
@@ -659,6 +649,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     approveMedicalCondition,
     dismissSuggestion,
     getFullPatientData,
+    profile,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

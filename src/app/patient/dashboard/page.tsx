@@ -5,7 +5,7 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { PatientDashboard } from '@/components/patient-dashboard';
 import { Logo } from '@/components/logo';
-import PatientLoginPage from '../login/page';
+import { PatientLoginPage } from '@/components/patient-login-page';
 
 export default function DashboardPage() {
   const { isClient, profile, isLoading } = useApp();

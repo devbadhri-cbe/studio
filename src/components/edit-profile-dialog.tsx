@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -32,7 +33,7 @@ interface EditProfileDialogProps {
 
 export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { profile, setProfile } = useApp();
+  const { profile, setPatient } = useApp();
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
@@ -70,9 +71,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
             bmi: newBmi,
         };
 
-        setProfile(updatedProfile);
-        // Explicitly save to localStorage immediately on edit
-        localStorage.setItem('patientData', JSON.stringify(updatedProfile));
+        setPatient(updatedProfile);
 
         toast({
             title: 'Profile Updated',

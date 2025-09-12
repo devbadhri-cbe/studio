@@ -39,14 +39,14 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body>
-        <AppProvider>
-            <TooltipProvider>
+        <TooltipProvider>
+            <AppProvider>
               <div className="flex flex-col min-h-screen pt-[env(safe-area-inset-top)] pb-20">
                 {children}
               </div>
               <Toaster />
-            </TooltipProvider>
-        </AppProvider>
+            </AppProvider>
+        </TooltipProvider>
       </body>
     </html>
   );
