@@ -42,7 +42,7 @@ export function PatientLoginPage() {
     setIsCreating(true);
   };
 
-  const handleFormSubmit = async (data: PatientFormData) => {
+  const handleFormSubmit = (data: PatientFormData) => {
     setIsSubmitting(true);
     const countryInfo = countries.find(c => c.code === data.country);
     const isImperial = countryInfo?.unitSystem === 'imperial';
@@ -61,32 +61,15 @@ export function PatientLoginPage() {
         name: data.name,
         dob: data.dob.toISOString(),
         gender: data.gender,
-        email: data.email || '',
-        country: data.country,
-        phone: data.phone || '',
         height: heightInCm,
+        country: data.country,
+        email: data.email || '',
+        phone: data.phone || '',
         dateFormat: countryInfo?.dateFormat || 'MM-dd-yyyy',
         unitSystem: countryInfo?.unitSystem || 'metric',
-        status: 'On Track',
         hba1cRecords: [],
-        fastingBloodGlucoseRecords: [],
-        thyroidRecords: [],
-        thyroxineRecords: [],
-        serumCreatinineRecords: [],
-        uricAcidRecords: [],
-        hemoglobinRecords: [],
-        weightRecords: [],
-        bloodPressureRecords: [],
-        totalCholesterolRecords: [],
-        ldlRecords: [],
-        hdlRecords: [],
-        triglyceridesRecords: [],
         medication: [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }],
-        presentMedicalConditions: [],
-        enabledBiomarkers: {
-          dashboard: ['profile', 'medicalHistory', 'weight', 'bloodPressure']
-        },
-        doctorUid: 'doc_12345'
+        status: 'On Track',
     };
 
     try {
@@ -99,10 +82,6 @@ export function PatientLoginPage() {
             description: `Your patient profile has been created successfully.`,
         });
         
-        setTimeout(() => {
-          // This timeout allows the success UI to be visible before the component unmounts.
-        }, 2000);
-
     } catch (error) {
         console.error("Failed to save patient", error);
         toast({
@@ -163,7 +142,7 @@ export function PatientLoginPage() {
       <div className="w-full max-w-sm text-center">
         <UniversalCard 
             icon={<Logo className="h-16 w-16 mx-auto" />}
-            title="Glycemic Guardian"
+            title="Health Guardian Lite"
             description="Your Patient-Centric Health Dashboard"
         >
           <div className="space-y-4 text-center">

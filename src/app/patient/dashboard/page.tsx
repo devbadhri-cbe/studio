@@ -14,7 +14,7 @@ export default function DashboardPage() {
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
             <Logo className="h-24 w-24" />
-            <p className="ml-4 text-lg animate-pulse">Loading Glycemic Guardian...</p>
+            <p className="ml-4 text-lg animate-pulse">Loading Health Guardian Lite...</p>
         </div>
       </div>
     );

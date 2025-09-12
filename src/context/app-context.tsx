@@ -1,13 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { type Patient, type MedicalCondition, type Medication, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, BiomarkerKey, DiseasePanelKey, ThyroxineRecord, SerumCreatinineRecord, UricAcidRecord } from '@/lib/types';
+import { type Patient, type MedicalCondition, type Medication, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord } from '@/lib/types';
 import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
-import { toast } from '@/hooks/use-toast';
-import { LabDataExtractionOutput } from '@/lib/ai-types';
 
 type Theme = 'dark' | 'light' | 'system';
-export type BatchRecords = Partial<LabDataExtractionOutput>;
 
 interface AppContextType {
   patient: Patient | null;
@@ -48,7 +45,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setPatient: AppContextType['setPatient'] = (newPatient) => {
     setPatientState(newPatient);
     if (isClient && !isReadOnlyView && newPatient) {
-      localStorage.setItem('patientData', JSON.stringify(newPatient));
+        // Saving to localStorage is now handled at the point of creation/update
+        // to avoid race conditions.
     }
   }
   
