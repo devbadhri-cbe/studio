@@ -48,31 +48,10 @@ const processMedicationFlow = ai.defineFlow(
     outputSchema: MedicationInfoOutputSchema,
   },
   async (input) => {
-    let retries = 3;
-    let delay = 1000; // Initial delay of 1 second
-
-    while (retries > 0) {
-      try {
-        const { output } = await prompt(input);
-        if (output) return output;
-        
-        // If output is null, it's an error and should be retried.
-        throw new Error('AI returned no output.');
-
-      } catch (e: any) {
-        retries--;
-        const errorMessage = e.message || '';
-        console.log(`Error processing medication. Retries left: ${retries}. Error: ${errorMessage}`);
-        
-        if (retries === 0) throw e;
-
-        // Implement exponential backoff for rate limit or server unavailable errors
-        if (errorMessage.includes('429') || errorMessage.includes('503')) {
-           await new Promise(resolve => setTimeout(resolve, delay));
-           delay *= 2; // Double the delay for the next retry
-        }
-      }
+    const { output } = await prompt(input);
+    if (!output) {
+      throw new Error('AI failed to process the medication.');
     }
-    throw new Error('Failed to process medication after multiple retries.');
+    return output;
   }
 );
