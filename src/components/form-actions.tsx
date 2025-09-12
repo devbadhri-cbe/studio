@@ -18,7 +18,7 @@ export function FormActions({
     cancelText = 'Cancel'
 }: FormActionsProps) {
     return (
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4 border border-green-500 p-2 rounded-md">
             <Button type="button" variant="ghost" onClick={onCancel} className="w-full sm:w-auto border border-destructive">
                 {cancelText}
             </Button>
