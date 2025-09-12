@@ -23,6 +23,7 @@ export function PatientLoginPage() {
   const [isCreating, setIsCreating] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
+  const [newPatientName, setNewPatientName] = React.useState('');
   const isMobile = useIsMobile();
   const [hasExistingData, setHasExistingData] = React.useState(false);
 
@@ -44,6 +45,7 @@ export function PatientLoginPage() {
 
   const handleFormSubmit = (data: PatientFormData) => {
     setIsSubmitting(true);
+    setNewPatientName(data.name);
     const countryInfo = countries.find(c => c.code === data.country);
     const isImperial = countryInfo?.unitSystem === 'imperial';
     
@@ -68,19 +70,23 @@ export function PatientLoginPage() {
         dateFormat: countryInfo?.dateFormat || 'MM-dd-yyyy',
         unitSystem: countryInfo?.unitSystem || 'metric',
         hba1cRecords: [],
-        medication: [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }],
-        status: 'On Track',
+        medication: [],
+        presentMedicalConditions: [],
     };
 
     try {
         localStorage.setItem('patientData', JSON.stringify(newPatient));
-        setPatient(newPatient);
-
+        
         setIsSuccess(true);
         toast({
             title: 'Profile Created',
             description: `Your patient profile has been created successfully.`,
         });
+
+        // Delay setting patient to allow success screen to show
+        setTimeout(() => {
+            setPatient(newPatient);
+        }, 1500);
         
     } catch (error) {
         console.error("Failed to save patient", error);
@@ -98,8 +104,8 @@ export function PatientLoginPage() {
       isSuccess ? (
         <div className="flex flex-col items-center justify-center h-48 text-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <h3 className="text-xl font-bold">Profile Created!</h3>
-            <p className="text-muted-foreground">Entering your dashboard...</p>
+            <h3 className="text-xl font-bold">Welcome, {newPatientName}!</h3>
+            <p className="text-muted-foreground">Entering your health dashboard...</p>
         </div>
       ) : (
         <PatientForm 
