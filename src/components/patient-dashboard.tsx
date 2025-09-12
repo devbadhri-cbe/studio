@@ -1,8 +1,9 @@
+
 'use client';
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { ArrowLeft, Share2 } from 'lucide-react';
+import { ArrowLeft, Share2, Droplet } from 'lucide-react';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
@@ -15,7 +16,6 @@ import { Logo } from './logo';
 import { ProfileCard } from './profile-card';
 import { MedicalHistoryCard } from './medical-history-card';
 import { SharePatientAccessDialog } from './share-patient-access-dialog';
-import { Hba1cCard } from './hba1c-card';
 import { ReminderCard } from './reminder-card';
 import { InsightsCard } from './insights-card';
 import { BiomarkersPanel } from './biomarkers-panel';
@@ -117,7 +117,7 @@ export function PatientDashboard() {
                     <DashboardSectionToggle
                         title="Disease Panels"
                         subtitle="Manage multi-biomarker panels for specific conditions"
-                        icon={<Hba1cCard />} // Placeholder icon
+                        icon={<Droplet className="h-6 w-6 text-primary" />} 
                         isOpen={isPanelsOpen}
                         searchQuery={panelSearchQuery}
                         onSearchChange={setPanelSearchQuery}
@@ -134,7 +134,7 @@ export function PatientDashboard() {
                     <DashboardSectionToggle
                         title="All Biomarkers"
                         subtitle="View and manage individual biomarker cards"
-                        icon={<Hba1cCard />} // Placeholder icon
+                        icon={<Droplet className="h-6 w-6 text-primary" />}
                         isOpen={isBiomarkersOpen}
                         searchQuery={biomarkerSearchQuery}
                         onSearchChange={setBiomarkerSearchQuery}
