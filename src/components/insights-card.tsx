@@ -45,13 +45,13 @@ export function InsightsCard() {
   }
   
   const hasNoRecords = [
-    hba1cRecords,
-    fastingBloodGlucoseRecords,
-    weightRecords,
-    bloodPressureRecords,
+    hba1cRecords || [],
+    fastingBloodGlucoseRecords || [],
+    weightRecords || [],
+    bloodPressureRecords || [],
   ].every(records => records.length === 0);
 
-  const isButtonDisabled = isGeneratingInsights || isTranslatingInsights || hasNoRecords || !profile.name || !profile.dob;
+  const isButtonDisabled = isGeneratingInsights || isTranslatingInsights || hasNoRecords || !profile?.name || !profile?.dob;
 
   return (
     <Card className="h-full shadow-xl flex flex-col">
