@@ -9,11 +9,11 @@ interface TitleBarProps {
     subtitle?: string;
     onSubtitleClick?: () => void;
     children?: React.ReactNode;
-    backButton?: React.ReactNode;
+    rightChildren?: React.ReactNode;
     isScrolled: boolean;
 }
 
-export function TitleBar({ title, subtitle, onSubtitleClick, children, backButton, isScrolled }: TitleBarProps) {
+export function TitleBar({ title, subtitle, onSubtitleClick, children, rightChildren, isScrolled }: TitleBarProps) {
     
     const renderTitle = () => {
         if(title.length === 1) {
@@ -35,7 +35,7 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, backButto
         )}>
             <div className="mx-auto w-full max-w-7xl flex items-center justify-between">
                  <div className="flex justify-start items-center gap-2 w-24">
-                    {backButton || children}
+                    {children}
                 </div>
                 <div className="flex-1 flex justify-center">
                     <div className="flex flex-col items-center">
@@ -60,7 +60,7 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, backButto
                     </div>
                 </div>
                 <div className="flex justify-end w-24">
-                    {/* ThemeToggle has been moved to the ProfileSettingsPopover */}
+                    {rightChildren}
                 </div>
             </div>
         </header>

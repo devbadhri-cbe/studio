@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -57,34 +56,6 @@ export function PatientDashboard() {
     );
   }
 
-  const BackButton = isReadOnlyView ? (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" onClick={() => router.push('/patient/login')}>
-          <ArrowLeft className="h-4 w-4" />
-          <span className="sr-only">Back to Login</span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>Back to Login</p>
-      </TooltipContent>
-    </Tooltip>
-  ) : null;
-  
-  const ShareButton = !isReadOnlyView ? (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" onClick={() => setIsShareOpen(true)}>
-          <Share2 className="h-4 w-4" />
-          <span className="sr-only">Share or Sync Data</span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>Share or Sync Data</p>
-      </TooltipContent>
-    </Tooltip>
-  ) : null;
-
   return (
     <>
       <div className="flex min-h-screen w-full flex-col bg-background">
@@ -92,10 +63,36 @@ export function PatientDashboard() {
           title={['Health', 'Guardian']}
           subtitle={doctorDetails.name}
           onSubtitleClick={() => setIsEditingDoctor(true)}
-          backButton={BackButton}
           isScrolled={isScrolled}
+          rightChildren={
+            !isReadOnlyView ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={() => setIsShareOpen(true)}>
+                    <Share2 className="h-4 w-4" />
+                    <span className="sr-only">Share or Sync Data</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Share or Sync Data</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : null
+          }
         >
-            {ShareButton}
+          {isReadOnlyView && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={() => router.push('/patient/dashboard')}>
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="sr-only">Back to Login</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Back to Login</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </TitleBar>
         <main className="flex-1 p-4 md:p-6 pb-4">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
