@@ -55,7 +55,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
     }
 
     try {
-        const latestWeight = [...profile.weightRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+        const latestWeight = [...(profile.weightRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
         const newBmi = calculateBmi(latestWeight?.value, heightInCm);
 
         const updatedProfile: Patient = {
