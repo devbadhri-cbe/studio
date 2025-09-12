@@ -76,17 +76,18 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
 
     if (type === 'condition') {
         const cond = item as MedicalCondition;
-        isPending = cond.icdCode === 'loading...';
-        isFailed = cond.icdCode === 'failed';
+        isPending = cond.status === 'pending_review';
+        isFailed = cond.status === 'failed';
         title = cond.condition;
         icdCode = cond.icdCode;
         date = cond.date;
     } else {
         const med = item as Medication;
-        isPending = med.name === 'pending...';
+        isPending = med.status === 'pending_review';
+        isFailed = med.status === 'failed';
         isNil = med.name.toLowerCase() === 'nil';
         title = isPending || isNil ? med.brandName : med.name;
-        if (!isPending && !isNil) {
+        if (!isPending && !isNil && med.status !== 'failed') {
             details = [med.dosage, med.frequency, med.foodInstructions ? `${med.foodInstructions} food` : ''].filter(Boolean).join(', ');
         }
     }
@@ -118,7 +119,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
                     {isPending ? (
                         <div className="flex items-center gap-1.5 mt-1">
                             <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
-                            <p className="text-muted-foreground text-xs italic">AI is processing...</p>
+                            <p className="text-muted-foreground text-xs italic">Pending AI processing...</p>
                         </div>
                     ) : isFailed ? (
                         <div className="flex items-center gap-1.5 mt-1">
@@ -183,7 +184,7 @@ export function MedicalHistoryCard() {
 
   const handleProcessCondition = async (condition: MedicalCondition) => {
     toast({ title: "Processing Condition...", description: `Asking AI about "${condition.userInput}"`});
-    updateMedicalCondition({ ...condition, icdCode: 'loading...' });
+    updateMedicalCondition({ ...condition, status: 'pending_review' });
     try {
       const result = await processMedicalCondition({ condition: condition.userInput || '' });
       if (result.isValid && result.standardizedName && result.icdCode) {
@@ -192,21 +193,23 @@ export function MedicalHistoryCard() {
             condition: result.standardizedName,
             icdCode: result.icdCode,
             synopsis: result.synopsis || '',
+            status: 'verified',
         });
         toast({ title: 'Condition Processed', description: `AI identified: ${result.standardizedName} (${result.icdCode})` });
       } else {
-        updateMedicalCondition({ ...condition, icdCode: 'failed' });
+        updateMedicalCondition({ ...condition, status: 'failed' });
         toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}` });
       }
     } catch(e) {
       console.error(e);
-      updateMedicalCondition({ ...condition, icdCode: 'failed' });
+      updateMedicalCondition({ ...condition, status: 'failed' });
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
     }
   }
 
   const handleProcessMedication = async (med: Medication) => {
     toast({ title: "Processing Medication...", description: `Asking AI about "${med.brandName}"`});
+    updateMedication({ ...med, status: 'pending_review' });
      try {
       const result = await getMedicationInfo({ 
         medicationName: med.brandName,
@@ -222,13 +225,16 @@ export function MedicalHistoryCard() {
              frequency: result.frequency || med.frequency,
              foodInstructions: result.foodInstructions || med.foodInstructions,
              brandName: result.correctedMedicationName || med.brandName,
+             status: 'processed',
         });
         toast({ title: "Medication Processed", description: `AI identified: ${result.activeIngredient}`});
       } else {
+        updateMedication({ ...med, status: 'failed' });
         toast({ variant: 'destructive', title: 'Could not identify medication.' });
       }
     } catch(e) {
       console.error(e);
+      updateMedication({ ...med, status: 'failed' });
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication.' });
     }
   }

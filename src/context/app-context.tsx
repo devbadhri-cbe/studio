@@ -36,20 +36,20 @@ interface AppContextType {
   setPatientData: (data: Patient, isReadOnly: boolean) => void;
   
   // Data modification functions
-  addHba1cRecord: (record: Omit<Hba1cRecord, 'id'>) => void;
-  addWeightRecord: (record: Omit<WeightRecord, 'id'>) => void;
-  addFastingBloodGlucoseRecord: (record: Omit<FastingBloodGlucoseRecord, 'id'>) => void;
-  addBloodPressureRecord: (record: Omit<BloodPressureRecord, 'id'>) => void;
-  addThyroidRecord: (record: Omit<ThyroidRecord, 'id'>) => void;
-  addMedicalCondition: (condition: MedicalCondition) => void;
-  addMedication: (medication: Omit<Medication, 'id'>) => void;
-  addThyroxineRecord: (record: Omit<ThyroxineRecord, 'id'>) => void;
-  addSerumCreatinineRecord: (record: Omit<SerumCreatinineRecord, 'id'>) => void;
-  addUricAcidRecord: (record: Omit<UricAcidRecord, 'id'>) => void;
-  addTotalCholesterolRecord: (record: Omit<TotalCholesterolRecord, 'id'>) => void;
-  addLdlRecord: (record: Omit<LdlRecord, 'id'>) => void;
-  addHdlRecord: (record: Omit<HdlRecord, 'id'>) => void;
-  addTriglyceridesRecord: (record: Omit<TriglyceridesRecord, 'id'>) => void;
+  addHba1cRecord: (record: Omit<Hba1cRecord, 'id'>) => string;
+  addWeightRecord: (record: Omit<WeightRecord, 'id'>) => string;
+  addFastingBloodGlucoseRecord: (record: Omit<FastingBloodGlucoseRecord, 'id'>) => string;
+  addBloodPressureRecord: (record: Omit<BloodPressureRecord, 'id'>) => string;
+  addThyroidRecord: (record: Omit<ThyroidRecord, 'id'>) => string;
+  addMedicalCondition: (condition: Omit<MedicalCondition, 'id'>) => string;
+  addMedication: (medication: Omit<Medication, 'id'>) => string;
+  addThyroxineRecord: (record: Omit<ThyroxineRecord, 'id'>) => string;
+  addSerumCreatinineRecord: (record: Omit<SerumCreatinineRecord, 'id'>) => string;
+  addUricAcidRecord: (record: Omit<UricAcidRecord, 'id'>) => string;
+  addTotalCholesterolRecord: (record: Omit<TotalCholesterolRecord, 'id'>) => string;
+  addLdlRecord: (record: Omit<LdlRecord, 'id'>) => string;
+  addHdlRecord: (record: Omit<HdlRecord, 'id'>) => string;
+  addTriglyceridesRecord: (record: Omit<TriglyceridesRecord, 'id'>) => string;
   addBatchRecords: (records: BatchRecords) => Promise<{ added: string[], duplicates: string[] }>;
 
   removeHba1cRecord: (id: string) => void;
@@ -204,8 +204,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setThemeState(theme);
   }, []);
 
-  const createRecordAdder = <T extends { id: string }>(recordType: keyof Patient) => (record: Omit<T, 'id'>) => {
-      if (!patient) return;
+  const createRecordAdder = <T extends { id: string }>(recordType: keyof Patient) => (record: Omit<T, 'id'>): string => {
+      if (!patient) return '';
       const newRecord = { ...record, id: uuidv4() } as T;
       const nextState = produce(patient, draft => {
           if (!draft[recordType]) {
@@ -214,6 +214,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           (draft[recordType] as T[]).push(newRecord);
       });
       setPatient(nextState);
+      return newRecord.id;
   };
   
   const createRecordRemover = (recordType: keyof Patient) => (id: string) => {
@@ -264,6 +265,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const index = draft.presentMedicalConditions.findIndex(c => c.id === condition.id);
         if (index !== -1) {
             draft.presentMedicalConditions[index] = condition;
+        } else {
+            // This can happen if the component state is stale, add it instead.
+            draft.presentMedicalConditions.push(condition);
         }
     });
     setPatient(nextState);
@@ -290,6 +294,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const index = draft.medication.findIndex(m => m.id === medication.id);
         if (index !== -1) {
             draft.medication[index] = medication;
+        } else {
+             draft.medication.push(medication);
         }
     });
     setPatient(nextState);
@@ -298,7 +304,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setMedicationNil = () => {
     if (!patient) return;
     const nextState = produce(patient, draft => {
-        draft.medication = [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }];
+        draft.medication = [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '', status: 'processed' }];
     });
     setPatient(nextState);
   }

@@ -6,10 +6,11 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
-import type { FoodInstruction } from '@/lib/types';
+import type { FoodInstruction, Medication } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { FormActions } from './form-actions';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
 
 
 interface AddMedicationFormProps {
@@ -19,7 +20,7 @@ interface AddMedicationFormProps {
 
 export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addMedication } = useApp();
+  const { addMedication, updateMedication } = useApp();
   const { toast } = useToast();
 
   const form = useForm({
@@ -33,19 +34,59 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
 
   const onSubmit = async (data: {medicationName: string, dosage: string, frequency: string, foodInstructions?: FoodInstruction}) => {
     setIsSubmitting(true);
-    addMedication({
+    
+    const newMedication: Omit<Medication, 'id'> = {
         name: 'pending...',
         brandName: data.medicationName,
         dosage: data.dosage,
         frequency: data.frequency,
         foodInstructions: data.foodInstructions,
-    });
+        status: 'pending_review',
+    };
+
+    // Add medication to state immediately for UI feedback
+    const tempId = addMedication(newMedication);
+
     toast({
-        title: 'Medication Added',
-        description: `${data.medicationName} has been added and is pending AI processing.`
+        title: 'Processing Medication...',
+        description: `AI is analyzing "${data.medicationName}".`
     });
+
     onCancel();
     onSuccess?.();
+    
+    try {
+      const result = await getMedicationInfo({ 
+        medicationName: data.medicationName,
+        dosage: data.dosage,
+        frequency: data.frequency,
+        foodInstructions: data.foodInstructions,
+      });
+
+      if (result.activeIngredient) {
+        updateMedication({
+             id: tempId,
+             name: result.activeIngredient,
+             dosage: result.dosage || data.dosage,
+             frequency: result.frequency || data.frequency,
+             foodInstructions: result.foodInstructions || data.foodInstructions,
+             brandName: result.correctedMedicationName || data.medicationName,
+             status: 'processed',
+        });
+        toast({ title: "Medication Processed", description: `AI identified: ${result.activeIngredient}`});
+      } else {
+        throw new Error('AI could not identify the medication.');
+      }
+    } catch(e) {
+      console.error(e);
+      updateMedication({
+          id: tempId,
+          ...newMedication,
+          status: 'failed',
+      });
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication.' });
+    }
+    
     setIsSubmitting(false);
   };
 
@@ -53,7 +94,7 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
     <Card className="mt-2 border-primary border-2">
         <CardHeader>
           <CardTitle>Add New Medication</CardTitle>
-          <CardDescription>Enter the medication details. The AI will process it in the background.</CardDescription>
+          <CardDescription>Enter the medication details. The AI will process it automatically.</CardDescription>
         </CardHeader>
         <CardContent>
             <Form {...form}>
