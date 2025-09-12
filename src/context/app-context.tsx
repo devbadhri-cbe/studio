@@ -1,8 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { type Patient, type MedicalCondition, type Medication, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord } from '@/lib/types';
-import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
+import { type Patient, type Hba1cRecord } from '@/lib/types';
+import { v4 as uuidv4 } from 'uuid';
+import { produce } from 'immer';
 
 type Theme = 'dark' | 'light' | 'system';
 
@@ -15,18 +16,21 @@ interface AppContextType {
   setTheme: (theme: Theme) => void;
   isReadOnlyView: boolean;
   setPatientData: (data: Patient, isReadOnly: boolean) => void;
+  
+  // Data modification functions
+  addHba1cRecord: (record: Omit<Hba1cRecord, 'id'>) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [patient, setPatientState] = useState<Patient | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
-  const [theme, setThemeState] = useState<Theme>('system');
-  const [isReadOnlyView, setIsReadOnlyView] = useState(false);
+export function AppProvider({ children }: { children: React.ReactNode }) {
+  const [patient, setPatientState] = React.useState<Patient | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isClient, setIsClient] = React.useState(false);
+  const [theme, setThemeState] = React.useState<Theme>('system');
+  const [isReadOnlyView, setIsReadOnlyView] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setIsClient(true);
     try {
       const localDataString = localStorage.getItem('patientData');
@@ -45,8 +49,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setPatient: AppContextType['setPatient'] = (newPatient) => {
     setPatientState(newPatient);
     if (isClient && !isReadOnlyView && newPatient) {
-        // Saving to localStorage is now handled at the point of creation/update
-        // to avoid race conditions.
+      localStorage.setItem('patientData', JSON.stringify(newPatient));
     }
   }
   
@@ -55,14 +58,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsReadOnlyView(isReadOnly);
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
     if (storedTheme) {
       setThemeState(storedTheme);
     }
   }, []);
   
-  useEffect(() => {
+  React.useEffect(() => {
     if (isClient) {
       const root = window.document.documentElement;
       root.classList.remove('light', 'dark');
@@ -78,9 +81,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [theme, isClient]);
 
-  const setTheme = useCallback((theme: Theme) => {
+  const setTheme = React.useCallback((theme: Theme) => {
     setThemeState(theme);
   }, []);
+
+  // Data modification functions
+  const addHba1cRecord = React.useCallback((record: Omit<Hba1cRecord, 'id'>) => {
+    if (!patient) return;
+    const newRecord = { ...record, id: uuidv4() };
+    const nextState = produce(patient, draft => {
+        draft.hba1cRecords.push(newRecord);
+    });
+    setPatient(nextState);
+  }, [patient, setPatient]);
 
   const value: AppContextType = {
     patient,
@@ -91,13 +104,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTheme,
     isReadOnlyView,
     setPatientData,
+    addHba1cRecord,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
 export function useApp() {
-  const context = useContext(AppContext);
+  const context = React.useContext(AppContext);
   if (context === undefined) {
     throw new Error('useApp must be used within an AppProvider');
   }
