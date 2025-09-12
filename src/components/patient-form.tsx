@@ -86,8 +86,8 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
           )}
         />
         
-        <div className="flex flex-col md:flex-row gap-x-6 gap-y-6">
-            <div className="flex-1">
+        <div className="flex flex-col md:flex-row gap-x-6 gap-y-6 border-2 border-red-500 p-2">
+            <div className="flex-1 border-2 border-green-500 p-2">
                  <DateInput
                     name="dob"
                     label="Date of Birth"
@@ -95,7 +95,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
                     toYear={new Date().getFullYear()}
                 />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 border-2 border-yellow-500 p-2">
                  <FormField
                     control={formMethods.control}
                     name="gender"
@@ -156,7 +156,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
-                <div className="flex items-center">
+                <div className="flex items-center border-2 border-purple-500 p-1">
                   {phoneCode && (
                     <span className="inline-flex items-center px-3 h-10 rounded-l-md border border-r-0 border-input bg-muted text-sm text-muted-foreground">
                       {phoneCode}
