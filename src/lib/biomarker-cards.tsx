@@ -32,6 +32,26 @@ import { SerumCreatinineCard } from '@/components/serum-creatinine-card';
 import { AddSerumCreatinineRecordDialog } from '@/components/add-serum-creatinine-record-dialog';
 import { UricAcidCard } from '@/components/uric-acid-card';
 import { AddUricAcidRecordDialog } from '@/components/add-uric-acid-record-dialog';
+import { ProfileCard } from '@/components/profile-card';
+import { MedicalHistoryCard } from '@/components/medical-history-card';
+import React from 'react';
+
+
+export const mainDashboardCards = {
+  profile: <ProfileCard />,
+  medicalHistory: <MedicalHistoryCard />,
+  weight: <WeightRecordCard />,
+  bloodPressure: <BloodPressureCard />,
+}
+
+export const getEnabledCards = (enabledBiomarkers?: { [key: string]: string[] }): React.ReactNode[] => {
+  if (!enabledBiomarkers || !enabledBiomarkers.dashboard) {
+    return [];
+  }
+  return enabledBiomarkers.dashboard
+    .map(key => (mainDashboardCards as any)[key])
+    .filter(Boolean);
+};
 
 
 export const availableBiomarkerCards = {

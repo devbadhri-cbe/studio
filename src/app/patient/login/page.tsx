@@ -8,7 +8,7 @@ import { UniversalCard } from '@/components/universal-card';
 import { Logo } from '@/components/logo';
 import { useToast } from '@/hooks/use-toast';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ftInToCm } from '@/lib/utils';
@@ -70,7 +70,9 @@ export default function PatientLoginPage() {
         triglyceridesRecords: [],
         medication: [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }],
         presentMedicalConditions: [],
-        enabledBiomarkers: {},
+        enabledBiomarkers: {
+          dashboard: ['profile', 'medicalHistory', 'weight', 'bloodPressure']
+        },
         doctorUid: 'doc_12345'
     };
 
