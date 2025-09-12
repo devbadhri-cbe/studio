@@ -10,15 +10,17 @@ import type { MedicationInfoOutput } from '@/lib/ai-types';
 import { EditMedicationForm } from './edit-medication-form';
 import { Alert, AlertDescription } from './ui/alert';
 
+type UserInput = {
+    userInput: string;
+    frequency: string;
+    foodInstructions?: FoodInstruction;
+};
+
 interface MedicationReviewCardProps {
-    userInput: {
-        userInput: string;
-        frequency: string;
-        foodInstructions?: FoodInstruction;
-    };
+    userInput: UserInput;
     aiResult: MedicationInfoOutput;
-    onConfirm: (data: MedicationInfoOutput) => void;
-    onEdit: (data: MedicationInfoOutput) => void;
+    onConfirm: (data: { aiResult: MedicationInfoOutput, userInput: UserInput }) => void;
+    onEdit: (data: MedicationInfoOutput & { userInput: string }) => void;
     onCancel: () => void;
 }
 
@@ -40,7 +42,7 @@ export function MedicationReviewCard({ userInput, aiResult, onConfirm, onEdit, o
 
     if (isEditing) {
         // Pass the spelling suggestion into the initial data for the edit form
-        const initialDataForEdit: Medication & { spellingSuggestion?: string } = {
+        const initialDataForEdit: Medication & { spellingSuggestion?: string; userInput: string } = {
             id: 'temp',
             name: currentAiResult.activeIngredient,
             userInput: currentUserInput.userInput,
@@ -127,7 +129,7 @@ export function MedicationReviewCard({ userInput, aiResult, onConfirm, onEdit, o
                         <Edit className="mr-2 h-4 w-4" />
                         Edit
                     </Button>
-                    <Button type="button" onClick={() => onConfirm(currentAiResult)}>
+                    <Button type="button" onClick={() => onConfirm({ aiResult: currentAiResult, userInput: currentUserInput })}>
                         <Check className="mr-2 h-4 w-4" />
                         Confirm & Save
                     </Button>

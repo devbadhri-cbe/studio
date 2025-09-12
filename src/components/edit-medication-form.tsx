@@ -18,9 +18,9 @@ import type { MedicationInfoOutput } from '@/lib/ai-types';
 
 
 interface EditMedicationFormProps {
-  onSuccess: (data: MedicationInfoOutput) => void;
+  onSuccess: (data: MedicationInfoOutput & { userInput: string }) => void;
   onCancel: () => void;
-  initialData: Medication;
+  initialData: Medication & { userInput: string };
 }
 
 export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMedicationFormProps) {
@@ -41,12 +41,13 @@ export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMed
     setIsSubmitting(true);
     
     try {
-      const updatedData: MedicationInfoOutput = {
+      const updatedData: MedicationInfoOutput & { userInput: string } = {
           activeIngredient: data.name,
+          userInput: data.userInput,
           dosage: data.dosage,
           frequency: data.frequency,
           foodInstructions: data.foodInstructions,
-          isBrandName: initialData.status === 'processed' ? (initialData as any).isBrandName : false, // Preserve original if exists
+          isBrandName: (initialData as any).isBrandName,
           spellingSuggestion: (initialData as any).spellingSuggestion,
       };
       

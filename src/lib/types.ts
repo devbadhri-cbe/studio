@@ -1,3 +1,4 @@
+
 export type UnitSystem = 'metric' | 'imperial';
 
 export interface MedicalCondition {
@@ -20,6 +21,7 @@ export interface Medication {
   frequency: string;
   foodInstructions?: FoodInstruction;
   status: 'processed' | 'pending_review' | 'failed';
+  [key: string]: any; // Allow for extra properties from AI like spellingSuggestion
 }
 
 export interface WeightRecord {

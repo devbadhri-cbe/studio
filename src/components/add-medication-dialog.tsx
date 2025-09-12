@@ -33,7 +33,7 @@ export const AddMedicationForm = React.forwardRef((props: AddMedicationFormProps
   const [userInput, setUserInput] = React.useState<UserInput | null>(null);
   const [aiResult, setAiResult] = React.useState<MedicationInfoOutput | null>(null);
   const [reprocessingMed, setReprocessingMed] = React.useState<Medication | null>(null);
-  const { addMedication, updateMedication } = useApp();
+  const { addMedication, updateMedication, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm({
@@ -75,6 +75,7 @@ export const AddMedicationForm = React.forwardRef((props: AddMedicationFormProps
         userInput: data.userInput,
         frequency: data.frequency,
         foodInstructions: data.foodInstructions,
+        country: profile.country,
       });
 
       setAiResult(result);
@@ -87,7 +88,8 @@ export const AddMedicationForm = React.forwardRef((props: AddMedicationFormProps
     } catch(e) {
       console.error(e);
       if (reprocessingMed) {
-        updateMedication({ ...reprocessingMed, status: 'failed' });
+        // If reprocessing fails, update status but keep existing data
+        updateMedication({ ...reprocessingMed, status: 'failed', ...aiResult });
       }
       setStep('failed');
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication. Please check the name and try again.' });
@@ -97,29 +99,33 @@ export const AddMedicationForm = React.forwardRef((props: AddMedicationFormProps
     }
   };
 
-  const handleFinalSave = (finalData: MedicationInfoOutput) => {
+  const handleFinalSave = (confirmedData: { aiResult: MedicationInfoOutput, userInput: UserInput }) => {
+      const { aiResult, userInput: finalUserInput } = confirmedData;
       if (reprocessingMed) {
         const updatedMed: Medication = {
           ...reprocessingMed,
-          name: finalData.activeIngredient,
-          dosage: finalData.dosage || '',
-          frequency: finalData.frequency || userInput!.frequency,
-          foodInstructions: finalData.foodInstructions || userInput!.foodInstructions,
+          name: aiResult.activeIngredient,
+          userInput: finalUserInput.userInput,
+          dosage: aiResult.dosage || '',
+          frequency: aiResult.frequency || finalUserInput.frequency,
+          foodInstructions: aiResult.foodInstructions || finalUserInput.foodInstructions,
           status: 'processed',
+          ...aiResult,
         };
         updateMedication(updatedMed);
-        toast({ title: "Medication Updated", description: `${finalData.activeIngredient} has been successfully processed.`});
+        toast({ title: "Medication Updated", description: `${aiResult.activeIngredient} has been successfully processed.`});
       } else {
         const newMedication: Omit<Medication, 'id'> = {
-            name: finalData.activeIngredient,
-            userInput: userInput!.userInput,
-            dosage: finalData.dosage || '',
-            frequency: finalData.frequency || userInput!.frequency,
-            foodInstructions: finalData.foodInstructions || userInput!.foodInstructions,
+            name: aiResult.activeIngredient,
+            userInput: finalUserInput.userInput,
+            dosage: aiResult.dosage || '',
+            frequency: aiResult.frequency || finalUserInput.frequency,
+            foodInstructions: aiResult.foodInstructions || finalUserInput.foodInstructions,
             status: 'processed',
+            ...aiResult,
         };
         addMedication(newMedication);
-        toast({ title: "Medication Saved", description: `${finalData.activeIngredient} has been added to your list.`});
+        toast({ title: "Medication Saved", description: `${aiResult.activeIngredient} has been added to your list.`});
       }
       
       onCancel(); // Close the form area
@@ -128,7 +134,8 @@ export const AddMedicationForm = React.forwardRef((props: AddMedicationFormProps
 
   const handleEdit = (editedData: MedicationInfoOutput) => {
     // When user confirms edits, save it
-    handleFinalSave(editedData);
+    // The userInput might have been changed in the edit form
+     handleFinalSave({ aiResult: editedData, userInput: { userInput: editedData.userInput || userInput!.userInput, frequency: editedData.frequency || userInput!.frequency, foodInstructions: editedData.foodInstructions || userInput!.foodInstructions } });
   }
 
   if (step === 'loading') {
