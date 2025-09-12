@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import { type Patient, type MedicalCondition, type Medication, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, BiomarkerKey, DiseasePanelKey, ThyroxineRecord, SerumCreatinineRecord, UricAcidRecord } from '@/lib/types';
-import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, ReactNode, useMemo } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
@@ -117,25 +117,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const profile = patient;
 
   // Centralized data saving to local storage
-  useEffect(() => {
-    if (isClient && !isReadOnlyView && patient) {
-      localStorage.setItem('patientData', JSON.stringify(patient));
+  const savePatient = (data: Patient | null) => {
+    if (isClient && !isReadOnlyView && data) {
+      localStorage.setItem('patientData', JSON.stringify(data));
     }
-  }, [patient, isClient, isReadOnlyView]);
-  
-  // Foolproof save on exit
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (!isReadOnlyView && patient) {
-        localStorage.setItem('patientData', JSON.stringify(patient));
-      }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [patient, isReadOnlyView]);
-
+  }
 
   // Initial data load from local storage
   useEffect(() => {
@@ -303,15 +289,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addMedicalCondition = useCallback((condition: MedicalCondition) => {
-    setPatient(prev => prev ? ({...prev, presentMedicalConditions: [...prev.presentMedicalConditions, condition]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, presentMedicalConditions: [...prev.presentMedicalConditions, condition]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
 
   const updateMedicalCondition = useCallback((condition: MedicalCondition) => {
-    setPatient(prev => prev ? ({ ...prev, presentMedicalConditions: prev.presentMedicalConditions.map(c => c.id === condition.id ? condition : c)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({ ...prev, presentMedicalConditions: prev.presentMedicalConditions.map(c => c.id === condition.id ? condition : c)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
   
   const removeMedicalCondition = useCallback((id: string) => {
-    setPatient(prev => prev ? ({ ...prev, presentMedicalConditions: prev.presentMedicalConditions.filter(c => c.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({ ...prev, presentMedicalConditions: prev.presentMedicalConditions.filter(c => c.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
   
    const addMedication = useCallback((medication: Omit<Medication, 'id'>) => {
@@ -320,83 +318,151 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (!prev) return null;
         const isCurrentlyNil = prev.medication.length === 1 && prev.medication[0].name.toLowerCase() === 'nil';
         const newMedicationList = isCurrentlyNil ? [newMedication] : [...prev.medication, newMedication];
-        return { ...prev, medication: newMedicationList };
+        const newState = { ...prev, medication: newMedicationList };
+        savePatient(newState);
+        return newState;
     });
   }, []);
 
   const updateMedication = useCallback((medication: Medication) => {
-    setPatient(prev => prev ? ({ ...prev, medication: prev.medication.map(m => m.id === medication.id ? medication : m)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({ ...prev, medication: prev.medication.map(m => m.id === medication.id ? medication : m)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
 
   const removeMedication = useCallback((id: string) => {
     setPatient(prev => {
         if (!prev) return null;
         const updatedMedication = prev.medication.filter(m => m.id !== id);
-        if (updatedMedication.length === 0) {
-            return { ...prev, medication: [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }] };
-        }
-        return { ...prev, medication: updatedMedication };
+        const newMedicationList = updatedMedication.length === 0 
+            ? [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }]
+            : updatedMedication;
+        const newState = { ...prev, medication: newMedicationList };
+        savePatient(newState);
+        return newState;
     });
   }, []);
 
   const setMedicationNil = useCallback(() => {
-    setPatient(prev => prev ? { ...prev, medication: [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }] } : null);
+    setPatient(prev => {
+        const newState = prev ? { ...prev, medication: [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }] } : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
 
   const addHba1cRecord = useCallback((record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, hba1cRecords: [...prev.hba1cRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, hba1cRecords: [...prev.hba1cRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeHba1cRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, hba1cRecords: prev.hba1cRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, hba1cRecords: prev.hba1cRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
   
   const addFastingBloodGlucoseRecord = useCallback((record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, fastingBloodGlucoseRecords: [...prev.fastingBloodGlucoseRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, fastingBloodGlucoseRecords: [...prev.fastingBloodGlucoseRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeFastingBloodGlucoseRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, fastingBloodGlucoseRecords: prev.fastingBloodGlucoseRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, fastingBloodGlucoseRecords: prev.fastingBloodGlucoseRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
 
   const addThyroidRecord = useCallback((record: Omit<ThyroidRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, thyroidRecords: [...prev.thyroidRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, thyroidRecords: [...prev.thyroidRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeThyroidRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, thyroidRecords: prev.thyroidRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, thyroidRecords: prev.thyroidRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
   
   const addThyroxineRecord = useCallback((record: Omit<ThyroxineRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, thyroxineRecords: [...prev.thyroxineRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, thyroxineRecords: [...prev.thyroxineRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeThyroxineRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, thyroxineRecords: prev.thyroxineRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, thyroxineRecords: prev.thyroxineRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
   
   const addSerumCreatinineRecord = useCallback((record: Omit<SerumCreatinineRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, serumCreatinineRecords: [...prev.serumCreatinineRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, serumCreatinineRecords: [...prev.serumCreatinineRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeSerumCreatinineRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, serumCreatinineRecords: prev.serumCreatinineRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, serumCreatinineRecords: prev.serumCreatinineRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
 
   const addUricAcidRecord = useCallback((record: Omit<UricAcidRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, uricAcidRecords: [...prev.uricAcidRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, uricAcidRecords: [...prev.uricAcidRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeUricAcidRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, uricAcidRecords: prev.uricAcidRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, uricAcidRecords: prev.uricAcidRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
 
   const addHemoglobinRecord = useCallback((record: Omit<HemoglobinRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, hemoglobinRecords: [...prev.hemoglobinRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, hemoglobinRecords: [...prev.hemoglobinRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeHemoglobinRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, hemoglobinRecords: prev.hemoglobinRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, hemoglobinRecords: prev.hemoglobinRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
   
   const addWeightRecord = useCallback((record: Omit<WeightRecord, 'id'>) => {
@@ -405,7 +471,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (!prev) return null;
         const updatedRecords = [...prev.weightRecords, newRecord];
         const newBmi = calculateBmi(newRecord.value, prev.height);
-        return { ...prev, weightRecords: updatedRecords, bmi: newBmi };
+        const newState = { ...prev, weightRecords: updatedRecords, bmi: newBmi };
+        savePatient(newState);
+        return newState;
     });
   }, []);
 
@@ -415,48 +483,90 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const updatedRecords = prev.weightRecords.filter(r => r.id !== id);
         const newLatestRecord = [...updatedRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
         const newBmi = calculateBmi(newLatestRecord?.value, prev.height);
-        return { ...prev, weightRecords: updatedRecords, bmi: newBmi };
+        const newState = { ...prev, weightRecords: updatedRecords, bmi: newBmi };
+        savePatient(newState);
+        return newState;
     });
   }, []);
   
   const addBloodPressureRecord = useCallback((record: Omit<BloodPressureRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, bloodPressureRecords: [...prev.bloodPressureRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, bloodPressureRecords: [...prev.bloodPressureRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeBloodPressureRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, bloodPressureRecords: prev.bloodPressureRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, bloodPressureRecords: prev.bloodPressureRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
 
   const addTotalCholesterolRecord = useCallback((record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, totalCholesterolRecords: [...prev.totalCholesterolRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, totalCholesterolRecords: [...prev.totalCholesterolRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeTotalCholesterolRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, totalCholesterolRecords: prev.totalCholesterolRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, totalCholesterolRecords: prev.totalCholesterolRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
 
   const addLdlRecord = useCallback((record: Omit<LdlRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, ldlRecords: [...prev.ldlRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, ldlRecords: [...prev.ldlRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeLdlRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, ldlRecords: prev.ldlRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, ldlRecords: prev.ldlRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
   
   const addHdlRecord = useCallback((record: Omit<HdlRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, hdlRecords: [...prev.hdlRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, hdlRecords: [...prev.hdlRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeHdlRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, hdlRecords: prev.hdlRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, hdlRecords: prev.hdlRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
 
   const addTriglyceridesRecord = useCallback((record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => {
-    setPatient(prev => prev ? ({...prev, triglyceridesRecords: [...prev.triglyceridesRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, triglyceridesRecords: [...prev.triglyceridesRecords, { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(prev.medication) }]}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, [getMedicationForRecord]);
 
   const removeTriglyceridesRecord = useCallback((id: string) => {
-    setPatient(prev => prev ? ({...prev, triglyceridesRecords: prev.triglyceridesRecords.filter(r => r.id !== id)}) : null);
+    setPatient(prev => {
+        const newState = prev ? ({...prev, triglyceridesRecords: prev.triglyceridesRecords.filter(r => r.id !== id)}) : null;
+        if(newState) savePatient(newState);
+        return newState;
+    });
   }, []);
 
   const toggleDiseaseBiomarker = useCallback((panelKey: string, biomarkerKey: BiomarkerKey | string) => {
@@ -469,10 +579,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ? panelBiomarkers.filter(b => b !== biomarkerKey)
           : [...panelBiomarkers, biomarkerKey];
 
-        return {
+        const newState = {
           ...prev,
           enabledBiomarkers: { ...currentEnabled, [panelKey]: newPanelBiomarkers }
         };
+        savePatient(newState);
+        return newState;
     });
   }, []);
 
@@ -497,7 +609,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
             description: `The ${panelName} has been ${isCurrentlyEnabled ? 'disabled' : 'enabled'} for this patient.`
         });
         
-        return { ...prev, enabledBiomarkers: updatedEnabledBiomarkers };
+        const newState = { ...prev, enabledBiomarkers: updatedEnabledBiomarkers };
+        savePatient(newState);
+        return newState;
     });
   }, []);
 
@@ -513,50 +627,54 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     setPatient(prev => {
       if (!prev) return null;
-      const newPatient: Patient = { ...prev };
+      let newPatient: Patient = { ...prev };
 
       const checkAndAdd = <T extends { date: string | Date }>(
-          records: T[],
+          records: T[] | undefined,
           newRecordData: Omit<T, 'id' | 'date'> & { date: string },
-          recordName: string
-      ): T[] => {
-          const exists = records.some(r => startOfDay(parseISO(r.date as string)).getTime() === recordDate.getTime());
+          recordName: string,
+          updateState: (p: Patient, r: T[]) => Patient
+      ): void => {
+          const currentRecords = records || [];
+          const exists = currentRecords.some(r => startOfDay(parseISO(r.date as string)).getTime() === recordDate.getTime());
           if (!exists) {
               result.added.push(recordName);
-              return [...records, { ...newRecordData, id: `${recordName}-${Date.now()}` } as T];
+              const newRecords = [...currentRecords, { ...newRecordData, id: `${recordName}-${Date.now()}` } as T];
+              newPatient = updateState(newPatient, newRecords);
+          } else {
+              result.duplicates.push(recordName);
           }
-          result.duplicates.push(recordName);
-          return records;
       };
 
       if (batch.hba1c?.value) {
-        newPatient.hba1cRecords = checkAndAdd(newPatient.hba1cRecords, { ...batch.hba1c, date: recordDate.toISOString() }, 'HbA1c');
+        checkAndAdd(newPatient.hba1cRecords, { ...batch.hba1c, date: recordDate.toISOString() }, 'HbA1c', (p, r) => ({...p, hba1cRecords: r}));
       }
       if (batch.fastingBloodGlucose?.value) {
-        newPatient.fastingBloodGlucoseRecords = checkAndAdd(newPatient.fastingBloodGlucoseRecords, { ...batch.fastingBloodGlucose, date: recordDate.toISOString() }, 'Fasting Glucose');
+        checkAndAdd(newPatient.fastingBloodGlucoseRecords, { ...batch.fastingBloodGlucose, date: recordDate.toISOString() }, 'Fasting Glucose', (p, r) => ({...p, fastingBloodGlucoseRecords: r}));
       }
       if (batch.thyroid) {
-        newPatient.thyroidRecords = checkAndAdd(newPatient.thyroidRecords, {tsh:0, t3:0, t4:0, ...batch.thyroid, date: recordDate.toISOString() }, 'Thyroid');
+        checkAndAdd(newPatient.thyroidRecords, {tsh:0, t3:0, t4:0, ...batch.thyroid, date: recordDate.toISOString() }, 'Thyroid', (p, r) => ({...p, thyroidRecords: r}));
       }
       if (batch.bloodPressure) {
-        newPatient.bloodPressureRecords = checkAndAdd(newPatient.bloodPressureRecords, { ...batch.bloodPressure, date: recordDate.toISOString() }, 'Blood Pressure');
+        checkAndAdd(newPatient.bloodPressureRecords, { ...batch.bloodPressure, date: recordDate.toISOString() }, 'Blood Pressure', (p, r) => ({...p, bloodPressureRecords: r}));
       }
       if (batch.hemoglobin) {
-        newPatient.hemoglobinRecords = checkAndAdd(newPatient.hemoglobinRecords, { ...batch.hemoglobin, date: recordDate.toISOString() }, 'Hemoglobin');
+        checkAndAdd(newPatient.hemoglobinRecords, { ...batch.hemoglobin, date: recordDate.toISOString() }, 'Hemoglobin', (p, r) => ({...p, hemoglobinRecords: r}));
       }
       if (batch.lipidPanel?.totalCholesterol) {
-        newPatient.totalCholesterolRecords = checkAndAdd(newPatient.totalCholesterolRecords, { value: batch.lipidPanel.totalCholesterol, date: recordDate.toISOString() }, 'Total Cholesterol');
+        checkAndAdd(newPatient.totalCholesterolRecords, { value: batch.lipidPanel.totalCholesterol, date: recordDate.toISOString() }, 'Total Cholesterol', (p, r) => ({...p, totalCholesterolRecords: r}));
       }
       if (batch.lipidPanel?.ldl) {
-        newPatient.ldlRecords = checkAndAdd(newPatient.ldlRecords, { value: batch.lipidPanel.ldl, date: recordDate.toISOString() }, 'LDL');
+        checkAndAdd(newPatient.ldlRecords, { value: batch.lipidPanel.ldl, date: recordDate.toISOString() }, 'LDL', (p, r) => ({...p, ldlRecords: r}));
       }
       if (batch.lipidPanel?.hdl) {
-        newPatient.hdlRecords = checkAndAdd(newPatient.hdlRecords, { value: batch.lipidPanel.hdl, date: recordDate.toISOString() }, 'HDL');
+        checkAndAdd(newPatient.hdlRecords, { value: batch.lipidPanel.hdl, date: recordDate.toISOString() }, 'HDL', (p, r) => ({...p, hdlRecords: r}));
       }
       if (batch.lipidPanel?.triglycerides) {
-        newPatient.triglyceridesRecords = checkAndAdd(newPatient.triglyceridesRecords, { value: batch.lipidPanel.triglycerides, date: recordDate.toISOString() }, 'Triglycerides');
+        checkAndAdd(newPatient.triglyceridesRecords, { value: batch.lipidPanel.triglycerides, date: recordDate.toISOString() }, 'Triglycerides', (p, r) => ({...p, triglyceridesRecords: r}));
       }
-
+      
+      savePatient(newPatient);
       return newPatient;
     });
     
@@ -572,7 +690,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (!prev) return null;
         const newConditions = prev.presentMedicalConditions.map(c => c.id === conditionId ? { ...c, status: 'verified' } : c);
         toast({ title: 'Condition Approved', description: 'The medical condition has been marked as verified.' });
-        return { ...prev, presentMedicalConditions: newConditions };
+        const newState = { ...prev, presentMedicalConditions: newConditions };
+        savePatient(newState);
+        return newState;
     });
   }, []);
 
@@ -581,7 +701,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (!prev) return null;
         const newConditions = prev.presentMedicalConditions.map(c => c.id === conditionId ? { ...c, status: 'needs_revision' } : c);
         toast({ title: 'Condition Dismissed', description: 'The condition has been marked for patient revision.' });
-        return { ...prev, presentMedicalConditions: newConditions };
+        const newState = { ...prev, presentMedicalConditions: newConditions };
+        savePatient(newState);
+        return newState;
     });
   }, []);
   

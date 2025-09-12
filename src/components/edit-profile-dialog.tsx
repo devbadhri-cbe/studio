@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -70,7 +71,9 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
             unitSystem: countryInfo?.unitSystem || profile.unitSystem,
             bmi: newBmi,
         };
-
+        
+        // Directly save to localStorage to ensure data integrity
+        localStorage.setItem('patientData', JSON.stringify(updatedProfile));
         setPatient(updatedProfile);
 
         toast({

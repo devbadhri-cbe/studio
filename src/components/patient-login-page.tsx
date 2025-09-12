@@ -86,17 +86,20 @@ export function PatientLoginPage() {
     };
 
     try {
+        // Explicitly save to localStorage first to prevent race conditions on Safari
+        localStorage.setItem('patientData', JSON.stringify(patientData));
         setPatient(patientData);
+
         setIsSuccess(true);
         toast({
             title: 'Profile Created',
             description: `Your patient profile has been created successfully.`,
         });
         
-        // The context useEffect will handle saving, and the dashboard will load automatically.
-        // We just need to keep the success UI showing for a moment.
+        // The UI will show the success message, and the main page will automatically
+        // detect the new patient state and render the dashboard.
         setTimeout(() => {
-          // The main page will detect the new patient state and show the dashboard
+          // This timeout allows the success UI to be visible before the component unmounts.
         }, 2000);
 
     } catch (error) {
