@@ -121,9 +121,10 @@ export function DatePicker({
             value={value && isValid(value) ? format(value, 'yyyy-MM-dd') : ''}
             onChange={handleMobileDateChange}
             className={cn(
-                "w-full justify-start text-left font-normal h-10",
+                "w-full justify-start text-left font-normal h-10 border border-red-500",
                 !value && "text-muted-foreground"
             )}
+            style={{ colorScheme: 'light' }}
         />
     )
   }
@@ -131,7 +132,7 @@ export function DatePicker({
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex items-center rounded-md border border-input h-10 w-full px-2 space-x-1 text-sm justify-start">
+    <div className="flex items-center rounded-md border border-red-500 h-10 w-full px-2 space-x-1 text-sm">
       <div className="w-auto">
         <Select 
             value={day} 

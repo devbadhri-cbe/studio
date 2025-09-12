@@ -108,9 +108,9 @@ export function AddMedicalConditionForm({
                 control={form.control}
                 name="date"
                 render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="border border-blue-500">
                     <FormLabel>Date of Diagnosis</FormLabel>
-                    <FormControl>
+                    <FormControl className="border border-green-500">
                         <DatePicker
                         value={field.value}
                         onChange={field.onChange}
