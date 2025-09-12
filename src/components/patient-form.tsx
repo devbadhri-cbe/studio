@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import * as z from 'zod';
 import { parseISO } from 'date-fns';
 
@@ -12,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { countries } from '@/lib/countries';
 import type { Patient } from '@/lib/types';
-import { DatePicker } from './ui/date-picker';
 import { FormActions } from './form-actions';
+import { cmToFtIn } from '@/lib/utils';
+import { DateInput } from './date-input';
 
 const FormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -37,7 +38,7 @@ interface PatientFormProps {
 }
 
 export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: PatientFormProps) {
-  const form = useForm<PatientFormData>({
+  const formMethods = useForm<PatientFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: React.useMemo(() => {
         const isImperial = countries.find(c => c.code === initialData?.country)?.unitSystem === 'imperial';
@@ -63,16 +64,16 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
     }, [initialData])
   });
   
-  const watchCountry = form.watch('country');
+  const watchCountry = formMethods.watch('country');
   const countryInfo = React.useMemo(() => countries.find(c => c.code === watchCountry), [watchCountry]);
   const isImperial = countryInfo?.unitSystem === 'imperial';
   const phoneCode = countryInfo?.phoneCode;
   
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <FormProvider {...formMethods}>
+      <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
-          control={form.control}
+          control={formMethods.control}
           name="name"
           render={({ field }) => (
             <FormItem>
@@ -86,26 +87,14 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
         />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+            <DateInput 
+              name="dob"
+              label="Date of Birth"
+              fromYear={new Date().getFullYear() - 120}
+              toYear={new Date().getFullYear()}
+            />
           <FormField
-            control={form.control}
-            name="dob"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date of Birth</FormLabel>
-                <FormControl>
-                  <DatePicker
-                    value={field.value}
-                    onChange={field.onChange}
-                    fromYear={new Date().getFullYear() - 120}
-                    toYear={new Date().getFullYear()}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
+            control={formMethods.control}
             name="gender"
             render={({ field }) => (
               <FormItem>
@@ -123,7 +112,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
         </div>
 
         <FormField
-          control={form.control}
+          control={formMethods.control}
           name="country"
           render={({ field }) => (
             <FormItem>
@@ -149,16 +138,16 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
         
         {isImperial ? (
           <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="height_ft" render={({ field }) => ( <FormItem><FormLabel>Height (ft)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} value={field.value || ''} autoComplete="off"/></FormControl><FormMessage /></FormItem> )} />
-            <FormField control={form.control} name="height_in" render={({ field }) => ( <FormItem><FormLabel>Height (in)</FormLabel><FormControl><Input type="number" placeholder="e.g., 9" {...field} value={field.value || ''} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
+            <FormField control={formMethods.control} name="height_ft" render={({ field }) => ( <FormItem><FormLabel>Height (ft)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} value={field.value || ''} autoComplete="off"/></FormControl><FormMessage /></FormItem> )} />
+            <FormField control={formMethods.control} name="height_in" render={({ field }) => ( <FormItem><FormLabel>Height (in)</FormLabel><FormControl><Input type="number" placeholder="e.g., 9" {...field} value={field.value || ''} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
           </div>
         ) : (
-          <FormField control={form.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
+          <FormField control={formMethods.control} name="height" render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 175" {...field} value={field.value || ''} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
           <FormField
-            control={form.control}
+            control={formMethods.control}
             name="phone"
             render={({ field }) => (
               <FormItem>
@@ -183,7 +172,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
               </FormItem>
             )}
           />
-          <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} value={field.value || ''} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
+          <FormField control={formMethods.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="patient@example.com" {...field} value={field.value || ''} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
         </div>
 
         <FormActions
@@ -191,9 +180,6 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
           isSubmitting={isSubmitting}
         />
       </form>
-    </Form>
+    </FormProvider>
   );
 }
-
-// Re-exporting utility functions to keep them co-located if needed elsewhere
-export { cmToFtIn, ftInToCm } from '@/lib/utils';
