@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -425,7 +426,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         title: "Success!",
         description: "Your changes have been saved."
       });
-      await regenerateInsights(selectedInsightsLanguage);
+      // Do not await this, let it run in the background
+      regenerateInsights(selectedInsightsLanguage);
     } catch(e) {
       console.error("Failed to save changes", e);
       toast({
@@ -436,7 +438,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSaving(false);
     }
-  }, [profile, hasUnsavedChanges, getFullPatientData, regenerateInsights, selectedInsightsLanguage]);
+  }, [profile.id, hasUnsavedChanges, getFullPatientData, regenerateInsights, selectedInsightsLanguage]);
   
   const getMedicationForRecord = useCallback((medication: Medication[]): string => {
     if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
