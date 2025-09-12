@@ -17,9 +17,7 @@ export function WeightChart() {
 
   const sortedRecords = [...(weightRecords || [])].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
-  const latestRecords = sortedRecords.slice(-10);
-  
-  const chartData = latestRecords.map((r) => ({
+  const chartData = sortedRecords.map((r) => ({
     date: r.date,
     value: isImperial ? parseFloat(kgToLbs(r.value).toFixed(1)) : parseFloat(r.value.toFixed(1)),
   }));
