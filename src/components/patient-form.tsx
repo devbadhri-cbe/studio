@@ -139,6 +139,8 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                                 <DatePicker
                                     value={field.value}
                                     onChange={field.onChange}
+                                    fromYear={new Date().getFullYear() - 120}
+                                    toYear={new Date().getFullYear()}
                                 />
                             </FormControl>
                             <FormMessage />
