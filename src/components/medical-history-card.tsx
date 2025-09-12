@@ -101,8 +101,10 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
     }
     
     const handleItemClick = () => {
-        if (isFailed) onProcess(item);
-        if (isMobile && !isNil && !isFailed && !isPending && type === 'medication') {
+        if (isFailed) {
+            onProcess(item);
+        } else if (isMobile && type === 'medication' && !isNil && !isFailed && !isPending) {
+            // On mobile, tapping the item shows the synopsis.
             onShowSynopsis(item.id);
         }
     }
@@ -110,7 +112,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
     const showOriginalInput = originalInput && originalInput.toLowerCase() !== title.toLowerCase() && !isNil;
 
     const itemBorderColor = isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
-    const itemCursor = isFailed || (isMobile && type === 'medication' && !isNil && !isFailed && !isPending) ? "cursor-pointer" : "";
+    const itemCursor = isFailed || (isMobile && type === 'medication' && !isNil && !isFailed && !isPending) ? "cursor-pointer" : "cursor-default";
 
 
     return (
@@ -160,7 +162,6 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                                 tooltip="View Synopsis"
                                 icon={<Info className="h-5 w-5 text-blue-500" />}
                                 onClick={(e) => { e.stopPropagation(); onShowSynopsis(item.id); }}
-                                className={isMobile ? 'hidden' : 'flex'}
                             />
                             {isEditing && onRevise && (
                                 <ActionIcon 
