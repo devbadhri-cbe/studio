@@ -69,7 +69,7 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
         <PopoverTrigger asChild>
             <ActionIcon tooltip="Display Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
         </PopoverTrigger>
-        <PopoverContent className="w-80" align="end" side="bottom" sideOffset={8}>
+        <PopoverContent className="w-80">
             <div className="grid gap-4">
                  <div className="space-y-2">
                     <h4 className="font-medium leading-none">Profile</h4>
