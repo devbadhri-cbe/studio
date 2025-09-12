@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -18,14 +19,13 @@ export default function DashboardPage() {
     if (!isClient) return;
 
     if (hasLocalData()) {
-      if (!profile.id) { // Check if profile is not loaded yet
-        loadLocalPatientData();
-      }
+      // The profile should be loaded by the time we get here from the login page redirect.
       setIsLoading(false);
     } else {
+      // If for some reason we land here without data, go back to login.
       router.replace('/patient/login');
     }
-  }, [isClient, hasLocalData, loadLocalPatientData, router, profile.id]);
+  }, [isClient, hasLocalData, router]);
 
   if (isLoading || !isClient) {
     return (

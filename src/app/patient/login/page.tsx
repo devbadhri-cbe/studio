@@ -28,10 +28,14 @@ export default function PatientLoginPage() {
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
+    // This effect ensures that if a user has data, they are immediately redirected
+    // to their dashboard, and if not, they are shown the login/creation screen.
     if (hasLocalData()) {
+      // IMPORTANT: Load data *before* navigating away.
       loadLocalPatientData();
       router.replace(`/patient/dashboard`);
     } else {
+      // No data found, stop loading and show the creation screen.
       setIsLoading(false);
     }
   }, [hasLocalData, loadLocalPatientData, router]);
