@@ -27,15 +27,19 @@ const prompt = ai.definePrompt({
 User Input: "{{userInput}}"
 User-provided Frequency: "{{frequency}}"
 User-provided Food Instruction: "{{foodInstructions}}"
+Patient's Country: "{{country}}"
 
-1.  Analyze the 'userInput', which contains the medication name and potentially the dosage (e.g., "Rosuvas 20mg", "Tylenol PM", "Rosvas 10").
-2.  Determine the primary 'activeIngredient' (generic name) for the medication. If you cannot determine this, do not return the 'activeIngredient' field, which will signal a failure.
-3.  As a separate step, assess if there is a spelling mistake in the medication name within 'userInput'. If you are highly confident of a correction, provide a 'spellingSuggestion'. The suggestion should be a correction of the original 'userInput' string itself. For example, if the input is "Rosvas 10", the spelling suggestion should be "Rosuvas 10". You can provide this even if you can't find the active ingredient.
-4.  Extract the 'dosage' from the 'userInput' string and standardize it (e.g., "20 mg" becomes "20mg").
-5.  Set 'isBrandName' to true if the input is a commercial brand name, and false if it's a generic name.
-6.  Analyze and standardize the 'frequency' input (e.g., "twice a day" or "BD" becomes "twice daily"; "at night" becomes "once daily at bedtime").
-7.  Determine the standard food instruction for the 'activeIngredient' (before, after, or with food). Set this in the 'foodInstructions' output field.
-8.  Compare the standard food instruction with the '{{foodInstructions}}'. If they differ, provide a brief explanation in 'foodInstructionSuggestion'.`,
+1.  **Identify Active Ingredient**: Analyze the 'userInput' (e.g., "Rosuvas 20mg", "Tylenol PM") to determine the primary 'activeIngredient' (generic name). If you cannot determine this with high confidence, do not return the 'activeIngredient' field. This is your primary task.
+
+2.  **Suggest Spelling Correction (Separate Task)**: Independently from the above, assess if there is a spelling mistake in the medication brand name within 'userInput'. If you are highly confident of a correction, provide a 'spellingSuggestion'. The suggestion should be a correction of the original 'userInput' string itself (e.g., for "Rosvas 10", the spelling suggestion should be "Rosuvas 10"). Use the patient's country to inform which brand names are most likely. Provide this suggestion even if you can't find the active ingredient.
+
+3.  **Extract Dosage**: Extract the 'dosage' from the 'userInput' string and standardize it (e.g., "20 mg" becomes "20mg").
+
+4.  **Identify Brand Name**: Set 'isBrandName' to true if the input is a commercial brand name, and false if it's a generic name.
+
+5.  **Standardize Frequency**: Analyze and standardize the 'frequency' input (e.g., "twice a day" or "BD" becomes "twice daily"; "at night" becomes "once daily at bedtime").
+
+6.  **Standardize Food Instructions**: Determine the standard food instruction for the identified 'activeIngredient' (before, after, or with food). Set this in the 'foodInstructions' output field. If this differs from the user's provided instruction, provide a brief explanation in 'foodInstructionSuggestion'.`,
 });
 
 
