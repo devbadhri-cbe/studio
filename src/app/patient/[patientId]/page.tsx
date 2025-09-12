@@ -34,7 +34,20 @@ export default function SharedPatientPage() {
             const newPatientData = produce(patientData, draft => {
                 draft.lastLogin = new Date().toISOString();
                 // Ensure all record arrays exist to prevent spread errors
+                draft.hba1cRecords = draft.hba1cRecords || [];
+                draft.medication = draft.medication || [];
+                draft.presentMedicalConditions = draft.presentMedicalConditions || [];
+                draft.fastingBloodGlucoseRecords = draft.fastingBloodGlucoseRecords || [];
                 draft.weightRecords = draft.weightRecords || [];
+                draft.bloodPressureRecords = draft.bloodPressureRecords || [];
+                draft.thyroidRecords = draft.thyroidRecords || [];
+                draft.thyroxineRecords = draft.thyroxineRecords || [];
+                draft.serumCreatinineRecords = draft.serumCreatinineRecords || [];
+                draft.uricAcidRecords = draft.uricAcidRecords || [];
+                draft.totalCholesterolRecords = draft.totalCholesterolRecords || [];
+                draft.ldlRecords = draft.ldlRecords || [];
+                draft.hdlRecords = draft.hdlRecords || [];
+                draft.triglyceridesRecords = draft.triglyceridesRecords || [];
             });
             setPatient(newPatientData);
             setPatientData(newPatientData, false);

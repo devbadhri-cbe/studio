@@ -69,9 +69,21 @@ export function PatientLoginPage() {
         phone: data.phone || '',
         dateFormat: countryInfo?.dateFormat || 'MM-dd-yyyy',
         unitSystem: countryInfo?.unitSystem || 'metric',
+        status: 'On Track',
         hba1cRecords: [],
         medication: [],
         presentMedicalConditions: [],
+        fastingBloodGlucoseRecords: [],
+        weightRecords: [],
+        bloodPressureRecords: [],
+        thyroidRecords: [],
+        thyroxineRecords: [],
+        serumCreatinineRecords: [],
+        uricAcidRecords: [],
+        totalCholesterolRecords: [],
+        ldlRecords: [],
+        hdlRecords: [],
+        triglyceridesRecords: [],
     };
 
     try {
