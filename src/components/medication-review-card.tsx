@@ -121,7 +121,7 @@ export function MedicationReviewCard({ userInput, aiResult, onConfirm, onEdit, o
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 pt-4">
-                    <Button type="button" variant="ghost" onClick={onCancel}>
+                    <Button type="button" variant="outline" onClick={onCancel}>
                         Cancel
                     </Button>
                     <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>
