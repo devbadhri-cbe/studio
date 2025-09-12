@@ -44,6 +44,8 @@ const extractLabDataFlow = ai.defineFlow(
   },
   async (input) => {
     let retries = 3;
+    let delay = 1000; // Initial delay of 1 second
+
     while (retries > 0) {
       try {
         const { output } = await prompt(input);
@@ -59,9 +61,10 @@ const extractLabDataFlow = ai.defineFlow(
         
         if (retries === 0) throw e;
 
-        // Wait longer for rate limit or server unavailable errors
+        // Implement exponential backoff for rate limit or server unavailable errors
         if (errorMessage.includes('429') || errorMessage.includes('503')) {
-           await new Promise(resolve => setTimeout(resolve, 1000));
+           await new Promise(resolve => setTimeout(resolve, delay));
+           delay *= 2; // Double the delay for the next retry
         }
       }
     }
