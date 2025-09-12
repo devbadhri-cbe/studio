@@ -17,7 +17,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { startOfDay, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useApp } from '@/context/app-context';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { FormActions } from './form-actions';
 
@@ -51,7 +51,7 @@ export function AddRecordDialogLayout({
   const isMobile = useIsMobile();
 
   const handleFormSubmit = (data: any) => {
-    if (existingRecords) {
+    if (existingRecords && data.date) {
       const newDate = startOfDay(data.date);
       const dateExists = existingRecords.some((record) => {
           const storedDate = startOfDay(parseISO(record.date as string));
@@ -71,7 +71,8 @@ export function AddRecordDialogLayout({
   };
   
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (profile.medication.length === 0) {
+    // Only check for medication if it's a biomarker entry dialog (indicated by existingRecords prop)
+    if (existingRecords && profile.medication.length === 0) {
       e.preventDefault();
       toast({
         variant: 'destructive',
@@ -96,17 +97,23 @@ export function AddRecordDialogLayout({
         </form>
     </Form>
   );
+  
+  const renderTrigger = () => {
+    if (!trigger) return null;
+    return React.cloneElement(trigger as React.ReactElement, {
+      onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+        // Propagate original onClick if it exists
+        if ((trigger as React.ReactElement).props.onClick) {
+          (trigger as React.ReactElement).props.onClick(e);
+        }
+        handleTriggerClick(e);
+      },
+    });
+  }
 
   if (isMobile) {
     if (!open) {
-      return trigger ? React.cloneElement(trigger as React.ReactElement, {
-        onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
-          if ((trigger as React.ReactElement).props.onClick) {
-            (trigger as React.ReactElement).props.onClick(e);
-          }
-          handleTriggerClick(e);
-        },
-      }) : null;
+      return renderTrigger();
     }
     return (
         <Card className="mt-4 border-primary">
@@ -128,7 +135,7 @@ export function AddRecordDialogLayout({
     );
   }
 
-  const content = (
+  const dialogContent = (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle>{title}</DialogTitle>
@@ -139,26 +146,17 @@ export function AddRecordDialogLayout({
   );
   
   if (trigger) {
-    const triggerWithClick = React.cloneElement(trigger as React.ReactElement, {
-      onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
-        if ((trigger as React.ReactElement).props.onClick) {
-          (trigger as React.ReactElement).props.onClick(e);
-        }
-        handleTriggerClick(e);
-      },
-    });
-
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogTrigger asChild>{triggerWithClick}</DialogTrigger>
-        {content}
+        <DialogTrigger asChild>{renderTrigger()}</DialogTrigger>
+        {dialogContent}
       </Dialog>
     );
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {content}
+      {dialogContent}
     </Dialog>
   )
 }
