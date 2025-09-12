@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -48,9 +47,9 @@ export function AddMedicalConditionForm({
   });
   
   const handleFormSubmit = async (data: MedicalConditionFormValues) => {
+    if (!profile) return;
     setIsSubmitting(true);
     
-    // Check for duplicates based on user input for existing pending items
     const isDuplicate = profile.presentMedicalConditions.some(c => 
         c.id !== initialData?.id &&
         c.userInput?.toLowerCase() === data.userInput.toLowerCase()
@@ -65,8 +64,8 @@ export function AddMedicalConditionForm({
     onSave({
       id: initialData?.id || `cond-${Date.now()}`,
       userInput: data.userInput,
-      condition: data.userInput, // Initially, condition is same as userInput
-      icdCode: 'loading...', // Mark as loading
+      condition: data.userInput,
+      icdCode: 'loading...',
       synopsis: '',
       date: data.date.toISOString(),
       status: 'pending_review',

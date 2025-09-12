@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -22,12 +21,13 @@ const FormSchema = z.object({
 
 interface AddTriglyceridesRecordDialogProps {
     children?: React.ReactNode;
+    onSuccess?: () => void;
 }
 
-export function AddTriglyceridesRecordDialog({ children }: AddTriglyceridesRecordDialogProps) {
+export function AddTriglyceridesRecordDialog({ children, onSuccess }: AddTriglyceridesRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addTriglyceridesRecord, triglyceridesRecords } = useApp();
+  const { addTriglyceridesRecord, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -59,6 +59,7 @@ export function AddTriglyceridesRecordDialog({ children }: AddTriglyceridesRecor
     });
     setOpen(false);
     setIsSubmitting(false);
+    onSuccess?.();
   };
   
    const triggerButton = children || (
@@ -75,7 +76,7 @@ export function AddTriglyceridesRecordDialog({ children }: AddTriglyceridesRecor
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
-        existingRecords={triglyceridesRecords}
+        existingRecords={profile?.triglyceridesRecords}
       >
         <FormField
             control={form.control}

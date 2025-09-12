@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -22,12 +21,13 @@ const FormSchema = z.object({
 
 interface AddFastingBloodGlucoseRecordDialogProps {
     children?: React.ReactNode;
+    onSuccess?: () => void;
 }
 
-export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBloodGlucoseRecordDialogProps) {
+export function AddFastingBloodGlucoseRecordDialog({ children, onSuccess }: AddFastingBloodGlucoseRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addFastingBloodGlucoseRecord, biomarkerUnit, getDbGlucoseValue, fastingBloodGlucoseRecords } = useApp();
+  const { addFastingBloodGlucoseRecord, biomarkerUnit, getDbGlucoseValue, profile } = useApp();
   const { toast } = useToast();
   const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
 
@@ -61,6 +61,7 @@ export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBlood
     });
     setOpen(false);
     setIsSubmitting(false);
+    onSuccess?.();
   };
   
    const triggerButton = children || (
@@ -78,7 +79,7 @@ export function AddFastingBloodGlucoseRecordDialog({ children }: AddFastingBlood
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
-        existingRecords={fastingBloodGlucoseRecords}
+        existingRecords={profile?.fastingBloodGlucoseRecords}
       >
         <FormField
             control={form.control}

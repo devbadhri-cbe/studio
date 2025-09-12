@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -28,7 +27,7 @@ interface AddHemoglobinRecordDialogProps {
 export function AddHemoglobinRecordDialog({ children, onSuccess }: AddHemoglobinRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addHemoglobinRecord, getDbHemoglobinValue, biomarkerUnit, hemoglobinRecords } = useApp();
+  const { addHemoglobinRecord, getDbHemoglobinValue, biomarkerUnit, profile } = useApp();
   const { toast } = useToast();
   const unitLabel = biomarkerUnit === 'si' ? 'g/L' : 'g/dL';
 
@@ -78,7 +77,7 @@ export function AddHemoglobinRecordDialog({ children, onSuccess }: AddHemoglobin
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
-        existingRecords={hemoglobinRecords}
+        existingRecords={profile?.hemoglobinRecords}
       >
         <FormField
             control={form.control}

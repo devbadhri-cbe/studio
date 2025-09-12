@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -37,6 +36,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
   const isMobile = useIsMobile();
   
   const onProfileSubmit = async (data: PatientFormData) => {
+    if (!profile) return;
     setIsSubmitting(true);
     
     const countryInfo = countries.find(c => c.code === data.country);
@@ -52,7 +52,10 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
     }
 
     try {
-        const updatedProfile = {
+        const latestWeight = [...profile.weightRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+        const newBmi = calculateBmi(latestWeight?.value, heightInCm);
+
+        setProfile({
             ...profile,
             name: data.name,
             dob: data.dob.toISOString(),
@@ -63,9 +66,8 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
             height: heightInCm,
             dateFormat: countryInfo?.dateFormat || profile.dateFormat,
             unitSystem: countryInfo?.unitSystem || profile.unitSystem,
-        };
-
-        setProfile(updatedProfile);
+            bmi: newBmi,
+        });
 
         toast({
             title: 'Profile Updated',

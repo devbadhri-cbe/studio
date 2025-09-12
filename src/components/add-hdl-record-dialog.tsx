@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -22,12 +21,13 @@ const FormSchema = z.object({
 
 interface AddHdlRecordDialogProps {
     children?: React.ReactNode;
+    onSuccess?: () => void;
 }
 
-export function AddHdlRecordDialog({ children }: AddHdlRecordDialogProps) {
+export function AddHdlRecordDialog({ children, onSuccess }: AddHdlRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addHdlRecord, hdlRecords } = useApp();
+  const { addHdlRecord, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -59,6 +59,7 @@ export function AddHdlRecordDialog({ children }: AddHdlRecordDialogProps) {
     });
     setOpen(false);
     setIsSubmitting(false);
+    onSuccess?.();
   };
   
    const triggerButton = children || (
@@ -75,7 +76,7 @@ export function AddHdlRecordDialog({ children }: AddHdlRecordDialogProps) {
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
-        existingRecords={hdlRecords}
+        existingRecords={profile?.hdlRecords}
       >
         <FormField
             control={form.control}

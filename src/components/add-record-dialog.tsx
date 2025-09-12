@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -28,7 +27,7 @@ interface AddRecordDialogProps {
 export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addHba1cRecord, hba1cRecords } = useApp();
+  const { addHba1cRecord, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -77,7 +76,7 @@ export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
-        existingRecords={hba1cRecords}
+        existingRecords={profile?.hba1cRecords}
       >
         <FormField
             control={form.control}

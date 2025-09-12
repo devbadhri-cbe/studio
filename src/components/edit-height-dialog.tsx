@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { cmToFtIn, ftInToCm } from '@/lib/utils';
+import { cmToFtIn, ftInToCm, calculateBmi } from '@/lib/utils';
 
 const FormSchema = z.object({
   height_cm: z.coerce.number().optional(),
@@ -37,7 +36,8 @@ export const EditHeightDialog = React.forwardRef<EditHeightDialogHandles>((props
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { profile, setProfile } = useApp();
   const { toast } = useToast();
-  const isImperial = profile.unitSystem === 'imperial';
+
+  const isImperial = profile?.unitSystem === 'imperial';
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -53,21 +53,20 @@ export const EditHeightDialog = React.forwardRef<EditHeightDialogHandles>((props
   }));
   
   React.useEffect(() => {
-    if (open) {
-      if (profile.height) {
+    if (open && profile?.height) {
         if (isImperial) {
           const { feet, inches } = cmToFtIn(profile.height);
           form.reset({ height_ft: feet, height_in: inches });
         } else {
           form.reset({ height_cm: profile.height });
         }
-      } else {
+    } else if (open) {
         form.reset({ height_cm: undefined, height_ft: undefined, height_in: undefined });
-      }
     }
-  }, [open, profile.height, isImperial, form]);
+  }, [open, profile?.height, isImperial, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    if (!profile) return;
     setIsSubmitting(true);
     try {
         let heightInCm: number | undefined;
@@ -78,8 +77,11 @@ export const EditHeightDialog = React.forwardRef<EditHeightDialogHandles>((props
         } else {
             heightInCm = data.height_cm ? Number(data.height_cm) : undefined;
         }
+        
+        const latestWeight = [...profile.weightRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+        const newBmi = calculateBmi(latestWeight?.value, heightInCm);
 
-        setProfile({ ...profile, height: heightInCm });
+        setProfile({ ...profile, height: heightInCm, bmi: newBmi });
         
         toast({
             title: 'Success!',

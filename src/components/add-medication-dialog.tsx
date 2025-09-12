@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -35,7 +34,7 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
   const onSubmit = async (data: {medicationName: string, dosage: string, frequency: string, foodInstructions?: FoodInstruction}) => {
     setIsSubmitting(true);
     addMedication({
-        name: 'pending...', // AI will fill this
+        name: 'pending...',
         brandName: data.medicationName,
         dosage: data.dosage,
         frequency: data.frequency,

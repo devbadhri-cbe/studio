@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useApp } from '@/context/app-context';
@@ -15,9 +13,10 @@ export function BiomarkersPanel({ searchQuery = '' }: BiomarkersPanelProps) {
     const { profile } = useApp();
 
     const enabledForPatient: (BiomarkerKey | string)[] = React.useMemo(() => {
-        const allEnabled = Object.values(profile.enabledBiomarkers || {}).flat();
+        if (!profile?.enabledBiomarkers) return [];
+        const allEnabled = Object.values(profile.enabledBiomarkers).flat();
         return [...new Set(allEnabled)];
-    }, [profile.enabledBiomarkers]);
+    }, [profile?.enabledBiomarkers]);
     
     const allCards = Object.entries(availableBiomarkerCards).map(([key, value]) => ({
         key,
@@ -41,6 +40,8 @@ export function BiomarkersPanel({ searchQuery = '' }: BiomarkersPanelProps) {
             return a.label.localeCompare(b.label);
         });
     }, [allCards, enabledForPatient, searchQuery]);
+
+    if (!profile) return null;
 
     return (
         <Card>

@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -22,12 +21,13 @@ const FormSchema = z.object({
 
 interface AddThyroxineRecordDialogProps {
     children?: React.ReactNode;
+    onSuccess?: () => void;
 }
 
-export function AddThyroxineRecordDialog({ children }: AddThyroxineRecordDialogProps) {
+export function AddThyroxineRecordDialog({ children, onSuccess }: AddThyroxineRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addThyroxineRecord, thyroxineRecords } = useApp();
+  const { addThyroxineRecord, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -59,6 +59,7 @@ export function AddThyroxineRecordDialog({ children }: AddThyroxineRecordDialogP
     });
     setOpen(false);
     setIsSubmitting(false);
+    onSuccess?.();
   };
   
    const triggerButton = children || (
@@ -75,7 +76,7 @@ export function AddThyroxineRecordDialog({ children }: AddThyroxineRecordDialogP
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
-        existingRecords={thyroxineRecords}
+        existingRecords={profile?.thyroxineRecords}
       >
         <FormField
             control={form.control}

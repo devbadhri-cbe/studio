@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import * as React from 'react';
@@ -35,6 +33,7 @@ export function AddNewBiomarker({ onCancel }: AddNewBiomarkerProps) {
     });
 
     const handleCreate = async (data: { name: string, unit: string }) => {
+        if (!profile) return;
         setIsCreating(true);
         try {
             if (!profile.id) {

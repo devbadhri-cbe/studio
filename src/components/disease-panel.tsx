@@ -13,7 +13,9 @@ export function DiseasePanel({ searchQuery = '' }: DiseasePanelProps) {
     const { profile, isReadOnlyView } = useApp();
 
     const panelsToShow = React.useMemo(() => {
-        const enabledPanelKeys = Object.keys(profile.enabledBiomarkers || {});
+        if (!profile?.enabledBiomarkers) return [];
+
+        const enabledPanelKeys = Object.keys(profile.enabledBiomarkers);
         const lowercasedQuery = searchQuery.toLowerCase();
 
         let panels = availableDiseasePanels;
@@ -31,8 +33,10 @@ export function DiseasePanel({ searchQuery = '' }: DiseasePanelProps) {
         });
         return sortedPanels.map(p => React.cloneElement(p.component, { key: p.key }));
 
-    }, [profile.enabledBiomarkers, searchQuery]);
+    }, [profile?.enabledBiomarkers, searchQuery]);
 
+    if (!profile) return null;
+    
     if (panelsToShow.length === 0) {
         return (
             <Card>

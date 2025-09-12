@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -29,7 +28,7 @@ interface AddThyroidRecordDialogProps {
 export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addThyroidRecord, thyroidRecords } = useApp();
+  const { addThyroidRecord, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm({
@@ -82,7 +81,7 @@ export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecord
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
-        existingRecords={thyroidRecords}
+        existingRecords={profile?.thyroidRecords}
       >
         <FormField
             control={form.control}

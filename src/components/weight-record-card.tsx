@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,7 +19,9 @@ interface WeightRecordCardProps {
 }
 
 export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) {
-  const { weightRecords, removeWeightRecord, profile, setProfile } = useApp();
+  const { profile, removeWeightRecord, setProfile } = useApp();
+  if (!profile) return null;
+
   const isImperial = profile.unitSystem === 'imperial';
   const weightUnit = isImperial ? 'lbs' : 'kg';
   const editHeightDialogRef = React.useRef<EditHeightDialogHandles>(null);
@@ -88,7 +89,7 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
     <BiomarkerCard<WeightRecord>
         title={`Weight & BMI (${weightUnit})`}
         icon={<Weight className="h-5 w-5 shrink-0 text-muted-foreground" />}
-        records={weightRecords}
+        records={profile.weightRecords}
         onRemoveRecord={removeWeightRecord}
         getStatus={getStatus}
         formatRecord={formatRecord}

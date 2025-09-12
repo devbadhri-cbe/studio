@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -13,7 +12,6 @@ import type { Patient } from '@/lib/types';
 import { parseISO } from 'date-fns';
 import { calculateAge, cmToFtIn } from '@/lib/utils';
 import { DatePicker } from './ui/date-picker';
-import { useApp } from '@/context/app-context';
 import { FormActions } from './form-actions';
 
 
@@ -30,14 +28,13 @@ export type PatientFormData = {
 };
 
 interface PatientFormProps {
-    patient?: Patient;
+    patient?: Patient | null;
     onSubmit: (data: PatientFormData) => void;
     isSubmitting: boolean;
     onCancel: () => void;
 }
 
 export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: PatientFormProps) {
-  const { profile } = useApp();
   const nameInputRef = React.useRef<HTMLInputElement>(null);
   
   React.useEffect(() => {

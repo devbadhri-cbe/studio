@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -22,12 +21,13 @@ const FormSchema = z.object({
 
 interface AddSerumCreatinineRecordDialogProps {
     children?: React.ReactNode;
+    onSuccess?: () => void;
 }
 
-export function AddSerumCreatinineRecordDialog({ children }: AddSerumCreatinineRecordDialogProps) {
+export function AddSerumCreatinineRecordDialog({ children, onSuccess }: AddSerumCreatinineRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addSerumCreatinineRecord, serumCreatinineRecords } = useApp();
+  const { addSerumCreatinineRecord, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -59,6 +59,7 @@ export function AddSerumCreatinineRecordDialog({ children }: AddSerumCreatinineR
     });
     setOpen(false);
     setIsSubmitting(false);
+    onSuccess?.();
   };
   
    const triggerButton = children || (
@@ -75,7 +76,7 @@ export function AddSerumCreatinineRecordDialog({ children }: AddSerumCreatinineR
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
-        existingRecords={serumCreatinineRecords}
+        existingRecords={profile?.serumCreatinineRecords}
       >
         <FormField
             control={form.control}

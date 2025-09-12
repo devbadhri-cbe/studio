@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -7,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { startOfDay } from 'date-fns';
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
@@ -18,7 +17,7 @@ import { AddRecordDialogLayout } from './add-record-dialog-layout';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
-  value: z.coerce.number().min(2, 'Weight seems too low.').max(300, 'Weight seems too high.'),
+  value: z.coerce.number().min(2, 'Weight seems too low.').max(1000, 'Weight seems too high.'), // Increased max for lbs
 });
 
 interface AddWeightRecordDialogProps {
@@ -29,9 +28,9 @@ interface AddWeightRecordDialogProps {
 export function AddWeightRecordDialog({ children, onSuccess }: AddWeightRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addWeightRecord, profile, weightRecords } = useApp();
+  const { addWeightRecord, profile } = useApp();
   const { toast } = useToast();
-  const isImperial = profile.unitSystem === 'imperial';
+  const isImperial = profile?.unitSystem === 'imperial';
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -81,7 +80,7 @@ export function AddWeightRecordDialog({ children, onSuccess }: AddWeightRecordDi
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
-        existingRecords={weightRecords}
+        existingRecords={profile?.weightRecords}
       >
         <FormField
             control={form.control}

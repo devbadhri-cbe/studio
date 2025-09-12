@@ -12,7 +12,6 @@ import { InsightsCard } from '@/components/insights-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { ProfileCard } from '@/components/profile-card';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
-import { UnsavedChangesBar } from './unsaved-changes-bar';
 import { DashboardSectionToggle } from './dashboard-section-toggle';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { Button } from './ui/button';
@@ -24,9 +23,10 @@ import { AddNewBiomarker } from './add-new-biomarker';
 import { WeightRecordCard } from './weight-record-card';
 import { BloodPressureCard } from './blood-pressure-card';
 import { DoctorReviewCard } from './doctor-review-card';
+import { Logo } from './logo';
 
 export function PatientDashboard() {
-  const { isClient, isReadOnlyView } = useApp();
+  const { isClient, isReadOnlyView, profile } = useApp();
   const router = useRouter();
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(true);
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
@@ -54,10 +54,13 @@ export function PatientDashboard() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
-  if (!isClient) {
+  if (!isClient || !profile) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <div className="flex flex-col items-center gap-4">
+            <Logo className="h-24 w-24" />
+            <p className="ml-4 text-lg animate-pulse">Loading patient data...</p>
+        </div>
       </div>
     );
   }

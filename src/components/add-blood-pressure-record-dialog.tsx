@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -22,7 +21,7 @@ interface AddBloodPressureRecordDialogProps {
 export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPressureRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addBloodPressureRecord, bloodPressureRecords } = useApp();
+  const { addBloodPressureRecord, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm({
@@ -74,7 +73,7 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
-        existingRecords={bloodPressureRecords}
+        existingRecords={profile?.bloodPressureRecords}
       >
         <FormField
             control={form.control}

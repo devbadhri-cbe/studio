@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -29,7 +28,7 @@ interface AddLipidRecordDialogProps {
 export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addLipidRecord, lipidRecords } = useApp();
+  const { addTotalCholesterolRecord, addLdlRecord, addHdlRecord, addTriglyceridesRecord, profile } = useApp();
   const { toast } = useToast();
 
   const form = useForm({
@@ -56,13 +55,13 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
 
   const onSubmit = (data: any) => {
     setIsSubmitting(true);
-    addLipidRecord({
-      date: startOfDay(data.date).toISOString(),
-      totalCholesterol: Number(data.totalCholesterol),
-      ldl: Number(data.ldl),
-      hdl: Number(data.hdl),
-      triglycerides: Number(data.triglycerides),
-    });
+    const date = startOfDay(data.date).toISOString();
+    
+    if (data.totalCholesterol) addTotalCholesterolRecord({ date, value: Number(data.totalCholesterol) });
+    if (data.ldl) addLdlRecord({ date, value: Number(data.ldl) });
+    if (data.hdl) addHdlRecord({ date, value: Number(data.hdl) });
+    if (data.triglycerides) addTriglyceridesRecord({ date, value: Number(data.triglycerides) });
+    
     toast({
       title: 'Success!',
       description: 'Your new lipid panel record has been added.',
@@ -85,7 +84,7 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
         form={form}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
-        existingRecords={lipidRecords}
+        existingRecords={profile?.totalCholesterolRecords} // Use one as a proxy
       >
         <FormField
             control={form.control}

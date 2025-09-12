@@ -1,8 +1,7 @@
-
 'use client';
 
 import * as React from 'react';
-import { format as formatDateFns, parseISO } from 'date-fns';
+import { format as formatDateFns, parseISO, isValid } from 'date-fns';
 import { useApp } from '@/context/app-context';
 
 export function useDateFormatter() {
@@ -15,10 +14,14 @@ export function useDateFormatter() {
     if (!date) return 'Invalid Date';
     try {
         const dateObj = typeof date === 'string' ? parseISO(date) : date;
+        if (!isValid(dateObj)) {
+            console.error("Invalid date provided to formatDate:", date);
+            return 'Invalid Date';
+        }
         // Use 'PPP' for the "Month D, YYYY" format, otherwise use the stored format string
         return formatDateFns(dateObj, dateFormat === 'PPP' ? 'PPP' : dateFormat);
     } catch (error) {
-        console.error("Invalid date for formatting:", date);
+        console.error("Error formatting date:", date, error);
         return 'Invalid Date';
     }
   }, [dateFormat]);
