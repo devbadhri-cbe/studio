@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -94,6 +95,7 @@ interface AppContextType {
   dismissSuggestion: (conditionId: string) => void;
   getFullPatientData: () => Patient | null;
   profile: Patient | null;
+  deleteProfile: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -219,7 +221,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const getLatestReadings = useCallback(() => {
     if (!profile) return {};
-    const getLatest = <T extends { date: string | Date }>(records: T[]) => [...records].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+    const getLatest = <T extends { date: string | Date }>(records: T[]) => [...(records || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
     return {
         hba1c: getLatest(profile.hba1cRecords)?.value,
         fastingBloodGlucose: getLatest(profile.fastingBloodGlucoseRecords) ? getDisplayGlucoseValue(getLatest(profile.fastingBloodGlucoseRecords)!.value) : undefined,
@@ -291,7 +293,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [profile, getLatestReadings]);
   
 
-  const getMedicationForRecord = useCallback((medication: Medication[]): string => {
+  const getMedicationForRecord = useCallback((medication?: Medication[]): string => {
     if (!medication || !Array.isArray(medication) || medication.length === 0) return 'N/A';
     try {
       return JSON.stringify(medication.map(m => ({name: m.name, dosage: m.dosage, frequency: m.frequency})));
@@ -586,6 +588,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const getFullPatientData = useCallback((): Patient | null => {
     return patient;
   }, [patient]);
+  
+  const deleteProfile = useCallback(() => {
+    localStorage.removeItem('patientData');
+    window.location.reload();
+  }, []);
 
   const value: AppContextType = {
     patient,
@@ -650,6 +657,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dismissSuggestion,
     getFullPatientData,
     profile,
+    deleteProfile,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

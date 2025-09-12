@@ -14,19 +14,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { dateFormats } from '@/lib/countries';
 import { useApp } from '@/context/app-context';
 import type { UnitSystem } from '@/lib/types';
-import { Settings, Edit, Download, Copy } from 'lucide-react';
+import { Settings, Edit, Download, Copy, Trash2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { ActionIcon } from './ui/action-icon';
 import { toast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
 import { ThemeToggle } from './theme-toggle';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 
 interface ProfileSettingsPopoverProps {
     onEdit: () => void;
 }
 
 export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) {
-  const { profile, setProfile, getFullPatientData } = useApp();
+  const { profile, setProfile, getFullPatientData, deleteProfile } = useApp();
   
   const handleExportData = () => {
     try {
@@ -56,6 +57,7 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
   };
 
   const handleCopyId = () => {
+    if (!profile?.id) return;
     navigator.clipboard.writeText(profile.id).then(() => {
         toast({ title: "Patient ID Copied" });
     }).catch(err => {
@@ -95,6 +97,8 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
                             <ThemeToggle />
                         </div>
                     </div>
+                    {profile && (
+                    <>
                     <div className="grid grid-cols-3 items-center gap-4">
                         <Label htmlFor="date-format">Date Format</Label>
                         <Select
@@ -126,6 +130,8 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
                             </SelectContent>
                         </Select>
                     </div>
+                    </>
+                    )}
                 </div>
                 <Separator />
                  <div className="space-y-2">
@@ -134,6 +140,7 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
                        Save your data to a file or copy your unique ID.
                     </p>
                 </div>
+                {profile && (
                 <div className="space-y-2">
                     <div className="flex gap-2">
                       <Input id="patient-id" value={profile.id} readOnly className="h-8 text-xs" />
@@ -145,7 +152,34 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
                         <Download className="mr-2 h-4 w-4" />
                         Export Data
                     </Button>
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive-outline" size="sm" className="w-full">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Profile and Start Over
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete your
+                                    entire profile and all associated health records from this device.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={deleteProfile}
+                                    className="bg-destructive hover:bg-destructive/90"
+                                >
+                                    Delete Profile
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
+                )}
             </div>
         </PopoverContent>
     </Popover>
