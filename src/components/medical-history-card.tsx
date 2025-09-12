@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
@@ -25,8 +24,9 @@ import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { Alert, AlertDescription } from './ui/alert';
 import { produce } from 'immer';
+import { EditMedicationForm } from './edit-medication-form';
 
-type ActiveView = 'none' | 'addCondition' | 'editCondition' | 'addMedication' | 'interaction' | `synopsis_condition_${string}` | `synopsis_medication_${string}`;
+type ActiveView = 'none' | 'addCondition' | 'editCondition' | 'addMedication' | 'editMedication' | 'interaction' | `synopsis_condition_${string}` | `synopsis_medication_${string}`;
 
 interface MedicalInfoSectionProps {
   title: string;
@@ -84,7 +84,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
         date = cond.date;
     } else {
         const med = item as Medication;
-        isNil = med.name.toLowerCase() === 'nil';
+        isNil = med.name.toLowerCase() === 'nil - no medication taken';
         title = isNil ? 'Nil - No medication taken' : med.name;
         originalInput = med.userInput;
         if (!isNil && med.status !== 'failed') {
@@ -140,6 +140,13 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
                             icon={<Info className="h-5 w-5 text-blue-500" />}
                             onClick={(e) => { e.stopPropagation(); onShowSynopsis(item.id); }}
                         />
+                        {isEditing && onRevise && (
+                            <ActionIcon 
+                                tooltip={`Edit ${type}`}
+                                icon={<Edit className="h-5 w-5 text-gray-500" />}
+                                onClick={(e) => { e.stopPropagation(); onRevise(item); }}
+                            />
+                        )}
                         {isEditing && (
                             <ActionIcon 
                                 tooltip={`Delete ${type}`}
@@ -239,6 +246,11 @@ export function MedicalHistoryCard() {
       setActiveView('editCondition');
   }
 
+  const handleReviseMedication = (medicationToEdit: Medication) => {
+    setActiveData(medicationToEdit);
+    setActiveView('editMedication');
+  }
+
   const handleAddConditionClick = () => {
     setActiveView('addCondition');
     setActiveData(null);
@@ -292,10 +304,13 @@ export function MedicalHistoryCard() {
 
   const renderActiveViewContent = () => {
     if (activeView === 'addCondition' || activeView === 'editCondition') {
-        return <AddMedicalConditionForm onCancel={closeActiveView} initialData={activeData} />;
+        return <AddMedicalConditionForm onSave={updateMedicalCondition} onCancel={closeActiveView} initialData={activeData} />;
     }
     if (activeView === 'addMedication') {
         return <AddMedicationForm onCancel={closeActiveView} onSuccess={closeActiveView} />;
+    }
+     if (activeView === 'editMedication') {
+        return <EditMedicationForm onCancel={closeActiveView} onSuccess={closeActiveView} initialData={activeData} />;
     }
     if (activeView === 'interaction') {
         return <DrugInteractionViewer medications={profile.medication.map(m => m.userInput)} onClose={closeActiveView} />;
@@ -373,7 +388,7 @@ export function MedicalHistoryCard() {
             icon={<Pill className="h-5 w-5 shrink-0 text-muted-foreground" />}
             actions={medicationActions}
         >
-            {activeView === 'addMedication' ? activeViewContent : null}
+            {activeView === 'addMedication' || activeView === 'editMedication' ? activeViewContent : null}
             <ul className="space-y-1 mt-2">
                 {profile.medication.length > 0 ? (
                     profile.medication.map((med) => (
@@ -385,17 +400,20 @@ export function MedicalHistoryCard() {
                             onRemove={handleRemoveMedication}
                             onShowSynopsis={() => showSynopsis('medication', med)}
                             onProcess={handleProcessMedication}
+                            onRevise={handleReviseMedication}
                         />
                     ))
                 ) : (
-                    <ListItem
-                        item={nilMedicationRecord}
-                        type="medication"
-                        isEditing={false}
-                        onRemove={() => {}}
-                        onShowSynopsis={() => {}}
-                        onProcess={() => {}}
-                    />
+                    activeView !== 'addMedication' && activeView !== 'editMedication' && (
+                        <ListItem
+                            item={nilMedicationRecord}
+                            type="medication"
+                            isEditing={false}
+                            onRemove={() => {}}
+                            onShowSynopsis={() => {}}
+                            onProcess={() => {}}
+                        />
+                    )
                 )}
             </ul>
 
