@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { UniversalCard } from '@/components/universal-card';
 import { Logo } from '@/components/logo';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
 import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -21,20 +20,10 @@ import { v4 as uuidv4 } from 'uuid';
 export default function PatientLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { loadLocalPatientData, hasLocalData, setPatient: setPatientInContext } = useApp();
+  const { setPatient: setPatientInContext } = useApp();
   const [isCreating, setIsCreating] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const isMobile = useIsMobile();
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    if (hasLocalData()) {
-      loadLocalPatientData();
-      router.replace(`/patient/dashboard`);
-    } else {
-      setIsLoading(false);
-    }
-  }, [hasLocalData, loadLocalPatientData, router]);
 
   const handleCreateNewProfile = () => {
     setIsCreating(true);
@@ -86,13 +75,12 @@ export default function PatientLoginPage() {
     };
 
     try {
-        localStorage.setItem('patientData', JSON.stringify(patientData));
+        setPatientInContext(patientData);
         toast({
             title: 'Profile Created',
             description: `Your patient profile has been created successfully.`,
         });
-        setPatientInContext(patientData);
-        router.push(`/patient/dashboard`);
+        // The dashboard page will automatically pick up the new patient context
     } catch (error) {
         console.error("Failed to save patient", error);
         toast({
@@ -102,21 +90,10 @@ export default function PatientLoginPage() {
         });
     } finally {
         setIsSubmitting(false);
+        setIsCreating(false);
     }
   };
   
-  if (isLoading) {
-    return (
-        <div className="flex h-screen items-center justify-center bg-background">
-            <div className="flex flex-col items-center gap-4">
-                <Logo className="h-24 w-24" />
-                <p className="ml-4 text-lg animate-pulse">Loading Health Guardian...</p>
-            </div>
-        </div>
-    );
-  }
-
-
   if (isCreating) {
     const formContent = (
       <PatientForm 

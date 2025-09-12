@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { type Patient, type MedicalCondition, type Medication, type ThyroidRecord, type WeightRecord, type BloodPressureRecord, type HemoglobinRecord, type FastingBloodGlucoseRecord, type Hba1cRecord, type TotalCholesterolRecord, type LdlRecord, type HdlRecord, type TriglyceridesRecord, BiomarkerKey, DiseasePanelKey, ThyroxineRecord, SerumCreatinineRecord, UricAcidRecord } from '@/lib/types';
-import { useState, useEffect, createContext, useContext, useCallback, ReactNode, useMemo, useRef } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, ReactNode, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
@@ -12,35 +12,6 @@ import { calculateBmi } from '@/lib/utils';
 import { availableDiseasePanels } from '@/lib/biomarker-cards';
 import { getHealthInsights } from '@/ai/flows/health-insights-flow';
 import { LabDataExtractionOutput } from '@/lib/ai-types';
-
-const initialPatient: Patient = { 
-  id: '', 
-  name: 'User', 
-  dob: '', 
-  gender: 'female', 
-  country: 'IN', 
-  dateFormat: 'dd-MM-yyyy', 
-  unitSystem: 'metric', 
-  presentMedicalConditions: [], 
-  medication: [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }], 
-  enabledBiomarkers: {}, 
-  hba1cRecords: [],
-  fastingBloodGlucoseRecords: [],
-  thyroidRecords: [],
-  thyroxineRecords: [],
-  serumCreatinineRecords: [],
-  uricAcidRecords: [],
-  hemoglobinRecords: [],
-  weightRecords: [],
-  bloodPressureRecords: [],
-  totalCholesterolRecords: [],
-  ldlRecords: [],
-  hdlRecords: [],
-  triglyceridesRecords: [],
-  status: 'On Track',
-  doctorUid: 'doc_12345'
-};
-
 
 type Theme = 'dark' | 'light' | 'system';
 export type BatchRecords = Partial<LabDataExtractionOutput>;
@@ -62,15 +33,15 @@ const supportedLanguages = [
 
 interface AppContextType {
   patient: Patient | null;
-  setPatient: (patient: Patient) => void;
-  hasLocalData: () => boolean;
-  loadLocalPatientData: () => void;
+  setPatient: (patient: Patient | null) => void;
+  isLoading: boolean;
   addMedicalCondition: (condition: MedicalCondition) => void;
   updateMedicalCondition: (condition: MedicalCondition) => void;
   removeMedicalCondition: (id: string) => void;
   addMedication: (medication: Omit<Medication, 'id'>) => void;
   updateMedication: (medication: Medication) => void;
   removeMedication: (id: string) => void;
+  setMedicationNil: () => void;
   addHba1cRecord: (record: Omit<Hba1cRecord, 'id' | 'medication'>) => void;
   removeHba1cRecord: (id: string) => void;
   addFastingBloodGlucoseRecord: (record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => void;
@@ -129,9 +100,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [patient, setPatient] = useState<Patient | null>(null);
-  const patientRef = useRef(patient);
-  patientRef.current = patient;
-
+  const [isLoading, setIsLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const [theme, setThemeState] = useState<Theme>('system');
   const [biomarkerUnit, setBiomarkerUnitState] = useState<BiomarkerUnitSystem>('conventional');
@@ -145,6 +114,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const profile = patient;
 
+  // Centralized data saving
   useEffect(() => {
     if (isClient && !isReadOnlyView && patient) {
       try {
@@ -159,61 +129,49 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
   }, [patient, isClient, isReadOnlyView]);
-  
+
+  // Initial data load from local storage
+  useEffect(() => {
+    setIsClient(true);
+    try {
+      const localDataString = localStorage.getItem('patientData');
+      if (localDataString) {
+        const patientData: Patient = JSON.parse(localDataString);
+        setPatient(patientData);
+        const countryInfo = countries.find(c => c.code === patientData.country);
+        setBiomarkerUnitState(countryInfo?.biomarkerUnit || 'conventional');
+      }
+    } catch (e) {
+      console.error("Failed to parse local patient data", e);
+      localStorage.removeItem('patientData');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Theme management
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
     if (storedTheme) {
       setThemeState(storedTheme);
     }
-    const countryUnit = countries.find(c => c.code === profile?.country)?.biomarkerUnit || 'conventional';
-    setBiomarkerUnitState(countryUnit);
-    setIsClient(true);
-  }, [profile?.country]);
-  
-   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!isReadOnlyView && patientRef.current) {
-        try {
-          localStorage.setItem('patientData', JSON.stringify(patientRef.current));
-        } catch (error) {
-          console.error('Failed to save data on unload:', error);
-        }
-      }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [isReadOnlyView]);
-
-
-  useEffect(() => {
-    if (!isClient) return;
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-
-    let effectiveTheme = theme;
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      effectiveTheme = systemTheme;
-    }
-    
-    root.classList.add(effectiveTheme);
-    localStorage.setItem('theme', theme);
-  }, [theme, isClient]);
-
-  const hasLocalData = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const data = localStorage.getItem('patientData');
-        return data !== null && data.length > 0 && data !== 'null';
-      } catch (e) {
-        console.error("Could not access local storage:", e);
-        return false;
-      }
-    }
-    return false;
   }, []);
+  
+  useEffect(() => {
+    if (isClient) {
+      const root = window.document.documentElement;
+      root.classList.remove('light', 'dark');
+
+      let effectiveTheme = theme;
+      if (theme === 'system') {
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        effectiveTheme = systemTheme;
+      }
+      
+      root.classList.add(effectiveTheme);
+      localStorage.setItem('theme', theme);
+    }
+  }, [theme, isClient]);
 
   const setPatientData = useCallback((patientData: Patient, isReadOnly: boolean = false) => {
     setPatient(patientData);
@@ -228,22 +186,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const countryInfo = countries.find(c => c.code === patientData.country);
     setBiomarkerUnitState(countryInfo?.biomarkerUnit || 'conventional');
   }, []);
-
-  const loadLocalPatientData = useCallback(() => {
-    if (typeof window !== 'undefined') {
-        const localDataString = localStorage.getItem('patientData');
-        if (localDataString) {
-            try {
-                const patientData: Patient = JSON.parse(localDataString);
-                setPatientData(patientData, false);
-            } catch (e) {
-                console.error("Failed to parse local patient data", e);
-                localStorage.removeItem('patientData');
-            }
-        }
-    }
-  }, [setPatientData]);
-
+  
   const setBiomarkerUnit = useCallback((unit: BiomarkerUnitSystem) => {
     setBiomarkerUnitState(unit);
   }, []);
@@ -401,6 +344,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         return { ...prev, medication: updatedMedication };
     });
+  }, []);
+
+  const setMedicationNil = useCallback(() => {
+    setPatient(prev => prev ? { ...prev, medication: [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }] } : null);
   }, []);
 
   const addHba1cRecord = useCallback((record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
@@ -645,21 +592,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
   
-  const getFullPatientData = useCallback(() => {
-    return patientRef.current;
-  }, []);
+  const getFullPatientData = useCallback((): Patient | null => {
+    return patient;
+  }, [patient]);
 
   const value: AppContextType = {
     patient,
     setPatient,
-    hasLocalData,
-    loadLocalPatientData,
+    isLoading,
     addMedicalCondition,
     updateMedicalCondition,
     removeMedicalCondition,
     addMedication,
     updateMedication,
     removeMedication,
+    setMedicationNil,
     addHba1cRecord,
     removeHba1cRecord,
     addFastingBloodGlucoseRecord,

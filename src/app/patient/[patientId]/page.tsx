@@ -2,32 +2,24 @@
 'use client';
 
 import * as React from 'react';
-import { useSearchParams, useRouter, useParams } from 'next/navigation';
+import { useSearchParams, useParams } from 'next/navigation';
 import { useApp } from '@/context/app-context';
 import { PatientDashboard } from '@/components/patient-dashboard';
-import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Patient } from '@/lib/types';
+import { Logo } from '@/components/logo';
 
 export default function SharedPatientPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const params = useParams();
-  const { setPatientData, isClient, hasLocalData, loadLocalPatientData } = useApp();
+  const { setPatientData, isClient } = useApp();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const { toast } = useToast();
   
   const patientId = params.patientId as string;
 
   React.useEffect(() => {
     if (!isClient) return;
-
-    if (hasLocalData()) {
-      loadLocalPatientData();
-      router.replace('/patient/dashboard');
-      return;
-    }
 
     const sharedData = searchParams.get('data');
     
@@ -46,17 +38,18 @@ export default function SharedPatientPage() {
         setIsLoading(false);
       }
     } else {
-      setError("No patient data found. Please create a profile or use a valid shared link.");
+      setError("No shared patient data found in the link.");
       setIsLoading(false);
-      router.replace('/patient/login');
     }
-  }, [isClient, patientId, router, searchParams, setPatientData, hasLocalData, loadLocalPatientData]);
+  }, [isClient, patientId, searchParams, setPatientData]);
   
   if (isLoading || !isClient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-         <p className="ml-4">Loading shared patient data...</p>
+        <div className="flex flex-col items-center gap-4">
+            <Logo className="h-24 w-24" />
+            <p className="ml-4 text-lg animate-pulse">Loading shared patient data...</p>
+        </div>
       </div>
     );
   }
