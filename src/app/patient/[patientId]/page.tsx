@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -20,47 +21,36 @@ export default function SharedPatientPage() {
   const patientId = params.patientId as string;
 
   React.useEffect(() => {
-    // This effect should only run on the client side.
     if (!isClient) return;
 
-    // If the user has local data, they should be on their main dashboard, not a shared page.
     if (hasLocalData()) {
-        loadLocalPatientData();
-        router.replace('/patient/dashboard');
-        return;
+      loadLocalPatientData();
+      router.replace('/patient/dashboard');
+      return;
     }
-    
-    const loadSharedData = () => {
-      const sharedData = searchParams.get('data');
-      
-      // If there's shared data in the URL, it's a doctor's or shared view.
-      if (sharedData) {
-        try {
-          const patientData: Patient = JSON.parse(atob(sharedData));
-          // Check if the ID in the URL matches the ID in the data payload.
-          if (patientData.id !== patientId) {
-             setError("The shared link is invalid. The patient ID does not match the provided data.");
-             return;
-          }
-          setPatientData(patientData, true); // Set for read-only view
-        } catch (e) {
-          console.error("Failed to parse shared data", e);
-          setError("The shared patient data is invalid or corrupted.");
-        } finally {
-            setIsLoading(false);
-        }
-        return;
-      }
 
-      // If no shared data and no local data, redirect to the login page to create a profile.
+    const sharedData = searchParams.get('data');
+    
+    if (sharedData) {
+      try {
+        const patientData: Patient = JSON.parse(atob(sharedData));
+        if (patientData.id !== patientId) {
+          setError("The shared link is invalid. The patient ID does not match the provided data.");
+        } else {
+          setPatientData(patientData, true); // Set for read-only view
+        }
+      } catch (e) {
+        console.error("Failed to parse shared data", e);
+        setError("The shared patient data is invalid or corrupted.");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
       setError("No patient data found. Please create a profile or use a valid shared link.");
       setIsLoading(false);
       router.replace('/patient/login');
-    };
-    
-    loadSharedData();
-    
-  }, [isClient, setPatientData, toast, searchParams, hasLocalData, loadLocalPatientData, router, patientId]);
+    }
+  }, [isClient, patientId, router, searchParams, setPatientData, hasLocalData, loadLocalPatientData]);
   
   if (isLoading || !isClient) {
     return (
@@ -82,6 +72,5 @@ export default function SharedPatientPage() {
     );
   }
 
-  // Only render the dashboard if there is no error and loading is complete.
   return <PatientDashboard />;
 }

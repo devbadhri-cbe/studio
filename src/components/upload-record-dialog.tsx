@@ -68,7 +68,7 @@ export function UploadRecordDialog() {
         return;
       }
       
-      const reportDate = result.hba1c?.date || result.fastingBloodGlucose?.date || result.vitaminD?.date || result.thyroid?.date;
+      const reportDate = result.hba1c?.date || result.fastingBloodGlucose?.date || result.thyroid?.date;
       if (!reportDate || !isValid(parseISO(reportDate))) {
         setStep('error');
         setErrorMessage('The AI could not determine the date of the test from the report. Please ensure the date is visible and clear.');
@@ -100,19 +100,28 @@ export function UploadRecordDialog() {
   
   const handleCameraClick = async () => {
     setIsCapturing(true);
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        setHasCameraPermission(true);
-        if (videoRef.current) {
-            videoRef.current.srcObject = stream;
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            setHasCameraPermission(true);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+            setHasCameraPermission(false);
+            toast({
+                variant: 'destructive',
+                title: 'Camera Access Denied',
+                description: 'Please enable camera permissions in your browser settings.',
+            });
         }
-    } catch (error) {
-        console.error('Error accessing camera:', error);
+    } else {
         setHasCameraPermission(false);
         toast({
             variant: 'destructive',
-            title: 'Camera Access Denied',
-            description: 'Please enable camera permissions in your browser settings to use this app.',
+            title: 'Camera Not Supported',
+            description: 'Your browser does not support camera access.',
         });
     }
   };
@@ -265,7 +274,7 @@ export function UploadRecordDialog() {
                              setIsCapturing(false);
                              stopCameraStream();
                          }}>Cancel</Button>
-                        <Button onClick={handleCaptureImage}>Capture Image</Button>
+                        <Button onClick={handleCaptureImage} disabled={!hasCameraPermission}>Capture Image</Button>
                     </div>
                 </div>
             ) : renderContent()}

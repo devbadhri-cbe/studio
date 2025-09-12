@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { startOfDay, parseISO } from 'date-fns';
+import { startOfDay } from 'date-fns';
 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -86,8 +86,6 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
                     <DatePicker
                     value={field.value}
                     onChange={field.onChange}
-                    fromYear={new Date().getFullYear() - 10}
-                    toYear={new Date().getFullYear()}
                     />
                 </FormControl>
                 <FormMessage />

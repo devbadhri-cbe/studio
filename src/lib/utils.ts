@@ -1,10 +1,8 @@
 
-
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { differenceInYears } from "date-fns"
 import { countries } from "./countries";
-import type { Patient } from "./types";
  
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -24,15 +22,15 @@ export function calculateAge(dob: string): number | null {
   }
 }
 
-export function calculateBmi(weight: number | undefined, height: number | undefined): number | null {
-  if (!weight || !height || height === 0) return null;
+export function calculateBmi(weight?: number, height?: number): number | undefined {
+  if (!weight || !height || height === 0) return undefined;
   try {
     const heightInMeters = height / 100;
     const bmi = weight / (heightInMeters * heightInMeters);
     return parseFloat(bmi.toFixed(2));
   } catch (e) {
     console.error("Could not calculate BMI", e);
-    return null;
+    return undefined;
   }
 }
 
@@ -108,26 +106,3 @@ export const formatDisplayPhoneNumber = (phone?: string, countryCode?: string): 
     // Return formatted with country code if no specific format matched
     return `${country.phoneCode} ${nationalNumber}`;
 }
-
-export const processPatientData = (data: any): Patient => {
-  // This function now primarily handles data type conversion and defaults.
-  // Expensive sorting and aggregation has been moved to the backend (firestore.ts).
-  return {
-    ...data,
-    hba1cRecords: data.hba1cRecords || [],
-    fastingBloodGlucoseRecords: data.fastingBloodGlucoseRecords || [],
-    vitaminDRecords: data.vitaminDRecords || [],
-    thyroidRecords: data.thyroidRecords || [],
-    weightRecords: data.weightRecords || [],
-    bloodPressureRecords: data.bloodPressureRecords || [],
-    presentMedicalConditions: data.presentMedicalConditions || [],
-    hemoglobinRecords: data.hemoglobinRecords || [],
-    totalCholesterolRecords: data.totalCholesterolRecords || [],
-    ldlRecords: data.ldlRecords || [],
-    hdlRecords: data.hdlRecords || [],
-    triglyceridesRecords: data.triglyceridesRecords || [],
-    medication: data.medication || [],
-    enabledBiomarkers: data.enabledBiomarkers || {},
-    status: data.status || 'On Track',
-  } as Patient;
-};

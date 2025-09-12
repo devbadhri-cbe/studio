@@ -3,10 +3,9 @@
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { startOfDay, parseISO } from 'date-fns';
+import { startOfDay } from 'date-fns';
 
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -95,8 +94,6 @@ export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecord
                     <DatePicker
                     value={field.value}
                     onChange={field.onChange}
-                    fromYear={new Date().getFullYear() - 10}
-                    toYear={new Date().getFullYear()}
                     />
                 </FormControl>
                 <FormMessage />
