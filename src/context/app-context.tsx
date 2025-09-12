@@ -8,12 +8,11 @@ import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
-import { calculateBmi } from '@/lib/utils';
+import { calculateBmi, updateMedication as updateMedicationInContext } from '@/lib/utils';
 import { availableDiseasePanels } from '@/lib/biomarker-cards';
 import { getHealthInsights } from '@/ai/flows/health-insights-flow';
 import { LabDataExtractionOutput } from '@/lib/ai-types';
 import { v4 as uuidv4 } from 'uuid';
-import { updateMedication as updateMedicationInContext } from '@/lib/utils';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'female', country: 'IN', dateFormat: 'dd-MM-yyyy', unitSystem: 'metric', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
 
@@ -250,7 +249,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (localDataString) {
             try {
                 const patientData: Patient = JSON.parse(localDataString);
-                setPatientData(patientData, false);
+                setPatientData(patientData);
             } catch (e) {
                 console.error("Failed to parse local patient data", e);
                 localStorage.removeItem('patientData');
@@ -422,10 +421,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setProfile = useCallback((newProfile: UserProfile) => {
-      const newBmi = calculateBmi(newProfile.height, newProfile.weightRecords?.[0]?.value);
-      const updatedProfile = { ...newProfile, bmi: newBmi };
-      setProfileState(updatedProfile);
-  }, []);
+    const newBmi = calculateBmi(newProfile.height, newProfile.weightRecords?.[0]?.value);
+    const updatedProfile = { ...newProfile, bmi: newBmi };
+    setProfileState(updatedProfile);
+    // Directly trigger a save to localStorage after updating profile state
+    if (!isReadOnlyView) {
+        const fullData = {
+            ...updatedProfile,
+            hba1cRecords,
+            fastingBloodGlucoseRecords,
+            thyroidRecords,
+            thyroxineRecords,
+            serumCreatinineRecords,
+            uricAcidRecords,
+            hemoglobinRecords,
+            weightRecords,
+            bloodPressureRecords,
+            totalCholesterolRecords,
+            ldlRecords,
+            hdlRecords,
+            triglyceridesRecords,
+        };
+        try {
+            localStorage.setItem('patientData', JSON.stringify(fullData));
+        } catch (e) {
+            console.error("Failed to save data to local storage on profile update", e);
+        }
+    }
+  }, [isReadOnlyView, hba1cRecords, fastingBloodGlucoseRecords, thyroidRecords, thyroxineRecords, serumCreatinineRecords, uricAcidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
   
   const addMedicalCondition = useCallback((condition: MedicalCondition) => {
     setProfileState(prev => ({
