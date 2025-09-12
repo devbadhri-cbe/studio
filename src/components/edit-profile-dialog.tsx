@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import * as React from 'react';
@@ -21,11 +19,10 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { ftInToCm, calculateBmi } from '@/lib/utils';
-import { PatientForm, type PatientFormData } from './patient-form';
-import { ScrollArea } from './ui/scroll-area';
 import { countries } from '@/lib/countries';
-import { Patient } from '@/lib/types';
-
+import type { Patient } from '@/lib/types';
+import { ScrollArea } from './ui/scroll-area';
+import { PatientForm, type PatientFormData } from './patient-form';
 
 interface EditProfileDialogProps {
     open: boolean;
@@ -72,8 +69,6 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
             bmi: newBmi,
         };
         
-        // Directly save to localStorage to ensure data integrity
-        localStorage.setItem('patientData', JSON.stringify(updatedProfile));
         setPatient(updatedProfile);
 
         toast({
@@ -94,12 +89,12 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
   };
 
   const formContent = (
-      <PatientForm
-        patient={profile}
+    <PatientForm
         onSubmit={onProfileSubmit}
-        isSubmitting={isSubmitting}
         onCancel={() => onOpenChange(false)}
-      />
+        isSubmitting={isSubmitting}
+        initialData={profile}
+    />
   );
 
   if (isMobile) {
@@ -109,7 +104,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
            <SheetHeader className="p-6 border-b">
             <SheetTitle>Edit Profile</SheetTitle>
             <SheetDescription>
-              Update your personal details below. Your name cannot be changed.
+              Update your personal details below.
             </SheetDescription>
           </SheetHeader>
           <ScrollArea className="h-[calc(90vh-80px)]">
@@ -126,7 +121,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
         <DialogHeader className="p-6 pb-4 border-b">
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
-            Update your personal details below. Your name cannot be changed.
+            Update your personal details below.
           </DialogDescription>
         </DialogHeader>
         
