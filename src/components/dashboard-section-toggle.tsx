@@ -35,15 +35,8 @@ export function DashboardSectionToggle({
   isCollapsible = true,
 }: DashboardSectionToggleProps) {
   
-  const handleTriggerClick = (e: React.MouseEvent) => {
-    // This allows clicks on the create button or search input to not toggle the collapsible
-    if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('input')) {
-      e.preventDefault();
-    }
-  }
-  
   const content = (
-    <CardContent className="p-4 cursor-pointer" onClick={handleTriggerClick}>
+    <CardContent className="p-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full gap-4">
           <div className="flex items-center flex-1 gap-4 text-left">
             <div className="flex-shrink-0">{icon}</div>
@@ -51,9 +44,13 @@ export function DashboardSectionToggle({
               <h3 className="font-semibold text-lg">{title}</h3>
               <p className="text-sm text-muted-foreground">{subtitle}</p>
             </div>
-              {isCollapsible && (
-                <ChevronDown className={cn("h-5 w-5 transition-transform md:hidden", isOpen && "rotate-180")} />
-              )}
+             {isCollapsible && (
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                    <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
+                </Button>
+              </CollapsibleTrigger>
+            )}
           </div>
           
           <div className="flex items-center justify-end gap-2 shrink-0 w-full md:w-auto">
@@ -81,7 +78,11 @@ export function DashboardSectionToggle({
               </div>
             )}
               {isCollapsible && (
-                <ChevronDown className={cn("h-5 w-5 transition-transform hidden md:block", isOpen && "rotate-180")} />
+                <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="icon" className="hidden md:flex">
+                        <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
+                    </Button>
+                </CollapsibleTrigger>
               )}
           </div>
         </div>
@@ -91,11 +92,9 @@ export function DashboardSectionToggle({
   return (
     <Card className="hover:bg-muted/50 transition-colors shadow-xl">
       {isCollapsible ? (
-        <CollapsibleTrigger asChild>
-            {content}
-        </CollapsibleTrigger>
+        <div className="w-full">{content}</div>
       ) : (
-        <div className="w-full">
+        <div role="button" onClick={onCreateClick} className="w-full cursor-pointer">
             {content}
         </div>
       )}
