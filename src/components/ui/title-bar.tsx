@@ -44,7 +44,7 @@ export function TitleBar({ title, subtitle, children, rightChildren, isScrolled 
                                 isScrolled ? "h-8 w-8 md:h-8 md:w-8" : "h-14 w-14 md:h-10 md:w-10"
                             )} />
                             <div className={cn(
-                                "flex flex-col font-bold font-headline text-center md:flex-row md:gap-2 text-shadow-3d transition-all duration-300",
+                                "flex flex-col font-bold font-headline text-center md:flex-row md:gap-2 transition-all duration-300",
                                 isScrolled ? "text-xl md:text-2xl" : "text-2xl md:text-4xl"
                             )}>
                                 {renderTitle()}
