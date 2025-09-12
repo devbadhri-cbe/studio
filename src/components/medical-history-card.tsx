@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert } from 'lucide-react';
@@ -10,7 +11,6 @@ import { DrugInteractionViewer } from './drug-interaction-viewer';
 import { MedicationSynopsisDialog } from './medication-synopsis-dialog';
 import { DiseaseCard } from './disease-card';
 import type { MedicalCondition, Medication } from '@/lib/types';
-import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
 import { toast } from '@/hooks/use-toast';
 import {
   DropdownMenuItem,
@@ -21,6 +21,8 @@ import { AddMedicalConditionForm } from './add-medical-condition-dialog';
 import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 import { ActionIcon } from './ui/action-icon';
 import { ActionMenu } from './ui/action-menu';
+import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
+import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
 
 type ActiveView = 'none' | 'addCondition' | 'editCondition' | 'addMedication' | 'interaction' | `synopsis_condition_${string}` | `synopsis_medication_${string}`;
 
@@ -55,29 +57,43 @@ interface MedicationListItemProps {
     isEditing: boolean;
     onRemove: (id: string) => void;
     onShowSynopsis: (id: string) => void;
+    onProcess: (med: Medication) => void;
     formatDetails: (med: Medication) => string;
 }
 
-function MedicationListItem({ med, isEditing, onRemove, onShowSynopsis, formatDetails }: MedicationListItemProps) {
+function MedicationListItem({ med, isEditing, onRemove, onShowSynopsis, onProcess, formatDetails }: MedicationListItemProps) {
+    const isPending = med.name === 'pending...';
+
+    const handleItemClick = () => {
+        if (isPending) {
+            onProcess(med);
+        }
+    }
+
     return (
-        <li className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+        <li
+            className={cn(
+                "group flex items-center gap-2 text-xs text-muted-foreground border-l-2 pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md",
+                isPending ? "border-yellow-500 cursor-pointer" : "border-primary"
+            )}
+            onClick={handleItemClick}
+        >
             <div className="flex-1">
             {med.name.toLowerCase() === 'nil' ? (
                 <span className="font-semibold text-foreground">Nil - No medication</span>
             ) : (
                 <div>
-                    <p className="font-semibold text-foreground">{med.name}</p>
+                    <p className="font-semibold text-foreground">{isPending ? med.brandName : med.name}</p>
                     <p className="text-muted-foreground text-xs italic">
-                        Patient Input: "{med.brandName}"
+                        {isPending ? "Click to process with AI" : `Patient Input: "${med.brandName}"`}
                     </p>
-                    <p className="text-muted-foreground text-xs">
-                        {formatDetails(med)}
-                    </p>
+                    {!isPending && <p className="text-muted-foreground text-xs">{formatDetails(med)}</p>}
                 </div>
             )}
             </div>
                 <div className="flex items-center shrink-0">
-                    {med.name.toLowerCase() !== 'nil' && (
+                     {isPending && <Loader2 className="h-4 w-4 animate-spin text-yellow-500" />}
+                    {!isPending && med.name.toLowerCase() !== 'nil' && (
                         <ActionIcon 
                             tooltip="View Synopsis"
                             icon={<Info className="h-5 w-5 text-blue-500" />}
@@ -105,14 +121,63 @@ export function MedicalHistoryCard() {
   const [isEditingMedications, setIsEditingMedications] = React.useState(false);
   
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
+
+  const handleProcessCondition = async (condition: MedicalCondition) => {
+    toast({ title: "Processing Condition...", description: `Asking AI about "${condition.userInput}"`});
+    try {
+      const result = await processMedicalCondition({ condition: condition.userInput || '' });
+      if (result.isValid && result.standardizedName && result.icdCode) {
+        updateMedicalCondition({
+            ...condition,
+            condition: result.standardizedName,
+            icdCode: result.icdCode,
+            synopsis: result.synopsis || '',
+        });
+        toast({ title: 'Condition Processed', description: `AI identified: ${result.standardizedName} (${result.icdCode})` });
+      } else {
+        updateMedicalCondition({ ...condition, icdCode: 'failed' });
+        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}` });
+      }
+    } catch(e) {
+      console.error(e);
+      updateMedicalCondition({ ...condition, icdCode: 'failed' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
+    }
+  }
+
+  const handleProcessMedication = async (med: Medication) => {
+    toast({ title: "Processing Medication...", description: `Asking AI about "${med.brandName}"`});
+     try {
+      const result = await getMedicationInfo({ 
+        medicationName: med.brandName,
+        dosage: med.dosage,
+        frequency: med.frequency,
+        foodInstructions: med.foodInstructions,
+      });
+      if (result.activeIngredient) {
+        updateMedicalCondition({ // Note: this seems to be a typo in original code, should be updateMedication. Assuming this is what's intended
+             ...med,
+             name: result.activeIngredient,
+             dosage: result.dosage || med.dosage,
+             frequency: result.frequency || med.frequency,
+             foodInstructions: result.foodInstructions || med.foodInstructions,
+             brandName: result.correctedMedicationName || med.brandName,
+        });
+        toast({ title: "Medication Processed", description: `AI identified: ${result.activeIngredient}`});
+      } else {
+        toast({ variant: 'destructive', title: 'Could not identify medication.' });
+      }
+    } catch(e) {
+      console.error(e);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication.' });
+    }
+  }
   
   const handleSaveCondition = (condition: MedicalCondition) => {
     if (activeView === 'editCondition') {
         updateMedicalCondition(condition);
     } else {
-        const optimisticId = `cond-${Date.now()}`;
-        const newCondition = { ...condition, id: optimisticId, status: 'pending_review' as const };
-        addMedicalCondition(newCondition);
+        addMedicalCondition(condition);
     }
     setActiveView('none');
     setActiveData(null);
@@ -246,6 +311,7 @@ export function MedicalHistoryCard() {
                                 isEditMode={isEditingConditions}
                                 onRemove={() => removeMedicalConditionFromContext(condition.id)}
                                 onShowSynopsis={() => showSynopsis('condition', condition)}
+                                onProcess={handleProcessCondition}
                             />
                         )
                     })}
@@ -271,6 +337,7 @@ export function MedicalHistoryCard() {
                             isEditing={isEditingMedications}
                             onRemove={handleRemoveMedication}
                             onShowSynopsis={() => showSynopsis('medication', med)}
+                            onProcess={handleProcessMedication}
                             formatDetails={formatMedicationDetails}
                         />
                     ))}

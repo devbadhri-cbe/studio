@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -6,13 +7,11 @@ import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
-import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import type { MedicationInfoOutput } from '@/lib/ai-types';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import type { FoodInstruction } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { FormActions } from './form-actions';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+
 
 interface AddMedicationFormProps {
   onSuccess?: () => void;
@@ -20,8 +19,7 @@ interface AddMedicationFormProps {
 }
 
 export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProps) {
-  const [isProcessing, setIsProcessing] = React.useState(false);
-  const [processedMed, setProcessedMed] = React.useState<MedicationInfoOutput | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addMedication } = useApp();
   const { toast } = useToast();
 
@@ -34,46 +32,10 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
     },
   });
 
-  const handleProcessMedication = async () => {
-    const values = form.getValues();
-    if (!values.medicationName) {
-      form.setError('medicationName', { type: 'manual', message: 'Medication name is required.' });
-      return;
-    }
-    setIsProcessing(true);
-    setProcessedMed(null);
-    try {
-      const result = await getMedicationInfo({ 
-        medicationName: values.medicationName,
-        dosage: values.dosage,
-        frequency: values.frequency,
-        foodInstructions: values.foodInstructions
-      });
-      if (result.activeIngredient) {
-        setProcessedMed(result);
-        form.setValue('dosage', result.dosage || '');
-        form.setValue('frequency', result.frequency || '');
-        if (result.foodInstructions) {
-            form.setValue('foodInstructions', result.foodInstructions);
-        }
-      } else {
-        toast({ variant: 'destructive', title: 'Could not identify medication.' });
-      }
-    } catch(e) {
-      console.error(e);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication.' });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   const onSubmit = async (data: {medicationName: string, dosage: string, frequency: string, foodInstructions?: FoodInstruction}) => {
-    if (!processedMed) {
-      await handleProcessMedication();
-      return;
-    }
+    setIsSubmitting(true);
     addMedication({
-        name: processedMed.activeIngredient,
+        name: 'pending...', // AI will fill this
         brandName: data.medicationName,
         dosage: data.dosage,
         frequency: data.frequency,
@@ -81,17 +43,18 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
     });
     toast({
         title: 'Medication Added',
-        description: `${data.medicationName} has been added to your list.`
+        description: `${data.medicationName} has been added and is pending AI verification.`
     });
     onCancel();
     onSuccess?.();
+    setIsSubmitting(false);
   };
 
   return (
     <Card className="mt-2 border-primary border-2">
         <CardHeader>
           <CardTitle>Add New Medication</CardTitle>
-          <CardDescription>Enter the medication details below. The AI will identify the active ingredient and standardize the dosage.</CardDescription>
+          <CardDescription>Enter the medication details. The AI will process it in the background.</CardDescription>
         </CardHeader>
         <CardContent>
             <Form {...form}>
@@ -99,6 +62,7 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
                 <FormField
                 control={form.control}
                 name="medicationName"
+                rules={{ required: "Medication name is required." }}
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Medication Name (Brand or Generic)</FormLabel>
@@ -175,23 +139,10 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
                 )}
                 />
 
-                {processedMed && (
-                <Alert variant="default" className="bg-background">
-                    <AlertTitle className="font-semibold">AI Processed Information</AlertTitle>
-                    <AlertDescription>
-                    {processedMed.correctedMedicationName && <p><strong>Spelling Suggestion:</strong> {processedMed.correctedMedicationName}</p>}
-                    <p><strong>Active Ingredient:</strong> {processedMed.activeIngredient}</p>
-                    {processedMed.dosage && <p><strong>Standardized Dosage:</strong> {processedMed.dosage}</p>}
-                    {processedMed.frequency && <p><strong>Standardized Frequency:</strong> {processedMed.frequency}</p>}
-                    {processedMed.foodInstructionSuggestion && <p className="text-destructive"><strong>Suggestion:</strong> {processedMed.foodInstructionSuggestion}</p>}
-                    </AlertDescription>
-                </Alert>
-                )}
-
                 <FormActions
                   onCancel={onCancel}
-                  isSubmitting={isProcessing}
-                  submitText={processedMed ? 'Save Medication' : 'Check & Confirm'}
+                  isSubmitting={isSubmitting}
+                  submitText={'Save Medication'}
                 />
             </form>
             </Form>

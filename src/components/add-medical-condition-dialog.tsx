@@ -1,15 +1,12 @@
+
 'use client';
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
-import { Loader2 } from 'lucide-react';
-import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { DatePicker } from './ui/date-picker';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { type MedicalCondition } from '@/lib/types';
@@ -19,12 +16,6 @@ import { FormActions } from './form-actions';
 interface MedicalConditionFormValues {
   userInput: string;
   date: Date;
-}
-
-interface ProcessedCondition {
-    standardizedName: string;
-    icdCode: string;
-    synopsis: string;
 }
 
 interface AddMedicalConditionFormProps {
@@ -40,10 +31,7 @@ export function AddMedicalConditionForm({
 }: AddMedicalConditionFormProps) {
   const { profile } = useApp();
   const { toast } = useToast();
-  const [isProcessing, setIsProcessing] = React.useState(false);
-  const [processedCondition, setProcessedCondition] = React.useState<ProcessedCondition | null>(
-    initialData?.icdCode ? { standardizedName: initialData.condition, icdCode: initialData.icdCode, synopsis: initialData.synopsis || '' } : null
-  );
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   
   React.useEffect(() => {
@@ -59,63 +47,45 @@ export function AddMedicalConditionForm({
     },
   });
   
-  const handleProcessCondition = async () => {
-    const userInput = form.getValues('userInput');
-    if (!userInput) {
-        form.setError('userInput', { type: 'manual', message: 'Condition name is required.' });
-        return;
-    }
-    setIsProcessing(true);
-    setProcessedCondition(null);
-    try {
-      const result = await processMedicalCondition({ condition: userInput });
-      if (result.isValid && result.standardizedName && result.icdCode) {
-        setProcessedCondition({
-            standardizedName: result.standardizedName,
-            icdCode: result.icdCode,
-            synopsis: result.synopsis || '',
-        });
-        toast({ title: 'Condition Processed', description: `AI suggested: ${result.standardizedName} (${result.icdCode})` });
-      } else {
-        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}` });
-      }
-    } catch(e) {
-      console.error(e);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
-    } finally {
-      setIsProcessing(false);
-    }
-  }
-
   const handleFormSubmit = async (data: MedicalConditionFormValues) => {
-    if (!processedCondition) {
-        await handleProcessCondition();
-        return;
-    }
+    setIsSubmitting(true);
+    
+    // Check for duplicates based on user input for existing pending items
+    const isDuplicate = profile.presentMedicalConditions.some(c => 
+        c.id !== initialData?.id &&
+        c.userInput?.toLowerCase() === data.userInput.toLowerCase()
+    );
 
-    const isDuplicate = profile.presentMedicalConditions.some(c => c.id !== initialData?.id && c.icdCode === processedCondition.icdCode);
     if (isDuplicate) {
-        toast({ variant: 'destructive', title: 'Duplicate Condition', description: `A condition with ICD-11 code ${processedCondition.icdCode} already exists.` });
+        toast({ variant: 'destructive', title: 'Duplicate Condition', description: `This condition has already been added and is pending review.` });
+        setIsSubmitting(false);
         return;
     }
     
     onSave({
       id: initialData?.id || `cond-${Date.now()}`,
       userInput: data.userInput,
-      condition: processedCondition.standardizedName,
-      icdCode: processedCondition.icdCode,
-      synopsis: processedCondition.synopsis,
+      condition: data.userInput, // Initially, condition is same as userInput
+      icdCode: 'loading...', // Mark as loading
+      synopsis: '',
       date: data.date.toISOString(),
       status: 'pending_review',
     });
+
+    toast({
+      title: "Condition Added",
+      description: `"${data.userInput}" was added and is pending AI verification.`,
+    })
+
     onCancel();
+    setIsSubmitting(false);
   };
 
   return (
     <Card className="mt-2 border-primary border-2">
       <CardHeader>
         <CardTitle>{initialData ? 'Edit' : 'Add'} Medical Condition</CardTitle>
-        <CardDescription>Enter a condition and our AI will help standardize it.</CardDescription>
+        <CardDescription>Enter a condition. Our AI will process it in the background.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -153,21 +123,11 @@ export function AddMedicalConditionForm({
                     </FormItem>
                 )}
                 />
-
-            {processedCondition && (
-            <Alert variant="default" className="bg-background">
-                <AlertTitle className="font-semibold">AI Suggestion</AlertTitle>
-                <AlertDescription>
-                <p><strong>Official Name:</strong> {processedCondition.standardizedName}</p>
-                <p><strong>ICD-11 Code:</strong> {processedCondition.icdCode}</p>
-                </AlertDescription>
-            </Alert>
-            )}
         
             <FormActions
               onCancel={onCancel}
-              isSubmitting={isProcessing}
-              submitText={processedCondition ? 'Confirm & Save' : 'Process & Review'}
+              isSubmitting={isSubmitting}
+              submitText={'Save Condition'}
             />
           </form>
         </Form>
