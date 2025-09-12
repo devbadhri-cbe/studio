@@ -30,7 +30,7 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchInteractionSummary = React.useCallback(async (language: string, isInitialLoad: boolean) => {
+  const fetchInteractionSummary = React.useCallback(async (languageCode: string) => {
     if (medications.length < 2) {
       toast({
         variant: 'destructive',
@@ -40,18 +40,19 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
       onClose();
       return;
     }
-
-    if (isInitialLoad) {
-      setIsLoading(true);
+    
+    if (languageCode === 'en') {
+        setIsLoading(true);
     } else {
-      setIsTranslating(true);
+        setIsTranslating(true);
     }
     setError(null);
 
     try {
+        const languageName = supportedLanguages.find(l => l.code === languageCode)?.name || 'English';
         const response = await checkDrugInteractions({ 
             medications, 
-            language: supportedLanguages.find(l => l.code === language)?.name || 'English'
+            language: languageName
         });
         if (response.summary) {
            setSummary(response.summary);
@@ -74,14 +75,14 @@ export function DrugInteractionViewer({ medications, onClose }: DrugInteractionV
 
   React.useEffect(() => {
     // Only fetch on initial mount
-    fetchInteractionSummary('en', true);
+    fetchInteractionSummary('en');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   const handleLanguageChange = (languageCode: string) => {
     if (!languageCode || languageCode === selectedLanguage) return;
     setSelectedLanguage(languageCode);
-    fetchInteractionSummary(languageCode, false);
+    fetchInteractionSummary(languageCode);
   };
 
   const footerContent = (
