@@ -153,17 +153,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   
   const setPatient: AppContextType['setPatient'] = (newPatient) => {
     setPatientState(newPatient);
-  }
+  };
 
   React.useEffect(() => {
     if (isClient && !isReadOnlyView) {
       if (patient) {
         // Update BMI whenever patient data changes (e.g., height update or new weight record)
-        const latestWeight = [...(patient.weightRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
-        const newBmi = calculateBmi(latestWeight?.value, patient.height);
-        
         const patientWithBmi = produce(patient, draft => {
-            draft.bmi = newBmi;
+            const latestWeight = [...(draft.weightRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+            draft.bmi = calculateBmi(latestWeight?.value, draft.height);
         });
 
         localStorage.setItem('patientData', JSON.stringify(patientWithBmi));
@@ -177,7 +175,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setPatientData: AppContextType['setPatientData'] = (data, isReadOnly) => {
     setPatientState(data);
     setIsReadOnlyView(isReadOnly);
-  }
+  };
 
   React.useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
