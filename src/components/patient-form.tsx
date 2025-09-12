@@ -87,7 +87,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
         />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-            <DateInput 
+            <DateInput
               name="dob"
               label="Date of Birth"
               fromYear={new Date().getFullYear() - 120}
