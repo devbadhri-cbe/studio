@@ -80,7 +80,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
     <>
     <Form {...form}>
         <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} disabled={!!patient} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
+            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
             
              <FormField
               control={form.control}
