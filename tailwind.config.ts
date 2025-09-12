@@ -134,13 +134,5 @@ export default {
   },
   plugins: [
     require('tailwindcss-animate'),
-    plugin(function({ addUtilities, theme }: { addUtilities: any, theme: any }) {
-      const newUtilities = {
-        '.text-shadow-3d': {
-          'text-shadow': '0px 1px 0px hsl(var(--card)), 0px 2px 0px hsl(var(--border)), 0px 3px 0px hsl(var(--border)), 0px 4px 5px hsla(var(--foreground), 0.2)',
-        },
-      }
-      addUtilities(newUtilities)
-    })
   ],
 } satisfies Config;
