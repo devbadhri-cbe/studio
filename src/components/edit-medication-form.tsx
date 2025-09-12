@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -10,6 +11,9 @@ import type { FoodInstruction, Medication } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { FormActions } from './form-actions';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Button } from './ui/button';
+import { Wand2 } from 'lucide-react';
 
 
 interface EditMedicationFormProps {
@@ -26,22 +30,24 @@ export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMed
   const form = useForm({
     defaultValues: {
       userInput: initialData.userInput || '',
+      name: initialData.name || '',
+      dosage: initialData.dosage || '',
       frequency: initialData.frequency || '',
       foodInstructions: initialData.foodInstructions,
     },
   });
 
-  const onSubmit = async (data: {userInput: string, frequency: string, foodInstructions?: FoodInstruction}) => {
+  const onSubmit = async (data: { userInput: string; name: string; dosage: string; frequency: string; foodInstructions?: FoodInstruction}) => {
     setIsSubmitting(true);
     
     try {
-      // For manual edits, we respect the user's input as the source of truth.
-      // We are not re-running the AI here to avoid overwriting the user's correction.
+      // When manually editing, we respect the user's input as the source of truth.
+      // We are not re-running the full AI analysis here to avoid overwriting corrections.
       const updatedMedication: Medication = {
           ...initialData,
-          name: data.userInput.split(' ')[0], // Simple split for the name part
+          name: data.name,
           userInput: data.userInput,
-          dosage: data.userInput.split(' ')[1] || '', // Simple split for dosage
+          dosage: data.dosage,
           frequency: data.frequency,
           foodInstructions: data.foodInstructions,
           status: 'processed', // Mark as processed since it's a manual correction
@@ -61,6 +67,8 @@ export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMed
     
     setIsSubmitting(false);
   };
+  
+  const spellingSuggestion = (initialData as any).spellingSuggestion;
 
   return (
     <Card className="mt-2 border-primary border-2">
@@ -71,34 +79,77 @@ export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMed
         <CardContent>
             <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                control={form.control}
-                name="userInput"
-                rules={{ required: "Medication name is required." }}
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Medication Name & Dosage</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., Tylenol PM or Metformin 500mg" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <div className="grid grid-cols-1 gap-4">
-                <FormField
+                 <FormField
                     control={form.control}
-                    name="frequency"
+                    name="userInput"
+                    rules={{ required: "Original input is required." }}
                     render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Frequency</FormLabel>
+                        <FormItem>
+                        <FormLabel>Original Input</FormLabel>
                         <FormControl>
-                        <Input placeholder="e.g., Twice daily" {...field} />
+                            <Input placeholder="e.g., Tylenol 500mg" {...field} />
+                        </FormControl>
+                         {spellingSuggestion && (
+                           <Alert className="mt-2 p-2 bg-accent/10 border-accent/20">
+                             <AlertDescription className="text-xs flex items-center justify-between gap-2">
+                               <span>AI Suggestion: <span className="font-semibold">{spellingSuggestion}</span></span>
+                               <Button
+                                 type="button"
+                                 size="xs"
+                                 variant="outline"
+                                 onClick={() => form.setValue('userInput', spellingSuggestion)}
+                               >
+                                 <Wand2 className="mr-1 h-3 w-3" />
+                                 Use
+                               </Button>
+                             </AlertDescription>
+                           </Alert>
+                         )}
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                 />
+                 <FormField
+                    control={form.control}
+                    name="name"
+                    rules={{ required: "Active ingredient is required." }}
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Active Ingredient</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g., Acetaminophen" {...field} />
                         </FormControl>
                         <FormMessage />
-                    </FormItem>
+                        </FormItem>
                     )}
-                />
+                 />
+                <div className="grid grid-cols-2 gap-4">
+                     <FormField
+                        control={form.control}
+                        name="dosage"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Dosage</FormLabel>
+                            <FormControl>
+                            <Input placeholder="e.g., 500mg" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="frequency"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Frequency</FormLabel>
+                            <FormControl>
+                            <Input placeholder="e.g., Twice daily" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
                 </div>
                 
                 <FormField
@@ -149,3 +200,4 @@ export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMed
     </Card>
   );
 }
+

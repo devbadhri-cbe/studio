@@ -123,6 +123,7 @@ export const MedicationInfoOutputSchema = z.object({
   frequency: z.string().optional().describe('The standardized frequency (e.g., "twice daily").'),
   foodInstructions: z.enum(['before', 'after', 'with']).optional().describe('The standard food instruction for this medication.'),
   foodInstructionSuggestion: z.string().optional().describe('A brief explanation if the user\'s food instruction was incorrect and why it was corrected.'),
+  spellingSuggestion: z.string().optional().describe('A suggested correction for the medication name if a spelling error is suspected.'),
 });
 export type MedicationInfoOutput = z.infer<typeof MedicationInfoOutputSchema>;
 

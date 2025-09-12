@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
@@ -26,16 +27,20 @@ import { Alert, AlertDescription } from './ui/alert';
 import { produce } from 'immer';
 import { EditMedicationForm } from './edit-medication-form';
 
-type ActiveView = 'none' | 'addCondition' | 'editCondition' | 'addMedication' | 'editMedication' | 'interaction' | `synopsis_condition_${string}` | `synopsis_medication_${string}`;
+type ActiveView = 'none' | `add_${'condition' | 'medication'}` | `edit_${'condition' | 'medication'}_${string}` | 'interaction' | `synopsis_${'condition' | 'medication'}_${string}`;
+
 
 interface MedicalInfoSectionProps {
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;
   actions: React.ReactNode;
+  isAdding: boolean;
+  onAdd: () => void;
+  form: React.ReactNode;
 }
 
-function MedicalInfoSection({ title, icon, actions, children }: MedicalInfoSectionProps) {
+function MedicalInfoSection({ title, icon, actions, children, isAdding, onAdd, form }: MedicalInfoSectionProps) {
   return (
     <Card className="shadow-xl h-full flex flex-col">
         <CardContent className="space-y-4 text-sm p-4 flex-1 flex flex-col">
@@ -48,6 +53,7 @@ function MedicalInfoSection({ title, icon, actions, children }: MedicalInfoSecti
                     {actions}
                 </div>
             </div>
+            {isAdding && form}
             {children}
         </CardContent>
     </Card>
@@ -59,13 +65,15 @@ interface ListItemProps {
     item: MedicalCondition | Medication;
     type: 'condition' | 'medication';
     isEditing: boolean;
+    isFormOpen: boolean;
     onRemove: (id: string) => void;
     onShowSynopsis: (id: string) => void;
     onProcess: (item: any) => void;
     onRevise?: (item: any) => void;
+    form: React.ReactNode;
 }
 
-function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, onRevise }: ListItemProps) {
+function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis, onProcess, onRevise, form }: ListItemProps) {
     const formatDate = useDateFormatter();
     
     const isPending = item.status === 'pending_review';
@@ -102,7 +110,8 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
     const itemCursor = isFailed ? "cursor-pointer" : "";
 
     return (
-        <li
+        <li>
+        <div
             className={cn(
                 "group flex flex-col text-xs text-muted-foreground border-l-2 pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md",
                 itemBorderColor,
@@ -172,6 +181,8 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
                 </Alert>
                 </div>
             )}
+        </div>
+        {isFormOpen && <div className="mt-2">{form}</div>}
         </li>
     );
 }
@@ -180,8 +191,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
 export function MedicalHistoryCard() {
   const { profile, addMedicalCondition, updateMedicalCondition, removeMedication, removeMedicalCondition: removeMedicalConditionFromContext, updateMedication } = useApp();
   const [activeView, setActiveView] = React.useState<ActiveView>('none');
-  const [activeData, setActiveData] = React.useState<any>(null);
-
+  
   const [isEditingConditions, setIsEditingConditions] = React.useState(false);
   const [isEditingMedications, setIsEditingMedications] = React.useState(false);
   
@@ -219,20 +229,21 @@ export function MedicalHistoryCard() {
         frequency: med.frequency,
         foodInstructions: med.foodInstructions,
       });
-      if (result.activeIngredient) {
-        updateMedication({
-             ...med,
-             name: result.activeIngredient,
-             dosage: result.dosage || med.dosage,
-             frequency: result.frequency || med.frequency,
-             foodInstructions: result.foodInstructions || med.foodInstructions,
-             status: 'processed',
-        });
-        toast({ title: "Medication Processed", description: `AI identified: ${result.activeIngredient}`});
-      } else {
-        updateMedication(produce(med, draft => { draft.status = 'failed' }));
-        toast({ variant: 'destructive', title: 'Could not identify medication.' });
-      }
+      const updatedMed = produce(med, draft => {
+        if (result.activeIngredient) {
+            draft.name = result.activeIngredient;
+            draft.dosage = result.dosage || med.dosage;
+            draft.frequency = result.frequency || med.frequency;
+            draft.foodInstructions = result.foodInstructions || med.foodInstructions;
+            draft.status = 'processed';
+            (draft as any).spellingSuggestion = result.spellingSuggestion;
+            toast({ title: "Medication Processed", description: `AI identified: ${result.activeIngredient}`});
+        } else {
+            draft.status = 'failed';
+            toast({ variant: 'destructive', title: 'Could not identify medication.' });
+        }
+      });
+      updateMedication(updatedMed);
     } catch(e) {
       console.error(e);
       updateMedication(produce(med, draft => { draft.status = 'failed' }));
@@ -240,28 +251,44 @@ export function MedicalHistoryCard() {
     }
   }
 
-  const handleReviseCondition = (conditionToEdit: MedicalCondition) => {
-      setActiveData(conditionToEdit);
-      setActiveView('editCondition');
+  const closeActiveView = () => {
+    setActiveView('none');
   }
 
-  const handleReviseMedication = (medicationToEdit: Medication) => {
-    setActiveData(medicationToEdit);
-    setActiveView('editMedication');
+  const renderSynopsisDialog = () => {
+    const parts = activeView.split('_');
+    if (parts.length < 3) return null;
+    const type = parts[1];
+    const id = parts[2];
+    
+    if (type === 'condition') {
+        const data = profile.presentMedicalConditions.find(c => c.id === id);
+        if (!data) return null;
+        return (
+            <ConditionSynopsisDialog
+                conditionName={data.condition}
+                initialSynopsis={data.synopsis}
+                onClose={closeActiveView}
+            />
+        );
+    }
+     if (type === 'medication') {
+        const data = profile.medication.find(m => m.id === id);
+        if (!data) return null;
+        return (
+             <MedicationSynopsisDialog
+                medicationName={data.name}
+                onClose={closeActiveView}
+            />
+        );
+    }
+    return null;
   }
-
-  const handleAddConditionClick = () => {
-    setActiveView('addCondition');
-    setActiveData(null);
-  };
   
-  const handleRemoveMedication = (id: string) => {
-    removeMedication(id);
-  };
   
   const conditionActions = (
     <ActionMenu tooltip="Condition Settings" icon={<Settings className="h-4 w-4" />}>
-      <DropdownMenuItem onSelect={handleAddConditionClick}>
+      <DropdownMenuItem onSelect={() => setActiveView('add_condition')}>
         <PlusCircle className="mr-2 h-4 w-4" />
         Add Condition
       </DropdownMenuItem>
@@ -277,7 +304,7 @@ export function MedicalHistoryCard() {
 
   const medicationActions = (
     <ActionMenu tooltip="Medication Settings" icon={<Settings className="h-4 w-4" />}>
-        <DropdownMenuItem onSelect={() => setActiveView('addMedication')}>
+        <DropdownMenuItem onSelect={() => setActiveView('add_medication')}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Medication
         </DropdownMenuItem>
@@ -288,57 +315,18 @@ export function MedicalHistoryCard() {
           <Edit className="mr-2 h-4 w-4" />
           {isEditingMedications ? 'Done Editing' : 'Edit List'}
         </DropdownMenuItem>
+         {profile.medication.length > 1 && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => setActiveView('interaction')}>
+                <ShieldAlert className="mr-2 h-4 w-4" />
+                Check Interactions
+              </DropdownMenuItem>
+            </>
+          )}
     </ActionMenu>
   );
 
-  const closeActiveView = () => {
-    setActiveView('none');
-    setActiveData(null);
-  }
-  
-  const showSynopsis = (type: 'condition' | 'medication', data: any) => {
-    setActiveView(`synopsis_${type}_${data.id}`);
-    setActiveData(data);
-  }
-
-  const renderActiveViewContent = () => {
-    if (activeView === 'addCondition' || activeView === 'editCondition') {
-        return <AddMedicalConditionForm onSave={updateMedicalCondition} onCancel={closeActiveView} initialData={activeData} />;
-    }
-    if (activeView === 'addMedication') {
-        return <AddMedicationForm onCancel={closeActiveView} onSuccess={closeActiveView} />;
-    }
-     if (activeView === 'editMedication') {
-        return <EditMedicationForm onCancel={closeActiveView} onSuccess={closeActiveView} initialData={activeData} />;
-    }
-    if (activeView === 'interaction') {
-        return <DrugInteractionViewer medications={profile.medication.map(m => m.userInput)} onClose={closeActiveView} />;
-    }
-    if (activeView.startsWith('synopsis_condition_')) {
-      return (
-        <div className="pl-5 pb-2">
-            <ConditionSynopsisDialog
-                conditionName={activeData.condition}
-                initialSynopsis={activeData.synopsis}
-                onClose={closeActiveView}
-            />
-        </div>
-      )
-    }
-     if (activeView.startsWith('synopsis_medication_')) {
-      return (
-         <div className="pl-5 pb-2">
-            <MedicationSynopsisDialog
-                medicationName={activeData.name}
-                onClose={closeActiveView}
-            />
-        </div>
-      )
-    }
-    return null;
-  }
-
-  const activeViewContent = renderActiveViewContent();
 
   const nilMedicationRecord: Medication = {
     id: 'nil',
@@ -356,79 +344,84 @@ export function MedicalHistoryCard() {
             title="Present Medical Conditions"
             icon={<Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />}
             actions={conditionActions}
+            isAdding={activeView === 'add_condition'}
+            onAdd={() => setActiveView('add_condition')}
+            form={<AddMedicalConditionForm onSave={updateMedicalCondition} onCancel={closeActiveView} />}
         >
-            {activeView === 'addCondition' || activeView === 'editCondition' ? activeViewContent : null}
-            {profile.presentMedicalConditions.length > 0 ? (
-                <ul className="space-y-1 mt-2">
-                    {profile.presentMedicalConditions.map((condition) => {
+            <ul className="space-y-1 mt-2">
+                {profile.presentMedicalConditions.length > 0 ? (
+                    profile.presentMedicalConditions.map((condition) => {
                         if (!condition || !condition.id) return null;
+                        const isEditingThis = activeView === `edit_condition_${condition.id}`;
                         return (
                             <ListItem
                                 key={condition.id}
                                 item={condition}
                                 type="condition"
                                 isEditing={isEditingConditions}
+                                isFormOpen={isEditingThis}
                                 onRemove={() => removeMedicalConditionFromContext(condition.id)}
-                                onShowSynopsis={() => showSynopsis('condition', condition)}
+                                onShowSynopsis={() => setActiveView(`synopsis_condition_${condition.id}`)}
                                 onProcess={handleProcessCondition}
-                                onRevise={handleReviseCondition}
+                                onRevise={() => setActiveView(`edit_condition_${condition.id}`)}
+                                form={<AddMedicalConditionForm onCancel={closeActiveView} initialData={condition} onSave={updateMedicalCondition}/>}
                             />
                         )
-                    })}
-                </ul>
-            ) : (
-                activeView !== 'addCondition' && activeView !== 'editCondition' && <p className="text-xs text-muted-foreground pl-8 pt-2">No conditions recorded.</p>
-            )}
-            {activeView.startsWith('synopsis_condition_') ? activeViewContent : null}
+                    })
+                ) : (
+                    activeView !== 'add_condition' && <p className="text-xs text-muted-foreground pl-8 pt-2">No conditions recorded.</p>
+                )}
+            </ul>
+            {activeView.startsWith('synopsis_condition_') && renderSynopsisDialog()}
         </MedicalInfoSection>
         
         <MedicalInfoSection
             title="Current Medication"
             icon={<Pill className="h-5 w-5 shrink-0 text-muted-foreground" />}
             actions={medicationActions}
+            isAdding={activeView === 'add_medication'}
+            onAdd={() => setActiveView('add_medication')}
+            form={<AddMedicationForm onCancel={closeActiveView} />}
         >
-            {activeView === 'addMedication' || activeView === 'editMedication' ? activeViewContent : null}
             <ul className="space-y-1 mt-2">
                 {profile.medication.length > 0 ? (
-                    profile.medication.map((med) => (
-                       <ListItem
-                            key={med.id}
-                            item={med}
-                            type="medication"
-                            isEditing={isEditingMedications}
-                            onRemove={handleRemoveMedication}
-                            onShowSynopsis={() => showSynopsis('medication', med)}
-                            onProcess={handleProcessMedication}
-                            onRevise={handleReviseMedication}
-                        />
-                    ))
+                    profile.medication.map((med) => {
+                        const isEditingThis = activeView === `edit_medication_${med.id}`;
+                        return (
+                           <ListItem
+                                key={med.id}
+                                item={med}
+                                type="medication"
+                                isEditing={isEditingMedications}
+                                isFormOpen={isEditingThis}
+                                onRemove={() => removeMedication(med.id)}
+                                onShowSynopsis={() => setActiveView(`synopsis_medication_${med.id}`)}
+                                onProcess={handleProcessMedication}
+                                onRevise={() => setActiveView(`edit_medication_${med.id}`)}
+                                form={<EditMedicationForm onCancel={closeActiveView} initialData={med} />}
+                            />
+                        )
+                    })
                 ) : (
-                    activeView !== 'addMedication' && activeView !== 'editMedication' && (
+                     activeView !== 'add_medication' && (
                         <ListItem
                             item={nilMedicationRecord}
                             type="medication"
                             isEditing={false}
+                            isFormOpen={false}
                             onRemove={() => {}}
                             onShowSynopsis={() => {}}
                             onProcess={() => {}}
+                            form={null}
                         />
                     )
                 )}
             </ul>
 
-            {activeView.startsWith('synopsis_medication_') ? activeViewContent : null}
+            {activeView.startsWith('synopsis_medication_') && renderSynopsisDialog()}
             
-            {profile.medication.length > 1 && (
-                <div className="pt-2">
-                    {activeView === 'interaction' ? (
-                        activeViewContent
-                    ) : (
-                        <Button variant="outline" size="sm" className="w-full" onClick={() => setActiveView('interaction')}>
-                            <ShieldAlert className="mr-2 h-4 w-4" />
-                            Analyze Drug Interactions
-                        </Button>
-                    )}
-                </div>
+            {activeView === 'interaction' && (
+                 <DrugInteractionViewer medications={profile.medication.map(m => m.userInput)} onClose={closeActiveView} />
             )}
         </MedicalInfoSection>
       </div>
