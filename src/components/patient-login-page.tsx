@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -116,9 +117,14 @@ export function PatientLoginPage() {
     const formContent = (
       isSuccess ? (
         <div className="flex flex-col items-center justify-center h-48 text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <h3 className="text-xl font-bold">Welcome, {newPatientName}!</h3>
-            <p className="text-muted-foreground">Entering your health dashboard...</p>
+            <Logo className="h-16 w-16 mb-4" />
+            <div className="flex items-center">
+                <Loader2 className="h-6 w-6 animate-spin text-primary mr-3" />
+                <div>
+                    <h3 className="text-xl font-bold">Welcome, {newPatientName}!</h3>
+                    <p className="text-muted-foreground">Entering your health dashboard...</p>
+                </div>
+            </div>
         </div>
       ) : (
         <PatientForm 
