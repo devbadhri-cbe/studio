@@ -11,6 +11,7 @@ import { type MedicalCondition } from '@/lib/types';
 import { parseISO } from 'date-fns';
 import { FormActions } from './form-actions';
 import { DateInput } from './date-input';
+import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
 
 interface MedicalConditionFormValues {
   userInput: string;
@@ -28,7 +29,7 @@ export function AddMedicalConditionForm({
     onCancel,
     initialData,
 }: AddMedicalConditionFormProps) {
-  const { profile } = useApp();
+  const { profile, updateMedicalCondition } = useApp();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -56,12 +57,12 @@ export function AddMedicalConditionForm({
     );
 
     if (isDuplicate) {
-        toast({ variant: 'destructive', title: 'Duplicate Condition', description: `This condition has already been added and is pending review.` });
+        toast({ variant: 'destructive', title: 'Duplicate Condition', description: `This condition has already been added.` });
         setIsSubmitting(false);
         return;
     }
-    
-    onSave({
+
+    const newCondition: MedicalCondition = {
       id: initialData?.id || `cond-${Date.now()}`,
       userInput: data.userInput,
       condition: data.userInput,
@@ -69,14 +70,35 @@ export function AddMedicalConditionForm({
       synopsis: '',
       date: data.date.toISOString(),
       status: 'pending_review',
-    });
+    };
 
+    onSave(newCondition);
     toast({
-      title: "Condition Added",
-      description: `"${data.userInput}" was added and is pending AI processing.`,
-    })
-
+      title: "Processing Condition...",
+      description: `AI is analyzing "${data.userInput}".`,
+    });
     onCancel();
+
+    try {
+      const result = await processMedicalCondition({ condition: data.userInput });
+      if (result.isValid && result.standardizedName && result.icdCode) {
+          updateMedicalCondition({
+              ...newCondition,
+              condition: result.standardizedName,
+              icdCode: result.icdCode,
+              synopsis: result.synopsis || '',
+          });
+          toast({ title: 'Condition Processed', description: `AI identified: ${result.standardizedName} (${result.icdCode})` });
+      } else {
+          updateMedicalCondition({ ...newCondition, icdCode: 'failed' });
+          toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}` });
+      }
+    } catch(e) {
+      console.error(e);
+      updateMedicalCondition({ ...newCondition, icdCode: 'failed' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
+    }
+
     setIsSubmitting(false);
   };
 
@@ -84,7 +106,7 @@ export function AddMedicalConditionForm({
     <Card className="mt-2 border-primary border-2">
       <CardHeader>
         <CardTitle>{initialData ? 'Edit' : 'Add'} Medical Condition</CardTitle>
-        <CardDescription>Enter a condition. Our AI will process it in the background.</CardDescription>
+        <CardDescription>Enter a condition. Our AI will process it automatically.</CardDescription>
       </CardHeader>
       <CardContent>
         <FormProvider {...formMethods}>

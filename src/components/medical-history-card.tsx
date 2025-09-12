@@ -1,6 +1,6 @@
 'use client';
 
-import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert } from 'lucide-react';
+import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -67,6 +67,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
     const formatDate = useDateFormatter();
     
     let isPending = false;
+    let isFailed = false;
     let title = '';
     let details: string | null = null;
     let icdCode: string | undefined = undefined;
@@ -76,6 +77,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
     if (type === 'condition') {
         const cond = item as MedicalCondition;
         isPending = cond.icdCode === 'loading...';
+        isFailed = cond.icdCode === 'failed';
         title = cond.condition;
         icdCode = cond.icdCode;
         date = cond.date;
@@ -90,14 +92,18 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
     }
     
     const handleItemClick = () => {
-        if (isPending) onProcess(item);
+        if (isPending || isFailed) onProcess(item);
     }
+    
+    const itemBorderColor = isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
+    const itemCursor = (isPending || isFailed) ? "cursor-pointer" : "";
 
     return (
         <li
             className={cn(
                 "group flex flex-col text-xs text-muted-foreground border-l-2 pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md",
-                isPending ? "border-yellow-500 cursor-pointer" : "border-primary"
+                itemBorderColor,
+                itemCursor
             )}
             onClick={handleItemClick}
         >
@@ -112,18 +118,23 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
                     {isPending ? (
                         <div className="flex items-center gap-1.5 mt-1">
                             <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
-                            <p className="text-muted-foreground text-xs italic">Pending AI processing...</p>
+                            <p className="text-muted-foreground text-xs italic">AI is processing...</p>
+                        </div>
+                    ) : isFailed ? (
+                        <div className="flex items-center gap-1.5 mt-1">
+                            <AlertTriangleIcon className="h-3 w-3 text-destructive" />
+                            <p className="text-destructive text-xs italic">AI failed. Click to retry.</p>
                         </div>
                     ) : (
                         <>
                             {details && <p className="text-muted-foreground text-xs">{`(${details})`}</p>}
-                            {icdCode && icdCode !== 'failed' && <p className="text-xs text-muted-foreground">ICD-11: {icdCode}</p>}
+                            {icdCode && <p className="text-xs text-muted-foreground">ICD-11: {icdCode}</p>}
                             {date && <p className="text-xs text-muted-foreground">{formatDate(date)}</p>}
                         </>
                     )}
                 </div>
 
-                {!isPending && !isNil && (
+                {!isPending && !isNil && !isFailed && (
                     <div className="flex items-center shrink-0">
                          <ActionIcon 
                             tooltip="View Synopsis"
@@ -144,7 +155,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
             {(item as MedicalCondition).status === 'needs_revision' && onRevise && (
                 <div className="mt-2 w-full">
                 <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive text-xs p-2">
-                    <AlertTriangle className="h-4 w-4 !text-destructive" />
+                    <AlertTriangleIcon className="h-4 w-4 !text-destructive" />
                     <AlertDescription className="flex items-center justify-between">
                     Doctor requested revision.
                     <Button size="xs" className="ml-2" onClick={() => onRevise(item)}>
@@ -172,6 +183,7 @@ export function MedicalHistoryCard() {
 
   const handleProcessCondition = async (condition: MedicalCondition) => {
     toast({ title: "Processing Condition...", description: `Asking AI about "${condition.userInput}"`});
+    updateMedicalCondition({ ...condition, icdCode: 'loading...' });
     try {
       const result = await processMedicalCondition({ condition: condition.userInput || '' });
       if (result.isValid && result.standardizedName && result.icdCode) {
@@ -227,8 +239,6 @@ export function MedicalHistoryCard() {
     } else {
         addMedicalCondition(condition);
     }
-    setActiveView('none');
-    setActiveData(null);
   }
 
   const handleReviseCondition = (conditionToEdit: MedicalCondition) => {
@@ -347,6 +357,7 @@ export function MedicalHistoryCard() {
             icon={<Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />}
             actions={conditionActions}
         >
+            {activeView === 'addCondition' || activeView === 'editCondition' ? activeViewContent : null}
             {profile.presentMedicalConditions.length > 0 ? (
                 <ul className="space-y-1 mt-2">
                     {profile.presentMedicalConditions.map((condition) => {
@@ -366,9 +377,8 @@ export function MedicalHistoryCard() {
                     })}
                 </ul>
             ) : (
-                <p className="text-xs text-muted-foreground pl-8 pt-2">No conditions recorded.</p>
+                activeView !== 'addCondition' && activeView !== 'editCondition' && <p className="text-xs text-muted-foreground pl-8 pt-2">No conditions recorded.</p>
             )}
-            {activeView === 'addCondition' || activeView === 'editCondition' ? activeViewContent : null}
             {activeView.startsWith('synopsis_condition_') ? activeViewContent : null}
         </MedicalInfoSection>
         
@@ -377,6 +387,7 @@ export function MedicalHistoryCard() {
             icon={<Pill className="h-5 w-5 shrink-0 text-muted-foreground" />}
             actions={medicationActions}
         >
+            {activeView === 'addMedication' ? activeViewContent : null}
             {profile.medication.length > 0 ? (
                  <ul className="space-y-1 mt-2">
                     {profile.medication.map((med) => (
@@ -392,10 +403,9 @@ export function MedicalHistoryCard() {
                     ))}
                 </ul>
             ) : (
-                <p className="text-xs text-muted-foreground pl-8 pt-2">No medication recorded.</p>
+                activeView !== 'addMedication' && <p className="text-xs text-muted-foreground pl-8 pt-2">No medication recorded.</p>
             )}
 
-            {activeView === 'addMedication' ? activeViewContent : null}
             {activeView.startsWith('synopsis_medication_') ? activeViewContent : null}
             
             {profile.medication.length > 1 && !isMedicationNil && (
