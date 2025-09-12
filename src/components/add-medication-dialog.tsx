@@ -12,7 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/
 import { FormActions } from './form-actions';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
-import { produce } from 'immer';
+import type { MedicationInfoOutput } from '@/lib/ai-types';
+import { MedicationReviewCard } from './medication-review-card';
+import { Loader2 } from 'lucide-react';
 
 
 interface AddMedicationFormProps {
@@ -20,8 +22,15 @@ interface AddMedicationFormProps {
   onCancel: () => void;
 }
 
+type FormStep = 'input' | 'loading' | 'review' | 'failed';
+type UserInput = { userInput: string; frequency: string; foodInstructions?: FoodInstruction };
+
+
 export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProps) {
+  const [step, setStep] = React.useState<FormStep>('input');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [userInput, setUserInput] = React.useState<UserInput | null>(null);
+  const [aiResult, setAiResult] = React.useState<MedicationInfoOutput | null>(null);
   const { addMedication } = useApp();
   const { toast } = useToast();
 
@@ -33,8 +42,10 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
     },
   });
 
-  const onSubmit = async (data: {userInput: string, frequency: string, foodInstructions?: FoodInstruction}) => {
+  const handleInitialSubmit = async (data: UserInput) => {
     setIsSubmitting(true);
+    setStep('loading');
+    setUserInput(data);
     
     try {
       toast({
@@ -48,52 +59,76 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
         foodInstructions: data.foodInstructions,
       });
 
+      setAiResult(result);
+      if (result.activeIngredient) {
+        setStep('review');
+      } else {
+        throw new Error("Could not identify medication.");
+      }
+
+    } catch(e) {
+      console.error(e);
+      setStep('failed');
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication. Please check the name and try again.' });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
+  const handleFinalSave = (finalData: MedicationInfoOutput) => {
       const newMedication: Omit<Medication, 'id'> = {
-          name: result.activeIngredient || data.userInput,
-          userInput: data.userInput,
-          dosage: result.dosage || '',
-          frequency: result.frequency || data.frequency,
-          foodInstructions: result.foodInstructions || data.foodInstructions,
+          name: finalData.activeIngredient,
+          userInput: userInput!.userInput,
+          dosage: finalData.dosage || '',
+          frequency: finalData.frequency || userInput!.frequency,
+          foodInstructions: finalData.foodInstructions || userInput!.foodInstructions,
           status: 'processed',
       };
       
       addMedication(newMedication);
+      toast({ title: "Medication Saved", description: `${finalData.activeIngredient} has been added to your list.`});
 
-      if (result.activeIngredient) {
-        toast({ title: "Medication Processed", description: `AI identified: ${result.activeIngredient}`});
-      } else {
-         throw new Error("Could not identify medication.");
-      }
-
-      onCancel();
+      onCancel(); // Close the form area
       onSuccess?.();
-
-    } catch(e) {
-      console.error(e);
-      const failedMedication: Omit<Medication, 'id'> = {
-          name: data.userInput,
-          userInput: data.userInput,
-          dosage: '',
-          frequency: data.frequency,
-          foodInstructions: data.foodInstructions,
-          status: 'failed',
-      };
-      addMedication(failedMedication);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication. Please check the name and try again.' });
-    }
-    
-    setIsSubmitting(false);
   };
+
+  const handleEdit = (editedData: MedicationInfoOutput) => {
+    // When user confirms edits, save it
+    handleFinalSave(editedData);
+  }
+
+  if (step === 'loading') {
+    return (
+        <Card className="mt-2 border-primary border-2">
+            <CardContent className="p-6 flex items-center justify-center h-48">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="ml-3">AI is processing your entry...</p>
+            </CardContent>
+        </Card>
+    );
+  }
+
+  if (step === 'review' && aiResult && userInput) {
+    return (
+        <MedicationReviewCard 
+            userInput={userInput}
+            aiResult={aiResult}
+            onConfirm={handleFinalSave}
+            onEdit={handleEdit}
+            onCancel={onCancel}
+        />
+    )
+  }
 
   return (
     <Card className="mt-2 border-primary border-2">
         <CardHeader>
           <CardTitle>Add New Medication</CardTitle>
-          <CardDescription>Enter the medication details. The AI will process it automatically.</CardDescription>
+          <CardDescription>Enter the medication details. The AI will process and verify it.</CardDescription>
         </CardHeader>
         <CardContent>
             <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleInitialSubmit)} className="space-y-4">
                 <FormField
                 control={form.control}
                 name="userInput"
@@ -164,7 +199,7 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
                 <FormActions
                   onCancel={onCancel}
                   isSubmitting={isSubmitting}
-                  submitText={'Save Medication'}
+                  submitText={'Process with AI'}
                 />
             </form>
             </Form>
@@ -172,5 +207,3 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
     </Card>
   );
 }
-
-    

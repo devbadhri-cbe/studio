@@ -414,7 +414,11 @@ export function MedicalHistoryCard() {
                                 onShowSynopsis={() => setActiveView(`synopsis_medication_${med.id}`)}
                                 onProcess={handleProcessMedication}
                                 onRevise={() => setActiveView(`edit_medication_${med.id}`)}
-                                form={<EditMedicationForm onCancel={closeActiveView} initialData={med} />}
+                                form={<EditMedicationForm onCancel={closeActiveView} initialData={med} onSuccess={(editedData) => {
+                                    const finalMed = { ...med, ...editedData, name: editedData.activeIngredient };
+                                    updateMedication(finalMed);
+                                    closeActiveView();
+                                }}/>}
                             />
                         )
                     })

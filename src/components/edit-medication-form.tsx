@@ -14,17 +14,17 @@ import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Button } from './ui/button';
 import { Wand2 } from 'lucide-react';
+import type { MedicationInfoOutput } from '@/lib/ai-types';
 
 
 interface EditMedicationFormProps {
-  onSuccess?: () => void;
+  onSuccess: (data: MedicationInfoOutput) => void;
   onCancel: () => void;
   initialData: Medication;
 }
 
 export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMedicationFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { updateMedication } = useApp();
   const { toast } = useToast();
 
   const form = useForm({
@@ -41,24 +41,18 @@ export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMed
     setIsSubmitting(true);
     
     try {
-      // When manually editing, we respect the user's input as the source of truth.
-      // We are not re-running the full AI analysis here to avoid overwriting corrections.
-      const updatedMedication: Medication = {
-          ...initialData,
-          name: data.name,
-          userInput: data.userInput,
+      const updatedData: MedicationInfoOutput = {
+          activeIngredient: data.name,
           dosage: data.dosage,
           frequency: data.frequency,
           foodInstructions: data.foodInstructions,
-          status: 'processed', // Mark as processed since it's a manual correction
+          isBrandName: initialData.status === 'processed' ? (initialData as any).isBrandName : false, // Preserve original if exists
+          spellingSuggestion: (initialData as any).spellingSuggestion,
       };
       
-      updateMedication(updatedMedication);
+      toast({ title: "Medication Updated", description: `Your changes have been staged.`});
 
-      toast({ title: "Medication Updated", description: `Your changes to ${initialData.name} have been saved.`});
-
-      onCancel();
-      onSuccess?.();
+      onSuccess(updatedData);
 
     } catch(e) {
       console.error(e);
@@ -192,7 +186,7 @@ export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMed
                 <FormActions
                   onCancel={onCancel}
                   isSubmitting={isSubmitting}
-                  submitText={'Save Changes'}
+                  submitText={'Confirm Changes'}
                 />
             </form>
             </Form>
@@ -200,4 +194,3 @@ export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMed
     </Card>
   );
 }
-
