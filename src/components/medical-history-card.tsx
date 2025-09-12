@@ -169,15 +169,13 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
 
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, updateMedicalCondition, removeMedication, setMedicationNil, removeMedicalCondition: removeMedicalConditionFromContext, updateMedication } = useApp();
+  const { profile, addMedicalCondition, updateMedicalCondition, removeMedication, removeMedicalCondition: removeMedicalConditionFromContext, updateMedication } = useApp();
   const [activeView, setActiveView] = React.useState<ActiveView>('none');
   const [activeData, setActiveData] = React.useState<any>(null);
 
   const [isEditingConditions, setIsEditingConditions] = React.useState(false);
   const [isEditingMedications, setIsEditingMedications] = React.useState(false);
   
-  const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
-
   const handleProcessCondition = async (condition: MedicalCondition) => {
     toast({ title: "Re-processing Condition...", description: `Asking AI about "${condition.userInput}"`});
     updateMedicalCondition({ ...condition, status: 'pending_review' });
@@ -257,10 +255,6 @@ export function MedicalHistoryCard() {
     removeMedication(id);
   };
   
-  const handleSetMedicationNil = () => {
-      setMedicationNil();
-  }
-  
   const conditionActions = (
     <ActionMenu tooltip="Condition Settings" icon={<Settings className="h-4 w-4" />}>
       <DropdownMenuItem onSelect={handleAddConditionClick}>
@@ -279,29 +273,17 @@ export function MedicalHistoryCard() {
 
   const medicationActions = (
     <ActionMenu tooltip="Medication Settings" icon={<Settings className="h-4 w-4" />}>
-       {!isMedicationNil && (
-         <DropdownMenuItem onSelect={() => setActiveView('addMedication')}>
+        <DropdownMenuItem onSelect={() => setActiveView('addMedication')}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Medication
         </DropdownMenuItem>
-       )}
         <DropdownMenuItem
           onSelect={() => setIsEditingMedications(!isEditingMedications)}
-          disabled={profile.medication.length === 0 || isMedicationNil}
+          disabled={profile.medication.length === 0}
         >
           <Edit className="mr-2 h-4 w-4" />
           {isEditingMedications ? 'Done Editing' : 'Edit List'}
         </DropdownMenuItem>
-
-        {profile.medication.length > 0 && !isMedicationNil && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={handleSetMedicationNil} className="text-destructive focus:text-destructive">
-              <X className="mr-2 h-4 w-4" />
-              Set to Nil
-            </DropdownMenuItem>
-          </>
-        )}
     </ActionMenu>
   );
 
@@ -351,6 +333,15 @@ export function MedicalHistoryCard() {
 
   const activeViewContent = renderActiveViewContent();
 
+  const nilMedicationRecord: Medication = {
+    id: 'nil',
+    name: 'Nil - No medication taken',
+    brandName: 'Nil',
+    dosage: '',
+    frequency: '',
+    status: 'processed'
+  };
+
   return (
     <>
       <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -390,9 +381,9 @@ export function MedicalHistoryCard() {
             actions={medicationActions}
         >
             {activeView === 'addMedication' ? activeViewContent : null}
-            {profile.medication.length > 0 ? (
-                 <ul className="space-y-1 mt-2">
-                    {profile.medication.map((med) => (
+            <ul className="space-y-1 mt-2">
+                {profile.medication.length > 0 ? (
+                    profile.medication.map((med) => (
                        <ListItem
                             key={med.id}
                             item={med}
@@ -402,15 +393,22 @@ export function MedicalHistoryCard() {
                             onShowSynopsis={() => showSynopsis('medication', med)}
                             onProcess={handleProcessMedication}
                         />
-                    ))}
-                </ul>
-            ) : (
-                activeView !== 'addMedication' && <p className="text-xs text-muted-foreground pl-8 pt-2">No medication recorded.</p>
-            )}
+                    ))
+                ) : (
+                    <ListItem
+                        item={nilMedicationRecord}
+                        type="medication"
+                        isEditing={false}
+                        onRemove={() => {}}
+                        onShowSynopsis={() => {}}
+                        onProcess={() => {}}
+                    />
+                )}
+            </ul>
 
             {activeView.startsWith('synopsis_medication_') ? activeViewContent : null}
             
-            {profile.medication.length > 1 && !isMedicationNil && (
+            {profile.medication.length > 1 && (
                 <div className="pt-2">
                     {activeView === 'interaction' ? (
                         activeViewContent

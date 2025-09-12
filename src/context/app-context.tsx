@@ -72,7 +72,6 @@ interface AppContextType {
   approveMedicalCondition: (id: string) => void;
   dismissSuggestion: (id: string) => void;
 
-  setMedicationNil: () => void;
   deleteProfile: () => void;
   getFullPatientData: () => Patient | null;
 
@@ -300,14 +299,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
     setPatient(nextState);
   };
-
-  const setMedicationNil = () => {
-    if (!patient) return;
-    const nextState = produce(patient, draft => {
-        draft.medication = [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '', status: 'processed' }];
-    });
-    setPatient(nextState);
-  }
 
   const deleteProfile = () => {
     setPatient(null);
@@ -555,7 +546,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updateMedication,
     approveMedicalCondition,
     dismissSuggestion,
-    setMedicationNil,
     deleteProfile,
     getFullPatientData,
     tips,
