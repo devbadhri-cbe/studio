@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from './ui/form';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
@@ -80,7 +80,22 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
     <>
     <Form {...form}>
         <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter patient's full name" {...field} autoComplete="off" /></FormControl><FormMessage /></FormItem> )} />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter patient's full name" {...field} autoComplete="off" />
+                  </FormControl>
+                  <FormDescription>
+                    Your name is used by the AI to verify ownership of uploaded lab reports.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
              <FormField
               control={form.control}
