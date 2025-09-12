@@ -76,6 +76,8 @@ export default function PatientLoginPage() {
 
     try {
         setPatientInContext(patientData);
+        // Explicitly save to localStorage immediately on creation
+        localStorage.setItem('patientData', JSON.stringify(patientData));
         toast({
             title: 'Profile Created',
             description: `Your patient profile has been created successfully.`,
