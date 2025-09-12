@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -16,7 +17,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Skeleton } from './ui/skeleton';
-import { useIsMobile } from './use-mobile';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useApp } from '@/context/app-context';
 
