@@ -92,6 +92,12 @@
   }
 }
 
+/* Diagnostic styles */
+* {
+    /* border: 1px solid red; */
+}
+
+
 @media print {
   body {
     background-color: white !important;
