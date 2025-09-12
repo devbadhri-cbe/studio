@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -11,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/
 import { FormActions } from './form-actions';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
+import { produce } from 'immer';
 
 
 interface AddMedicationFormProps {
@@ -25,36 +27,34 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
 
   const form = useForm({
     defaultValues: {
-      medicationName: '',
-      dosage: '',
+      userInput: '',
       frequency: '',
       foodInstructions: undefined as FoodInstruction | undefined,
     },
   });
 
-  const onSubmit = async (data: {medicationName: string, dosage: string, frequency: string, foodInstructions?: FoodInstruction}) => {
+  const onSubmit = async (data: {userInput: string, frequency: string, foodInstructions?: FoodInstruction}) => {
     setIsSubmitting(true);
     
     try {
       toast({
           title: 'Processing Medication...',
-          description: `AI is analyzing "${data.medicationName}".`
+          description: `AI is analyzing "${data.userInput}".`
       });
 
       const result = await getMedicationInfo({ 
-        medicationName: data.medicationName,
-        dosage: data.dosage,
+        userInput: data.userInput,
         frequency: data.frequency,
         foodInstructions: data.foodInstructions,
       });
 
       const newMedication: Omit<Medication, 'id'> = {
-          name: result.activeIngredient || data.medicationName,
-          brandName: result.correctedMedicationName || data.medicationName,
-          dosage: result.dosage || data.dosage,
+          name: result.activeIngredient || data.userInput,
+          userInput: result.correctedMedicationName || data.userInput,
+          dosage: result.dosage || '',
           frequency: result.frequency || data.frequency,
           foodInstructions: result.foodInstructions || data.foodInstructions,
-          status: result.activeIngredient ? 'processed' : 'failed',
+          status: 'processed',
       };
       
       addMedication(newMedication);
@@ -62,7 +62,7 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
       if (result.activeIngredient) {
         toast({ title: "Medication Processed", description: `AI identified: ${result.activeIngredient}`});
       } else {
-        toast({ variant: 'destructive', title: 'Could not identify medication.', description: 'Please review the entry.' });
+         throw new Error("Could not identify medication.");
       }
 
       onCancel();
@@ -71,15 +71,15 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
     } catch(e) {
       console.error(e);
       const failedMedication: Omit<Medication, 'id'> = {
-          name: data.medicationName,
-          brandName: data.medicationName,
-          dosage: data.dosage,
+          name: data.userInput,
+          userInput: data.userInput,
+          dosage: '',
           frequency: data.frequency,
           foodInstructions: data.foodInstructions,
           status: 'failed',
       };
       addMedication(failedMedication);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication.' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication. Please check the name and try again.' });
     }
     
     setIsSubmitting(false);
@@ -96,32 +96,19 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                 control={form.control}
-                name="medicationName"
+                name="userInput"
                 rules={{ required: "Medication name is required." }}
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Medication Name (Brand or Generic)</FormLabel>
+                    <FormLabel>Medication Name & Dosage</FormLabel>
                     <FormControl>
-                        <Input placeholder="e.g., Tylenol PM or Metformin" {...field} />
+                        <Input placeholder="e.g., Tylenol PM or Metformin 500mg" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
                 )}
                 />
-                <div className="grid grid-cols-2 gap-4">
-                <FormField
-                    control={form.control}
-                    name="dosage"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Dosage</FormLabel>
-                        <FormControl>
-                        <Input placeholder="e.g., 500 mg" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
+                <div className="grid grid-cols-1 gap-4">
                 <FormField
                     control={form.control}
                     name="frequency"

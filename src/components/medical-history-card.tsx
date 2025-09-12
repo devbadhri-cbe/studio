@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
@@ -23,6 +24,7 @@ import { processMedicalCondition } from '@/ai/flows/process-medical-condition-fl
 import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { Alert, AlertDescription } from './ui/alert';
+import { produce } from 'immer';
 
 type ActiveView = 'none' | 'addCondition' | 'editCondition' | 'addMedication' | 'interaction' | `synopsis_condition_${string}` | `synopsis_medication_${string}`;
 
@@ -84,7 +86,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
         const med = item as Medication;
         isNil = med.name.toLowerCase() === 'nil';
         title = isNil ? 'Nil - No medication taken' : med.name;
-        originalInput = med.brandName;
+        originalInput = med.userInput;
         if (!isNil && med.status !== 'failed') {
             details = [med.dosage, med.frequency, med.foodInstructions ? `${med.foodInstructions} food` : ''].filter(Boolean).join(', ');
         }
@@ -116,7 +118,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
                     {isPending ? (
                         <div className="flex items-center gap-1.5 mt-1">
                             <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
-                            <p className="text-muted-foreground text-xs italic">AI is processing...</p>
+                            <p className="text-muted-foreground text-xs italic">Pending AI processing...</p>
                         </div>
                     ) : isFailed ? (
                         <div className="flex items-center gap-1.5 mt-1">
@@ -178,7 +180,7 @@ export function MedicalHistoryCard() {
   
   const handleProcessCondition = async (condition: MedicalCondition) => {
     toast({ title: "Re-processing Condition...", description: `Asking AI about "${condition.userInput}"`});
-    updateMedicalCondition({ ...condition, status: 'pending_review' });
+    updateMedicalCondition(produce(condition, draft => { draft.status = 'pending_review' }));
     try {
       const result = await processMedicalCondition({ condition: condition.userInput || '' });
       if (result.isValid && result.standardizedName && result.icdCode) {
@@ -191,23 +193,22 @@ export function MedicalHistoryCard() {
         });
         toast({ title: 'Condition Processed', description: `AI identified: ${result.standardizedName}` });
       } else {
-        updateMedicalCondition({ ...condition, status: 'failed' });
-        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}. Please review.` });
+        updateMedicalCondition(produce(condition, draft => { draft.status = 'failed' }));
+        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'Please check spelling.'}.` });
       }
     } catch(e) {
       console.error(e);
-      updateMedicalCondition({ ...condition, status: 'failed' });
+      updateMedicalCondition(produce(condition, draft => { draft.status = 'failed' }));
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
     }
   }
 
   const handleProcessMedication = async (med: Medication) => {
-    toast({ title: "Re-processing Medication...", description: `Asking AI about "${med.brandName}"`});
-    updateMedication({ ...med, status: 'pending_review' });
+    toast({ title: "Re-processing Medication...", description: `Asking AI about "${med.userInput}"`});
+    updateMedication(produce(med, draft => { draft.status = 'pending_review' }));
      try {
       const result = await getMedicationInfo({ 
-        medicationName: med.brandName,
-        dosage: med.dosage,
+        userInput: med.userInput,
         frequency: med.frequency,
         foodInstructions: med.foodInstructions,
       });
@@ -218,26 +219,18 @@ export function MedicalHistoryCard() {
              dosage: result.dosage || med.dosage,
              frequency: result.frequency || med.frequency,
              foodInstructions: result.foodInstructions || med.foodInstructions,
-             brandName: result.correctedMedicationName || med.brandName,
+             userInput: result.correctedMedicationName || med.userInput,
              status: 'processed',
         });
         toast({ title: "Medication Processed", description: `AI identified: ${result.activeIngredient}`});
       } else {
-        updateMedication({ ...med, status: 'failed' });
+        updateMedication(produce(med, draft => { draft.status = 'failed' }));
         toast({ variant: 'destructive', title: 'Could not identify medication.' });
       }
     } catch(e) {
       console.error(e);
-      updateMedication({ ...med, status: 'failed' });
+      updateMedication(produce(med, draft => { draft.status = 'failed' }));
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication.' });
-    }
-  }
-  
-  const handleSaveCondition = (condition: MedicalCondition) => {
-    if (activeView === 'editCondition') {
-        updateMedicalCondition(condition);
-    } else {
-        addMedicalCondition(condition);
     }
   }
 
@@ -299,13 +292,13 @@ export function MedicalHistoryCard() {
 
   const renderActiveViewContent = () => {
     if (activeView === 'addCondition' || activeView === 'editCondition') {
-        return <AddMedicalConditionForm onSave={handleSaveCondition} onCancel={closeActiveView} initialData={activeData} />;
+        return <AddMedicalConditionForm onCancel={closeActiveView} initialData={activeData} />;
     }
     if (activeView === 'addMedication') {
         return <AddMedicationForm onCancel={closeActiveView} onSuccess={closeActiveView} />;
     }
     if (activeView === 'interaction') {
-        return <DrugInteractionViewer medications={profile.medication.map(m => `${m.name} ${m.dosage}`)} onClose={closeActiveView} />;
+        return <DrugInteractionViewer medications={profile.medication.map(m => m.userInput)} onClose={closeActiveView} />;
     }
     if (activeView.startsWith('synopsis_condition_')) {
       return (
@@ -336,7 +329,7 @@ export function MedicalHistoryCard() {
   const nilMedicationRecord: Medication = {
     id: 'nil',
     name: 'Nil - No medication taken',
-    brandName: 'Nil',
+    userInput: 'Nil',
     dosage: '',
     frequency: '',
     status: 'processed'

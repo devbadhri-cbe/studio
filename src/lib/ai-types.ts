@@ -110,8 +110,7 @@ export type MedicalConditionOutput = z.infer<typeof MedicalConditionOutputSchema
 //-================================================================----------
 
 export const MedicationInfoInputSchema = z.object({
-  medicationName: z.string().describe('The brand or generic name of the medication provided by the user.'),
-  dosage: z.string().optional().describe('The user-provided dosage (e.g., "500 mg", "1 tablet").'),
+  userInput: z.string().describe('The full medication text entered by the user, including name and dosage (e.g., "Nebicard 5mg").'),
   frequency: z.string().optional().describe('The user-provided frequency (e.g., "twice a day", "at bedtime").'),
   foodInstructions: z.enum(['before', 'after', 'with']).optional().describe('The user-provided food instruction.'),
 });
@@ -120,7 +119,7 @@ export type MedicationInfoInput = z.infer<typeof MedicationInfoInputSchema>;
 export const MedicationInfoOutputSchema = z.object({
   activeIngredient: z.string().describe('The active pharmaceutical ingredient (API) or generic name of the medication.'),
   isBrandName: z.boolean().describe('Whether the user input was identified as a brand name.'),
-  dosage: z.string().optional().describe('The standardized dosage (e.g., "500mg").'),
+  dosage: z.string().optional().describe('The standardized dosage extracted from the user input (e.g., "5mg").'),
   frequency: z.string().optional().describe('The standardized frequency (e.g., "twice daily").'),
   foodInstructions: z.enum(['before', 'after', 'with']).optional().describe('The standard food instruction for this medication.'),
   foodInstructionSuggestion: z.string().optional().describe('A brief explanation if the user\'s food instruction was incorrect and why it was corrected.'),

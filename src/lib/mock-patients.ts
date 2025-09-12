@@ -58,7 +58,7 @@ export const mockPatients: Patient[] = [
     bloodPressureRecords: [{ id: 'bp2', date: '2024-07-29T00:00:00.000Z', systolic: 145, diastolic: 92 }],
     lastBloodPressure: { systolic: 145, diastolic: 92, date: '2024-07-29T00:00:00.000Z' },
     presentMedicalConditions: [{ id: 'cond2', date: '2020-01-15T00:00:00.000Z', condition: 'Type 2 Diabetes', status: 'verified' }],
-    medication: [{ id: 'med1', name: 'Metformin', brandName: 'Metformin', dosage: '1000mg', frequency: 'twice daily' }],
+    medication: [{ id: 'med1', name: 'Metformin', userInput: 'Metformin 1000mg', dosage: '1000mg', frequency: 'twice daily', status: 'processed' }],
     enabledBiomarkers: { 'diabetes': ['hba1c', 'glucose'] },
     doctorUid: 'doc_12345',
     thyroidRecords: [],

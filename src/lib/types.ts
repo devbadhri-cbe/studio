@@ -14,8 +14,8 @@ export type FoodInstruction = 'before' | 'after' | 'with';
 
 export interface Medication {
   id: string;
-  name: string;
-  brandName: string;
+  name: string; // The active ingredient
+  userInput: string; // The original text the user entered
   dosage: string;
   frequency: string;
   foodInstructions?: FoodInstruction;
