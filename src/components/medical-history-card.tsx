@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert } from 'lucide-react';
@@ -160,12 +159,10 @@ export function MedicalHistoryCard() {
 
   const medicationActions = (
     <ActionMenu tooltip="Medication Settings" icon={<Settings className="h-4 w-4" />}>
-      {!isMedicationNil && (
-        <DropdownMenuItem onSelect={() => setActiveView('addMedication')}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Medication
-        </DropdownMenuItem>
-      )}
+      <DropdownMenuItem onSelect={() => setActiveView('addMedication')}>
+        <PlusCircle className="mr-2 h-4 w-4" />
+        Add Medication
+      </DropdownMenuItem>
       {!isMedicationNil && (
         <DropdownMenuItem
           onSelect={() => setIsEditingMedications(!isEditingMedications)}
