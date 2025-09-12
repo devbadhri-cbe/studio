@@ -18,11 +18,11 @@ import {
 } from '@/components/ui/sheet';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { updatePatient } from '@/lib/firestore';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { ftInToCm } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-is-mobile';
+import { ftInToCm, calculateBmi } from '@/lib/utils';
 import { PatientForm, type PatientFormData } from './patient-form';
 import { ScrollArea } from './ui/scroll-area';
+import { countries } from '@/lib/countries';
 
 
 interface EditProfileDialogProps {
@@ -36,10 +36,11 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  const isImperial = profile.unitSystem === 'imperial';
-
-   const onProfileSubmit = async (data: PatientFormData) => {
+  const onProfileSubmit = async (data: PatientFormData) => {
     setIsSubmitting(true);
+    
+    const countryInfo = countries.find(c => c.code === data.country);
+    const isImperial = countryInfo?.unitSystem === 'imperial';
 
     let heightInCm: number | undefined;
     if (isImperial) {
@@ -50,19 +51,22 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
         heightInCm = data.height ? Number(data.height) : undefined;
     }
 
-     const updatedProfileData = {
-        name: data.name,
-        dob: data.dob.toISOString(),
-        gender: data.gender,
-        email: data.email,
-        country: data.country,
-        phone: data.phone || '',
-        height: heightInCm,
-    };
-
     try {
-        const updatedPatient = await updatePatient(profile.id, updatedProfileData);
-        setProfile(updatedPatient);
+        const updatedProfile = {
+            ...profile,
+            name: data.name,
+            dob: data.dob.toISOString(),
+            gender: data.gender,
+            email: data.email,
+            country: data.country,
+            phone: data.phone || '',
+            height: heightInCm,
+            dateFormat: countryInfo?.dateFormat || profile.dateFormat,
+            unitSystem: countryInfo?.unitSystem || profile.unitSystem,
+        };
+
+        setProfile(updatedProfile);
+
         toast({
             title: 'Profile Updated',
             description: 'Your details have been successfully saved.',
