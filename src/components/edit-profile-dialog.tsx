@@ -22,6 +22,7 @@ import { ftInToCm, calculateBmi } from '@/lib/utils';
 import { PatientForm, type PatientFormData } from './patient-form';
 import { ScrollArea } from './ui/scroll-area';
 import { countries } from '@/lib/countries';
+import { Patient } from '@/lib/types';
 
 
 interface EditProfileDialogProps {
@@ -55,7 +56,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
         const latestWeight = [...profile.weightRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
         const newBmi = calculateBmi(latestWeight?.value, heightInCm);
 
-        setProfile({
+        const updatedProfile: Patient = {
             ...profile,
             name: data.name,
             dob: data.dob.toISOString(),
@@ -67,7 +68,11 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
             dateFormat: countryInfo?.dateFormat || profile.dateFormat,
             unitSystem: countryInfo?.unitSystem || profile.unitSystem,
             bmi: newBmi,
-        });
+        };
+
+        setProfile(updatedProfile);
+        // Explicitly save to localStorage immediately on edit
+        localStorage.setItem('patientData', JSON.stringify(updatedProfile));
 
         toast({
             title: 'Profile Updated',
