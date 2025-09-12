@@ -27,7 +27,7 @@ export function ActionMenu({ tooltip, icon, children, align = 'end', ...props }:
           onClick={(e) => e.stopPropagation()}
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} onClick={(e) => e.stopPropagation()}>
+      <DropdownMenuContent align={align} side="bottom" onClick={(e) => e.stopPropagation()}>
         {children}
       </DropdownMenuContent>
     </DropdownMenu>
