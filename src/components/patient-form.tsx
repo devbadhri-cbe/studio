@@ -1,21 +1,19 @@
-
 'use client';
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { countries } from '@/lib/countries';
-import { Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import type { Patient } from '@/lib/types';
 import { parseISO } from 'date-fns';
 import { calculateAge, cmToFtIn } from '@/lib/utils';
 import { DatePicker } from './ui/date-picker';
 import { useApp } from '@/context/app-context';
+import { FormActions } from './form-actions';
 
 
 export type PatientFormData = {
@@ -188,13 +186,10 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 </div>
             </div>
 
-             <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-                <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save
-                </Button>
-            </div>
+            <FormActions
+              onCancel={onCancel}
+              isSubmitting={isSubmitting}
+            />
         </form>
     </Form>
     </>

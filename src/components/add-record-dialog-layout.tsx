@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useApp } from '@/context/app-context';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { FormActions } from './form-actions';
 
 interface AddRecordDialogLayoutProps {
   open: boolean;
@@ -88,13 +88,11 @@ export function AddRecordDialogLayout({
     <Form {...form}>
         <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 py-4">
           {children}
-          <div className="flex justify-end gap-2">
-            {!isMobile && <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>}
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Record
-            </Button>
-          </div>
+           <FormActions
+              onCancel={() => onOpenChange(false)}
+              isSubmitting={isSubmitting}
+              submitText="Save Record"
+           />
         </form>
     </Form>
   );

@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -15,6 +14,7 @@ import { DatePicker } from './ui/date-picker';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { type MedicalCondition } from '@/lib/types';
 import { parseISO } from 'date-fns';
+import { FormActions } from './form-actions';
 
 interface MedicalConditionFormValues {
   userInput: string;
@@ -164,13 +164,11 @@ export function AddMedicalConditionForm({
             </Alert>
             )}
         
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-              <Button type="submit" disabled={isProcessing}>
-                {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {processedCondition ? 'Confirm & Save' : 'Process & Review'}
-              </Button>
-            </div>
+            <FormActions
+              onCancel={onCancel}
+              isSubmitting={isProcessing}
+              submitText={processedCondition ? 'Confirm & Save' : 'Process & Review'}
+            />
           </form>
         </Form>
       </CardContent>

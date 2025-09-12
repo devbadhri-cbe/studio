@@ -1,20 +1,18 @@
-
 'use client';
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from './ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
-import { Loader2 } from 'lucide-react';
 import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import type { MedicationInfoOutput } from '@/lib/ai-types';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import type { FoodInstruction } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { FormActions } from './form-actions';
 
 interface AddMedicationFormProps {
   onSuccess?: () => void;
@@ -190,13 +188,11 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
                 </Alert>
                 )}
 
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-                  <Button type="submit" disabled={isProcessing}>
-                    {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {processedMed ? 'Save Medication' : 'Check & Confirm'}
-                  </Button>
-                </div>
+                <FormActions
+                  onCancel={onCancel}
+                  isSubmitting={isProcessing}
+                  submitText={processedMed ? 'Save Medication' : 'Check & Confirm'}
+                />
             </form>
             </Form>
         </CardContent>
