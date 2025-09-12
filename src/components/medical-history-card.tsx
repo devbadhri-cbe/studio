@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert } from 'lucide-react';
@@ -113,7 +112,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
                     {isPending ? (
                         <div className="flex items-center gap-1.5 mt-1">
                             <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
-                            <p className="text-muted-foreground text-xs italic">AI is processing...</p>
+                            <p className="text-muted-foreground text-xs italic">Pending AI processing...</p>
                         </div>
                     ) : (
                         <>

@@ -42,7 +42,7 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
     });
     toast({
         title: 'Medication Added',
-        description: `${data.medicationName} has been added and is pending AI verification.`
+        description: `${data.medicationName} has been added and is pending AI processing.`
     });
     onCancel();
     onSuccess?.();

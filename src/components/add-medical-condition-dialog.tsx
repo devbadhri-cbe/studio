@@ -73,7 +73,7 @@ export function AddMedicalConditionForm({
 
     toast({
       title: "Condition Added",
-      description: `"${data.userInput}" was added and is pending AI verification.`,
+      description: `"${data.userInput}" was added and is pending AI processing.`,
     })
 
     onCancel();
