@@ -86,29 +86,31 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
           )}
         />
         
-        <DateInput
-            name="dob"
-            label="Date of Birth"
-            fromYear={new Date().getFullYear() - 120}
-            toYear={new Date().getFullYear()}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+            <DateInput
+                name="dob"
+                label="Date of Birth"
+                fromYear={new Date().getFullYear() - 120}
+                toYear={new Date().getFullYear()}
+            />
 
-        <FormField
-            control={formMethods.control}
-            name="gender"
-            render={({ field }) => (
-            <FormItem>
-                <FormLabel>Gender</FormLabel>
-                <FormControl>
-                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2">
-                    <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem>
-                    <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem>
-                </RadioGroup>
-                </FormControl>
-                <FormMessage />
-            </FormItem>
-            )}
-        />
+            <FormField
+                control={formMethods.control}
+                name="gender"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Gender</FormLabel>
+                    <FormControl>
+                    <RadioGroup onValueChange={field.onChange} value={field.value} className="flex items-center space-x-4 pt-2">
+                        <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="male" /></FormControl><FormLabel className="font-normal">Male</FormLabel></FormItem>
+                        <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><RadioGroupItem value="female" /></FormControl><FormLabel className="font-normal">Female</FormLabel></FormItem>
+                    </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
 
         <FormField
           control={formMethods.control}
