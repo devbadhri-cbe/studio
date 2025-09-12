@@ -12,6 +12,8 @@ import { calculateBmi } from '@/lib/utils';
 import { availableDiseasePanels } from '@/lib/biomarker-cards';
 import { getHealthInsights } from '@/ai/flows/health-insights-flow';
 import { LabDataExtractionOutput } from '@/lib/ai-types';
+import { v4 as uuidv4 } from 'uuid';
+import { updateMedication as updateMedicationInContext } from '@/lib/utils';
 
 const initialProfile: UserProfile = { id: '', name: 'User', dob: '', gender: 'female', country: 'IN', dateFormat: 'dd-MM-yyyy', unitSystem: 'metric', presentMedicalConditions: [], medication: [], enabledBiomarkers: {}, dashboardSuggestions: [] };
 
@@ -62,49 +64,50 @@ interface AppContextType {
   removeMedicalCondition: (id: string) => void;
   removeAllMedicalConditions: () => Promise<void>;
   addMedication: (medication: Omit<Medication, 'id'>) => void;
+  updateMedication: (medication: Medication) => void;
   removeMedication: (id: string) => void;
   setMedicationNil: () => void;
   hba1cRecords: Hba1cRecord[];
-  addHba1cRecord: (record: Omit<Hba1cRecord, 'id' | 'medication'>) => void;
+  addHba1cRecord: (record: Omit<Hba1cRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeHba1cRecord: (id: string) => void;
   fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
-  addFastingBloodGlucoseRecord: (record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => void;
+  addFastingBloodGlucoseRecord: (record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeFastingBloodGlucoseRecord: (id: string) => void;
   thyroidRecords: ThyroidRecord[];
-  addThyroidRecord: (record: Omit<ThyroidRecord, 'id' | 'medication'>) => void;
+  addThyroidRecord: (record: Omit<ThyroidRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeThyroidRecord: (id: string) => void;
   thyroxineRecords: ThyroxineRecord[];
-  addThyroxineRecord: (record: Omit<ThyroxineRecord, 'id' | 'medication'>) => void;
+  addThyroxineRecord: (record: Omit<ThyroxineRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeThyroxineRecord: (id: string) => void;
   serumCreatinineRecords: SerumCreatinineRecord[];
-  addSerumCreatinineRecord: (record: Omit<SerumCreatinineRecord, 'id' | 'medication'>) => void;
+  addSerumCreatinineRecord: (record: Omit<SerumCreatinineRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeSerumCreatinineRecord: (id: string) => void;
   uricAcidRecords: UricAcidRecord[];
-  addUricAcidRecord: (record: Omit<UricAcidRecord, 'id' | 'medication'>) => void;
+  addUricAcidRecord: (record: Omit<UricAcidRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeUricAcidRecord: (id: string) => void;
   hemoglobinRecords: HemoglobinRecord[];
-  addHemoglobinRecord: (record: Omit<HemoglobinRecord, 'id' | 'medication'>) => void;
+  addHemoglobinRecord: (record: Omit<HemoglobinRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeHemoglobinRecord: (id: string) => void;
   weightRecords: WeightRecord[];
-  addWeightRecord: (record: Omit<WeightRecord, 'id'>) => void;
+  addWeightRecord: (record: Omit<WeightRecord, 'id'>, onSuccess?: () => void) => void;
   removeWeightRecord: (id: string) => void;
   bloodPressureRecords: BloodPressureRecord[];
-  addBloodPressureRecord: (record: Omit<BloodPressureRecord, 'id' | 'medication'>) => void;
+  addBloodPressureRecord: (record: Omit<BloodPressureRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeBloodPressureRecord: (id: string) => void;
   lipidRecords: (TotalCholesterolRecord & {ldl: number, hdl: number, triglycerides: number})[];
   addLipidRecord: (data: LipidRecordData) => void;
   removeLipidRecord: (id: string) => void;
   totalCholesterolRecords: TotalCholesterolRecord[];
-  addTotalCholesterolRecord: (record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => void;
+  addTotalCholesterolRecord: (record: Omit<TotalCholesterolRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeTotalCholesterolRecord: (id: string) => void;
   ldlRecords: LdlRecord[];
-  addLdlRecord: (record: Omit<LdlRecord, 'id' | 'medication'>) => void;
+  addLdlRecord: (record: Omit<LdlRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeLdlRecord: (id: string) => void;
   hdlRecords: HdlRecord[];
-  addHdlRecord: (record: Omit<HdlRecord, 'id' | 'medication'>) => void;
+  addHdlRecord: (record: Omit<HdlRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeHdlRecord: (id: string) => void;
   triglyceridesRecords: TriglyceridesRecord[];
-  addTriglyceridesRecord: (record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => void;
+  addTriglyceridesRecord: (record: Omit<TriglyceridesRecord, 'id' | 'medication'>, onSuccess?: () => void) => void;
   removeTriglyceridesRecord: (id: string) => void;
   addBatchRecords: (records: BatchRecords) => Promise<AddBatchRecordsResult>;
   tips: string[];
@@ -460,6 +463,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const updateMedication = useCallback((medication: Medication) => {
+    setProfileState(prevProfile => ({
+      ...prevProfile,
+      medication: prevProfile.medication.map(m => m.id === medication.id ? medication : m),
+    }));
+  }, []);
+
   const removeMedication = useCallback((id: string) => {
     setProfileState(prevProfile => ({
       ...prevProfile,
@@ -472,70 +482,77 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setProfileState(prevProfile => ({ ...prevProfile, medication: nilMedication }));
   }, []);
 
-  const addHba1cRecord = useCallback((record: Omit<Hba1cRecord, 'id' | 'medication'>) => {
+  const addHba1cRecord = useCallback((record: Omit<Hba1cRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setHba1cRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeHba1cRecord = useCallback((id: string) => {
     setHba1cRecordsState(prev => prev.filter(r => r.id !== id));
   }, []);
   
-  const addFastingBloodGlucoseRecord = useCallback((record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>) => {
+  const addFastingBloodGlucoseRecord = useCallback((record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setFastingBloodGlucoseRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeFastingBloodGlucoseRecord = useCallback((id: string) => {
     setFastingBloodGlucoseRecordsState(prev => prev.filter(r => r.id !== id));
   }, []);
 
-  const addThyroidRecord = useCallback((record: Omit<ThyroidRecord, 'id' | 'medication'>) => {
+  const addThyroidRecord = useCallback((record: Omit<ThyroidRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setThyroidRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeThyroidRecord = useCallback((id: string) => {
     setThyroidRecordsState(prev => prev.filter(r => r.id !== id));
   }, []);
   
-  const addThyroxineRecord = useCallback((record: Omit<ThyroxineRecord, 'id' | 'medication'>) => {
+  const addThyroxineRecord = useCallback((record: Omit<ThyroxineRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setThyroxineRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeThyroxineRecord = useCallback((id: string) => {
     setThyroxineRecordsState(prev => prev.filter(r => r.id !== id));
   }, []);
   
-  const addSerumCreatinineRecord = useCallback((record: Omit<SerumCreatinineRecord, 'id' | 'medication'>) => {
+  const addSerumCreatinineRecord = useCallback((record: Omit<SerumCreatinineRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setSerumCreatinineRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeSerumCreatinineRecord = useCallback((id: string) => {
     setSerumCreatinineRecordsState(prev => prev.filter(r => r.id !== id));
   }, []);
 
-  const addUricAcidRecord = useCallback((record: Omit<UricAcidRecord, 'id' | 'medication'>) => {
+  const addUricAcidRecord = useCallback((record: Omit<UricAcidRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setUricAcidRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeUricAcidRecord = useCallback((id: string) => {
     setUricAcidRecordsState(prev => prev.filter(r => r.id !== id));
   }, []);
 
-  const addHemoglobinRecord = useCallback((record: Omit<HemoglobinRecord, 'id' | 'medication'>) => {
+  const addHemoglobinRecord = useCallback((record: Omit<HemoglobinRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setHemoglobinRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeHemoglobinRecord = useCallback((id: string) => {
     setHemoglobinRecordsState(prev => prev.filter(r => r.id !== id));
   }, []);
   
-  const addWeightRecord = useCallback((record: Omit<WeightRecord, 'id'>) => {
+  const addWeightRecord = useCallback((record: Omit<WeightRecord, 'id'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setWeightRecordsState(prev => [...prev, newRecord]);
     
@@ -543,6 +560,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if(newBmi) {
         setProfileState(prevProfile => ({ ...prevProfile, bmi: newBmi }));
     }
+    onSuccess?.();
   }, [profile.medication, profile.height, getMedicationForRecord]);
 
   const removeWeightRecord = useCallback((id: string) => {
@@ -554,9 +572,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProfileState(prev => ({ ...prev, bmi: newBmi || prev.bmi }));
   }, [weightRecords, profile.height]);
   
-  const addBloodPressureRecord = useCallback((record: Omit<BloodPressureRecord, 'id' | 'medication'>) => {
+  const addBloodPressureRecord = useCallback((record: Omit<BloodPressureRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setBloodPressureRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeBloodPressureRecord = useCallback((id: string) => {
@@ -583,36 +602,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTriglyceridesRecordsState(prev => prev.filter(r => !r.id.endsWith(baseId)));
   }, []);
 
-  const addTotalCholesterolRecord = useCallback((record: Omit<TotalCholesterolRecord, 'id' | 'medication'>) => {
+  const addTotalCholesterolRecord = useCallback((record: Omit<TotalCholesterolRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setTotalCholesterolRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeTotalCholesterolRecord = useCallback((id: string) => {
     setTotalCholesterolRecordsState(prev => prev.filter(r => r.id !== id));
   }, []);
 
-  const addLdlRecord = useCallback((record: Omit<LdlRecord, 'id' | 'medication'>) => {
+  const addLdlRecord = useCallback((record: Omit<LdlRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setLdlRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeLdlRecord = useCallback((id: string) => {
     setLdlRecordsState(prev => prev.filter(r => r.id !== id));
   }, []);
   
-  const addHdlRecord = useCallback((record: Omit<HdlRecord, 'id' | 'medication'>) => {
+  const addHdlRecord = useCallback((record: Omit<HdlRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setHdlRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeHdlRecord = useCallback((id: string) => {
     setHdlRecordsState(prev => prev.filter(r => r.id !== id));
   }, []);
 
-  const addTriglyceridesRecord = useCallback((record: Omit<TriglyceridesRecord, 'id' | 'medication'>) => {
+  const addTriglyceridesRecord = useCallback((record: Omit<TriglyceridesRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
     setTriglyceridesRecordsState(prev => [...prev, newRecord]);
+    onSuccess?.();
   }, [profile.medication, getMedicationForRecord]);
 
   const removeTriglyceridesRecord = useCallback((id: string) => {
@@ -829,6 +852,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     removeMedicalCondition,
     removeAllMedicalConditions,
     addMedication,
+    updateMedication,
     removeMedication,
     setMedicationNil,
     hba1cRecords,
