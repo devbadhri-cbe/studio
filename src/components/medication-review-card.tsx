@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -121,7 +120,7 @@ export function MedicationReviewCard({ userInput, aiResult, onConfirm, onEdit, o
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4">
+                <div className="flex flex-wrap justify-end gap-2 pt-4">
                     <Button type="button" variant="ghost" onClick={onCancel}>
                         Cancel
                     </Button>
