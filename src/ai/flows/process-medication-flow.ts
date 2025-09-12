@@ -29,14 +29,13 @@ User-provided Frequency: "{{frequency}}"
 User-provided Food Instruction: "{{foodInstructions}}"
 
 1.  Analyze the 'userInput', which contains the medication name and potentially the dosage (e.g., "Rosuvas 20mg", "Tylenol PM").
-2.  If you suspect a spelling mistake in the 'userInput', provide a 'spellingSuggestion' with the corrected full name and dosage (e.g., if user enters "Metformine 500", suggest "Metformin 500mg").
-3.  Determine the primary active ingredient (generic name) for the medication.
-4.  Extract the dosage from the 'userInput' string. Standardize it (e.g., "20 mg" becomes "20mg").
+2.  First, independently assess if there is a spelling mistake in the medication name within 'userInput'. If you are highly confident of a correction, provide a 'spellingSuggestion' with the corrected full name and dosage (e.g., if user enters "Metformine 500", suggest "Metformin 500mg"). Do this even if you cannot complete the steps below.
+3.  Next, attempt to determine the primary 'activeIngredient' (generic name) for the medication. If you cannot determine this, do not return the 'activeIngredient' field.
+4.  Extract the 'dosage' from the 'userInput' string and standardize it (e.g., "20 mg" becomes "20mg").
 5.  Set 'isBrandName' to true if the input is a commercial brand name, and false if it's a generic name.
 6.  Analyze and standardize the 'frequency' input (e.g., "twice a day" or "BD" becomes "twice daily"; "at night" becomes "once daily at bedtime").
 7.  Determine the standard food instruction for the 'activeIngredient' (before, after, or with food). Set this in the 'foodInstructions' output field.
-8.  Compare the standard food instruction with the '{{foodInstructions}}'. If they differ, provide a brief explanation in 'foodInstructionSuggestion'. For example: "Rosuvastatin can be taken with or without food. Changed from 'before food' to 'with food' for better tolerance."
-9.  Return the identified active ingredient, standardized dosage, and other information in their respective fields.`,
+8.  Compare the standard food instruction with the '{{foodInstructions}}'. If they differ, provide a brief explanation in 'foodInstructionSuggestion'.`,
 });
 
 
