@@ -417,7 +417,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
    const addMedication = useCallback((medication: Omit<Medication, 'id'>) => {
     const newMedication = { ...medication, id: Date.now().toString() };
-    setProfileState(prevProfile => ({ ...prevProfile, medication: [...prevProfile.medication.filter(m => m.name.toLowerCase() !== 'nil'), newMedication] }));
+    setProfileState(prevProfile => {
+        const isCurrentlyNil = prevProfile.medication.length === 1 && prevProfile.medication[0].name.toLowerCase() === 'nil';
+        const newMedicationList = isCurrentlyNil ? [newMedication] : [...prevProfile.medication, newMedication];
+        return { ...prevProfile, medication: newMedicationList };
+    });
   }, []);
 
   const updateMedication = useCallback((medication: Medication) => {
@@ -425,7 +429,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const removeMedication = useCallback((id: string) => {
-    setProfileState(prevProfile => ({ ...prevProfile, medication: prevProfile.medication.filter(m => m.id !== id) }));
+    setProfileState(prevProfile => {
+        const updatedMedication = prevProfile.medication.filter(m => m.id !== id);
+        if (updatedMedication.length === 0) {
+            return { ...prevProfile, medication: [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }] };
+        }
+        return { ...prevProfile, medication: updatedMedication };
+    });
   }, []);
 
   const setMedicationNil = useCallback(() => {

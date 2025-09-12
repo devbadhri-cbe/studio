@@ -79,7 +79,7 @@ export default function PatientLoginPage() {
         ldlRecords: [],
         hdlRecords: [],
         triglyceridesRecords: [],
-        medication: [],
+        medication: [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }],
         presentMedicalConditions: [],
         enabledBiomarkers: {},
         doctorUid: 'doc_12345'
@@ -91,6 +91,7 @@ export default function PatientLoginPage() {
             title: 'Profile Created',
             description: `Your patient profile has been created successfully.`,
         });
+        loadLocalPatientData();
         router.push(`/patient/dashboard`);
     } catch (error) {
         console.error("Failed to save patient", error);

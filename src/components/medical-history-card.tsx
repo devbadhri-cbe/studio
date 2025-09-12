@@ -105,7 +105,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
             <div className="flex items-start gap-2 w-full">
                 <div className="flex-1">
                     {isNil ? (
-                         <span className="font-semibold text-foreground">Nil - No medication</span>
+                         <span className="font-semibold text-foreground">Nil - No medication taken</span>
                     ) : (
                         <p className="font-semibold text-foreground">{title}</p>
                     )}
@@ -274,20 +274,23 @@ export function MedicalHistoryCard() {
             Add Medication
         </DropdownMenuItem>
        )}
-      {!isMedicationNil && (
         <DropdownMenuItem
           onSelect={() => setIsEditingMedications(!isEditingMedications)}
-          disabled={profile.medication.length === 0}
+          disabled={profile.medication.length === 0 || isMedicationNil}
         >
           <Edit className="mr-2 h-4 w-4" />
           {isEditingMedications ? 'Done Editing' : 'Edit List'}
         </DropdownMenuItem>
-      )}
-      <DropdownMenuSeparator />
-      <DropdownMenuItem onSelect={handleSetMedicationNil}>
-        <X className="mr-2 h-4 w-4" />
-        Set to Nil
-      </DropdownMenuItem>
+
+        {profile.medication.length > 0 && !isMedicationNil && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={handleSetMedicationNil} className="text-destructive focus:text-destructive">
+              <X className="mr-2 h-4 w-4" />
+              Set to Nil
+            </DropdownMenuItem>
+          </>
+        )}
     </ActionMenu>
   );
 
