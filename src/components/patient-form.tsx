@@ -38,6 +38,14 @@ interface PatientFormProps {
 
 export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: PatientFormProps) {
   const { profile } = useApp();
+  const nameInputRef = React.useRef<HTMLInputElement>(null);
+  
+  React.useEffect(() => {
+    // Automatically focus the name input when the form loads
+    setTimeout(() => {
+        nameInputRef.current?.focus();
+    }, 100);
+  }, []);
   
   const form = useForm<PatientFormData>({
     defaultValues: React.useMemo(() => {
@@ -88,7 +96,7 @@ export function PatientForm({ patient, onSubmit, isSubmitting, onCancel }: Patie
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter patient's full name" {...field} autoComplete="off" />
+                    <Input placeholder="Enter name" {...field} ref={nameInputRef} autoComplete="off" />
                   </FormControl>
                   <FormDescription>
                     Your name is used by the AI to verify ownership of uploaded lab reports.
