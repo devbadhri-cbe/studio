@@ -1,3 +1,4 @@
+
 'use client';
 
 import { PatientCard } from '@/components/patient-card';
@@ -10,9 +11,11 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function HomeDashboard() {
   const router = useRouter();
+  const { toast } = useToast();
   const [isScrolled, setIsScrolled] = React.useState(false);
 
   React.useEffect(() => {
@@ -25,8 +28,11 @@ export default function HomeDashboard() {
   }, []);
 
   const handlePatientAction = (patient: Patient) => {
-    // This action now navigates to the patient login/creation flow.
-    router.push('/patient/login');
+    console.log(`Action for mock patient ${patient.name} triggered.`);
+    toast({
+      title: 'Demonstration Action',
+      description: 'This is a mock patient profile. Create a new profile to use the app.',
+    });
   };
 
   return (
