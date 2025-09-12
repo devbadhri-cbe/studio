@@ -110,7 +110,10 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
                     {isNil ? (
                          <span className="font-semibold text-foreground">Nil - No medication taken</span>
                     ) : (
-                        <p className="font-semibold text-foreground">{title}</p>
+                        <div>
+                            <p className="font-semibold text-foreground">{title}</p>
+                            {userInput && userInput.toLowerCase() !== title.toLowerCase() && <p className="text-muted-foreground text-xs">({userInput})</p>}
+                        </div>
                     )}
 
                     {isPending ? (
@@ -125,8 +128,7 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
                         </div>
                     ) : (
                         <>
-                            {userInput && userInput.toLowerCase() !== title.toLowerCase() && <p className="text-muted-foreground text-xs">({userInput})</p>}
-                            {details && <p className="text-muted-foreground text-xs">{details}</p>}
+                            {details && <p className="text-muted-foreground text-xs mt-1">{details}</p>}
                             {date && <p className="text-xs text-muted-foreground">{formatDate(date)}</p>}
                         </>
                     )}
