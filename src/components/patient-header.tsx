@@ -7,9 +7,9 @@ import { Button } from './ui/button';
 import { FileText } from 'lucide-react';
 
 export function PatientHeader() {
-  const { profile } = useApp();
+  const { patient } = useApp();
 
-  const pageTitle = `Welcome, ${profile.name || 'User'}!`;
+  const pageTitle = `Welcome, ${patient?.name || 'User'}!`;
   
   return (
     <>

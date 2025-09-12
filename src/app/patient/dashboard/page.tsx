@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -8,20 +7,20 @@ import { Logo } from '@/components/logo';
 import { PatientLoginPage } from '@/components/patient-login-page';
 
 export default function DashboardPage() {
-  const { isClient, profile, isLoading } = useApp();
+  const { patient, isLoading } = useApp();
   
-  if (isLoading || !isClient) {
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
             <Logo className="h-24 w-24" />
-            <p className="ml-4 text-lg animate-pulse">Loading Health Guardian...</p>
+            <p className="ml-4 text-lg animate-pulse">Loading Glycemic Guardian...</p>
         </div>
       </div>
     );
   }
 
-  if (!profile) {
+  if (!patient) {
     return <PatientLoginPage />;
   }
 

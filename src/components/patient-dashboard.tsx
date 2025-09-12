@@ -22,7 +22,7 @@ import { Logo } from './logo';
 import { getEnabledCards } from '@/lib/biomarker-cards';
 
 export function PatientDashboard() {
-  const { isClient, isReadOnlyView, profile } = useApp();
+  const { isClient, isReadOnlyView, patient } = useApp();
   const router = useRouter();
   const [isDiseasePanelOpen, setIsDiseasePanelOpen] = React.useState(true);
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
@@ -41,7 +41,7 @@ export function PatientDashboard() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  if (!isClient || !profile) {
+  if (!isClient || !patient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -52,7 +52,7 @@ export function PatientDashboard() {
     );
   }
   
-  const enabledCards = getEnabledCards(profile.enabledBiomarkers);
+  const enabledCards = getEnabledCards(patient.enabledBiomarkers);
 
   const BackButton = isReadOnlyView ? (
     <Tooltip>
@@ -72,7 +72,7 @@ export function PatientDashboard() {
     <>
       <div className="flex min-h-screen w-full flex-col bg-background">
         <TitleBar
-          title={['Health', 'Guardian']}
+          title={['Glycemic', 'Guardian']}
           subtitle={doctorDetails.name}
           onSubtitleClick={() => setIsEditingDoctor(true)}
           backButton={BackButton}

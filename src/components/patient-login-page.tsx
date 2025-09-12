@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,7 +19,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 export function PatientLoginPage() {
   const { toast } = useToast();
-  const { setPatient, deleteProfile, isClient } = useApp();
+  const { setPatient, isClient } = useApp();
   const [isCreating, setIsCreating] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
@@ -33,6 +32,11 @@ export function PatientLoginPage() {
       setHasExistingData(!!localData);
     }
   }, [isClient]);
+  
+  const deleteProfile = () => {
+    localStorage.removeItem('patientData');
+    window.location.reload();
+  };
 
   const handleCreateNewProfile = () => {
     setIsCreating(true);
@@ -52,7 +56,7 @@ export function PatientLoginPage() {
         heightInCm = data.height ? Number(data.height) : undefined;
     }
 
-    const patientData: Patient = {
+    const newPatient: Patient = {
         id: uuidv4(),
         name: data.name,
         dob: data.dob.toISOString(),
@@ -86,9 +90,8 @@ export function PatientLoginPage() {
     };
 
     try {
-        // Explicitly save to localStorage first to prevent race conditions on Safari
-        localStorage.setItem('patientData', JSON.stringify(patientData));
-        setPatient(patientData);
+        localStorage.setItem('patientData', JSON.stringify(newPatient));
+        setPatient(newPatient);
 
         setIsSuccess(true);
         toast({
@@ -96,8 +99,6 @@ export function PatientLoginPage() {
             description: `Your patient profile has been created successfully.`,
         });
         
-        // The UI will show the success message, and the main page will automatically
-        // detect the new patient state and render the dashboard.
         setTimeout(() => {
           // This timeout allows the success UI to be visible before the component unmounts.
         }, 2000);
@@ -162,7 +163,7 @@ export function PatientLoginPage() {
       <div className="w-full max-w-sm text-center">
         <UniversalCard 
             icon={<Logo className="h-16 w-16 mx-auto" />}
-            title="Health Guardian"
+            title="Glycemic Guardian"
             description="Your Patient-Centric Health Dashboard"
         >
           <div className="space-y-4 text-center">

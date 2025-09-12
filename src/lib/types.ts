@@ -1,19 +1,8 @@
-
-
-import { Timestamp } from "firebase/firestore";
-
 export type UnitSystem = 'metric' | 'imperial';
-
-// The Doctor type is not used in the single-doctor model, but kept for future reference.
-export interface Doctor {
-  uid: string;
-  name: string;
-  email: string;
-}
 
 export interface MedicalCondition {
   id: string;
-  date: string; // Stored as 'YYYY-MM-DD' string
+  date: string; 
   condition: string;
   userInput?: string;
   icdCode?: string;
@@ -34,132 +23,86 @@ export interface Medication {
 
 export interface WeightRecord {
   id:string;
-  date: Date | string;
+  date: string;
   value: number; // in kg
-  medication?: string;
-}
-
-export interface DashboardSuggestion {
-  id: string;
-  basedOnCondition: string;
-  panelName: string;
-  isNewPanel: boolean;
-  biomarkers: string[];
-  status: 'pending' | 'dismissed' | 'completed';
-}
-
-export interface UserProfile {
-  id: string; // Add patient ID to profile for easier lookup
-  name: string;
-  dob: string; // Stored as 'YYYY-MM-DD' string
-  gender: 'male' | 'female';
-  email?: string;
-  country: string;
-  phone?: string;
-  height?: number; // in cm
-  dateFormat: string; // e.g., 'dd-MM-yyyy'
-  unitSystem: UnitSystem;
-  presentMedicalConditions: MedicalCondition[];
-  medication: Medication[];
-  bmi?: number;
-  enabledBiomarkers?: { [key: string]: string[] };
-  doctorUid?: string;
-  doctorName?: string;
-  doctorEmail?: string;
-  doctorPhone?: string;
-  dashboardSuggestions?: DashboardSuggestion[];
 }
 
 export interface Hba1cRecord {
     id: string;
-    date: Date | string;
+    date: string;
     value: number; // as percentage
-    medication?: string;
 }
 
 export interface FastingBloodGlucoseRecord {
   id: string;
-  date: Date | string;
+  date: string;
   value: number; // in mg/dL
-  medication?: string;
 }
 
 export interface ThyroidRecord {
   id: string;
-  date: Date | string;
+  date: string;
   tsh: number;
   t3: number;
   t4: number;
-  medication?: string;
 }
 
 export interface ThyroxineRecord {
   id: string;
-  date: Date | string;
+  date: string;
   value: number; // in ng/dL
-  medication?: string;
 }
 
 export interface SerumCreatinineRecord {
   id: string;
-  date: Date | string;
+  date: string;
   value: number; // in mg/dL
-  medication?: string;
 }
 
 export interface UricAcidRecord {
   id: string;
-  date: Date | string;
+  date: string;
   value: number; // in mg/dL
-  medication?: string;
 }
 
 
 export interface BloodPressureRecord {
   id: string;
-  date: Date | string;
+  date: string;
   systolic: number;
   diastolic: number;
   heartRate?: number;
-  medication?: string;
 }
 
 export interface HemoglobinRecord {
   id: string;
-  date: Date | string;
+  date: string;
   hemoglobin: number; // in g/dL
-  medication?: string;
 }
 
 export interface TotalCholesterolRecord {
   id: string;
-  date: Date | string;
+  date: string;
   value: number; // in mg/dL
-  medication?: string;
 }
 
 export interface LdlRecord {
   id: string;
-  date: Date | string;
+  date: string;
   value: number; // in mg/dL
-  medication?: string;
 }
 
 export interface HdlRecord {
   id: string;
-  date: Date | string;
+  date: string;
   value: number; // in mg/dL
-  medication?: string;
 }
 
 export interface TriglyceridesRecord {
   id: string;
-  date: Date | string;
+  date: string;
   value: number; // in mg/dL
-  medication?: string;
 }
-
-export type LipidRecord = TotalCholesterolRecord & { ldl: number; hdl: number; triglycerides: number; };
 
 export interface Patient {
   id: string;
@@ -174,30 +117,7 @@ export interface Patient {
   unitSystem: UnitSystem;
   lastLogin?: string; // ISO string
   bmi?: number;
-  lastHba1c?: {
-      value: number;
-      date: string;
-  } | null;
-  lastThyroid?: {
-    tsh: number;
-    date: string;
-  } | null;
-  lastBloodPressure?: {
-    systolic: number;
-    diastolic: number;
-    heartRate?: number;
-    date: string;
-  } | null;
-  lastHemoglobin?: {
-    value: number;
-    date: string;
-  } | null;
-  lastFastingBloodGlucose?: {
-      value: number;
-      date: string;
-  } | null;
   status: 'On Track' | 'Needs Review' | 'Urgent';
-  // Add full record history to the patient object
   hba1cRecords: Hba1cRecord[];
   fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
   thyroidRecords: ThyroidRecord[];
@@ -218,7 +138,6 @@ export interface Patient {
   doctorName?: string;
   doctorEmail?: string;
   doctorPhone?: string;
-  dashboardSuggestions?: DashboardSuggestion[];
 }
 
 export type BiomarkerKey = 

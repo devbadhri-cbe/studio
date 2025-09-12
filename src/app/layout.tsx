@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next';
 import './globals.css';
 import { AppProvider } from '@/context/app-context';
@@ -7,7 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 
 
 export const metadata: Metadata = {
-  title: 'Health Guardian',
+  title: 'Glycemic Guardian',
   description: 'Track and manage your health metrics with AI-powered insights.',
   manifest: '/manifest.json',
   icons: {
@@ -29,10 +28,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
         
         {/* PWA Meta Tags */}
-        <meta name="application-name" content="Health Guardian" />
+        <meta name="application-name" content="Glycemic Guardian" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Health Guardian" />
+        <meta name="apple-mobile-web-app-title" content="Glycemic Guardian" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#A1C9F7" />
