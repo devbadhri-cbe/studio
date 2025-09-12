@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
@@ -21,7 +20,6 @@ import { ConditionSynopsisDialog } from './condition-synopsis-dialog';
 import { ActionIcon } from './ui/action-icon';
 import { ActionMenu } from './ui/action-menu';
 import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
-import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { Alert, AlertDescription } from './ui/alert';
 import { produce } from 'immer';
@@ -205,7 +203,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
 
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, updateMedicalCondition, removeMedication, removeMedicalCondition: removeMedicalConditionFromContext, updateMedication } = useApp();
+  const { profile, updateMedicalCondition, removeMedication, removeMedicalCondition: removeMedicalConditionFromContext, updateMedication } = useApp();
   const [activeView, setActiveView] = React.useState<ActiveView>('none');
   
   const [isEditingConditions, setIsEditingConditions] = React.useState(false);
@@ -236,36 +234,13 @@ export function MedicalHistoryCard() {
     }
   }
 
-  const handleProcessMedication = async (med: Medication) => {
-    toast({ title: "Re-processing Medication...", description: `Asking AI about "${med.userInput}"`});
-    updateMedication(produce(med, draft => { draft.status = 'pending_review' }));
-     try {
-      const result = await getMedicationInfo({ 
-        userInput: med.userInput,
-        frequency: med.frequency,
-        foodInstructions: med.foodInstructions,
-      });
-      const updatedMed = produce(med, draft => {
-        if (result.activeIngredient) {
-            draft.name = result.activeIngredient;
-            draft.dosage = result.dosage || med.dosage;
-            draft.frequency = result.frequency || med.frequency;
-            draft.foodInstructions = result.foodInstructions || med.foodInstructions;
-            draft.status = 'processed';
-            (draft as any).spellingSuggestion = result.spellingSuggestion;
-            toast({ title: "Medication Processed", description: `AI identified: ${result.activeIngredient}`});
-        } else {
-            draft.status = 'failed';
-            toast({ variant: 'destructive', title: 'Could not identify medication.' });
-        }
-      });
-      updateMedication(updatedMed);
-    } catch(e) {
-      console.error(e);
-      updateMedication(produce(med, draft => { draft.status = 'failed' }));
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication.' });
-    }
-  }
+  const handleProcessMedication = (med: Medication) => {
+    setActiveView(`add_medication`);
+    // Pass the failed medication to the AddMedicationForm to be re-processed
+    // The AddMedicationForm will handle the AI call and review step.
+    (document.querySelector(`#add-med-form-${med.id}`) as any)?.startReprocessing(med);
+  };
+
 
   const closeActiveView = () => {
     setActiveView('none');
@@ -412,7 +387,14 @@ export function MedicalHistoryCard() {
                                 isFormOpen={isEditingThis}
                                 onRemove={() => removeMedication(med.id)}
                                 onShowSynopsis={() => setActiveView(`synopsis_medication_${med.id}`)}
-                                onProcess={handleProcessMedication}
+                                onProcess={() => {
+                                  // This is a bit of a hack to trigger the reprocessing
+                                  // by making the AddMedicationForm visible and calling a method on it.
+                                  setActiveView('add_medication'); 
+                                  setTimeout(() => {
+                                    (document.querySelector(`#add-med-form-${med.id}`) as any)?.startReprocessing(med);
+                                  }, 0);
+                                }}
                                 onRevise={() => setActiveView(`edit_medication_${med.id}`)}
                                 form={<EditMedicationForm onCancel={closeActiveView} initialData={med} onSuccess={(editedData) => {
                                     const finalMed = { ...med, ...editedData, name: editedData.activeIngredient };
@@ -435,6 +417,11 @@ export function MedicalHistoryCard() {
                             form={null}
                         />
                     )
+                )}
+                 {activeView === 'add_medication' && (
+                    <div id="add-med-form-placeholder">
+                        {/* This is where the AddMedicationForm will be rendered */}
+                    </div>
                 )}
             </ul>
 

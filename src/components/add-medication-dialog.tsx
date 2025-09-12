@@ -26,12 +26,14 @@ type FormStep = 'input' | 'loading' | 'review' | 'failed';
 type UserInput = { userInput: string; frequency: string; foodInstructions?: FoodInstruction };
 
 
-export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProps) {
+export const AddMedicationForm = React.forwardRef((props: AddMedicationFormProps, ref) => {
+  const { onSuccess, onCancel } = props;
   const [step, setStep] = React.useState<FormStep>('input');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [userInput, setUserInput] = React.useState<UserInput | null>(null);
   const [aiResult, setAiResult] = React.useState<MedicationInfoOutput | null>(null);
-  const { addMedication } = useApp();
+  const [reprocessingMed, setReprocessingMed] = React.useState<Medication | null>(null);
+  const { addMedication, updateMedication } = useApp();
   const { toast } = useToast();
 
   const form = useForm({
@@ -41,6 +43,22 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
       foodInstructions: undefined as FoodInstruction | undefined,
     },
   });
+
+  React.useImperativeHandle(ref, () => ({
+    startReprocessing: (med: Medication) => {
+      setReprocessingMed(med);
+      form.reset({
+        userInput: med.userInput,
+        frequency: med.frequency,
+        foodInstructions: med.foodInstructions,
+      });
+      handleInitialSubmit({
+        userInput: med.userInput,
+        frequency: med.frequency,
+        foodInstructions: med.foodInstructions,
+      });
+    },
+  }));
 
   const handleInitialSubmit = async (data: UserInput) => {
     setIsSubmitting(true);
@@ -68,26 +86,42 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
 
     } catch(e) {
       console.error(e);
+      if (reprocessingMed) {
+        updateMedication({ ...reprocessingMed, status: 'failed' });
+      }
       setStep('failed');
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication. Please check the name and try again.' });
+       onCancel(); // Close form on failure
     } finally {
         setIsSubmitting(false);
     }
   };
 
   const handleFinalSave = (finalData: MedicationInfoOutput) => {
-      const newMedication: Omit<Medication, 'id'> = {
+      if (reprocessingMed) {
+        const updatedMed: Medication = {
+          ...reprocessingMed,
           name: finalData.activeIngredient,
-          userInput: userInput!.userInput,
           dosage: finalData.dosage || '',
           frequency: finalData.frequency || userInput!.frequency,
           foodInstructions: finalData.foodInstructions || userInput!.foodInstructions,
           status: 'processed',
-      };
+        };
+        updateMedication(updatedMed);
+        toast({ title: "Medication Updated", description: `${finalData.activeIngredient} has been successfully processed.`});
+      } else {
+        const newMedication: Omit<Medication, 'id'> = {
+            name: finalData.activeIngredient,
+            userInput: userInput!.userInput,
+            dosage: finalData.dosage || '',
+            frequency: finalData.frequency || userInput!.frequency,
+            foodInstructions: finalData.foodInstructions || userInput!.foodInstructions,
+            status: 'processed',
+        };
+        addMedication(newMedication);
+        toast({ title: "Medication Saved", description: `${finalData.activeIngredient} has been added to your list.`});
+      }
       
-      addMedication(newMedication);
-      toast({ title: "Medication Saved", description: `${finalData.activeIngredient} has been added to your list.`});
-
       onCancel(); // Close the form area
       onSuccess?.();
   };
@@ -115,7 +149,7 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
             aiResult={aiResult}
             onConfirm={handleFinalSave}
             onEdit={handleEdit}
-            onCancel={onCancel}
+            onCancel={() => { onCancel(); setStep('input'); }}
         />
     )
   }
@@ -206,4 +240,6 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
         </CardContent>
     </Card>
   );
-}
+});
+
+AddMedicationForm.displayName = 'AddMedicationForm';
