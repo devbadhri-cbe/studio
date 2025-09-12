@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -8,6 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { produce } from 'immer';
 import { getBmiStatus, calculateBmi } from '@/lib/utils';
 import { toMmolL, toMgDl, toGL, toGDL } from '@/lib/unit-conversions';
+import { getHealthInsights } from '@/ai/flows/health-insights-flow';
+import { HealthInsightsInput, HealthInsightsOutput } from '@/lib/ai-types';
 
 type Theme = 'dark' | 'light' | 'system';
 type BiomarkerUnit = 'conventional' | 'si';
@@ -40,7 +41,7 @@ interface AppContextType {
   addFastingBloodGlucoseRecord: (record: Omit<FastingBloodGlucoseRecord, 'id'>) => void;
   addBloodPressureRecord: (record: Omit<BloodPressureRecord, 'id'>) => void;
   addThyroidRecord: (record: Omit<ThyroidRecord, 'id'>) => void;
-  addMedicalCondition: (condition: Omit<MedicalCondition, 'id'>) => void;
+  addMedicalCondition: (condition: MedicalCondition) => void;
   addMedication: (medication: Omit<Medication, 'id'>) => void;
   addThyroxineRecord: (record: Omit<ThyroxineRecord, 'id'>) => void;
   addSerumCreatinineRecord: (record: Omit<SerumCreatinineRecord, 'id'>) => void;
@@ -68,10 +69,26 @@ interface AppContextType {
   
   updateMedicalCondition: (condition: MedicalCondition) => void;
   updateMedication: (medication: Medication) => void;
+  approveMedicalCondition: (id: string) => void;
+  dismissSuggestion: (id: string) => void;
 
   setMedicationNil: () => void;
   deleteProfile: () => void;
   getFullPatientData: () => Patient | null;
+
+  // AI Insights
+  tips: string[];
+  isGeneratingInsights: boolean;
+  isTranslatingInsights: boolean;
+  insightsError: string | null;
+  regenerateInsights: (languageCode?: string) => Promise<void>;
+  translateInsights: (languageCode: string) => Promise<void>;
+  selectedInsightsLanguage: string;
+  setSelectedInsightsLanguage: (code: string) => void;
+  
+  // Disease Panels
+  toggleDiseasePanel: (panelKey: 'diabetes' | 'hypertension' | 'lipidPanel') => void;
+  toggleDiseaseBiomarker: (panelKey: 'diabetes' | 'hypertension' | 'lipidPanel', biomarkerKey: string) => void;
 
   // Derived state and utility functions
   profile: any; // Simplified for this context
@@ -106,6 +123,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isClient, setIsClient] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
   const [isReadOnlyView, setIsReadOnlyView] = React.useState(false);
+  
+  // AI Insights State
+  const [tips, setTips] = React.useState<string[]>([]);
+  const [isGeneratingInsights, setIsGeneratingInsights] = React.useState(false);
+  const [isTranslatingInsights, setIsTranslatingInsights] = React.useState(false);
+  const [insightsError, setInsightsError] = React.useState<string | null>(null);
+  const [selectedInsightsLanguage, setSelectedInsightsLanguage] = React.useState('en');
+
 
   React.useEffect(() => {
     setIsClient(true);
@@ -114,6 +139,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (localDataString) {
         const localPatientData: Patient = JSON.parse(localDataString);
         setPatientState(localPatientData);
+        if (localPatientData.dashboardSuggestions) {
+            setTips(localPatientData.dashboardSuggestions);
+        }
       }
     } catch (e) {
       console.error("Failed to parse local patient data", e);
@@ -175,6 +203,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!patient) return;
       const newRecord = { ...record, id: uuidv4() } as T;
       const nextState = produce(patient, draft => {
+          if (!draft[recordType]) {
+            (draft as any)[recordType] = [];
+          }
           (draft[recordType] as T[]).push(newRecord);
 
           // Recalculate BMI if a new weight record is added
@@ -188,9 +219,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const createRecordRemover = (recordType: keyof Patient) => (id: string) => {
     if (!patient) return;
     const nextState = produce(patient, draft => {
-        const recordIndex = (draft[recordType] as any[]).findIndex(r => r.id === id);
+        const records = draft[recordType] as any[];
+        const recordIndex = records ? records.findIndex(r => r.id === id) : -1;
         if (recordIndex > -1) {
-            (draft[recordType] as any[]).splice(recordIndex, 1);
+            records.splice(recordIndex, 1);
         }
     });
     setPatient(nextState);
@@ -237,6 +269,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setPatient(nextState);
   };
   
+  const approveMedicalCondition = (id: string) => {
+    if (!patient) return;
+    const nextState = produce(patient, draft => {
+        const condition = draft.presentMedicalConditions.find(c => c.id === id);
+        if (condition) {
+            condition.status = 'verified';
+        }
+    });
+    setPatient(nextState);
+  }
+  
+  const dismissSuggestion = (id: string) => {
+    removeMedicalCondition(id);
+  }
+  
   const updateMedication = (medication: Medication) => {
     if (!patient) return;
     const nextState = produce(patient, draft => {
@@ -273,6 +320,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const nextState = produce(patient, draft => {
        const checkAndAdd = (recordType: keyof Patient, newRecordData: any, recordName: string) => {
             if (!newRecordData) return;
+            if (!draft[recordType]) {
+                (draft as any)[recordType] = [];
+            }
             const existingRecords = draft[recordType] as { date: string }[];
             const newRecordDate = new Date(newRecordData.date).toISOString().split('T')[0];
             const isDuplicate = existingRecords.some(r => new Date(r.date).toISOString().split('T')[0] === newRecordDate);
@@ -304,6 +354,96 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return { added, duplicates };
   };
   
+  const languages: { [key: string]: string } = {
+    en: 'English', es: 'Spanish', fr: 'French', de: 'German', hi: 'Hindi', ta: 'Tamil', zh: 'Chinese'
+  };
+
+  const generateInsights = async (languageCode: string) => {
+    if (!patient) return null;
+    
+    const latestHba1c = [...patient.hba1cRecords || []].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    const latestGlucose = [...patient.fastingBloodGlucoseRecords || []].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    const latestWeight = [...patient.weightRecords || []].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    const latestBloodPressure = [...patient.bloodPressureRecords || []].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+
+    const input: HealthInsightsInput = {
+      language: languages[languageCode] || 'English',
+      patient: {
+        age: patient.dob ? new Date().getFullYear() - new Date(patient.dob).getFullYear() : undefined,
+        gender: patient.gender,
+        bmi: patient.bmi,
+        conditions: patient.presentMedicalConditions.map(c => c.condition),
+        medications: patient.medication.map(m => m.name)
+      },
+      latestReadings: {
+        hba1c: latestHba1c?.value,
+        fastingBloodGlucose: latestGlucose?.value,
+        weight: latestWeight?.value,
+        bloodPressure: latestBloodPressure ? { systolic: latestBloodPressure.systolic, diastolic: latestBloodPressure.diastolic } : undefined,
+      }
+    };
+
+    try {
+      const result = await getHealthInsights(input);
+      return result;
+    } catch (e) {
+      console.error(e);
+      setInsightsError('An AI error occurred. Please try again.');
+      return null;
+    }
+  };
+
+  const regenerateInsights = async (languageCode: string = 'en') => {
+    setIsGeneratingInsights(true);
+    setInsightsError(null);
+    const result = await generateInsights(languageCode);
+    if (result && result.tips) {
+      setTips(result.tips);
+      setPatient(produce(patient!, draft => {
+        draft.dashboardSuggestions = result.tips;
+      }));
+    }
+    setIsGeneratingInsights(false);
+  };
+  
+  const translateInsights = async (languageCode: string) => {
+    setIsTranslatingInsights(true);
+    setInsightsError(null);
+    const result = await generateInsights(languageCode);
+    if (result && result.tips) {
+      setTips(result.tips);
+    }
+    setIsTranslatingInsights(false);
+  };
+  
+  const toggleDiseasePanel = (panelKey: 'diabetes' | 'hypertension' | 'lipidPanel') => {
+      if (!patient) return;
+      const nextState = produce(patient, draft => {
+          if (draft.enabledBiomarkers[panelKey]) {
+              delete draft.enabledBiomarkers[panelKey];
+          } else {
+              draft.enabledBiomarkers[panelKey] = [];
+          }
+      });
+      setPatient(nextState);
+  }
+  
+  const toggleDiseaseBiomarker = (panelKey: 'diabetes' | 'hypertension' | 'lipidPanel', biomarkerKey: string) => {
+      if (!patient) return;
+      const nextState = produce(patient, draft => {
+          const panel = draft.enabledBiomarkers[panelKey];
+          if (panel) {
+              const index = panel.indexOf(biomarkerKey);
+              if (index > -1) {
+                  panel.splice(index, 1);
+              } else {
+                  panel.push(biomarkerKey);
+              }
+          }
+      });
+      setPatient(nextState);
+  }
+  
   // ==================================================================
   // DERIVED STATE & UTILITY FUNCTIONS
   // ==================================================================
@@ -320,8 +460,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   
   React.useEffect(() => {
     if (patient?.unitSystem === 'metric') {
-        // Most metric countries use SI units, but we allow override.
-        // Let's default to SI for metric system countries unless set.
         const storedUnit = localStorage.getItem('biomarkerUnit') as BiomarkerUnit;
         if(storedUnit) {
           setBiomarkerUnitState(storedUnit);
@@ -409,9 +547,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     removeTriglyceridesRecord,
     updateMedicalCondition,
     updateMedication,
+    approveMedicalCondition,
+    dismissSuggestion,
     setMedicationNil,
     deleteProfile,
     getFullPatientData,
+    tips,
+    isGeneratingInsights,
+    isTranslatingInsights,
+    insightsError,
+    regenerateInsights,
+    translateInsights,
+    selectedInsightsLanguage,
+    setSelectedInsightsLanguage,
+    toggleDiseasePanel,
+    toggleDiseaseBiomarker,
     profile,
     hba1cRecords: patient?.hba1cRecords || [],
     weightRecords: patient?.weightRecords || [],

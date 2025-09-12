@@ -15,6 +15,14 @@ import { Logo } from './logo';
 import { ProfileCard } from './profile-card';
 import { MedicalHistoryCard } from './medical-history-card';
 import { SharePatientAccessDialog } from './share-patient-access-dialog';
+import { Hba1cCard } from './hba1c-card';
+import { ReminderCard } from './reminder-card';
+import { InsightsCard } from './insights-card';
+import { BiomarkersPanel } from './biomarkers-panel';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { DashboardSectionToggle } from './dashboard-section-toggle';
+import { DiseasePanel } from './disease-panel';
+import { AddBiomarkerCard } from './add-biomarker-card';
 
 export function PatientDashboard() {
   const { isClient, isReadOnlyView, patient } = useApp();
@@ -22,6 +30,12 @@ export function PatientDashboard() {
   const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isShareOpen, setIsShareOpen] = React.useState(false);
+  
+  const [isPanelsOpen, setIsPanelsOpen] = React.useState(true);
+  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
+  const [panelSearchQuery, setPanelSearchQuery] = React.useState('');
+  const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
+
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -88,10 +102,44 @@ export function PatientDashboard() {
             <PatientHeader />
             <Separator />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <ProfileCard />
-              <MedicalHistoryCard />
+                <div className="lg:col-span-2 grid grid-cols-1 gap-6">
+                    <ProfileCard />
+                    <MedicalHistoryCard />
+                </div>
+                <div className="space-y-6">
+                    <ReminderCard />
+                    <InsightsCard />
+                </div>
             </div>
             <Separator />
+            <div className="space-y-6">
+                <DashboardSectionToggle
+                    title="Disease Panels"
+                    subtitle="Manage multi-biomarker panels for specific conditions"
+                    icon={<Hba1cCard />} // Placeholder icon
+                    isOpen={isPanelsOpen}
+                    searchQuery={panelSearchQuery}
+                    onSearchChange={setPanelSearchQuery}
+                    searchPlaceholder="Search panels..."
+                    onCreateClick={() => {}}
+                    isCollapsible={true}
+                />
+                {isPanelsOpen && <DiseasePanel searchQuery={panelSearchQuery} />}
+                
+                <DashboardSectionToggle
+                    title="All Biomarkers"
+                    subtitle="View and manage individual biomarker cards"
+                    icon={<Hba1cCard />} // Placeholder icon
+                    isOpen={isBiomarkersOpen}
+                    searchQuery={biomarkerSearchQuery}
+                    onSearchChange={setBiomarkerSearchQuery}
+                    searchPlaceholder="Search biomarkers..."
+                    isCollapsible={true}
+                />
+                {isBiomarkersOpen && <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>}
+
+                <AddBiomarkerCard />
+            </div>
           </div>
         </main>
       </div>
