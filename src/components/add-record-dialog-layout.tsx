@@ -79,8 +79,7 @@ export function AddRecordDialogLayout({
   };
   
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // Only check for medication if it's a biomarker entry dialog (indicated by existingRecords prop)
-    if (existingRecords && profile.medication.length === 0) {
+    if (existingRecords && (!profile || !profile.medication || profile.medication.length === 0)) {
       e.preventDefault();
       toast({
         variant: 'destructive',
