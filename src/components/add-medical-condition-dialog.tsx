@@ -1,16 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
-import { DatePicker } from './ui/date-picker';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { type MedicalCondition } from '@/lib/types';
 import { parseISO } from 'date-fns';
 import { FormActions } from './form-actions';
+import { DateInput } from './date-input';
 
 interface MedicalConditionFormValues {
   userInput: string;
@@ -39,7 +39,7 @@ export function AddMedicalConditionForm({
     }, 100);
   }, []);
 
-  const form = useForm<MedicalConditionFormValues>({
+  const formMethods = useForm<MedicalConditionFormValues>({
     defaultValues: { 
         userInput: initialData?.userInput || initialData?.condition || '', 
         date: initialData?.date ? parseISO(initialData.date) : new Date(),
@@ -87,10 +87,10 @@ export function AddMedicalConditionForm({
         <CardDescription>Enter a condition. Our AI will process it in the background.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+        <FormProvider {...formMethods}>
+          <form onSubmit={formMethods.handleSubmit(handleFormSubmit)} className="space-y-4">
             <FormField
-                control={form.control}
+                control={formMethods.control}
                 name="userInput"
                 rules={{ required: "Condition name is required." }}
                 render={({ field }) => (
@@ -104,24 +104,12 @@ export function AddMedicalConditionForm({
                 )}
             />
             
-            <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Date of Diagnosis</FormLabel>
-                    <FormControl>
-                        <DatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        fromYear={new Date().getFullYear() - 50}
-                        toYear={new Date().getFullYear()}
-                        />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
+            <DateInput 
+              name="date"
+              label="Date of Diagnosis"
+              fromYear={new Date().getFullYear() - 50}
+              toYear={new Date().getFullYear()}
+            />
         
             <FormActions
               onCancel={onCancel}
@@ -129,7 +117,7 @@ export function AddMedicalConditionForm({
               submitText={'Save Condition'}
             />
           </form>
-        </Form>
+        </FormProvider>
       </CardContent>
     </Card>
   );
