@@ -139,7 +139,7 @@ export function DatePicker({
             open={openSelect === 'day'}
             onOpenChange={handleOpenChange('day')}
         >
-          <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
+          <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent">
             <SelectValue placeholder="Day" />
           </SelectTrigger>
           <SelectContent>
@@ -161,7 +161,7 @@ export function DatePicker({
             open={openSelect === 'month'}
             onOpenChange={handleOpenChange('month')}
         >
-            <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
+            <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent">
             <SelectValue placeholder="Month" />
             </SelectTrigger>
             <SelectContent>
@@ -183,7 +183,7 @@ export function DatePicker({
             open={openSelect === 'year'}
             onOpenChange={handleOpenChange('year')}
         >
-            <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent justify-center">
+            <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent">
             <SelectValue placeholder="Year" />
             </SelectTrigger>
             <SelectContent>
