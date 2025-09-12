@@ -50,7 +50,7 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
 
       const newMedication: Omit<Medication, 'id'> = {
           name: result.activeIngredient || data.userInput,
-          userInput: result.correctedMedicationName || data.userInput,
+          userInput: data.userInput,
           dosage: result.dosage || '',
           frequency: result.frequency || data.frequency,
           foodInstructions: result.foodInstructions || data.foodInstructions,
@@ -172,3 +172,5 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
     </Card>
   );
 }
+
+    

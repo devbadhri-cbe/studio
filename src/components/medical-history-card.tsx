@@ -226,7 +226,6 @@ export function MedicalHistoryCard() {
              dosage: result.dosage || med.dosage,
              frequency: result.frequency || med.frequency,
              foodInstructions: result.foodInstructions || med.foodInstructions,
-             userInput: result.correctedMedicationName || med.userInput,
              status: 'processed',
         });
         toast({ title: "Medication Processed", description: `AI identified: ${result.activeIngredient}`});
@@ -436,3 +435,5 @@ export function MedicalHistoryCard() {
     </>
   );
 }
+
+    

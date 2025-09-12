@@ -123,7 +123,6 @@ export const MedicationInfoOutputSchema = z.object({
   frequency: z.string().optional().describe('The standardized frequency (e.g., "twice daily").'),
   foodInstructions: z.enum(['before', 'after', 'with']).optional().describe('The standard food instruction for this medication.'),
   foodInstructionSuggestion: z.string().optional().describe('A brief explanation if the user\'s food instruction was incorrect and why it was corrected.'),
-  correctedMedicationName: z.string().optional().describe('The corrected spelling of the medication name if a mistake was detected.'),
 });
 export type MedicationInfoOutput = z.infer<typeof MedicationInfoOutputSchema>;
 
@@ -192,3 +191,5 @@ export const HealthInsightsOutputSchema = z.object({
     tips: z.array(z.string()).describe('An array of 3-5 personalized, actionable health tips.'),
 });
 export type HealthInsightsOutput = z.infer<typeof HealthInsightsOutputSchema>;
+
+    
