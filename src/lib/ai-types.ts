@@ -113,6 +113,7 @@ export const MedicationInfoInputSchema = z.object({
   userInput: z.string().describe('The full medication text entered by the user, including name and dosage (e.g., "Nebicard 5mg").'),
   frequency: z.string().optional().describe('The user-provided frequency (e.g., "twice a day", "at bedtime").'),
   foodInstructions: z.enum(['before', 'after', 'with']).optional().describe('The user-provided food instruction.'),
+  country: z.string().describe("The patient's country of residence (e.g., 'US', 'IN')."),
 });
 export type MedicationInfoInput = z.infer<typeof MedicationInfoInputSchema>;
 
