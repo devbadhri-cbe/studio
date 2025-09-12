@@ -55,7 +55,14 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, rightChil
                             "text-center text-xs text-muted-foreground mt-2 flex items-center gap-1 transition-all duration-300",
                             isScrolled ? "opacity-0 h-0" : "opacity-100 h-auto"
                          )}>
-                           {subtitle && <button onClick={onSubtitleClick} className={cn("hover:underline", onSubtitleClick && "cursor-pointer")}>{subtitle}</button>}
+                           {subtitle && (
+                            <span 
+                                onClick={onSubtitleClick} 
+                                className={cn("hover:underline", onSubtitleClick && "cursor-pointer")}
+                            >
+                                {subtitle}
+                            </span>
+                           )}
                         </div>
                     </div>
                 </div>
