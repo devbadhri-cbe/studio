@@ -2,17 +2,17 @@
 "use client"
 
 import * as React from "react"
-import { format, isValid, parse } from "date-fns"
+import { format } from "date-fns"
+import { Calendar as CalendarIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { useIsMobile } from "@/hooks/use-is-mobile"
-import { Input } from "./input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
-import { Popover, PopoverContent, PopoverTrigger } from "./popover"
-import { Calendar } from "./calendar"
-import { Calendar as CalendarIcon } from 'lucide-react';
-import { Button } from './button';
-
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 interface DatePickerProps {
   value?: Date;
@@ -26,42 +26,11 @@ interface DatePickerProps {
 export function DatePicker({
   value,
   onChange,
-  fromYear = new Date().getFullYear() - 100,
-  toYear = new Date().getFullYear(),
+  fromYear,
+  toYear,
+  placeholder = "Pick a date",
 }: DatePickerProps) {
-  const isMobile = useIsMobile();
-
   const [open, setOpen] = React.useState(false);
-  
-  if (isMobile) {
-    const handleMobileDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const dateValue = e.target.value;
-        if (!dateValue) {
-            onChange(undefined);
-            return;
-        }
-        const date = parse(dateValue, 'yyyy-MM-dd', new Date());
-        if (isValid(date)) {
-            onChange(date);
-        } else {
-            onChange(undefined);
-        }
-    };
-    
-    return (
-        <Input
-            type="date"
-            value={value && isValid(value) ? format(value, 'yyyy-MM-dd') : ''}
-            onChange={handleMobileDateChange}
-            className={cn(
-                "w-full justify-start text-left font-normal h-10",
-                !value && "text-muted-foreground"
-            )}
-            style={{ colorScheme: 'light' }}
-        />
-    )
-  }
-
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -74,7 +43,7 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? format(value, "PPP") : <span>Pick a date</span>}
+          {value ? format(value, "PPP") : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
@@ -94,4 +63,3 @@ export function DatePicker({
     </Popover>
   );
 }
-
