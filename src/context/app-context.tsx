@@ -8,7 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { startOfDay, parseISO, isValid } from 'date-fns';
 import { countries } from '@/lib/countries';
 import { toMmolL, toGDL, toGL, toMgDl } from '@/lib/unit-conversions';
-import { calculateBmi, updateMedication as updateMedicationInContext } from '@/lib/utils';
+import { calculateBmi } from '@/lib/utils';
 import { availableDiseasePanels } from '@/lib/biomarker-cards';
 import { getHealthInsights } from '@/ai/flows/health-insights-flow';
 import { LabDataExtractionOutput } from '@/lib/ai-types';
@@ -190,20 +190,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     root.classList.add(effectiveTheme);
     localStorage.setItem('theme', theme);
   }, [theme]);
-
-  const saveAllData = useCallback((data: Patient) => {
-    if (isReadOnlyView) return;
-    try {
-        localStorage.setItem('patientData', JSON.stringify(data));
-    } catch (e) {
-        console.error("Failed to save data to local storage", e);
-        toast({
-            variant: "destructive",
-            title: "Save Error",
-            description: "Could not save changes to your device."
-        })
-    }
-  }, [isReadOnlyView]);
   
   const getFullPatientData = useCallback((): Patient => {
     return {
@@ -223,6 +209,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
       triglyceridesRecords,
     };
   }, [profile, hba1cRecords, fastingBloodGlucoseRecords, thyroidRecords, thyroxineRecords, serumCreatinineRecords, uricAcidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
+
+  // Centralized effect to save all data to localStorage whenever any piece of it changes.
+  useEffect(() => {
+    if (!isClient || isReadOnlyView) return;
+
+    try {
+        const fullData = getFullPatientData();
+        // Only save if there's a valid patient ID to avoid overwriting with initial empty state
+        if (fullData.id) {
+            localStorage.setItem('patientData', JSON.stringify(fullData));
+        }
+    } catch (e) {
+        console.error("Failed to save data to local storage", e);
+        toast({
+            variant: "destructive",
+            title: "Save Error",
+            description: "Could not save changes to your device."
+        });
+    }
+  }, [isClient, isReadOnlyView, getFullPatientData]);
+
 
   const hasLocalData = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -416,197 +423,115 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setProfile = useCallback((newProfile: UserProfile) => {
-    const newBmi = calculateBmi(newProfile.height, newProfile.weightRecords?.[0]?.value);
+    const latestWeight = [...weightRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+    const newBmi = calculateBmi(newProfile.height, latestWeight?.value);
     const updatedProfile = { ...newProfile, bmi: newBmi };
     setProfileState(updatedProfile);
-
-    const fullData = {
-        ...updatedProfile,
-        hba1cRecords,
-        fastingBloodGlucoseRecords,
-        thyroidRecords,
-        thyroxineRecords,
-        serumCreatinineRecords,
-        uricAcidRecords,
-        hemoglobinRecords,
-        weightRecords,
-        bloodPressureRecords,
-        totalCholesterolRecords,
-        ldlRecords,
-        hdlRecords,
-        triglyceridesRecords,
-    };
-    saveAllData(fullData);
-  }, [hba1cRecords, fastingBloodGlucoseRecords, thyroidRecords, thyroxineRecords, serumCreatinineRecords, uricAcidRecords, hemoglobinRecords, weightRecords, bloodPressureRecords, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords, saveAllData]);
+  }, [weightRecords]);
   
   const addMedicalCondition = useCallback((condition: MedicalCondition) => {
-    setProfileState(prev => {
-        const newState = {...prev, presentMedicalConditions: [...prev.presentMedicalConditions, condition]};
-        saveAllData(getFullPatientData());
-        return newState;
-    });
-  }, [getFullPatientData, saveAllData]);
+    setProfileState(prev => ({...prev, presentMedicalConditions: [...prev.presentMedicalConditions, condition]}));
+  }, []);
 
   const updateMedicalCondition = useCallback((condition: MedicalCondition) => {
-    setProfileState(prevProfile => {
-      const newConditions = prevProfile.presentMedicalConditions.map(c => c.id === condition.id ? condition : c);
-      const newState = { ...prevProfile, presentMedicalConditions: newConditions };
-      saveAllData(newState);
-      return newState;
-    });
-  }, [saveAllData]);
+    setProfileState(prevProfile => ({ ...prevProfile, presentMedicalConditions: prevProfile.presentMedicalConditions.map(c => c.id === condition.id ? condition : c)}));
+  }, []);
   
   const removeMedicalCondition = useCallback((id: string) => {
-    setProfileState(prevProfile => {
-      const newConditions = prevProfile.presentMedicalConditions.filter(c => c.id !== id);
-      const newState = { ...prevProfile, presentMedicalConditions: newConditions };
-      saveAllData(newState);
-      return newState;
-    });
-  }, [saveAllData]);
+    setProfileState(prevProfile => ({ ...prevProfile, presentMedicalConditions: prevProfile.presentMedicalConditions.filter(c => c.id !== id)}));
+  }, []);
 
   const removeAllMedicalConditions = useCallback(async () => {
-    setProfileState(prevProfile => {
-        const newState = { ...prevProfile, presentMedicalConditions: [] };
-        saveAllData(newState);
-        return newState;
-    });
-  }, [saveAllData]);
+    setProfileState(prevProfile => ({ ...prevProfile, presentMedicalConditions: [] }));
+  }, []);
   
    const addMedication = useCallback((medication: Omit<Medication, 'id'>) => {
     const newMedication = { ...medication, id: Date.now().toString() };
-    setProfileState(prevProfile => {
-        const newMeds = [...prevProfile.medication.filter(m => m.name.toLowerCase() !== 'nil'), newMedication];
-        const newState = { ...prevProfile, medication: newMeds };
-        saveAllData(newState);
-        return newState;
-    });
-  }, [saveAllData]);
+    setProfileState(prevProfile => ({ ...prevProfile, medication: [...prevProfile.medication.filter(m => m.name.toLowerCase() !== 'nil'), newMedication] }));
+  }, []);
 
   const updateMedication = useCallback((medication: Medication) => {
-    setProfileState(prevProfile => {
-      const newMeds = prevProfile.medication.map(m => m.id === medication.id ? medication : m);
-      const newState = { ...prevProfile, medication: newMeds };
-      saveAllData(newState);
-      return newState;
-    });
-  }, [saveAllData]);
+    setProfileState(prevProfile => ({ ...prevProfile, medication: prevProfile.medication.map(m => m.id === medication.id ? medication : m)}));
+  }, []);
 
   const removeMedication = useCallback((id: string) => {
-    setProfileState(prevProfile => {
-      const newMeds = prevProfile.medication.filter(m => m.id !== id);
-      const newState = { ...prevProfile, medication: newMeds };
-      saveAllData(newState);
-      return newState;
-    });
-  }, [saveAllData]);
+    setProfileState(prevProfile => ({ ...prevProfile, medication: prevProfile.medication.filter(m => m.id !== id) }));
+  }, []);
 
   const setMedicationNil = useCallback(() => {
       const nilMedication: Medication[] = [{ id: 'nil', name: 'Nil', brandName: 'Nil', dosage: '', frequency: '' }];
-      setProfileState(prevProfile => {
-          const newState = { ...prevProfile, medication: nilMedication };
-          saveAllData(newState);
-          return newState;
-      });
-  }, [saveAllData]);
+      setProfileState(prevProfile => ({ ...prevProfile, medication: nilMedication }));
+  }, []);
 
   const addHba1cRecord = useCallback((record: Omit<Hba1cRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...hba1cRecords, newRecord];
-    setHba1cRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), hba1cRecords: newRecords });
+    setHba1cRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, hba1cRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeHba1cRecord = useCallback((id: string) => {
-    const newRecords = hba1cRecords.filter(r => r.id !== id);
-    setHba1cRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), hba1cRecords: newRecords });
-  }, [hba1cRecords, getFullPatientData, saveAllData]);
+    setHba1cRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
   
   const addFastingBloodGlucoseRecord = useCallback((record: Omit<FastingBloodGlucoseRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...fastingBloodGlucoseRecords, newRecord];
-    setFastingBloodGlucoseRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), fastingBloodGlucoseRecords: newRecords });
+    setFastingBloodGlucoseRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, fastingBloodGlucoseRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeFastingBloodGlucoseRecord = useCallback((id: string) => {
-    const newRecords = fastingBloodGlucoseRecords.filter(r => r.id !== id);
-    setFastingBloodGlucoseRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), fastingBloodGlucoseRecords: newRecords });
-  }, [fastingBloodGlucoseRecords, getFullPatientData, saveAllData]);
+    setFastingBloodGlucoseRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
 
   const addThyroidRecord = useCallback((record: Omit<ThyroidRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...thyroidRecords, newRecord];
-    setThyroidRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), thyroidRecords: newRecords });
+    setThyroidRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, thyroidRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeThyroidRecord = useCallback((id: string) => {
-    const newRecords = thyroidRecords.filter(r => r.id !== id);
-    setThyroidRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), thyroidRecords: newRecords });
-  }, [thyroidRecords, getFullPatientData, saveAllData]);
+    setThyroidRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
   
   const addThyroxineRecord = useCallback((record: Omit<ThyroxineRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...thyroxineRecords, newRecord];
-    setThyroxineRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), thyroxineRecords: newRecords });
+    setThyroxineRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, thyroxineRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeThyroxineRecord = useCallback((id: string) => {
-    const newRecords = thyroxineRecords.filter(r => r.id !== id);
-    setThyroxineRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), thyroxineRecords: newRecords });
-  }, [thyroxineRecords, getFullPatientData, saveAllData]);
+    setThyroxineRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
   
   const addSerumCreatinineRecord = useCallback((record: Omit<SerumCreatinineRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...serumCreatinineRecords, newRecord];
-    setSerumCreatinineRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), serumCreatinineRecords: newRecords });
+    setSerumCreatinineRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, serumCreatinineRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeSerumCreatinineRecord = useCallback((id: string) => {
-    const newRecords = serumCreatinineRecords.filter(r => r.id !== id);
-    setSerumCreatinineRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), serumCreatinineRecords: newRecords });
-  }, [serumCreatinineRecords, getFullPatientData, saveAllData]);
+    setSerumCreatinineRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
 
   const addUricAcidRecord = useCallback((record: Omit<UricAcidRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...uricAcidRecords, newRecord];
-    setUricAcidRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), uricAcidRecords: newRecords });
+    setUricAcidRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, uricAcidRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeUricAcidRecord = useCallback((id: string) => {
-    const newRecords = uricAcidRecords.filter(r => r.id !== id);
-    setUricAcidRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), uricAcidRecords: newRecords });
-  }, [uricAcidRecords, getFullPatientData, saveAllData]);
+    setUricAcidRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
 
   const addHemoglobinRecord = useCallback((record: Omit<HemoglobinRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...hemoglobinRecords, newRecord];
-    setHemoglobinRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), hemoglobinRecords: newRecords });
+    setHemoglobinRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, hemoglobinRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeHemoglobinRecord = useCallback((id: string) => {
-    const newRecords = hemoglobinRecords.filter(r => r.id !== id);
-    setHemoglobinRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), hemoglobinRecords: newRecords });
-  }, [hemoglobinRecords, getFullPatientData, saveAllData]);
+    setHemoglobinRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
   
   const addWeightRecord = useCallback((record: Omit<WeightRecord, 'id'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
@@ -616,10 +541,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const newBmi = calculateBmi(newRecord.value, profile.height);
     const newProfile = { ...profile, bmi: newBmi || profile.bmi };
     setProfileState(newProfile);
-
-    saveAllData({ ...getFullPatientData(), profile: newProfile, weightRecords: newRecords });
     onSuccess?.();
-  }, [profile, getMedicationForRecord, weightRecords, getFullPatientData, saveAllData]);
+  }, [profile, getMedicationForRecord, weightRecords]);
 
   const removeWeightRecord = useCallback((id: string) => {
     const updatedRecords = weightRecords.filter(r => r.id !== id);
@@ -627,24 +550,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const newLatestRecord = [...updatedRecords].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
     const newBmi = calculateBmi(newLatestRecord?.value, profile.height);
-    const newProfile = { ...profile, bmi: newBmi || profile.bmi };
-    setProfileState(newProfile);
-    saveAllData({ ...getFullPatientData(), profile: newProfile, weightRecords: updatedRecords });
-  }, [weightRecords, profile, getFullPatientData, saveAllData]);
+    setProfileState(prev => ({ ...prev, bmi: newBmi || prev.bmi }));
+  }, [weightRecords, profile]);
   
   const addBloodPressureRecord = useCallback((record: Omit<BloodPressureRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...bloodPressureRecords, newRecord];
-    setBloodPressureRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), bloodPressureRecords: newRecords });
+    setBloodPressureRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, bloodPressureRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeBloodPressureRecord = useCallback((id: string) => {
-    const newRecords = bloodPressureRecords.filter(r => r.id !== id);
-    setBloodPressureRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), bloodPressureRecords: newRecords });
-  }, [bloodPressureRecords, getFullPatientData, saveAllData]);
+    setBloodPressureRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
 
   const addLipidRecord = useCallback((data: LipidRecordData) => {
     const recordMedication = getMedicationForRecord(profile.medication);
@@ -660,15 +577,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLdlRecordsState(newLdlRecords);
     setHdlRecordsState(newHdlRecords);
     setTriglyceridesRecordsState(newTrigRecords);
-
-    saveAllData({
-        ...getFullPatientData(),
-        totalCholesterolRecords: newTcRecords,
-        ldlRecords: newLdlRecords,
-        hdlRecords: newHdlRecords,
-        triglyceridesRecords: newTrigRecords,
-    });
-  }, [profile.medication, getMedicationForRecord, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord, totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
 
   const removeLipidRecord = useCallback((id: string) => {
     const baseId = id.split('-').slice(1).join('-');
@@ -681,71 +590,47 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLdlRecordsState(newLdl);
     setHdlRecordsState(newHdl);
     setTriglyceridesRecordsState(newTrig);
-
-    saveAllData({
-      ...getFullPatientData(),
-      totalCholesterolRecords: newTc,
-      ldlRecords: newLdl,
-      hdlRecords: newHdl,
-      triglyceridesRecords: newTrig
-    });
-  }, [totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords, getFullPatientData, saveAllData]);
+  }, [totalCholesterolRecords, ldlRecords, hdlRecords, triglyceridesRecords]);
 
   const addTotalCholesterolRecord = useCallback((record: Omit<TotalCholesterolRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...totalCholesterolRecords, newRecord];
-    setTotalCholesterolRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), totalCholesterolRecords: newRecords });
+    setTotalCholesterolRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, totalCholesterolRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeTotalCholesterolRecord = useCallback((id: string) => {
-    const newRecords = totalCholesterolRecords.filter(r => r.id !== id);
-    setTotalCholesterolRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), totalCholesterolRecords: newRecords });
-  }, [totalCholesterolRecords, getFullPatientData, saveAllData]);
+    setTotalCholesterolRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
 
   const addLdlRecord = useCallback((record: Omit<LdlRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...ldlRecords, newRecord];
-    setLdlRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), ldlRecords: newRecords });
+    setLdlRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, ldlRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeLdlRecord = useCallback((id: string) => {
-    const newRecords = ldlRecords.filter(r => r.id !== id);
-    setLdlRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), ldlRecords: newRecords });
-  }, [ldlRecords, getFullPatientData, saveAllData]);
+    setLdlRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
   
   const addHdlRecord = useCallback((record: Omit<HdlRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...hdlRecords, newRecord];
-    setHdlRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), hdlRecords: newRecords });
+    setHdlRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, hdlRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeHdlRecord = useCallback((id: string) => {
-    const newRecords = hdlRecords.filter(r => r.id !== id);
-    setHdlRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), hdlRecords: newRecords });
-  }, [hdlRecords, getFullPatientData, saveAllData]);
+    setHdlRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
 
   const addTriglyceridesRecord = useCallback((record: Omit<TriglyceridesRecord, 'id' | 'medication'>, onSuccess?: () => void) => {
     const newRecord = { ...record, id: Date.now().toString(), date: new Date(record.date).toISOString(), medication: getMedicationForRecord(profile.medication) };
-    const newRecords = [...triglyceridesRecords, newRecord];
-    setTriglyceridesRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), triglyceridesRecords: newRecords });
+    setTriglyceridesRecordsState(prev => [...prev, newRecord]);
     onSuccess?.();
-  }, [profile.medication, getMedicationForRecord, triglyceridesRecords, getFullPatientData, saveAllData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const removeTriglyceridesRecord = useCallback((id: string) => {
-    const newRecords = triglyceridesRecords.filter(r => r.id !== id);
-    setTriglyceridesRecordsState(newRecords);
-    saveAllData({ ...getFullPatientData(), triglyceridesRecords: newRecords });
-  }, [triglyceridesRecords, getFullPatientData, saveAllData]);
+    setTriglyceridesRecordsState(prev => prev.filter(r => r.id !== id));
+  }, []);
 
   const toggleDiseaseBiomarker = useCallback((panelKey: string, biomarkerKey: BiomarkerKey | string) => {
     setProfileState(prevProfile => {
@@ -760,10 +645,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ...prevProfile,
           enabledBiomarkers: { ...currentEnabled, [panelKey]: newPanelBiomarkers }
         };
-        saveAllData(newState as Patient);
         return newState;
     });
-  }, [saveAllData]);
+  }, []);
 
   const toggleDiseasePanel = useCallback((panelKey: DiseasePanelKey) => {
     setProfileState(prevProfile => {
@@ -787,10 +671,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
             description: `The ${panelName} has been ${isCurrentlyEnabled ? 'disabled' : 'enabled'} for this patient.`
         });
         
-        saveAllData(newState as Patient);
         return newState;
     });
-  }, [saveAllData]);
+  }, []);
 
   const addBatchRecords = useCallback(async (batch: BatchRecords): Promise<AddBatchRecordsResult> => {
     const newMedication = getMedicationForRecord(profile.medication);
@@ -906,11 +789,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
             return prev;
         });
     }
-
-    saveAllData(getFullPatientData());
-
+    
     return result;
-  }, [profile.medication, getMedicationForRecord, saveAllData, getFullPatientData]);
+  }, [profile.medication, getMedicationForRecord]);
 
   const setTheme = useCallback((theme: Theme) => {
     setThemeState(theme);
@@ -935,21 +816,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProfileState(prev => {
         const newConditions = prev.presentMedicalConditions.map(c => c.id === conditionId ? { ...c, status: 'verified' } : c);
         const newState = { ...prev, presentMedicalConditions: newConditions };
-        saveAllData(newState as Patient);
         toast({ title: 'Condition Approved', description: 'The medical condition has been marked as verified.' });
         return newState;
     });
-  }, [saveAllData]);
+  }, []);
 
   const dismissSuggestion = useCallback((conditionId: string) => {
     setProfileState(prev => {
         const newConditions = prev.presentMedicalConditions.map(c => c.id === conditionId ? { ...c, status: 'needs_revision' } : c);
         const newState = { ...prev, presentMedicalConditions: newConditions };
-        saveAllData(newState as Patient);
         toast({ title: 'Condition Dismissed', description: 'The condition has been marked for patient revision.' });
         return newState;
     });
-  }, [saveAllData]);
+  }, []);
 
   const value: AppContextType = {
     profile,
