@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -7,39 +6,34 @@ import { PatientDashboard } from '@/components/patient-dashboard';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Logo } from '@/components/logo';
 
 export default function DashboardPage() {
-  const { isClient, hasLocalData, loadLocalPatientData } = useApp();
+  const { isClient, hasLocalData, loadLocalPatientData, profile } = useApp();
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
   const router = useRouter();
-  
+
   React.useEffect(() => {
-    const loadPatientData = () => {
-      if (hasLocalData()) {
-          loadLocalPatientData();
-          setIsLoading(false);
-      } else {
-          toast({
-              title: "No Patient Data Found",
-              description: "Create a new profile to get started.",
-              variant: "destructive"
-          });
-          router.replace('/patient/login');
+    if (!isClient) return;
+
+    if (hasLocalData()) {
+      if (!profile.id) { // Check if profile is not loaded yet
+        loadLocalPatientData();
       }
-    };
-    
-    if (isClient) {
-        loadPatientData();
+      setIsLoading(false);
+    } else {
+      router.replace('/patient/login');
     }
-    
-  }, [isClient, toast, hasLocalData, loadLocalPatientData, router]);
+  }, [isClient, hasLocalData, loadLocalPatientData, router, profile.id]);
 
   if (isLoading || !isClient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-         <p className="ml-4">Loading patient data...</p>
+        <div className="flex flex-col items-center gap-4">
+            <Logo className="h-24 w-24" />
+            <p className="ml-4 text-lg animate-pulse">Loading patient data...</p>
+        </div>
       </div>
     );
   }
