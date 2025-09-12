@@ -6,11 +6,18 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger
+} from '@/components/ui/sheet';
 import { Form } from '@/components/ui/form';
 import { Loader2, X } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
@@ -20,6 +27,7 @@ import { useApp } from '@/context/app-context';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { FormActions } from './form-actions';
+import { ScrollArea } from './ui/scroll-area';
 
 interface AddRecordDialogLayoutProps {
   open: boolean;
@@ -112,26 +120,31 @@ export function AddRecordDialogLayout({
   }
 
   if (isMobile) {
-    if (!open) {
-      return renderTrigger();
-    }
+    const sheetContent = (
+      <SheetContent side="bottom" className="h-[90vh] p-0 flex flex-col">
+        <SheetHeader className="p-6 border-b">
+          <SheetTitle>{title}</SheetTitle>
+          <SheetDescription>{description}</SheetDescription>
+        </SheetHeader>
+        <ScrollArea className="flex-1">
+          <div className="p-6">{formContent}</div>
+        </ScrollArea>
+      </SheetContent>
+    );
+    
+     if (trigger) {
+        return (
+          <Sheet open={open} onOpenChange={onOpenChange}>
+            <SheetTrigger asChild>{renderTrigger()}</SheetTrigger>
+            {sheetContent}
+          </Sheet>
+        );
+      }
+
     return (
-        <Card className="mt-4 border-primary">
-            <CardHeader>
-                <div className="flex justify-between items-start">
-                    <div>
-                        <CardTitle>{title}</CardTitle>
-                        <CardDescription>{description}</CardDescription>
-                    </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
-                        <X className="h-4 w-4" />
-                    </Button>
-                </div>
-            </CardHeader>
-            <CardContent>
-                {formContent}
-            </CardContent>
-        </Card>
+        <Sheet open={open} onOpenChange={onOpenChange}>
+            {sheetContent}
+        </Sheet>
     );
   }
 
