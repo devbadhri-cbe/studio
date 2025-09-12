@@ -27,7 +27,7 @@ interface ProfileSettingsPopoverProps {
 }
 
 export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) {
-  const { profile, setProfile, getFullPatientData, deleteProfile } = useApp();
+  const { profile, setPatient, getFullPatientData, deleteProfile } = useApp();
   
   const handleExportData = () => {
     try {
@@ -103,7 +103,7 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
                         <Label htmlFor="date-format">Date Format</Label>
                         <Select
                             value={profile.dateFormat}
-                            onValueChange={(value) => setProfile({...profile, dateFormat: value})}
+                            onValueChange={(value) => setPatient({...profile, dateFormat: value})}
                         >
                             <SelectTrigger className="col-span-2 h-8">
                                 <SelectValue />
@@ -119,7 +119,7 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
                         <Label htmlFor="unit-system">Units</Label>
                         <Select
                             value={profile.unitSystem}
-                            onValueChange={(value) => setProfile({...profile, unitSystem: value as UnitSystem})}
+                            onValueChange={(value) => setPatient({...profile, unitSystem: value as UnitSystem})}
                         >
                             <SelectTrigger className="col-span-2 h-8">
                                 <SelectValue />
