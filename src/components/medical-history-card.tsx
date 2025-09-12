@@ -66,24 +66,24 @@ interface ListItemProps {
 function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, onRevise }: ListItemProps) {
     const formatDate = useDateFormatter();
     
-    let isPending = item.status === 'pending_review';
-    let isFailed = item.status === 'failed';
-    let title = '';
+    const isPending = item.status === 'pending_review';
+    const isFailed = item.status === 'failed';
+    const isNil = 'name' in item && item.name.toLowerCase() === 'nil';
+
+    let title: string;
     let details: string | null = null;
-    let userInput: string | undefined = undefined;
-    let date: string | undefined = undefined;
-    let isNil = false;
+    let originalInput: string | undefined;
+    let date: string | undefined;
 
     if (type === 'condition') {
         const cond = item as MedicalCondition;
         title = cond.condition;
-        userInput = cond.userInput;
+        originalInput = cond.userInput;
         date = cond.date;
     } else {
         const med = item as Medication;
-        isNil = med.name.toLowerCase() === 'nil';
-        title = isNil ? med.brandName : med.name;
-        userInput = med.brandName;
+        title = isNil ? 'Nil - No medication taken' : med.name;
+        originalInput = med.brandName;
         if (!isNil && med.status !== 'failed') {
             details = [med.dosage, med.frequency, med.foodInstructions ? `${med.foodInstructions} food` : ''].filter(Boolean).join(', ');
         }
@@ -93,6 +93,8 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
         if (isFailed) onProcess(item);
     }
     
+    const showOriginalInput = originalInput && originalInput.toLowerCase() !== title.toLowerCase() && !isNil;
+
     const itemBorderColor = isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
     const itemCursor = isFailed ? "cursor-pointer" : "";
 
@@ -107,15 +109,9 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
         >
             <div className="flex items-start gap-2 w-full">
                 <div className="flex-1">
-                    {isNil ? (
-                         <span className="font-semibold text-foreground">Nil - No medication taken</span>
-                    ) : (
-                        <div>
-                            <p className="font-semibold text-foreground">{title}</p>
-                            {userInput && userInput.toLowerCase() !== title.toLowerCase() && <p className="text-muted-foreground text-xs">({userInput})</p>}
-                        </div>
-                    )}
-
+                    <p className="font-semibold text-foreground">{title}</p>
+                    {showOriginalInput && <p className="text-muted-foreground text-xs">({originalInput})</p>}
+                    
                     {isPending ? (
                         <div className="flex items-center gap-1.5 mt-1">
                             <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
