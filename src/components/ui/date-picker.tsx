@@ -8,6 +8,11 @@ import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-is-mobile"
 import { Input } from "./input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
+import { Popover, PopoverContent, PopoverTrigger } from "./popover"
+import { Calendar } from "./calendar"
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { Button } from './button';
+
 
 interface DatePickerProps {
   value?: Date;
@@ -18,25 +23,6 @@ interface DatePickerProps {
   label?: string;
 }
 
-const months = [
-    { value: '0', label: 'Jan' },
-    { value: '1', label: 'Feb' },
-    { value: '2', label: 'Mar' },
-    { value: '3', label: 'Apr' },
-    { value: '4', label: 'May' },
-    { value: '5', label: 'Jun' },
-    { value: '6', label: 'Jul' },
-    { value: '7', label: 'Aug' },
-    { value: '8', label: 'Sep' },
-    { value: '9', label: 'Oct' },
-    { value: '10', label: 'Nov' },
-    { value: '11', label: 'Dec' },
-];
-
-const days = Array.from({ length: 31 }, (_, i) => ({ value: (i + 1).toString(), label: (i + 1).toString() }));
-
-type OpenSelect = 'day' | 'month' | 'year' | null;
-
 export function DatePicker({
   value,
   onChange,
@@ -45,60 +31,8 @@ export function DatePicker({
 }: DatePickerProps) {
   const isMobile = useIsMobile();
 
-  const [day, setDay] = React.useState<string>(() => value ? format(value, 'd') : '');
-  const [month, setMonth] = React.useState<string>(() => value ? String(value.getMonth()) : '');
-  const [year, setYear] = React.useState<string>(() => value ? format(value, 'yyyy') : '');
-  const [openSelect, setOpenSelect] = React.useState<OpenSelect>(null);
-
-  React.useEffect(() => {
-    if (value && isValid(value)) {
-      setDay(format(value, 'd'));
-      setMonth(String(value.getMonth()));
-      setYear(format(value, 'yyyy'));
-    } else {
-        setDay('');
-        setMonth('');
-        setYear('');
-    }
-  }, [value]);
-
-  const handleDateChange = (newDay: string, newMonth: string, newYear: string) => {
-    if (newDay && newMonth && newYear && newYear.length === 4) {
-      const dayInt = parseInt(newDay, 10);
-      const monthInt = parseInt(newMonth, 10);
-      const yearInt = parseInt(newYear, 10);
-
-      const newDate = new Date(yearInt, monthInt, dayInt);
-
-      if (isValid(newDate) && newDate.getFullYear() === yearInt && newDate.getMonth() === monthInt && newDate.getDate() === dayInt) {
-        onChange(newDate);
-      } else {
-        onChange(undefined);
-      }
-    } else {
-      onChange(undefined);
-    }
-  };
-
-  const handleDayChange = (newDay: string) => {
-    setDay(newDay);
-    handleDateChange(newDay, month, year);
-  };
-
-  const handleMonthChange = (newMonth: string) => {
-    setMonth(newMonth);
-    handleDateChange(day, newMonth, year);
-  };
+  const [open, setOpen] = React.useState(false);
   
-  const handleYearChange = (newYear: string) => {
-    setYear(newYear);
-    handleDateChange(day, month, newYear);
-  };
-  
-  const handleOpenChange = (select: OpenSelect) => (isOpen: boolean) => {
-    setOpenSelect(isOpen ? select : null);
-  }
-
   if (isMobile) {
     const handleMobileDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const dateValue = e.target.value;
@@ -106,7 +40,6 @@ export function DatePicker({
             onChange(undefined);
             return;
         }
-        // Add time to avoid timezone issues where parsing `yyyy-MM-dd` might result in the previous day.
         const date = parse(dateValue, 'yyyy-MM-dd', new Date());
         if (isValid(date)) {
             onChange(date);
@@ -121,7 +54,7 @@ export function DatePicker({
             value={value && isValid(value) ? format(value, 'yyyy-MM-dd') : ''}
             onChange={handleMobileDateChange}
             className={cn(
-                "w-full justify-start text-left font-normal h-10 border border-red-500",
+                "w-full justify-start text-left font-normal h-10",
                 !value && "text-muted-foreground"
             )}
             style={{ colorScheme: 'light' }}
@@ -129,73 +62,36 @@ export function DatePicker({
     )
   }
 
-  const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   return (
-    <div className="flex items-center rounded-md border border-red-500 h-10 w-full px-2 space-x-1 text-sm">
-      <div className="w-auto">
-        <Select 
-            value={day} 
-            onValueChange={handleDayChange}
-            open={openSelect === 'day'}
-            onOpenChange={handleOpenChange('day')}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant={"outline"}
+          className={cn(
+            "w-full justify-start text-left font-normal",
+            !value && "text-muted-foreground"
+          )}
         >
-          <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent">
-            <SelectValue placeholder="Day" />
-          </SelectTrigger>
-          <SelectContent>
-            {days.map(d => (
-              <SelectItem key={d.value} value={d.value}>
-                {d.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <span className="text-muted-foreground">/</span>
-
-      <div className="w-auto">
-        <Select 
-            value={month} 
-            onValueChange={handleMonthChange}
-            open={openSelect === 'month'}
-            onOpenChange={handleOpenChange('month')}
-        >
-            <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent">
-            <SelectValue placeholder="Month" />
-            </SelectTrigger>
-            <SelectContent>
-            {months.map(m => (
-                <SelectItem key={m.value} value={String(m.value)}>
-                {m.label}
-                </SelectItem>
-            ))}
-            </SelectContent>
-        </Select>
-       </div>
-
-      <span className="text-muted-foreground">/</span>
-      
-      <div className="w-auto">
-        <Select 
-            value={year} 
-            onValueChange={handleYearChange}
-            open={openSelect === 'year'}
-            onOpenChange={handleOpenChange('year')}
-        >
-            <SelectTrigger icon={null} className="border-0 p-0 shadow-none focus:ring-0 h-auto w-full focus-visible:ring-0 bg-transparent">
-            <SelectValue placeholder="Year" />
-            </SelectTrigger>
-            <SelectContent>
-            {years.map(y => (
-                <SelectItem key={y} value={y.toString()}>
-                {y}
-                </SelectItem>
-            ))}
-            </SelectContent>
-        </Select>
-      </div>
-    </div>
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {value ? format(value, "PPP") : <span>Pick a date</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0">
+        <Calendar
+          mode="single"
+          selected={value}
+          onSelect={(day) => {
+            onChange(day);
+            setOpen(false);
+          }}
+          fromYear={fromYear}
+          toYear={toYear}
+          captionLayout="dropdown-buttons"
+          initialFocus
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
+
