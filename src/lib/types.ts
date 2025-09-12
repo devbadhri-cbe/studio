@@ -7,7 +7,7 @@ export interface MedicalCondition {
   userInput?: string;
   icdCode?: string;
   synopsis?: string;
-  status: 'verified' | 'pending_review' | 'needs_revision' | 'failed';
+  status: 'processed' | 'pending_review' | 'needs_revision' | 'failed';
 }
 
 export type FoodInstruction = 'before' | 'after' | 'with';

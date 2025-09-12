@@ -29,7 +29,7 @@ export function AddMedicalConditionForm({
     onCancel,
     initialData,
 }: AddMedicalConditionFormProps) {
-  const { profile, updateMedicalCondition } = useApp();
+  const { profile, updateMedicalCondition, addMedicalCondition } = useApp();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -62,44 +62,42 @@ export function AddMedicalConditionForm({
         return;
     }
 
-    const newCondition: MedicalCondition = {
-      id: initialData?.id || `cond-${Date.now()}`,
-      userInput: data.userInput,
-      condition: data.userInput,
-      icdCode: 'loading...',
-      synopsis: '',
-      date: data.date.toISOString(),
-      status: 'pending_review',
-    };
-
-    onSave(newCondition);
-    toast({
-      title: "Processing Condition...",
-      description: `AI is analyzing "${data.userInput}".`,
-    });
-    onCancel();
-
     try {
+      toast({
+        title: "Processing Condition...",
+        description: `AI is analyzing "${data.userInput}".`,
+      });
       const result = await processMedicalCondition({ condition: data.userInput });
-      if (result.isValid && result.standardizedName && result.icdCode) {
-          updateMedicalCondition({
-              ...newCondition,
-              condition: result.standardizedName,
-              icdCode: result.icdCode,
-              synopsis: result.synopsis || '',
-          });
-          toast({ title: 'Condition Processed', description: `AI identified: ${result.standardizedName} (${result.icdCode})` });
+      
+      const newCondition: MedicalCondition = {
+        id: initialData?.id || `cond-${Date.now()}`,
+        userInput: data.userInput,
+        condition: result.isValid ? result.standardizedName! : data.userInput,
+        icdCode: result.isValid ? result.icdCode : 'failed',
+        synopsis: result.synopsis || '',
+        date: data.date.toISOString(),
+        status: result.isValid ? 'processed' : 'failed',
+      };
+
+      if (initialData?.id) {
+          updateMedicalCondition(newCondition);
       } else {
-          updateMedicalCondition({ ...newCondition, icdCode: 'failed' });
-          toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}` });
+          addMedicalCondition(newCondition);
       }
+      
+      if (result.isValid) {
+        toast({ title: 'Condition Processed', description: `AI identified: ${result.standardizedName}` });
+      } else {
+        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}. Please review.` });
+      }
+      onCancel();
+
     } catch(e) {
       console.error(e);
-      updateMedicalCondition({ ...newCondition, icdCode: 'failed' });
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   return (

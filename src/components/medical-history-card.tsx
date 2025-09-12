@@ -66,38 +66,35 @@ interface ListItemProps {
 function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, onRevise }: ListItemProps) {
     const formatDate = useDateFormatter();
     
-    let isPending = false;
-    let isFailed = false;
+    let isPending = item.status === 'pending_review';
+    let isFailed = item.status === 'failed';
     let title = '';
     let details: string | null = null;
-    let icdCode: string | undefined = undefined;
+    let userInput: string | undefined = undefined;
     let date: string | undefined = undefined;
     let isNil = false;
 
     if (type === 'condition') {
         const cond = item as MedicalCondition;
-        isPending = cond.status === 'pending_review';
-        isFailed = cond.status === 'failed';
         title = cond.condition;
-        icdCode = cond.icdCode;
+        userInput = cond.userInput;
         date = cond.date;
     } else {
         const med = item as Medication;
-        isPending = med.status === 'pending_review';
-        isFailed = med.status === 'failed';
         isNil = med.name.toLowerCase() === 'nil';
-        title = isPending || isNil ? med.brandName : med.name;
-        if (!isPending && !isNil && med.status !== 'failed') {
+        title = isNil ? med.brandName : med.name;
+        userInput = med.brandName;
+        if (!isNil && med.status !== 'failed') {
             details = [med.dosage, med.frequency, med.foodInstructions ? `${med.foodInstructions} food` : ''].filter(Boolean).join(', ');
         }
     }
     
     const handleItemClick = () => {
-        if (isPending || isFailed) onProcess(item);
+        if (isFailed) onProcess(item);
     }
     
     const itemBorderColor = isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
-    const itemCursor = (isPending || isFailed) ? "cursor-pointer" : "";
+    const itemCursor = isFailed ? "cursor-pointer" : "";
 
     return (
         <li
@@ -128,8 +125,8 @@ function ListItem({ item, type, isEditing, onRemove, onShowSynopsis, onProcess, 
                         </div>
                     ) : (
                         <>
-                            {details && <p className="text-muted-foreground text-xs">{`(${details})`}</p>}
-                            {icdCode && <p className="text-xs text-muted-foreground">ICD-11: {icdCode}</p>}
+                            {userInput && userInput.toLowerCase() !== title.toLowerCase() && <p className="text-muted-foreground text-xs">({userInput})</p>}
+                            {details && <p className="text-muted-foreground text-xs">{details}</p>}
                             {date && <p className="text-xs text-muted-foreground">{formatDate(date)}</p>}
                         </>
                     )}
@@ -183,7 +180,7 @@ export function MedicalHistoryCard() {
   const isMedicationNil = profile.medication.length === 1 && profile.medication[0].name.toLowerCase() === 'nil';
 
   const handleProcessCondition = async (condition: MedicalCondition) => {
-    toast({ title: "Processing Condition...", description: `Asking AI about "${condition.userInput}"`});
+    toast({ title: "Re-processing Condition...", description: `Asking AI about "${condition.userInput}"`});
     updateMedicalCondition({ ...condition, status: 'pending_review' });
     try {
       const result = await processMedicalCondition({ condition: condition.userInput || '' });
@@ -193,12 +190,12 @@ export function MedicalHistoryCard() {
             condition: result.standardizedName,
             icdCode: result.icdCode,
             synopsis: result.synopsis || '',
-            status: 'verified',
+            status: 'processed',
         });
-        toast({ title: 'Condition Processed', description: `AI identified: ${result.standardizedName} (${result.icdCode})` });
+        toast({ title: 'Condition Processed', description: `AI identified: ${result.standardizedName}` });
       } else {
         updateMedicalCondition({ ...condition, status: 'failed' });
-        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}` });
+        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}. Please review.` });
       }
     } catch(e) {
       console.error(e);
@@ -208,7 +205,7 @@ export function MedicalHistoryCard() {
   }
 
   const handleProcessMedication = async (med: Medication) => {
-    toast({ title: "Processing Medication...", description: `Asking AI about "${med.brandName}"`});
+    toast({ title: "Re-processing Medication...", description: `Asking AI about "${med.brandName}"`});
     updateMedication({ ...med, status: 'pending_review' });
      try {
       const result = await getMedicationInfo({ 

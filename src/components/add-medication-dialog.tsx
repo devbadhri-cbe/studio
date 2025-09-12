@@ -20,7 +20,7 @@ interface AddMedicationFormProps {
 
 export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { addMedication, updateMedication } = useApp();
+  const { addMedication } = useApp();
   const { toast } = useToast();
 
   const form = useForm({
@@ -35,27 +35,12 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
   const onSubmit = async (data: {medicationName: string, dosage: string, frequency: string, foodInstructions?: FoodInstruction}) => {
     setIsSubmitting(true);
     
-    const newMedication: Omit<Medication, 'id'> = {
-        name: 'pending...',
-        brandName: data.medicationName,
-        dosage: data.dosage,
-        frequency: data.frequency,
-        foodInstructions: data.foodInstructions,
-        status: 'pending_review',
-    };
-
-    // Add medication to state immediately for UI feedback
-    const tempId = addMedication(newMedication);
-
-    toast({
-        title: 'Processing Medication...',
-        description: `AI is analyzing "${data.medicationName}".`
-    });
-
-    onCancel();
-    onSuccess?.();
-    
     try {
+      toast({
+          title: 'Processing Medication...',
+          description: `AI is analyzing "${data.medicationName}".`
+      });
+
       const result = await getMedicationInfo({ 
         medicationName: data.medicationName,
         dosage: data.dosage,
@@ -63,27 +48,37 @@ export function AddMedicationForm({ onSuccess, onCancel }: AddMedicationFormProp
         foodInstructions: data.foodInstructions,
       });
 
+      const newMedication: Omit<Medication, 'id'> = {
+          name: result.activeIngredient || data.medicationName,
+          brandName: result.correctedMedicationName || data.medicationName,
+          dosage: result.dosage || data.dosage,
+          frequency: result.frequency || data.frequency,
+          foodInstructions: result.foodInstructions || data.foodInstructions,
+          status: result.activeIngredient ? 'processed' : 'failed',
+      };
+      
+      addMedication(newMedication);
+
       if (result.activeIngredient) {
-        updateMedication({
-             id: tempId,
-             name: result.activeIngredient,
-             dosage: result.dosage || data.dosage,
-             frequency: result.frequency || data.frequency,
-             foodInstructions: result.foodInstructions || data.foodInstructions,
-             brandName: result.correctedMedicationName || data.medicationName,
-             status: 'processed',
-        });
         toast({ title: "Medication Processed", description: `AI identified: ${result.activeIngredient}`});
       } else {
-        throw new Error('AI could not identify the medication.');
+        toast({ variant: 'destructive', title: 'Could not identify medication.', description: 'Please review the entry.' });
       }
+
+      onCancel();
+      onSuccess?.();
+
     } catch(e) {
       console.error(e);
-      updateMedication({
-          id: tempId,
-          ...newMedication,
+      const failedMedication: Omit<Medication, 'id'> = {
+          name: data.medicationName,
+          brandName: data.medicationName,
+          dosage: data.dosage,
+          frequency: data.frequency,
+          foodInstructions: data.foodInstructions,
           status: 'failed',
-      });
+      };
+      addMedication(failedMedication);
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication.' });
     }
     
