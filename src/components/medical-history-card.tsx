@@ -84,36 +84,47 @@ function MedicationListItem({ med, isEditing, onRemove, onShowSynopsis, onProces
             ) : (
                 <div>
                     <p className="font-semibold text-foreground">{isPending ? med.brandName : med.name}</p>
-                    <p className="text-muted-foreground text-xs italic">
-                        {isPending ? "Click to process with AI" : `Patient Input: "${med.brandName}"`}
-                    </p>
-                    {!isPending && <p className="text-muted-foreground text-xs">{formatDetails(med)}</p>}
+                    {isPending ? (
+                       <p className="text-muted-foreground text-xs italic">Click to process with AI</p>
+                    ) : (
+                      <>
+                        <p className="text-muted-foreground text-xs italic">
+                            Patient Input: "{med.brandName}"
+                        </p>
+                        <p className="text-muted-foreground text-xs">{formatDetails(med)}</p>
+                      </>
+                    )}
                 </div>
             )}
             </div>
                 <div className="flex items-center shrink-0">
-                     {isPending && <Loader2 className="h-4 w-4 animate-spin text-yellow-500" />}
-                    {!isPending && med.name.toLowerCase() !== 'nil' && (
-                        <ActionIcon 
-                            tooltip="View Synopsis"
-                            icon={<Info className="h-5 w-5 text-blue-500" />}
-                            onClick={(e) => { e.stopPropagation(); onShowSynopsis(med.id); }}
-                        />
-                    )}
-                    {isEditing && med.name.toLowerCase() !== 'nil' && (
-                         <ActionIcon 
-                            tooltip="Delete Medication"
-                            icon={<Trash2 className="h-5 w-5 text-destructive" />}
-                            onClick={(e) => { e.stopPropagation(); onRemove(med.id); }}
-                        />
-                    )}
+                     {isPending ? (
+                       <Loader2 className="h-4 w-4 animate-spin text-yellow-500" />
+                     ) : (
+                       <>
+                        {med.name.toLowerCase() !== 'nil' && (
+                            <ActionIcon 
+                                tooltip="View Synopsis"
+                                icon={<Info className="h-5 w-5 text-blue-500" />}
+                                onClick={(e) => { e.stopPropagation(); onShowSynopsis(med.id); }}
+                            />
+                        )}
+                        {isEditing && med.name.toLowerCase() !== 'nil' && (
+                            <ActionIcon 
+                                tooltip="Delete Medication"
+                                icon={<Trash2 className="h-5 w-5 text-destructive" />}
+                                onClick={(e) => { e.stopPropagation(); onRemove(med.id); }}
+                            />
+                        )}
+                       </>
+                     )}
                 </div>
         </li>
     )
 }
 
 export function MedicalHistoryCard() {
-  const { profile, addMedicalCondition, updateMedicalCondition, removeMedication, setMedicationNil, removeMedicalCondition: removeMedicalConditionFromContext } = useApp();
+  const { profile, addMedicalCondition, updateMedicalCondition, removeMedication, setMedicationNil, removeMedicalCondition: removeMedicalConditionFromContext, updateMedication } = useApp();
   const [activeView, setActiveView] = React.useState<ActiveView>('none');
   const [activeData, setActiveData] = React.useState<any>(null);
 
@@ -155,7 +166,7 @@ export function MedicalHistoryCard() {
         foodInstructions: med.foodInstructions,
       });
       if (result.activeIngredient) {
-        updateMedicalCondition({ // Note: this seems to be a typo in original code, should be updateMedication. Assuming this is what's intended
+        updateMedication({
              ...med,
              name: result.activeIngredient,
              dosage: result.dosage || med.dosage,

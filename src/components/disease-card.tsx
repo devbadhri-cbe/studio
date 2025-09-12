@@ -57,14 +57,9 @@ export function DiseaseCard({ condition, onRevise, isEditMode, onRemove, onShowS
        >
         <div className="flex items-start gap-2 w-full">
             <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <p className="font-semibold text-foreground">{condition.condition}</p>
-              </div>
+              <p className="font-semibold text-foreground">{condition.condition}</p>
               {isIcdLoading ? (
-                 <div className="flex items-center gap-2 text-xs text-yellow-600">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    <span>Click to process with AI...</span>
-                 </div>
+                 <p className="text-muted-foreground text-xs italic">Click to process with AI</p>
               ) : (
                 condition.icdCode && condition.icdCode !== 'failed' && (
                     <p className="text-xs text-muted-foreground">ICD-11: {condition.icdCode}</p>
@@ -73,20 +68,23 @@ export function DiseaseCard({ condition, onRevise, isEditMode, onRemove, onShowS
               <p className="text-xs text-muted-foreground">{formatDate(condition.date)}</p>
             </div>
             <div className="flex items-center shrink-0 gap-1">
-                {!isIcdLoading && (
+                {isIcdLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-yellow-500" />
+                ) : (
+                  <>
                     <ActionIcon 
                         tooltip="View Synopsis"
                         icon={<Info className="h-5 w-5 text-blue-500" />}
                         onClick={handleToggleSynopsis}
                     />
-                )}
-                
-                {isEditMode && (
-                    <ActionIcon 
-                        tooltip="Delete Condition"
-                        icon={<Trash2 className="h-5 w-5 text-destructive" />}
-                        onClick={handleRemoveCondition}
-                    />
+                    {isEditMode && (
+                        <ActionIcon 
+                            tooltip="Delete Condition"
+                            icon={<Trash2 className="h-5 w-5 text-destructive" />}
+                            onClick={handleRemoveCondition}
+                        />
+                    )}
+                  </>
                 )}
             </div>
         </div>
