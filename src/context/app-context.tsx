@@ -153,19 +153,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   
   const setPatient: AppContextType['setPatient'] = (newPatient) => {
     setPatientState(newPatient);
-    if (isClient && !isReadOnlyView && newPatient) {
-        // Update BMI whenever patient data changes (e.g., height update)
-        const latestWeight = [...(newPatient.weightRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
-        const newBmi = calculateBmi(latestWeight?.value, newPatient.height);
-        const patientWithBmi = produce(newPatient, draft => {
+  }
+
+  React.useEffect(() => {
+    if (isClient && !isReadOnlyView) {
+      if (patient) {
+        // Update BMI whenever patient data changes (e.g., height update or new weight record)
+        const latestWeight = [...(patient.weightRecords || [])].sort((a,b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())[0];
+        const newBmi = calculateBmi(latestWeight?.value, patient.height);
+        
+        const patientWithBmi = produce(patient, draft => {
             draft.bmi = newBmi;
         });
+
         localStorage.setItem('patientData', JSON.stringify(patientWithBmi));
-        setPatientState(patientWithBmi); // update state with BMI
-    } else if (isClient && !isReadOnlyView && !newPatient) {
+      } else {
         localStorage.removeItem('patientData');
+      }
     }
-  }
+  }, [patient, isClient, isReadOnlyView]);
+
 
   const setPatientData: AppContextType['setPatientData'] = (data, isReadOnly) => {
     setPatientState(data);
@@ -207,11 +214,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             (draft as any)[recordType] = [];
           }
           (draft[recordType] as T[]).push(newRecord);
-
-          // Recalculate BMI if a new weight record is added
-          if (recordType === 'weightRecords') {
-              draft.bmi = calculateBmi((record as unknown as WeightRecord).value, draft.height);
-          }
       });
       setPatient(nextState);
   };
