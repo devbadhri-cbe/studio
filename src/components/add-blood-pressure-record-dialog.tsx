@@ -55,6 +55,8 @@ export function AddBloodPressureRecordDialog({ onCancel }: AddBloodPressureRecor
         <DateInput
             name="date"
             label="Test Date"
+            fromYear={new Date().getFullYear() - 10}
+            toYear={new Date().getFullYear()}
         />
         <div className="grid grid-cols-2 gap-4">
             <FormField
