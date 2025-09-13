@@ -19,6 +19,7 @@ import { HypertensionCard } from '@/components/hypertension-card';
 import { LipidPanelCard } from '@/components/lipid-panel-card';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import { AnemiaCard } from '@/components/anemia-card';
 
 export default function PatientDashboardPage() {
   const { isClient, patient } = useApp();
@@ -54,8 +55,9 @@ export default function PatientDashboardPage() {
   
   const DiseasePanels = () => {
     const panels = [
-        <DiabetesCard key="diabetes" />,
         <HypertensionCard key="hypertension" />,
+        <AnemiaCard key="anemia" />,
+        <DiabetesCard key="diabetes" />,
         <LipidPanelCard key="lipid" />,
     ];
 
@@ -75,7 +77,12 @@ export default function PatientDashboardPage() {
 
     return (
         <div className="grid grid-cols-1 gap-6">
-            {panels}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <HypertensionCard />
+                <AnemiaCard />
+            </div>
+            <DiabetesCard />
+            <LipidPanelCard />
         </div>
     );
   }

@@ -1,24 +1,24 @@
 'use client';
 
 import * as React from 'react';
-import { Heart } from 'lucide-react';
+import { HeartCrack } from 'lucide-react'; // Using HeartCrack as a placeholder
 import { UniversalCard } from './universal-card';
-import { BloodPressureCard } from './blood-pressure-card';
+import { HemoglobinCard } from './hemoglobin-card';
 import { Collapsible, CollapsibleContent } from './ui/collapsible';
 import { cn } from '@/lib/utils';
 
-export function HypertensionCard() {
+export function AnemiaCard() {
     const [isOpen, setIsOpen] = React.useState(true);
 
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <UniversalCard
-                title="Hypertension Panel"
-                icon={<Heart className="h-6 w-6 text-primary" />}
+                title="Anemia Panel"
+                icon={<HeartCrack className="h-6 w-6 text-primary" />}
             >
                 <CollapsibleContent>
                     <div className={cn("grid grid-cols-1 gap-6 transition-all")}>
-                        <BloodPressureCard isReadOnly />
+                        <HemoglobinCard isReadOnly />
                     </div>
                 </CollapsibleContent>
             </UniversalCard>
