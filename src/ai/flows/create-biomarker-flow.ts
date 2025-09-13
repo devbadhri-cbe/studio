@@ -63,30 +63,21 @@ const prompt = ai.definePrompt({
     input: { schema: CreateBiomarkerInputSchema },
     output: { schema: CreateBiomarkerOutputSchema },
     model: gemini15Flash,
-    prompt: `You are an expert Next.js and React developer. Your task is to generate the code for a new biomarker, which includes a Card, a Chart, and an "Add Record" Dialog component.
+    prompt: `You are an expert Next.js and React developer. Your task is to generate the code for a new biomarker Card component.
 
 **Biomarker Details:**
 - **Name**: {{name}}
 - **Key**: {{key}}
 - **Unit**: {{unit}}
 
-**Your instructions are to generate the complete, final code for the following three files:**
+**Your instruction is to generate the complete, final code for the following file:**
 
 1.  **Card Component (src/components/{{key}}-card.tsx):**
     - This is the main component. It must use the existing \`BiomarkerCard\` as a wrapper.
-    - It should import and pass the newly created Chart and Dialog components as props to \`BiomarkerCard\`.
+    - It should include placeholder Chart and Dialog components.
     - It must define \`getStatus\` and \`formatRecord\` functions with appropriate placeholder logic for the new biomarker.
 
-2.  **Chart Component (src/components/{{key}}-chart.tsx):**
-    - This component should use \`recharts\` to create a simple \`LineChart\` for visualizing the biomarker's data over time.
-    - Include placeholder text for when no data is available.
-
-3.  **Dialog Component (src/components/add-{{key}}-record-dialog.tsx):**
-    - This component must use the \`AddRecordDialogLayout\` for its structure.
-    - It needs a \`DatePicker\` for the date and a numerical \`Input\` for the biomarker's value.
-    - Use \`zod\` for basic form validation (e.g., date is required, value is a positive number).
-
-Generate the complete code for all three files. Ensure all file paths are relative to the \`src/\` directory.
+Generate the complete code for the file. Ensure the file path is relative to the \`src/\` directory.
 `,
 });
 
