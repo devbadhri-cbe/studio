@@ -25,6 +25,7 @@ import { Alert, AlertDescription } from './ui/alert';
 import { produce } from 'immer';
 import { EditMedicationForm } from './edit-medication-form';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { v4 as uuidv4 } from 'uuid';
 
 type ActiveView = 'none' | `add` | `edit_${string}` | `synopsis_${string}`;
 
@@ -399,10 +400,13 @@ export function MedicalHistoryCard() {
   }
   
   const handleAddCondition = (data: Omit<MedicalCondition, 'id' | 'status' | 'synopsis' | 'icdCode'>) => {
-      addMedicalCondition({
+      const newCondition: MedicalCondition = {
           ...data,
+          id: uuidv4(),
           status: 'pending_review',
-      });
+      };
+      addMedicalCondition(newCondition);
+      handleProcessCondition(newCondition);
   }
 
   return (
