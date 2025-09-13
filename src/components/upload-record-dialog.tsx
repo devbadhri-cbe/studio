@@ -326,6 +326,7 @@ export function UploadRecordDialog() {
         return extractedData ? (
           <ExtractedRecordReview
             data={extractedData}
+            profile={profile}
             onSave={handleSaveLabReport}
             onCancel={resetState}
           />

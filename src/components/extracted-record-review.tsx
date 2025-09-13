@@ -13,9 +13,11 @@ import { Label } from './ui/label';
 import { Alert, AlertDescription } from './ui/alert';
 import { DatePicker } from './ui/date-picker';
 import { toNgDl } from '@/lib/unit-conversions';
+import { Patient } from '@/lib/types';
 
 interface ExtractedRecordReviewProps {
   data: BatchRecords;
+  profile: Patient | null;
   onSave: (editedData: BatchRecords) => void;
   onCancel: () => void;
 }
@@ -60,8 +62,8 @@ const RecordRow: React.FC<{ label: string; value?: string | number | null; unit?
   );
 };
 
-export function ExtractedRecordReview({ data, onSave, onCancel }: ExtractedRecordReviewProps) {
-  const { biomarkerUnit, profile } = useApp();
+export function ExtractedRecordReview({ data, profile, onSave, onCancel }: ExtractedRecordReviewProps) {
+  const { biomarkerUnit } = useApp();
   const [editedData, setEditedData] = React.useState<BatchRecords>(data);
 
   React.useEffect(() => {
@@ -98,7 +100,7 @@ export function ExtractedRecordReview({ data, onSave, onCancel }: ExtractedRecor
     }
   }
 
-  const nameMismatch = !!(editedData.patientName && profile.name.toLowerCase() !== editedData.patientName.toLowerCase());
+  const nameMismatch = !!(profile && editedData.patientName && profile.name.toLowerCase() !== editedData.patientName.toLowerCase());
 
   const getRecordDate = () => {
     for (const key in editedData) {
@@ -124,7 +126,7 @@ export function ExtractedRecordReview({ data, onSave, onCancel }: ExtractedRecor
         </CardHeader>
         <CardContent className="space-y-4">
 
-          {nameMismatch && (
+          {nameMismatch && profile && (
             <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
