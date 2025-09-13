@@ -3,25 +3,18 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { ArrowLeft, Share2, Droplet } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
-import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { TitleBar } from '@/components/ui/title-bar';
 import { Logo } from './logo';
 import { ProfileCard } from './profile-card';
 import { MedicalHistoryCard } from './medical-history-card';
-import { SharePatientAccessDialog } from './share-patient-access-dialog';
 import { ReminderCard } from './reminder-card';
 import { InsightsCard } from './insights-card';
-import { BiomarkersPanel } from './biomarkers-panel';
-import { DashboardSectionToggle } from './dashboard-section-toggle';
-import { DiseasePanel } from './disease-panel';
-import { AddBiomarkerCard } from './add-biomarker-card';
-import { Collapsible, CollapsibleContent } from './ui/collapsible';
 import { WeightRecordCard } from './weight-record-card';
 import { BloodPressureCard } from './blood-pressure-card';
 
@@ -29,14 +22,7 @@ export function PatientDashboard() {
   const { isClient, isReadOnlyView, patient } = useApp();
   const router = useRouter();
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [isShareOpen, setIsShareOpen] = React.useState(false);
   
-  const [isPanelsOpen, setIsPanelsOpen] = React.useState(true);
-  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
-  const [panelSearchQuery, setPanelSearchQuery] = React.useState('');
-  const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
-
-
   React.useEffect(() => {
     const handleScroll = () => {
       const offset = window.scrollY;
@@ -61,24 +47,9 @@ export function PatientDashboard() {
     <>
       <div className="flex min-h-screen w-full flex-col bg-background">
         <TitleBar
-          title={['Health', 'Guardian']}
+          title={['Health', 'Guardian', 'Lite']}
           subtitle="Developer, Dr N Badhrinathan"
           isScrolled={isScrolled}
-          rightChildren={
-            !isReadOnlyView ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => setIsShareOpen(true)}>
-                    <Share2 className="h-4 w-4" />
-                    <span className="sr-only">Share or Sync Data</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Share or Sync Data</p>
-                </TooltipContent>
-              </Tooltip>
-            ) : null
-          }
         >
           {isReadOnlyView && (
             <Tooltip>
@@ -96,7 +67,9 @@ export function PatientDashboard() {
         </TitleBar>
         <main className="flex-1 p-4 md:p-6 pb-4">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
-            <PatientHeader />
+            <div className="flex items-center gap-4">
+                <PatientHeader />
+            </div>
             <Separator />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 grid grid-cols-1 gap-6">
@@ -115,7 +88,6 @@ export function PatientDashboard() {
           </div>
         </main>
       </div>
-      {patient && <SharePatientAccessDialog open={isShareOpen} onOpenChange={setIsShareOpen} patient={patient} />}
     </>
   );
 }

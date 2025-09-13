@@ -63,39 +63,30 @@ const prompt = ai.definePrompt({
     input: { schema: CreateBiomarkerInputSchema },
     output: { schema: CreateBiomarkerOutputSchema },
     model: gemini15Flash,
-    prompt: `You are an expert Next.js and React developer tasked with creating the necessary .tsx files for a new health biomarker card in an existing application.
+    prompt: `You are an expert Next.js and React developer. Your task is to generate the code for a new biomarker, which includes a Card, a Chart, and an "Add Record" Dialog component.
 
-You MUST generate three separate files:
-1.  **Card Component**: This component brings everything together. It MUST use the existing 'BiomarkerCard' as a template.
-2.  **Chart Component**: A simple line chart to visualize the biomarker data over time.
-3.  **Dialog Component**: A dialog for adding new records of this biomarker.
+**Biomarker Details:**
+- **Name**: {{name}}
+- **Key**: {{key}}
+- **Unit**: {{unit}}
 
-**Instructions:**
+**Your instructions are to generate the complete, final code for the following three files:**
 
--   **Biomarker Name**: {{name}}
--   **Biomarker Key (for props and state)**: {{key}}
--   **Unit of Measurement**: {{unit}}
+1.  **Card Component (src/components/{{key}}-card.tsx):**
+    - This is the main component. It must use the existing \`BiomarkerCard\` as a wrapper.
+    - It should import and pass the newly created Chart and Dialog components as props to \`BiomarkerCard\`.
+    - It must define \`getStatus\` and \`formatRecord\` functions with appropriate placeholder logic for the new biomarker.
 
-**Card Component Requirements (e.g., src/components/{{key}}-card.tsx):**
--   Import and use the 'BiomarkerCard' component from '@/components/biomarker-card'.
--   Create a new 'Add...Dialog' component and pass it to the 'addRecordDialog' prop.
--   Create a new '...Chart' component and pass it to the 'chart' prop.
--   Define a 'getStatus' function with placeholder logic (e.g., return 'Normal').
--   Define a 'formatRecord' function to display the value and unit.
--   Use a suitable icon from 'lucide-react'.
+2.  **Chart Component (src/components/{{key}}-chart.tsx):**
+    - This component should use \`recharts\` to create a simple \`LineChart\` for visualizing the biomarker's data over time.
+    - Include placeholder text for when no data is available.
 
-**Chart Component Requirements (e.g., src/components/{{key}}-chart.tsx):**
--   Use 'recharts' to create a simple 'LineChart'.
--   Include placeholder text for when there is no data.
--   Display the value and unit in the tooltip.
+3.  **Dialog Component (src/components/add-{{key}}-record-dialog.tsx):**
+    - This component must use the \`AddRecordDialogLayout\` for its structure.
+    - It needs a \`DatePicker\` for the date and a numerical \`Input\` for the biomarker's value.
+    - Use \`zod\` for basic form validation (e.g., date is required, value is a positive number).
 
-**Dialog Component Requirements (e.g., src/components/add-{{key}}-record-dialog.tsx):**
--   Use the 'AddRecordDialogLayout' component.
--   Include a 'DatePicker' and a numerical 'Input' for the value.
--   Use 'zod' for basic form validation (e.g., required date, positive number).
--   Call the appropriate 'add...Record' function from the 'useApp' context on submit.
-
-Generate the complete code for all three files. Ensure all paths are relative to the 'src/directory.
+Generate the complete code for all three files. Ensure all file paths are relative to the \`src/\` directory.
 `,
 });
 
