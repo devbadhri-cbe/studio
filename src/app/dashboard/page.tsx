@@ -12,7 +12,6 @@ import { BiomarkersPanel } from '@/components/biomarkers-panel';
 import { AddNewBiomarker } from '@/components/add-new-biomarker';
 import { DashboardSectionToggle } from '@/components/dashboard-section-toggle';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
-import { Separator } from '@/components/ui/separator';
 
 export default function HomeDashboard() {
   const router = useRouter();

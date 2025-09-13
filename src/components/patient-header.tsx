@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
-import { FileText } from 'lucide-react';
+import { UploadCloud } from 'lucide-react';
 
 export function PatientHeader() {
   const { patient, isReadOnlyView } = useApp();
@@ -21,6 +21,11 @@ export function PatientHeader() {
           Your health overview. Consult your doctor before making any decisions.
       </p>
     </div>
+     {!isReadOnlyView && (
+      <div className="flex items-center">
+        <UploadRecordDialog />
+      </div>
+    )}
     </>
   );
 }

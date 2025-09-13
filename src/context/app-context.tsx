@@ -5,7 +5,7 @@ import { createContext } from 'react';
 import { type Patient, type Hba1cRecord, type WeightRecord, type FastingBloodGlucoseRecord, type BloodPressureRecord, type ThyroidRecord, type MedicalCondition, type Medication, type ThyroxineRecord, type SerumCreatinineRecord, type UricAcidRecord, TotalCholesterolRecord, LdlRecord, HdlRecord, TriglyceridesRecord } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 import { produce } from 'immer';
-import { getBmiStatus, calculateBmi } from '@/lib/utils';
+import { calculateBmi } from '@/lib/utils';
 import { toMmolL, toMgDl, toGL, toGDL } from '@/lib/unit-conversions';
 import { getHealthInsights } from '@/ai/flows/health-insights-flow';
 import { HealthInsightsInput, HealthInsightsOutput } from '@/lib/ai-types';
@@ -21,7 +21,6 @@ export type BatchRecords = {
     hemoglobin?: { date: string; hemoglobin: number };
     thyroid?: { date: string; tsh?: number; t3?: number; t4?: number };
     lipidPanel?: { date: string; totalCholesterol?: number; ldl?: number; hdl?: number; triglycerides?: number };
-    vitaminD?: { date: string; value: number; units: 'ng/mL' | 'nmol/L' };
 };
 
 
@@ -107,7 +106,6 @@ interface AppContextType {
   getDisplayHemoglobinValue: (dbValue: number) => number;
   getDbHemoglobinValue: (displayValue: number) => number;
   getDisplayLipidValue: (dbValue: number, type: 'total' | 'ldl' | 'hdl' | 'triglycerides') => number;
-  getDisplayVitaminDValue: (dbValue: number, unit: 'ng/mL' | 'nmol/L') => number;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -460,17 +458,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const getDisplayLipidValue = (dbValue: number, type: 'total' | 'ldl' | 'hdl' | 'triglycerides') => {
     return biomarkerUnit === 'si' ? parseFloat(toMmolL(dbValue, type).toFixed(2)) : dbValue;
   }
-  
-  const getDisplayVitaminDValue = (dbValue: number, unit: 'ng/mL' | 'nmol/L') => {
-      // Conversion factor: 1 ng/mL = 2.496 nmol/L
-      if (unit === 'nmol/L' && biomarkerUnit === 'conventional') {
-          return parseFloat((dbValue / 2.496).toFixed(1)); // to ng/mL
-      }
-      if (unit === 'ng/mL' && biomarkerUnit === 'si') {
-          return parseFloat((dbValue * 2.496).toFixed(1)); // to nmol/L
-      }
-      return dbValue;
-  }
 
   const value: AppContextType = {
     patient,
@@ -544,7 +531,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     getDisplayHemoglobinValue,
     getDbHemoglobinValue,
     getDisplayLipidValue,
-    getDisplayVitaminDValue,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -61,7 +61,7 @@ const RecordRow: React.FC<{ label: string; value?: string | number | null; unit?
 };
 
 export function ExtractedRecordReview({ data, onSave, onCancel }: ExtractedRecordReviewProps) {
-  const { getDisplayVitaminDValue, biomarkerUnit, profile } = useApp();
+  const { biomarkerUnit, profile } = useApp();
   const [editedData, setEditedData] = React.useState<BatchRecords>(data);
 
   React.useEffect(() => {
@@ -96,17 +96,6 @@ export function ExtractedRecordReview({ data, onSave, onCancel }: ExtractedRecor
             return updated;
         });
     }
-  }
-  
-  const handleUnitChange = (field: keyof Pick<BatchRecords, 'vitaminD'>, subField: 'units') => (value: string) => {
-     setEditedData(prev => {
-        const newData = { ...prev };
-        const record = newData[field];
-        if (record && subField) {
-           (record as any)[subField] = value;
-        }
-        return newData;
-    });
   }
 
   const nameMismatch = !!(editedData.patientName && profile.name.toLowerCase() !== editedData.patientName.toLowerCase());
@@ -156,16 +145,6 @@ export function ExtractedRecordReview({ data, onSave, onCancel }: ExtractedRecor
             <RecordRow label="Fasting Blood Glucose (mg/dL)" value={editedData.fastingBloodGlucose?.value} onValueChange={handleValueChange('fastingBloodGlucose', 'value')} />
             <RecordRow label="Hemoglobin (g/dL)" value={editedData.hemoglobin?.hemoglobin} onValueChange={handleValueChange('hemoglobin', 'hemoglobin')} />
             
-            {editedData.vitaminD?.value !== undefined && (
-              <RecordRow 
-                label="Vitamin D" 
-                value={editedData.vitaminD.value} 
-                unit={editedData.vitaminD.units}
-                onValueChange={handleValueChange('vitaminD', 'value')}
-                onUnitChange={handleUnitChange('vitaminD', 'units')}
-              />
-            )}
-
             {editedData.bloodPressure && (
               <>
                 <RecordRow label="Systolic BP (mmHg)" value={editedData.bloodPressure.systolic} onValueChange={handleValueChange('bloodPressure', 'systolic')} />
