@@ -98,11 +98,11 @@ export function InsightsCard() {
             )}
         </div>
 
-        <div className="flex flex-col lg:flex-row justify-center items-center gap-4 pt-6 mt-auto">
-            <div className="flex items-center gap-2 w-full lg:w-auto">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-6 mt-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Languages className="h-4 w-4 text-muted-foreground" />
                 <Select value={selectedInsightsLanguage} onValueChange={handleLanguageChange} disabled={isButtonDisabled}>
-                    <SelectTrigger className="w-full lg:w-[150px] h-9 text-sm">
+                    <SelectTrigger className="w-full sm:w-[150px] h-9 text-sm">
                         <SelectValue placeholder="Translate..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -114,7 +114,7 @@ export function InsightsCard() {
                     </SelectContent>
                 </Select>
             </div>
-            <Button onClick={() => regenerateInsights(selectedInsightsLanguage)} disabled={isButtonDisabled} className="w-full lg:w-auto">
+            <Button onClick={() => regenerateInsights(selectedInsightsLanguage)} disabled={isButtonDisabled} className="w-full sm:w-auto">
                 <RotateCw className="mr-2 h-4 w-4" />
                 Generate New Insights
             </Button>
