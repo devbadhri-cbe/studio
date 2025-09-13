@@ -33,6 +33,7 @@ export const LabDataExtractionInputSchema = z.object({
 export type LabDataExtractionInput = z.infer<typeof LabDataExtractionInputSchema>;
 
 export const LabDataExtractionOutputSchema = z.object({
+  // Lab Report Fields
   patientName: z.string().optional().describe("The full name of the patient as it appears on the lab report."),
   hba1c: z
     .object({
@@ -83,6 +84,11 @@ export const LabDataExtractionOutputSchema = z.object({
     })
     .optional()
     .describe('Full lipid panel results.'),
+    
+  // Medication Fields
+  medicationName: z.string().optional().describe("The brand or generic name of the medication extracted from the image."),
+  dosage: z.string().optional().describe("The strength of the medication, including units (e.g., '500mg')."),
+  activeIngredient: z.string().optional().describe("The active ingredient of the medication, if different from the medication name."),
 });
 export type LabDataExtractionOutput = z.infer<typeof LabDataExtractionOutputSchema>;
 

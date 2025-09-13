@@ -12,9 +12,13 @@ import type { BatchRecords } from '@/context/app-context';
 import { useApp } from '@/context/app-context';
 import { ExtractedRecordReview } from './extracted-record-review';
 import { isValid, parseISO } from 'date-fns';
+import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
+import { MedicationReviewCard } from './medication-review-card';
+import type { Medication, FoodInstruction } from '@/lib/types';
+import type { MedicationInfoOutput } from '@/lib/ai-types';
 
 
-type Step = 'initial' | 'loading' | 'confirmName' | 'review' | 'error';
+type Step = 'initial' | 'loading' | 'confirmName' | 'reviewLab' | 'reviewMedication' | 'error';
 
 export function UploadRecordDialog() {
   const [open, setOpen] = React.useState(false);
@@ -23,12 +27,14 @@ export function UploadRecordDialog() {
   const [extractedData, setExtractedData] = React.useState<BatchRecords | null>(null);
   const [isCapturing, setIsCapturing] = React.useState(false);
   const [hasCameraPermission, setHasCameraPermission] = React.useState<boolean | null>(null);
+  const [medicationAiResult, setMedicationAiResult] = React.useState<MedicationInfoOutput | null>(null);
+  const [medicationUserInput, setMedicationUserInput] = React.useState<{ userInput: string; frequency: string; foodInstructions?: FoodInstruction; } | null>(null);
   
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { addBatchRecords, profile } = useApp();
+  const { addBatchRecords, profile, addMedication } = useApp();
   
   const stopCameraStream = React.useCallback(() => {
     if (videoRef.current && videoRef.current.srcObject) {
@@ -45,6 +51,8 @@ export function UploadRecordDialog() {
     setIsCapturing(false);
     stopCameraStream();
     setHasCameraPermission(null);
+    setMedicationAiResult(null);
+    setMedicationUserInput(null);
   }, [stopCameraStream]);
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -60,23 +68,35 @@ export function UploadRecordDialog() {
     try {
       const result = await extractLabData({ photoDataUri: dataUri });
       
-      const hasAnyData = Object.keys(result).some(key => key !== 'patientName' && result[key as keyof Omit<BatchRecords, 'patientName'>] !== null);
+      const isMedication = result.medicationName && result.dosage;
+      const isLabReport = Object.keys(result).some(key => !['patientName', 'medicationName', 'dosage', 'activeIngredient'].includes(key) && result[key as keyof Omit<BatchRecords, 'patientName'>] !== null && result[key as keyof Omit<BatchRecords, 'patientName'>] !== undefined);
 
-      if (!hasAnyData) {
+      if (isMedication) {
+        const userInput = `${result.medicationName} ${result.dosage}`;
+        setMedicationUserInput({ userInput, frequency: '' });
+        
+        toast({ title: "Processing Medication...", description: `AI is analyzing "${userInput}".` });
+        const medInfo = await getMedicationInfo({
+          userInput,
+          country: profile.country,
+        });
+        setMedicationAiResult(medInfo);
+        setStep('reviewMedication');
+
+      } else if (isLabReport) {
+        const reportDate = result.hba1c?.date || result.fastingBloodGlucose?.date || result.thyroid?.date;
+        if (!reportDate || !isValid(parseISO(reportDate))) {
+          setStep('error');
+          setErrorMessage('The AI could not determine the date of the test from the report. Please ensure the date is visible and clear.');
+          return;
+        }
+        setExtractedData(result);
+        setStep('confirmName');
+      } else {
         setStep('error');
-        setErrorMessage('Could not extract any lab data from the document. Please try a clearer image.');
+        setErrorMessage('Could not extract any recognizable data from the document. Please try a clearer image.');
         return;
       }
-      
-      const reportDate = result.hba1c?.date || result.fastingBloodGlucose?.date || result.thyroid?.date;
-      if (!reportDate || !isValid(parseISO(reportDate))) {
-        setStep('error');
-        setErrorMessage('The AI could not determine the date of the test from the report. Please ensure the date is visible and clear.');
-        return;
-      }
-      
-      setExtractedData(result);
-      setStep('confirmName');
 
     } catch (e) {
       console.error(e);
@@ -142,7 +162,7 @@ export function UploadRecordDialog() {
     processImage(dataUri);
   };
   
-  const handleSave = async (dataToSave: BatchRecords) => {
+  const handleSaveLabReport = async (dataToSave: BatchRecords) => {
     setStep('loading');
     const { added, duplicates } = await addBatchRecords(dataToSave);
     
@@ -159,6 +179,23 @@ export function UploadRecordDialog() {
       description: description || 'No new records were added.',
     });
     handleOpenChange(false);
+  };
+  
+  const handleSaveMedication = (confirmedData: { aiResult: MedicationInfoOutput, userInput: { userInput: string, frequency: string, foodInstructions?: FoodInstruction } }) => {
+      const { aiResult, userInput: finalUserInput } = confirmedData;
+      const newMedication: Omit<Medication, 'id'> = {
+          name: aiResult.activeIngredient,
+          userInput: finalUserInput.userInput,
+          dosage: aiResult.dosage || '',
+          frequency: aiResult.frequency || finalUserInput.frequency,
+          foodInstructions: aiResult.foodInstructions || finalUserInput.foodInstructions,
+          status: 'processed',
+          ...aiResult,
+      };
+      addMedication(newMedication);
+      toast({ title: "Medication Saved", description: `${aiResult.activeIngredient} has been added to your list.`});
+      
+      handleOpenChange(false);
   };
 
   const renderContent = () => {
@@ -224,17 +261,27 @@ export function UploadRecordDialog() {
                 )}
                 <div className="flex justify-end gap-2 pt-4">
                     <Button variant="ghost" onClick={resetState}>Cancel</Button>
-                    <Button onClick={() => setStep('review')}>Confirm & Proceed</Button>
+                    <Button onClick={() => setStep('reviewLab')}>Confirm & Proceed</Button>
                 </div>
             </div>
         );
-      case 'review':
+      case 'reviewLab':
         return extractedData ? (
           <ExtractedRecordReview
             data={extractedData}
-            onSave={handleSave}
+            onSave={handleSaveLabReport}
             onCancel={resetState}
           />
+        ) : null;
+      case 'reviewMedication':
+        return medicationAiResult && medicationUserInput ? (
+            <MedicationReviewCard 
+                userInput={medicationUserInput}
+                aiResult={medicationAiResult}
+                onConfirm={handleSaveMedication}
+                onEdit={handleSaveMedication} // Edit also confirms and saves
+                onCancel={resetState}
+            />
         ) : null;
       default:
         return null;
@@ -251,9 +298,9 @@ export function UploadRecordDialog() {
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0">
         <DialogHeader className="p-6 pb-4 border-b">
-          <DialogTitle>Upload & Extract Lab Result</DialogTitle>
+          <DialogTitle>Upload & Extract Data</DialogTitle>
           <DialogDescription>
-            Upload a PDF or image of a lab report. The AI will extract the data for you to review and save.
+            Upload a PDF or image of a lab report or medication. The AI will extract the data for you.
           </DialogDescription>
         </DialogHeader>
         <div className="p-6 overflow-y-auto">

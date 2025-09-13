@@ -1,9 +1,8 @@
-
 'use server';
 /**
- * @fileOverview An AI flow to extract structured data from lab reports.
+ * @fileOverview An AI flow to extract structured data from lab reports or medication labels.
  *
- * - extractLabData - A function that extracts biomarker data from a lab report image.
+ * - extractLabData - A function that extracts biomarker or medication data from an image.
  */
 
 import { ai } from '@/ai/genkit';
@@ -19,12 +18,12 @@ const prompt = ai.definePrompt({
   input: { schema: LabDataExtractionInputSchema },
   output: { schema: LabDataExtractionOutputSchema },
   model: gemini15Flash,
-  prompt: `You are a specialized medical data entry assistant. Your task is to accurately extract biomarker data from an image of a patient's lab report.
+  prompt: `You are a specialized medical data entry assistant. Your task is to accurately extract structured data from an image.
 
-Analyze the provided image and extract any of the following biomarkers. If a biomarker is not present, do not include it in the output. For each biomarker found, you MUST extract the date of the test. Ensure the date is in YYYY-MM-DD format.
+First, determine if the image is a **lab report** or a **medication label/box**.
 
-You MUST also extract the full name of the patient from the report.
-
+**If it is a LAB REPORT:**
+Analyze the image and extract any of the following biomarkers. If a biomarker is not present, do not include it in the output. For each biomarker found, you MUST extract the date of the test. Ensure the date is in YYYY-MM-DD format. You MUST also extract the full name of the patient from the report.
 - Patient Name
 - HbA1c (%)
 - Fasting Blood Glucose (mg/dL)
@@ -32,6 +31,14 @@ You MUST also extract the full name of the patient from the report.
 - Blood Pressure (Systolic, Diastolic, Heart Rate)
 - Hemoglobin (g/dL)
 - Lipid Panel (Total Cholesterol, LDL, HDL, Triglycerides, all in mg/dL)
+
+**If it is a MEDICATION LABEL:**
+Extract the following details from the medication label.
+- **medicationName**: The brand or generic name of the medication (e.g., "Tylenol PM", "Metformin").
+- **dosage**: The strength of the medication, including units (e.g., "500mg").
+- **activeIngredient**: If the brand name is prominent, identify the generic active ingredient.
+
+Do not extract any other information.
 
 Image to analyze: {{media url=photoDataUri}}`,
 });
