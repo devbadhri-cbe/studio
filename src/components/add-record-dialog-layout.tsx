@@ -5,10 +5,8 @@ import { Form } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
 import { startOfDay, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from './ui/card';
 import { FormActions } from './form-actions';
-import { Button } from './ui/button';
-import { Loader2 } from 'lucide-react';
 
 interface AddRecordDialogLayoutProps {
   onCancel: () => void;
@@ -57,24 +55,26 @@ export function AddRecordDialogLayout({
   
   return (
       <Card className="mt-2 border-destructive border-4">
-        <CardHeader className="border-blue-500 border-2">
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent className="border-green-500 border-2">
-             <div className="flex flex-col">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-                    {children}
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleFormSubmit)}>
+                <CardHeader className="border-blue-500 border-2">
+                    <CardTitle>{title}</CardTitle>
+                    <CardDescription>{description}</CardDescription>
+                </CardHeader>
+                <CardContent className="border-green-500 border-2">
+                    <div className="flex flex-col space-y-4">
+                        {children}
+                    </div>
+                </CardContent>
+                <CardFooter className="border-purple-500 border-2">
                     <FormActions
                         onCancel={onCancel}
                         isSubmitting={isSubmitting}
                         submitText="Save Record"
                     />
-                    </form>
-                </Form>
-            </div>
-        </CardContent>
+                </CardFooter>
+            </form>
+        </Form>
       </Card>
   );
 }
