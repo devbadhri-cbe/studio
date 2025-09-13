@@ -5,25 +5,24 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { Separator } from '@/components/ui/separator';
 import { TitleBar } from '@/components/ui/title-bar';
-import { Logo } from '@/components/logo';
-import { ProfileCard } from '@/components/profile-card';
-import { MedicalHistoryCard } from '@/components/medical-history-card';
-import { ReminderCard } from '@/components/reminder-card';
-import { InsightsCard } from '@/components/insights-card';
-import { WeightRecordCard } from '@/components/weight-record-card';
-import { BloodPressureCard } from '@/components/blood-pressure-card';
 import { PatientLoginPage } from '@/components/patient-login-page';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { PatientHeader } from '@/components/patient-header';
+import { ProfileCard } from '@/components/profile-card';
+import { WeightRecordCard } from '@/components/weight-record-card';
+import { BloodPressureCard } from '@/components/blood-pressure-card';
+import { MedicalHistoryCard } from '@/components/medical-history-card';
+import { ReminderCard } from '@/components/reminder-card';
+import { InsightsCard } from '@/components/insights-card';
+import { DiabetesCard } from '@/components/diabetes-card';
 
-export default function PatientDashboard() {
+export default function PatientDashboardPage() {
   const { isClient, patient } = useApp();
 
   if (!isClient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Logo className="h-24 w-24" />
           <p className="ml-4 text-lg animate-pulse">Loading patient data...</p>
         </div>
       </div>
@@ -64,6 +63,7 @@ export default function PatientDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 grid grid-cols-1 gap-6">
                     <ProfileCard />
+                    <DiabetesCard />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <WeightRecordCard />
                         <BloodPressureCard />

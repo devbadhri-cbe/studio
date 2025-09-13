@@ -1,8 +1,9 @@
+
 'use client';
 
 import * as React from 'react';
 import { createContext } from 'react';
-import { type Patient, type Hba1cRecord, type WeightRecord, type FastingBloodGlucoseRecord, type BloodPressureRecord, type ThyroidRecord, type MedicalCondition, type Medication, type ThyroxineRecord, type SerumCreatinineRecord, type UricAcidRecord, TotalCholesterolRecord, LdlRecord, HdlRecord, TriglyceridesRecord } from '@/lib/types';
+import { type Patient, type Hba1cRecord, type WeightRecord, type FastingBloodGlucoseRecord, type BloodPressureRecord, type ThyroidRecord, type MedicalCondition, type Medication, type ThyroxineRecord, type SerumCreatinineRecord, type UricAcidRecord, TotalCholesterolRecord, LdlRecord, HdlRecord, TriglyceridesRecord, DiseasePanelState } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 import { produce } from 'immer';
 import { calculateBmi } from '@/lib/utils';
@@ -70,6 +71,7 @@ interface AppContextType {
   updateMedication: (medication: Medication) => void;
   approveMedicalCondition: (id: string) => void;
   dismissSuggestion: (id: string) => void;
+  toggleBiomarkerInPanel: (panel: keyof DiseasePanelState, biomarker: string) => void;
 
   deleteProfile: () => void;
   getFullPatientData: () => Patient | null;
@@ -110,6 +112,13 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const defaultDiseasePanelState: DiseasePanelState = {
+    diabetes: {
+        hba1c: true,
+        glucose: true,
+    }
+}
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [patient, setPatientState] = React.useState<Patient | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -131,6 +140,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const localDataString = localStorage.getItem('patientData');
       if (localDataString) {
         const localPatientData: Patient = JSON.parse(localDataString);
+        if (!localPatientData.diseasePanels) {
+            localPatientData.diseasePanels = defaultDiseasePanelState;
+        }
         setPatientState(localPatientData);
         if (localPatientData.dashboardSuggestions) {
             setTips(localPatientData.dashboardSuggestions);
@@ -293,6 +305,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
     setPatient(nextState);
   };
+  
+  const toggleBiomarkerInPanel = (panel: keyof DiseasePanelState, biomarker: string) => {
+    if (!patient) return;
+    const nextState = produce(patient, draft => {
+      if (!draft.diseasePanels) {
+        draft.diseasePanels = defaultDiseasePanelState;
+      }
+      const currentPanel = draft.diseasePanels[panel];
+      if (currentPanel && biomarker in currentPanel) {
+        (currentPanel as any)[biomarker] = !(currentPanel as any)[biomarker];
+      }
+    });
+    setPatient(nextState);
+  }
 
   const deleteProfile = () => {
     setPatient(null);
@@ -501,6 +527,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updateMedication,
     approveMedicalCondition,
     dismissSuggestion,
+    toggleBiomarkerInPanel,
     deleteProfile,
     getFullPatientData,
     tips,

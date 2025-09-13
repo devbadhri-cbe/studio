@@ -112,6 +112,14 @@ export type BiomarkerKey =
   | 'serumCreatinine'
   | 'uricAcid';
 
+export interface DiseasePanelState {
+    diabetes: {
+        hba1c: boolean;
+        glucose: boolean;
+    };
+}
+  
+
 export interface Patient {
   id: string;
   name: string;
@@ -149,6 +157,7 @@ export interface Patient {
   
   // AI and UI settings
   dashboardSuggestions?: string[];
+  diseasePanels?: DiseasePanelState;
 
   // Doctor-related fields
   doctorUid?: string;
