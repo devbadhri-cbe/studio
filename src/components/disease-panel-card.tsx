@@ -334,7 +334,7 @@ export function DiseasePanelCard({
   });
 
   const sortedBiomarkers = React.useMemo(() => {
-    const allBiomarkers = Object.keys(availableBiomarkerCards).map(key => ({
+    const allBiomarkers = allPanelBiomarkers.map(key => ({
       key, ...availableBiomarkerCards[key as BiomarkerKey]
     }));
 
@@ -347,7 +347,7 @@ export function DiseasePanelCard({
       .sort((a, b) => a.label.localeCompare(b.label));
       
     return { enabled, disabled };
-  }, [enabledForPanel]);
+  }, [enabledForPanel, allPanelBiomarkers]);
 
   const Actions = (
     <div className="flex items-center gap-2">
@@ -381,7 +381,7 @@ export function DiseasePanelCard({
                     {sortedBiomarkers.enabled.length > 0 && sortedBiomarkers.disabled.length > 0 && <Separator className="my-1" />}
 
                     {sortedBiomarkers.disabled.map((biomarkerInfo) => (
-                        <DropdownMenuItem key={biomarkerInfo.key} onSelect={(e) => e.preventDefault()} disabled={!isReadOnlyView}>
+                        <DropdownMenuItem key={biomarkerInfo.key} onSelect={(e) => e.preventDefault()} disabled={isReadOnlyView}>
                             <Label htmlFor={`switch-${panelKey}-${biomarkerInfo.key}`} className={cn("flex items-center justify-between w-full px-2 py-1.5 font-normal", !isReadOnlyView ? "cursor-pointer" : "cursor-not-allowed")}>
                                 <span>{biomarkerInfo.label}</span>
                                 <Switch
