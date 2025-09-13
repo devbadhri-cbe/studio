@@ -175,7 +175,7 @@ export function BiomarkerCard<T extends Record>({
       title={title}
       icon={icon}
       actions={Actions}
-      className={cn("border-primary/50", className)}
+      className={className}
       contentClassName="p-0"
     >
        {hasRecords ? (
