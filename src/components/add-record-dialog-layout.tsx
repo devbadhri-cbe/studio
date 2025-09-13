@@ -54,15 +54,15 @@ export function AddRecordDialogLayout({
   };
   
   return (
-      <Card className="mt-2 flex flex-col">
+      <Card className="mt-2 bg-background/80 backdrop-blur-sm">
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleFormSubmit)} className="flex flex-col flex-1">
+            <form onSubmit={form.handleSubmit(handleFormSubmit)}>
                 <CardHeader>
                     <CardTitle>{title}</CardTitle>
                     <CardDescription>{description}</CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1">
-                    <div className="flex flex-col space-y-4">
+                <CardContent>
+                    <div className="space-y-4">
                         {children}
                     </div>
                 </CardContent>
