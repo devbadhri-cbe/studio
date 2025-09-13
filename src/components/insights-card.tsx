@@ -8,8 +8,15 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Separator } from './ui/separator';
 import { useApp } from '@/context/app-context';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 const supportedLanguages = [
     { code: 'en', name: 'English' },
@@ -54,10 +61,10 @@ export function InsightsCard() {
   const isButtonDisabled = isGeneratingInsights || isTranslatingInsights || hasNoRecords || !profile?.name || !profile?.dob;
 
   return (
-    <Card className="h-full shadow-xl flex flex-col border border-red-500">
+    <Card className="h-full shadow-xl flex flex-col">
       <CardHeader>
-        <div className="flex items-center gap-3 border border-red-500">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 border border-red-500">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
             <Lightbulb className="h-6 w-6 text-primary" />
           </div>
           <div>
@@ -68,11 +75,11 @@ export function InsightsCard() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-6 pt-0 border border-red-500">
+      <CardContent className="flex-1 flex flex-col p-6 pt-0">
         <Separator className="mb-6" />
-        <div className="flex-1 flex flex-col items-center justify-center border border-red-500">
+        <div className="flex-1 flex flex-col items-center justify-center">
             {(isGeneratingInsights || isTranslatingInsights) && (
-                <div className="flex justify-center items-center flex-1 border border-red-500">
+                <div className="flex justify-center items-center flex-1">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <p className="ml-2">{isTranslatingInsights ? 'Translating...' : 'Generating...'}</p>
                 </div>
@@ -98,22 +105,35 @@ export function InsightsCard() {
             )}
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-6 mt-auto border border-red-500">
-            <div className="flex items-center gap-2 w-full sm:w-auto border border-red-500">
-                <Languages className="h-4 w-4 text-muted-foreground" />
-                <Select value={selectedInsightsLanguage} onValueChange={handleLanguageChange} disabled={isButtonDisabled}>
-                    <SelectTrigger className="w-full sm:w-[150px] h-9 text-sm">
-                        <SelectValue placeholder="Translate..." />
-                    </SelectTrigger>
-                    <SelectContent>
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-6 mt-auto">
+             <DropdownMenu>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" disabled={isButtonDisabled}>
+                                <Languages className="h-5 w-5" />
+                                <span className="sr-only">Translate</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Translate Insights</p>
+                    </TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent>
+                    <DropdownMenuRadioGroup
+                        value={selectedInsightsLanguage}
+                        onValueChange={handleLanguageChange}
+                    >
                         {supportedLanguages.map((lang) => (
-                            <SelectItem key={lang.code} value={lang.code} className="text-sm">
+                            <DropdownMenuRadioItem key={lang.code} value={lang.code}>
                                 {lang.name}
-                            </SelectItem>
+                            </DropdownMenuRadioItem>
                         ))}
-                    </SelectContent>
-                </Select>
-            </div>
+                    </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button onClick={() => regenerateInsights(selectedInsightsLanguage)} disabled={isButtonDisabled} className="w-full sm:w-auto">
                 <RotateCw className="mr-2 h-4 w-4" />
                 Generate New Insights
