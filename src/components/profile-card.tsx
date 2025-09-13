@@ -1,9 +1,10 @@
+
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake, Stethoscope as DoctorIcon } from 'lucide-react';
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
+import { calculateAge, formatDisplayPhoneNumber, calculateBmi } from '@/lib/utils';
 import { countries } from '@/lib/countries';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { ProfileSettingsPopover } from './profile-settings-popover';
