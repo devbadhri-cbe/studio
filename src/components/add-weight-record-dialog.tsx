@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -11,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { lbsToKg } from '@/lib/utils';
-import { AddRecordButton } from './add-record-button';
 import { AddRecordDialogLayout } from './add-record-dialog-layout';
 import { DateInput } from './date-input';
 
@@ -21,12 +21,11 @@ const FormSchema = z.object({
 });
 
 interface AddWeightRecordDialogProps {
-    children?: React.ReactNode;
     onSuccess?: () => void;
+    onCancel: () => void;
 }
 
-export function AddWeightRecordDialog({ children, onSuccess }: AddWeightRecordDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function AddWeightRecordDialog({ onSuccess, onCancel }: AddWeightRecordDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addWeightRecord, profile } = useApp();
   const { toast } = useToast();
@@ -39,15 +38,6 @@ export function AddWeightRecordDialog({ children, onSuccess }: AddWeightRecordDi
       value: '' as any,
     },
   });
-  
-  React.useEffect(() => {
-    if (open) {
-      form.reset({
-        date: new Date(),
-        value: '' as any,
-      });
-    }
-  }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
@@ -60,21 +50,13 @@ export function AddWeightRecordDialog({ children, onSuccess }: AddWeightRecordDi
         title: 'Success!',
         description: 'Your new weight record has been added.',
     });
-    setOpen(false);
     setIsSubmitting(false);
     onSuccess?.();
   };
-  
-   const triggerButton = children || (
-      <AddRecordButton tooltipContent="Add Weight Record" />
-   );
-
 
   return (
       <AddRecordDialogLayout
-        open={open}
-        onOpenChange={setOpen}
-        trigger={triggerButton}
+        onCancel={onCancel}
         title="Add New Weight Record"
         description="Enter your weight and the date it was measured."
         form={form}

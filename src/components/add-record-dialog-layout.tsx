@@ -1,38 +1,16 @@
+
 'use client';
 
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetTrigger
-} from '@/components/ui/sheet';
 import { Form } from '@/components/ui/form';
-import { Loader2, X } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { startOfDay, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { useApp } from '@/context/app-context';
-import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { FormActions } from './form-actions';
-import { ScrollArea } from './ui/scroll-area';
 
 interface AddRecordDialogLayoutProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  trigger?: React.ReactNode;
+  onCancel: () => void;
   title: string;
   description: string;
   form: UseFormReturn<any>;
@@ -43,9 +21,7 @@ interface AddRecordDialogLayoutProps {
 }
 
 export function AddRecordDialogLayout({
-  open,
-  onOpenChange,
-  trigger,
+  onCancel,
   title,
   description,
   form,
@@ -55,7 +31,6 @@ export function AddRecordDialogLayout({
   existingRecords,
 }: AddRecordDialogLayoutProps) {
   const { toast } = useToast();
-  const isMobile = useIsMobile();
 
   const handleFormSubmit = (data: any) => {
     if (existingRecords && data.date) {
@@ -77,87 +52,24 @@ export function AddRecordDialogLayout({
     onSubmit(data);
   };
   
-  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    onOpenChange(true);
-  };
-
-  const formContent = (
-    <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 py-4">
-          {children}
-           <FormActions
-              onCancel={() => onOpenChange(false)}
-              isSubmitting={isSubmitting}
-              submitText="Save Record"
-           />
-        </form>
-    </Form>
-  );
-  
-  const renderTrigger = () => {
-    if (!trigger) return null;
-    return React.cloneElement(trigger as React.ReactElement, {
-      onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
-        // Propagate original onClick if it exists
-        if ((trigger as React.ReactElement).props.onClick) {
-          (trigger as React.ReactElement).props.onClick(e);
-        }
-        handleTriggerClick(e);
-      },
-    });
-  }
-
-  if (isMobile) {
-    const sheetContent = (
-      <SheetContent side="bottom" className="h-[90vh] p-0 flex flex-col">
-        <SheetHeader className="p-6 border-b">
-          <SheetTitle>{title}</SheetTitle>
-          <SheetDescription>{description}</SheetDescription>
-        </SheetHeader>
-        <ScrollArea className="flex-1">
-          <div className="p-6">{formContent}</div>
-        </ScrollArea>
-      </SheetContent>
-    );
-    
-     if (trigger) {
-        return (
-          <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetTrigger asChild>{renderTrigger()}</SheetTrigger>
-            {sheetContent}
-          </Sheet>
-        );
-      }
-
-    return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-            {sheetContent}
-        </Sheet>
-    );
-  }
-
-  const dialogContent = (
-    <DialogContent className="sm:max-w-[425px]">
-      <DialogHeader>
-        <DialogTitle>{title}</DialogTitle>
-        <DialogDescription>{description}</DialogDescription>
-      </DialogHeader>
-      {formContent}
-    </DialogContent>
-  );
-  
-  if (trigger) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogTrigger asChild>{renderTrigger()}</DialogTrigger>
-        {dialogContent}
-      </Dialog>
-    );
-  }
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      {dialogContent}
-    </Dialog>
-  )
+      <Card className="mt-2 border-primary border-2">
+        <CardHeader>
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+                {children}
+                <FormActions
+                    onCancel={onCancel}
+                    isSubmitting={isSubmitting}
+                    submitText="Save Record"
+                />
+                </form>
+            </Form>
+        </CardContent>
+      </Card>
+  );
 }

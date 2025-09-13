@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -14,19 +15,17 @@ import {
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { AddRecordButton } from './add-record-button';
 import { AddRecordDialogLayout } from './add-record-dialog-layout';
 import { DateInput } from './date-input';
 
 
 interface AddLipidRecordDialogProps {
-    children?: React.ReactNode;
     onSuccess?: () => void;
+    onCancel: () => void;
 }
 
 
-export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function AddLipidRecordDialog({ onSuccess, onCancel }: AddLipidRecordDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addTotalCholesterolRecord, addLdlRecord, addHdlRecord, addTriglyceridesRecord, profile } = useApp();
   const { toast } = useToast();
@@ -40,18 +39,6 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
       triglycerides: '' as any,
     },
   });
-  
-  React.useEffect(() => {
-    if (open) {
-      form.reset({
-        date: new Date(),
-        totalCholesterol: '' as any,
-        ldl: '' as any,
-        hdl: '' as any,
-        triglycerides: '' as any,
-      });
-    }
-  }, [open, form]);
 
   const onSubmit = (data: any) => {
     setIsSubmitting(true);
@@ -67,18 +54,13 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
       description: 'Your new lipid panel record has been added.',
     });
     setIsSubmitting(false);
-    setOpen(false);
     onSuccess?.();
   };
-  
-  const triggerButton = children || <AddRecordButton tooltipContent="Add Lipid Panel Record" />;
 
 
   return (
       <AddRecordDialogLayout
-        open={open}
-        onOpenChange={setOpen}
-        trigger={triggerButton}
+        onCancel={onCancel}
         title="Add New Lipid Panel Record"
         description="Enter the details of your new lipid panel result here."
         form={form}

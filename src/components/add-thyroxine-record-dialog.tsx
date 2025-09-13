@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -10,7 +11,6 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { AddRecordButton } from './add-record-button';
 import { AddRecordDialogLayout } from './add-record-dialog-layout';
 import { DateInput } from './date-input';
 
@@ -20,12 +20,11 @@ const FormSchema = z.object({
 });
 
 interface AddThyroxineRecordDialogProps {
-    children?: React.ReactNode;
     onSuccess?: () => void;
+    onCancel: () => void;
 }
 
-export function AddThyroxineRecordDialog({ children, onSuccess }: AddThyroxineRecordDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function AddThyroxineRecordDialog({ onSuccess, onCancel }: AddThyroxineRecordDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addThyroxineRecord, profile } = useApp();
   const { toast } = useToast();
@@ -37,15 +36,6 @@ export function AddThyroxineRecordDialog({ children, onSuccess }: AddThyroxineRe
       value: '' as any,
     },
   });
-  
-  React.useEffect(() => {
-    if (open) {
-      form.reset({
-        date: new Date(),
-        value: '' as any,
-      });
-    }
-  }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
@@ -57,20 +47,13 @@ export function AddThyroxineRecordDialog({ children, onSuccess }: AddThyroxineRe
         title: 'Success!',
         description: 'Your new Thyroxine (T4) record has been added.',
     });
-    setOpen(false);
     setIsSubmitting(false);
     onSuccess?.();
   };
-  
-   const triggerButton = children || (
-      <AddRecordButton tooltipContent="Add Thyroxine (T4) Record" />
-   );
 
   return (
       <AddRecordDialogLayout
-        open={open}
-        onOpenChange={setOpen}
-        trigger={triggerButton}
+        onCancel={onCancel}
         title="Add New Thyroxine (T4) Record"
         description="Enter your value and the date it was measured."
         form={form}

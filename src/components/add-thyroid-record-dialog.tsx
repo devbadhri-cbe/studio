@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -14,19 +15,17 @@ import {
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { AddRecordButton } from './add-record-button';
 import { AddRecordDialogLayout } from './add-record-dialog-layout';
 import { DateInput } from './date-input';
 
 
 interface AddThyroidRecordDialogProps {
-    children?: React.ReactNode;
     onSuccess?: () => void;
+    onCancel: () => void;
 }
 
 
-export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecordDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function AddThyroidRecordDialog({ onSuccess, onCancel }: AddThyroidRecordDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addThyroidRecord, profile } = useApp();
   const { toast } = useToast();
@@ -39,17 +38,6 @@ export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecord
       t4: '' as any,
     },
   });
-  
-  React.useEffect(() => {
-    if (open) {
-      form.reset({
-        date: new Date(),
-        tsh: '' as any,
-        t3: '' as any,
-        t4: '' as any,
-      });
-    }
-  }, [open, form]);
 
   const onSubmit = (data: any) => {
     setIsSubmitting(true);
@@ -64,18 +52,12 @@ export function AddThyroidRecordDialog({ children, onSuccess }: AddThyroidRecord
       description: 'Your new thyroid record has been added.',
     });
     setIsSubmitting(false);
-    setOpen(false);
     onSuccess?.();
   };
-  
-  const triggerButton = children || <AddRecordButton tooltipContent="Add Thyroid Record" />;
-
 
   return (
       <AddRecordDialogLayout
-        open={open}
-        onOpenChange={setOpen}
-        trigger={triggerButton}
+        onCancel={onCancel}
         title="Add New Thyroid Record"
         description="Enter the details of your new thyroid panel result here."
         form={form}

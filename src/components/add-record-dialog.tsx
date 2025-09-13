@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -10,7 +11,6 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { AddRecordButton } from './add-record-button';
 import { AddRecordDialogLayout } from './add-record-dialog-layout';
 import { DateInput } from './date-input';
 
@@ -20,12 +20,11 @@ const FormSchema = z.object({
 });
 
 interface AddRecordDialogProps {
-    children?: React.ReactNode;
     onSuccess?: () => void;
+    onCancel: () => void;
 }
 
-export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function AddRecordDialog({ onSuccess, onCancel }: AddRecordDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addHba1cRecord, profile } = useApp();
   const { toast } = useToast();
@@ -37,15 +36,6 @@ export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
       date: new Date(),
     },
   });
-  
-  React.useEffect(() => {
-    if (open) {
-      form.reset({
-        value: '' as any,
-        date: new Date(),
-      });
-    }
-  }, [open, form]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
@@ -57,20 +47,13 @@ export function AddRecordDialog({ children, onSuccess }: AddRecordDialogProps) {
       title: 'Success!',
       description: 'Your new HbA1c record has been added.',
     });
-    setOpen(false);
     setIsSubmitting(false);
     onSuccess?.();
   };
 
-  const triggerButton = children || (
-      <AddRecordButton tooltipContent="Add HbA1c Record" />
-   );
-
   return (
       <AddRecordDialogLayout
-        open={open}
-        onOpenChange={setOpen}
-        trigger={triggerButton}
+        onCancel={onCancel}
         title="Add New HbA1c Record"
         description="Enter the details of your new lab result here."
         form={form}

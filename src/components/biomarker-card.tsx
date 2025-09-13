@@ -72,7 +72,8 @@ export function BiomarkerCard<T extends Record>({
   className,
 }: BiomarkerCardProps<T>) {
   const [isEditMode, setIsEditMode] = React.useState(false);
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isAdding, setIsAdding] = React.useState(false);
+
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
@@ -98,11 +99,12 @@ export function BiomarkerCard<T extends Record>({
   const hasMultipleRecords = records && records.length > 1;
 
   const handleAddRecordSuccess = () => {
-    setIsMenuOpen(false);
+    setIsAdding(false);
   };
   
-  const addRecordDialogWithCallback = React.cloneElement(addRecordDialog as React.ReactElement, {
+  const addRecordForm = React.cloneElement(addRecordDialog as React.ReactElement, {
       onSuccess: handleAddRecordSuccess,
+      onCancel: () => setIsAdding(false)
   });
 
   const Actions = !isReadOnly ? (
@@ -110,18 +112,10 @@ export function BiomarkerCard<T extends Record>({
       tooltip="Settings" 
       icon={<Settings className="h-4 w-4" />} 
       onClick={(e) => e.stopPropagation()}
-      open={isMenuOpen}
-      onOpenChange={setIsMenuOpen}
     >
-      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-        {React.cloneElement(addRecordDialogWithCallback as React.ReactElement, {
-          children: (
-             <div className="flex items-center gap-2">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                <span>Add New Record</span>
-             </div>
-          )
-        })}
+      <DropdownMenuItem onSelect={() => setIsAdding(true)}>
+        <PlusCircle className="mr-2 h-4 w-4" />
+        Add New Record
       </DropdownMenuItem>
       <DropdownMenuItem onSelect={() => setIsEditMode((prev) => !prev)} disabled={sortedRecords.length === 0}>
         <Edit className="mr-2 h-4 w-4" />
@@ -173,6 +167,10 @@ export function BiomarkerCard<T extends Record>({
     </ScrollArea>
   );
 
+  if (isAdding) {
+    return addRecordForm;
+  }
+
   return (
     <UniversalCard
       title={title}
@@ -203,14 +201,10 @@ export function BiomarkerCard<T extends Record>({
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px]">
               <p className="text-sm">No records yet.</p>
-              {React.cloneElement(addRecordDialogWithCallback as React.ReactElement, {
-                children: (
-                  <Button variant="outline" size="sm" className="mt-4">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add First Record
-                  </Button>
-                )
-              })}
+              <Button variant="outline" size="sm" className="mt-4" onClick={() => setIsAdding(true)}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add First Record
+              </Button>
           </div>
         )}
     </UniversalCard>

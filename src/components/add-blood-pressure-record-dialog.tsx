@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -8,18 +9,16 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
-import { AddRecordButton } from './add-record-button';
 import { AddRecordDialogLayout } from './add-record-dialog-layout';
 import { DateInput } from './date-input';
 
 
 interface AddBloodPressureRecordDialogProps {
-    children?: React.ReactNode;
     onSuccess?: () => void;
+    onCancel: () => void;
 }
 
-export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPressureRecordDialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function AddBloodPressureRecordDialog({ onSuccess, onCancel }: AddBloodPressureRecordDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { addBloodPressureRecord, profile } = useApp();
   const { toast } = useToast();
@@ -32,17 +31,6 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
       heartRate: '' as any,
     },
   });
-  
-  React.useEffect(() => {
-    if (open) {
-      form.reset({
-        date: new Date(),
-        systolic: '' as any,
-        diastolic: '' as any,
-        heartRate: '' as any,
-      });
-    }
-  }, [open, form]);
 
   const onSubmit = (data: any) => {
     setIsSubmitting(true);
@@ -57,17 +45,12 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
       description: 'Your new blood pressure record has been added.',
     });
     setIsSubmitting(false);
-    setOpen(false);
     onSuccess?.();
   };
 
-  const triggerButton = children || <AddRecordButton tooltipContent="Add Blood Pressure Record" />;
-
   return (
       <AddRecordDialogLayout
-        open={open}
-        onOpenChange={setOpen}
-        trigger={triggerButton}
+        onCancel={onCancel}
         title="Add New Blood Pressure Record"
         description="Enter your systolic, diastolic, and heart rate readings."
         form={form}
