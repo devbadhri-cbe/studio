@@ -22,8 +22,8 @@ export default function HomeDashboard() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isAddingBiomarker, setIsAddingBiomarker] = React.useState(false);
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
-  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
-  const [isPanelsOpen, setIsPanelsOpen] = React.useState(true);
+  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
+  const [isPanelsOpen, setIsPanelsOpen] = React.useState(false);
   const [panelSearchQuery, setPanelSearchQuery] = React.useState('');
 
 
