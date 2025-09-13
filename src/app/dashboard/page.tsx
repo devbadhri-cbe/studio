@@ -1,22 +1,27 @@
 
 'use client';
 
-import { PatientCard } from '@/components/patient-card';
 import { TitleBar } from '@/components/ui/title-bar';
-import { mockPatients } from '@/lib/mock-patients';
-import { Patient } from '@/lib/types';
-import { PlusCircle, FileText } from 'lucide-react';
+import { PlusCircle, FileText, Droplet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useApp } from '@/context/app-context';
+import { BiomarkersPanel } from '@/components/biomarkers-panel';
+import { AddNewBiomarker } from '@/components/add-new-biomarker';
+import { DashboardSectionToggle } from '@/components/dashboard-section-toggle';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 
 export default function HomeDashboard() {
   const router = useRouter();
-  const { toast } = useToast();
+  const { isClient } = useApp();
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [isAddingBiomarker, setIsAddingBiomarker] = React.useState(false);
+  const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
+  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
+
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -27,18 +32,14 @@ export default function HomeDashboard() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handlePatientAction = (patient: Patient) => {
-    console.log(`Action for mock patient ${patient.name} triggered.`);
-    toast({
-      title: 'Demonstration Action',
-      description: 'This is a mock patient profile. Create a new profile to use the app.',
-    });
-  };
+  if (!isClient) {
+    return null; // or a loading skeleton
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <TitleBar
-        title={['Home', 'Dashboard']}
+        title={['Developer', 'Dashboard']}
         isScrolled={isScrolled}
       />
       <main className="flex-1 p-4 md:p-6">
@@ -47,7 +48,7 @@ export default function HomeDashboard() {
               <Info className="h-4 w-4" />
               <AlertTitle>Welcome, Developer!</AlertTitle>
               <AlertDescription>
-                This is the developer home page. The patient profiles below are mock data for demonstration. To use the app as a patient, click &quot;Create New Profile&quot; to begin.
+                This is your developer dashboard. You can view all biomarkers, create new ones, and navigate to the patient view. The patient view will not contain any of these developer tools.
               </AlertDescription>
             </Alert>
             <div className="flex items-center justify-between">
@@ -61,23 +62,28 @@ export default function HomeDashboard() {
                 </Button>
                 <Button size="sm" onClick={() => router.push('/patient/dashboard')}>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Create New Profile
+                Go to Patient View
                 </Button>
           </div>
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Example Patient Profiles</h2>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {mockPatients.map((patient) => (
-              <PatientCard
-                key={patient.id}
-                patient={patient}
-                onView={handlePatientAction}
-                onEdit={handlePatientAction}
-                onDelete={handlePatientAction}
-              />
-            ))}
-          </div>
+          
+            <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
+                <DashboardSectionToggle
+                    title="All Biomarkers"
+                    subtitle="View and manage the complete collection of biomarker cards"
+                    icon={<Droplet className="h-6 w-6 text-primary" />}
+                    isOpen={isBiomarkersOpen}
+                    searchQuery={biomarkerSearchQuery}
+                    onSearchChange={setBiomarkerSearchQuery}
+                    searchPlaceholder="Search biomarkers..."
+                    showCreateButton={true}
+                    onCreateClick={() => setIsAddingBiomarker(!isAddingBiomarker)}
+                />
+                <CollapsibleContent>
+                    {isAddingBiomarker && <AddNewBiomarker onCancel={() => setIsAddingBiomarker(false)} />}
+                    <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>
+                </CollapsibleContent>
+            </Collapsible>
+
         </div>
       </main>
     </div>

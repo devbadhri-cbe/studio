@@ -1,8 +1,9 @@
+
 'use client';
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { ArrowLeft, Share2, Droplet, FileText } from 'lucide-react';
+import { ArrowLeft, Share2, Droplet } from 'lucide-react';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
@@ -15,10 +16,8 @@ import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { SharePatientAccessDialog } from '@/components/share-patient-access-dialog';
 import { ReminderCard } from '@/components/reminder-card';
 import { InsightsCard } from '@/components/insights-card';
-import { BiomarkersPanel } from '@/components/biomarkers-panel';
 import { DashboardSectionToggle } from '@/components/dashboard-section-toggle';
 import { DiseasePanel } from '@/components/disease-panel';
-import { AddNewBiomarker } from '@/components/add-new-biomarker';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
@@ -32,10 +31,7 @@ export default function PatientDashboard() {
   const [isShareOpen, setIsShareOpen] = React.useState(false);
   
   const [isPanelsOpen, setIsPanelsOpen] = React.useState(true);
-  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
-  const [isAddingBiomarker, setIsAddingBiomarker] = React.useState(false);
   const [panelSearchQuery, setPanelSearchQuery] = React.useState('');
-  const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -117,16 +113,6 @@ export default function PatientDashboard() {
             <div className="flex flex-col md:flex-row items-start md:items-end gap-4 justify-between">
                 <PatientHeader />
                 <div className="w-full md:w-auto flex items-center justify-center md:justify-end gap-2 md:gap-4 shrink-0">
-                    {process.env.NODE_ENV === 'development' && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open('/project-plan.html', '_blank')}
-                            >
-                            <FileText className="mr-2 h-4 w-4" />
-                            Project Plan
-                        </Button>
-                    )}
                     <UploadRecordDialog />
                 </div>
             </div>
@@ -163,28 +149,6 @@ export default function PatientDashboard() {
                         <DiseasePanel searchQuery={panelSearchQuery} />
                     </CollapsibleContent>
                 </Collapsible>
-
-                {process.env.NODE_ENV === 'development' && (
-                  <>
-                    <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
-                        <DashboardSectionToggle
-                            title="All Biomarkers"
-                            subtitle="View and manage individual biomarker cards"
-                            icon={<Droplet className="h-6 w-6 text-primary" />}
-                            isOpen={isBiomarkersOpen}
-                            searchQuery={biomarkerSearchQuery}
-                            onSearchChange={setBiomarkerSearchQuery}
-                            searchPlaceholder="Search biomarkers..."
-                            showCreateButton={true}
-                            onCreateClick={() => setIsAddingBiomarker(!isAddingBiomarker)}
-                        />
-                        <CollapsibleContent>
-                            {isAddingBiomarker && <AddNewBiomarker onCancel={() => setIsAddingBiomarker(false)} />}
-                            <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>
-                        </CollapsibleContent>
-                    </Collapsible>
-                  </>
-                )}
             </div>
           </div>
         </main>
