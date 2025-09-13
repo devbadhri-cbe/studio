@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 const { fontFamily } = require('tailwindcss/defaultTheme')
 const plugin = require('tailwindcss/plugin')
@@ -130,9 +131,22 @@ export default {
         'fade-in-scale': 'fade-in-scale 0.5s ease-out',
         'fade-in-down': 'fade-in-down 0.5s ease-out',
       },
+      textShadow: {
+        '3d': '1px 1px 0 hsl(var(--primary-foreground) / 0.2), 2px 2px 0 hsl(var(--primary-foreground) / 0.15)',
+      },
     },
   },
   plugins: [
     require('tailwindcss-animate'),
+     plugin(function ({ matchUtilities, theme }: {matchUtilities: any, theme: any}) {
+      matchUtilities(
+        {
+          'text-shadow': (value: any) => ({
+            textShadow: value,
+          }),
+        },
+        { values: theme('textShadow') }
+      )
+    }),
   ],
 } satisfies Config;
