@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
@@ -111,14 +110,15 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
                         {actions}
                     </div>
                 </div>
-                {activeView === 'add' && <AddForm onSave={handleAddFormSave as any} onCancel={handleAddFormCancel} />}
-                
+
                 {isCheckingInteractions ? (
-                    <DrugInteractionViewer
+                     <DrugInteractionViewer
                         medications={items.map(m => (m as Medication).userInput)}
                         onClose={() => setIsCheckingInteractions(false)}
                     />
                 ) : (
+                <>
+                    {activeView === 'add' && <AddForm onSave={handleAddFormSave as any} onCancel={handleAddFormCancel} />}
                     <ul className="space-y-1 mt-2">
                         {items.length > 0 ? items.map((item) => {
                             const isEditingThis = activeView === `edit_${item.id}`;
@@ -137,10 +137,10 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
                                 />
                             )
                         }) : isNil && nilRecord ? (
-                            <ListItem
+                             <ListItem
                                 item={nilRecord}
                                 type={type}
-                                isEditing={false}
+                                isEditing={isEditingList}
                                 isFormOpen={false}
                                 onRemove={() => onRemoveItem(nilRecord.id)}
                                 onShowSynopsis={() => {}}
@@ -151,6 +151,7 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
                         ) : null}
                         {items.length === 0 && !isNil && activeView !== 'add' && <p className="text-xs text-muted-foreground pl-8 pt-2">No {type === 'condition' ? 'conditions' : 'medications'} recorded.</p>}
                     </ul>
+                </>
                 )}
             </CardContent>
         </Card>
@@ -198,7 +199,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
     }
     
     const handleItemClick = () => {
-        if (isFailed) {
+        if (isFailed || isPending) {
             onProcess(item);
         } else if (isMobile && type === 'medication' && !isNilItem && !isFailed && !isPending) {
             // On mobile, tapping the item shows the synopsis.
@@ -209,7 +210,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
     const showOriginalInput = originalInput && originalInput.toLowerCase() !== title.toLowerCase() && !isNilItem;
 
     const itemBorderColor = isNilItem ? 'border-transparent' : isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
-    const itemCursor = isFailed || (isMobile && type === 'medication' && !isNilItem && !isFailed && !isPending) ? "cursor-pointer" : "cursor-default";
+    const itemCursor = (isFailed || isPending) ? "cursor-pointer" : (isMobile && type === 'medication' && !isNilItem && !isFailed && !isPending) ? "cursor-pointer" : "cursor-default";
 
 
     return (
@@ -230,7 +231,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                     {isPending ? (
                         <div className="flex items-center gap-1.5 mt-1">
                             <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
-                            <p className="text-muted-foreground text-xs italic">Pending AI processing...</p>
+                            <p className="text-yellow-600 text-xs italic">Pending AI processing...</p>
                         </div>
                     ) : isFailed ? (
                         <div className="flex items-center gap-1.5 mt-1">
@@ -262,7 +263,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                         />
                        </>
                     )}
-                    {!isEditing && !isPending && !isNilItem && !isFailed && (
+                    {!isEditing && !isPending && !isNilItem && !isFailed && item.synopsis && (
                         <ActionIcon 
                             tooltip="View Synopsis"
                             icon={<Info className="h-5 w-5 text-blue-500" />}
@@ -294,14 +295,15 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
 
 
 export function MedicalHistoryCard() {
-  const { profile, updateMedicalCondition, removeMedication, removeMedicalCondition, addMedication, addMedicalCondition, updateMedication } = useApp();
+  const { profile, updateMedicalCondition, removeMedication, removeMedicalCondition, addMedicalCondition, addMedication, updateMedication } = useApp();
   const [activeSynopsis, setActiveSynopsis] = React.useState<{ type: 'condition' | 'medication', id: string } | null>(null);
   const addMedicationFormRef = React.useRef<{ startReprocessing: (med: Medication) => void }>(null);
 
 
   const handleProcessCondition = async (condition: MedicalCondition) => {
-    toast({ title: "Re-processing Condition...", description: `Asking AI about "${condition.userInput}"`});
-    updateMedicalCondition(produce(condition, draft => { draft.status = 'pending_review' }));
+    if (condition.status === 'processed') return; // Don't re-process if already done
+    toast({ title: "Processing Condition...", description: `Asking AI about "${condition.userInput}"`});
+    
     try {
       const result = await processMedicalCondition({ condition: condition.userInput || '' });
       if (result.isValid && result.standardizedName && result.icdCode) {
@@ -396,6 +398,13 @@ export function MedicalHistoryCard() {
         }
     }, 50);
   }
+  
+  const handleAddCondition = (data: Omit<MedicalCondition, 'id' | 'status' | 'synopsis' | 'icdCode'>) => {
+      addMedicalCondition({
+          ...data,
+          status: 'pending_review',
+      });
+  }
 
   return (
     <>
@@ -409,8 +418,8 @@ export function MedicalHistoryCard() {
             onProcessItem={handleProcessCondition}
             onRemoveItem={removeMedicalCondition}
             onUpdateItem={updateMedicalCondition}
-            onAddItem={addMedicalCondition}
-            AddForm={AddMedicalConditionForm}
+            onAddItem={handleAddCondition}
+            AddForm={AddMedicalConditionForm as any}
             EditForm={AddMedicalConditionForm as any}
         />
         

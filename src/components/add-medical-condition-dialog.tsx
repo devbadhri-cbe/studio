@@ -11,7 +11,6 @@ import { type MedicalCondition } from '@/lib/types';
 import { parseISO } from 'date-fns';
 import { FormActions } from './form-actions';
 import { DateInput } from './date-input';
-import { processMedicalCondition } from '@/ai/flows/process-medical-condition-flow';
 
 interface MedicalConditionFormValues {
   userInput: string;
@@ -19,7 +18,7 @@ interface MedicalConditionFormValues {
 }
 
 interface AddMedicalConditionFormProps {
-    onSave: (data: MedicalCondition) => void;
+    onSave: (data: Omit<MedicalCondition, 'id' | 'status' | 'synopsis' | 'icdCode'>) => void;
     onCancel: () => void;
     initialData?: MedicalCondition;
 }
@@ -29,7 +28,7 @@ export function AddMedicalConditionForm({
     onCancel,
     initialData,
 }: AddMedicalConditionFormProps) {
-  const { profile, updateMedicalCondition, addMedicalCondition } = useApp();
+  const { profile } = useApp();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -63,38 +62,19 @@ export function AddMedicalConditionForm({
     }
 
     try {
-      toast({
-        title: "Processing Condition...",
-        description: `AI is analyzing "${data.userInput}".`,
-      });
-      const result = await processMedicalCondition({ condition: data.userInput });
-      
-      const newCondition: MedicalCondition = {
-        id: initialData?.id || `cond-${Date.now()}`,
+      const newConditionData: Omit<MedicalCondition, 'id' | 'status' | 'synopsis' | 'icdCode'> = {
         userInput: data.userInput,
-        condition: result.isValid ? result.standardizedName! : data.userInput,
-        icdCode: result.isValid ? result.icdCode : 'failed',
-        synopsis: result.synopsis || '',
+        condition: data.userInput, // Initially, condition is the same as user input
         date: data.date.toISOString(),
-        status: result.isValid ? 'processed' : 'failed',
       };
 
-      if (initialData?.id) {
-          updateMedicalCondition(newCondition);
-      } else {
-          addMedicalCondition(newCondition);
-      }
-      
-      if (result.isValid) {
-        toast({ title: 'Condition Processed', description: `AI identified: ${result.standardizedName}` });
-      } else {
-        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'None'}. Please review.` });
-      }
+      onSave(newConditionData);
+      toast({ title: 'Condition Saved', description: 'It can be processed by AI later.' });
       onCancel();
 
     } catch(e) {
       console.error(e);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not save condition.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -104,7 +84,7 @@ export function AddMedicalConditionForm({
     <Card className="mt-2 border-primary border-2">
       <CardHeader>
         <CardTitle>{initialData ? 'Edit' : 'Add'} Medical Condition</CardTitle>
-        <CardDescription>Enter a condition. Our AI will process it automatically.</CardDescription>
+        <CardDescription>Enter a condition. It will be saved and can be processed by AI later.</CardDescription>
       </CardHeader>
       <CardContent>
         <FormProvider {...formMethods}>
