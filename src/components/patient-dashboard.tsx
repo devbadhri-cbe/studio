@@ -23,6 +23,7 @@ import { DiseasePanel } from './disease-panel';
 import { AddBiomarkerCard } from './add-biomarker-card';
 import { Collapsible, CollapsibleContent } from './ui/collapsible';
 import { WeightRecordCard } from './weight-record-card';
+import { BloodPressureCard } from './blood-pressure-card';
 
 export function PatientDashboard() {
   const { isClient, isReadOnlyView, patient } = useApp();
@@ -100,9 +101,10 @@ export function PatientDashboard() {
             <Separator />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 grid grid-cols-1 gap-6">
+                    <ProfileCard />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <ProfileCard />
                         <WeightRecordCard />
+                        <BloodPressureCard />
                     </div>
                     <MedicalHistoryCard />
                 </div>
