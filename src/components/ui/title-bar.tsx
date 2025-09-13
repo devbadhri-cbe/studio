@@ -4,6 +4,7 @@
 import { Logo } from '@/components/logo';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 
 interface TitleBarProps {
     title: string[];
@@ -17,12 +18,30 @@ interface TitleBarProps {
 export function TitleBar({ title, subtitle, onSubtitleClick, children, rightChildren, isScrolled }: TitleBarProps) {
     
     const renderTitle = () => {
-        if(title.length === 1) {
-            return <span className="animate-fade-in-down" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>{title[0]}</span>
-        }
-        return title.map((word, index) => (
-            <span key={index} className="animate-fade-in-down" style={{ animationDelay: `${400 + index * 200}ms`, animationFillMode: 'both' }}>{word}</span>
-        ));
+        return title.map((word, index) => {
+            if (word.toLowerCase() === 'lite') {
+                return (
+                    <Tooltip key={index}>
+                        <TooltipTrigger asChild>
+                            <span 
+                                className="self-end text-sm font-sans font-normal text-muted-foreground animate-fade-in-down"
+                                style={{ animationDelay: `${400 + index * 200}ms`, animationFillMode: 'both' }}
+                            >
+                                {word}
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p className="max-w-xs text-center">
+                                This Lite version has limited features. A full-featured version is planned for the future.
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
+                );
+            }
+            return (
+                 <span key={index} className="animate-fade-in-down" style={{ animationDelay: `${400 + index * 200}ms`, animationFillMode: 'both' }}>{word}</span>
+            );
+        });
     };
 
     return (
@@ -46,7 +65,7 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, rightChil
                                 isScrolled ? "h-8 w-8 md:h-8 md:w-8" : "h-14 w-14 md:h-10 md:w-10"
                             )} />
                             <div className={cn(
-                                "flex flex-col font-bold font-special text-center md:flex-row md:gap-2 transition-all duration-300 text-shadow-3d",
+                                "flex items-baseline font-bold font-special text-center md:flex-row md:gap-2 transition-all duration-300 text-shadow-3d",
                                 isScrolled ? "text-2xl md:text-3xl" : "text-3xl md:text-5xl"
                             )}>
                                 {renderTitle()}
