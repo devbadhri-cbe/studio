@@ -4,9 +4,6 @@
 import { Lightbulb, Loader2, Languages, RotateCw } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Separator } from './ui/separator';
-import { useApp } from '@/context/app-context';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { useApp } from '@/context/app-context';
+import { UniversalCard } from './universal-card';
 
 const supportedLanguages = [
     { code: 'en', name: 'English' },
@@ -60,23 +59,12 @@ export function InsightsCard() {
   const isButtonDisabled = isGeneratingInsights || isTranslatingInsights || hasNoRecords || !profile?.name || !profile?.dob;
 
   return (
-    <Card className="h-full shadow-xl flex flex-col">
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <Lightbulb className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <CardTitle>AI-Powered Insights</CardTitle>
-            <CardDescription>
-              Personalized tips to help you manage your overall health.
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-6 pt-0">
-        <Separator className="mb-6" />
-        <div className="flex-1 flex flex-col items-center justify-center">
+    <UniversalCard
+      icon={<Lightbulb className="h-6 w-6 text-primary" />}
+      title="AI-Powered Insights"
+      description="Personalized tips to help you manage your overall health."
+    >
+      <div className="flex-1 flex flex-col items-center justify-center">
             {(isGeneratingInsights || isTranslatingInsights) && (
                 <div className="flex justify-center items-center flex-1">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -104,7 +92,7 @@ export function InsightsCard() {
             )}
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-6 mt-auto">
+        <div className="flex justify-center items-center gap-4 pt-6 mt-auto">
              <DropdownMenu>
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -138,7 +126,6 @@ export function InsightsCard() {
                 Generate New Insights
             </Button>
         </div>
-      </CardContent>
-    </Card>
+    </UniversalCard>
   );
 }

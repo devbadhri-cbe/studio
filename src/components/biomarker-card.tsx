@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -163,9 +164,10 @@ export function BiomarkerCard<T extends Record>({
       icon={icon}
       actions={Actions}
       className={cn("border-primary/50", className)}
+      contentClassName="p-0"
     >
        {hasRecords ? (
-          <div className="flex flex-col flex-1 h-full">
+          <div className="flex flex-col flex-1 h-full p-6 pt-0">
             <div className="flex-1 flex flex-col justify-center">
                <div className={cn("flex gap-4", hasMultipleRecords ? "flex-row" : "flex-col items-center")}>
                   <div className={cn(hasMultipleRecords ? "w-1/2 shrink-0" : "text-center")}>

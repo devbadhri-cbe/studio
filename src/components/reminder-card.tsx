@@ -5,9 +5,9 @@
 import { useApp } from '@/context/app-context';
 import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears, differenceInDays } from 'date-fns';
 import { Bell, CheckCircle2, Heart, Sun, Activity, Zap } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { calculateAge } from '@/lib/utils';
 import { Separator } from './ui/separator';
+import { UniversalCard } from './universal-card';
 
 export function ReminderCard() {
   const { fastingBloodGlucoseRecords, thyroidRecords, bloodPressureRecords, profile } = useApp();
@@ -165,49 +165,42 @@ export function ReminderCard() {
   }
 
   return (
-    <Card className="h-full shadow-xl">
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <Bell className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <CardTitle>Testing Reminders</CardTitle>
-            <CardDescription>Your upcoming health check schedule.</CardDescription>
-          </div>
+    <UniversalCard
+      icon={<Bell className="h-6 w-6 text-primary" />}
+      title="Testing Reminders"
+      description="Your upcoming health check schedule."
+    >
+        <div className="space-y-4">
+            <div className="flex items-center gap-4">
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${fastingBloodGlucoseContent.color}`}>
+                    {fastingBloodGlucoseContent.icon}
+                </div>
+                <div>
+                    <p className="font-semibold">{fastingBloodGlucoseContent.title}</p>
+                    <p className="text-sm text-muted-foreground">{fastingBloodGlucoseContent.description}</p>
+                </div>
+            </div>
+            <Separator />
+            <div className="flex items-center gap-4">
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${thyroidContent.color}`}>
+                    {thyroidContent.icon}
+                </div>
+                <div>
+                    <p className="font-semibold">{thyroidContent.title}</p>
+                    <p className="text-sm text-muted-foreground">{thyroidContent.description}</p>
+                </div>
+            </div>
+            <Separator />
+            <div className="flex items-center gap-4">
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${bloodPressureContent.color}`}>
+                    {bloodPressureContent.icon}
+                </div>
+                <div>
+                    <p className="font-semibold">{bloodPressureContent.title}</p>
+                    <p className="text-sm text-muted-foreground">{bloodPressureContent.description}</p>
+                </div>
+            </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-4">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${fastingBloodGlucoseContent.color}`}>
-            {fastingBloodGlucoseContent.icon}
-          </div>
-          <div>
-            <p className="font-semibold">{fastingBloodGlucoseContent.title}</p>
-            <p className="text-sm text-muted-foreground">{fastingBloodGlucoseContent.description}</p>
-          </div>
-        </div>
-        <Separator />
-        <div className="flex items-center gap-4">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${thyroidContent.color}`}>
-            {thyroidContent.icon}
-          </div>
-          <div>
-            <p className="font-semibold">{thyroidContent.title}</p>
-            <p className="text-sm text-muted-foreground">{thyroidContent.description}</p>
-          </div>
-        </div>
-        <Separator />
-        <div className="flex items-center gap-4">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${bloodPressureContent.color}`}>
-            {bloodPressureContent.icon}
-          </div>
-          <div>
-            <p className="font-semibold">{bloodPressureContent.title}</p>
-            <p className="text-sm text-muted-foreground">{bloodPressureContent.description}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    </UniversalCard>
   );
 }

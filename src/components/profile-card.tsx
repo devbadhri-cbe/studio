@@ -1,8 +1,8 @@
+
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake, Stethoscope as DoctorIcon } from 'lucide-react';
 import * as React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
 import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
 import { countries } from '@/lib/countries';
@@ -14,6 +14,7 @@ import { toast } from '@/hooks/use-toast';
 import type { Patient } from '@/lib/types';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { Separator } from './ui/separator';
+import { UniversalCard } from './universal-card';
 
 
 export function ProfileCard() {
@@ -85,25 +86,12 @@ export function ProfileCard() {
 
   return (
     <>
-    <Card className="h-full shadow-xl">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <UserCircle className="h-10 w-10 shrink-0 text-muted-foreground" />
-              <div>
-                <CardTitle>{isEditing ? 'Edit Profile' : 'My Profile'}</CardTitle>
-                <CardDescription>{isEditing ? 'Update your personal details below.' : 'Your personal and medical information.'}</CardDescription>
-              </div>
-            </div>
-             <div className="flex items-center gap-1">
-                 <ProfileSettingsPopover 
-                    onEdit={() => setIsEditing(true)} 
-                    onEditDoctor={() => setIsEditingDoctor(true)}
-                 />
-            </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4 text-sm">
+    <UniversalCard
+      icon={<UserCircle className="h-6 w-6 text-primary" />}
+      title={isEditing ? 'Edit Profile' : 'My Profile'}
+      description={isEditing ? 'Update your personal details below.' : 'Your personal and medical information.'}
+      actions={<ProfileSettingsPopover onEdit={() => setIsEditing(true)} onEditDoctor={() => setIsEditingDoctor(true)} />}
+    >
         {isEditing ? (
             <PatientForm
                 onSubmit={onProfileSubmit}
@@ -112,7 +100,7 @@ export function ProfileCard() {
                 initialData={profile}
             />
         ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 text-sm">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 rounded-lg border bg-card p-4">
                     <div className="flex items-center gap-3 text-muted-foreground">
                         <Cake className="h-5 w-5 shrink-0" />
@@ -161,8 +149,7 @@ export function ProfileCard() {
                  </div>
             </div>
         )}
-      </CardContent>
-    </Card>
+    </UniversalCard>
     <EditDoctorDetailsDialog open={isEditingDoctor} onOpenChange={setIsEditingDoctor} />
     </>
   );
