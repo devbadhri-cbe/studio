@@ -1,7 +1,7 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -18,7 +18,6 @@ let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 let storage: FirebaseStorage;
-let persistenceEnabled = false;
 
 // Singleton pattern to initialize Firebase only once.
 function getFirebaseInstances() {
@@ -32,20 +31,6 @@ function getFirebaseInstances() {
     db = getFirestore(app);
     storage = getStorage(app);
 
-    if (typeof window !== 'undefined' && !persistenceEnabled) {
-      enableIndexedDbPersistence(db)
-        .then(() => {
-          persistenceEnabled = true;
-          console.log("Firestore offline persistence enabled");
-        })
-        .catch((err) => {
-          if (err.code === 'failed-precondition') {
-            console.warn("Firestore persistence failed: Multiple tabs open?");
-          } else if (err.code === 'unimplemented') {
-            console.log("Firestore persistence not available in this browser.");
-          }
-        });
-    }
   }
   return { app, auth, db, storage };
 }

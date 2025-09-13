@@ -7,10 +7,7 @@
 
 import { ai } from '@/ai/genkit';
 import { MedicationInfoInputSchema, MedicationInfoOutputSchema, type MedicationInfoInput, type MedicationInfoOutput } from '@/lib/ai-types';
-import { getFromCache, storeInCache } from '@/lib/ai-cache';
 import { gemini15Flash } from '@genkit-ai/googleai';
-
-const FLOW_NAME = 'getMedicationInfo';
 
 export async function getMedicationInfo(input: MedicationInfoInput): Promise<MedicationInfoOutput> {
   return processMedicationFlow(input);

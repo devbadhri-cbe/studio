@@ -7,18 +7,10 @@
  */
 import { ai } from '@/ai/genkit';
 import { MedicationSynopsisInputSchema, MedicationSynopsisOutputSchema, type MedicationSynopsisInput, type MedicationSynopsisOutput } from '@/lib/ai-types';
-import { getFromCache, storeInCache } from '@/lib/ai-cache';
 import { gemini15Flash } from '@genkit-ai/googleai';
 
-const FLOW_NAME = 'getMedicationSynopsis';
-
 export async function getMedicationSynopsis(input: MedicationSynopsisInput): Promise<MedicationSynopsisOutput> {
-  const cached = await getFromCache<MedicationSynopsisOutput>(FLOW_NAME, input);
-  if (cached) return cached;
-
-  const result = await getMedicationSynopsisFlow(input);
-  await storeInCache(FLOW_NAME, input, result);
-  return result;
+  return await getMedicationSynopsisFlow(input);
 }
 
 const prompt = ai.definePrompt({

@@ -8,10 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { MedicalConditionInputSchema, MedicalConditionOutputSchema, type MedicalConditionInput, type MedicalConditionOutput } from '@/lib/ai-types';
-import { getFromCache, storeInCache } from '@/lib/ai-cache';
 import { gemini15Flash } from '@genkit-ai/googleai';
-
-const FLOW_NAME = 'processMedicalCondition';
 
 export async function processMedicalCondition(input: MedicalConditionInput): Promise<MedicalConditionOutput> {
   return processMedicalConditionFlow(input);
