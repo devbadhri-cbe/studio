@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { ArrowLeft, Share2, Droplet } from 'lucide-react';
+import { ArrowLeft, Share2, Droplet, FileText } from 'lucide-react';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
@@ -22,6 +22,7 @@ import { AddNewBiomarker } from '@/components/add-new-biomarker';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
+import { UploadRecordDialog } from '@/components/upload-record-dialog';
 
 export default function PatientDashboard() {
   const { isClient, isReadOnlyView, patient } = useApp();
@@ -107,7 +108,22 @@ export default function PatientDashboard() {
         </TitleBar>
         <main className="flex-1 p-4 md:p-6 pb-4">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
-            <PatientHeader />
+            <div className="flex flex-col md:flex-row items-start md:items-end gap-4 justify-between">
+                <PatientHeader />
+                <div className="w-full md:w-auto flex items-center justify-center md:justify-end gap-2 md:gap-4 shrink-0">
+                    {!isReadOnlyView && (
+                        <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open('/project-plan.html', '_blank')}
+                        >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Project Plan
+                        </Button>
+                    )}
+                    <UploadRecordDialog />
+                </div>
+            </div>
             <Separator />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 grid grid-cols-1 gap-6">
