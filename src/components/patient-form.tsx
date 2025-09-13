@@ -80,7 +80,6 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
   }, [initialData, formMethods]);
 
   React.useEffect(() => {
-    // Focus the first field when the form mounts
     const timer = setTimeout(() => {
       nameInputRef.current?.focus();
     }, 100);
@@ -202,6 +201,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
         <FormActions
           onCancel={onCancel}
           isSubmitting={isSubmitting}
+          submitText="Save Profile"
         />
       </form>
     </FormProvider>
