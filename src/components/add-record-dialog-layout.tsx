@@ -65,15 +65,11 @@ export function AddRecordDialogLayout({
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
                 {children}
-                 <div className="flex justify-end gap-2 pt-4">
-                    <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
-                        Cancel
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Save Record
-                    </Button>
-                </div>
+                 <FormActions
+                    onCancel={onCancel}
+                    isSubmitting={isSubmitting}
+                    submitText="Save Record"
+                 />
                 </form>
             </Form>
         </CardContent>
