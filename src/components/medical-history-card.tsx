@@ -227,7 +227,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                 </div>
 
                 <div className="flex items-center shrink-0">
-                    {isFailed && !isNil &&(
+                    {isFailed && !isNil && (
                          <ActionIcon 
                             tooltip={`Delete Failed Record`}
                             icon={<Trash2 className="h-5 w-5 text-destructive" />}
@@ -236,11 +236,14 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                     )}
                     {!isPending && !isNil && !isFailed && (
                         <>
-                            <ActionIcon 
-                                tooltip="View Synopsis"
-                                icon={<Info className="h-5 w-5 text-blue-500" />}
-                                onClick={(e) => { e.stopPropagation(); onShowSynopsis(item.id); }}
-                            />
+                             {/* Non-edit mode icons */}
+                            {!isEditing && (
+                                <ActionIcon 
+                                    tooltip="View Synopsis"
+                                    icon={<Info className="h-5 w-5 text-blue-500" />}
+                                    onClick={(e) => { e.stopPropagation(); onShowSynopsis(item.id); }}
+                                />
+                            )}
                             {isEditing && onRevise && (
                                 <ActionIcon 
                                     tooltip={`Edit ${type}`}
