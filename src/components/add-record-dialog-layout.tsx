@@ -56,7 +56,7 @@ export function AddRecordDialogLayout({
   };
   
   return (
-      <Card className="mt-2 border-primary border-2">
+      <Card className="mt-2 border-destructive border-4">
         <CardHeader>
             <CardTitle>{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
