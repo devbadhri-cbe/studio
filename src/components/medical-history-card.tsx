@@ -41,10 +41,11 @@ interface MedicalInfoSectionProps<T extends MedicalCondition | Medication> {
   onAddItem: (item: Omit<T, 'id'>) => void;
   isNil?: boolean;
   nilRecord?: T;
-  AddForm: React.ComponentType<{ onSave: (data: any) => void; onCancel: () => void; }>;
+  AddForm: React.ComponentType<{ onSave: (data: any) => void; onCancel: () => void; initialData?: T }>;
   EditForm: React.ComponentType<{ onSave: (data: any) => void; onCancel: () => void; initialData: T; }>;
   extraActions?: React.ReactNode;
 }
+
 
 function MedicalInfoSection<T extends MedicalCondition | Medication>({ 
     title, icon, items, type, onShowSynopsis, onProcessItem, onRemoveItem, onUpdateItem, isNil, nilRecord, AddForm, EditForm, extraActions
@@ -74,6 +75,19 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
         </ActionMenu>
     );
 
+    const handleAddFormCancel = () => setActiveView('none');
+    const handleEditFormCancel = () => setActiveView('none');
+
+    const handleAddFormSave = (data: Omit<T, 'id'>) => {
+        onAddItem(data);
+        setActiveView('none');
+    }
+
+    const handleEditFormSave = (data: T) => {
+        onUpdateItem(data);
+        setActiveView('none');
+    }
+
     return (
         <Card className="shadow-xl h-full flex flex-col">
             <CardContent className="space-y-4 text-sm p-4 flex-1 flex flex-col">
@@ -86,7 +100,7 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
                         {actions}
                     </div>
                 </div>
-                {activeView === 'add' && <AddForm onSave={handleSaveNew} onCancel={() => setActiveView('none')} />}
+                {activeView === 'add' && <AddForm onSave={handleAddFormSave as any} onCancel={handleAddFormCancel} />}
                 <ul className="space-y-1 mt-2">
                     {items.length > 0 ? items.map((item) => {
                         const isEditingThis = activeView === `edit_${item.id}`;
@@ -101,10 +115,10 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
                                 onShowSynopsis={onShowSynopsis}
                                 onProcess={onProcessItem}
                                 onRevise={() => setActiveView(`edit_${item.id}`)}
-                                form={<EditForm onCancel={() => setActiveView('none')} initialData={item} onSave={handleSaveNew}/>}
+                                form={<EditForm onCancel={handleEditFormCancel} initialData={item} onSave={handleEditFormSave as any}/>}
                             />
                         )
-                    }) : (isNil && nilRecord) && (
+                    }) : (isNil && nilRecord) ? (
                         <ListItem
                             item={nilRecord}
                             type={type}
@@ -115,7 +129,7 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
                             onProcess={() => {}}
                             form={null}
                         />
-                    )}
+                    ) : null}
                     {items.length === 0 && !isNil && activeView !== 'add' && <p className="text-xs text-muted-foreground pl-8 pt-2">No {type === 'condition' ? 'conditions' : 'medications'} recorded.</p>}
                 </ul>
             </CardContent>
@@ -175,7 +189,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
     
     const showOriginalInput = originalInput && originalInput.toLowerCase() !== title.toLowerCase() && !isNil;
 
-    const itemBorderColor = isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
+    const itemBorderColor = isNil ? 'border-transparent' : isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
     const itemCursor = isFailed || (isMobile && type === 'medication' && !isNil && !isFailed && !isPending) ? "cursor-pointer" : "cursor-default";
 
 
@@ -213,7 +227,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                 </div>
 
                 <div className="flex items-center shrink-0">
-                    {isFailed && (
+                    {isFailed && !isNil &&(
                          <ActionIcon 
                             tooltip={`Delete Failed Record`}
                             icon={<Trash2 className="h-5 w-5 text-destructive" />}
@@ -296,6 +310,12 @@ export function MedicalHistoryCard() {
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
     }
   }
+  
+  const handleProcessMedication = async (med: Medication) => {
+      // Reprocessing a medication is handled by the AddMedicationForm's reprocessing mode
+      // For this prototype, we'll just show a toast
+      toast({title: 'Not Implemented', description: 'Please use the "Add Medication" form to re-process failed entries for now.'});
+  }
 
   const renderSynopsisDialog = () => {
     if (!activeSynopsis) return null;
@@ -375,11 +395,11 @@ export function MedicalHistoryCard() {
             items={profile.medication || []}
             type="medication"
             onShowSynopsis={(id) => setActiveSynopsis({ type: 'medication', id })}
-            onProcessItem={() => toast({ title: 'Notice', description: 'Reprocessing is handled via the Add Medication form.'})}
+            onProcessItem={handleProcessMedication}
             onRemoveItem={removeMedication}
             onUpdateItem={updateMedication}
             onAddItem={addMedication}
-            isNil={profile.medication.length === 0}
+            isNil={profile.medication?.length === 0 && profile.status !== 'On Track'}
             nilRecord={nilMedicationRecord}
             AddForm={AddMedicationForm as any}
             EditForm={EditMedicationWrapper as any}
