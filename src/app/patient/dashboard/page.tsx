@@ -94,16 +94,16 @@ export default function PatientDashboard() {
             ) : null
           }
         >
-          {isReadOnlyView && (
+          {process.env.NODE_ENV === 'development' && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard')}>
                   <ArrowLeft className="h-4 w-4" />
-                  <span className="sr-only">Back to Home</span>
+                  <span className="sr-only">Back to Developer View</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Back to Home</p>
+                <p>Back to Developer View</p>
               </TooltipContent>
             </Tooltip>
           )}
