@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Logo } from '@/components/logo';
@@ -7,12 +8,13 @@ import { cn } from '@/lib/utils';
 interface TitleBarProps {
     title: string[];
     subtitle?: string;
+    onSubtitleClick?: () => void;
     children?: React.ReactNode;
     rightChildren?: React.ReactNode;
     isScrolled: boolean;
 }
 
-export function TitleBar({ title, subtitle, children, rightChildren, isScrolled }: TitleBarProps) {
+export function TitleBar({ title, subtitle, onSubtitleClick, children, rightChildren, isScrolled }: TitleBarProps) {
     
     const renderTitle = () => {
         if(title.length === 1) {
@@ -55,11 +57,12 @@ export function TitleBar({ title, subtitle, children, rightChildren, isScrolled 
                             isScrolled ? "opacity-0 h-0" : "opacity-100 h-auto"
                          )}>
                            {subtitle && (
-                            <span 
-                                className="hover:underline"
+                            <button 
+                                onClick={onSubtitleClick}
+                                className={cn("hover:underline", onSubtitleClick && "cursor-pointer")}
                             >
                                 {subtitle}
-                            </span>
+                            </button>
                            )}
                         </div>
                     </div>

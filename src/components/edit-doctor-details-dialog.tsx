@@ -16,8 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from './ui/input';
 import { Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { updatePatient } from '@/lib/firestore';
-import { doctorDetails } from '@/lib/doctor-data';
+import { FormActions } from './form-actions';
 
 
 interface EditDoctorDetailsDialogProps {
@@ -26,7 +25,7 @@ interface EditDoctorDetailsDialogProps {
 }
 
 export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetailsDialogProps) {
-  const { profile, setProfile } = useApp();
+  const { profile, setPatient } = useApp();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm({
@@ -38,26 +37,39 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
   });
 
   React.useEffect(() => {
-    if (open) {
+    if (open && profile) {
       form.reset({
-        doctorName: doctorDetails.name || '',
-        doctorEmail: doctorDetails.email || '',
-        doctorPhone: '',
+        doctorName: profile.doctorName || '',
+        doctorEmail: profile.doctorEmail || '',
+        doctorPhone: profile.doctorPhone || '',
       });
     }
-  }, [open, form]);
+  }, [open, profile, form]);
 
   const onSubmit = async (data: { doctorName?: string; doctorEmail?: string; doctorPhone?: string }) => {
+    if (!profile) return;
     setIsSubmitting(true);
-    // This functionality is disabled in the single-doctor model.
-    setTimeout(() => {
-        toast({
-            title: 'Action Disabled',
-            description: "This feature is not available.",
+    try {
+        setPatient({
+            ...profile,
+            doctorName: data.doctorName,
+            doctorEmail: data.doctorEmail,
+            doctorPhone: data.doctorPhone,
         });
-        setIsSubmitting(false);
+        toast({
+            title: 'Doctor Details Updated',
+            description: "Your doctor's information has been saved.",
+        });
         onOpenChange(false);
-    }, 500);
+    } catch (error) {
+         toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: "Could not save your doctor's details.",
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   return (
@@ -66,7 +78,7 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
         <DialogHeader>
           <DialogTitle>Doctor's Details</DialogTitle>
           <DialogDescription>
-            Details of your consulting doctor.
+            Enter or update the contact information for your consulting doctor.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -78,7 +90,7 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Dr. John Doe" {...field} disabled />
+                    <Input placeholder="Dr. John Doe" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -91,7 +103,7 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="doctor@example.com" {...field} disabled />
+                    <Input type="email" placeholder="doctor@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -104,17 +116,17 @@ export function EditDoctorDetailsDialog({ open, onOpenChange }: EditDoctorDetail
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="+1 (555) 123-4567" {...field} disabled />
+                    <Input type="tel" placeholder="+1 (555) 123-4567" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-                Close
-              </Button>
-            </div>
+             <FormActions
+              onCancel={() => onOpenChange(false)}
+              isSubmitting={isSubmitting}
+              submitText="Save Details"
+           />
           </form>
         </Form>
       </DialogContent>

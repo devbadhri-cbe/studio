@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -8,7 +9,6 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
-import { doctorDetails } from '@/lib/doctor-data';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { TitleBar } from '@/components/ui/title-bar';
 import { Logo } from './logo';
@@ -63,7 +63,8 @@ export function PatientDashboard() {
       <div className="flex min-h-screen w-full flex-col bg-background">
         <TitleBar
           title={['Health', 'Guardian']}
-          subtitle={doctorDetails.name}
+          subtitle={patient.doctorName || 'Click to add Doctor'}
+          onSubtitleClick={() => setIsEditingDoctor(true)}
           isScrolled={isScrolled}
           rightChildren={
             !isReadOnlyView ? (
