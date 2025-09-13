@@ -9,7 +9,7 @@ import { FileText } from 'lucide-react';
 export function PatientHeader() {
   const { patient } = useApp();
 
-  const pageTitle = `Welcome, ${patient?.name || 'User'}!`;
+  const pageTitle = `Welcome, ${patient?.name || ''}!`;
   
   return (
     <>
