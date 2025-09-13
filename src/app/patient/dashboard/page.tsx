@@ -2,16 +2,13 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { Share2 } from 'lucide-react';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Button } from '@/components/ui/button';
 import { TitleBar } from '@/components/ui/title-bar';
 import { Logo } from '@/components/logo';
 import { ProfileCard } from '@/components/profile-card';
 import { MedicalHistoryCard } from '@/components/medical-history-card';
-import { SharePatientAccessDialog } from '@/components/share-patient-access-dialog';
 import { ReminderCard } from '@/components/reminder-card';
 import { InsightsCard } from '@/components/insights-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
@@ -19,9 +16,8 @@ import { BloodPressureCard } from '@/components/blood-pressure-card';
 import { PatientLoginPage } from '@/components/patient-login-page';
 
 export default function PatientDashboard() {
-  const { isClient, isReadOnlyView, patient } = useApp();
+  const { isClient, patient } = useApp();
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [isShareOpen, setIsShareOpen] = React.useState(false);
   
   React.useEffect(() => {
     const handleScroll = () => {
@@ -68,21 +64,6 @@ export default function PatientDashboard() {
           title={['Health', 'Guardian', 'Lite']}
           subtitle={developerCredit}
           isScrolled={isScrolled}
-          rightChildren={
-            !isReadOnlyView ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => setIsShareOpen(true)}>
-                    <Share2 className="h-4 w-4" />
-                    <span className="sr-only">Share or Sync Data</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Share or Sync Data</p>
-                </TooltipContent>
-              </Tooltip>
-            ) : null
-          }
         />
         <main className="flex-1 p-4 md:p-6 pb-4">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
@@ -107,7 +88,6 @@ export default function PatientDashboard() {
           </div>
         </main>
       </div>
-      {patient && <SharePatientAccessDialog open={isShareOpen} onOpenChange={setIsShareOpen} patient={patient} />}
     </>
   );
 }
