@@ -72,6 +72,7 @@ export function BiomarkerCard<T extends Record>({
   className,
 }: BiomarkerCardProps<T>) {
   const [isEditMode, setIsEditMode] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const formatDate = useDateFormatter();
 
   const sortedRecords = React.useMemo(() => {
@@ -96,10 +97,24 @@ export function BiomarkerCard<T extends Record>({
   const hasRecords = records && records.length > 0;
   const hasMultipleRecords = records && records.length > 1;
 
+  const handleAddRecordSuccess = () => {
+    setIsMenuOpen(false);
+  };
+  
+  const addRecordDialogWithCallback = React.cloneElement(addRecordDialog as React.ReactElement, {
+      onSuccess: handleAddRecordSuccess,
+  });
+
   const Actions = !isReadOnly ? (
-    <ActionMenu tooltip="Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()}>
+    <ActionMenu 
+      tooltip="Settings" 
+      icon={<Settings className="h-4 w-4" />} 
+      onClick={(e) => e.stopPropagation()}
+      open={isMenuOpen}
+      onOpenChange={setIsMenuOpen}
+    >
       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-        {React.cloneElement(addRecordDialog as React.ReactElement, {
+        {React.cloneElement(addRecordDialogWithCallback as React.ReactElement, {
           children: (
              <div className="flex items-center gap-2">
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -188,7 +203,7 @@ export function BiomarkerCard<T extends Record>({
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px]">
               <p className="text-sm">No records yet.</p>
-              {React.cloneElement(addRecordDialog as React.ReactElement, {
+              {React.cloneElement(addRecordDialogWithCallback as React.ReactElement, {
                 children: (
                   <Button variant="outline" size="sm" className="mt-4">
                     <PlusCircle className="mr-2 h-4 w-4" />
