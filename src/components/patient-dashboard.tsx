@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -28,7 +27,6 @@ import { BloodPressureCard } from './blood-pressure-card';
 export function PatientDashboard() {
   const { isClient, isReadOnlyView, patient } = useApp();
   const router = useRouter();
-  const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isShareOpen, setIsShareOpen] = React.useState(false);
   
@@ -63,8 +61,7 @@ export function PatientDashboard() {
       <div className="flex min-h-screen w-full flex-col bg-background">
         <TitleBar
           title={['Health', 'Guardian']}
-          subtitle={patient.doctorName || 'Click to add Doctor'}
-          onSubtitleClick={() => setIsEditingDoctor(true)}
+          subtitle="Your Personal Health Dashboard"
           isScrolled={isScrolled}
           rightChildren={
             !isReadOnlyView ? (
@@ -102,7 +99,7 @@ export function PatientDashboard() {
             <Separator />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 grid grid-cols-1 gap-6">
-                    <ProfileCard />
+                     <ProfileCard />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <WeightRecordCard />
                         <BloodPressureCard />
@@ -154,7 +151,6 @@ export function PatientDashboard() {
           </div>
         </main>
       </div>
-      <EditDoctorDetailsDialog open={isEditingDoctor} onOpenChange={setIsEditingDoctor} />
       {patient && <SharePatientAccessDialog open={isShareOpen} onOpenChange={setIsShareOpen} patient={patient} />}
     </>
   );

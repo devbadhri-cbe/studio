@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { dateFormats } from '@/lib/countries';
 import { useApp } from '@/context/app-context';
 import type { UnitSystem } from '@/lib/types';
-import { Settings, Edit, Download, Copy, Trash2 } from 'lucide-react';
+import { Settings, Edit, Download, Copy, Trash2, UserCircle } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { ActionIcon } from './ui/action-icon';
 import { toast } from '@/hooks/use-toast';
@@ -24,9 +24,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 interface ProfileSettingsPopoverProps {
     onEdit: () => void;
+    onEditDoctor: () => void;
 }
 
-export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) {
+export function ProfileSettingsPopover({ onEdit, onEditDoctor }: ProfileSettingsPopoverProps) {
   const { profile, setPatient, getFullPatientData, deleteProfile } = useApp();
   
   const handleExportData = () => {
@@ -76,13 +77,19 @@ export function ProfileSettingsPopover({ onEdit }: ProfileSettingsPopoverProps) 
                  <div className="space-y-2">
                     <h4 className="font-medium leading-none">Profile</h4>
                     <p className="text-sm text-muted-foreground">
-                       Edit your personal details.
+                       Edit your personal or doctor's details.
                     </p>
                 </div>
-                 <Button variant="outline" size="sm" onClick={onEdit}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit Profile
-                </Button>
+                 <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" size="sm" onClick={onEdit}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit Profile
+                    </Button>
+                     <Button variant="outline" size="sm" onClick={onEditDoctor}>
+                        <UserCircle className="mr-2 h-4 w-4" />
+                        Doctor Details
+                    </Button>
+                </div>
                 <Separator />
                 <div className="space-y-2">
                     <h4 className="font-medium leading-none">Display Settings</h4>

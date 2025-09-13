@@ -1,6 +1,6 @@
 'use client';
 
-import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake } from 'lucide-react';
+import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake, Stethoscope as DoctorIcon } from 'lucide-react';
 import * as React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/app-context';
@@ -12,11 +12,14 @@ import { PatientForm, type PatientFormData } from './patient-form';
 import { ftInToCm } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import type { Patient } from '@/lib/types';
+import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
+import { Separator } from './ui/separator';
 
 
 export function ProfileCard() {
   const { profile, setPatient } = useApp();
   const [isEditing, setIsEditing] = React.useState(false);
+  const [isEditingDoctor, setIsEditingDoctor] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const formatDate = useDateFormatter();
   
@@ -24,6 +27,7 @@ export function ProfileCard() {
   const country = countries.find(c => c.code === profile.country);
   const countryName = country?.name || profile.country;
   const formattedPhone = formatDisplayPhoneNumber(profile.phone, profile.country);
+  const formattedDoctorPhone = formatDisplayPhoneNumber(profile.doctorPhone, profile.country);
 
   const onProfileSubmit = async (data: PatientFormData) => {
     if (!profile) return;
@@ -92,7 +96,10 @@ export function ProfileCard() {
               </div>
             </div>
              <div className="flex items-center gap-1">
-                 <ProfileSettingsPopover onEdit={() => setIsEditing(true)} />
+                 <ProfileSettingsPopover 
+                    onEdit={() => setIsEditing(true)} 
+                    onEditDoctor={() => setIsEditingDoctor(true)}
+                 />
             </div>
         </div>
       </CardHeader>
@@ -105,34 +112,58 @@ export function ProfileCard() {
                 initialData={profile}
             />
         ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 rounded-lg border bg-card p-4">
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <Cake className="h-5 w-5 shrink-0" />
-                    <p>
-                        {profile.dob ? formatDate(profile.dob) : 'N/A'}
-                        {calculatedAge !== null && ` (${calculatedAge} yrs)`}
-                    </p>
+            <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 rounded-lg border bg-card p-4">
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                        <Cake className="h-5 w-5 shrink-0" />
+                        <p>
+                            {profile.dob ? formatDate(profile.dob) : 'N/A'}
+                            {calculatedAge !== null && ` (${calculatedAge} yrs)`}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                        <VenetianMask className="h-5 w-5 shrink-0" />
+                        <p><span className="capitalize">{profile.gender || 'N/A'}</span></p>
+                    </div>
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                        <Globe className="h-5 w-5 shrink-0" />
+                        <p>{countryName}</p>
+                    </div>
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                        <Mail className="h-5 w-5 shrink-0" />
+                        <p>{profile.email || 'N/A'}</p>
+                    </div>
+                    <div className="md:col-span-2 flex items-center gap-3 text-muted-foreground">
+                        <Phone className="h-5 w-5 shrink-0" />
+                        <p>{formattedPhone}</p>
+                    </div>
                 </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <VenetianMask className="h-5 w-5 shrink-0" />
-                    <p><span className="capitalize">{profile.gender || 'N/A'}</span></p>
-                </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <Globe className="h-5 w-5 shrink-0" />
-                    <p>{countryName}</p>
-                </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <Mail className="h-5 w-5 shrink-0" />
-                    <p>{profile.email || 'N/A'}</p>
-                </div>
-                <div className="md:col-span-2 flex items-center gap-3 text-muted-foreground">
-                    <Phone className="h-5 w-5 shrink-0" />
-                    <p>{formattedPhone}</p>
-                </div>
+                 <div className="rounded-lg border bg-card p-4 space-y-3">
+                     <h4 className="font-medium text-sm flex items-center gap-3">
+                         <DoctorIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
+                         Consulting Doctor
+                     </h4>
+                     <Separator />
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6">
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                            <UserCircle className="h-5 w-5 shrink-0" />
+                            <p>{profile.doctorName || 'Not specified'}</p>
+                        </div>
+                         <div className="flex items-center gap-3 text-muted-foreground">
+                            <Phone className="h-5 w-5 shrink-0" />
+                            <p>{formattedDoctorPhone}</p>
+                        </div>
+                        <div className="md:col-span-2 flex items-center gap-3 text-muted-foreground">
+                            <Mail className="h-5 w-5 shrink-0" />
+                            <p>{profile.doctorEmail || 'Not specified'}</p>
+                        </div>
+                    </div>
+                 </div>
             </div>
         )}
       </CardContent>
     </Card>
+    <EditDoctorDetailsDialog open={isEditingDoctor} onOpenChange={setIsEditingDoctor} />
     </>
   );
 }
