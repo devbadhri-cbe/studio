@@ -25,9 +25,15 @@ User-provided Frequency: "{{frequency}}"
 User-provided Food Instruction: "{{foodInstructions}}"
 Patient's Country: "{{country}}"
 
-1.  **Identify Active Ingredient**: Analyze the 'userInput' (e.g., "Rosuvas 20mg", "Tylenol PM", "Aspirin 81mg") to determine the primary 'activeIngredient' (generic name). This is your primary task. If you cannot determine this with high confidence, do not return the 'activeIngredient' field.
+**Task Breakdown:**
 
-2.  **Suggest Spelling Correction (Separate Task)**: Independently from the above, assess if there is a spelling mistake in the medication brand name within 'userInput'. If you are highly confident of a correction, provide a 'spellingSuggestion'. The suggestion should be a correction of the original 'userInput' string itself (e.g., for "Rosvas 10", the spelling suggestion should be "Rosuvas 10"). Check against all global brand names, but give priority to brands common in the patient's country. Provide this suggestion even if you can't find the active ingredient.
+1.  **Identify Active Ingredient (Primary Task)**: Analyze the 'userInput' (e.g., "Rosuvas 20mg", "Tylenol PM") to determine the primary 'activeIngredient' (generic name). If you cannot determine this with high confidence, do not return the 'activeIngredient' field.
+
+2.  **Suggest Spelling Correction (Independent Task)**:
+    a.  Assess if there's a likely spelling mistake in the medication brand name within the 'userInput'.
+    b.  Compare the original input to both the identified active ingredient and to a list of known global brand names, prioritizing those common in the patient's specified 'country'.
+    c.  If you find a very close brand name match (e.g., user enters "Rosvas", you find "Rosuvas"), your 'spellingSuggestion' MUST be the corrected brand name string (e.g., "Rosuvas 10mg").
+    d.  Only if no close brand name is found, but you are confident about the active ingredient, you may suggest the active ingredient (e.g., "Rosuvastatin 10mg").
 
 3.  **Extract Dosage**: Extract the 'dosage' from the 'userInput' string and standardize it, ensuring it includes the unit (e.g., "20 mg" becomes "20mg", "5" becomes "5mg" if that's the common dosage unit).
 
