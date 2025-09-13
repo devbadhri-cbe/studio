@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -57,9 +58,16 @@ export default function PatientDashboard() {
   }
 
   const developerCredit = (
-    <a href="mailto:dev.badhri@gmail.com" className="hover:underline">
-      Dr N Badhrinathan
-    </a>
+    <Tooltip>
+        <TooltipTrigger asChild>
+            <a href="mailto:dev.badhri@gmail.com" className="hover:underline">
+                Dr N Badhrinathan
+            </a>
+        </TooltipTrigger>
+        <TooltipContent>
+            <p>dev.badhri@gmail.com</p>
+        </TooltipContent>
+    </Tooltip>
   );
 
   return (
