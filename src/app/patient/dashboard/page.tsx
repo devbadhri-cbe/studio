@@ -93,21 +93,7 @@ export default function PatientDashboard() {
               </Tooltip>
             ) : null
           }
-        >
-          {process.env.NODE_ENV === 'development' && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard')}>
-                  <ArrowLeft className="h-4 w-4" />
-                  <span className="sr-only">Back to Developer View</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Back to Developer View</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </TitleBar>
+        />
         <main className="flex-1 p-4 md:p-6 pb-4">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
             <div className="flex flex-col md:flex-row items-start md:items-end gap-4 justify-between">
