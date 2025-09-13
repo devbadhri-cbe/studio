@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview An AI flow to process and standardize medical conditions.
@@ -19,22 +18,22 @@ const prompt = ai.definePrompt({
     input: { schema: MedicalConditionInputSchema },
     output: { schema: MedicalConditionOutputSchema },
     model: gemini15Flash,
-    prompt: `You are a medical data validation expert. Your task is to analyze and standardize a user-provided medical condition.
+    prompt: `You are a medical data validation expert. Your task is to analyze, correct, and standardize a user-provided medical condition.
 
 User Input: "{{condition}}"
 
 **Your primary goal is to find the standardized medical name and ICD-11 code for the user's input.**
 
-1.  **Assume the user's input is a valid medical condition.** Search for its standardized name (e.g., for "high blood pressure," the standardized name is "Hypertension").
-2.  You MUST provide the 'standardizedName'.
-3.  You MUST provide the most likely 'icdCode' from the ICD-11 classification.
-4.  You MUST provide a brief, one-paragraph 'synopsis' of the condition, suitable for a patient to read.
-5.  Set 'isValid' to true.
+1.  Analyze the user's input for spelling mistakes, grammatical errors, or colloquialisms (e.g., "high blood sugar" -> "Hyperglycemia" or "Diabetes").
+2.  Determine the most likely, specific medical condition the user is referring to. This will be the 'standardizedName'.
+3.  If you believe the user made a mistake, provide a 'suggestion' with the corrected, full name (e.g., if user input is "Hypertenson", suggestion should be "Hypertension").
+4.  You MUST provide the most likely 'icdCode' from the ICD-11 classification for the identified condition.
+5.  You MUST provide a brief, one-paragraph 'synopsis' of the condition, suitable for a patient to read.
+6.  Set 'isValid' to true if you could successfully identify a condition.
 
-**If, and only if, you absolutely cannot determine a specific medical condition from the input (e.g., the input is a vague symptom like "feeling tired"):**
+**If, and only if, you absolutely cannot determine a specific medical condition from the input (e.g., the input is too vague like "feeling tired" or nonsensical):**
 1.  Set 'isValid' to false.
-2.  Provide a list of up to 3 'suggestions' for more specific, valid medical conditions the user might have meant.
-3.  Do not provide 'standardizedName', 'icdCode', or 'synopsis'.`,
+2.  Do not provide 'standardizedName', 'icdCode', or 'synopsis'.`,
 });
 
 const processMedicalConditionFlow = ai.defineFlow(

@@ -26,6 +26,8 @@ import { produce } from 'immer';
 import { EditMedicationForm } from './edit-medication-form';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { v4 as uuidv4 } from 'uuid';
+import { type MedicalConditionOutput } from '@/lib/ai-types';
+import { ConditionReviewCard } from './condition-review-card';
 
 type ActiveView = 'none' | `add` | `edit_${string}` | `synopsis_${string}`;
 
@@ -201,8 +203,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
     const handleItemClick = () => {
         if (isFailed || isPending) {
             onProcess(item);
-        } else if (isMobile && type === 'medication' && !isNilItem && !isFailed && !isPending) {
-            // On mobile, tapping the item shows the synopsis.
+        } else if (isMobile && !isNilItem && !isFailed && !isPending) {
             onShowSynopsis(item.id);
         }
     }
@@ -210,7 +211,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
     const showOriginalInput = originalInput && originalInput.toLowerCase() !== title.toLowerCase() && !isNilItem;
 
     const itemBorderColor = isNilItem ? 'border-transparent' : isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
-    const itemCursor = (isFailed || isPending) ? "cursor-pointer" : (isMobile && type === 'medication' && !isNilItem && !isFailed && !isPending) ? "cursor-pointer" : "cursor-default";
+    const itemCursor = (isFailed || isPending || (isMobile && !isNilItem)) ? "cursor-pointer" : "cursor-default";
 
 
     return (
@@ -231,7 +232,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                     {isPending ? (
                         <div className="flex items-center gap-1.5 mt-1">
                             <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
-                            <p className="text-yellow-600 text-xs italic">Pending AI processing...</p>
+                            <p className="text-yellow-600 text-xs italic">AI is processing...</p>
                         </div>
                     ) : isFailed ? (
                         <div className="flex items-center gap-1.5 mt-1">
@@ -272,21 +273,6 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                     )}
                 </div>
             </div>
-
-            {(item as MedicalCondition).status === 'needs_revision' && onRevise && (
-                <div className="mt-2 w-full">
-                <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive text-xs p-2">
-                    <AlertTriangleIcon className="h-4 w-4 !text-destructive" />
-                    <AlertDescription className="flex items-center justify-between">
-                    Doctor requested revision.
-                    <Button size="xs" className="ml-2" onClick={() => onRevise(item)}>
-                        <Edit className="mr-1 h-3 w-3" />
-                        Revise
-                    </Button>
-                    </AlertDescription>
-                </Alert>
-                </div>
-            )}
         </div>
         {isFormOpen && <div className="mt-2">{form}</div>}
         </li>
@@ -297,33 +283,46 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
 export function MedicalHistoryCard() {
   const { profile, updateMedicalCondition, removeMedication, removeMedicalCondition, addMedicalCondition, addMedication, updateMedication } = useApp();
   const [activeSynopsis, setActiveSynopsis] = React.useState<{ type: 'condition' | 'medication', id: string } | null>(null);
+  const [reviewingCondition, setReviewingCondition] = React.useState<{ userInput: string; date: string; aiResult: MedicalConditionOutput } | null>(null);
   const addMedicationFormRef = React.useRef<{ startReprocessing: (med: Medication) => void }>(null);
 
 
   const handleProcessCondition = async (condition: MedicalCondition) => {
-    if (condition.status === 'processed') return; // Don't re-process if already done
+    if (condition.status === 'processed') return; 
+    
+    const tempId = condition.id || uuidv4();
+    updateMedicalCondition({ ...condition, id: tempId, status: 'pending_review' });
+
     toast({ title: "Processing Condition...", description: `Asking AI about "${condition.userInput}"`});
     
     try {
       const result = await processMedicalCondition({ condition: condition.userInput || '' });
-      if (result.isValid && result.standardizedName && result.icdCode) {
-        updateMedicalCondition({
-            ...condition,
-            condition: result.standardizedName,
-            icdCode: result.icdCode,
-            synopsis: result.synopsis || '',
-            status: 'processed',
-        });
-        toast({ title: 'Condition Processed', description: `AI identified: ${result.standardizedName}` });
+      if (result.isValid) {
+        removeMedicalCondition(tempId);
+        setReviewingCondition({ userInput: condition.userInput || '', date: condition.date, aiResult: result });
       } else {
         updateMedicalCondition(produce(condition, draft => { draft.status = 'failed' }));
-        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Suggestions: ${result.suggestions?.join(', ') || 'Please check spelling.'}.` });
+        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Please check spelling and try again.` });
       }
     } catch(e) {
       console.error(e);
       updateMedicalCondition(produce(condition, draft => { draft.status = 'failed' }));
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
     }
+  }
+
+  const handleConfirmCondition = (confirmedData: { aiResult: MedicalConditionOutput, userInput: string, date: string }) => {
+    const newCondition: Omit<MedicalCondition, 'id'> = {
+        userInput: confirmedData.userInput,
+        condition: confirmedData.aiResult.standardizedName!,
+        date: confirmedData.date,
+        icdCode: confirmedData.aiResult.icdCode,
+        synopsis: confirmedData.aiResult.synopsis,
+        status: 'processed',
+    };
+    addMedicalCondition(newCondition);
+    toast({ title: "Condition Saved", description: `${newCondition.condition} has been added to your list.`});
+    setReviewingCondition(null);
   }
   
   const handleProcessMedication = async (med: Medication) => {
@@ -380,8 +379,6 @@ export function MedicalHistoryCard() {
   );
   
   const handleRemoveNilMedication = () => {
-    // A bit of a hack: add and then immediately remove a 'nil' medication
-    // This tells the app context that the user has interacted and no longer wants the nil placeholder
     const nilMed: Omit<Medication, 'id'> = {
         name: 'Nil',
         userInput: 'Nil',
@@ -405,12 +402,20 @@ export function MedicalHistoryCard() {
           id: uuidv4(),
           status: 'pending_review',
       };
-      addMedicalCondition(newCondition);
       handleProcessCondition(newCondition);
   }
 
   return (
     <>
+      {reviewingCondition && (
+        <ConditionReviewCard
+            userInput={reviewingCondition.userInput}
+            date={reviewingCondition.date}
+            aiResult={reviewingCondition.aiResult}
+            onConfirm={handleConfirmCondition}
+            onCancel={() => setReviewingCondition(null)}
+        />
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <MedicalInfoSection
             title="Present Medical Conditions"

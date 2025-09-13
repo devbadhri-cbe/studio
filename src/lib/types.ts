@@ -1,14 +1,13 @@
-
 export type UnitSystem = 'metric' | 'imperial';
 
 export interface MedicalCondition {
   id: string;
   date: string; 
-  condition: string;
-  userInput?: string;
+  condition: string; // This will be the standardized name
+  userInput: string; // What the user originally typed
   icdCode?: string;
   synopsis?: string;
-  status: 'processed' | 'pending_review' | 'needs_revision' | 'failed';
+  status: 'processed' | 'pending_review' | 'failed';
 }
 
 export type FoodInstruction = 'before' | 'after' | 'with';

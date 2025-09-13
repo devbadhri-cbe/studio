@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 /**
@@ -103,11 +102,11 @@ export const MedicalConditionInputSchema = z.object({
 export type MedicalConditionInput = z.infer<typeof MedicalConditionInputSchema>;
 
 export const MedicalConditionOutputSchema = z.object({
-    isValid: z.boolean().describe('Whether the input is a recognized medical condition.'),
-    standardizedName: z.string().optional().describe('The standardized medical name for the condition.'),
-    icdCode: z.string().optional().describe('The ICD-11 code for the condition.'),
+    isValid: z.boolean().describe('Whether the AI could identify a specific medical condition.'),
+    standardizedName: z.string().optional().describe('The standardized medical name for the condition (e.g., "Hypertension").'),
+    suggestion: z.string().optional().describe('A corrected name for the condition if a spelling or grammar mistake is suspected in the user input.'),
+    icdCode: z.string().optional().describe('The ICD-11 code for the identified condition.'),
     synopsis: z.string().optional().describe('A brief, easy-to-understand synopsis of the condition.'),
-    suggestions: z.array(z.string()).optional().describe('A list of suggested valid condition names if the input is ambiguous or not recognized.'),
 });
 export type MedicalConditionOutput = z.infer<typeof MedicalConditionOutputSchema>;
 
