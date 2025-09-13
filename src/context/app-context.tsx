@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -426,20 +427,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   
   const toggleDiseaseBiomarker = (panelKey: 'diabetes' | 'hypertension' | 'lipidPanel', biomarkerKey: string) => {
-      if (!patient) return;
-      const nextState = produce(patient, draft => {
-          const panel = draft.enabledBiomarkers[panelKey];
-          if (panel) {
-              const index = panel.indexOf(biomarkerKey);
-              if (index > -1) {
-                  panel.splice(index, 1);
-              } else {
-                  panel.push(biomarkerKey);
-              }
-          }
-      });
-      setPatient(nextState);
-  }
+    if (!patient) return;
+    const nextState = produce(patient, draft => {
+        if (!draft.enabledBiomarkers) {
+            draft.enabledBiomarkers = {};
+        }
+        
+        let panel = draft.enabledBiomarkers[panelKey];
+        
+        if (!panel) {
+            // If the panel doesn't exist, create it and add the biomarker.
+            draft.enabledBiomarkers[panelKey] = [biomarkerKey];
+        } else {
+            // If the panel exists, toggle the biomarker.
+            const index = panel.indexOf(biomarkerKey);
+            if (index > -1) {
+                panel.splice(index, 1);
+            } else {
+                panel.push(biomarkerKey);
+            }
+        }
+    });
+    setPatient(nextState);
+};
   
   // ==================================================================
   // DERIVED STATE & UTILITY FUNCTIONS
