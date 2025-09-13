@@ -60,12 +60,6 @@ export function DashboardSectionToggle({
                 Create
               </Button>
             )}
-             {showCreateButton && !isOpen && !isCollapsible && (
-              <Button variant="outline" size="sm" onClick={onCreateClick}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Create
-              </Button>
-            )}
             {isOpen && (
               <div className="relative flex-1">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -89,15 +83,15 @@ export function DashboardSectionToggle({
       </CardContent>
   );
 
+  const triggerContent = (
+     <div className="w-full" role="button">
+        {content}
+     </div>
+  )
+
   return (
     <Card className="hover:bg-muted/50 transition-colors shadow-xl">
-      {isCollapsible ? (
-        <div className="w-full">{content}</div>
-      ) : (
-        <div role="button" onClick={onCreateClick} className="w-full cursor-pointer">
-            {content}
-        </div>
-      )}
+      {isCollapsible ? <CollapsibleTrigger asChild>{triggerContent}</CollapsibleTrigger> : <div onClick={onCreateClick}>{content}</div> }
     </Card>
   );
 }
