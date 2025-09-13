@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
@@ -43,20 +44,30 @@ interface MedicalInfoSectionProps<T extends MedicalCondition | Medication> {
   nilRecord?: T;
   AddForm: React.ComponentType<{ onSave: (data: any) => void; onCancel: () => void; initialData?: T }>;
   EditForm?: React.ComponentType<{ onSave: (data: any) => void; onCancel: () => void; initialData: T; }>;
-  extraActions?: React.ReactNode;
 }
 
 
 function MedicalInfoSection<T extends MedicalCondition | Medication>({ 
-    title, icon, items, type, onShowSynopsis, onProcessItem, onRemoveItem, onUpdateItem, onAddItem, isNil, nilRecord, AddForm, EditForm, extraActions
+    title, icon, items, type, onShowSynopsis, onProcessItem, onRemoveItem, onUpdateItem, onAddItem, isNil, nilRecord, AddForm, EditForm
 }: MedicalInfoSectionProps<T>) {
     const [activeView, setActiveView] = React.useState<ActiveView>('none');
     const [isEditingList, setIsEditingList] = React.useState(false);
+    const [isCheckingInteractions, setIsCheckingInteractions] = React.useState(false);
 
     const handleSaveNew = (data: any) => {
         onUpdateItem(data);
         setActiveView('none');
     };
+    
+    const medicationExtraActions = type === 'medication' && items.length > 1 ? (
+        <>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={() => setIsCheckingInteractions(true)}>
+            <ShieldAlert className="mr-2 h-4 w-4" />
+            Check Interactions
+        </DropdownMenuItem>
+        </>
+    ) : null;
     
     const actions = (
         <ActionMenu tooltip={`${title} Settings`} icon={<Settings className="h-4 w-4" />}>
@@ -66,12 +77,12 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => setIsEditingList(!isEditingList)}
-              disabled={items.length === 0}
+              disabled={items.length === 0 && !isNil}
             >
               <Edit className="mr-2 h-4 w-4" />
               {isEditingList ? 'Done Editing' : 'Edit List'}
             </DropdownMenuItem>
-            {extraActions}
+            {medicationExtraActions}
         </ActionMenu>
     );
 
@@ -101,37 +112,46 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
                     </div>
                 </div>
                 {activeView === 'add' && <AddForm onSave={handleAddFormSave as any} onCancel={handleAddFormCancel} />}
-                <ul className="space-y-1 mt-2">
-                    {items.length > 0 ? items.map((item) => {
-                        const isEditingThis = activeView === `edit_${item.id}`;
-                        return (
+                
+                {isCheckingInteractions ? (
+                    <DrugInteractionViewer
+                        medications={items.map(m => (m as Medication).userInput)}
+                        onClose={() => setIsCheckingInteractions(false)}
+                    />
+                ) : (
+                    <ul className="space-y-1 mt-2">
+                        {items.length > 0 ? items.map((item) => {
+                            const isEditingThis = activeView === `edit_${item.id}`;
+                            return (
+                                <ListItem
+                                    key={item.id}
+                                    item={item}
+                                    type={type}
+                                    isEditing={isEditingList}
+                                    isFormOpen={isEditingThis}
+                                    onRemove={onRemoveItem}
+                                    onShowSynopsis={onShowSynopsis}
+                                    onProcess={onProcessItem}
+                                    onRevise={EditForm ? () => setActiveView(`edit_${item.id}`) : undefined}
+                                    form={EditForm ? <EditForm onCancel={handleEditFormCancel} initialData={item} onSave={handleEditFormSave as any}/> : null}
+                                />
+                            )
+                        }) : isNil && nilRecord ? (
                             <ListItem
-                                key={item.id}
-                                item={item}
+                                item={nilRecord}
                                 type={type}
-                                isEditing={isEditingList}
-                                isFormOpen={isEditingThis}
-                                onRemove={onRemoveItem}
-                                onShowSynopsis={onShowSynopsis}
-                                onProcess={onProcessItem}
-                                onRevise={EditForm ? () => setActiveView(`edit_${item.id}`) : undefined}
-                                form={EditForm ? <EditForm onCancel={handleEditFormCancel} initialData={item} onSave={handleEditFormSave as any}/> : null}
+                                isEditing={false}
+                                isFormOpen={false}
+                                onRemove={() => onRemoveItem(nilRecord.id)}
+                                onShowSynopsis={() => {}}
+                                onProcess={() => {}}
+                                form={null}
+                                isNilItem={true}
                             />
-                        )
-                    }) : (isNil && nilRecord) ? (
-                        <ListItem
-                            item={nilRecord}
-                            type={type}
-                            isEditing={false}
-                            isFormOpen={false}
-                            onRemove={() => {}}
-                            onShowSynopsis={() => {}}
-                            onProcess={() => {}}
-                            form={null}
-                        />
-                    ) : null}
-                    {items.length === 0 && !isNil && activeView !== 'add' && <p className="text-xs text-muted-foreground pl-8 pt-2">No {type === 'condition' ? 'conditions' : 'medications'} recorded.</p>}
-                </ul>
+                        ) : null}
+                        {items.length === 0 && !isNil && activeView !== 'add' && <p className="text-xs text-muted-foreground pl-8 pt-2">No {type === 'condition' ? 'conditions' : 'medications'} recorded.</p>}
+                    </ul>
+                )}
             </CardContent>
         </Card>
     );
@@ -148,9 +168,10 @@ interface ListItemProps {
     onProcess: (item: any) => void;
     onRevise?: (item: any) => void;
     form: React.ReactNode;
+    isNilItem?: boolean;
 }
 
-function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis, onProcess, onRevise, form }: ListItemProps) {
+function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis, onProcess, onRevise, form, isNilItem = false }: ListItemProps) {
     const formatDate = useDateFormatter();
     const isMobile = useIsMobile();
     
@@ -161,7 +182,6 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
     let details: string | null = null;
     let originalInput: string | undefined;
     let date: string | undefined;
-    let isNil = false;
 
     if (type === 'condition') {
         const cond = item as MedicalCondition;
@@ -170,10 +190,9 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
         date = cond.date;
     } else {
         const med = item as Medication;
-        isNil = med.name.toLowerCase() === 'nil - no medication taken';
-        title = isNil ? 'Nil - No medication taken' : med.name;
+        title = isNilItem ? 'Nil - No medication taken' : med.name;
         originalInput = med.userInput;
-        if (!isNil && med.status !== 'failed') {
+        if (!isNilItem && med.status !== 'failed') {
             details = [med.dosage, med.frequency, med.foodInstructions ? `${med.foodInstructions} food` : ''].filter(Boolean).join(', ');
         }
     }
@@ -181,16 +200,16 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
     const handleItemClick = () => {
         if (isFailed) {
             onProcess(item);
-        } else if (isMobile && type === 'medication' && !isNil && !isFailed && !isPending) {
+        } else if (isMobile && type === 'medication' && !isNilItem && !isFailed && !isPending) {
             // On mobile, tapping the item shows the synopsis.
             onShowSynopsis(item.id);
         }
     }
     
-    const showOriginalInput = originalInput && originalInput.toLowerCase() !== title.toLowerCase() && !isNil;
+    const showOriginalInput = originalInput && originalInput.toLowerCase() !== title.toLowerCase() && !isNilItem;
 
-    const itemBorderColor = isNil ? 'border-transparent' : isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
-    const itemCursor = isFailed || (isMobile && type === 'medication' && !isNil && !isFailed && !isPending) ? "cursor-pointer" : "cursor-default";
+    const itemBorderColor = isNilItem ? 'border-transparent' : isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
+    const itemCursor = isFailed || (isMobile && type === 'medication' && !isNilItem && !isFailed && !isPending) ? "cursor-pointer" : "cursor-default";
 
 
     return (
@@ -227,38 +246,28 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                 </div>
 
                 <div className="flex items-center shrink-0">
-                    {isFailed && !isNil && (
-                         <ActionIcon 
-                            tooltip={`Delete Failed Record`}
+                    {isEditing && !isNilItem && (
+                       <>
+                        {onRevise && (
+                            <ActionIcon 
+                                tooltip={`Edit ${type}`}
+                                icon={<Edit className="h-5 w-5 text-gray-500" />}
+                                onClick={(e) => { e.stopPropagation(); onRevise(item); }}
+                            />
+                        )}
+                        <ActionIcon 
+                            tooltip={`Delete ${type}`}
                             icon={<Trash2 className="h-5 w-5 text-destructive" />}
                             onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
                         />
+                       </>
                     )}
-                    {!isPending && !isNil && !isFailed && (
-                        <>
-                             {/* Non-edit mode icons */}
-                            {!isEditing && (
-                                <ActionIcon 
-                                    tooltip="View Synopsis"
-                                    icon={<Info className="h-5 w-5 text-blue-500" />}
-                                    onClick={(e) => { e.stopPropagation(); onShowSynopsis(item.id); }}
-                                />
-                            )}
-                            {isEditing && onRevise && (
-                                <ActionIcon 
-                                    tooltip={`Edit ${type}`}
-                                    icon={<Edit className="h-5 w-5 text-gray-500" />}
-                                    onClick={(e) => { e.stopPropagation(); onRevise(item); }}
-                                />
-                            )}
-                            {isEditing && (
-                                <ActionIcon 
-                                    tooltip={`Delete ${type}`}
-                                    icon={<Trash2 className="h-5 w-5 text-destructive" />}
-                                    onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
-                                />
-                            )}
-                        </>
+                    {!isEditing && !isPending && !isNilItem && !isFailed && (
+                        <ActionIcon 
+                            tooltip="View Synopsis"
+                            icon={<Info className="h-5 w-5 text-blue-500" />}
+                            onClick={(e) => { e.stopPropagation(); onShowSynopsis(item.id); }}
+                        />
                     )}
                 </div>
             </div>
@@ -287,7 +296,6 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
 export function MedicalHistoryCard() {
   const { profile, updateMedicalCondition, removeMedication, removeMedicalCondition, addMedication, addMedicalCondition, updateMedication } = useApp();
   const [activeSynopsis, setActiveSynopsis] = React.useState<{ type: 'condition' | 'medication', id: string } | null>(null);
-  const [activeInteractionCheck, setActiveInteractionCheck] = React.useState(false);
   const addMedicationFormRef = React.useRef<{ startReprocessing: (med: Medication) => void }>(null);
 
 
@@ -361,16 +369,6 @@ export function MedicalHistoryCard() {
     status: 'processed'
   };
 
-  const medicationExtraActions = profile.medication.length > 1 ? (
-    <>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem onSelect={() => setActiveInteractionCheck(true)}>
-        <ShieldAlert className="mr-2 h-4 w-4" />
-        Check Interactions
-      </DropdownMenuItem>
-    </>
-  ) : null;
-  
   const EditMedicationWrapper = (props: any) => (
     <EditMedicationForm {...props} onSuccess={(editedData) => {
         const finalMed = { ...props.initialData, ...editedData, name: editedData.activeIngredient };
@@ -379,6 +377,26 @@ export function MedicalHistoryCard() {
     }}/>
   );
   
+  const handleRemoveNilMedication = () => {
+    // A bit of a hack: add and then immediately remove a 'nil' medication
+    // This tells the app context that the user has interacted and no longer wants the nil placeholder
+    const nilMed: Omit<Medication, 'id'> = {
+        name: 'Nil',
+        userInput: 'Nil',
+        dosage: '',
+        frequency: '',
+        status: 'processed'
+    };
+    addMedication(nilMed);
+
+    setTimeout(() => {
+        const addedNilMed = profile.medication.find(m => m.name === 'Nil');
+        if (addedNilMed) {
+            removeMedication(addedNilMed.id);
+        }
+    }, 50);
+  }
+
   return (
     <>
       <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -403,20 +421,22 @@ export function MedicalHistoryCard() {
             type="medication"
             onShowSynopsis={(id) => setActiveSynopsis({ type: 'medication', id })}
             onProcessItem={handleProcessMedication}
-            onRemoveItem={removeMedication}
+            onRemoveItem={(id) => {
+                if(id === 'nil') {
+                    handleRemoveNilMedication();
+                } else {
+                    removeMedication(id);
+                }
+            }}
             onUpdateItem={updateMedication}
             onAddItem={addMedication}
             isNil={profile.medication?.length === 0 && profile.status !== 'On Track'}
             nilRecord={nilMedicationRecord}
             AddForm={(props) => <AddMedicationForm {...props} ref={addMedicationFormRef} />}
             EditForm={EditMedicationWrapper as any}
-            extraActions={medicationExtraActions}
         />
       </div>
       {activeSynopsis && renderSynopsisDialog()}
-      {activeInteractionCheck && (
-         <DrugInteractionViewer medications={profile.medication.map(m => m.userInput)} onClose={() => setActiveInteractionCheck(false)} />
-      )}
     </>
   );
 }
