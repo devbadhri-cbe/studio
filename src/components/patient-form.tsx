@@ -99,7 +99,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
             height_in: '',
         });
     }
-  }, [initialData, formMethods.reset, formMethods]);
+  }, [initialData, formMethods]);
   
   const watchCountry = formMethods.watch('country');
   const countryInfo = React.useMemo(() => countries.find(c => c.code === watchCountry), [watchCountry]);
