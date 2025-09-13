@@ -34,9 +34,10 @@ export function AddMedicalConditionForm({
   const inputRef = React.useRef<HTMLInputElement>(null);
   
   React.useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   const formMethods = useForm<MedicalConditionFormValues>({

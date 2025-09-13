@@ -38,6 +38,16 @@ interface PatientFormProps {
 }
 
 export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: PatientFormProps) {
+  const nameInputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    // Focus the first field when the form opens
+    const timer = setTimeout(() => {
+      nameInputRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   const formMethods = useForm<PatientFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: React.useMemo(() => {
@@ -79,7 +89,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input placeholder="Enter name" {...field} autoComplete="off" />
+                <Input ref={nameInputRef} placeholder="Enter name" {...field} autoComplete="off" />
               </FormControl>
               <FormMessage />
             </FormItem>
