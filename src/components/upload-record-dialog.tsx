@@ -1,23 +1,24 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, Camera, FileUp, AlertTriangle, Pill, FileText } from 'lucide-react';
+import { Loader2, UploadCloud, Camera, FileUp, AlertTriangle, Pill, FileText, Check, ArrowRight } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { extractLabData } from '@/ai/flows/extract-lab-data-flow';
+import { extractPatientName } from '@/ai/flows/extract-lab-data-flow';
+import { extractBiomarkers } from '@/ai/flows/extract-biomarkers-flow';
 import type { BatchRecords } from '@/context/app-context';
 import { useApp } from '@/context/app-context';
 import { ExtractedRecordReview } from './extracted-record-review';
-import { isValid, parseISO } from 'date-fns';
 import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
 import { MedicationReviewCard } from './medication-review-card';
 import type { Medication, FoodInstruction } from '@/lib/types';
 import type { MedicationInfoOutput } from '@/lib/ai-types';
+import { Card, CardContent, CardHeader } from './ui/card';
 
 
-type Step = 'initial' | 'upload' | 'loading' | 'reviewLab' | 'reviewMedication' | 'error';
+type Step = 'initial' | 'upload' | 'loading' | 'confirmName' | 'reviewLab' | 'reviewMedication' | 'error';
 type UploadType = 'lab' | 'medication';
 
 export function UploadRecordDialog() {
@@ -30,6 +31,8 @@ export function UploadRecordDialog() {
   const [hasCameraPermission, setHasCameraPermission] = React.useState<boolean | null>(null);
   const [medicationAiResult, setMedicationAiResult] = React.useState<MedicationInfoOutput | null>(null);
   const [medicationUserInput, setMedicationUserInput] = React.useState<{ userInput: string; frequency: string; foodInstructions?: FoodInstruction; } | null>(null);
+  const [patientName, setPatientName] = React.useState<string | null>(null);
+  const [uploadedFileUri, setUploadedFileUri] = React.useState<string | null>(null);
   
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -55,6 +58,8 @@ export function UploadRecordDialog() {
     setHasCameraPermission(null);
     setMedicationAiResult(null);
     setMedicationUserInput(null);
+    setPatientName(null);
+    setUploadedFileUri(null);
   }, [stopCameraStream]);
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -64,60 +69,67 @@ export function UploadRecordDialog() {
     }
   };
 
-  const processFile = async (dataUri: string) => {
+  const processFileForName = async (dataUri: string) => {
     setStep('loading');
+    setUploadedFileUri(dataUri);
     setErrorMessage('');
+    
+    if (uploadType === 'medication') {
+        processFileForMedication(dataUri);
+        return;
+    }
+
     try {
-      const result = await extractLabData({ photoDataUri: dataUri });
-      
-      const isMedicationUpload = uploadType === 'medication';
-
-      if (isMedicationUpload) {
-         if (result.medicationName && result.dosage) {
-            const userInput = `${result.medicationName} ${result.dosage}`;
-            setMedicationUserInput({ userInput, frequency: '' });
-            
-            toast({ title: "Processing Medication...", description: `AI is analyzing "${userInput}".` });
-            const medInfo = await getMedicationInfo({
-              userInput,
-              country: profile.country,
-            });
-            setMedicationAiResult(medInfo);
-            setStep('reviewMedication');
-          } else {
-            setStep('error');
-            setErrorMessage('The AI could not recognize a medication in the image. Please try a clearer picture.');
-          }
-        return;
-      }
-      
-      // If lab report upload
-      const labReportFields: (keyof BatchRecords)[] = ['hba1c', 'fastingBloodGlucose', 'thyroid', 'bloodPressure', 'hemoglobin', 'lipidPanel'];
-      const isLabReport = labReportFields.some(field => result[field] !== undefined);
-
-      if (isLabReport) {
-        const anyRecordWithDate = labReportFields.find(field => result[field] && (result[field] as any).date);
-        const reportDate = anyRecordWithDate ? (result[anyRecordWithDate as keyof BatchRecords] as any).date : null;
-        
-        if (!reportDate || !isValid(parseISO(reportDate))) {
-          setStep('error');
-          setErrorMessage('The AI could not determine the date of the test from the report. Please ensure the date is visible and clear.');
-          return;
-        }
-        setExtractedData(result);
-        setStep('reviewLab');
-      } else {
-        setStep('error');
-        setErrorMessage('Could not extract any recognizable lab data from the document. Please try a clearer image.');
-        return;
-      }
-
+      const result = await extractPatientName({ photoDataUri: dataUri });
+      setPatientName(result.patientName || 'Not Found');
+      setStep('confirmName');
     } catch (e) {
       console.error(e);
       setStep('error');
-      setErrorMessage('An unexpected error occurred while analyzing the document.');
+      setErrorMessage('The AI could not read the patient name from the document. Please try a clearer image.');
     }
   };
+  
+  const processFileForBiomarkers = async () => {
+    if (!uploadedFileUri) {
+        setStep('error');
+        setErrorMessage('File missing. Please re-upload.');
+        return;
+    }
+    setStep('loading');
+    try {
+        const result = await extractBiomarkers({ photoDataUri: uploadedFileUri });
+        setExtractedData(result);
+        setStep('reviewLab');
+    } catch(e) {
+        console.error(e);
+        setStep('error');
+        setErrorMessage('Failed to extract biomarker data. The document might be unclear or not a valid lab report.');
+    }
+  }
+
+  const processFileForMedication = async (dataUri: string) => {
+    setStep('loading');
+    try {
+      const result = await extractPatientName({ photoDataUri: dataUri }); // Still extractPatientName for medication name
+      if (result.patientName) { // patientName field here is repurposed for medication name
+        const userInput = result.patientName;
+        setMedicationUserInput({ userInput, frequency: '' });
+        toast({ title: "Processing Medication...", description: `AI is analyzing "${userInput}".` });
+        const medInfo = await getMedicationInfo({ userInput, country: profile.country });
+        setMedicationAiResult(medInfo);
+        setStep('reviewMedication');
+      } else {
+        setStep('error');
+        setErrorMessage('The AI could not recognize a medication in the image. Please try a clearer picture.');
+      }
+    } catch (e) {
+      console.error(e);
+      setStep('error');
+      setErrorMessage('An unexpected error occurred while analyzing the medication image.');
+    }
+  };
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -126,7 +138,7 @@ export function UploadRecordDialog() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUri = e.target?.result as string;
-      processFile(dataUri);
+      processFileForName(dataUri);
     };
     reader.readAsDataURL(file);
     event.target.value = '';
@@ -173,7 +185,7 @@ export function UploadRecordDialog() {
     const dataUri = canvas.toDataURL('image/jpeg');
     stopCameraStream();
     setIsCapturing(false);
-    processFile(dataUri);
+    processFileForName(dataUri);
   };
   
   const handleSaveLabReport = async (dataToSave: BatchRecords) => {
@@ -185,7 +197,7 @@ export function UploadRecordDialog() {
       description += `Added: ${added.join(', ')}. `;
     }
     if (duplicates.length > 0) {
-      description += `Duplicates found for: ${duplicates.join(', ')}.`;
+      description += `Skipped duplicates for: ${duplicates.join(', ')}.`;
     }
 
     toast({
@@ -267,6 +279,35 @@ export function UploadRecordDialog() {
         );
       case 'loading':
         return <div className="flex justify-center items-center h-40"><Loader2 className="h-12 w-12 animate-spin text-primary" /><p className="ml-4">AI is analyzing...</p></div>;
+      case 'confirmName':
+        const nameMismatch = patientName && profile && patientName.toLowerCase() !== profile.name.toLowerCase();
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Confirm Patient Name</CardTitle>
+                    <p className="text-sm text-muted-foreground">The AI found the following name on the document. Please confirm it's correct before proceeding.</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {nameMismatch && (
+                        <Alert variant="destructive">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertDescription>
+                                Warning: This name (<strong>{patientName}</strong>) does not match the current patient profile (<strong>{profile?.name}</strong>).
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                    <div className="text-center text-lg font-bold p-4 bg-muted rounded-md">
+                        {patientName}
+                    </div>
+                    <div className="flex justify-between items-center pt-4">
+                        <Button variant="ghost" onClick={resetState}>Re-upload</Button>
+                        <Button onClick={processFileForBiomarkers}>
+                            Confirm & Extract Data <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        );
       case 'reviewLab':
         return extractedData ? (
           <ExtractedRecordReview

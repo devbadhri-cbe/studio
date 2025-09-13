@@ -1,58 +1,52 @@
 'use server';
 /**
- * @fileOverview An AI flow to extract structured data from lab reports or medication labels.
+ * @fileOverview An AI flow to extract the patient's name from a lab report.
  *
- * - extractLabData - A function that extracts biomarker or medication data from an image.
+ * - extractPatientName - A function that extracts only the patient's name from an image.
  */
 
 import { ai } from '@/ai/genkit';
-import { LabDataExtractionInputSchema, LabDataExtractionOutputSchema, type LabDataExtractionInput, type LabDataExtractionOutput } from '@/lib/ai-types';
+import { z } from 'zod';
 import { gemini15Flash } from '@genkit-ai/googleai';
 
-export async function extractLabData(input: LabDataExtractionInput): Promise<LabDataExtractionOutput> {
-  return extractLabDataFlow(input);
+const PatientNameInputSchema = z.object({
+  photoDataUri: z.string().describe("A photo or PDF of a lab report, as a data URI."),
+});
+
+const PatientNameOutputSchema = z.object({
+  patientName: z.string().optional().describe("The full name of the patient as it appears on the lab report."),
+});
+
+export type PatientNameInput = z.infer<typeof PatientNameInputSchema>;
+export type PatientNameOutput = z.infer<typeof PatientNameOutputSchema>;
+
+
+export async function extractPatientName(input: PatientNameInput): Promise<PatientNameOutput> {
+  return extractPatientNameFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'extractLabDataPrompt',
-  input: { schema: LabDataExtractionInputSchema },
-  output: { schema: LabDataExtractionOutputSchema },
+  name: 'extractPatientNamePrompt',
+  input: { schema: PatientNameInputSchema },
+  output: { schema: PatientNameOutputSchema },
   model: gemini15Flash,
-  prompt: `You are a specialized medical data entry assistant. Your task is to accurately extract structured data from a document (image or PDF).
+  prompt: `You are a specialized medical data entry assistant. Your task is to analyze the provided document and extract ONLY the patient's full name.
 
-First, determine if the document is a **lab report** or a **medication label/box**.
-
-**If it is a LAB REPORT:**
-Analyze the document and extract any of the following biomarkers. If a biomarker is not present, do not include it in the output. For each biomarker found, you MUST extract the date of the test. Ensure the date is in YYYY-MM-DD format. You MUST also extract the full name of the patient from the report.
-- Patient Name
-- HbA1c (%)
-- Fasting Blood Glucose (mg/dL)
-- Thyroid Panel (TSH, T3, T4)
-- Blood Pressure (Systolic, Diastolic, Heart Rate)
-- Hemoglobin (g/dL)
-- Lipid Panel (Total Cholesterol, LDL, HDL, Triglycerides, all in mg/dL)
-
-**If it is a MEDICATION LABEL:**
-Extract the following details from the medication label.
-- **medicationName**: The brand or generic name of the medication (e.g., "Tylenol PM", "Metformin").
-- **dosage**: The strength of the medication, including units (e.g., "500mg").
-- **activeIngredient**: If the brand name is prominent, identify the generic active ingredient.
-
-Do not extract any other information.
+Do not extract any other information. If no name is found, do not return anything.
 
 Document to analyze: {{media url=photoDataUri}}`,
 });
 
-const extractLabDataFlow = ai.defineFlow(
+const extractPatientNameFlow = ai.defineFlow(
   {
-    name: 'extractLabDataFlow',
-    inputSchema: LabDataExtractionInputSchema,
-    outputSchema: LabDataExtractionOutputSchema,
+    name: 'extractPatientNameFlow',
+    inputSchema: PatientNameInputSchema,
+    outputSchema: PatientNameOutputSchema,
   },
   async (input) => {
     const { output } = await prompt(input);
     if (!output) {
-      throw new Error('AI failed to extract any lab data from the document.');
+      throw new Error('AI failed to extract a name from the document.');
     }
     return output;
   }
