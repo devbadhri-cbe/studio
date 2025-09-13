@@ -39,7 +39,6 @@ interface MedicalInfoSectionProps<T extends MedicalCondition | Medication> {
   onRemoveItem: (id: string) => void;
   onUpdateItem: (item: T) => void;
   onAddItem: (item: Omit<T, 'id'>) => void;
-  isNil?: boolean;
   nilRecord?: T;
   AddForm: React.ComponentType<{ onSave: (data: any) => void; onCancel: () => void; initialData?: T }>;
   EditForm?: React.ComponentType<{ onSave: (data: any) => void; onCancel: () => void; initialData: T; }>;
@@ -47,7 +46,7 @@ interface MedicalInfoSectionProps<T extends MedicalCondition | Medication> {
 
 
 function MedicalInfoSection<T extends MedicalCondition | Medication>({ 
-    title, icon, items, type, onShowSynopsis, onProcessItem, onRemoveItem, onUpdateItem, onAddItem, isNil, nilRecord, AddForm, EditForm
+    title, icon, items, type, onShowSynopsis, onProcessItem, onRemoveItem, onUpdateItem, onAddItem, nilRecord, AddForm, EditForm
 }: MedicalInfoSectionProps<T>) {
     const [activeView, setActiveView] = React.useState<ActiveView>('none');
     const [isEditingList, setIsEditingList] = React.useState(false);
@@ -76,7 +75,7 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => setIsEditingList(!isEditingList)}
-              disabled={items.length === 0 && !isNil}
+              disabled={items.length === 0 && !nilRecord}
             >
               <Edit className="mr-2 h-4 w-4" />
               {isEditingList ? 'Done Editing' : 'Edit List'}
@@ -136,7 +135,7 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
                                     form={EditForm ? <EditForm onCancel={handleEditFormCancel} initialData={item} onSave={handleEditFormSave as any}/> : null}
                                 />
                             )
-                        }) : isNil && nilRecord ? (
+                        }) : nilRecord ? (
                              <ListItem
                                 item={nilRecord}
                                 type={type}
@@ -149,7 +148,7 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
                                 isNilItem={true}
                             />
                         ) : null}
-                        {items.length === 0 && !isNil && activeView !== 'add' && <p className="text-xs text-muted-foreground pl-8 pt-2">No {type === 'condition' ? 'conditions' : 'medications'} recorded.</p>}
+                        {items.length === 0 && !nilRecord && activeView !== 'add' && <p className="text-xs text-muted-foreground pl-8 pt-2">No {type === 'condition' ? 'conditions' : 'medications'} recorded.</p>}
                     </ul>
                 </>
                 )}
@@ -439,8 +438,7 @@ export function MedicalHistoryCard() {
             }}
             onUpdateItem={updateMedication}
             onAddItem={addMedication}
-            isNil={profile.medication?.length === 0 && profile.status !== 'On Track'}
-            nilRecord={nilMedicationRecord}
+            nilRecord={profile.medication?.length === 0 ? nilMedicationRecord : undefined}
             AddForm={(props) => <AddMedicationForm {...props} ref={addMedicationFormRef} />}
             EditForm={EditMedicationWrapper as any}
         />

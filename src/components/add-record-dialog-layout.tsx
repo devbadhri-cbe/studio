@@ -55,7 +55,6 @@ export function AddRecordDialogLayout({
   existingRecords,
 }: AddRecordDialogLayoutProps) {
   const { toast } = useToast();
-  const { profile } = useApp();
   const isMobile = useIsMobile();
 
   const handleFormSubmit = (data: any) => {
@@ -79,17 +78,7 @@ export function AddRecordDialogLayout({
   };
   
   const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (existingRecords && (!profile || !profile.medication || profile.medication.length === 0)) {
-      e.preventDefault();
-      toast({
-        variant: 'destructive',
-        title: 'Medication Required',
-        description: 'Please enter your current medication or select "Nil" in your profile before adding a new record.',
-      });
-      onOpenChange(false);
-    } else {
-      onOpenChange(true);
-    }
+    onOpenChange(true);
   };
 
   const formContent = (
