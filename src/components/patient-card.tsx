@@ -15,7 +15,6 @@ import * as React from 'react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { cn } from '@/lib/utils';
-import { SharePatientAccessDialog } from './share-patient-access-dialog';
 import { ActionIcon } from './ui/action-icon';
 import { ActionMenu } from './ui/action-menu';
 
@@ -47,7 +46,6 @@ const statusDescriptions: Record<Patient['status'], string> = {
 
 
 export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardProps) {
-  const [isShareOpen, setIsShareOpen] = React.useState(false);
 
   const statusVariant = getStatusVariant(patient.status);
   const age = calculateAge(patient.dob);
@@ -56,8 +54,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const formattedPhone = formatDisplayPhoneNumber(patient.phone, patient.country);
   const nameRef = React.useRef<HTMLHeadingElement>(null);
   const [isNameOverflowing, setIsNameOverflowing] = React.useState(false);
-
-  const needsReview = patient.presentMedicalConditions?.some(c => c.status === 'pending_review');
 
   React.useEffect(() => {
     if (nameRef.current) {
@@ -113,22 +109,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                                     WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
                                 } : {}}
                             >{patient.name}</CardTitle>
-                            {needsReview && (
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <div className="relative">
-                                            <Bell className="h-4 w-4 text-destructive" />
-                                            <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
-                                            </span>
-                                        </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Needs doctor's review</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            )}
                         </div>
                         <p className="text-xs text-muted-foreground truncate">
                             {age ? `${age} years` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
@@ -145,10 +125,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                         <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => onEdit(patient))}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit Patient
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={(e) => handleDropdownSelect(e, () => setIsShareOpen(true))}>
-                            <Share2 className="mr-2 h-4 w-4" />
-                            Share Access
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -216,7 +192,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
         </div>
       </div>
     </Card>
-    {patient && <SharePatientAccessDialog open={isShareOpen} onOpenChange={setIsShareOpen} patient={patient} />}
     </>
   );
 }
