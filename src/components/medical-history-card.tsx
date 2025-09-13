@@ -247,21 +247,21 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                 </div>
 
                 <div className="flex items-center shrink-0">
-                    {isEditing && !isNilItem && (
-                       <>
-                        {onRevise && (
+                    {isEditing && (
+                        <>
+                            {onRevise && !isNilItem && (
+                                <ActionIcon 
+                                    tooltip={`Edit ${type}`}
+                                    icon={<Edit className="h-5 w-5 text-gray-500" />}
+                                    onClick={(e) => { e.stopPropagation(); onRevise(item); }}
+                                />
+                            )}
                             <ActionIcon 
-                                tooltip={`Edit ${type}`}
-                                icon={<Edit className="h-5 w-5 text-gray-500" />}
-                                onClick={(e) => { e.stopPropagation(); onRevise(item); }}
+                                tooltip={`Delete ${type}`}
+                                icon={<Trash2 className="h-5 w-5 text-destructive" />}
+                                onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
                             />
-                        )}
-                        <ActionIcon 
-                            tooltip={`Delete ${type}`}
-                            icon={<Trash2 className="h-5 w-5 text-destructive" />}
-                            onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
-                        />
-                       </>
+                        </>
                     )}
                     {!isEditing && !isPending && !isNilItem && !isFailed && item.synopsis && (
                         <ActionIcon 
@@ -408,7 +408,7 @@ export function MedicalHistoryCard() {
 
   return (
     <>
-      <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <MedicalInfoSection
             title="Present Medical Conditions"
             icon={<Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />}
