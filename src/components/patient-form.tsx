@@ -40,6 +40,20 @@ interface PatientFormProps {
 export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: PatientFormProps) {
   const nameInputRef = React.useRef<HTMLInputElement>(null);
 
+  const formMethods = useForm<PatientFormData>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+        name: '',
+        gender: undefined,
+        email: '',
+        phone: '',
+        country: '',
+        height: '',
+        height_ft: '',
+        height_in: '',
+    },
+  });
+
   React.useEffect(() => {
     // Focus the first field when the form opens
     const timer = setTimeout(() => {
@@ -47,26 +61,9 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
     }, 100);
     return () => clearTimeout(timer);
   }, []);
-
-  const formMethods = useForm<PatientFormData>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: React.useMemo(() => {
-        if (!initialData) {
-            // Defaults for a new patient
-            return {
-                name: '',
-                dob: new Date(),
-                gender: undefined,
-                country: '',
-                email: '',
-                phone: '',
-                height: '',
-                height_ft: '',
-                height_in: '',
-            }
-        }
-
-        // Defaults for editing an existing patient
+  
+  React.useEffect(() => {
+    if (initialData) {
         const isImperial = countries.find(c => c.code === initialData.country)?.unitSystem === 'imperial';
         let height_ft = '';
         let height_in = '';
@@ -76,7 +73,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
             height_in = Math.round(inches).toString();
         }
 
-        return {
+        formMethods.reset({
             name: initialData.name || '',
             dob: initialData.dob ? parseISO(initialData.dob) : new Date(),
             gender: initialData.gender || undefined,
@@ -86,9 +83,22 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
             height: !isImperial ? (initialData.height?.toString() || '') : '',
             height_ft: isImperial ? height_ft : '',
             height_in: isImperial ? height_in : '',
-        }
-    }, [initialData])
-  });
+        });
+    } else {
+        // Reset for new patient form
+        formMethods.reset({
+            name: '',
+            dob: new Date(),
+            gender: undefined,
+            email: '',
+            country: '',
+            phone: '',
+            height: '',
+            height_ft: '',
+            height_in: '',
+        });
+    }
+  }, [initialData, formMethods.reset]);
   
   const watchCountry = formMethods.watch('country');
   const countryInfo = React.useMemo(() => countries.find(c => c.code === watchCountry), [watchCountry]);
