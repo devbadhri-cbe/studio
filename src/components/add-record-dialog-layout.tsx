@@ -54,7 +54,7 @@ export function AddRecordDialogLayout({
   };
   
   return (
-      <Card className="mt-2 bg-background/80 backdrop-blur-sm">
+      <Card className="mt-2">
         <Form {...form}>
             <form onSubmit={form.handleSubmit(handleFormSubmit)}>
                 <CardHeader>
