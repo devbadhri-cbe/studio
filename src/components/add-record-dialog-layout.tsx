@@ -66,7 +66,7 @@ export function AddRecordDialogLayout({
                         {children}
                     </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="justify-center">
                     <FormActions
                         onCancel={onCancel}
                         isSubmitting={isSubmitting}
