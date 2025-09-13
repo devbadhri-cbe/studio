@@ -16,19 +16,9 @@ import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 export default function HomeDashboard() {
   const router = useRouter();
   const { isClient } = useApp();
-  const [isScrolled, setIsScrolled] = React.useState(false);
   const [isAddingBiomarker, setIsAddingBiomarker] = React.useState(false);
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      const offset = window.scrollY;
-      setIsScrolled(offset > 20);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   if (!isClient) {
     return null; // or a loading skeleton
@@ -38,7 +28,6 @@ export default function HomeDashboard() {
     <div className="flex min-h-screen w-full flex-col bg-background">
       <TitleBar
         title={['Health', 'Guardian', 'Lite']}
-        isScrolled={isScrolled}
       />
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto grid w-full max-w-7xl gap-6">

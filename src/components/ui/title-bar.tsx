@@ -11,11 +11,20 @@ interface TitleBarProps {
     subtitle?: string | React.ReactNode;
     children?: React.ReactNode;
     rightChildren?: React.ReactNode;
-    isScrolled: boolean;
 }
 
-export function TitleBar({ title, subtitle, children, rightChildren, isScrolled }: TitleBarProps) {
-    
+export function TitleBar({ title, subtitle, children, rightChildren }: TitleBarProps) {
+    const [isScrolled, setIsScrolled] = React.useState(false);
+
+    React.useEffect(() => {
+        const handleScroll = () => {
+            const offset = window.scrollY;
+            setIsScrolled(offset > 20);
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     const renderTitle = () => {
         return title.map((word, index) => {
             if (word.toLowerCase() === 'lite') {

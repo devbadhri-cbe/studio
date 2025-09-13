@@ -7,7 +7,7 @@ import { Button } from './ui/button';
 import { UploadCloud } from 'lucide-react';
 
 export function PatientHeader() {
-  const { patient, isReadOnlyView } = useApp();
+  const { patient } = useApp();
 
   const pageTitle = `Welcome, ${patient?.name || ''}!`;
   
@@ -21,11 +21,9 @@ export function PatientHeader() {
           Your health overview. Consult your doctor before making any decisions.
       </p>
     </div>
-     {!isReadOnlyView && (
       <div className="flex items-center">
         <UploadRecordDialog />
       </div>
-    )}
     </>
   );
 }
