@@ -12,7 +12,6 @@ import { BiomarkersPanel } from '@/components/biomarkers-panel';
 import { AddNewBiomarker } from '@/components/add-new-biomarker';
 import { DashboardSectionToggle } from '@/components/dashboard-section-toggle';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
-import { DiseasePanel } from '@/components/disease-panel';
 import { Separator } from '@/components/ui/separator';
 
 export default function HomeDashboard() {
@@ -22,9 +21,6 @@ export default function HomeDashboard() {
   const [isAddingBiomarker, setIsAddingBiomarker] = React.useState(false);
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
-  const [isPanelsOpen, setIsPanelsOpen] = React.useState(false);
-  const [panelSearchQuery, setPanelSearchQuery] = React.useState('');
-
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -86,26 +82,6 @@ export default function HomeDashboard() {
                     <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>
                 </CollapsibleContent>
             </Collapsible>
-            
-            <Separator />
-
-            <Collapsible open={isPanelsOpen} onOpenChange={setIsPanelsOpen}>
-                <DashboardSectionToggle
-                    title="Disease Panels"
-                    subtitle="Manage multi-biomarker panels for specific conditions"
-                    icon={<Droplet className="h-6 w-6 text-primary" />} 
-                    isOpen={isPanelsOpen}
-                    searchQuery={panelSearchQuery}
-                    onSearchChange={setPanelSearchQuery}
-                    searchPlaceholder="Search panels..."
-                    onCreateClick={() => {}}
-                    isCollapsible={true}
-                />
-                <CollapsibleContent>
-                    <DiseasePanel searchQuery={panelSearchQuery} />
-                </CollapsibleContent>
-            </Collapsible>
-
         </div>
       </main>
     </div>

@@ -2,12 +2,11 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { ArrowLeft, Share2, Droplet } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
 import { TitleBar } from '@/components/ui/title-bar';
 import { Logo } from '@/components/logo';
 import { ProfileCard } from '@/components/profile-card';
@@ -15,15 +14,12 @@ import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { SharePatientAccessDialog } from '@/components/share-patient-access-dialog';
 import { ReminderCard } from '@/components/reminder-card';
 import { InsightsCard } from '@/components/insights-card';
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
-import { UploadRecordDialog } from '@/components/upload-record-dialog';
 import { PatientLoginPage } from '@/components/patient-login-page';
 
 export default function PatientDashboard() {
   const { isClient, isReadOnlyView, patient } = useApp();
-  const router = useRouter();
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isShareOpen, setIsShareOpen] = React.useState(false);
   
@@ -92,9 +88,6 @@ export default function PatientDashboard() {
           <div className="mx-auto grid w-full max-w-7xl gap-6">
             <div className="flex flex-col md:flex-row items-start md:items-end gap-4 justify-between">
                 <PatientHeader />
-                <div className="w-full md:w-auto flex items-center justify-center md:justify-end gap-2 md:gap-4 shrink-0">
-                    <UploadRecordDialog />
-                </div>
             </div>
             <Separator />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

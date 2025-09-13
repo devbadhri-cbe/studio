@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -85,10 +84,6 @@ interface AppContextType {
   translateInsights: (languageCode: string) => Promise<void>;
   selectedInsightsLanguage: string;
   setSelectedInsightsLanguage: (code: string) => void;
-  
-  // Disease Panels
-  toggleDiseasePanel: (panelKey: 'diabetes' | 'hypertension' | 'lipidPanel') => void;
-  toggleDiseaseBiomarker: (panelKey: 'diabetes' | 'hypertension' | 'lipidPanel', biomarkerKey: string) => void;
 
   // Derived state and utility functions
   profile: any; // Simplified for this context
@@ -414,43 +409,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsTranslatingInsights(false);
   };
   
-  const toggleDiseasePanel = (panelKey: 'diabetes' | 'hypertension' | 'lipidPanel') => {
-      if (!patient) return;
-      const nextState = produce(patient, draft => {
-          if (draft.enabledBiomarkers[panelKey]) {
-              delete draft.enabledBiomarkers[panelKey];
-          } else {
-              draft.enabledBiomarkers[panelKey] = [];
-          }
-      });
-      setPatient(nextState);
-  }
-  
-  const toggleDiseaseBiomarker = (panelKey: 'diabetes' | 'hypertension' | 'lipidPanel', biomarkerKey: string) => {
-    if (!patient) return;
-    const nextState = produce(patient, draft => {
-        if (!draft.enabledBiomarkers) {
-            draft.enabledBiomarkers = {};
-        }
-        
-        let panel = draft.enabledBiomarkers[panelKey];
-        
-        if (!panel) {
-            // If the panel doesn't exist, create it and add the biomarker.
-            draft.enabledBiomarkers[panelKey] = [biomarkerKey];
-        } else {
-            // If the panel exists, toggle the biomarker.
-            const index = panel.indexOf(biomarkerKey);
-            if (index > -1) {
-                panel.splice(index, 1);
-            } else {
-                panel.push(biomarkerKey);
-            }
-        }
-    });
-    setPatient(nextState);
-};
-  
   // ==================================================================
   // DERIVED STATE & UTILITY FUNCTIONS
   // ==================================================================
@@ -566,8 +524,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     translateInsights,
     selectedInsightsLanguage,
     setSelectedInsightsLanguage,
-    toggleDiseasePanel,
-    toggleDiseaseBiomarker,
     profile,
     hba1cRecords: patient?.hba1cRecords || [],
     weightRecords: patient?.weightRecords || [],

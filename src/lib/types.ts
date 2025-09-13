@@ -112,8 +112,6 @@ export type BiomarkerKey =
   | 'serumCreatinine'
   | 'uricAcid';
 
-export type DiseasePanelKey = 'diabetes' | 'hypertension' | 'lipidPanel';
-
 export interface Patient {
   id: string;
   name: string;
@@ -151,9 +149,7 @@ export interface Patient {
   
   // AI and UI settings
   dashboardSuggestions?: string[];
-  enabledBiomarkers?: {
-    [key in DiseasePanelKey]?: BiomarkerKey[];
-  };
+  enabledBiomarkers?: { [key: string]: string[] };
 
   // Doctor-related fields
   doctorUid?: string;

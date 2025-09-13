@@ -14,9 +14,6 @@ import { AddBloodPressureRecordDialog } from '@/components/add-blood-pressure-re
 import { AddThyroidRecordDialog } from '@/components/add-thyroid-record-dialog';
 import { AddThyroxineRecordDialog } from '@/components/add-thyroxine-record-dialog';
 import { AddWeightRecordDialog } from '@/components/add-weight-record-dialog';
-import { DiabetesCard } from '@/components/diabetes-card';
-import { HypertensionCard } from '@/components/hypertension-card';
-import { BiomarkerKey, DiseasePanelKey } from './types';
 import { AddLipidRecordDialog } from '@/components/add-lipid-record-dialog';
 import { LipidCard } from '@/components/lipid-card';
 import { TotalCholesterolCard } from '@/components/total-cholesterol-card';
@@ -27,7 +24,6 @@ import { HdlCard } from '@/components/hdl-card';
 import { AddHdlRecordDialog } from '@/components/add-hdl-record-dialog';
 import { TriglyceridesCard } from '@/components/triglycerides-card';
 import { AddTriglyceridesRecordDialog } from '@/components/add-triglycerides-record-dialog';
-import { LipidPanelCard } from '@/components/lipid-panel-card';
 import { SerumCreatinineCard } from '@/components/serum-creatinine-card';
 import { AddSerumCreatinineRecordDialog } from '@/components/add-serum-creatinine-record-dialog';
 import { UricAcidCard } from '@/components/uric-acid-card';
@@ -134,9 +130,3 @@ export const availableBiomarkerCards = {
     addRecordDialog: <AddUricAcidRecordDialog />,
   },
 };
-
-export const availableDiseasePanels = [
-    { key: 'diabetes' as DiseasePanelKey, label: 'Diabetes Panel', component: <DiabetesCard /> },
-    { key: 'hypertension' as DiseasePanelKey, label: 'Hypertension Panel', component: <HypertensionCard /> },
-    { key: 'lipidPanel' as DiseasePanelKey, label: 'Lipid Panel', component: <LipidPanelCard /> },
-];
