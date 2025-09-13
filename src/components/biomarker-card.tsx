@@ -99,21 +99,16 @@ export function BiomarkerCard<T extends Record>({
   const hasRecords = records && records.length > 0;
   const hasMultipleRecords = records && records.length > 1;
 
-  const handleAddRecordSuccess = () => {
-    setIsAdding(false);
-    setIsMenuOpen(false);
-  };
+  const handleAddRecordCancel = () => setIsAdding(false);
   
   const addRecordForm = React.cloneElement(addRecordDialog as React.ReactElement, {
-      onSuccess: handleAddRecordSuccess,
-      onCancel: () => setIsAdding(false)
+      onCancel: handleAddRecordCancel,
   });
 
   const Actions = !isReadOnly ? (
     <ActionMenu 
       tooltip="Settings" 
       icon={<Settings className="h-4 w-4" />} 
-      onClick={(e) => e.stopPropagation()}
       open={isMenuOpen}
       onOpenChange={setIsMenuOpen}
     >
@@ -184,13 +179,13 @@ export function BiomarkerCard<T extends Record>({
       contentClassName="p-0"
     >
        {hasRecords ? (
-          <div className="flex flex-col flex-1 h-full p-6 pt-0">
-            <div className="flex-1 flex flex-col justify-center">
-               <div className={cn("flex gap-4", hasMultipleRecords ? "flex-row" : "flex-col items-center")}>
+          <div style={{ border: '2px solid red' }} className="flex flex-col flex-1 h-full p-6 pt-0">
+            <div style={{ border: '2px solid blue' }} className="flex-1 flex flex-col justify-center">
+               <div style={{ border: '2px solid green' }} className={cn("flex gap-4", hasMultipleRecords ? "flex-row" : "flex-col items-center")}>
                   <div className={cn(hasMultipleRecords ? "w-1/2 shrink-0" : "text-center")}>
                       {RecordsList}
                   </div>
-                  <div className={cn("flex-1 w-full flex items-center justify-center", hasMultipleRecords ? "" : "mt-2")}>
+                  <div style={{ border: '2px solid orange' }} className={cn("flex-1 w-full flex items-center justify-center", hasMultipleRecords ? "" : "mt-2")}>
                       {statusContent}
                   </div>
               </div>
@@ -198,12 +193,12 @@ export function BiomarkerCard<T extends Record>({
 
             <Separator className="my-4" />
 
-            <div className="flex-1 flex w-full rounded-lg p-2 min-h-[200px]">
+            <div style={{ border: '2px solid purple' }} className="flex-1 flex w-full rounded-lg p-2 min-h-[200px]">
                 {chart}
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px]">
+          <div style={{ border: '2px solid red' }} className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px]">
               <p className="text-sm">No records yet.</p>
               <Button variant="outline" size="sm" className="mt-4" onClick={() => setIsAdding(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
