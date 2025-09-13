@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
@@ -109,10 +110,15 @@ export function UploadRecordDialog() {
   }
 
   const processFileForMedication = async (dataUri: string) => {
+    if (!profile) {
+      setStep('error');
+      setErrorMessage('A patient profile must be loaded to process medications.');
+      return;
+    }
     setStep('loading');
     try {
-      const result = await extractPatientName({ photoDataUri: dataUri }); // Still extractPatientName for medication name
-      if (result.patientName) { // patientName field here is repurposed for medication name
+      const result = await extractPatientName({ photoDataUri: dataUri }); // patientName field here is repurposed for medication name
+      if (result.patientName) {
         const userInput = result.patientName;
         setMedicationUserInput({ userInput, frequency: '' });
         toast({ title: "Processing Medication...", description: `AI is analyzing "${userInput}".` });
@@ -280,7 +286,15 @@ export function UploadRecordDialog() {
       case 'loading':
         return <div className="flex justify-center items-center h-40"><Loader2 className="h-12 w-12 animate-spin text-primary" /><p className="ml-4">AI is analyzing...</p></div>;
       case 'confirmName':
-        const nameMismatch = patientName && profile && patientName.toLowerCase() !== profile.name.toLowerCase();
+        if (!profile) {
+            return (
+                <Alert variant="destructive">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>No patient profile is loaded. Please create or load a profile first.</AlertDescription>
+                </Alert>
+            );
+        }
+        const nameMismatch = patientName && patientName.toLowerCase() !== profile.name.toLowerCase();
         return (
             <Card>
                 <CardHeader>
@@ -292,7 +306,7 @@ export function UploadRecordDialog() {
                         <Alert variant="destructive">
                             <AlertTriangle className="h-4 w-4" />
                             <AlertDescription>
-                                Warning: This name (<strong>{patientName}</strong>) does not match the current patient profile (<strong>{profile?.name}</strong>).
+                                Warning: This name (<strong>{patientName}</strong>) does not match the current patient profile (<strong>{profile.name}</strong>).
                             </AlertDescription>
                         </Alert>
                     )}
