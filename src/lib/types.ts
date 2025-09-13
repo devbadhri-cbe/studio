@@ -149,7 +149,6 @@ export interface Patient {
   
   // AI and UI settings
   dashboardSuggestions?: string[];
-  enabledBiomarkers?: { [key: string]: string[] };
 
   // Doctor-related fields
   doctorUid?: string;

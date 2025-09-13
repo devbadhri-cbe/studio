@@ -75,7 +75,7 @@ export async function getAllPatients(): Promise<Patient[]> {
   });
 }
 
-export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'doctorUid' | 'doctorName' | 'doctorEmail' | 'thyroxineRecords' | 'serumCreatinineRecords' | 'uricAcidRecords' | 'hba1cRecords' | 'fastingBloodGlucoseRecords' | 'thyroidRecords' | 'hemoglobinRecords' | 'weightRecords' | 'bloodPressureRecords' | 'medication' | 'presentMedicalConditions' | 'enabledBiomarkers' | 'dashboardSuggestions'>): Promise<Patient> {
+export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'lastLogin' | 'doctorPhone' | 'totalCholesterolRecords' | 'ldlRecords' | 'hdlRecords' | 'triglyceridesRecords' | 'doctorUid' | 'doctorName' | 'doctorEmail' | 'thyroxineRecords' | 'serumCreatinineRecords' | 'uricAcidRecords' | 'hba1cRecords' | 'fastingBloodGlucoseRecords' | 'thyroidRecords' | 'hemoglobinRecords' | 'weightRecords' | 'bloodPressureRecords' | 'medication' | 'presentMedicalConditions' | 'dashboardSuggestions'>): Promise<Patient> {
     const db = getFirebaseDb();
     const docData = {
         ...patientData,
@@ -99,7 +99,6 @@ export async function addPatient(patientData: Omit<Patient, 'id' | 'status' | 'l
         triglyceridesRecords: [],
         presentMedicalConditions: [],
         medication: [],
-        enabledBiomarkers: {},
         createdAt: serverTimestamp(),
         // Initialize summary fields
         bmi: null,

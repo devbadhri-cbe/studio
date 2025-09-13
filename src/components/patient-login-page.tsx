@@ -85,7 +85,6 @@ export function PatientLoginPage() {
         ldlRecords: [],
         hdlRecords: [],
         triglyceridesRecords: [],
-        enabledBiomarkers: {},
     };
 
     try {
