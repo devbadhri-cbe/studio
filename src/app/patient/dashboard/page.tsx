@@ -16,8 +16,6 @@ import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { SharePatientAccessDialog } from '@/components/share-patient-access-dialog';
 import { ReminderCard } from '@/components/reminder-card';
 import { InsightsCard } from '@/components/insights-card';
-import { DashboardSectionToggle } from '@/components/dashboard-section-toggle';
-import { DiseasePanel } from '@/components/disease-panel';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
@@ -30,9 +28,6 @@ export default function PatientDashboard() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isShareOpen, setIsShareOpen] = React.useState(false);
   
-  const [isPanelsOpen, setIsPanelsOpen] = React.useState(true);
-  const [panelSearchQuery, setPanelSearchQuery] = React.useState('');
-
   React.useEffect(() => {
     const handleScroll = () => {
       const offset = window.scrollY;
@@ -116,25 +111,6 @@ export default function PatientDashboard() {
                     <ReminderCard />
                     <InsightsCard />
                 </div>
-            </div>
-            <Separator />
-            <div className="space-y-6">
-                <Collapsible open={isPanelsOpen} onOpenChange={setIsPanelsOpen}>
-                    <DashboardSectionToggle
-                        title="Disease Panels"
-                        subtitle="Manage multi-biomarker panels for specific conditions"
-                        icon={<Droplet className="h-6 w-6 text-primary" />} 
-                        isOpen={isPanelsOpen}
-                        searchQuery={panelSearchQuery}
-                        onSearchChange={setPanelSearchQuery}
-                        searchPlaceholder="Search panels..."
-                        onCreateClick={() => {}}
-                        isCollapsible={true}
-                    />
-                    <CollapsibleContent>
-                        <DiseasePanel searchQuery={panelSearchQuery} />
-                    </CollapsibleContent>
-                </Collapsible>
             </div>
           </div>
         </main>
