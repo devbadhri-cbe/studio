@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -110,43 +111,6 @@ export function PatientDashboard() {
                     <ReminderCard />
                     <InsightsCard />
                 </div>
-            </div>
-            <Separator />
-            <div className="space-y-6">
-                <Collapsible open={isPanelsOpen} onOpenChange={setIsPanelsOpen}>
-                    <DashboardSectionToggle
-                        title="Disease Panels"
-                        subtitle="Manage multi-biomarker panels for specific conditions"
-                        icon={<Droplet className="h-6 w-6 text-primary" />} 
-                        isOpen={isPanelsOpen}
-                        searchQuery={panelSearchQuery}
-                        onSearchChange={setPanelSearchQuery}
-                        searchPlaceholder="Search panels..."
-                        onCreateClick={() => {}}
-                        isCollapsible={true}
-                    />
-                    <CollapsibleContent>
-                        <DiseasePanel searchQuery={panelSearchQuery} />
-                    </CollapsibleContent>
-                </Collapsible>
-                
-                <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
-                    <DashboardSectionToggle
-                        title="All Biomarkers"
-                        subtitle="View and manage individual biomarker cards"
-                        icon={<Droplet className="h-6 w-6 text-primary" />}
-                        isOpen={isBiomarkersOpen}
-                        searchQuery={biomarkerSearchQuery}
-                        onSearchChange={setBiomarkerSearchQuery}
-                        searchPlaceholder="Search biomarkers..."
-                        isCollapsible={true}
-                    />
-                     <CollapsibleContent>
-                        <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>
-                     </CollapsibleContent>
-                </Collapsible>
-
-                <AddBiomarkerCard />
             </div>
           </div>
         </main>

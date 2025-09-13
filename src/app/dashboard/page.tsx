@@ -43,7 +43,7 @@ export default function HomeDashboard() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <TitleBar
-        title={['Developer', 'Dashboard']}
+        title={['Health', 'Guardian']}
         isScrolled={isScrolled}
       />
       <main className="flex-1 p-4 md:p-6">
