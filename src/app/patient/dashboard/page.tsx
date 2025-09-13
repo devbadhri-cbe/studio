@@ -15,6 +15,8 @@ import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { InsightsCard } from '@/components/insights-card';
 import { DiabetesCard } from '@/components/diabetes-card';
+import { HypertensionCard } from '@/components/hypertension-card';
+import { LipidPanelCard } from '@/components/lipid-panel-card';
 
 export default function PatientDashboardPage() {
   const { isClient, patient } = useApp();
@@ -63,12 +65,16 @@ export default function PatientDashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 grid grid-cols-1 gap-6">
                     <ProfileCard />
-                    <DiabetesCard />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <WeightRecordCard />
                         <BloodPressureCard />
                     </div>
                     <MedicalHistoryCard />
+                    <div className="grid grid-cols-1 gap-6">
+                      <DiabetesCard />
+                      <HypertensionCard />
+                      <LipidPanelCard />
+                    </div>
                 </div>
                 <div className="lg:col-span-1 grid grid-cols-1 gap-6">
                     <ReminderCard />
