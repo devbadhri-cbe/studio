@@ -44,14 +44,14 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
   const formMethods = useForm<PatientFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-        name: '',
-        gender: undefined,
-        email: '',
-        phone: '',
-        country: '',
-        height: '',
-        height_ft: '',
-        height_in: '',
+      name: '',
+      gender: undefined,
+      email: '',
+      phone: '',
+      country: '',
+      height: '',
+      height_ft: '',
+      height_in: '',
     },
   });
 
@@ -86,7 +86,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
             height_in: isImperial ? height_in : '',
         });
     } else {
-        // Reset for new patient form
+        // Reset for new patient form to ensure it's blank
         formMethods.reset({
             name: '',
             dob: new Date(),
