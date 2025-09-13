@@ -73,6 +73,7 @@ export function BiomarkerCard<T extends Record>({
 }: BiomarkerCardProps<T>) {
   const [isEditMode, setIsEditMode] = React.useState(false);
   const [isAdding, setIsAdding] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const formatDate = useDateFormatter();
 
@@ -100,6 +101,7 @@ export function BiomarkerCard<T extends Record>({
 
   const handleAddRecordSuccess = () => {
     setIsAdding(false);
+    setIsMenuOpen(false);
   };
   
   const addRecordForm = React.cloneElement(addRecordDialog as React.ReactElement, {
@@ -112,6 +114,8 @@ export function BiomarkerCard<T extends Record>({
       tooltip="Settings" 
       icon={<Settings className="h-4 w-4" />} 
       onClick={(e) => e.stopPropagation()}
+      open={isMenuOpen}
+      onOpenChange={setIsMenuOpen}
     >
       <DropdownMenuItem onSelect={() => setIsAdding(true)}>
         <PlusCircle className="mr-2 h-4 w-4" />
