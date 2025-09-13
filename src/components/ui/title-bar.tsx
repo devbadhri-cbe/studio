@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 interface TitleBarProps {
     title: string[];
-    subtitle?: string;
+    subtitle?: string | React.ReactNode;
     onSubtitleClick?: () => void;
     children?: React.ReactNode;
     rightChildren?: React.ReactNode;
@@ -55,7 +55,7 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, rightChil
                             "text-center text-xs text-muted-foreground mt-2 flex items-center gap-1 transition-all duration-300",
                             isScrolled ? "opacity-0 h-0" : "opacity-100 h-auto"
                          )}>
-                           {subtitle && <p>{subtitle}</p>}
+                           {subtitle && (typeof subtitle === 'string' ? <p>{subtitle}</p> : subtitle)}
                         </div>
                     </div>
                 </div>
