@@ -57,11 +57,11 @@ export function AddRecordDialogLayout({
   
   return (
       <Card className="mt-2 border-destructive border-4">
-        <CardHeader>
+        <CardHeader className="border-blue-500 border-2">
             <CardTitle>{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="border-green-500 border-2">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
                 {children}
