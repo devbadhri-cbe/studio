@@ -1,4 +1,3 @@
-
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake, Stethoscope as DoctorIcon } from 'lucide-react';
@@ -8,7 +7,7 @@ import { calculateAge, formatDisplayPhoneNumber } from '@/lib/utils';
 import { countries } from '@/lib/countries';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { ProfileSettingsPopover } from './profile-settings-popover';
-import { PatientForm, type PatientFormData } from './patient-form';
+import { PatientForm, type PatientFormData } from '@/components/patient-form';
 import { ftInToCm } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import type { Patient } from '@/lib/types';
@@ -24,6 +23,8 @@ export function ProfileCard() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const formatDate = useDateFormatter();
   
+  if (!profile) return null;
+
   const calculatedAge = calculateAge(profile.dob);
   const country = countries.find(c => c.code === profile.country);
   const countryName = country?.name || profile.country;
