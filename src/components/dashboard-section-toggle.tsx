@@ -41,7 +41,7 @@ export function DashboardSectionToggle({
           <div className="flex items-center flex-1 gap-4 text-left">
             <div className="flex-shrink-0">{icon}</div>
             <div className="flex-1">
-              <h3 className="font-semibold text-lg">{title}</h3>
+              <h3 className="font-semibold text-base">{title}</h3>
               <p className="text-sm text-muted-foreground">{subtitle}</p>
             </div>
              {isCollapsible && (
@@ -90,7 +90,7 @@ export function DashboardSectionToggle({
   )
 
   return (
-    <Card className="hover:bg-muted/50 transition-colors shadow-xl">
+    <Card className="hover:bg-muted/50 transition-colors shadow-sm">
       {isCollapsible ? <CollapsibleTrigger asChild>{triggerContent}</CollapsibleTrigger> : <div onClick={onCreateClick}>{content}</div> }
     </Card>
   );
