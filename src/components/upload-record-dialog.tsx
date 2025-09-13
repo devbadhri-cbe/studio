@@ -64,7 +64,7 @@ export function UploadRecordDialog() {
     }
   };
 
-  const processImage = async (dataUri: string) => {
+  const processFile = async (dataUri: string) => {
     setStep('loading');
     setErrorMessage('');
     try {
@@ -126,7 +126,7 @@ export function UploadRecordDialog() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUri = e.target?.result as string;
-      processImage(dataUri);
+      processFile(dataUri);
     };
     reader.readAsDataURL(file);
     event.target.value = '';
@@ -173,7 +173,7 @@ export function UploadRecordDialog() {
     const dataUri = canvas.toDataURL('image/jpeg');
     stopCameraStream();
     setIsCapturing(false);
-    processImage(dataUri);
+    processFile(dataUri);
   };
   
   const handleSaveLabReport = async (dataToSave: BatchRecords) => {
@@ -261,7 +261,7 @@ export function UploadRecordDialog() {
               ref={fileInputRef}
               onChange={handleFileChange}
               className="hidden"
-              accept="image/*"
+              accept="image/*,application/pdf"
             />
           </>
         );
@@ -302,7 +302,7 @@ export function UploadRecordDialog() {
         <DialogHeader className="p-6 pb-4 border-b">
           <DialogTitle>Upload & Extract Data</DialogTitle>
           <DialogDescription>
-            Upload an image of a lab report or medication. The AI will extract the data for you.
+            Upload a PDF or an image of a lab report or medication. The AI will extract the data for you.
           </DialogDescription>
         </DialogHeader>
         <div className="p-6 overflow-y-auto">

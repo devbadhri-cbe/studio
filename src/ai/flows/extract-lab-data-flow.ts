@@ -18,12 +18,12 @@ const prompt = ai.definePrompt({
   input: { schema: LabDataExtractionInputSchema },
   output: { schema: LabDataExtractionOutputSchema },
   model: gemini15Flash,
-  prompt: `You are a specialized medical data entry assistant. Your task is to accurately extract structured data from an image.
+  prompt: `You are a specialized medical data entry assistant. Your task is to accurately extract structured data from a document (image or PDF).
 
-First, determine if the image is a **lab report** or a **medication label/box**.
+First, determine if the document is a **lab report** or a **medication label/box**.
 
 **If it is a LAB REPORT:**
-Analyze the image and extract any of the following biomarkers. If a biomarker is not present, do not include it in the output. For each biomarker found, you MUST extract the date of the test. Ensure the date is in YYYY-MM-DD format. You MUST also extract the full name of the patient from the report.
+Analyze the document and extract any of the following biomarkers. If a biomarker is not present, do not include it in the output. For each biomarker found, you MUST extract the date of the test. Ensure the date is in YYYY-MM-DD format. You MUST also extract the full name of the patient from the report.
 - Patient Name
 - HbA1c (%)
 - Fasting Blood Glucose (mg/dL)
@@ -40,7 +40,7 @@ Extract the following details from the medication label.
 
 Do not extract any other information.
 
-Image to analyze: {{media url=photoDataUri}}`,
+Document to analyze: {{media url=photoDataUri}}`,
 });
 
 const extractLabDataFlow = ai.defineFlow(
