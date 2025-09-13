@@ -19,7 +19,7 @@ export function FormActions({
     cancelText = 'Cancel'
 }: FormActionsProps) {
     return (
-        <div style={{ border: '2px solid blue' }} className={cn("flex justify-end gap-2 pt-4")}>
+        <div className={cn("flex justify-end gap-2 pt-4")}>
             <Button type="button" variant="ghost" onClick={onCancel}>
                 {cancelText}
             </Button>
