@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -56,14 +55,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
   });
 
   React.useEffect(() => {
-    // Focus the first field when the form opens
-    const timer = setTimeout(() => {
-      nameInputRef.current?.focus();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-  
-  React.useEffect(() => {
+    // This effect correctly resets the form with initialData when it's provided for editing.
     if (initialData) {
         const isImperial = countries.find(c => c.code === initialData.country)?.unitSystem === 'imperial';
         let height_ft = '';
@@ -85,21 +77,16 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
             height_ft: isImperial ? height_ft : '',
             height_in: isImperial ? height_in : '',
         });
-    } else {
-        // Reset for new patient form to ensure it's blank
-        formMethods.reset({
-            name: '',
-            dob: new Date(),
-            gender: undefined,
-            email: '',
-            country: '',
-            phone: '',
-            height: '',
-            height_ft: '',
-            height_in: '',
-        });
     }
   }, [initialData, formMethods]);
+
+  React.useEffect(() => {
+    // Focus the first field when the form mounts
+    const timer = setTimeout(() => {
+      nameInputRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
   
   const watchCountry = formMethods.watch('country');
   const countryInfo = React.useMemo(() => countries.find(c => c.code === watchCountry), [watchCountry]);
