@@ -62,7 +62,7 @@ export function AddRecordDialogLayout({
                     <CardDescription>{description}</CardDescription>
                 </CardHeader>
                 <CardContent className="border-green-500 border-2 flex-1">
-                    <div className="flex flex-col justify-center space-y-4">
+                    <div className="flex flex-col space-y-4">
                         {children}
                     </div>
                 </CardContent>
