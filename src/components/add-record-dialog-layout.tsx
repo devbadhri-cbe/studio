@@ -62,16 +62,18 @@ export function AddRecordDialogLayout({
             <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent className="border-green-500 border-2">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-                {children}
-                 <FormActions
-                    onCancel={onCancel}
-                    isSubmitting={isSubmitting}
-                    submitText="Save Record"
-                 />
-                </form>
-            </Form>
+             <div className="flex flex-col">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+                    {children}
+                    <FormActions
+                        onCancel={onCancel}
+                        isSubmitting={isSubmitting}
+                        submitText="Save Record"
+                    />
+                    </form>
+                </Form>
+            </div>
         </CardContent>
       </Card>
   );
