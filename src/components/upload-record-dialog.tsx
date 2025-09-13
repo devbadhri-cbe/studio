@@ -1,7 +1,7 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, Camera, FileUp, UserCheck, AlertTriangle } from 'lucide-react';
+import { Loader2, UploadCloud, Camera, FileUp, UserCheck, AlertTriangle, Pill, FileText } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
@@ -17,11 +17,13 @@ import type { Medication, FoodInstruction } from '@/lib/types';
 import type { MedicationInfoOutput } from '@/lib/ai-types';
 
 
-type Step = 'initial' | 'loading' | 'confirmName' | 'reviewLab' | 'reviewMedication' | 'error';
+type Step = 'initial' | 'upload' | 'loading' | 'confirmName' | 'reviewLab' | 'reviewMedication' | 'error';
+type UploadType = 'lab' | 'medication';
 
 export function UploadRecordDialog() {
   const [open, setOpen] = React.useState(false);
   const [step, setStep] = React.useState<Step>('initial');
+  const [uploadType, setUploadType] = React.useState<UploadType | null>(null);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [extractedData, setExtractedData] = React.useState<BatchRecords | null>(null);
   const [isCapturing, setIsCapturing] = React.useState(false);
@@ -45,6 +47,7 @@ export function UploadRecordDialog() {
 
   const resetState = React.useCallback(() => {
     setStep('initial');
+    setUploadType(null);
     setErrorMessage('');
     setExtractedData(null);
     setIsCapturing(false);
@@ -67,22 +70,28 @@ export function UploadRecordDialog() {
     try {
       const result = await extractLabData({ photoDataUri: dataUri });
       
-      const isMedication = result.medicationName && result.dosage;
+      const isMedicationUpload = uploadType === 'medication';
 
-      if (isMedication) {
-        const userInput = `${result.medicationName} ${result.dosage}`;
-        setMedicationUserInput({ userInput, frequency: '' });
-        
-        toast({ title: "Processing Medication...", description: `AI is analyzing "${userInput}".` });
-        const medInfo = await getMedicationInfo({
-          userInput,
-          country: profile.country,
-        });
-        setMedicationAiResult(medInfo);
-        setStep('reviewMedication');
+      if (isMedicationUpload) {
+         if (result.medicationName && result.dosage) {
+            const userInput = `${result.medicationName} ${result.dosage}`;
+            setMedicationUserInput({ userInput, frequency: '' });
+            
+            toast({ title: "Processing Medication...", description: `AI is analyzing "${userInput}".` });
+            const medInfo = await getMedicationInfo({
+              userInput,
+              country: profile.country,
+            });
+            setMedicationAiResult(medInfo);
+            setStep('reviewMedication');
+          } else {
+            setStep('error');
+            setErrorMessage('The AI could not recognize a medication in the image. Please try a clearer picture.');
+          }
         return;
       }
       
+      // If lab report upload
       const labReportFields: (keyof BatchRecords)[] = ['hba1c', 'fastingBloodGlucose', 'thyroid', 'bloodPressure', 'hemoglobin', 'lipidPanel'];
       const isLabReport = labReportFields.some(field => result[field] !== undefined);
 
@@ -99,7 +108,7 @@ export function UploadRecordDialog() {
         setStep('confirmName');
       } else {
         setStep('error');
-        setErrorMessage('Could not extract any recognizable data from the document. Please try a clearer image.');
+        setErrorMessage('Could not extract any recognizable lab data from the document. Please try a clearer image.');
         return;
       }
 
@@ -203,9 +212,30 @@ export function UploadRecordDialog() {
       handleOpenChange(false);
   };
 
+  const handleSetUploadType = (type: UploadType) => {
+    setUploadType(type);
+    setStep('upload');
+  }
+
   const renderContent = () => {
     switch (step) {
       case 'initial':
+         return (
+             <div className="text-center space-y-4">
+                <p className="text-muted-foreground">What would you like to upload?</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <Button variant="outline" size="lg" className="h-24 flex-col gap-2" onClick={() => handleSetUploadType('lab')}>
+                        <FileText className="h-8 w-8" />
+                        <span>Lab Report</span>
+                    </Button>
+                     <Button variant="outline" size="lg" className="h-24 flex-col gap-2" onClick={() => handleSetUploadType('medication')}>
+                        <Pill className="h-8 w-8" />
+                        <span>Medication</span>
+                    </Button>
+                </div>
+            </div>
+        );
+      case 'upload':
       case 'error':
         return (
           <>
@@ -223,12 +253,15 @@ export function UploadRecordDialog() {
                 <Camera className="mr-2 h-5 w-5" /> Use Camera
               </Button>
             </div>
+            <div className="pt-4">
+                <Button variant="link" size="sm" onClick={() => setStep('initial')}>&larr; Back</Button>
+            </div>
             <input
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
               className="hidden"
-              accept="image/*,application/pdf"
+              accept="image/*"
             />
           </>
         );
@@ -305,7 +338,7 @@ export function UploadRecordDialog() {
         <DialogHeader className="p-6 pb-4 border-b">
           <DialogTitle>Upload & Extract Data</DialogTitle>
           <DialogDescription>
-            Upload a PDF or image of a lab report or medication. The AI will extract the data for you.
+            Upload an image of a lab report or medication. The AI will extract the data for you.
           </DialogDescription>
         </DialogHeader>
         <div className="p-6 overflow-y-auto">
