@@ -11,18 +11,20 @@ import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent } from './ui/collapsible';
+import { HemoglobinCard } from './hemoglobin-card';
 
 export function HypertensionCard() {
     const { profile, toggleBiomarkerInPanel } = useApp();
     const [isOpen, setIsOpen] = React.useState(true);
 
     const isBloodPressureEnabled = profile?.diseasePanels?.hypertension?.bloodPressure ?? true;
+    const isHemoglobinEnabled = profile?.diseasePanels?.hypertension?.hemoglobin ?? false;
 
-    const handleToggle = (biomarker: 'bloodPressure') => {
+    const handleToggle = (biomarker: 'bloodPressure' | 'hemoglobin') => {
         toggleBiomarkerInPanel('hypertension', biomarker);
     };
 
-    const BiomarkerToggle = ({ label, biomarkerKey, isEnabled }: { label: string, biomarkerKey: 'bloodPressure', isEnabled: boolean }) => (
+    const BiomarkerToggle = ({ label, biomarkerKey, isEnabled }: { label: string, biomarkerKey: 'bloodPressure' | 'hemoglobin', isEnabled: boolean }) => (
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
             <Label htmlFor={`${biomarkerKey}-switch-htn`} className="flex items-center justify-between w-full cursor-pointer">
                 <span>{label}</span>
@@ -40,10 +42,13 @@ export function HypertensionCard() {
             <DropdownMenuLabel>Manage Biomarkers</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <BiomarkerToggle label="Blood Pressure" biomarkerKey="bloodPressure" isEnabled={isBloodPressureEnabled} />
+            <BiomarkerToggle label="Hemoglobin" biomarkerKey="hemoglobin" isEnabled={isHemoglobinEnabled} />
         </ActionMenu>
     );
+
+    const enabledCardsCount = [isBloodPressureEnabled, isHemoglobinEnabled].filter(Boolean).length;
     
-    if (!isBloodPressureEnabled) {
+    if (enabledCardsCount === 0) {
         return (
             <UniversalCard
                 title="Hypertension Panel"
@@ -66,8 +71,12 @@ export function HypertensionCard() {
                 actions={actions}
             >
                 <CollapsibleContent>
-                    <div className="grid grid-cols-1 gap-6 transition-all">
+                    <div className={cn(
+                        "grid grid-cols-1 gap-6 transition-all",
+                        enabledCardsCount > 1 && "md:grid-cols-2"
+                    )}>
                         {isBloodPressureEnabled && <BloodPressureCard isReadOnly />}
+                        {isHemoglobinEnabled && <HemoglobinCard isReadOnly />}
                     </div>
                 </CollapsibleContent>
             </UniversalCard>

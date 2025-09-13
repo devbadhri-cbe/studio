@@ -57,6 +57,13 @@ export interface ThyroidRecord {
     t4: number;
 }
 
+export interface HemoglobinRecord {
+    id: string;
+    date: string;
+    hemoglobin: number;
+}
+
+
 export interface ThyroxineRecord {
     id: string;
     date: string;
@@ -118,6 +125,7 @@ export interface DiseasePanelState {
     };
     hypertension: {
         bloodPressure: boolean;
+        hemoglobin: boolean;
     };
     lipidPanel: {
         total: boolean;
@@ -153,6 +161,7 @@ export interface Patient {
   thyroxineRecords: ThyroxineRecord[];
   serumCreatinineRecords: SerumCreatinineRecord[];
   uricAcidRecords: UricAcidRecord[];
+  hemoglobinRecords: HemoglobinRecord[];
   totalCholesterolRecords: TotalCholesterolRecord[];
   ldlRecords: LdlRecord[];
   hdlRecords: HdlRecord[];

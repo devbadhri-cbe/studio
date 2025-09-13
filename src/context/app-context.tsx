@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { createContext } from 'react';
-import { type Patient, type Hba1cRecord, type WeightRecord, type FastingBloodGlucoseRecord, type BloodPressureRecord, type ThyroidRecord, type MedicalCondition, type Medication, type ThyroxineRecord, type SerumCreatinineRecord, type UricAcidRecord, TotalCholesterolRecord, LdlRecord, HdlRecord, TriglyceridesRecord, DiseasePanelState } from '@/lib/types';
+import { type Patient, type Hba1cRecord, type WeightRecord, type FastingBloodGlucoseRecord, type BloodPressureRecord, type ThyroidRecord, type MedicalCondition, type Medication, type ThyroxineRecord, type SerumCreatinineRecord, type UricAcidRecord, TotalCholesterolRecord, LdlRecord, HdlRecord, TriglyceridesRecord, DiseasePanelState, HemoglobinRecord } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 import { produce } from 'immer';
 import { calculateBmi } from '@/lib/utils';
@@ -45,6 +45,7 @@ interface AppContextType {
   addThyroxineRecord: (record: Omit<ThyroxineRecord, 'id'>) => string;
   addSerumCreatinineRecord: (record: Omit<SerumCreatinineRecord, 'id'>) => string;
   addUricAcidRecord: (record: Omit<UricAcidRecord, 'id'>) => string;
+  addHemoglobinRecord: (record: Omit<HemoglobinRecord, 'id'>) => string;
   addTotalCholesterolRecord: (record: Omit<TotalCholesterolRecord, 'id'>) => string;
   addLdlRecord: (record: Omit<LdlRecord, 'id'>) => string;
   addHdlRecord: (record: Omit<HdlRecord, 'id'>) => string;
@@ -61,6 +62,7 @@ interface AppContextType {
   removeThyroxineRecord: (id: string) => void;
   removeSerumCreatinineRecord: (id: string) => void;
   removeUricAcidRecord: (id: string) => void;
+  removeHemoglobinRecord: (id: string) => void;
   removeTotalCholesterolRecord: (id: string) => void;
   removeLdlRecord: (id: string) => void;
   removeHdlRecord: (id: string) => void;
@@ -95,6 +97,7 @@ interface AppContextType {
   thyroxineRecords: ThyroxineRecord[];
   serumCreatinineRecords: SerumCreatinineRecord[];
   uricAcidRecords: UricAcidRecord[];
+  hemoglobinRecords: HemoglobinRecord[];
   totalCholesterolRecords: TotalCholesterolRecord[];
   ldlRecords: LdlRecord[];
   hdlRecords: HdlRecord[];
@@ -118,6 +121,7 @@ const defaultDiseasePanelState: DiseasePanelState = {
     },
     hypertension: {
         bloodPressure: true,
+        hemoglobin: false,
     },
     lipidPanel: {
         total: true,
@@ -250,6 +254,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addThyroxineRecord = createRecordAdder<ThyroxineRecord>('thyroxineRecords');
   const addSerumCreatinineRecord = createRecordAdder<SerumCreatinineRecord>('serumCreatinineRecords');
   const addUricAcidRecord = createRecordAdder<UricAcidRecord>('uricAcidRecords');
+  const addHemoglobinRecord = createRecordAdder<HemoglobinRecord>('hemoglobinRecords');
   const addTotalCholesterolRecord = createRecordAdder<TotalCholesterolRecord>('totalCholesterolRecords');
   const addLdlRecord = createRecordAdder<LdlRecord>('ldlRecords');
   const addHdlRecord = createRecordAdder<HdlRecord>('hdlRecords');
@@ -265,6 +270,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const removeThyroxineRecord = createRecordRemover('thyroxineRecords');
   const removeSerumCreatinineRecord = createRecordRemover('serumCreatinineRecords');
   const removeUricAcidRecord = createRecordRemover('uricAcidRecords');
+  const removeHemoglobinRecord = createRecordRemover('hemoglobinRecords');
   const removeTotalCholesterolRecord = createRecordRemover('totalCholesterolRecords');
   const removeLdlRecord = createRecordRemover('ldlRecords');
   const removeHdlRecord = createRecordRemover('hdlRecords');
@@ -509,6 +515,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addThyroxineRecord,
     addSerumCreatinineRecord,
     addUricAcidRecord,
+    addHemoglobinRecord,
     addTotalCholesterolRecord,
     addLdlRecord,
     addHdlRecord,
@@ -524,6 +531,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     removeThyroxineRecord,
     removeSerumCreatinineRecord,
     removeUricAcidRecord,
+    removeHemoglobinRecord,
     removeTotalCholesterolRecord,
     removeLdlRecord,
     removeHdlRecord,
@@ -552,6 +560,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     thyroxineRecords: patient?.thyroxineRecords || [],
     serumCreatinineRecords: patient?.serumCreatinineRecords || [],
     uricAcidRecords: patient?.uricAcidRecords || [],
+    hemoglobinRecords: patient?.hemoglobinRecords || [],
     totalCholesterolRecords: patient?.totalCholesterolRecords || [],
     ldlRecords: patient?.ldlRecords || [],
     hdlRecords: patient?.hdlRecords || [],
