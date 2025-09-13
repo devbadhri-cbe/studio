@@ -157,7 +157,7 @@ export default function PatientDashboard() {
                             onSearchChange={setBiomarkerSearchQuery}
                             searchPlaceholder="Search biomarkers..."
                             isCollapsible={true}
-                            showCreateButton={isDeveloper}
+                            showCreateButton={true}
                             onCreateClick={() => setIsAddingBiomarker(!isAddingBiomarker)}
                         />
                         <CollapsibleContent>
