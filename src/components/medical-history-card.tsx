@@ -29,6 +29,8 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { v4 as uuidv4 } from 'uuid';
 import { type MedicalConditionOutput } from '@/lib/ai-types';
 import { ConditionReviewCard } from './condition-review-card';
+import { UniversalCard } from './universal-card';
+import { Separator } from './ui/separator';
 
 type ActiveView = 'none' | `add` | `edit_${string}` | `synopsis_${string}`;
 
@@ -102,62 +104,54 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
     }
 
     return (
-        <Card className="shadow-xl h-full flex flex-col">
-            <CardContent className="space-y-4 text-sm p-4 flex-1 flex flex-col">
-                <div className="flex items-center justify-between mb-2">
-                    <div className='flex items-center gap-3 flex-1'>
-                        {icon}
-                        <h3 className="font-medium">{title}</h3>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                        {actions}
-                    </div>
-                </div>
-
-                {isCheckingInteractions ? (
-                     <DrugInteractionViewer
-                        medications={items.map(m => (m as Medication).userInput)}
-                        onClose={() => setIsCheckingInteractions(false)}
-                    />
-                ) : (
-                <>
-                    {activeView === 'add' && <AddForm onSave={handleAddFormSave as any} onCancel={handleAddFormCancel} />}
-                    <ul className="space-y-1 mt-2">
-                        {items.length > 0 ? items.map((item) => {
-                            const isEditingThis = activeView === `edit_${item.id}`;
-                            return (
-                                <ListItem
-                                    key={item.id}
-                                    item={item}
-                                    type={type}
-                                    isEditing={isEditingList}
-                                    isFormOpen={isEditingThis}
-                                    onRemove={onRemoveItem}
-                                    onShowSynopsis={onShowSynopsis}
-                                    onProcess={onProcessItem}
-                                    onRevise={EditForm ? () => setActiveView(`edit_${item.id}`) : undefined}
-                                    form={EditForm ? <EditForm onCancel={handleEditFormCancel} initialData={item} onSave={handleEditFormSave as any}/> : null}
-                                />
-                            )
-                        }) : nilRecord ? (
-                             <ListItem
-                                item={nilRecord}
+        <UniversalCard
+            title={title}
+            icon={icon}
+            actions={actions}
+        >
+            {isCheckingInteractions ? (
+                <DrugInteractionViewer
+                    medications={items.map(m => (m as Medication).userInput)}
+                    onClose={() => setIsCheckingInteractions(false)}
+                />
+            ) : (
+            <>
+                {activeView === 'add' && <AddForm onSave={handleAddFormSave as any} onCancel={handleAddFormCancel} />}
+                <ul className="space-y-1 mt-2">
+                    {items.length > 0 ? items.map((item) => {
+                        const isEditingThis = activeView === `edit_${item.id}`;
+                        return (
+                            <ListItem
+                                key={item.id}
+                                item={item}
                                 type={type}
                                 isEditing={isEditingList}
-                                isFormOpen={false}
-                                onRemove={() => onRemoveItem(nilRecord.id)}
-                                onShowSynopsis={() => {}}
-                                onProcess={() => {}}
-                                form={null}
-                                isNilItem={true}
+                                isFormOpen={isEditingThis}
+                                onRemove={onRemoveItem}
+                                onShowSynopsis={onShowSynopsis}
+                                onProcess={onProcessItem}
+                                onRevise={EditForm ? () => setActiveView(`edit_${item.id}`) : undefined}
+                                form={EditForm ? <EditForm onCancel={handleEditFormCancel} initialData={item} onSave={handleEditFormSave as any}/> : null}
                             />
-                        ) : null}
-                        {items.length === 0 && !nilRecord && activeView !== 'add' && <p className="text-xs text-muted-foreground pl-8 pt-2">No {type === 'condition' ? 'conditions' : 'medications'} recorded.</p>}
-                    </ul>
-                </>
-                )}
-            </CardContent>
-        </Card>
+                        )
+                    }) : nilRecord ? (
+                            <ListItem
+                            item={nilRecord}
+                            type={type}
+                            isEditing={isEditingList}
+                            isFormOpen={false}
+                            onRemove={() => onRemoveItem(nilRecord.id)}
+                            onShowSynopsis={() => {}}
+                            onProcess={() => {}}
+                            form={null}
+                            isNilItem={true}
+                        />
+                    ) : null}
+                    {items.length === 0 && !nilRecord && activeView !== 'add' && <p className="text-xs text-muted-foreground pl-8 pt-2">No {type === 'condition' ? 'conditions' : 'medications'} recorded.</p>}
+                </ul>
+            </>
+            )}
+        </UniversalCard>
     );
 }
 
@@ -189,7 +183,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
 
     if (type === 'condition') {
         const cond = item as MedicalCondition;
-        title = cond.condition || cond.userInput; // Fallback to userInput if condition name is not yet processed
+        title = cond.condition || cond.userInput;
         originalInput = cond.userInput;
         date = cond.date;
     } else {
@@ -299,8 +293,9 @@ export function MedicalHistoryCard() {
     try {
       const result = await processMedicalCondition({ condition: condition.userInput || '' });
       if (result.isValid) {
-        removeMedicalCondition(tempId);
         setReviewingCondition({ userInput: condition.userInput || '', date: condition.date, aiResult: result });
+        // We remove the temporary pending item only if the AI returns a valid result that will be shown in the review card
+        removeMedicalCondition(tempId);
       } else {
         updateMedicalCondition(produce(condition, draft => { draft.status = 'failed' }));
         toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Please check spelling and try again.` });
@@ -418,7 +413,7 @@ export function MedicalHistoryCard() {
             onCancel={() => setReviewingCondition(null)}
         />
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <MedicalInfoSection
             title="Present Medical Conditions"
             icon={<Stethoscope className="h-5 w-5 shrink-0 text-muted-foreground" />}
@@ -432,7 +427,7 @@ export function MedicalHistoryCard() {
             AddForm={AddMedicalConditionForm as any}
             EditForm={AddMedicalConditionForm as any}
         />
-        
+        <Separator />
         <MedicalInfoSection
             title="Current Medication"
             icon={<Pill className="h-5 w-5 shrink-0 text-muted-foreground" />}
