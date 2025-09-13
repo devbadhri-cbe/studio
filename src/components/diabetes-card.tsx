@@ -47,7 +47,9 @@ export function DiabetesCard() {
         </ActionMenu>
     );
     
-    if (!isHba1cEnabled && !isGlucoseEnabled) {
+    const enabledCardsCount = [isHba1cEnabled, isGlucoseEnabled].filter(Boolean).length;
+
+    if (enabledCardsCount === 0) {
         return (
             <UniversalCard
                 title="Diabetes Panel"
@@ -72,7 +74,7 @@ export function DiabetesCard() {
                 <CollapsibleContent>
                     <div className={cn(
                         "grid grid-cols-1 gap-6 transition-all",
-                        isHba1cEnabled && isGlucoseEnabled && "md:grid-cols-2"
+                        enabledCardsCount > 1 && "md:grid-cols-2"
                     )}>
                         {isHba1cEnabled && <Hba1cCard isReadOnly />}
                         {isGlucoseEnabled && <FastingBloodGlucoseCard isReadOnly />}

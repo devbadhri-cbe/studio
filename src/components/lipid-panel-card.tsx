@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -51,9 +52,10 @@ export function LipidPanelCard() {
         </ActionMenu>
     );
 
-    const anyBiomarkerEnabled = ['total', 'ldl', 'hdl', 'triglycerides'].some(key => isEnabled(key as LipidBiomarkerKey));
+    const enabledKeys: LipidBiomarkerKey[] = ['total', 'ldl', 'hdl', 'triglycerides'];
+    const enabledCardsCount = enabledKeys.filter(key => isEnabled(key)).length;
     
-    if (!anyBiomarkerEnabled) {
+    if (enabledCardsCount === 0) {
         return (
             <UniversalCard
                 title="Lipid Panel"
@@ -76,7 +78,10 @@ export function LipidPanelCard() {
                 actions={actions}
             >
                 <CollapsibleContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transition-all">
+                    <div className={cn(
+                        "grid grid-cols-1 gap-6 transition-all",
+                        enabledCardsCount > 1 && "md:grid-cols-2"
+                    )}>
                         {isEnabled('total') && <TotalCholesterolCard isReadOnly={true} />}
                         {isEnabled('ldl') && <LdlCard isReadOnly={true} />}
                         {isEnabled('hdl') && <HdlCard isReadOnly={true} />}
