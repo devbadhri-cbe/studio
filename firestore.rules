@@ -1,8 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
+    // Allow read/write access to the AI cache collection
+    match /AiCache/{flowName}/entries/{cacheKey} {
       allow read, write: if true;
+    }
+
+    // Deny all other access by default
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
