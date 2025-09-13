@@ -29,6 +29,7 @@ interface ProfileSettingsPopoverProps {
 
 export function ProfileSettingsPopover({ onEdit, onEditDoctor }: ProfileSettingsPopoverProps) {
   const { profile, setPatient, getFullPatientData, deleteProfile } = useApp();
+  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   
   const handleExportData = () => {
     try {
@@ -66,9 +67,19 @@ export function ProfileSettingsPopover({ onEdit, onEditDoctor }: ProfileSettings
         toast({ variant: "destructive", title: "Copy Failed" });
     });
   }
+  
+  const handleEditClick = () => {
+    onEdit();
+    setIsPopoverOpen(false);
+  }
+  
+  const handleEditDoctorClick = () => {
+    onEditDoctor();
+    setIsPopoverOpen(false);
+  }
 
   return (
-    <Popover>
+    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
             <ActionIcon tooltip="Display Settings" icon={<Settings className="h-4 w-4" />} onClick={(e) => e.stopPropagation()} />
         </PopoverTrigger>
@@ -81,11 +92,11 @@ export function ProfileSettingsPopover({ onEdit, onEditDoctor }: ProfileSettings
                     </p>
                 </div>
                  <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" size="sm" onClick={onEdit}>
+                    <Button variant="outline" size="sm" onClick={handleEditClick}>
                         <Edit className="mr-2 h-4 w-4" />
                         Edit Profile
                     </Button>
-                     <Button variant="outline" size="sm" onClick={onEditDoctor}>
+                     <Button variant="outline" size="sm" onClick={handleEditDoctorClick}>
                         <UserCircle className="mr-2 h-4 w-4" />
                         Doctor Details
                     </Button>
