@@ -8,7 +8,6 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { EditDoctorDetailsDialog } from '@/components/edit-doctor-details-dialog';
 import { TitleBar } from '@/components/ui/title-bar';
 import { Logo } from '@/components/logo';
 import { ProfileCard } from '@/components/profile-card';
@@ -35,9 +34,6 @@ export default function PatientDashboard() {
   const [isAddingBiomarker, setIsAddingBiomarker] = React.useState(false);
   const [panelSearchQuery, setPanelSearchQuery] = React.useState('');
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
-
-  // This check ensures the button is only visible in a non-production, non-read-only context.
-  const isDeveloper = process.env.NODE_ENV === 'development' && !isReadOnlyView;
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -146,7 +142,7 @@ export default function PatientDashboard() {
                     </CollapsibleContent>
                 </Collapsible>
                 
-                {isDeveloper && (
+                {process.env.NODE_ENV === 'development' && (
                     <Collapsible open={isBiomarkersOpen} onOpenChange={(isOpen) => { setIsBiomarkersOpen(isOpen); if (!isOpen) setIsAddingBiomarker(false); }}>
                         <DashboardSectionToggle
                             title="All Biomarkers"
