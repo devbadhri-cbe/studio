@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
@@ -188,7 +189,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
 
     if (type === 'condition') {
         const cond = item as MedicalCondition;
-        title = cond.condition;
+        title = cond.condition || cond.userInput; // Fallback to userInput if condition name is not yet processed
         originalInput = cond.userInput;
         date = cond.date;
     } else {
@@ -208,7 +209,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
         }
     }
     
-    const showOriginalInput = originalInput && originalInput.toLowerCase() !== title.toLowerCase() && !isNilItem;
+    const showOriginalInput = originalInput && title && originalInput.toLowerCase() !== title.toLowerCase() && !isNilItem;
 
     const itemBorderColor = isNilItem ? 'border-transparent' : isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
     const itemCursor = (isFailed || isPending || (isMobile && !isNilItem)) ? "cursor-pointer" : "cursor-default";
@@ -332,6 +333,16 @@ export function MedicalHistoryCard() {
         toast({title: 'Error', description: 'Cannot reprocess at the moment. Please try again.', variant: 'destructive'});
     }
   }
+  
+  const handleAddCondition = (data: { userInput: string; date: string }) => {
+      const newCondition: MedicalCondition = {
+          ...data,
+          id: uuidv4(),
+          condition: '', // No standard name yet
+          status: 'pending_review',
+      };
+      handleProcessCondition(newCondition);
+  }
 
   const renderSynopsisDialog = () => {
     if (!activeSynopsis) return null;
@@ -395,15 +406,6 @@ export function MedicalHistoryCard() {
         }
     }, 50);
   }
-  
-  const handleAddCondition = (data: Omit<MedicalCondition, 'id' | 'status' | 'synopsis' | 'icdCode'>) => {
-      const newCondition: MedicalCondition = {
-          ...data,
-          id: uuidv4(),
-          status: 'pending_review',
-      };
-      handleProcessCondition(newCondition);
-  }
 
   return (
     <>
@@ -426,7 +428,7 @@ export function MedicalHistoryCard() {
             onProcessItem={handleProcessCondition}
             onRemoveItem={removeMedicalCondition}
             onUpdateItem={updateMedicalCondition}
-            onAddItem={handleAddCondition}
+            onAddItem={handleAddCondition as any}
             AddForm={AddMedicalConditionForm as any}
             EditForm={AddMedicalConditionForm as any}
         />
