@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
 import { useApp } from '@/context/app-context';
-import { PatientDashboard } from '@/components/patient-dashboard';
+import PatientDashboard from '@/app/patient/dashboard/page';
 import { Loader2 } from 'lucide-react';
 import { Patient } from '@/lib/types';
 import { Logo } from '@/components/logo';

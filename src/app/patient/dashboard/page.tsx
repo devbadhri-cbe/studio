@@ -15,11 +15,11 @@ import { BloodPressureCard } from '@/components/blood-pressure-card';
 import { PatientLoginPage } from '@/components/patient-login-page';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useRouter } from 'next/navigation';
+import { PatientHeader } from '@/components/patient-header';
 
 export default function PatientDashboard() {
   const { isClient, patient } = useApp();
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const router = useRouter();
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -69,15 +69,8 @@ export default function PatientDashboard() {
         />
         <main className="flex-1 p-4 md:p-6 pb-4">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
-            <div className="flex flex-col md:flex-row items-start md:items-end gap-4 justify-between">
-                <div className="flex-1">
-                  <h1 className="text-2xl md:text-3xl font-semibold font-headline">
-                    Welcome, {patient?.name || ''}!
-                  </h1>
-                  <p className="text-muted-foreground mt-2">
-                      Your health overview. Consult your doctor before making any decisions.
-                  </p>
-                </div>
+            <div className="flex items-center gap-4">
+                <PatientHeader />
             </div>
             <Separator />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
