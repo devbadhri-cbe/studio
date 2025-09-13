@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -23,6 +24,7 @@ import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
 import { UploadRecordDialog } from '@/components/upload-record-dialog';
+import { PatientLoginPage } from '@/components/patient-login-page';
 
 export default function PatientDashboard() {
   const { isClient, isReadOnlyView, patient } = useApp();
@@ -45,7 +47,7 @@ export default function PatientDashboard() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  if (!isClient || !patient) {
+  if (!isClient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -54,6 +56,11 @@ export default function PatientDashboard() {
         </div>
       </div>
     );
+  }
+
+  // If no patient data is found, show the login/creation page.
+  if (!patient) {
+    return <PatientLoginPage />;
   }
 
   const developerCredit = (
@@ -95,13 +102,13 @@ export default function PatientDashboard() {
           {isReadOnlyView && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => router.push('/patient/dashboard')}>
+                <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard')}>
                   <ArrowLeft className="h-4 w-4" />
-                  <span className="sr-only">Back to Login</span>
+                  <span className="sr-only">Back to Home</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Back to Login</p>
+                <p>Back to Home</p>
               </TooltipContent>
             </Tooltip>
           )}
@@ -111,16 +118,6 @@ export default function PatientDashboard() {
             <div className="flex flex-col md:flex-row items-start md:items-end gap-4 justify-between">
                 <PatientHeader />
                 <div className="w-full md:w-auto flex items-center justify-center md:justify-end gap-2 md:gap-4 shrink-0">
-                    {process.env.NODE_ENV === 'development' && (
-                        <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open('/project-plan.html', '_blank')}
-                        >
-                        <FileText className="mr-2 h-4 w-4" />
-                        Project Plan
-                        </Button>
-                    )}
                     <UploadRecordDialog />
                 </div>
             </div>
@@ -157,30 +154,6 @@ export default function PatientDashboard() {
                         <DiseasePanel searchQuery={panelSearchQuery} />
                     </CollapsibleContent>
                 </Collapsible>
-                
-                {process.env.NODE_ENV === 'development' && (
-                    <Collapsible open={isBiomarkersOpen} onOpenChange={(isOpen) => { setIsBiomarkersOpen(isOpen); if (!isOpen) setIsAddingBiomarker(false); }}>
-                        <DashboardSectionToggle
-                            title="All Biomarkers"
-                            subtitle="View and manage individual biomarker cards"
-                            icon={<Droplet className="h-6 w-6 text-primary" />}
-                            isOpen={isBiomarkersOpen}
-                            searchQuery={biomarkerSearchQuery}
-                            onSearchChange={setBiomarkerSearchQuery}
-                            searchPlaceholder="Search biomarkers..."
-                            isCollapsible={true}
-                            showCreateButton={true}
-                            onCreateClick={() => setIsAddingBiomarker(!isAddingBiomarker)}
-                        />
-                        <CollapsibleContent>
-                            {isAddingBiomarker ? (
-                                <AddNewBiomarker onCancel={() => setIsAddingBiomarker(false)} />
-                            ) : (
-                                <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
-                            )}
-                        </CollapsibleContent>
-                    </Collapsible>
-                )}
             </div>
           </div>
         </main>

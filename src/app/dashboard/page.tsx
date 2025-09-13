@@ -5,7 +5,7 @@ import { PatientCard } from '@/components/patient-card';
 import { TitleBar } from '@/components/ui/title-bar';
 import { mockPatients } from '@/lib/mock-patients';
 import { Patient } from '@/lib/types';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, FileText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
@@ -50,12 +50,22 @@ export default function HomeDashboard() {
                 This is the developer home page. The patient profiles below are mock data for demonstration. To use the app as a patient, click &quot;Create New Profile&quot; to begin.
               </AlertDescription>
             </Alert>
+            <div className="flex items-center justify-between">
+                 <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open('/project-plan.html', '_blank')}
+                    >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Project Plan
+                </Button>
+                <Button size="sm" onClick={() => router.push('/patient/dashboard')}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Create New Profile
+                </Button>
+          </div>
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Example Patient Profiles</h2>
-            <Button size="sm" onClick={() => router.push('/patient/login')}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create New Profile
-            </Button>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {mockPatients.map((patient) => (
