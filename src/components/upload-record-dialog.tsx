@@ -68,7 +68,7 @@ export function UploadRecordDialog() {
       const result = await extractLabData({ photoDataUri: dataUri });
       
       const isMedication = result.medicationName && result.dosage;
-      
+
       if (isMedication) {
         const userInput = `${result.medicationName} ${result.dosage}`;
         setMedicationUserInput({ userInput, frequency: '' });
@@ -80,13 +80,16 @@ export function UploadRecordDialog() {
         });
         setMedicationAiResult(medInfo);
         setStep('reviewMedication');
-        return; // Exit here to prevent falling through to lab report logic
+        return;
       }
       
-      const isLabReport = Object.keys(result).some(key => !['patientName', 'medicationName', 'dosage', 'activeIngredient'].includes(key) && result[key as keyof Omit<BatchRecords, 'patientName'>] !== null && result[key as keyof Omit<BatchRecords, 'patientName'>] !== undefined);
+      const labReportFields: (keyof BatchRecords)[] = ['hba1c', 'fastingBloodGlucose', 'thyroid', 'bloodPressure', 'hemoglobin', 'lipidPanel'];
+      const isLabReport = labReportFields.some(field => result[field] !== undefined);
 
       if (isLabReport) {
-        const reportDate = result.hba1c?.date || result.fastingBloodGlucose?.date || result.thyroid?.date;
+        const anyRecordWithDate = labReportFields.find(field => result[field] && (result[field] as any).date);
+        const reportDate = anyRecordWithDate ? (result[anyRecordWithDate as keyof BatchRecords] as any).date : null;
+        
         if (!reportDate || !isValid(parseISO(reportDate))) {
           setStep('error');
           setErrorMessage('The AI could not determine the date of the test from the report. Please ensure the date is visible and clear.');
