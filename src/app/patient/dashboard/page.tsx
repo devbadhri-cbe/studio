@@ -17,9 +17,12 @@ import { InsightsCard } from '@/components/insights-card';
 import { DiabetesCard } from '@/components/diabetes-card';
 import { HypertensionCard } from '@/components/hypertension-card';
 import { LipidPanelCard } from '@/components/lipid-panel-card';
+import { useIsMobile } from '@/hooks/use-is-mobile';
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 
 export default function PatientDashboardPage() {
   const { isClient, patient } = useApp();
+  const isMobile = useIsMobile();
 
   if (!isClient) {
     return (
@@ -48,6 +51,35 @@ export default function PatientDashboardPage() {
         </TooltipContent>
     </Tooltip>
   );
+  
+  const DiseasePanels = () => {
+    const panels = [
+        <DiabetesCard key="diabetes" />,
+        <HypertensionCard key="hypertension" />,
+        <LipidPanelCard key="lipid" />,
+    ];
+
+    if (isMobile) {
+        return (
+            <Carousel opts={{ align: "start", loop: false }} className="w-full">
+                <CarouselContent>
+                    {panels.map((panel, index) => (
+                        <CarouselItem key={index} className="basis-11/12">
+                           {panel}
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+            </Carousel>
+        )
+    }
+
+    return (
+        <div className="grid grid-cols-1 gap-6">
+            {panels}
+        </div>
+    );
+  }
+
 
   return (
     <>
@@ -70,11 +102,7 @@ export default function PatientDashboardPage() {
                         <BloodPressureCard />
                     </div>
                     <MedicalHistoryCard />
-                    <div className="grid grid-cols-1 gap-6">
-                      <DiabetesCard />
-                      <HypertensionCard />
-                      <LipidPanelCard />
-                    </div>
+                    <DiseasePanels />
                 </div>
                 <div className="lg:col-span-1 grid grid-cols-1 gap-6">
                     <ReminderCard />
