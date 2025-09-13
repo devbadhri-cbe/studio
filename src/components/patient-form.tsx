@@ -13,7 +13,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { countries } from '@/lib/countries';
 import type { Patient } from '@/lib/types';
 import { FormActions } from './form-actions';
-import { cmToFtIn } from '@/lib/utils';
+import { cmToFtIn, ftInToCm } from '@/lib/utils';
 import { DateInput } from './date-input';
 
 const FormSchema = z.object({
@@ -43,11 +43,12 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
   const formMethods = useForm<PatientFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: '',
-      gender: undefined,
-      email: '',
-      phone: '',
-      country: '',
+      name: initialData?.name || '',
+      dob: initialData?.dob ? parseISO(initialData.dob) : new Date(),
+      gender: initialData?.gender,
+      country: initialData?.country || '',
+      email: initialData?.email || '',
+      phone: initialData?.phone || '',
       height: '',
       height_ft: '',
       height_in: '',
@@ -68,7 +69,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
         formMethods.reset({
             name: initialData.name || '',
             dob: initialData.dob ? parseISO(initialData.dob) : new Date(),
-            gender: initialData.gender || undefined,
+            gender: initialData.gender,
             email: initialData.email || '',
             country: initialData.country || '',
             phone: initialData.phone || '',
