@@ -1,10 +1,11 @@
+
 'use client';
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { PatientHeader } from '@/components/patient-header';
 import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { TitleBar } from '@/components/ui/title-bar';
 import { Logo } from '@/components/logo';
 import { ProfileCard } from '@/components/profile-card';

@@ -72,9 +72,9 @@ export function TitleBar({ title, subtitle, onSubtitleClick, children, rightChil
                             </div>
                         </div>
                          <div className={cn(
-                            "text-center text-xs text-muted-foreground mt-2 flex items-center gap-1 transition-all duration-300",
+                            "text-center text-xs text-muted-foreground mt-2 flex items-center gap-1 transition-all duration-300 animate-fade-in",
                             isScrolled ? "opacity-0 h-0" : "opacity-100 h-auto"
-                         )}>
+                         )} style={{ animationDelay: '1300ms', animationFillMode: 'backwards' }}>
                            {subtitle && (typeof subtitle === 'string' ? <p>{subtitle}</p> : subtitle)}
                         </div>
                     </div>
