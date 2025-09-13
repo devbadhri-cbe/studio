@@ -55,7 +55,6 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
   });
 
   React.useEffect(() => {
-    // This effect correctly resets the form with initialData when it's provided for editing.
     if (initialData) {
         const isImperial = countries.find(c => c.code === initialData.country)?.unitSystem === 'imperial';
         let height_ft = '';
