@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -70,7 +69,7 @@ export default function PatientDashboard() {
     <>
       <div className="flex min-h-screen w-full flex-col bg-background">
         <TitleBar
-          title={['Health', 'Guardian']}
+          title={['Health', 'Guardian', 'Lite']}
           subtitle={developerCredit}
           isScrolled={isScrolled}
           rightChildren={
