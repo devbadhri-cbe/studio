@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -52,23 +51,39 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
   const formMethods = useForm<PatientFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: React.useMemo(() => {
-        const isImperial = countries.find(c => c.code === initialData?.country)?.unitSystem === 'imperial';
+        if (!initialData) {
+            // Defaults for a new patient
+            return {
+                name: '',
+                dob: new Date(),
+                gender: undefined,
+                country: '',
+                email: '',
+                phone: '',
+                height: '',
+                height_ft: '',
+                height_in: '',
+            }
+        }
+
+        // Defaults for editing an existing patient
+        const isImperial = countries.find(c => c.code === initialData.country)?.unitSystem === 'imperial';
         let height_ft = '';
         let height_in = '';
-        if(initialData?.height && isImperial) {
+        if(initialData.height && isImperial) {
             const { feet, inches } = cmToFtIn(initialData.height);
             height_ft = feet.toString();
             height_in = Math.round(inches).toString();
         }
 
         return {
-            name: initialData?.name || '',
-            dob: initialData?.dob ? parseISO(initialData.dob) : new Date(),
-            gender: initialData?.gender || undefined,
-            email: initialData?.email || '',
-            country: initialData?.country || '',
-            phone: initialData?.phone || '',
-            height: !isImperial ? (initialData?.height?.toString() || '') : '',
+            name: initialData.name || '',
+            dob: initialData.dob ? parseISO(initialData.dob) : new Date(),
+            gender: initialData.gender || undefined,
+            email: initialData.email || '',
+            country: initialData.country || '',
+            phone: initialData.phone || '',
+            height: !isImperial ? (initialData.height?.toString() || '') : '',
             height_ft: isImperial ? height_ft : '',
             height_in: isImperial ? height_in : '',
         }
