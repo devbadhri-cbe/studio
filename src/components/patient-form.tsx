@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -98,7 +99,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
             height_in: '',
         });
     }
-  }, [initialData, formMethods.reset]);
+  }, [initialData, formMethods.reset, formMethods]);
   
   const watchCountry = formMethods.watch('country');
   const countryInfo = React.useMemo(() => countries.find(c => c.code === watchCountry), [watchCountry]);
