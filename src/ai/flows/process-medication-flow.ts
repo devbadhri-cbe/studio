@@ -25,7 +25,7 @@ User-provided Frequency: "{{frequency}}"
 User-provided Food Instruction: "{{foodInstructions}}"
 Patient's Country: "{{country}}"
 
-1.  **Identify Active Ingredient**: Analyze the 'userInput' (e.g., "Rosuvas 20mg", "Tylenol PM") to determine the primary 'activeIngredient' (generic name). This is your primary task. If you cannot determine this with high confidence, do not return the 'activeIngredient' field.
+1.  **Identify Active Ingredient**: Analyze the 'userInput' (e.g., "Rosuvas 20mg", "Tylenol PM", "Aspirin 81mg") to determine the primary 'activeIngredient' (generic name). This is your primary task. If you cannot determine this with high confidence, do not return the 'activeIngredient' field.
 
 2.  **Suggest Spelling Correction (Separate Task)**: Independently from the above, assess if there is a spelling mistake in the medication brand name within 'userInput'. If you are highly confident of a correction, provide a 'spellingSuggestion'. The suggestion should be a correction of the original 'userInput' string itself (e.g., for "Rosvas 10", the spelling suggestion should be "Rosuvas 10"). Check against all global brand names, but give priority to brands common in the patient's country. Provide this suggestion even if you can't find the active ingredient.
 
