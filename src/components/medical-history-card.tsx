@@ -42,13 +42,13 @@ interface MedicalInfoSectionProps<T extends MedicalCondition | Medication> {
   isNil?: boolean;
   nilRecord?: T;
   AddForm: React.ComponentType<{ onSave: (data: any) => void; onCancel: () => void; initialData?: T }>;
-  EditForm: React.ComponentType<{ onSave: (data: any) => void; onCancel: () => void; initialData: T; }>;
+  EditForm?: React.ComponentType<{ onSave: (data: any) => void; onCancel: () => void; initialData: T; }>;
   extraActions?: React.ReactNode;
 }
 
 
 function MedicalInfoSection<T extends MedicalCondition | Medication>({ 
-    title, icon, items, type, onShowSynopsis, onProcessItem, onRemoveItem, onUpdateItem, isNil, nilRecord, AddForm, EditForm, extraActions
+    title, icon, items, type, onShowSynopsis, onProcessItem, onRemoveItem, onUpdateItem, onAddItem, isNil, nilRecord, AddForm, EditForm, extraActions
 }: MedicalInfoSectionProps<T>) {
     const [activeView, setActiveView] = React.useState<ActiveView>('none');
     const [isEditingList, setIsEditingList] = React.useState(false);
@@ -114,8 +114,8 @@ function MedicalInfoSection<T extends MedicalCondition | Medication>({
                                 onRemove={onRemoveItem}
                                 onShowSynopsis={onShowSynopsis}
                                 onProcess={onProcessItem}
-                                onRevise={() => setActiveView(`edit_${item.id}`)}
-                                form={<EditForm onCancel={handleEditFormCancel} initialData={item} onSave={handleEditFormSave as any}/>}
+                                onRevise={EditForm ? () => setActiveView(`edit_${item.id}`) : undefined}
+                                form={EditForm ? <EditForm onCancel={handleEditFormCancel} initialData={item} onSave={handleEditFormSave as any}/> : null}
                             />
                         )
                     }) : (isNil && nilRecord) ? (
@@ -288,6 +288,8 @@ export function MedicalHistoryCard() {
   const { profile, updateMedicalCondition, removeMedication, removeMedicalCondition, addMedication, addMedicalCondition, updateMedication } = useApp();
   const [activeSynopsis, setActiveSynopsis] = React.useState<{ type: 'condition' | 'medication', id: string } | null>(null);
   const [activeInteractionCheck, setActiveInteractionCheck] = React.useState(false);
+  const addMedicationFormRef = React.useRef<{ startReprocessing: (med: Medication) => void }>(null);
+
 
   const handleProcessCondition = async (condition: MedicalCondition) => {
     toast({ title: "Re-processing Condition...", description: `Asking AI about "${condition.userInput}"`});
@@ -315,9 +317,11 @@ export function MedicalHistoryCard() {
   }
   
   const handleProcessMedication = async (med: Medication) => {
-      // Reprocessing a medication is handled by the AddMedicationForm's reprocessing mode
-      // For this prototype, we'll just show a toast
-      toast({title: 'Not Implemented', description: 'Please use the "Add Medication" form to re-process failed entries for now.'});
+    if (addMedicationFormRef.current) {
+        addMedicationFormRef.current.startReprocessing(med);
+    } else {
+        toast({title: 'Error', description: 'Cannot reprocess at the moment. Please try again.', variant: 'destructive'});
+    }
   }
 
   const renderSynopsisDialog = () => {
@@ -404,7 +408,7 @@ export function MedicalHistoryCard() {
             onAddItem={addMedication}
             isNil={profile.medication?.length === 0 && profile.status !== 'On Track'}
             nilRecord={nilMedicationRecord}
-            AddForm={AddMedicationForm as any}
+            AddForm={(props) => <AddMedicationForm {...props} ref={addMedicationFormRef} />}
             EditForm={EditMedicationWrapper as any}
             extraActions={medicationExtraActions}
         />
