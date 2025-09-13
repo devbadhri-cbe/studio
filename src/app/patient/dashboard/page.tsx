@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,7 +19,7 @@ import { InsightsCard } from '@/components/insights-card';
 import { BiomarkersPanel } from '@/components/biomarkers-panel';
 import { DashboardSectionToggle } from '@/components/dashboard-section-toggle';
 import { DiseasePanel } from '@/components/disease-panel';
-import { AddBiomarkerCard } from '@/components/add-biomarker-card';
+import { AddNewBiomarker } from '@/components/add-new-biomarker';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
@@ -33,6 +32,7 @@ export default function PatientDashboard() {
   
   const [isPanelsOpen, setIsPanelsOpen] = React.useState(true);
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
+  const [isAddingBiomarker, setIsAddingBiomarker] = React.useState(false);
   const [panelSearchQuery, setPanelSearchQuery] = React.useState('');
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
 
@@ -144,7 +144,7 @@ export default function PatientDashboard() {
                     </CollapsibleContent>
                 </Collapsible>
                 
-                <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
+                <Collapsible open={isBiomarkersOpen} onOpenChange={(isOpen) => { setIsBiomarkersOpen(isOpen); if (!isOpen) setIsAddingBiomarker(false); }}>
                     <DashboardSectionToggle
                         title="All Biomarkers"
                         subtitle="View and manage individual biomarker cards"
@@ -154,13 +154,17 @@ export default function PatientDashboard() {
                         onSearchChange={setBiomarkerSearchQuery}
                         searchPlaceholder="Search biomarkers..."
                         isCollapsible={true}
+                        showCreateButton={true}
+                        onCreateClick={() => setIsAddingBiomarker(!isAddingBiomarker)}
                     />
                      <CollapsibleContent>
-                        <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>
+                        {isAddingBiomarker ? (
+                            <AddNewBiomarker onCancel={() => setIsAddingBiomarker(false)} />
+                        ) : (
+                            <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
+                        )}
                      </CollapsibleContent>
                 </Collapsible>
-
-                <AddBiomarkerCard />
             </div>
           </div>
         </main>
