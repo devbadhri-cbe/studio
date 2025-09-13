@@ -26,9 +26,9 @@ User Input: "{{condition}}"
 1.  First, determine if the input is a valid, specific medical condition. "Feeling tired" is not specific, but "Chronic Fatigue Syndrome" is.
 2.  If the input is a valid condition:
     - Set 'isValid' to true.
-    - Provide the 'standardizedName' (e.g., for "high blood pressure," return "Hypertension").
-    - Provide the most likely 'icdCode' from the ICD-11 classification.
-    - YOU MUST provide a brief, one-paragraph 'synopsis' of the condition, suitable for a patient to read.
+    - You MUST provide the 'standardizedName' (e.g., for "high blood pressure," return "Hypertension").
+    - You MUST provide the most likely 'icdCode' from the ICD-11 classification.
+    - You MUST provide a brief, one-paragraph 'synopsis' of the condition, suitable for a patient to read.
 3.  If the input is ambiguous, a symptom, or not a recognized medical condition:
     - Set 'isValid' to false.
     - Provide a list of up to 3 'suggestions' for more specific, valid medical conditions the user might have meant. For example, if the user enters "sugar problems", suggest "Type 2 Diabetes", "Hypoglycemia", "Hyperglycemia".
@@ -49,3 +49,4 @@ const processMedicalConditionFlow = ai.defineFlow(
     return output;
   }
 );
+
