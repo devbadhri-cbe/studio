@@ -111,7 +111,7 @@ export default function PatientDashboard() {
             <div className="flex flex-col md:flex-row items-start md:items-end gap-4 justify-between">
                 <PatientHeader />
                 <div className="w-full md:w-auto flex items-center justify-center md:justify-end gap-2 md:gap-4 shrink-0">
-                    {!isReadOnlyView && (
+                    {process.env.NODE_ENV === 'development' && (
                         <Button
                         variant="outline"
                         size="sm"
