@@ -1,7 +1,7 @@
 'use client';
 
 import { TitleBar } from '@/components/ui/title-bar';
-import { PlusCircle, FileText, Droplet } from 'lucide-react';
+import { PlusCircle, FileText, Droplet, Heart, Flame } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
@@ -12,13 +12,20 @@ import { BiomarkersPanel } from '@/components/biomarkers-panel';
 import { AddNewBiomarker } from '@/components/add-new-biomarker';
 import { DashboardSectionToggle } from '@/components/dashboard-section-toggle';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { DiabetesCard } from '@/components/diabetes-card';
+import { HypertensionCard } from '@/components/hypertension-card';
+import { LipidPanelCard } from '@/components/lipid-panel-card';
+import { Card, CardContent } from '@/components/ui/card';
+
 
 export default function HomeDashboard() {
   const router = useRouter();
   const { isClient } = useApp();
   const [isAddingBiomarker, setIsAddingBiomarker] = React.useState(false);
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
-  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
+  const [diseasePanelSearchQuery, setDiseasePanelSearchQuery] = React.useState('');
+  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
+  const [isDiseasePanelsOpen, setIsDiseasePanelsOpen] = React.useState(true);
 
   if (!isClient) {
     return null; // or a loading skeleton
@@ -51,11 +58,36 @@ export default function HomeDashboard() {
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Go to Patient View
                 </Button>
-          </div>
+            </div>
           
+            <Collapsible open={isDiseasePanelsOpen} onOpenChange={setIsDiseasePanelsOpen}>
+                <DashboardSectionToggle
+                    title="Disease Panels"
+                    subtitle="Manage high-level disease-specific panels"
+                    icon={<Heart className="h-6 w-6 text-primary" />}
+                    isOpen={isDiseasePanelsOpen}
+                    searchQuery={diseasePanelSearchQuery}
+                    onSearchChange={setDiseasePanelSearchQuery}
+                    searchPlaceholder="Search disease panels..."
+                />
+                <CollapsibleContent>
+                    <Card>
+                        <CardContent className="p-4">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <DiabetesCard />
+                                <HypertensionCard />
+                                <div className="lg:col-span-2">
+                                    <LipidPanelCard />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </CollapsibleContent>
+            </Collapsible>
+
             <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
                 <DashboardSectionToggle
-                    title="All Biomarkers"
+                    title="Biomarkers Panel"
                     subtitle="View and manage the complete collection of biomarker cards"
                     icon={<Droplet className="h-6 w-6 text-primary" />}
                     isOpen={isBiomarkersOpen}

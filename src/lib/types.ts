@@ -117,6 +117,15 @@ export interface DiseasePanelState {
         hba1c: boolean;
         glucose: boolean;
     };
+    hypertension: {
+        bloodPressure: boolean;
+    };
+    lipidPanel: {
+        total: boolean;
+        ldl: boolean;
+        hdl: boolean;
+        triglycerides: boolean;
+    };
 }
   
 

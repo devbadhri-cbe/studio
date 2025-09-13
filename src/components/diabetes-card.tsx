@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Droplet, Settings, Edit, PlusCircle, Check } from 'lucide-react';
+import { Droplet, Settings } from 'lucide-react';
 import { UniversalCard } from './universal-card';
 import { ActionMenu } from './ui/action-menu';
 import { DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from './ui/dropdown-menu';
@@ -12,7 +12,7 @@ import { useApp } from '@/context/app-context';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import { cn } from '@/lib/utils';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import { Collapsible, CollapsibleContent } from './ui/collapsible';
 
 export function DiabetesCard() {
     const { profile, toggleBiomarkerInPanel } = useApp();
@@ -27,10 +27,10 @@ export function DiabetesCard() {
 
     const BiomarkerToggle = ({ label, biomarkerKey, isEnabled }: { label: string, biomarkerKey: 'hba1c' | 'glucose', isEnabled: boolean }) => (
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-            <Label htmlFor={`${biomarkerKey}-switch`} className="flex items-center justify-between w-full cursor-pointer">
+            <Label htmlFor={`${biomarkerKey}-switch-diabetes`} className="flex items-center justify-between w-full cursor-pointer">
                 <span>{label}</span>
                 <Switch
-                    id={`${biomarkerKey}-switch`}
+                    id={`${biomarkerKey}-switch-diabetes`}
                     checked={isEnabled}
                     onCheckedChange={() => handleToggle(biomarkerKey)}
                 />

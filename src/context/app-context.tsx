@@ -32,7 +32,6 @@ interface AppContextType {
   isClient: boolean;
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  isReadOnlyView: boolean;
   setPatientData: (data: Patient, isReadOnly: boolean) => void;
   
   // Data modification functions
@@ -116,6 +115,15 @@ const defaultDiseasePanelState: DiseasePanelState = {
     diabetes: {
         hba1c: true,
         glucose: true,
+    },
+    hypertension: {
+        bloodPressure: true,
+    },
+    lipidPanel: {
+        total: true,
+        ldl: true,
+        hdl: true,
+        triglycerides: true,
     }
 }
 
@@ -124,7 +132,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isClient, setIsClient] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
-  const [isReadOnlyView, setIsReadOnlyView] = React.useState(false);
   
   // AI Insights State
   const [tips, setTips] = React.useState<string[]>([]);
@@ -161,7 +168,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   React.useEffect(() => {
-    if (isClient && !isReadOnlyView) {
+    if (isClient) {
       if (patient) {
         // Update BMI whenever patient data changes (e.g., height update or new weight record)
         const patientWithBmi = produce(patient, draft => {
@@ -174,12 +181,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('patientData');
       }
     }
-  }, [patient, isClient, isReadOnlyView]);
+  }, [patient, isClient]);
 
 
   const setPatientData: AppContextType['setPatientData'] = (data, isReadOnly) => {
     setPatientState(data);
-    setIsReadOnlyView(isReadOnly);
   };
 
   React.useEffect(() => {
@@ -492,7 +498,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isClient,
     theme,
     setTheme,
-    isReadOnlyView,
     setPatientData,
     addHba1cRecord,
     addWeightRecord,
