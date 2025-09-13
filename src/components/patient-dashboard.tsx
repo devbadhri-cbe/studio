@@ -61,7 +61,7 @@ export function PatientDashboard() {
       <div className="flex min-h-screen w-full flex-col bg-background">
         <TitleBar
           title={['Health', 'Guardian']}
-          subtitle="Your Personal Health Dashboard"
+          subtitle="Developer, Dr N Badhrinathan"
           isScrolled={isScrolled}
           rightChildren={
             !isReadOnlyView ? (
@@ -99,7 +99,7 @@ export function PatientDashboard() {
             <Separator />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 grid grid-cols-1 gap-6">
-                     <ProfileCard />
+                    <ProfileCard />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <WeightRecordCard />
                         <BloodPressureCard />
