@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -63,7 +64,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting, initialData }: P
         return {
             name: initialData?.name || '',
             dob: initialData?.dob ? parseISO(initialData.dob) : new Date(),
-            gender: initialData?.gender,
+            gender: initialData?.gender || undefined,
             email: initialData?.email || '',
             country: initialData?.country || '',
             phone: initialData?.phone || '',
