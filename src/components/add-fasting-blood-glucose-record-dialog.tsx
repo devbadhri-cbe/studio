@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,12 +19,10 @@ const FormSchema = z.object({
 });
 
 interface AddFastingBloodGlucoseRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
-export function AddFastingBloodGlucoseRecordDialog({ onSuccess, onCancel }: AddFastingBloodGlucoseRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddFastingBloodGlucoseRecordDialog({ onCancel }: AddFastingBloodGlucoseRecordDialogProps) {
   const { addFastingBloodGlucoseRecord, biomarkerUnit, getDbGlucoseValue, profile } = useApp();
   const { toast } = useToast();
   const unitLabel = biomarkerUnit === 'si' ? 'mmol/L' : 'mg/dL';
@@ -40,7 +37,6 @@ export function AddFastingBloodGlucoseRecordDialog({ onSuccess, onCancel }: AddF
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setIsSubmitting(true);
     addFastingBloodGlucoseRecord({
         date: startOfDay(data.date).toISOString(),
         value: getDbGlucoseValue(data.value),
@@ -49,8 +45,7 @@ export function AddFastingBloodGlucoseRecordDialog({ onSuccess, onCancel }: AddF
         title: 'Success!',
         description: 'Your new Fasting Blood Glucose record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -60,7 +55,6 @@ export function AddFastingBloodGlucoseRecordDialog({ onSuccess, onCancel }: AddF
         description="Enter your value and the date it was measured."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.fastingBloodGlucoseRecords}
       >
         <DateInput

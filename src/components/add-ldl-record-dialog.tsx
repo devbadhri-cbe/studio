@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,12 +19,10 @@ const FormSchema = z.object({
 });
 
 interface AddLdlRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
-export function AddLdlRecordDialog({ onSuccess, onCancel }: AddLdlRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddLdlRecordDialog({ onCancel }: AddLdlRecordDialogProps) {
   const { addLdlRecord, profile } = useApp();
   const { toast } = useToast();
 
@@ -38,7 +35,6 @@ export function AddLdlRecordDialog({ onSuccess, onCancel }: AddLdlRecordDialogPr
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setIsSubmitting(true);
     addLdlRecord({
         date: startOfDay(data.date).toISOString(),
         value: data.value,
@@ -47,8 +43,7 @@ export function AddLdlRecordDialog({ onSuccess, onCancel }: AddLdlRecordDialogPr
         title: 'Success!',
         description: 'Your new LDL Cholesterol record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -58,7 +53,6 @@ export function AddLdlRecordDialog({ onSuccess, onCancel }: AddLdlRecordDialogPr
         description="Enter your value and the date it was measured."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.ldlRecords}
       >
         <DateInput

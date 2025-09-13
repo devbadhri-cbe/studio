@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,12 +19,10 @@ const FormSchema = z.object({
 });
 
 interface AddSerumCreatinineRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
-export function AddSerumCreatinineRecordDialog({ onSuccess, onCancel }: AddSerumCreatinineRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddSerumCreatinineRecordDialog({ onCancel }: AddSerumCreatinineRecordDialogProps) {
   const { addSerumCreatinineRecord, profile } = useApp();
   const { toast } = useToast();
 
@@ -38,7 +35,6 @@ export function AddSerumCreatinineRecordDialog({ onSuccess, onCancel }: AddSerum
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setIsSubmitting(true);
     addSerumCreatinineRecord({
         date: startOfDay(data.date).toISOString(),
         value: data.value,
@@ -47,8 +43,7 @@ export function AddSerumCreatinineRecordDialog({ onSuccess, onCancel }: AddSerum
         title: 'Success!',
         description: 'Your new Serum Creatinine record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -58,7 +53,6 @@ export function AddSerumCreatinineRecordDialog({ onSuccess, onCancel }: AddSerum
         description="Enter your value and the date it was measured."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.serumCreatinineRecords}
       >
         <DateInput

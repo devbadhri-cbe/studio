@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,12 +19,10 @@ const FormSchema = z.object({
 });
 
 interface AddUricAcidRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
-export function AddUricAcidRecordDialog({ onSuccess, onCancel }: AddUricAcidRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddUricAcidRecordDialog({ onCancel }: AddUricAcidRecordDialogProps) {
   const { addUricAcidRecord, profile } = useApp();
   const { toast } = useToast();
 
@@ -38,7 +35,6 @@ export function AddUricAcidRecordDialog({ onSuccess, onCancel }: AddUricAcidReco
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setIsSubmitting(true);
     addUricAcidRecord({
         date: startOfDay(data.date).toISOString(),
         value: data.value,
@@ -47,8 +43,7 @@ export function AddUricAcidRecordDialog({ onSuccess, onCancel }: AddUricAcidReco
         title: 'Success!',
         description: 'Your new Uric Acid record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -58,7 +53,6 @@ export function AddUricAcidRecordDialog({ onSuccess, onCancel }: AddUricAcidReco
         description="Enter your value and the date it was measured."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.uricAcidRecords}
       >
         <DateInput

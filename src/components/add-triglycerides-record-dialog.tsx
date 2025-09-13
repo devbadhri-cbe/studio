@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,12 +19,10 @@ const FormSchema = z.object({
 });
 
 interface AddTriglyceridesRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
-export function AddTriglyceridesRecordDialog({ onSuccess, onCancel }: AddTriglyceridesRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddTriglyceridesRecordDialog({ onCancel }: AddTriglyceridesRecordDialogProps) {
   const { addTriglyceridesRecord, profile } = useApp();
   const { toast } = useToast();
 
@@ -38,7 +35,6 @@ export function AddTriglyceridesRecordDialog({ onSuccess, onCancel }: AddTriglyc
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setIsSubmitting(true);
     addTriglyceridesRecord({
         date: startOfDay(data.date).toISOString(),
         value: data.value,
@@ -47,8 +43,7 @@ export function AddTriglyceridesRecordDialog({ onSuccess, onCancel }: AddTriglyc
         title: 'Success!',
         description: 'Your new Triglycerides record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -58,7 +53,6 @@ export function AddTriglyceridesRecordDialog({ onSuccess, onCancel }: AddTriglyc
         description="Enter your value and the date it was measured."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.triglyceridesRecords}
       >
         <DateInput

@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,12 +19,10 @@ const FormSchema = z.object({
 });
 
 interface AddHemoglobinRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
-export function AddHemoglobinRecordDialog({ onSuccess, onCancel }: AddHemoglobinRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddHemoglobinRecordDialog({ onCancel }: AddHemoglobinRecordDialogProps) {
   const { addHemoglobinRecord, getDbHemoglobinValue, biomarkerUnit, profile } = useApp();
   const { toast } = useToast();
   const unitLabel = biomarkerUnit === 'si' ? 'g/L' : 'g/dL';
@@ -39,7 +36,6 @@ export function AddHemoglobinRecordDialog({ onSuccess, onCancel }: AddHemoglobin
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setIsSubmitting(true);
     addHemoglobinRecord({
         date: startOfDay(data.date).toISOString(),
         hemoglobin: getDbHemoglobinValue(data.value),
@@ -48,8 +44,7 @@ export function AddHemoglobinRecordDialog({ onSuccess, onCancel }: AddHemoglobin
         title: 'Success!',
         description: 'Your new hemoglobin record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -59,7 +54,6 @@ export function AddHemoglobinRecordDialog({ onSuccess, onCancel }: AddHemoglobin
         description="Enter your value and the date it was measured."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.hemoglobinRecords}
       >
         <DateInput

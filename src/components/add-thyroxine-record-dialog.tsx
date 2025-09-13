@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,12 +19,10 @@ const FormSchema = z.object({
 });
 
 interface AddThyroxineRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
-export function AddThyroxineRecordDialog({ onSuccess, onCancel }: AddThyroxineRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddThyroxineRecordDialog({ onCancel }: AddThyroxineRecordDialogProps) {
   const { addThyroxineRecord, profile } = useApp();
   const { toast } = useToast();
 
@@ -38,7 +35,6 @@ export function AddThyroxineRecordDialog({ onSuccess, onCancel }: AddThyroxineRe
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setIsSubmitting(true);
     addThyroxineRecord({
         date: startOfDay(data.date).toISOString(),
         value: data.value,
@@ -47,8 +43,7 @@ export function AddThyroxineRecordDialog({ onSuccess, onCancel }: AddThyroxineRe
         title: 'Success!',
         description: 'Your new Thyroxine (T4) record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -58,7 +53,6 @@ export function AddThyroxineRecordDialog({ onSuccess, onCancel }: AddThyroxineRe
         description="Enter your value and the date it was measured."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.thyroxineRecords}
       >
         <DateInput

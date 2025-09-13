@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,12 +19,10 @@ const FormSchema = z.object({
 });
 
 interface AddRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
-export function AddRecordDialog({ onSuccess, onCancel }: AddRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddRecordDialog({ onCancel }: AddRecordDialogProps) {
   const { addHba1cRecord, profile } = useApp();
   const { toast } = useToast();
 
@@ -38,7 +35,6 @@ export function AddRecordDialog({ onSuccess, onCancel }: AddRecordDialogProps) {
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setIsSubmitting(true);
     addHba1cRecord({
       date: startOfDay(data.date).toISOString(),
       value: data.value,
@@ -47,8 +43,7 @@ export function AddRecordDialog({ onSuccess, onCancel }: AddRecordDialogProps) {
       title: 'Success!',
       description: 'Your new HbA1c record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -58,7 +53,6 @@ export function AddRecordDialog({ onSuccess, onCancel }: AddRecordDialogProps) {
         description="Enter the details of your new lab result here."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.hba1cRecords}
       >
         <DateInput

@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,13 +19,11 @@ import { DateInput } from './date-input';
 
 
 interface AddLipidRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
 
-export function AddLipidRecordDialog({ onSuccess, onCancel }: AddLipidRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddLipidRecordDialog({ onCancel }: AddLipidRecordDialogProps) {
   const { addTotalCholesterolRecord, addLdlRecord, addHdlRecord, addTriglyceridesRecord, profile } = useApp();
   const { toast } = useToast();
 
@@ -41,7 +38,6 @@ export function AddLipidRecordDialog({ onSuccess, onCancel }: AddLipidRecordDial
   });
 
   const onSubmit = (data: any) => {
-    setIsSubmitting(true);
     const date = startOfDay(data.date).toISOString();
     
     if (data.totalCholesterol) addTotalCholesterolRecord({ date, value: Number(data.totalCholesterol) });
@@ -53,8 +49,7 @@ export function AddLipidRecordDialog({ onSuccess, onCancel }: AddLipidRecordDial
       title: 'Success!',
       description: 'Your new lipid panel record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
 
@@ -65,7 +60,6 @@ export function AddLipidRecordDialog({ onSuccess, onCancel }: AddLipidRecordDial
         description="Enter the details of your new lipid panel result here."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.totalCholesterolRecords} // Use one as a proxy
       >
         <DateInput

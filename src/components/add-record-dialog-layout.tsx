@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -8,6 +7,8 @@ import { startOfDay, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { FormActions } from './form-actions';
+import { Button } from './ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface AddRecordDialogLayoutProps {
   onCancel: () => void;
@@ -15,7 +16,6 @@ interface AddRecordDialogLayoutProps {
   description: string;
   form: UseFormReturn<any>;
   onSubmit: (data: any) => void;
-  isSubmitting: boolean;
   children: React.ReactNode;
   existingRecords?: { date: string | Date }[];
 }
@@ -26,13 +26,14 @@ export function AddRecordDialogLayout({
   description,
   form,
   onSubmit,
-  isSubmitting,
   children,
   existingRecords,
 }: AddRecordDialogLayoutProps) {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const handleFormSubmit = (data: any) => {
+  const handleFormSubmit = async (data: any) => {
+    setIsSubmitting(true);
     if (existingRecords && data.date) {
       const newDate = startOfDay(data.date);
       const dateExists = existingRecords.some((record) => {
@@ -46,10 +47,12 @@ export function AddRecordDialogLayout({
           title: 'Duplicate Entry',
           description: 'A record for this date already exists. Please choose a different date.',
         });
+        setIsSubmitting(false);
         return;
       }
     }
-    onSubmit(data);
+    await onSubmit(data);
+    setIsSubmitting(false);
   };
   
   return (
@@ -62,11 +65,15 @@ export function AddRecordDialogLayout({
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
                 {children}
-                <FormActions
-                    onCancel={onCancel}
-                    isSubmitting={isSubmitting}
-                    submitText="Save Record"
-                />
+                 <div className="flex justify-end gap-2 pt-4">
+                    <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
+                        Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save Record
+                    </Button>
+                </div>
                 </form>
             </Form>
         </CardContent>

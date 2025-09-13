@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,13 +19,11 @@ import { DateInput } from './date-input';
 
 
 interface AddThyroidRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
 
-export function AddThyroidRecordDialog({ onSuccess, onCancel }: AddThyroidRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddThyroidRecordDialog({ onCancel }: AddThyroidRecordDialogProps) {
   const { addThyroidRecord, profile } = useApp();
   const { toast } = useToast();
 
@@ -40,7 +37,6 @@ export function AddThyroidRecordDialog({ onSuccess, onCancel }: AddThyroidRecord
   });
 
   const onSubmit = (data: any) => {
-    setIsSubmitting(true);
     addThyroidRecord({
       date: startOfDay(data.date).toISOString(),
       tsh: Number(data.tsh),
@@ -51,8 +47,7 @@ export function AddThyroidRecordDialog({ onSuccess, onCancel }: AddThyroidRecord
       title: 'Success!',
       description: 'Your new thyroid record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -62,7 +57,6 @@ export function AddThyroidRecordDialog({ onSuccess, onCancel }: AddThyroidRecord
         description="Enter the details of your new thyroid panel result here."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.thyroidRecords}
       >
         <DateInput

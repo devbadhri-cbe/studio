@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,12 +19,10 @@ const FormSchema = z.object({
 });
 
 interface AddTotalCholesterolRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
-export function AddTotalCholesterolRecordDialog({ onSuccess, onCancel }: AddTotalCholesterolRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddTotalCholesterolRecordDialog({ onCancel }: AddTotalCholesterolRecordDialogProps) {
   const { addTotalCholesterolRecord, profile } = useApp();
   const { toast } = useToast();
 
@@ -38,7 +35,6 @@ export function AddTotalCholesterolRecordDialog({ onSuccess, onCancel }: AddTota
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setIsSubmitting(true);
     addTotalCholesterolRecord({
         date: startOfDay(data.date).toISOString(),
         value: data.value,
@@ -47,8 +43,7 @@ export function AddTotalCholesterolRecordDialog({ onSuccess, onCancel }: AddTota
         title: 'Success!',
         description: 'Your new Total Cholesterol record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -58,7 +53,6 @@ export function AddTotalCholesterolRecordDialog({ onSuccess, onCancel }: AddTota
         description="Enter your value and the date it was measured."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.totalCholesterolRecords}
       >
         <DateInput

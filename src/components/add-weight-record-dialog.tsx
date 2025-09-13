@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -21,12 +20,10 @@ const FormSchema = z.object({
 });
 
 interface AddWeightRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
-export function AddWeightRecordDialog({ onSuccess, onCancel }: AddWeightRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddWeightRecordDialog({ onCancel }: AddWeightRecordDialogProps) {
   const { addWeightRecord, profile } = useApp();
   const { toast } = useToast();
   const isImperial = profile?.unitSystem === 'imperial';
@@ -40,7 +37,6 @@ export function AddWeightRecordDialog({ onSuccess, onCancel }: AddWeightRecordDi
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setIsSubmitting(true);
     const dbValue = isImperial ? lbsToKg(data.value) : data.value;
     addWeightRecord({
         date: startOfDay(data.date).toISOString(),
@@ -50,8 +46,7 @@ export function AddWeightRecordDialog({ onSuccess, onCancel }: AddWeightRecordDi
         title: 'Success!',
         description: 'Your new weight record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -61,7 +56,6 @@ export function AddWeightRecordDialog({ onSuccess, onCancel }: AddWeightRecordDi
         description="Enter your weight and the date it was measured."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.weightRecords}
       >
         <DateInput

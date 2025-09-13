@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -14,12 +13,10 @@ import { DateInput } from './date-input';
 
 
 interface AddBloodPressureRecordDialogProps {
-    onSuccess?: () => void;
     onCancel: () => void;
 }
 
-export function AddBloodPressureRecordDialog({ onSuccess, onCancel }: AddBloodPressureRecordDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddBloodPressureRecordDialog({ onCancel }: AddBloodPressureRecordDialogProps) {
   const { addBloodPressureRecord, profile } = useApp();
   const { toast } = useToast();
 
@@ -33,7 +30,6 @@ export function AddBloodPressureRecordDialog({ onSuccess, onCancel }: AddBloodPr
   });
 
   const onSubmit = (data: any) => {
-    setIsSubmitting(true);
     addBloodPressureRecord({
       date: startOfDay(data.date).toISOString(),
       systolic: Number(data.systolic),
@@ -44,8 +40,7 @@ export function AddBloodPressureRecordDialog({ onSuccess, onCancel }: AddBloodPr
       title: 'Success!',
       description: 'Your new blood pressure record has been added.',
     });
-    setIsSubmitting(false);
-    onSuccess?.();
+    onCancel();
   };
 
   return (
@@ -55,7 +50,6 @@ export function AddBloodPressureRecordDialog({ onSuccess, onCancel }: AddBloodPr
         description="Enter your systolic, diastolic, and heart rate readings."
         form={form}
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
         existingRecords={profile?.bloodPressureRecords}
       >
         <DateInput
