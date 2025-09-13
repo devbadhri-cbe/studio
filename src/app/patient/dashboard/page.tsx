@@ -146,27 +146,29 @@ export default function PatientDashboard() {
                     </CollapsibleContent>
                 </Collapsible>
                 
-                <Collapsible open={isBiomarkersOpen} onOpenChange={(isOpen) => { setIsBiomarkersOpen(isOpen); if (!isOpen) setIsAddingBiomarker(false); }}>
-                    <DashboardSectionToggle
-                        title="All Biomarkers"
-                        subtitle="View and manage individual biomarker cards"
-                        icon={<Droplet className="h-6 w-6 text-primary" />}
-                        isOpen={isBiomarkersOpen}
-                        searchQuery={biomarkerSearchQuery}
-                        onSearchChange={setBiomarkerSearchQuery}
-                        searchPlaceholder="Search biomarkers..."
-                        isCollapsible={true}
-                        showCreateButton={isDeveloper}
-                        onCreateClick={() => setIsAddingBiomarker(!isAddingBiomarker)}
-                    />
-                     <CollapsibleContent>
-                        {isAddingBiomarker ? (
-                            <AddNewBiomarker onCancel={() => setIsAddingBiomarker(false)} />
-                        ) : (
-                            <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
-                        )}
-                     </CollapsibleContent>
-                </Collapsible>
+                {isDeveloper && (
+                    <Collapsible open={isBiomarkersOpen} onOpenChange={(isOpen) => { setIsBiomarkersOpen(isOpen); if (!isOpen) setIsAddingBiomarker(false); }}>
+                        <DashboardSectionToggle
+                            title="All Biomarkers"
+                            subtitle="View and manage individual biomarker cards"
+                            icon={<Droplet className="h-6 w-6 text-primary" />}
+                            isOpen={isBiomarkersOpen}
+                            searchQuery={biomarkerSearchQuery}
+                            onSearchChange={setBiomarkerSearchQuery}
+                            searchPlaceholder="Search biomarkers..."
+                            isCollapsible={true}
+                            showCreateButton={isDeveloper}
+                            onCreateClick={() => setIsAddingBiomarker(!isAddingBiomarker)}
+                        />
+                        <CollapsibleContent>
+                            {isAddingBiomarker ? (
+                                <AddNewBiomarker onCancel={() => setIsAddingBiomarker(false)} />
+                            ) : (
+                                <BiomarkersPanel searchQuery={biomarkerSearchQuery} />
+                            )}
+                        </CollapsibleContent>
+                    </Collapsible>
+                )}
             </div>
           </div>
         </main>
