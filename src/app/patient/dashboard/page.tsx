@@ -36,6 +36,8 @@ export default function PatientDashboard() {
   const [panelSearchQuery, setPanelSearchQuery] = React.useState('');
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
 
+  // This check ensures the button is only visible in a non-production, non-read-only context.
+  const isDeveloper = process.env.NODE_ENV === 'development' && !isReadOnlyView;
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -154,7 +156,7 @@ export default function PatientDashboard() {
                         onSearchChange={setBiomarkerSearchQuery}
                         searchPlaceholder="Search biomarkers..."
                         isCollapsible={true}
-                        showCreateButton={true}
+                        showCreateButton={isDeveloper}
                         onCreateClick={() => setIsAddingBiomarker(!isAddingBiomarker)}
                     />
                      <CollapsibleContent>
