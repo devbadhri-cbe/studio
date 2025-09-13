@@ -9,13 +9,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 interface TitleBarProps {
     title: string[];
     subtitle?: string | React.ReactNode;
-    onSubtitleClick?: () => void;
     children?: React.ReactNode;
     rightChildren?: React.ReactNode;
     isScrolled: boolean;
 }
 
-export function TitleBar({ title, subtitle, onSubtitleClick, children, rightChildren, isScrolled }: TitleBarProps) {
+export function TitleBar({ title, subtitle, children, rightChildren, isScrolled }: TitleBarProps) {
     
     const renderTitle = () => {
         return title.map((word, index) => {

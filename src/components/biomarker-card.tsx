@@ -54,7 +54,6 @@ interface BiomarkerCardProps<T extends Record> {
   unitSwitch?: UnitSwitchProps;
   isReadOnly?: boolean;
   editMenuItems?: React.ReactNode;
-  className?: string;
 }
 
 export function BiomarkerCard<T extends Record>({
@@ -69,7 +68,6 @@ export function BiomarkerCard<T extends Record>({
   unitSwitch,
   isReadOnly = false,
   editMenuItems,
-  className,
 }: BiomarkerCardProps<T>) {
   const [isEditMode, setIsEditMode] = React.useState(false);
   const [isAdding, setIsAdding] = React.useState(false);
@@ -175,7 +173,6 @@ export function BiomarkerCard<T extends Record>({
       title={title}
       icon={icon}
       actions={Actions}
-      className={className}
       contentClassName="p-0"
     >
        {hasRecords ? (

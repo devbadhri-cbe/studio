@@ -1,7 +1,7 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, Camera, FileUp, UserCheck, AlertTriangle, Pill, FileText } from 'lucide-react';
+import { Loader2, UploadCloud, Camera, FileUp, AlertTriangle, Pill, FileText } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
@@ -17,7 +17,7 @@ import type { Medication, FoodInstruction } from '@/lib/types';
 import type { MedicationInfoOutput } from '@/lib/ai-types';
 
 
-type Step = 'initial' | 'upload' | 'loading' | 'confirmName' | 'reviewLab' | 'reviewMedication' | 'error';
+type Step = 'initial' | 'upload' | 'loading' | 'reviewLab' | 'reviewMedication' | 'error';
 type UploadType = 'lab' | 'medication';
 
 export function UploadRecordDialog() {
@@ -105,7 +105,7 @@ export function UploadRecordDialog() {
           return;
         }
         setExtractedData(result);
-        setStep('confirmName');
+        setStep('reviewLab');
       } else {
         setStep('error');
         setErrorMessage('Could not extract any recognizable lab data from the document. Please try a clearer image.');
@@ -267,42 +267,6 @@ export function UploadRecordDialog() {
         );
       case 'loading':
         return <div className="flex justify-center items-center h-40"><Loader2 className="h-12 w-12 animate-spin text-primary" /><p className="ml-4">AI is analyzing...</p></div>;
-      case 'confirmName':
-        const nameOnReport = extractedData?.patientName || "Not Found";
-        const nameOnProfile = profile.name;
-        const namesMatch = nameOnReport.toLowerCase() === nameOnProfile.toLowerCase();
-
-        return (
-            <div className="space-y-4 text-center">
-                <UserCheck className="mx-auto h-12 w-12 text-primary" />
-                <h3 className="text-lg font-semibold">Confirm Patient Name</h3>
-                <p className="text-sm text-muted-foreground">
-                    Please confirm the name on the lab report matches the patient profile.
-                </p>
-                <div className="space-y-2 rounded-lg border p-4">
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Name on Report:</span>
-                        <span className="font-semibold">{nameOnReport}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Patient Profile:</span>
-                        <span className="font-semibold">{nameOnProfile}</span>
-                    </div>
-                </div>
-                {!namesMatch && (
-                     <Alert variant="destructive">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertDescription>
-                            Warning: The names do not match. Proceeding will add these records to <strong>{nameOnProfile}</strong>'s profile.
-                        </AlertDescription>
-                    </Alert>
-                )}
-                <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="ghost" onClick={resetState}>Cancel</Button>
-                    <Button onClick={() => setStep('reviewLab')}>Confirm & Proceed</Button>
-                </div>
-            </div>
-        );
       case 'reviewLab':
         return extractedData ? (
           <ExtractedRecordReview

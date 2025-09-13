@@ -14,21 +14,10 @@ import { WeightRecordCard } from '@/components/weight-record-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
 import { PatientLoginPage } from '@/components/patient-login-page';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useRouter } from 'next/navigation';
 import { PatientHeader } from '@/components/patient-header';
 
 export default function PatientDashboard() {
   const { isClient, patient } = useApp();
-  const [isScrolled, setIsScrolled] = React.useState(false);
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      const offset = window.scrollY;
-      setIsScrolled(offset > 20);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   if (!isClient) {
     return (
@@ -65,7 +54,6 @@ export default function PatientDashboard() {
         <TitleBar
           title={['Health', 'Guardian', 'Lite']}
           subtitle={developerCredit}
-          isScrolled={isScrolled}
         />
         <main className="flex-1 p-4 md:p-6 pb-4">
           <div className="mx-auto grid w-full max-w-7xl gap-6">
