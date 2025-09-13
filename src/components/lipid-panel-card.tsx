@@ -77,10 +77,10 @@ export function LipidPanelCard() {
             >
                 <CollapsibleContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transition-all">
-                        {isEnabled('total') && <TotalCholesterolCard isReadOnly />}
-                        {isEnabled('ldl') && <LdlCard isReadOnly />}
-                        {isEnabled('hdl') && <HdlCard isReadOnly />}
-                        {isEnabled('triglycerides') && <TriglyceridesCard isReadOnly />}
+                        {isEnabled('total') && <TotalCholesterolCard isReadOnly={true} />}
+                        {isEnabled('ldl') && <LdlCard isReadOnly={true} />}
+                        {isEnabled('hdl') && <HdlCard isReadOnly={true} />}
+                        {isEnabled('triglycerides') && <TriglyceridesCard isReadOnly={true} />}
                     </div>
                 </CollapsibleContent>
             </UniversalCard>
