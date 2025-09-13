@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
 import { AddRecordDialogLayout } from './add-record-dialog-layout';
+import { DateInput } from './date-input';
 
 
 interface AddBloodPressureRecordDialogProps {
@@ -75,21 +76,9 @@ export function AddBloodPressureRecordDialog({ children, onSuccess }: AddBloodPr
         isSubmitting={isSubmitting}
         existingRecords={profile?.bloodPressureRecords}
       >
-        <FormField
-            control={form.control}
+        <DateInput
             name="date"
-            render={({ field }) => (
-                <FormItem className="flex flex-col">
-                <FormLabel>Test Date</FormLabel>
-                <FormControl>
-                    <DatePicker
-                    value={field.value}
-                    onChange={field.onChange}
-                    />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
+            label="Test Date"
         />
         <div className="grid grid-cols-2 gap-4">
             <FormField

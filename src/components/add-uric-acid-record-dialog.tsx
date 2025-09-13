@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
 import { AddRecordDialogLayout } from './add-record-dialog-layout';
+import { DateInput } from './date-input';
 
 const FormSchema = z.object({
   date: z.date({ required_error: 'A valid date is required.' }),
@@ -78,23 +79,11 @@ export function AddUricAcidRecordDialog({ children, onSuccess }: AddUricAcidReco
         isSubmitting={isSubmitting}
         existingRecords={profile?.uricAcidRecords}
       >
-        <FormField
-            control={form.control}
+        <DateInput
             name="date"
-            render={({ field }) => (
-                <FormItem className="flex flex-col">
-                <FormLabel>Date</FormLabel>
-                <FormControl>
-                    <DatePicker
-                    value={field.value}
-                    onChange={field.onChange}
-                    fromYear={new Date().getFullYear() - 10}
-                    toYear={new Date().getFullYear()}
-                    />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
+            label="Date"
+            fromYear={new Date().getFullYear() - 10}
+            toYear={new Date().getFullYear()}
         />
         <FormField
             control={form.control}

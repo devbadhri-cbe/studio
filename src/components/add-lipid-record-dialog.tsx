@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AddRecordButton } from './add-record-button';
 import { DatePicker } from './ui/date-picker';
 import { AddRecordDialogLayout } from './add-record-dialog-layout';
+import { DateInput } from './date-input';
 
 
 interface AddLipidRecordDialogProps {
@@ -86,21 +87,9 @@ export function AddLipidRecordDialog({ children, onSuccess }: AddLipidRecordDial
         isSubmitting={isSubmitting}
         existingRecords={profile?.totalCholesterolRecords} // Use one as a proxy
       >
-        <FormField
-            control={form.control}
+        <DateInput
             name="date"
-            render={({ field }) => (
-                <FormItem className="flex flex-col">
-                <FormLabel>Test Date</FormLabel>
-                <FormControl>
-                    <DatePicker
-                    value={field.value}
-                    onChange={field.onChange}
-                    />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
+            label="Test Date"
         />
         <div className="grid grid-cols-2 gap-4">
             <FormField
