@@ -68,8 +68,7 @@ export function UploadRecordDialog() {
       const result = await extractLabData({ photoDataUri: dataUri });
       
       const isMedication = result.medicationName && result.dosage;
-      const isLabReport = Object.keys(result).some(key => !['patientName', 'medicationName', 'dosage', 'activeIngredient'].includes(key) && result[key as keyof Omit<BatchRecords, 'patientName'>] !== null && result[key as keyof Omit<BatchRecords, 'patientName'>] !== undefined);
-
+      
       if (isMedication) {
         const userInput = `${result.medicationName} ${result.dosage}`;
         setMedicationUserInput({ userInput, frequency: '' });
@@ -81,8 +80,12 @@ export function UploadRecordDialog() {
         });
         setMedicationAiResult(medInfo);
         setStep('reviewMedication');
+        return; // Exit here to prevent falling through to lab report logic
+      }
+      
+      const isLabReport = Object.keys(result).some(key => !['patientName', 'medicationName', 'dosage', 'activeIngredient'].includes(key) && result[key as keyof Omit<BatchRecords, 'patientName'>] !== null && result[key as keyof Omit<BatchRecords, 'patientName'>] !== undefined);
 
-      } else if (isLabReport) {
+      if (isLabReport) {
         const reportDate = result.hba1c?.date || result.fastingBloodGlucose?.date || result.thyroid?.date;
         if (!reportDate || !isValid(parseISO(reportDate))) {
           setStep('error');
@@ -329,5 +332,3 @@ export function UploadRecordDialog() {
     </Dialog>
   );
 }
-
-    
