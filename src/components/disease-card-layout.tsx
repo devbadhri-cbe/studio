@@ -55,9 +55,9 @@ export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardL
   );
 
   return (
-    <AccordionItem value={value}>
+    <AccordionItem value={value} className="border-red-500 border-2">
         <AccordionTrigger>
-             <div className="flex items-center gap-3 text-left w-full cursor-pointer p-6">
+             <div className="flex items-center gap-3 text-left w-full cursor-pointer p-6 border-blue-500 border-2">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                     {icon}
                 </div>
@@ -67,10 +67,10 @@ export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardL
             </div>
         </AccordionTrigger>
         <AccordionContent>
-            <div className="p-6 pt-0">
+            <div className="p-6 pt-0 border-green-500 border-2">
                  <Separator className="mb-6" />
                 {hasMultipleBiomarkers ? (
-                    <Carousel setApi={setApi}>
+                    <Carousel setApi={setApi} className="border-yellow-500 border-2">
                         <CarouselContent>
                             {childrenArray.map((child, index) => (
                                 <CarouselItem key={index}>{child}</CarouselItem>
