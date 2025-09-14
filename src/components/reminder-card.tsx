@@ -4,26 +4,127 @@
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears } from 'date-fns';
-import { Bell, CheckCircle2, Heart, Activity, Zap, Flame } from 'lucide-react';
-import { calculateAge } from '@/lib/utils';
+import { Bell, CheckCircle2, Heart, Activity, Zap, Flame, Weight } from 'lucide-react';
+import { calculateAge, getBmiStatus } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { UniversalCard } from './universal-card';
 import type { ReactNode } from 'react';
 
 export function ReminderCard() {
-  const { fastingBloodGlucoseRecords, bloodPressureRecords, totalCholesterolRecords, thyroidRecords, profile } = useApp();
+  const { patient } = useApp();
 
   if (!profile) return null;
 
-  const { presentMedicalConditions, dob, diseasePanels } = profile;
+  const { presentMedicalConditions, dob, diseasePanels, weightRecords, bmi, bloodPressureRecords, fastingBloodGlucoseRecords, totalCholesterolRecords, thyroidRecords } = patient;
   const hasMedicalConditions = presentMedicalConditions && presentMedicalConditions.length > 0;
   const age = calculateAge(dob);
   
   const reminders: ReactNode[] = [];
 
+  // == Default Reminders ==
+
+  // Weight & BMI Reminder (Always On)
+  const sortedWeightRecords = [...(weightRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const lastWeightRecord = sortedWeightRecords[0];
+  let weightContent;
+
+  if (!lastWeightRecord) {
+      weightContent = {
+          icon: <Weight className="h-5 w-5 text-yellow-500" />,
+          title: 'Track Your Weight & BMI',
+          description: 'Add your first weight record to calculate your BMI.',
+          color: 'bg-yellow-500/10',
+      };
+  } else {
+      const bmiStatus = getBmiStatus(bmi);
+      const monthsSinceLastCheck = differenceInMonths(new Date(), new Date(lastWeightRecord.date));
+      if (monthsSinceLastCheck >= 6) {
+          weightContent = {
+              icon: <Weight className="h-5 w-5 text-yellow-500" />,
+              title: 'Time for a Weight Check-in',
+              description: `Last record was ${formatDistanceToNow(new Date(lastWeightRecord.date), { addSuffix: true })}. Regular checks are helpful.`,
+              color: 'bg-yellow-500/10',
+          };
+      } else {
+          weightContent = {
+              icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+              title: `BMI is ${bmi?.toFixed(1) || 'N/A'} (${bmiStatus?.text || 'Unknown'})`,
+              description: `Weight tracking is up to date.`,
+              color: 'bg-green-500/10',
+          };
+      }
+  }
+   reminders.push(
+      <div key="weight" className="flex items-center gap-4">
+        <div className={`flex h-8 w-8 items-center justify-center rounded-full ${weightContent.color}`}>
+            {weightContent.icon}
+        </div>
+        <div>
+            <p className="font-semibold">{weightContent.title}</p>
+            <p className="text-sm text-muted-foreground">{weightContent.description}</p>
+        </div>
+      </div>
+    );
+
+  // Blood Pressure Reminder (Always On)
+  const sortedBloodPressureRecords = [...(bloodPressureRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const lastBloodPressureRecord = sortedBloodPressureRecords[0];
+  let bloodPressureContent;
+
+  if (!lastBloodPressureRecord) {
+      bloodPressureContent = {
+          icon: <Zap className="h-5 w-5 text-yellow-500" />,
+          title: 'Time for your first BP check!',
+          description: 'Add a record to start tracking.',
+          color: 'bg-yellow-500/10',
+      };
+  } else {
+    const { systolic, diastolic, date } = lastBloodPressureRecord;
+    const lastTestDate = new Date(date);
+    
+    if (systolic >= 130 || diastolic >= 80) {
+      bloodPressureContent = {
+        icon: <Zap className="h-5 w-5 text-destructive" />,
+        title: 'Follow Up on Blood Pressure',
+        description: 'Your last reading was elevated. Please consult your doctor.',
+        color: 'bg-destructive/10',
+      };
+    } else {
+      const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
+      if (yearsSinceLastTest >= 1) {
+          bloodPressureContent = {
+              icon: <Zap className="h-5 w-5 text-yellow-500" />,
+              title: 'Annual BP Check Due',
+              description: `Last check was over a year ago. Time for your annual check-up.`,
+              color: 'bg-yellow-500/10',
+          };
+      } else {
+          bloodPressureContent = {
+              icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+              title: 'Blood Pressure On Track',
+              description: `Your next annual check is around ${format(addYears(lastTestDate, 1), 'MMM yyyy')}.`,
+              color: 'bg-green-500/10',
+          };
+      }
+    }
+  }
+   reminders.push(
+    <div key="bp" className="flex items-center gap-4">
+      <div className={`flex h-8 w-8 items-center justify-center rounded-full ${bloodPressureContent.color}`}>
+          {bloodPressureContent.icon}
+      </div>
+      <div>
+          <p className="font-semibold">{bloodPressureContent.title}</p>
+          <p className="text-sm text-muted-foreground">{bloodPressureContent.description}</p>
+      </div>
+    </div>
+  );
+
+  // == Dynamic Reminders ==
+
   // Diabetes (Fasting Glucose) Reminder
-  const isGlucoseEnabled = diseasePanels?.diabetes?.glucose;
-  if (isGlucoseEnabled) {
+  const isDiabetesPanelEnabled = diseasePanels?.diabetes?.glucose || diseasePanels?.diabetes?.hba1c;
+  if (isDiabetesPanelEnabled) {
     const sortedFastingBloodGlucoseRecords = [...(fastingBloodGlucoseRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const lastFastingBloodGlucoseRecord = sortedFastingBloodGlucoseRecords[0];
     let fastingBloodGlucoseContent;
@@ -71,63 +172,6 @@ export function ReminderCard() {
         <div>
             <p className="font-semibold">{fastingBloodGlucoseContent.title}</p>
             <p className="text-sm text-muted-foreground">{fastingBloodGlucoseContent.description}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Blood Pressure Reminder
-  const isBloodPressureEnabled = diseasePanels?.hypertension?.bloodPressure;
-  if (isBloodPressureEnabled) {
-    const sortedBloodPressureRecords = [...(bloodPressureRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const lastBloodPressureRecord = sortedBloodPressureRecords[0];
-    let bloodPressureContent;
-
-    if (!lastBloodPressureRecord) {
-        bloodPressureContent = {
-            icon: <Zap className="h-5 w-5 text-yellow-500" />,
-            title: 'Time for your first BP check!',
-            description: 'Add a record to start tracking.',
-            color: 'bg-yellow-500/10',
-        };
-    } else {
-      const { systolic, diastolic, date } = lastBloodPressureRecord;
-      const lastTestDate = new Date(date);
-      
-      if (systolic >= 130 || diastolic >= 80) {
-        bloodPressureContent = {
-          icon: <Zap className="h-5 w-5 text-destructive" />,
-          title: 'Follow Up on Blood Pressure',
-          description: 'Your last reading was elevated. Please consult your doctor.',
-          color: 'bg-destructive/10',
-        };
-      } else {
-        const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
-        if (yearsSinceLastTest >= 1) {
-            bloodPressureContent = {
-                icon: <Zap className="h-5 w-5 text-yellow-500" />,
-                title: 'Annual BP Check Due',
-                description: `Last check was over a year ago. Time for your annual check-up.`,
-                color: 'bg-yellow-500/10',
-            };
-        } else {
-            bloodPressureContent = {
-                icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
-                title: 'Blood Pressure On Track',
-                description: `Your next annual check is around ${format(addYears(lastTestDate, 1), 'MMM yyyy')}.`,
-                color: 'bg-green-500/10',
-            };
-        }
-      }
-    }
-     reminders.push(
-      <div key="bp" className="flex items-center gap-4">
-        <div className={`flex h-8 w-8 items-center justify-center rounded-full ${bloodPressureContent.color}`}>
-            {bloodPressureContent.icon}
-        </div>
-        <div>
-            <p className="font-semibold">{bloodPressureContent.title}</p>
-            <p className="text-sm text-muted-foreground">{bloodPressureContent.description}</p>
         </div>
       </div>
     );
