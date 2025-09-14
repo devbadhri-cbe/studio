@@ -17,11 +17,15 @@ import { AnemiaCard } from '@/components/anemia-card';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { AiInsightCard } from '@/components/ai-insight-card';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+import { ActionIcon } from '@/components/ui/action-icon';
 
 
 export default function PatientDashboardPage() {
-  const { isClient, patient } = useApp();
+  const { isClient, patient, setPatientData, setPatient } = useApp();
   const isMobile = useIsMobile();
+  const router = useRouter();
 
   if (!isClient) {
     return (
@@ -36,6 +40,11 @@ export default function PatientDashboardPage() {
   // If no patient data is found, show the login/creation page.
   if (!patient) {
     return <PatientLoginPage />;
+  }
+  
+  const handleBack = () => {
+    setPatient(null); 
+    router.push('/dashboard');
   }
 
   const developerCredit = (
@@ -57,6 +66,13 @@ export default function PatientDashboardPage() {
         <TitleBar
           title={['Health', 'Guardian', 'Lite']}
           subtitle={developerCredit}
+          backButton={
+            <ActionIcon
+                tooltip="Back to Developer Dashboard"
+                icon={<ArrowLeft />}
+                onClick={handleBack}
+            />
+          }
         />
         <main className="flex-1 p-4 md:p-6 pb-4">
           <div className="mx-auto grid w-full max-w-xl gap-6">

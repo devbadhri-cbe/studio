@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Logo } from '@/components/logo';
@@ -12,9 +11,10 @@ interface TitleBarProps {
     subtitle?: string | React.ReactNode;
     children?: React.ReactNode;
     rightChildren?: React.ReactNode;
+    backButton?: React.ReactNode;
 }
 
-export function TitleBar({ title, subtitle, children, rightChildren }: TitleBarProps) {
+export function TitleBar({ title, subtitle, children, rightChildren, backButton }: TitleBarProps) {
     const [isScrolled, setIsScrolled] = React.useState(false);
 
     React.useEffect(() => {
@@ -64,7 +64,7 @@ export function TitleBar({ title, subtitle, children, rightChildren }: TitleBarP
         )}>
             <div className="mx-auto w-full max-w-7xl flex items-center justify-between">
                  <div className="flex justify-start items-center gap-2 w-24">
-                    {children}
+                    {backButton || children}
                 </div>
                 <div className="flex-1 flex justify-center min-w-0">
                     <div className="flex flex-col items-center">
