@@ -173,6 +173,9 @@ export interface Patient {
   lastBloodPressure?: { systolic: number; diastolic: number; date: string } | null;
   
   // AI and UI settings
+  aiInsightText?: string;
+  aiInsightTimestamp?: string;
+  lastInsightTimestamp?: string;
   dashboardSuggestions?: string[];
   dashboardSuggestionsTimestamp?: string;
   diseasePanels?: DiseasePanelState;

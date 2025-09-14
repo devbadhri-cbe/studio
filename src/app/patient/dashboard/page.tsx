@@ -16,6 +16,7 @@ import { LipidPanelCard } from '@/components/lipid-panel-card';
 import { AnemiaCard } from '@/components/anemia-card';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { MedicalHistoryCard } from '@/components/medical-history-card';
+import { AiInsightCard } from '@/components/ai-insight-card';
 
 
 export default function PatientDashboardPage() {
@@ -61,6 +62,7 @@ export default function PatientDashboardPage() {
           <div className="mx-auto grid w-full max-w-xl gap-6">
             <PatientHeader />
             <ProfileCard />
+            <AiInsightCard />
             <MedicalHistoryCard />
             <WeightRecordCard />
             <BloodPressureCard />
