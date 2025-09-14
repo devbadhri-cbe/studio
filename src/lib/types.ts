@@ -50,25 +50,10 @@ export interface BloodPressureRecord {
     heartRate?: number;
 }
 
-export interface ThyroidRecord {
-    id: string;
-    date: string;
-    tsh: number;
-    t3: number;
-    t4: number;
-}
-
 export interface HemoglobinRecord {
     id: string;
     date: string;
     hemoglobin: number;
-}
-
-
-export interface ThyroxineRecord {
-    id: string;
-    date: string;
-    value: number;
 }
 
 export interface SerumCreatinineRecord {
@@ -109,8 +94,6 @@ export type BiomarkerKey =
   | 'glucose'
   | 'hemoglobin'
   | 'bloodPressure'
-  | 'thyroid'
-  | 'thyroxine'
   | 'weight'
   | 'totalCholesterol'
   | 'ldl'
@@ -133,10 +116,6 @@ export interface DiseasePanelState {
         ldl: boolean;
         hdl: boolean;
         triglycerides: boolean;
-    };
-    thyroid: {
-        tsh: boolean;
-        t4: boolean;
     };
 }
   
@@ -162,8 +141,6 @@ export interface Patient {
   fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
   weightRecords: WeightRecord[];
   bloodPressureRecords: BloodPressureRecord[];
-  thyroidRecords: ThyroidRecord[];
-  thyroxineRecords: ThyroxineRecord[];
   serumCreatinineRecords: SerumCreatinineRecord[];
   uricAcidRecords: UricAcidRecord[];
   hemoglobinRecords: HemoglobinRecord[];

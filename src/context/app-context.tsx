@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { createContext } from 'react';
-import { type Patient, type Hba1cRecord, type WeightRecord, type FastingBloodGlucoseRecord, type BloodPressureRecord, type ThyroidRecord, type MedicalCondition, type Medication, type ThyroxineRecord, type SerumCreatinineRecord, type UricAcidRecord, TotalCholesterolRecord, LdlRecord, HdlRecord, TriglyceridesRecord, DiseasePanelState, HemoglobinRecord } from '@/lib/types';
+import { type Patient, type Hba1cRecord, type WeightRecord, type FastingBloodGlucoseRecord, type BloodPressureRecord, type MedicalCondition, type Medication, type SerumCreatinineRecord, type UricAcidRecord, TotalCholesterolRecord, LdlRecord, HdlRecord, TriglyceridesRecord, DiseasePanelState, HemoglobinRecord } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 import { produce } from 'immer';
 import { calculateBmi } from '@/lib/utils';
@@ -19,7 +19,6 @@ export type BatchRecords = {
     fastingBloodGlucose?: { date: string; value: number };
     bloodPressure?: { date: string; systolic: number; diastolic: number; heartRate?: number };
     hemoglobin?: { date: string; hemoglobin: number };
-    thyroid?: { date: string; tsh?: number; t3?: number; t4?: number };
     lipidPanel?: { date: string; totalCholesterol?: number; ldl?: number; hdl?: number; triglycerides?: number };
 };
 
@@ -40,10 +39,8 @@ interface AppContextType {
   addWeightRecord: (record: Omit<WeightRecord, 'id'>) => string;
   addFastingBloodGlucoseRecord: (record: Omit<FastingBloodGlucoseRecord, 'id'>) => string;
   addBloodPressureRecord: (record: Omit<BloodPressureRecord, 'id'>) => string;
-  addThyroidRecord: (record: Omit<ThyroidRecord, 'id'>) => string;
   addMedicalCondition: (condition: Omit<MedicalCondition, 'id'>) => string;
   addMedication: (medication: Omit<Medication, 'id'>) => string;
-  addThyroxineRecord: (record: Omit<ThyroxineRecord, 'id'>) => string;
   addSerumCreatinineRecord: (record: Omit<SerumCreatinineRecord, 'id'>) => string;
   addUricAcidRecord: (record: Omit<UricAcidRecord, 'id'>) => string;
   addHemoglobinRecord: (record: Omit<HemoglobinRecord, 'id'>) => string;
@@ -56,10 +53,8 @@ interface AppContextType {
   removeWeightRecord: (id: string) => void;
   removeFastingBloodGlucoseRecord: (id: string) => void;
   removeBloodPressureRecord: (id: string) => void;
-  removeThyroidRecord: (id: string) => void;
   removeMedication: (id: string) => void;
   removeMedicalCondition: (id: string) => void;
-  removeThyroxineRecord: (id: string) => void;
   removeSerumCreatinineRecord: (id: string) => void;
   removeUricAcidRecord: (id: string) => void;
   removeHemoglobinRecord: (id: string) => void;
@@ -83,8 +78,6 @@ interface AppContextType {
   weightRecords: WeightRecord[];
   fastingBloodGlucoseRecords: FastingBloodGlucoseRecord[];
   bloodPressureRecords: BloodPressureRecord[];
-  thyroidRecords: ThyroidRecord[];
-  thyroxineRecords: ThyroxineRecord[];
   serumCreatinineRecords: SerumCreatinineRecord[];
   uricAcidRecords: UricAcidRecord[];
   hemoglobinRecords: HemoglobinRecord[];
@@ -119,10 +112,6 @@ const defaultDiseasePanelState: DiseasePanelState = {
         hdl: true,
         triglycerides: true,
     },
-    thyroid: {
-        tsh: true,
-        t4: true,
-    }
 }
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -239,10 +228,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addWeightRecord = createRecordAdder<WeightRecord>('weightRecords');
   const addFastingBloodGlucoseRecord = createRecordAdder<FastingBloodGlucoseRecord>('fastingBloodGlucoseRecords');
   const addBloodPressureRecord = createRecordAdder<BloodPressureRecord>('bloodPressureRecords');
-  const addThyroidRecord = createRecordAdder<ThyroidRecord>('thyroidRecords');
   const addMedicalCondition = createRecordAdder<MedicalCondition>('presentMedicalConditions');
   const addMedication = createRecordAdder<Medication>('medication');
-  const addThyroxineRecord = createRecordAdder<ThyroxineRecord>('thyroxineRecords');
   const addSerumCreatinineRecord = createRecordAdder<SerumCreatinineRecord>('serumCreatinineRecords');
   const addUricAcidRecord = createRecordAdder<UricAcidRecord>('uricAcidRecords');
   const addHemoglobinRecord = createRecordAdder<HemoglobinRecord>('hemoglobinRecords');
@@ -255,10 +242,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const removeWeightRecord = createRecordRemover('weightRecords');
   const removeFastingBloodGlucoseRecord = createRecordRemover('fastingBloodGlucoseRecords');
   const removeBloodPressureRecord = createRecordRemover('bloodPressureRecords');
-  const removeThyroidRecord = createRecordRemover('thyroidRecords');
   const removeMedication = createRecordRemover('medication');
   const removeMedicalCondition = createRecordRemover('presentMedicalConditions');
-  const removeThyroxineRecord = createRecordRemover('thyroxineRecords');
   const removeSerumCreatinineRecord = createRecordRemover('serumCreatinineRecords');
   const removeUricAcidRecord = createRecordRemover('uricAcidRecords');
   const removeHemoglobinRecord = createRecordRemover('hemoglobinRecords');
@@ -397,10 +382,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addWeightRecord,
     addFastingBloodGlucoseRecord,
     addBloodPressureRecord,
-    addThyroidRecord,
     addMedicalCondition,
     addMedication,
-    addThyroxineRecord,
     addSerumCreatinineRecord,
     addUricAcidRecord,
     addHemoglobinRecord,
@@ -412,10 +395,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     removeWeightRecord,
     removeFastingBloodGlucoseRecord,
     removeBloodPressureRecord,
-    removeThyroidRecord,
     removeMedication,
     removeMedicalCondition,
-    removeThyroxineRecord,
     removeSerumCreatinineRecord,
     removeUricAcidRecord,
     removeHemoglobinRecord,
@@ -435,8 +416,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     weightRecords: patient?.weightRecords || [],
     fastingBloodGlucoseRecords: patient?.fastingBloodGlucoseRecords || [],
     bloodPressureRecords: patient?.bloodPressureRecords || [],
-    thyroidRecords: patient?.thyroidRecords || [],
-    thyroxineRecords: patient?.thyroxineRecords || [],
     serumCreatinineRecords: patient?.serumCreatinineRecords || [],
     uricAcidRecords: patient?.uricAcidRecords || [],
     hemoglobinRecords: patient?.hemoglobinRecords || [],

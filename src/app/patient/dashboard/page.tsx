@@ -20,7 +20,6 @@ import { AiInsightCard } from '@/components/ai-insight-card';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { ActionIcon } from '@/components/ui/action-icon';
-import { ThyroidPanelCard } from '@/components/thyroid-panel-card';
 
 
 export default function PatientDashboardPage() {
@@ -89,7 +88,6 @@ export default function PatientDashboardPage() {
             <AnemiaCard />
             <DiabetesCard />
             <LipidPanelCard />
-            <ThyroidPanelCard />
             <ReminderCard />
           </div>
         </main>

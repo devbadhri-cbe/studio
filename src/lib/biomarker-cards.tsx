@@ -4,15 +4,11 @@ import { Hba1cCard } from '@/components/hba1c-card';
 import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
 import { HemoglobinCard } from '@/components/hemoglobin-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
-import { ThyroidCard } from '@/components/thyroid-card';
-import { ThyroxineCard } from '@/components/thyroxine-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { AddRecordDialog } from '@/components/add-record-dialog';
 import { AddFastingBloodGlucoseRecordDialog } from '@/components/add-fasting-blood-glucose-record-dialog';
 import { AddHemoglobinRecordDialog } from '@/components/add-hemoglobin-record-dialog';
 import { AddBloodPressureRecordDialog } from '@/components/add-blood-pressure-record-dialog';
-import { AddThyroidRecordDialog } from '@/components/add-thyroid-record-dialog';
-import { AddThyroxineRecordDialog } from '@/components/add-thyroxine-record-dialog';
 import { AddWeightRecordDialog } from '@/components/add-weight-record-dialog';
 import { TotalCholesterolCard } from '@/components/total-cholesterol-card';
 import { AddTotalCholesterolRecordDialog } from '@/components/add-total-cholesterol-record-dialog';
@@ -53,18 +49,6 @@ export const availableBiomarkerCards = {
     component: <BloodPressureCard key="bloodPressure" isReadOnly />,
     addRecordLabel: 'New Blood Pressure Record',
     addRecordDialog: <AddBloodPressureRecordDialog />,
-  },
-  thyroid: {
-    label: 'Thyroid',
-    component: <ThyroidCard />,
-    addRecordLabel: 'New Thyroid Record',
-    addRecordDialog: <AddThyroidRecordDialog />,
-  },
-  thyroxine: {
-    label: 'Thyroxine (T4)',
-    component: <ThyroxineCard />,
-    addRecordLabel: 'New Thyroxine (T4) Record',
-    addRecordDialog: <AddThyroxineRecordDialog />,
   },
   weight: {
     label: 'Weight & BMI',

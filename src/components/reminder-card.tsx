@@ -15,7 +15,7 @@ export function ReminderCard() {
 
   if (!patient) return null;
 
-  const { presentMedicalConditions, dob, diseasePanels, weightRecords, bmi, bloodPressureRecords, fastingBloodGlucoseRecords, totalCholesterolRecords, thyroidRecords } = patient;
+  const { presentMedicalConditions, dob, diseasePanels, weightRecords, bmi, bloodPressureRecords, fastingBloodGlucoseRecords, totalCholesterolRecords } = patient;
   const hasMedicalConditions = presentMedicalConditions && presentMedicalConditions.length > 0;
   const age = calculateAge(dob);
   
@@ -221,56 +221,6 @@ export function ReminderCard() {
         <div>
             <p className="font-semibold">{lipidContent.title}</p>
             <p className="text-sm text-muted-foreground">{lipidContent.description}</p>
-        </div>
-      </div>
-    );
-  }
-  
-  // Thyroid Panel Reminder
-  const isThyroidPanelEnabled = Object.values(diseasePanels?.thyroid || {}).some(Boolean);
-  if (isThyroidPanelEnabled) {
-    const sortedThyroidRecords = [...(thyroidRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const lastThyroidRecord = sortedThyroidRecords[0];
-    let thyroidContent;
-
-    if (!lastThyroidRecord) {
-      thyroidContent = {
-        icon: <Activity className="h-5 w-5 text-yellow-500" />,
-        title: 'Consider a Thyroid Test',
-        description: 'Speak to your doctor about whether a TSH test is right for you.',
-        color: 'bg-yellow-500/10',
-      };
-    } else {
-      const lastTestDate = new Date(lastThyroidRecord.date);
-      const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
-      // General population screening isn't universally recommended, but every 5 years is a common interval if started.
-      const retestYears = 5; 
-      const nextTestDate = addYears(lastTestDate, retestYears);
-      
-      if (yearsSinceLastTest >= retestYears) {
-        thyroidContent = {
-          icon: <Activity className="h-5 w-5 text-yellow-500" />,
-          title: 'Thyroid Check-up Recommended',
-          description: `Last test was ${formatDistanceToNow(lastTestDate, { addSuffix: true })}. Consider a follow-up.`,
-          color: 'bg-yellow-500/10',
-        };
-      } else {
-        thyroidContent = {
-          icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
-          title: 'Thyroid On Track',
-          description: `Last test was normal. Next check-up around ${format(nextTestDate, 'MMM yyyy')}.`,
-          color: 'bg-green-500/10',
-        };
-      }
-    }
-     reminders.push(
-      <div key="thyroid" className="flex items-center gap-4">
-        <div className={`flex h-8 w-8 items-center justify-center rounded-full ${thyroidContent.color}`}>
-            {thyroidContent.icon}
-        </div>
-        <div>
-            <p className="font-semibold">{thyroidContent.title}</p>
-            <p className="text-sm text-muted-foreground">{thyroidContent.description}</p>
         </div>
       </div>
     );
