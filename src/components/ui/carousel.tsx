@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -184,7 +185,7 @@ const CarouselItem = React.forwardRef<
       role="group"
       aria-roledescription="slide"
       className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full pr-4",
+        "min-w-0 shrink-0 grow-0 basis-full",
         orientation === "horizontal" ? "" : "pt-4",
         className
       )}
