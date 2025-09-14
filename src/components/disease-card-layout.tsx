@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -73,13 +74,19 @@ export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardL
                     <Carousel setApi={setApi} className="border-yellow-500 border-2">
                         <CarouselContent>
                             {childrenArray.map((child, index) => (
-                                <CarouselItem key={index}>{child}</CarouselItem>
+                                <CarouselItem key={index}>
+                                    <div className="border-purple-500 border-2">
+                                        {child}
+                                    </div>
+                                </CarouselItem>
                             ))}
                         </CarouselContent>
                         {Dots}
                     </Carousel>
                 ) : (
-                    children
+                    <div className="border-purple-500 border-2">
+                        {children}
+                    </div>
                 )}
             </div>
         </AccordionContent>
