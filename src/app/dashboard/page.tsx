@@ -108,7 +108,7 @@ export default function HomeDashboard() {
           
             <Collapsible open={isDiseaseCardsOpen} onOpenChange={setIsDiseaseCardsOpen}>
                 <DashboardSectionToggle
-                    title="Disease Cards"
+                    title="Disease Cards Collection"
                     subtitle="Manage high-level disease-specific cards"
                     icon={<Heart className="h-6 w-6 text-primary" />}
                     isOpen={isDiseaseCardsOpen}
