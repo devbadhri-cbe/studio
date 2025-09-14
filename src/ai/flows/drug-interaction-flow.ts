@@ -7,7 +7,7 @@
  */
 import { ai } from '@/ai/genkit';
 import { DrugInteractionInputSchema, DrugInteractionOutputSchema, type DrugInteractionInput, type DrugInteractionOutput } from '@/lib/ai-types';
-import { gemini15Pro } from '@genkit-ai/googleai';
+import { googleAI } from '@genkit-ai/googleai';
 import { getFromCache, storeInCache } from '@/lib/ai-cache';
 
 export async function checkDrugInteractions(input: DrugInteractionInput): Promise<DrugInteractionOutput> {
@@ -24,7 +24,7 @@ const prompt = ai.definePrompt({
     name: 'checkDrugInteractionsPrompt',
     input: { schema: DrugInteractionInputSchema },
     output: { schema: DrugInteractionOutputSchema },
-    model: gemini15Pro,
+    model: googleAI.model('gemini-pro'),
     prompt: `You are a clinical pharmacist AI. Your task is to analyze a list of medications for potential drug-drug interactions.
 
 Medications:

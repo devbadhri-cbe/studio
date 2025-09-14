@@ -8,7 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { gemini15Pro } from '@genkit-ai/googleai';
+import { googleAI } from '@genkit-ai/googleai';
 
 const PatientNameInputSchema = z.object({
   photoDataUri: z.string().describe("A photo or PDF of a lab report, as a data URI."),
@@ -30,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'extractPatientNamePrompt',
   input: { schema: PatientNameInputSchema },
   output: { schema: PatientNameOutputSchema },
-  model: gemini15Pro,
+  model: googleAI.model('gemini-pro'),
   prompt: `You are a specialized medical data entry assistant. Your task is to analyze the provided document and extract ONLY the patient's full name.
 
 Do not extract any other information. If no name is found, do not return anything.
