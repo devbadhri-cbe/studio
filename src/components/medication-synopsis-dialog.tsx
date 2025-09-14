@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -32,8 +33,8 @@ export function MedicationSynopsisDialog({ medicationName, onClose }: Medication
 
   const synopsisToDisplay = translatedSynopsis || originalSynopsis;
 
-  const fetchSynopsis = React.useCallback(async (language: string) => {
-    if (language === 'en') {
+  const fetchSynopsis = React.useCallback(async (languageName: string) => {
+    if (languageName === 'English') {
       setIsLoading(true);
     } else {
       setIsTranslating(true);
@@ -42,10 +43,10 @@ export function MedicationSynopsisDialog({ medicationName, onClose }: Medication
     try {
       const result = await getMedicationSynopsis({
         medicationName,
-        language,
+        language: languageName,
       });
       if (result.synopsis) {
-        if (language === 'English') {
+        if (languageName === 'English') {
           setOriginalSynopsis(result.synopsis);
         } else {
           setTranslatedSynopsis(result.synopsis);
