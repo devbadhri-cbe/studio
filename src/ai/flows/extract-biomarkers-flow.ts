@@ -17,7 +17,6 @@ const prompt = ai.definePrompt({
   name: 'extractBiomarkersPrompt',
   input: { schema: LabDataExtractionInputSchema },
   output: { schema: LabDataExtractionOutputSchema },
-  model: 'gemini-pro',
   prompt: `You are a specialized medical data entry assistant. Your task is to accurately extract structured biomarker data from the provided lab report.
 
 Analyze the document and extract any of the following biomarkers. If a biomarker is not present, do not include it in the output. For each biomarker found, you MUST extract the date of the test. Ensure the date is in YYYY-MM-DD format.

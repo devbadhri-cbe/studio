@@ -1,7 +1,6 @@
 
-import { genkit, GenerationCommonConfigSchema } from 'genkit';
+import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/googleai';
-import { z } from 'zod';
 
 const safetySettings = [
   {
@@ -14,11 +13,6 @@ const safetySettings = [
   },
 ];
 
-const config: Partial<z.infer<typeof GenerationCommonConfigSchema>> = {
-  safetySettings,
-};
-
-
 export const ai = genkit({
     plugins: [
         googleAI({
@@ -26,8 +20,4 @@ export const ai = genkit({
             safetySettings,
         }),
     ],
-    defaultModel: {
-      model: 'gemini-pro',
-      config,
-    },
 });

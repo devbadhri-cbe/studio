@@ -24,7 +24,6 @@ const prompt = ai.definePrompt({
   name: 'processMedicationPrompt',
   input: { schema: MedicationInfoInputSchema },
   output: { schema: MedicationInfoOutputSchema },
-  model: 'gemini-pro',
   prompt: `You are a pharmaceutical information expert. Your task is to identify the active pharmaceutical ingredient (API), standardize dosage, and validate food instructions for a given medication.
 
 User Input: "{{userInput}}"

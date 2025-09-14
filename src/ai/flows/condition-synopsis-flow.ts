@@ -23,7 +23,6 @@ const prompt = ai.definePrompt({
     name: 'getConditionSynopsisPrompt',
     input: { schema: ConditionSynopsisInputSchema },
     output: { schema: ConditionSynopsisOutputSchema },
-    model: 'gemini-pro',
     prompt: `You are a medical information expert. Your task is to provide a clear, easy-to-understand synopsis for a given medical condition.
 
 Condition: "{{conditionName}}"
