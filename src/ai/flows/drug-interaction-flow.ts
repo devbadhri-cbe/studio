@@ -23,6 +23,7 @@ const prompt = ai.definePrompt({
     name: 'checkDrugInteractionsPrompt',
     input: { schema: DrugInteractionInputSchema },
     output: { schema: DrugInteractionOutputSchema },
+    model: 'gemini-pro',
     prompt: `You are a clinical pharmacist AI. Your task is to analyze a list of medications for potential drug-drug interactions.
 
 Medications:

@@ -29,6 +29,7 @@ const prompt = ai.definePrompt({
   name: 'extractPatientNamePrompt',
   input: { schema: PatientNameInputSchema },
   output: { schema: PatientNameOutputSchema },
+  model: 'gemini-pro',
   prompt: `You are a specialized medical data entry assistant. Your task is to analyze the provided document and extract ONLY the patient's full name.
 
 Do not extract any other information. If no name is found, do not return anything.

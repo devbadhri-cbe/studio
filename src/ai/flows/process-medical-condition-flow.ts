@@ -24,6 +24,7 @@ const prompt = ai.definePrompt({
     name: 'processMedicalConditionPrompt',
     input: { schema: MedicalConditionInputSchema },
     output: { schema: MedicalConditionOutputSchema },
+    model: 'gemini-pro',
     prompt: `You are a medical data validation expert. Your task is to analyze, correct, and standardize a user-provided medical condition.
 
 User Input: "{{condition}}"

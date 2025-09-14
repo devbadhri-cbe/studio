@@ -16,7 +16,6 @@ const safetySettings = [
 
 const config: Partial<z.infer<typeof GenerationCommonConfigSchema>> = {
   safetySettings,
-  model: 'gemini-pro',
 };
 
 

@@ -61,6 +61,7 @@ const prompt = ai.definePrompt({
     name: 'createBiomarkerPrompt',
     input: { schema: CreateBiomarkerInputSchema },
     output: { schema: CreateBiomarkerOutputSchema },
+    model: 'gemini-pro',
     prompt: `You are an expert Next.js and React developer. Your task is to generate the code for a new biomarker Card component.
 
 **Biomarker Details:**
