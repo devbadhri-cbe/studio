@@ -73,9 +73,6 @@ export default function HealthReportPage() {
             </div>
             <Logo className="h-16 w-16" />
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Generated on: {format(new Date(), 'PPP p')}
-          </p>
           
           <Separator className="my-8" />
 
@@ -144,6 +141,7 @@ export default function HealthReportPage() {
           
           <footer className="text-center text-xs text-muted-foreground">
             <p>This report is a summary of data entered by the patient and is intended for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
+             <p className="mt-2">Report generated on: {format(new Date(), 'PPP p')}</p>
           </footer>
         </div>
       </main>
