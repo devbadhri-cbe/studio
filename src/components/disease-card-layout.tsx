@@ -43,7 +43,7 @@ export function DiseaseCardLayout({ value, title, subtitle, icon, children, isSi
     const dialogKey = isSingleAction ? value : activeDialogKey;
     if (!dialogKey) return null;
     
-    const dialogElement = availableBiomarkerCards[dialogKey]?.addRecordDialog;
+    const dialogElement = availableBiomarkerCards[dialogKey as keyof typeof availableBiomarkerCards]?.addRecordDialog;
     if (!dialogElement) return null;
 
     return React.cloneElement(dialogElement, {
@@ -73,8 +73,8 @@ export function DiseaseCardLayout({ value, title, subtitle, icon, children, isSi
 
   return (
     <AccordionItem value={value} className="border rounded-lg shadow-sm overflow-hidden">
-       <div className="flex items-center w-full p-6">
-            <AccordionTrigger className="p-0 border-blue-500 border-2">
+        <div className="flex items-center w-full p-6">
+            <AccordionTrigger className="p-0">
                 <div className="flex items-center gap-3 text-left w-full cursor-pointer">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                         {icon}
@@ -85,7 +85,7 @@ export function DiseaseCardLayout({ value, title, subtitle, icon, children, isSi
                     </div>
                 </div>
             </AccordionTrigger>
-             <div className="flex-1 flex justify-end pl-4 border-purple-500 border-2" onClick={(e) => e.stopPropagation()}>{Actions}</div>
+             <div className="flex-1 flex justify-end pl-4" onClick={(e) => e.stopPropagation()}>{Actions}</div>
         </div>
         <AccordionContent>
             {activeDialogKey ? (
