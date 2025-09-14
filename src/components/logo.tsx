@@ -55,7 +55,7 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
       
       
       {/* Pulsating Graph */}
-      <style>
+      <style className="no-print">
         {`
           .pulse-trace {
             stroke-dasharray: 0 100;
@@ -78,15 +78,27 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
           }
         `}
       </style>
-      <polyline
-          className="pulse-trace"
-          fill="none"
-          stroke="#EF4444"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          points="8,16 12,16 14,10 18,22 20,16 24,16"
-      />
+      <g className="no-print">
+        <polyline
+            className="pulse-trace"
+            fill="none"
+            stroke="#EF4444"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            points="8,16 12,16 14,10 18,22 20,16 24,16"
+        />
+      </g>
+       <g className="hidden print:block">
+         <polyline
+            fill="none"
+            stroke="#EF4444"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            points="8,16 12,16 14,10 18,22 20,16 24,16"
+        />
+      </g>
     </svg>
   );
 }

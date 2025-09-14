@@ -96,6 +96,8 @@
 @media print {
   body {
     background-color: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   body * {
     visibility: hidden;
@@ -114,5 +116,9 @@
 
   .no-print, .no-print * {
       display: none !important;
+  }
+
+  .print\:block {
+    display: block !important;
   }
 }
