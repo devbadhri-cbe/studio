@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears, differenceInDays } from 'date-fns';
 import { Bell, CheckCircle2, Heart, Sun, Activity, Zap, Flame } from 'lucide-react';
@@ -262,4 +263,3 @@ export function ReminderCard() {
     </UniversalCard>
   );
 }
-
