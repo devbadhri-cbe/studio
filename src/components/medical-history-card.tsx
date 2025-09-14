@@ -334,21 +334,7 @@ export function MedicalHistoryCard() {
     const { aiResult, userInput, date } = confirmedData;
     
     if (aiResult.duplicateOf && (aiResult as any).existingConditionId) {
-        const existingId = (aiResult as any).existingConditionId;
-        const newDate = new Date(date);
-
-        const updatedCondition: MedicalCondition = {
-            id: existingId,
-            userInput: userInput,
-            condition: aiResult.standardizedName!,
-            date: date,
-            icdCode: aiResult.icdCode,
-            synopsis: aiResult.synopsis,
-            status: 'processed',
-        };
-        updateMedicalCondition(updatedCondition);
-        toast({ title: "Condition Updated", description: `${updatedCondition.condition} has been updated.` });
-        
+        toast({ title: "Duplicate Condition", description: `"${aiResult.duplicateOf}" is already in your list. The existing entry has been preserved.` });
         setReviewingCondition(null);
         return;
     }

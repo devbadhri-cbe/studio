@@ -50,7 +50,7 @@ export function ConditionReviewCard({ userInput, date, aiResult, onConfirm, onRe
                     <Alert variant="destructive">
                         <AlertTriangle className="h-4 w-4" />
                         <AlertDescription>
-                           This appears to be a duplicate of <strong>{currentAiResult.duplicateOf}</strong>. If you save, the existing entry will be replaced with this new information. If this is incorrect, you can edit your input below and reprocess.
+                           This appears to be a duplicate of <strong>{currentAiResult.duplicateOf}</strong>. The existing entry will be preserved. If this is incorrect, please edit your input below and reprocess.
                         </AlertDescription>
                     </Alert>
                 )}
