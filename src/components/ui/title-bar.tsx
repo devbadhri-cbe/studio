@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Logo } from '@/components/logo';
@@ -65,7 +66,7 @@ export function TitleBar({ title, subtitle, children, rightChildren }: TitleBarP
                  <div className="flex justify-start items-center gap-2 w-24">
                     {children}
                 </div>
-                <div className="flex-1 flex justify-center">
+                <div className="flex-1 flex justify-center min-w-0">
                     <div className="flex flex-col items-center">
                         <div className="flex items-center justify-center gap-2">
                             <Logo className={cn(
@@ -80,10 +81,10 @@ export function TitleBar({ title, subtitle, children, rightChildren }: TitleBarP
                             </div>
                         </div>
                          <div className={cn(
-                            "text-center text-xs text-muted-foreground mt-2 flex items-center gap-1 transition-all duration-300 animate-fade-in",
+                            "text-center text-xs text-muted-foreground mt-2 flex items-center gap-1 transition-all duration-300 animate-fade-in truncate",
                             isScrolled ? "opacity-0 h-0" : "opacity-100 h-auto"
                          )} style={{ animationDelay: '1300ms', animationFillMode: 'backwards' }}>
-                           {subtitle && (typeof subtitle === 'string' ? <p>{subtitle}</p> : subtitle)}
+                           {subtitle && (typeof subtitle === 'string' ? <p className="truncate">{subtitle}</p> : subtitle)}
                         </div>
                     </div>
                 </div>

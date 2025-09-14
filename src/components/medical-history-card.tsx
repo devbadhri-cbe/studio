@@ -223,8 +223,8 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
             onClick={handleItemClick}
         >
             <div className="flex items-start gap-2 w-full">
-                <div className="flex-1">
-                     <p className="font-semibold text-foreground text-sm">{title}</p>
+                <div className="flex-1 min-w-0">
+                     <p className="font-semibold text-foreground text-sm truncate" title={title}>{title}</p>
                      
                     {isPending ? (
                         <div className="flex items-center gap-1.5 mt-1">
@@ -240,14 +240,14 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                         <div className="mt-1 space-y-0.5 text-xs text-muted-foreground">
                             {type === 'condition' ? (
                                 <>
-                                    {showOriginalInput && <p>You entered as "{originalInput}"</p>}
+                                    {showOriginalInput && <p className="truncate">You entered as "{originalInput}"</p>}
                                     {icdCode && <p>ICD-11: {icdCode}</p>}
                                     {date && <p>Diagnosed: {formatDate(date)}</p>}
                                 </>
                             ) : (
                                 <>
-                                    {showOriginalInput && <p className="italic">({originalInput})</p>}
-                                    {details && <p>{details}</p>}
+                                    {showOriginalInput && <p className="italic truncate">({originalInput})</p>}
+                                    {details && <p className="truncate">{details}</p>}
                                 </>
                             )}
                         </div>

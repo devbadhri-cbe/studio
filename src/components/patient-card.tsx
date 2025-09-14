@@ -52,14 +52,6 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
   const country = countries.find(c => c.code === patient.country);
   const countryName = country?.name || patient.country;
   const formattedPhone = formatDisplayPhoneNumber(patient.phone, patient.country);
-  const nameRef = React.useRef<HTMLHeadingElement>(null);
-  const [isNameOverflowing, setIsNameOverflowing] = React.useState(false);
-
-  React.useEffect(() => {
-    if (nameRef.current) {
-        setIsNameOverflowing(nameRef.current.scrollWidth > nameRef.current.clientWidth);
-    }
-  }, [patient.name]);
 
   const handleDropdownSelect = (e: Event, callback: () => void) => {
     e.preventDefault();
@@ -101,14 +93,9 @@ export function PatientCard({ patient, onView, onEdit, onDelete }: PatientCardPr
                     </Avatar>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                            <CardTitle 
-                                ref={nameRef}
-                                className={cn("text-lg whitespace-nowrap overflow-hidden", isNameOverflowing && "pr-4")} 
-                                style={isNameOverflowing ? {
-                                    maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
-                                    WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
-                                } : {}}
-                            >{patient.name}</CardTitle>
+                             <CardTitle className="text-lg truncate" title={patient.name}>
+                                {patient.name}
+                            </CardTitle>
                         </div>
                         <p className="text-xs text-muted-foreground truncate">
                             {age ? `${age} years` : 'N/A'}, <span className="capitalize">{patient.gender}</span>
