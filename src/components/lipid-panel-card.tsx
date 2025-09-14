@@ -14,9 +14,10 @@ import { DiseaseCardLayout } from './disease-card-layout';
 export function LipidPanelCard() {
     return (
         <DiseaseCardLayout
-            value="lipid"
+            value="lipidPanel"
             title="Lipid Card"
             icon={<Flame className="h-6 w-6 text-primary" />}
+            isSingleAction={true}
         >
             <TotalCholesterolCard key="totalCholesterol" isReadOnly={true} />
             <LdlCard key="ldl" isReadOnly={true} />

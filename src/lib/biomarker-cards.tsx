@@ -1,5 +1,4 @@
 
-
 import { Hba1cCard } from '@/components/hba1c-card';
 import { FastingBloodGlucoseCard } from '@/components/fasting-blood-glucose-card';
 import { HemoglobinCard } from '@/components/hemoglobin-card';
@@ -23,6 +22,7 @@ import { AddSerumCreatinineRecordDialog } from '@/components/add-serum-creatinin
 import { UricAcidCard } from '@/components/uric-acid-card';
 import { AddUricAcidRecordDialog } from '@/components/add-uric-acid-record-dialog';
 import React from 'react';
+import { AddLipidRecordDialog } from '@/components/add-lipid-record-dialog';
 
 
 export const availableBiomarkerCards = {
@@ -79,6 +79,12 @@ export const availableBiomarkerCards = {
     component: <TriglyceridesCard />,
     addRecordLabel: 'New Triglycerides Record',
     addRecordDialog: <AddTriglyceridesRecordDialog />,
+  },
+  lipidPanel: {
+    label: 'Full Lipid Panel',
+    component: null,
+    addRecordLabel: 'New Lipid Panel Record',
+    addRecordDialog: <AddLipidRecordDialog />
   },
   serumCreatinine: {
     label: 'Serum Creatinine',

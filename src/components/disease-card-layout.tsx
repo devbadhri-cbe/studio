@@ -9,15 +9,17 @@ import { PlusCircle } from 'lucide-react';
 import { availableBiomarkerCards } from '@/lib/biomarker-cards';
 import { ActionMenu } from './ui/action-menu';
 import { DropdownMenuItem } from './ui/dropdown-menu';
+import { ActionIcon } from './ui/action-icon';
 
 interface DiseaseCardLayoutProps {
   value: string;
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;
+  isSingleAction?: boolean;
 }
 
-export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardLayoutProps) {
+export function DiseaseCardLayout({ value, title, icon, children, isSingleAction = false }: DiseaseCardLayoutProps) {
   const [activeDialogKey, setActiveDialogKey] = React.useState<string | null>(null);
 
   const validChildren = React.Children.toArray(children).filter(React.isValidElement);
@@ -36,8 +38,10 @@ export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardL
   }).filter(Boolean);
 
   const renderActiveDialog = () => {
-    if (!activeDialogKey) return null;
-    const dialogElement = availableBiomarkerCards[activeDialogKey]?.addRecordDialog;
+    const dialogKey = isSingleAction ? value : activeDialogKey;
+    if (!dialogKey) return null;
+    
+    const dialogElement = availableBiomarkerCards[dialogKey]?.addRecordDialog;
     if (!dialogElement) return null;
 
     return React.cloneElement(dialogElement, {
@@ -45,11 +49,25 @@ export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardL
     });
   };
 
-  const Actions = addRecordMenuItems.length > 0 ? (
-    <ActionMenu tooltip="Add New Record" icon={<PlusCircle className="h-4 w-4" />}>
-      {addRecordMenuItems}
-    </ActionMenu>
-  ) : null;
+  let Actions;
+  if (isSingleAction) {
+    Actions = (
+      <ActionIcon 
+        tooltip="Add New Record"
+        icon={<PlusCircle className="h-4 w-4" />}
+        onClick={(e) => {
+            e.stopPropagation();
+            setActiveDialogKey(value);
+        }}
+       />
+    )
+  } else if (addRecordMenuItems.length > 0) {
+      Actions = (
+        <ActionMenu tooltip="Add New Record" icon={<PlusCircle className="h-4 w-4" />}>
+            {addRecordMenuItems}
+        </ActionMenu>
+      )
+  }
 
   return (
     <AccordionItem value={value}>
