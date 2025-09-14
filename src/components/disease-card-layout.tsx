@@ -14,12 +14,13 @@ import { ActionIcon } from './ui/action-icon';
 interface DiseaseCardLayoutProps {
   value: string;
   title: string;
+  subtitle?: string;
   icon: React.ReactNode;
   children: React.ReactNode;
   isSingleAction?: boolean;
 }
 
-export function DiseaseCardLayout({ value, title, icon, children, isSingleAction = false }: DiseaseCardLayoutProps) {
+export function DiseaseCardLayout({ value, title, subtitle, icon, children, isSingleAction = false }: DiseaseCardLayoutProps) {
   const [activeDialogKey, setActiveDialogKey] = React.useState<string | null>(null);
 
   const validChildren = React.Children.toArray(children).filter(React.isValidElement);
@@ -79,10 +80,11 @@ export function DiseaseCardLayout({ value, title, icon, children, isSingleAction
                     </div>
                     <div className="flex-1">
                         <CardTitle>{title}</CardTitle>
+                        {subtitle && <CardDescription className="mt-1">{subtitle}</CardDescription>}
                     </div>
                 </div>
             </AccordionTrigger>
-             {Actions && <div onClick={(e) => e.stopPropagation()}>{Actions}</div>}
+             {Actions && <div className="pl-4" onClick={(e) => e.stopPropagation()}>{Actions}</div>}
         </div>
         <AccordionContent>
             {activeDialogKey ? (

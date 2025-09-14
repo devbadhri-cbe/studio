@@ -15,7 +15,8 @@ export function LipidPanelCard() {
     return (
         <DiseaseCardLayout
             value="lipidPanel"
-            title="Lipid Card"
+            title="Lipid Panel"
+            subtitle="Manage your cholesterol & triglycerides"
             icon={<Flame className="h-6 w-6 text-primary" />}
             isSingleAction={true}
         >
