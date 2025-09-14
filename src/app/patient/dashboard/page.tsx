@@ -20,6 +20,7 @@ import { AiInsightCard } from '@/components/ai-insight-card';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { ActionIcon } from '@/components/ui/action-icon';
+import { Accordion } from '@/components/ui/accordion';
 
 
 export default function PatientDashboardPage() {
@@ -81,9 +82,11 @@ export default function PatientDashboardPage() {
             <MedicalHistoryCard />
             <WeightRecordCard />
             <BloodPressureCard />
-            <AnemiaCard />
-            <DiabetesCard />
-            <LipidPanelCard />
+            <Accordion type="single" collapsible className="w-full space-y-6">
+              <AnemiaCard />
+              <DiabetesCard />
+              <LipidPanelCard />
+            </Accordion>
             <ReminderCard />
           </div>
         </main>

@@ -14,6 +14,7 @@ import { DiseaseCardLayout } from './disease-card-layout';
 export function LipidPanelCard() {
     return (
         <DiseaseCardLayout
+            value="lipid"
             title="Lipid Card"
             icon={<Flame className="h-6 w-6 text-primary" />}
         >

@@ -10,6 +10,7 @@ import { DiseaseCardLayout } from './disease-card-layout';
 export function AnemiaCard() {
     return (
         <DiseaseCardLayout
+            value="anemia"
             title="Anemia Card"
             icon={<HeartCrack className="h-6 w-6 text-primary" />}
         >

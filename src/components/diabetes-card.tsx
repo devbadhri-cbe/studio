@@ -11,6 +11,7 @@ import { DiseaseCardLayout } from './disease-card-layout';
 export function DiabetesCard() {
     return (
         <DiseaseCardLayout
+            value="diabetes"
             title="Diabetes Card"
             icon={<Droplet className="h-6 w-6 text-primary" />}
         >

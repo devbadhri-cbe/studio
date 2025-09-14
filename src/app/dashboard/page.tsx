@@ -16,6 +16,7 @@ import { DiabetesCard } from '@/components/diabetes-card';
 import { HypertensionCard } from '@/components/hypertension-card';
 import { LipidPanelCard } from '@/components/lipid-panel-card';
 import { Card, CardContent } from '@/components/ui/card';
+import { Accordion } from '@/components/ui/accordion';
 
 
 export default function HomeDashboard() {
@@ -73,13 +74,15 @@ export default function HomeDashboard() {
                 <CollapsibleContent>
                     <Card>
                         <CardContent className="p-4">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                <DiabetesCard />
-                                <HypertensionCard />
-                                <div className="lg:col-span-2">
-                                    <LipidPanelCard />
+                            <Accordion type="single" collapsible className="w-full space-y-4">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <DiabetesCard />
+                                    <HypertensionCard />
+                                    <div className="lg:col-span-2">
+                                        <LipidPanelCard />
+                                    </div>
                                 </div>
-                            </div>
+                             </Accordion>
                         </CardContent>
                     </Card>
                 </CollapsibleContent>
