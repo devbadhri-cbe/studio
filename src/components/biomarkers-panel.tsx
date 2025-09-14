@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useApp } from '@/context/app-context';
@@ -46,7 +47,7 @@ export function BiomarkersPanel({ searchQuery = '' }: BiomarkersPanelProps) {
     return (
         <Card>
             <CardContent className="p-4">
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-start">
+                 <div className="space-y-4">
                     {sortedAndFilteredCards.map(cardInfo => cardInfo.component)}
                 </div>
                 {sortedAndFilteredCards.length === 0 && (
