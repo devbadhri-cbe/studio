@@ -71,22 +71,24 @@ export function DiseaseCardLayout({ value, title, icon, children, isSingleAction
 
   return (
     <AccordionItem value={value}>
-        <AccordionTrigger>
-             <div className="flex items-center gap-3 text-left w-full cursor-pointer p-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    {icon}
+        <div className="flex items-center w-full p-6">
+            <AccordionTrigger className="flex-1 p-0">
+                <div className="flex items-center gap-3 text-left w-full cursor-pointer">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        {icon}
+                    </div>
+                    <div className="flex-1">
+                        <CardTitle>{title}</CardTitle>
+                    </div>
                 </div>
-                <div className="flex-1">
-                    <CardTitle>{title}</CardTitle>
-                </div>
-                {Actions && <div onClick={(e) => e.stopPropagation()}>{Actions}</div>}
-            </div>
-        </AccordionTrigger>
+            </AccordionTrigger>
+             {Actions && <div onClick={(e) => e.stopPropagation()}>{Actions}</div>}
+        </div>
         <AccordionContent>
             {activeDialogKey ? (
-              <div className="p-6 pt-0 w-full">{renderActiveDialog()}</div>
+              <div className="px-6 pb-6 w-full">{renderActiveDialog()}</div>
             ) : (
-              <div className="p-6 pt-0 w-full">
+              <div className="px-6 pb-6 w-full">
                   <Separator className="mb-6" />
                   <div className="space-y-4">
                       {children}
