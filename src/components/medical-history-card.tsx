@@ -304,23 +304,22 @@ export function MedicalHistoryCard() {
     try {
       const result = await processMedicalCondition({ condition: condition.userInput || '' });
       
-      // Before showing review, check for duplicates
-      if (result.isValid && result.icdCode) {
-        const existingCondition = profile.presentMedicalConditions.find(c => c.icdCode && c.icdCode === result.icdCode && c.id !== condition.id);
-        if(existingCondition) {
-            result.duplicateOf = existingCondition.condition;
-            (result as any).existingConditionId = existingCondition.id;
-            (result as any).existingConditionDate = existingCondition.date;
-        }
-      }
-      
       if (result.isValid) {
+        // Before showing review, check for duplicates
+        if (result.icdCode) {
+          const existingCondition = profile.presentMedicalConditions.find(c => c.icdCode && c.icdCode === result.icdCode && c.id !== condition.id);
+          if(existingCondition) {
+              result.duplicateOf = existingCondition.condition;
+              (result as any).existingConditionId = existingCondition.id;
+              (result as any).existingConditionDate = existingCondition.date;
+          }
+        }
         setReviewingCondition({ userInput: condition.userInput || '', date: condition.date, aiResult: result });
         // We remove the temporary pending item only if the AI returns a valid result that will be shown in the review card
         removeMedicalCondition(condition.id);
       } else {
         updateMedicalCondition(produce(condition, draft => { draft.status = 'failed' }));
-        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Please check spelling and try again.` });
+        toast({ variant: 'destructive', title: 'Condition Not Recognized', description: 'Your entry has been saved. You can click on it to try again later.' });
       }
     } catch(e) {
       console.error(e);
@@ -333,20 +332,7 @@ export function MedicalHistoryCard() {
     const { aiResult, userInput, date } = confirmedData;
     
     if (aiResult.duplicateOf && (aiResult as any).existingConditionId) {
-        const existingDate = (aiResult as any).existingConditionDate;
-        const newDate = date;
-
-        // Keep the record with the older diagnosis date
-        if (new Date(existingDate) < new Date(newDate)) {
-            toast({ title: "Duplicate Condition", description: `"${aiResult.duplicateOf}" is already in your list with an earlier diagnosis date, so the existing record has been preserved.` });
-        } else {
-             toast({ title: "Duplicate Condition", description: `"${aiResult.duplicateOf}" is already in your list. The diagnosis date has been updated.` });
-            // Since we're keeping the existing record, we might need to update its date if the new one is older
-            const existingCondition = profile.presentMedicalConditions.find(c => c.id === (aiResult as any).existingConditionId);
-            if (existingCondition) {
-                updateMedicalCondition({ ...existingCondition, date: newDate });
-            }
-        }
+        toast({ title: "Duplicate Condition", description: `"${aiResult.duplicateOf}" is already in your list. The existing record has been preserved.` });
         setReviewingCondition(null);
         return;
     }
