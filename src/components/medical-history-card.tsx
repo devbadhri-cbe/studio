@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
@@ -180,12 +181,14 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
     let details: string | null = null;
     let originalInput: string | undefined;
     let date: string | undefined;
+    let icdCode: string | undefined;
 
     if (type === 'condition') {
         const cond = item as MedicalCondition;
         title = cond.condition || cond.userInput;
         originalInput = cond.userInput;
         date = cond.date;
+        icdCode = cond.icdCode;
     } else {
         const med = item as Medication;
         title = isNilItem ? 'Nil - No medication taken' : med.name;
@@ -237,7 +240,10 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                     ) : (
                         <>
                             {details && <p className="text-muted-foreground text-xs mt-1">{details}</p>}
-                            {date && <p className="text-xs text-muted-foreground">{formatDate(date)}</p>}
+                            <div className="flex items-center gap-2">
+                                {date && <p className="text-xs text-muted-foreground">{formatDate(date)}</p>}
+                                {icdCode && <p className="text-xs text-muted-foreground">(ICD-11: {icdCode})</p>}
+                            </div>
                         </>
                     )}
                 </div>
