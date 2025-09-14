@@ -11,7 +11,6 @@ import { ProfileCard } from '@/components/profile-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
 import { BloodPressureCard } from '@/components/blood-pressure-card';
 import { ReminderCard } from '@/components/reminder-card';
-import { InsightsCard } from '@/components/insights-card';
 import { DiabetesCard } from '@/components/diabetes-card';
 import { LipidPanelCard } from '@/components/lipid-panel-card';
 import { AnemiaCard } from '@/components/anemia-card';
@@ -69,7 +68,6 @@ export default function PatientDashboardPage() {
             <DiabetesCard />
             <LipidPanelCard />
             <ReminderCard />
-            <InsightsCard />
           </div>
         </main>
       </div>

@@ -3,9 +3,8 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
-import { UploadCloud, Share2 } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function PatientHeader() {
@@ -29,7 +28,6 @@ export function PatientHeader() {
       </p>
     </div>
       <div className="flex justify-center items-center gap-2">
-        <UploadRecordDialog />
         <Button size="sm" onClick={handleShare}>
             <Share2 className="mr-2 h-4 w-4" />
             Share Report

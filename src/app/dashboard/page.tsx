@@ -9,7 +9,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 import { useApp } from '@/context/app-context';
 import { BiomarkersPanel } from '@/components/biomarkers-panel';
-import { AddNewBiomarker } from '@/components/add-new-biomarker';
 import { DashboardSectionToggle } from '@/components/dashboard-section-toggle';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { DiabetesCard } from '@/components/diabetes-card';
@@ -24,7 +23,6 @@ import type { Patient } from '@/lib/types';
 export default function HomeDashboard() {
   const router = useRouter();
   const { isClient, setPatientData } = useApp();
-  const [isAddingBiomarker, setIsAddingBiomarker] = React.useState(false);
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   const [diseasePanelSearchQuery, setDiseasePanelSearchQuery] = React.useState('');
   const [patientSearchQuery, setPatientSearchQuery] = React.useState('');
@@ -141,11 +139,8 @@ export default function HomeDashboard() {
                     searchQuery={biomarkerSearchQuery}
                     onSearchChange={setBiomarkerSearchQuery}
                     searchPlaceholder="Search biomarkers..."
-                    showCreateButton={true}
-                    onCreateClick={() => setIsAddingBiomarker(!isAddingBiomarker)}
                 />
                 <CollapsibleContent>
-                    {isAddingBiomarker && <AddNewBiomarker onCancel={() => setIsAddingBiomarker(false)} />}
                     <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>
                 </CollapsibleContent>
             </Collapsible>
