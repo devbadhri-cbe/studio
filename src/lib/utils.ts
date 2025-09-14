@@ -76,7 +76,6 @@ export const formatDisplayPhoneNumber = (phone?: string, countryCode?: string): 
         nationalNumber = phoneDigits.substring(countryPhoneCodeDigits.length);
     }
     
-    // Fallback for empty national number
     if (!nationalNumber) {
         return country.phoneCode;
     }
@@ -94,15 +93,15 @@ export const formatDisplayPhoneNumber = (phone?: string, countryCode?: string): 
             }
             break;
         case 'GB':
-             if (nationalNumber.length === 10) {
-                return `${country.phoneCode} 0${nationalNumber.substring(0, 4)} ${nationalNumber.substring(4)}`;
+             if (nationalNumber.length >= 10) { // UK numbers can be 10 or 11 digits
+                const areaCode = nationalNumber.startsWith('0') ? nationalNumber.substring(0, 5) : nationalNumber.substring(0, 4);
+                const rest = nationalNumber.substring(areaCode.length);
+                return `${country.phoneCode} ${areaCode} ${rest}`;
             }
             break;
         default:
-            // Generic formatting for other countries
             return `${country.phoneCode} ${nationalNumber}`;
     }
     
-    // Return formatted with country code if no specific format matched
     return `${country.phoneCode} ${nationalNumber}`;
 }
