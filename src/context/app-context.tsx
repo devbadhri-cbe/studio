@@ -30,7 +30,6 @@ interface AppContextType {
   isClient: boolean;
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  setPatientData: (data: Patient, isDeveloper: boolean) => void;
   isDeveloperMode: boolean;
   setIsDeveloperMode: (isDeveloper: boolean) => void;
   
@@ -142,15 +141,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
   
   const setPatient: AppContextType['setPatient'] = (newPatient) => {
-    if (newPatient) {
-        // When setting a patient directly (likely after creation), we are in user mode.
-        setIsDeveloperMode(false);
-    }
     setPatientState(newPatient);
   };
 
   React.useEffect(() => {
-    if (isClient && !isDeveloperMode) { // Only persist to storage in user mode
+    if (isClient) {
       if (patient) {
         // Update BMI whenever patient data changes (e.g., height update or new weight record)
         const patientWithBmi = produce(patient, draft => {
@@ -163,13 +158,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('patientData');
       }
     }
-  }, [patient, isClient, isDeveloperMode]);
+  }, [patient, isClient]);
 
-
-  const setPatientData: AppContextType['setPatientData'] = (data, isDeveloper) => {
-    setPatientState(data);
-    setIsDeveloperMode(isDeveloper);
-  };
 
   React.useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
@@ -360,7 +350,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isClient,
     theme,
     setTheme,
-    setPatientData,
     isDeveloperMode,
     setIsDeveloperMode,
     addHba1cRecord,

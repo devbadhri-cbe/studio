@@ -16,32 +16,20 @@ import { DiabetesCard } from '@/components/diabetes-card';
 import { HypertensionCard } from '@/components/hypertension-card';
 import { LipidPanelCard } from '@/components/lipid-panel-card';
 import { Card, CardContent } from '@/components/ui/card';
-import { mockPatients } from '@/lib/mock-patients';
-import { PatientCard } from '@/components/patient-card';
-import type { Patient } from '@/lib/types';
 
 
 export default function HomeDashboard() {
   const router = useRouter();
-  const { isClient, setPatientData } = useApp();
+  const { isClient } = useApp();
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   const [diseaseCardSearchQuery, setDiseaseCardSearchQuery] = React.useState('');
-  const [patientSearchQuery, setPatientSearchQuery] = React.useState('');
   
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
   const [isDiseaseCardsOpen, setIsDiseaseCardsOpen] = React.useState(true);
-  const [isPatientPanelOpen, setIsPatientPanelOpen] = React.useState(true);
 
   if (!isClient) {
     return null; // or a loading skeleton
   }
-  
-  const handleViewPatient = (patient: Patient) => {
-    setPatientData(patient, true);
-    router.push('/patient/dashboard');
-  };
-
-  const filteredPatients = mockPatients.filter(p => p.name.toLowerCase().includes(patientSearchQuery.toLowerCase()));
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -71,40 +59,6 @@ export default function HomeDashboard() {
                 Go to Patient View
                 </Button>
             </div>
-
-            <Collapsible open={isPatientPanelOpen} onOpenChange={setIsPatientPanelOpen}>
-                <DashboardSectionToggle
-                    title="Patient Management"
-                    subtitle="Select a mock patient to view their dashboard"
-                    icon={<Users className="h-6 w-6 text-primary" />}
-                    isOpen={isPatientPanelOpen}
-                    searchQuery={patientSearchQuery}
-                    onSearchChange={setPatientSearchQuery}
-                    searchPlaceholder="Search patients..."
-                />
-                 <CollapsibleContent>
-                    <Card>
-                        <CardContent className="p-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                {filteredPatients.map(p => (
-                                    <PatientCard 
-                                        key={p.id}
-                                        patient={p}
-                                        onView={handleViewPatient}
-                                        onEdit={() => {}}
-                                        onDelete={() => {}}
-                                    />
-                                ))}
-                            </div>
-                            {filteredPatients.length === 0 && (
-                                <div className="text-center text-muted-foreground py-12">
-                                    <p>No patients match your search.</p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                 </CollapsibleContent>
-            </Collapsible>
           
             <Collapsible open={isDiseaseCardsOpen} onOpenChange={setIsDiseaseCardsOpen}>
                 <DashboardSectionToggle

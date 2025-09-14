@@ -132,8 +132,6 @@ export interface Patient {
   bmi?: number;
   dateFormat: string;
   unitSystem: UnitSystem;
-  status: 'On Track' | 'Needs Review' | 'Urgent';
-  lastLogin?: string | null;
 
   hba1cRecords: Hba1cRecord[];
   medication: Medication[];

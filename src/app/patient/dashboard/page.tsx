@@ -43,8 +43,6 @@ export default function PatientDashboardPage() {
   }
   
   const handleBack = () => {
-    setPatient(null); 
-    setIsDeveloperMode(false);
     router.push('/dashboard');
   }
 
@@ -68,13 +66,11 @@ export default function PatientDashboardPage() {
           title={['Health', 'Guardian', 'Lite']}
           subtitle={developerCredit}
           backButton={
-            isDeveloperMode && (
-                <ActionIcon
-                    tooltip="Back to Developer Dashboard"
-                    icon={<ArrowLeft />}
-                    onClick={handleBack}
-                />
-            )
+              <ActionIcon
+                  tooltip="Back to Developer Dashboard"
+                  icon={<ArrowLeft />}
+                  onClick={handleBack}
+              />
           }
         />
         <main className="flex-1 p-4 md:p-6 pb-4">
