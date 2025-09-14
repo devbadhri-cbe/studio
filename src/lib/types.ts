@@ -174,6 +174,7 @@ export interface Patient {
   
   // AI and UI settings
   dashboardSuggestions?: string[];
+  dashboardSuggestionsTimestamp?: string;
   diseasePanels?: DiseasePanelState;
 
   // Doctor-related fields

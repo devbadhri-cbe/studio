@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useApp } from '@/context/app-context';
 import { UniversalCard } from './universal-card';
+import { formatDistanceToNow } from 'date-fns';
 
 const supportedLanguages = [
     { code: 'en', name: 'English' },
@@ -58,6 +59,8 @@ export function InsightsCard() {
 
   const isButtonDisabled = isGeneratingInsights || isTranslatingInsights || hasNoRecords || !profile?.name || !profile?.dob;
 
+  const timestamp = profile?.dashboardSuggestionsTimestamp;
+
   return (
     <UniversalCard
       icon={<Lightbulb className="h-6 w-6 text-primary" />}
@@ -74,15 +77,29 @@ export function InsightsCard() {
             
             {!isGeneratingInsights && !isTranslatingInsights && (
                 <>
-                    {insightsError ? (
-                        <Alert variant="destructive" className="bg-destructive/5 text-center">
+                    {tips.length > 0 ? (
+                        <div className="w-full">
+                            <ul className="space-y-3 text-sm list-disc pl-5 self-start">
+                                {tips.map((tip, index) => <li key={index}>{tip}</li>)}
+                            </ul>
+                            {timestamp && (
+                                <p className="text-xs text-muted-foreground mt-4 text-right">
+                                    Last generated: {formatDistanceToNow(new Date(timestamp), { addSuffix: true })}
+                                </p>
+                            )}
+                            {insightsError && (
+                                <Alert variant="destructive" className="bg-destructive/5 text-center mt-4">
+                                    <AlertDescription>
+                                        Could not generate new insights at this time. Showing last available suggestions.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                        </div>
+                    ) : insightsError ? (
+                         <Alert variant="destructive" className="bg-destructive/5 text-center">
                             <AlertTitle>Error</AlertTitle>
                             <AlertDescription>{insightsError}</AlertDescription>
                         </Alert>
-                    ) : tips.length > 0 ? (
-                        <ul className="space-y-3 text-sm list-disc pl-5 self-start">
-                            {tips.map((tip, index) => <li key={index}>{tip}</li>)}
-                        </ul>
                     ) : (
                         <div className="text-center text-sm text-muted-foreground">
                             <p>Click the button to generate personalized health insights based on your data.</p>

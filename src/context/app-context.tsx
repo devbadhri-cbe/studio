@@ -10,6 +10,7 @@ import { calculateBmi } from '@/lib/utils';
 import { toMmolL, toMgDl, toGL, toGDL } from '@/lib/unit-conversions';
 import { getHealthInsights } from '@/ai/flows/health-insights-flow';
 import { HealthInsightsInput, HealthInsightsOutput } from '@/lib/ai-types';
+import { useToast } from '@/hooks/use-toast';
 
 type Theme = 'dark' | 'light' | 'system';
 type BiomarkerUnit = 'conventional' | 'si';
@@ -136,6 +137,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isClient, setIsClient] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
+  const { toast } = useToast();
   
   // AI Insights State
   const [tips, setTips] = React.useState<string[]>([]);
@@ -417,7 +419,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return result;
     } catch (e) {
       console.error(e);
-      setInsightsError('An AI error occurred. Please try again.');
+      const errorMessage = 'An AI error occurred. Please try again later.';
+      setInsightsError(errorMessage);
+      toast({
+          variant: 'destructive',
+          title: 'Insights Error',
+          description: errorMessage
+      });
       return null;
     }
   };
@@ -430,6 +438,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTips(result.tips);
       setPatient(produce(patient!, draft => {
         draft.dashboardSuggestions = result.tips;
+        draft.dashboardSuggestionsTimestamp = new Date().toISOString();
       }));
     }
     setIsGeneratingInsights(false);
