@@ -14,9 +14,7 @@ export function HypertensionCard() {
             title="Hypertension Card"
             icon={<Heart className="h-6 w-6 text-primary" />}
         >
-            <div className={cn("grid grid-cols-1 gap-6 transition-all")}>
-                <BloodPressureCard isReadOnly />
-            </div>
+            <BloodPressureCard isReadOnly />
         </DiseaseCardLayout>
     );
 }

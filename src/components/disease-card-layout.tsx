@@ -1,11 +1,12 @@
-
 'use client';
 
 import * as React from 'react';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { CardDescription, CardTitle } from './ui/card';
-import { UniversalCard } from './universal-card';
 import { Separator } from './ui/separator';
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel';
+import { cn } from '@/lib/utils';
+import { Button } from './ui/button';
 
 interface DiseaseCardLayoutProps {
   value: string;
@@ -15,6 +16,44 @@ interface DiseaseCardLayoutProps {
 }
 
 export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardLayoutProps) {
+  const [api, setApi] = React.useState<CarouselApi>();
+  const [current, setCurrent] = React.useState(0);
+  const [count, setCount] = React.useState(0);
+
+  const childrenArray = React.Children.toArray(children);
+  const hasMultipleBiomarkers = childrenArray.length > 1;
+  
+  React.useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap());
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
+  
+  const Dots = (
+    <div className="flex items-center justify-center gap-2 mt-4">
+        {Array.from({ length: count }).map((_, i) => (
+            <Button
+                key={i}
+                aria-label={`Go to slide ${i + 1}`}
+                onClick={() => api?.scrollTo(i)}
+                className={cn(
+                    "h-2 w-2 rounded-full p-0",
+                    current === i ? "bg-primary" : "bg-primary/20"
+                )}
+                size="icon"
+                variant="ghost"
+            />
+        ))}
+    </div>
+  );
+
   return (
     <AccordionItem value={value}>
         <AccordionTrigger>
@@ -30,7 +69,18 @@ export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardL
         <AccordionContent>
             <div className="p-6 pt-0">
                  <Separator className="mb-6" />
-                {children}
+                {hasMultipleBiomarkers ? (
+                    <Carousel setApi={setApi}>
+                        <CarouselContent>
+                            {childrenArray.map((child, index) => (
+                                <CarouselItem key={index}>{child}</CarouselItem>
+                            ))}
+                        </CarouselContent>
+                        {Dots}
+                    </Carousel>
+                ) : (
+                    children
+                )}
             </div>
         </AccordionContent>
     </AccordionItem>

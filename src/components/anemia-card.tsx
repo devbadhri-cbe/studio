@@ -14,9 +14,7 @@ export function AnemiaCard() {
             title="Anemia Card"
             icon={<HeartCrack className="h-6 w-6 text-primary" />}
         >
-            <div className={cn("grid grid-cols-1 gap-6 transition-all")}>
-                <HemoglobinCard isReadOnly />
-            </div>
+            <HemoglobinCard isReadOnly />
         </DiseaseCardLayout>
     );
 }

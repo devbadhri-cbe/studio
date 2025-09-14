@@ -15,13 +15,8 @@ export function DiabetesCard() {
             title="Diabetes Card"
             icon={<Droplet className="h-6 w-6 text-primary" />}
         >
-            <div className={cn(
-                "grid grid-cols-1 gap-6 transition-all",
-                "md:grid-cols-2"
-            )}>
-                <Hba1cCard isReadOnly />
-                <FastingBloodGlucoseCard isReadOnly />
-            </div>
+            <Hba1cCard isReadOnly />
+            <FastingBloodGlucoseCard isReadOnly />
         </DiseaseCardLayout>
     );
 }

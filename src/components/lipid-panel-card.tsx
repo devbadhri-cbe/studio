@@ -18,15 +18,10 @@ export function LipidPanelCard() {
             title="Lipid Card"
             icon={<Flame className="h-6 w-6 text-primary" />}
         >
-            <div className={cn(
-                "grid grid-cols-1 gap-6 transition-all",
-                "md:grid-cols-2"
-            )}>
-                <TotalCholesterolCard isReadOnly={true} />
-                <LdlCard isReadOnly={true} />
-                <HdlCard isReadOnly={true} />
-                <TriglyceridesCard isReadOnly={true} />
-            </div>
+            <TotalCholesterolCard isReadOnly={true} />
+            <LdlCard isReadOnly={true} />
+            <HdlCard isReadOnly={true} />
+            <TriglyceridesCard isReadOnly={true} />
         </DiseaseCardLayout>
     );
 }
