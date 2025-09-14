@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { UserCircle, Mail, Phone, VenetianMask, Globe, Cake, Stethoscope as DoctorIcon } from 'lucide-react';
@@ -15,6 +16,7 @@ import type { Patient } from '@/lib/types';
 import { EditDoctorDetailsDialog } from './edit-doctor-details-dialog';
 import { Separator } from './ui/separator';
 import { UniversalCard } from './universal-card';
+import { CardDescription, CardTitle } from './ui/card';
 
 
 export function ProfileCard() {
@@ -84,14 +86,24 @@ export function ProfileCard() {
         setIsSubmitting(false);
     }
   };
+  
+  const headerContent = (
+      <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <UserCircle className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+              <CardTitle>{isEditing ? 'Edit Profile' : 'My Profile'}</CardTitle>
+              <CardDescription>{isEditing ? 'Update your personal details below.' : 'Your personal and medical information.'}</CardDescription>
+          </div>
+      </div>
+  );
 
 
   return (
     <>
     <UniversalCard
-      icon={<UserCircle className="h-6 w-6 text-primary" />}
-      title={isEditing ? 'Edit Profile' : 'My Profile'}
-      description={isEditing ? 'Update your personal details below.' : 'Your personal and medical information.'}
+      headerContent={headerContent}
       actions={<ProfileSettingsPopover onEdit={() => setIsEditing(true)} onEditDoctor={() => setIsEditingDoctor(true)} />}
     >
         {isEditing ? (

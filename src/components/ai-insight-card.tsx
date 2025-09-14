@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -10,6 +11,7 @@ import { differenceInHours, formatDistanceToNow } from 'date-fns';
 import { generateInsights } from '@/ai/flows/generate-insights-flow';
 import { type GenerateInsightsInput } from '@/lib/ai-types';
 import { Alert, AlertDescription } from './ui/alert';
+import { CardDescription, CardTitle } from './ui/card';
 
 const RATE_LIMIT_HOURS = 12; // Allow generation every 12 hours
 
@@ -76,12 +78,22 @@ export function AiInsightCard() {
   };
   
   const insightAge = patient.aiInsightTimestamp ? formatDistanceToNow(new Date(patient.aiInsightTimestamp), { addSuffix: true }) : null;
+  
+  const headerContent = (
+      <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Sparkles className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+              <CardTitle>AI Health Insight</CardTitle>
+              <CardDescription>{insightAge ? `Generated ${insightAge}` : 'Get an AI-powered summary of your health.'}</CardDescription>
+          </div>
+      </div>
+  );
 
   return (
     <UniversalCard
-      icon={<Sparkles className="h-6 w-6 text-primary" />}
-      title="AI Health Insight"
-      description={insightAge ? `Generated ${insightAge}` : 'Get an AI-powered summary of your health.'}
+      headerContent={headerContent}
     >
       {patient.aiInsightText ? (
         <Alert className="border-primary/20 bg-primary/5">

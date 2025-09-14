@@ -7,46 +7,34 @@ import { cn } from '@/lib/utils';
 import { Separator } from './ui/separator';
 
 interface UniversalCardProps {
-  title?: string;
-  description?: string;
-  icon?: React.ReactNode;
+  headerContent?: React.ReactNode;
   actions?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
   contentClassName?: string;
+  headerClassName?: string;
 }
 
 export function UniversalCard({
-  title,
-  description,
-  icon,
+  headerContent,
   actions,
   children,
   className,
   contentClassName,
+  headerClassName,
 }: UniversalCardProps) {
   return (
     <Card className={cn("w-full flex flex-col h-full shadow-xl", className)}>
-      {(title || description || icon) && (
-        <CardHeader>
+      {(headerContent || actions) && (
+        <CardHeader className={cn(headerClassName)}>
             <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                    {icon && (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                            {icon}
-                        </div>
-                    )}
-                    <div>
-                        {title && <CardTitle>{title}</CardTitle>}
-                        {description && <CardDescription>{description}</CardDescription>}
-                    </div>
-                </div>
+                <div className="flex-1 min-w-0">{headerContent}</div>
                  {actions && <div className="flex items-center gap-1 shrink-0">{actions}</div>}
             </div>
         </CardHeader>
       )}
       <CardContent className={cn("flex-1 flex flex-col p-6 pt-0", contentClassName)}>
-         {(title || description || icon) && <Separator className="mb-6" />}
+         {headerContent && <Separator className="mb-6" />}
         {children}
       </CardContent>
     </Card>

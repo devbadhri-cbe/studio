@@ -20,6 +20,7 @@ import { Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Separator } from './ui/separator';
 import { Button } from './ui/button';
+import { CardDescription, CardTitle } from './ui/card';
 
 interface Record {
   id: string;
@@ -167,11 +168,21 @@ export function BiomarkerCard<T extends Record>({
   if (isAdding) {
     return addRecordForm;
   }
+  
+  const headerContent = (
+      <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              {icon}
+          </div>
+          <div>
+              <CardTitle>{title}</CardTitle>
+          </div>
+      </div>
+  );
 
   return (
     <UniversalCard
-      title={title}
-      icon={icon}
+      headerContent={headerContent}
       actions={Actions}
       contentClassName="p-0"
     >

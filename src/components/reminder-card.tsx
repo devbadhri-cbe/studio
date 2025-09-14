@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -9,6 +10,7 @@ import { calculateAge, getBmiStatus } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { UniversalCard } from './universal-card';
 import type { ReactNode } from 'react';
+import { CardDescription, CardTitle } from './ui/card';
 
 export function ReminderCard() {
   const { patient } = useApp();
@@ -225,13 +227,23 @@ export function ReminderCard() {
       </div>
     );
   }
+  
+  const headerContent = (
+      <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Bell className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+              <CardTitle>Testing Reminders</CardTitle>
+              <CardDescription>Your upcoming health check schedule.</CardDescription>
+          </div>
+      </div>
+  );
 
   if (reminders.length === 0) {
     return (
         <UniversalCard
-            icon={<Bell className="h-6 w-6 text-primary" />}
-            title="Testing Reminders"
-            description="Your upcoming health check schedule."
+            headerContent={headerContent}
         >
             <div className="text-center text-muted-foreground text-sm py-8">
                 <p>No reminders to show right now.</p>
@@ -244,9 +256,7 @@ export function ReminderCard() {
 
   return (
     <UniversalCard
-      icon={<Bell className="h-6 w-6 text-primary" />}
-      title="Testing Reminders"
-      description="Your upcoming health check schedule."
+      headerContent={headerContent}
     >
         <div className="space-y-4">
             {reminders.map((reminder, index) => (
