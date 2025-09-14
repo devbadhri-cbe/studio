@@ -13,6 +13,7 @@ import { Hba1cChart } from '@/components/hba1c-chart';
 import { BloodPressureChart } from '@/components/blood-pressure-chart';
 import { WeightChart } from '@/components/weight-chart';
 import { LipidChart } from '@/components/lipid-chart';
+import { format } from 'date-fns';
 
 export default function HealthReportPage() {
   const { patient, isClient } = useApp();
