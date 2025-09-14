@@ -74,7 +74,7 @@ export default function PatientDashboardPage() {
               />
           }
         />
-        <main className="flex-1 p-4 md:p-6 pb-4">
+        <main className="flex-1 px-4 md:px-6 pb-4">
           <div className="mx-auto grid w-full max-w-xl gap-6">
             <PatientHeader />
             <ProfileCard />
