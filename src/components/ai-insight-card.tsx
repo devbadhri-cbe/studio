@@ -7,7 +7,8 @@ import { Button } from './ui/button';
 import { useApp } from '@/context/app-context';
 import { toast } from '@/hooks/use-toast';
 import { differenceInHours, formatDistanceToNow } from 'date-fns';
-import { generateInsights, type GenerateInsightsInput } from '@/ai/flows/generate-insights-flow';
+import { generateInsights } from '@/ai/flows/generate-insights-flow';
+import { type GenerateInsightsInput } from '@/lib/ai-types';
 import { Alert, AlertDescription } from './ui/alert';
 
 const RATE_LIMIT_HOURS = 12; // Allow generation every 12 hours
