@@ -118,6 +118,10 @@ const defaultDiseasePanelState: DiseasePanelState = {
         ldl: true,
         hdl: true,
         triglycerides: true,
+    },
+    thyroid: {
+        tsh: true,
+        t4: true,
     }
 }
 

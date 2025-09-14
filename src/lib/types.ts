@@ -1,3 +1,4 @@
+
 export type UnitSystem = 'metric' | 'imperial';
 
 export interface MedicalCondition {
@@ -132,6 +133,10 @@ export interface DiseasePanelState {
         ldl: boolean;
         hdl: boolean;
         triglycerides: boolean;
+    };
+    thyroid: {
+        tsh: boolean;
+        t4: boolean;
     };
 }
   
