@@ -14,8 +14,9 @@ const insightPrompt = ai.definePrompt({
     name: 'insightPrompt',
     input: { schema: GenerateInsightsInputSchema },
     output: { schema: GenerateInsightsOutputSchema },
-    prompt: `You are a health assistant analyzing patient data. Provide a concise, helpful, and actionable insight based on the data below.
-    Focus on the most critical patterns or risks. Do not give generic advice. Keep it to 1-2 short paragraphs.
+    prompt: `You are a health advisor. Based on the patient's age (derived from DOB) and gender, provide a list of recommended, age-appropriate screening tests.
+    If other health data is available, such as medical conditions or biomarker values, briefly mention how that might influence the recommendations, but the primary focus should be on preventative screening.
+    Keep the output concise and in a clear, easy-to-read format. Do not give generic advice.
 
     Patient Data:
     - Date of Birth: {{dob}}
