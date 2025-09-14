@@ -133,7 +133,7 @@ export default function HomeDashboard() {
 
             <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
                 <DashboardSectionToggle
-                    title="Biomarkers Panel"
+                    title="Biomarker Cards Collection"
                     subtitle="View and manage the complete collection of biomarker cards"
                     icon={<Droplet className="h-6 w-6 text-primary" />}
                     isOpen={isBiomarkersOpen}
