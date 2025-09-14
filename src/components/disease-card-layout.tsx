@@ -56,9 +56,9 @@ export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardL
   );
 
   return (
-    <AccordionItem value={value} className="border-red-500 border-2">
+    <AccordionItem value={value}>
         <AccordionTrigger>
-             <div className="flex items-center gap-3 text-left w-full cursor-pointer p-6 border-blue-500 border-2">
+             <div className="flex items-center gap-3 text-left w-full cursor-pointer p-6">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                     {icon}
                 </div>
@@ -68,14 +68,14 @@ export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardL
             </div>
         </AccordionTrigger>
         <AccordionContent>
-            <div className="p-6 pt-0 border-green-500 border-2 w-full">
+            <div className="p-6 pt-0 w-full">
                  <Separator className="mb-6" />
                 {hasMultipleBiomarkers ? (
-                    <Carousel setApi={setApi} className="border-yellow-500 border-2 w-full">
+                    <Carousel setApi={setApi} className="w-full">
                         <CarouselContent>
                             {childrenArray.map((child, index) => (
-                                <CarouselItem key={index}>
-                                    <div className="border-purple-500 border-2">
+                                <CarouselItem key={index} className="flex-shrink-0">
+                                    <div>
                                         {child}
                                     </div>
                                 </CarouselItem>
@@ -84,7 +84,7 @@ export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardL
                         {Dots}
                     </Carousel>
                 ) : (
-                    <div className="border-purple-500 border-2">
+                    <div>
                         {children}
                     </div>
                 )}
