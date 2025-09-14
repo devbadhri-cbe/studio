@@ -349,7 +349,7 @@ export function UploadRecordDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
+        <Button size="sm">
             <UploadCloud className="mr-2 h-4 w-4" />
             Upload Result
         </Button>

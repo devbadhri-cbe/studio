@@ -30,7 +30,7 @@ export function PatientHeader() {
     </div>
       <div className="flex justify-center items-center gap-2">
         <UploadRecordDialog />
-        <Button size="sm" variant="outline" onClick={handleShare}>
+        <Button size="sm" onClick={handleShare}>
             <Share2 className="mr-2 h-4 w-4" />
             Share Report
         </Button>
