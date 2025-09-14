@@ -224,9 +224,8 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
         >
             <div className="flex items-start gap-2 w-full">
                 <div className="flex-1">
-                    <p className="font-semibold text-foreground">{title}</p>
-                     {showOriginalInput && <p className="text-muted-foreground text-xs">({originalInput})</p>}
-                    
+                    <p className="font-semibold text-foreground text-sm">{title}</p>
+                     
                     {isPending ? (
                         <div className="flex items-center gap-1.5 mt-1">
                             <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
@@ -239,11 +238,18 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                         </div>
                     ) : (
                         <>
-                            {details && <p className="text-muted-foreground text-xs mt-1">{details}</p>}
-                            <div className="flex items-center gap-2 mt-1">
-                                {date && <p className="text-xs text-muted-foreground">{formatDate(date)}</p>}
-                                {icdCode && <p className="text-xs text-muted-foreground">(ICD-11: {icdCode})</p>}
-                            </div>
+                            {type === 'condition' ? (
+                                <>
+                                    {showOriginalInput && <p className="text-muted-foreground text-xs mt-0.5">You entered as "{originalInput}"</p>}
+                                    {icdCode && <p className="text-xs text-muted-foreground mt-0.5">ICD-11: {icdCode}</p>}
+                                    {date && <p className="text-xs text-muted-foreground mt-0.5">{formatDate(date)}</p>}
+                                </>
+                            ) : (
+                                <>
+                                    {showOriginalInput && <p className="text-muted-foreground text-xs italic mt-0.5">({originalInput})</p>}
+                                    {details && <p className="text-muted-foreground text-xs mt-1">{details}</p>}
+                                </>
+                            )}
                         </>
                     )}
                 </div>
