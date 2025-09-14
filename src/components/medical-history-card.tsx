@@ -237,20 +237,20 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                             <p className="text-destructive text-xs italic">AI failed. Click to retry.</p>
                         </div>
                     ) : (
-                        <>
+                        <div className="mt-1 space-y-0.5 text-xs text-muted-foreground">
                             {type === 'condition' ? (
-                                <div className="mt-1 space-y-0.5 text-xs text-muted-foreground">
+                                <>
                                     {showOriginalInput && <p>You entered as "{originalInput}"</p>}
                                     {icdCode && <p>ICD-11: {icdCode}</p>}
                                     {date && <p>Diagnosed: {formatDate(date)}</p>}
-                                </div>
+                                </>
                             ) : (
                                 <>
-                                    {showOriginalInput && <p className="text-muted-foreground text-xs italic mt-0.5">({originalInput})</p>}
-                                    {details && <p className="text-muted-foreground text-xs mt-1">{details}</p>}
+                                    {showOriginalInput && <p className="italic">({originalInput})</p>}
+                                    {details && <p>{details}</p>}
                                 </>
                             )}
-                        </>
+                        </div>
                     )}
                 </div>
 
@@ -271,7 +271,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                             />
                         </>
                     )}
-                    {!isEditing && !isPending && !isNilItem && !isFailed && item.synopsis && (
+                    {!isEditing && !isPending && !isNilItem && !isFailed && (
                         <ActionIcon 
                             tooltip="View Synopsis"
                             icon={<Info className="h-5 w-5 text-blue-500" />}
@@ -381,6 +381,14 @@ export function MedicalHistoryCard() {
       };
       handleProcessCondition(newCondition);
   }
+  
+  const handleAddMedication = (data: Omit<Medication, 'id'>) => {
+    const isNilPresent = profile.medication?.length === 1 && profile.medication[0].id === 'nil';
+    if (isNilPresent) {
+      removeMedication('nil');
+    }
+    addMedication(data);
+  }
 
   const renderSynopsisDialog = () => {
     if (!activeSynopsis) return null;
@@ -487,7 +495,7 @@ export function MedicalHistoryCard() {
                 }
             }}
             onUpdateItem={updateMedication}
-            onAddItem={addMedication}
+            onAddItem={handleAddMedication}
             nilRecord={profile.medication?.length === 0 ? nilMedicationRecord : undefined}
             AddForm={(props) => <AddMedicationForm {...props} ref={addMedicationFormRef} />}
             EditForm={EditMedicationWrapper as any}
