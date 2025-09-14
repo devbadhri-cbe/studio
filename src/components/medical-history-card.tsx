@@ -240,7 +240,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                     ) : (
                         <>
                             {details && <p className="text-muted-foreground text-xs mt-1">{details}</p>}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 mt-1">
                                 {date && <p className="text-xs text-muted-foreground">{formatDate(date)}</p>}
                                 {icdCode && <p className="text-xs text-muted-foreground">(ICD-11: {icdCode})</p>}
                             </div>
