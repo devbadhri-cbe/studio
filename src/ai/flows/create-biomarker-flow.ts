@@ -8,7 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { gemini15Flash } from '@genkit-ai/googleai';
+import { gemini15Pro } from '@genkit-ai/googleai';
 import { writeFile } from '@/lib/services/file-writer';
 
 //-======================================================================
@@ -62,7 +62,7 @@ const prompt = ai.definePrompt({
     name: 'createBiomarkerPrompt',
     input: { schema: CreateBiomarkerInputSchema },
     output: { schema: CreateBiomarkerOutputSchema },
-    model: gemini15Flash,
+    model: gemini15Pro,
     prompt: `You are an expert Next.js and React developer. Your task is to generate the code for a new biomarker Card component.
 
 **Biomarker Details:**

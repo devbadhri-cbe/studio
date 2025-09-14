@@ -7,7 +7,7 @@
  */
 import { ai } from '@/ai/genkit';
 import { HealthInsightsInputSchema, HealthInsightsOutputSchema, type HealthInsightsInput, type HealthInsightsOutput } from '@/lib/ai-types';
-import { gemini15Flash } from '@genkit-ai/googleai';
+import { gemini15Pro } from '@genkit-ai/googleai';
 
 export async function getHealthInsights(input: HealthInsightsInput): Promise<HealthInsightsOutput> {
   return await getHealthInsightsFlow(input);
@@ -17,7 +17,7 @@ const prompt = ai.definePrompt({
     name: 'getHealthInsightsPrompt',
     input: { schema: HealthInsightsInputSchema },
     output: { schema: HealthInsightsOutputSchema },
-    model: gemini15Flash,
+    model: gemini15Pro,
     prompt: `You are a friendly and encouraging health coach AI. Your goal is to provide personalized, actionable tips to help a user manage their health based on their latest data.
 
 Analyze the following patient data. Generate 3-5 concise, practical, and encouraging tips. Focus on the most important areas for improvement. Tailor the advice based on their specific numbers, conditions, and demographics.

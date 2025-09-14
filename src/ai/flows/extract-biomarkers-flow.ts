@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to extract structured biomarker data from a lab report.
@@ -7,7 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { LabDataExtractionInputSchema, LabDataExtractionOutputSchema, type LabDataExtractionInput, type LabDataExtractionOutput } from '@/lib/ai-types';
-import { gemini15Flash } from '@genkit-ai/googleai';
+import { gemini15Pro } from '@genkit-ai/googleai';
 
 export async function extractBiomarkers(input: LabDataExtractionInput): Promise<LabDataExtractionOutput> {
   return extractBiomarkersFlow(input);
@@ -17,7 +18,7 @@ const prompt = ai.definePrompt({
   name: 'extractBiomarkersPrompt',
   input: { schema: LabDataExtractionInputSchema },
   output: { schema: LabDataExtractionOutputSchema },
-  model: gemini15Flash,
+  model: gemini15Pro,
   prompt: `You are a specialized medical data entry assistant. Your task is to accurately extract structured biomarker data from the provided lab report.
 
 Analyze the document and extract any of the following biomarkers. If a biomarker is not present, do not include it in the output. For each biomarker found, you MUST extract the date of the test. Ensure the date is in YYYY-MM-DD format.

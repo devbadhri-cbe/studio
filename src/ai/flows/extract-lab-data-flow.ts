@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to extract the patient's name from a lab report.
@@ -7,7 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { gemini15Flash } from '@genkit-ai/googleai';
+import { gemini15Pro } from '@genkit-ai/googleai';
 
 const PatientNameInputSchema = z.object({
   photoDataUri: z.string().describe("A photo or PDF of a lab report, as a data URI."),
@@ -29,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'extractPatientNamePrompt',
   input: { schema: PatientNameInputSchema },
   output: { schema: PatientNameOutputSchema },
-  model: gemini15Flash,
+  model: gemini15Pro,
   prompt: `You are a specialized medical data entry assistant. Your task is to analyze the provided document and extract ONLY the patient's full name.
 
 Do not extract any other information. If no name is found, do not return anything.

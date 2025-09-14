@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to identify the active ingredient of a medication.
@@ -7,7 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { MedicationInfoInputSchema, MedicationInfoOutputSchema, type MedicationInfoInput, type MedicationInfoOutput } from '@/lib/ai-types';
-import { gemini15Flash } from '@genkit-ai/googleai';
+import { gemini15Pro } from '@genkit-ai/googleai';
 
 export async function getMedicationInfo(input: MedicationInfoInput): Promise<MedicationInfoOutput> {
   return processMedicationFlow(input);
@@ -17,7 +18,7 @@ const prompt = ai.definePrompt({
   name: 'processMedicationPrompt',
   input: { schema: MedicationInfoInputSchema },
   output: { schema: MedicationInfoOutputSchema },
-  model: gemini15Flash,
+  model: gemini15Pro,
   prompt: `You are a pharmaceutical information expert. Your task is to identify the active pharmaceutical ingredient (API), standardize dosage, and validate food instructions for a given medication.
 
 User Input: "{{userInput}}"

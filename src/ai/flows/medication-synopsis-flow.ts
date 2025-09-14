@@ -7,7 +7,7 @@
  */
 import { ai } from '@/ai/genkit';
 import { MedicationSynopsisInputSchema, MedicationSynopsisOutputSchema, type MedicationSynopsisInput, type MedicationSynopsisOutput } from '@/lib/ai-types';
-import { gemini15Flash } from '@genkit-ai/googleai';
+import { gemini15Pro } from '@genkit-ai/googleai';
 
 export async function getMedicationSynopsis(input: MedicationSynopsisInput): Promise<MedicationSynopsisOutput> {
   return await getMedicationSynopsisFlow(input);
@@ -17,7 +17,7 @@ const prompt = ai.definePrompt({
     name: 'getMedicationSynopsisPrompt',
     input: { schema: MedicationSynopsisInputSchema },
     output: { schema: MedicationSynopsisOutputSchema },
-    model: gemini15Flash,
+    model: gemini15Pro,
     prompt: `You are a clinical pharmacist AI. Your task is to provide a clear, easy-to-understand synopsis for a given medication.
 
 Medication: "{{medicationName}}"
