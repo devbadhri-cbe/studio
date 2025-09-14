@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Generates health insights for a patient using an AI model.
@@ -14,7 +13,7 @@ import { GenerateInsightsInputSchema, GenerateInsightsOutputSchema, type Generat
 // Define the prompt that will be sent to the AI model.
 const insightPrompt = ai.definePrompt({
     name: 'insightPrompt',
-    model: googleAI.model('gemini-pro'),
+    model: googleAI.model('gemini-1.5-flash'),
     input: { schema: GenerateInsightsInputSchema },
     output: { schema: GenerateInsightsOutputSchema },
     prompt: `You are a health advisor. Based on the patient's age (derived from DOB) and gender, provide a list of recommended, age-appropriate screening tests.
