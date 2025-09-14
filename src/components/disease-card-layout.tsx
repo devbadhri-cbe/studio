@@ -68,10 +68,10 @@ export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardL
             </div>
         </AccordionTrigger>
         <AccordionContent>
-            <div className="p-6 pt-0 border-green-500 border-2">
+            <div className="p-6 pt-0 border-green-500 border-2 w-full">
                  <Separator className="mb-6" />
                 {hasMultipleBiomarkers ? (
-                    <Carousel setApi={setApi} className="border-yellow-500 border-2">
+                    <Carousel setApi={setApi} className="border-yellow-500 border-2 w-full">
                         <CarouselContent>
                             {childrenArray.map((child, index) => (
                                 <CarouselItem key={index}>
