@@ -335,30 +335,20 @@ export function MedicalHistoryCard() {
     
     if (aiResult.duplicateOf && (aiResult as any).existingConditionId) {
         const existingId = (aiResult as any).existingConditionId;
-        const existingDate = new Date((aiResult as any).existingConditionDate);
         const newDate = new Date(date);
 
-        if (newDate > existingDate) {
-            // New date is more recent, so update the existing record
-            const updatedCondition: MedicalCondition = {
-                id: existingId,
-                userInput: userInput,
-                condition: aiResult.standardizedName!,
-                date: date,
-                icdCode: aiResult.icdCode,
-                synopsis: aiResult.synopsis,
-                status: 'processed',
-            };
-            updateMedicalCondition(updatedCondition);
-            toast({ title: "Condition Updated", description: `${updatedCondition.condition} has been updated with a more recent diagnosis date.` });
-        } else {
-            // New date is not more recent, so inform the user and do nothing
-            toast({
-                variant: 'destructive',
-                title: 'Duplicate Not Added',
-                description: `A record for ${aiResult.duplicateOf} with a more recent or same diagnosis date already exists.`,
-            });
-        }
+        const updatedCondition: MedicalCondition = {
+            id: existingId,
+            userInput: userInput,
+            condition: aiResult.standardizedName!,
+            date: date,
+            icdCode: aiResult.icdCode,
+            synopsis: aiResult.synopsis,
+            status: 'processed',
+        };
+        updateMedicalCondition(updatedCondition);
+        toast({ title: "Condition Updated", description: `${updatedCondition.condition} has been updated.` });
+        
         setReviewingCondition(null);
         return;
     }
