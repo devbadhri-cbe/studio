@@ -41,7 +41,7 @@ Patient's Country: "{{country}}"
     c.  If you find a very close brand name match (e.g., user enters "Rosvas", you find "Rosuvas"), your 'spellingSuggestion' MUST be the corrected brand name string (e.g., "Rosuvas 10mg").
     d.  Only if no close brand name is found, but you are confident about the active ingredient, you may suggest the active ingredient (e.g., "Rosuvastatin 10mg").
 
-3.  **Extract Dosage**: Extract the 'dosage' from the 'userInput' string and standardize it, ensuring it includes the unit (e.g., "20 mg" becomes "20mg", "5" becomes "5mg" if that's the common dosage unit).
+3.  **Extract Dosage**: Extract the 'dosage' from the 'userInput' string and standardize it. You MUST ensure it includes the unit (e.g., "20 mg" becomes "20mg", "5" becomes "5mg" if that's the common dosage unit).
 
 4.  **Identify Brand Name**: Set 'isBrandName' to true if the input is a commercial brand name, and false if it's a generic name.
 
