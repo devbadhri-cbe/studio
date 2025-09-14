@@ -63,7 +63,7 @@ export default function HealthReportPage() {
         </div>
       </header>
 
-      <main className="container mx-auto p-4 md:p-8 printable-area">
+      <main className="container mx-auto p-4 md:p-8 printable-area max-w-5xl">
         <div className="p-8 border rounded-lg bg-card text-card-foreground">
           {/* Report Header */}
           <div className="flex justify-between items-start">
