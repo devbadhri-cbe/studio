@@ -13,7 +13,7 @@ import type { ReactNode } from 'react';
 export function ReminderCard() {
   const { patient } = useApp();
 
-  if (!profile) return null;
+  if (!patient) return null;
 
   const { presentMedicalConditions, dob, diseasePanels, weightRecords, bmi, bloodPressureRecords, fastingBloodGlucoseRecords, totalCholesterolRecords, thyroidRecords } = patient;
   const hasMedicalConditions = presentMedicalConditions && presentMedicalConditions.length > 0;
