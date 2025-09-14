@@ -3,7 +3,6 @@
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { useApp } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
@@ -11,19 +10,15 @@ import type { FoodInstruction, Medication } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { FormActions } from './form-actions';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Button } from './ui/button';
-import { Wand2 } from 'lucide-react';
-import type { MedicationInfoOutput } from '@/lib/ai-types';
 
 
 interface EditMedicationFormProps {
-  onSuccess: (data: MedicationInfoOutput & { userInput: string }) => void;
+  onSave: (data: Medication) => void;
   onCancel: () => void;
-  initialData: Medication & { userInput: string };
+  initialData: Medication;
 }
 
-export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMedicationFormProps) {
+export function EditMedicationForm({ onSave, onCancel, initialData }: EditMedicationFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
 
@@ -37,23 +32,20 @@ export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMed
     },
   });
 
-  const onSubmit = async (data: { userInput: string; name: string; dosage: string; frequency: string; foodInstructions?: FoodInstruction}) => {
+  const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     
     try {
-      const updatedData: MedicationInfoOutput & { userInput: string } = {
-          activeIngredient: data.name,
+      const updatedData: Medication = {
+          ...initialData,
+          name: data.name,
           userInput: data.userInput,
           dosage: data.dosage,
           frequency: data.frequency,
           foodInstructions: data.foodInstructions,
-          isBrandName: (initialData as any).isBrandName,
-          spellingSuggestion: (initialData as any).spellingSuggestion,
       };
       
-      toast({ title: "Medication Updated", description: `Your changes have been staged.`});
-
-      onSuccess(updatedData);
+      onSave(updatedData);
 
     } catch(e) {
       console.error(e);
@@ -62,8 +54,6 @@ export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMed
     
     setIsSubmitting(false);
   };
-  
-  const spellingSuggestion = (initialData as any).spellingSuggestion;
 
   return (
     <Card className="mt-2 border-primary border-2">
@@ -76,41 +66,11 @@ export function EditMedicationForm({ onSuccess, onCancel, initialData }: EditMed
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                  <FormField
                     control={form.control}
-                    name="userInput"
-                    rules={{ required: "Original input is required." }}
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Original Input</FormLabel>
-                        <FormControl>
-                            <Input placeholder="e.g., Tylenol 500mg" {...field} />
-                        </FormControl>
-                         {spellingSuggestion && (
-                           <Alert className="mt-2 p-2 bg-accent/10 border-accent/20">
-                             <AlertDescription className="text-xs flex items-center justify-between gap-2">
-                               <span>AI Suggestion: <span className="font-semibold">{spellingSuggestion}</span></span>
-                               <Button
-                                 type="button"
-                                 size="xs"
-                                 variant="outline"
-                                 onClick={() => form.setValue('userInput', spellingSuggestion)}
-                               >
-                                 <Wand2 className="mr-1 h-3 w-3" />
-                                 Use
-                               </Button>
-                             </AlertDescription>
-                           </Alert>
-                         )}
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                 />
-                 <FormField
-                    control={form.control}
                     name="name"
-                    rules={{ required: "Active ingredient is required." }}
+                    rules={{ required: "Medication name is required." }}
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Active Ingredient</FormLabel>
+                        <FormLabel>Medication Name</FormLabel>
                         <FormControl>
                             <Input placeholder="e.g., Acetaminophen" {...field} />
                         </FormControl>

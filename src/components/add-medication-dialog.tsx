@@ -11,172 +11,51 @@ import type { FoodInstruction, Medication } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { FormActions } from './form-actions';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { getMedicationInfo } from '@/ai/flows/process-medication-flow';
-import type { MedicationInfoOutput } from '@/lib/ai-types';
-import { MedicationReviewCard } from './medication-review-card';
 import { Loader2 } from 'lucide-react';
 
 
 interface AddMedicationFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (data: Omit<Medication, 'id'>) => void;
   onCancel: () => void;
 }
 
-type FormStep = 'input' | 'loading' | 'review' | 'failed';
 type UserInput = { userInput: string; frequency: string; foodInstructions?: FoodInstruction };
 
 
 export const AddMedicationForm = React.forwardRef((props: AddMedicationFormProps, ref) => {
   const { onSuccess, onCancel } = props;
-  const [step, setStep] = React.useState<FormStep>('input');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [userInput, setUserInput] = React.useState<UserInput | null>(null);
-  const [aiResult, setAiResult] = React.useState<MedicationInfoOutput | null>(null);
-  const [reprocessingMed, setReprocessingMed] = React.useState<Medication | null>(null);
-  const { addMedication, updateMedication, profile } = useApp();
-  const { toast } = useToast();
 
   const form = useForm({
     defaultValues: {
       userInput: '',
+      dosage: '',
       frequency: '',
       foodInstructions: undefined as FoodInstruction | undefined,
     },
   });
 
-  React.useImperativeHandle(ref, () => ({
-    startReprocessing: (med: Medication) => {
-      setReprocessingMed(med);
-      form.reset({
-        userInput: med.userInput,
-        frequency: med.frequency,
-        foodInstructions: med.foodInstructions,
-      });
-      handleInitialSubmit({
-        userInput: med.userInput,
-        frequency: med.frequency,
-        foodInstructions: med.foodInstructions,
-      });
-    },
-  }));
-
-  const handleInitialSubmit = async (data: UserInput) => {
+  const handleInitialSubmit = async (data: any) => {
     setIsSubmitting(true);
-    setStep('loading');
-    setUserInput(data);
     
-    try {
-      toast({
-          title: 'Processing Medication...',
-          description: `AI is analyzing "${data.userInput}".`
-      });
-
-      const result = await getMedicationInfo({ 
+    const newMedication: Omit<Medication, 'id'> = {
+        name: data.userInput,
         userInput: data.userInput,
+        dosage: data.dosage,
         frequency: data.frequency,
         foodInstructions: data.foodInstructions,
-        country: profile.country,
-      });
+        status: 'processed'
+    };
 
-      setAiResult(result);
-      if (result.activeIngredient) {
-        setStep('review');
-      } else {
-        throw new Error("Could not identify medication.");
-      }
-
-    } catch(e) {
-      console.error(e);
-      const failedMed: Omit<Medication, 'id'> = {
-        name: data.userInput, // Use user input as name for failed entry
-        userInput: data.userInput,
-        dosage: '',
-        frequency: data.frequency,
-        foodInstructions: data.foodInstructions,
-        status: 'failed',
-      };
-
-      if (reprocessingMed) {
-        // If reprocessing fails, update status but keep existing data
-        updateMedication({ ...reprocessingMed, ...failedMed, status: 'failed' });
-      } else {
-        addMedication(failedMed);
-      }
-      
-      toast({ variant: 'destructive', title: 'Processing Failed', description: 'The entry has been saved. Click on it later to retry.' });
-      onCancel(); // Close form
-    } finally {
-        setIsSubmitting(false);
-    }
+    onSuccess?.(newMedication);
+    setIsSubmitting(false);
   };
-
-  const handleFinalSave = (confirmedData: { aiResult: MedicationInfoOutput, userInput: UserInput }) => {
-      const { aiResult, userInput: finalUserInput } = confirmedData;
-      if (reprocessingMed) {
-        const updatedMed: Medication = {
-          ...reprocessingMed,
-          name: aiResult.activeIngredient,
-          userInput: finalUserInput.userInput,
-          dosage: aiResult.dosage || '',
-          frequency: aiResult.frequency || finalUserInput.frequency,
-          foodInstructions: aiResult.foodInstructions || finalUserInput.foodInstructions,
-          status: 'processed',
-          ...aiResult,
-        };
-        updateMedication(updatedMed);
-        toast({ title: "Medication Updated", description: `${aiResult.activeIngredient} has been successfully processed.`});
-      } else {
-        const newMedication: Omit<Medication, 'id'> = {
-            name: aiResult.activeIngredient,
-            userInput: finalUserInput.userInput,
-            dosage: aiResult.dosage || '',
-            frequency: aiResult.frequency || finalUserInput.frequency,
-            foodInstructions: aiResult.foodInstructions || finalUserInput.foodInstructions,
-            status: 'processed',
-            ...aiResult,
-        };
-        addMedication(newMedication);
-        toast({ title: "Medication Saved", description: `${aiResult.activeIngredient} has been added to your list.`});
-      }
-      
-      onCancel(); // Close the form area
-      onSuccess?.();
-  };
-
-  const handleEdit = (editedData: MedicationInfoOutput) => {
-    // When user confirms edits, save it
-    // The userInput might have been changed in the edit form
-     handleFinalSave({ aiResult: editedData, userInput: { userInput: editedData.userInput || userInput!.userInput, frequency: editedData.frequency || userInput!.frequency, foodInstructions: editedData.foodInstructions || userInput!.foodInstructions } });
-  }
-
-  if (step === 'loading') {
-    return (
-        <Card className="mt-2 border-primary border-2">
-            <CardContent className="p-6 flex items-center justify-center h-48">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="ml-3">AI is processing your entry...</p>
-            </CardContent>
-        </Card>
-    );
-  }
-
-  if (step === 'review' && aiResult && userInput) {
-    return (
-        <MedicationReviewCard 
-            userInput={userInput}
-            aiResult={aiResult}
-            onConfirm={handleFinalSave}
-            onEdit={handleEdit}
-            onCancel={() => { onCancel(); setStep('input'); }}
-        />
-    )
-  }
 
   return (
     <Card className="mt-2 border-primary border-2">
         <CardHeader>
           <CardTitle>Add New Medication</CardTitle>
-          <CardDescription>Enter the medication details. The AI will process and verify it.</CardDescription>
+          <CardDescription>Enter the medication details below.</CardDescription>
         </CardHeader>
         <CardContent>
             <Form {...form}>
@@ -187,13 +66,26 @@ export const AddMedicationForm = React.forwardRef((props: AddMedicationFormProps
                 rules={{ required: "Medication name is required." }}
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Medication Name & Dosage</FormLabel>
+                    <FormLabel>Medication Name</FormLabel>
                     <FormControl>
-                        <Input placeholder="e.g., Tylenol PM or Metformin 500mg" {...field} />
+                        <Input placeholder="e.g., Tylenol PM" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
                 )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="dosage"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Dosage</FormLabel>
+                        <FormControl>
+                        <Input placeholder="e.g., 500mg" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
                 />
                 <div className="grid grid-cols-1 gap-4">
                 <FormField
@@ -251,7 +143,7 @@ export const AddMedicationForm = React.forwardRef((props: AddMedicationFormProps
                 <FormActions
                   onCancel={onCancel}
                   isSubmitting={isSubmitting}
-                  submitText={'Process with AI'}
+                  submitText={'Save Medication'}
                 />
             </form>
             </Form>

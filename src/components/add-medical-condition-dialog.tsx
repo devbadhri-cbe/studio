@@ -11,7 +11,6 @@ import type { MedicalCondition } from '@/lib/types';
 import { parseISO } from 'date-fns';
 import { FormActions } from './form-actions';
 import { DateInput } from './date-input';
-import type { MedicalConditionOutput } from '@/lib/ai-types';
 
 interface MedicalConditionFormValues {
   userInput: string;
@@ -77,7 +76,7 @@ export function AddMedicalConditionForm({
     <Card className="mt-2 border-primary border-2">
       <CardHeader>
         <CardTitle>{initialData ? 'Edit' : 'Add'} Medical Condition</CardTitle>
-        <CardDescription>Enter a condition. The AI will process and verify it.</CardDescription>
+        <CardDescription>Enter the name of a medical condition.</CardDescription>
       </CardHeader>
       <CardContent>
         <FormProvider {...formMethods}>
@@ -107,7 +106,7 @@ export function AddMedicalConditionForm({
             <FormActions
               onCancel={onCancel}
               isSubmitting={isSubmitting}
-              submitText={'Process with AI'}
+              submitText={'Save Condition'}
             />
           </form>
         </FormProvider>
