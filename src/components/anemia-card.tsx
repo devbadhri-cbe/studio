@@ -13,6 +13,7 @@ export function AnemiaCard() {
             value="anemia"
             title="Anemia Card"
             icon={<HeartCrack className="h-6 w-6 text-primary" />}
+            isSingleAction={true}
         >
             <HemoglobinCard isReadOnly />
         </DiseaseCardLayout>
