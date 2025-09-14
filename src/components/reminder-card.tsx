@@ -22,7 +22,8 @@ export function ReminderCard() {
   const reminders: ReactNode[] = [];
 
   // Diabetes (Fasting Glucose) Reminder
-  if (diseasePanels?.diabetes?.glucose) {
+  const isGlucoseEnabled = diseasePanels?.diabetes?.glucose;
+  if (isGlucoseEnabled) {
     const sortedFastingBloodGlucoseRecords = [...(fastingBloodGlucoseRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const lastFastingBloodGlucoseRecord = sortedFastingBloodGlucoseRecords[0];
     let fastingBloodGlucoseContent;
@@ -76,7 +77,8 @@ export function ReminderCard() {
   }
 
   // Blood Pressure Reminder
-  if (diseasePanels?.hypertension?.bloodPressure) {
+  const isBloodPressureEnabled = diseasePanels?.hypertension?.bloodPressure;
+  if (isBloodPressureEnabled) {
     const sortedBloodPressureRecords = [...(bloodPressureRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const lastBloodPressureRecord = sortedBloodPressureRecords[0];
     let bloodPressureContent;
