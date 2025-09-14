@@ -5,6 +5,10 @@ import * as React from 'react';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { CardDescription, CardTitle } from './ui/card';
 import { Separator } from './ui/separator';
+import { PlusCircle } from 'lucide-react';
+import { availableBiomarkerCards } from '@/lib/biomarker-cards';
+import { ActionMenu } from './ui/action-menu';
+import { DropdownMenuItem } from './ui/dropdown-menu';
 
 interface DiseaseCardLayoutProps {
   value: string;
@@ -14,7 +18,39 @@ interface DiseaseCardLayoutProps {
 }
 
 export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardLayoutProps) {
-  
+  const [activeDialogKey, setActiveDialogKey] = React.useState<string | null>(null);
+
+  const validChildren = React.Children.toArray(children).filter(React.isValidElement);
+
+  const addRecordMenuItems = validChildren.map(child => {
+    const biomarkerKey = child.key as string;
+    if (!biomarkerKey || !availableBiomarkerCards[biomarkerKey]) return null;
+
+    const { addRecordLabel } = availableBiomarkerCards[biomarkerKey];
+    return (
+      <DropdownMenuItem key={biomarkerKey} onSelect={() => setActiveDialogKey(biomarkerKey)}>
+        <PlusCircle className="mr-2 h-4 w-4" />
+        {addRecordLabel}
+      </DropdownMenuItem>
+    );
+  }).filter(Boolean);
+
+  const renderActiveDialog = () => {
+    if (!activeDialogKey) return null;
+    const dialogElement = availableBiomarkerCards[activeDialogKey]?.addRecordDialog;
+    if (!dialogElement) return null;
+
+    return React.cloneElement(dialogElement, {
+      onCancel: () => setActiveDialogKey(null),
+    });
+  };
+
+  const Actions = addRecordMenuItems.length > 0 ? (
+    <ActionMenu tooltip="Add New Record" icon={<PlusCircle className="h-4 w-4" />}>
+      {addRecordMenuItems}
+    </ActionMenu>
+  ) : null;
+
   return (
     <AccordionItem value={value}>
         <AccordionTrigger>
@@ -25,15 +61,20 @@ export function DiseaseCardLayout({ value, title, icon, children }: DiseaseCardL
                 <div className="flex-1">
                     <CardTitle>{title}</CardTitle>
                 </div>
+                {Actions && <div onClick={(e) => e.stopPropagation()}>{Actions}</div>}
             </div>
         </AccordionTrigger>
         <AccordionContent>
-            <div className="p-6 pt-0 w-full">
-                 <Separator className="mb-6" />
-                <div className="space-y-4">
-                    {children}
-                </div>
-            </div>
+            {activeDialogKey ? (
+              <div className="p-6 pt-0 w-full">{renderActiveDialog()}</div>
+            ) : (
+              <div className="p-6 pt-0 w-full">
+                  <Separator className="mb-6" />
+                  <div className="space-y-4">
+                      {children}
+                  </div>
+              </div>
+            )}
         </AccordionContent>
     </AccordionItem>
   );

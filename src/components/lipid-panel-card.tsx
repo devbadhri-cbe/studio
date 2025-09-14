@@ -18,10 +18,10 @@ export function LipidPanelCard() {
             title="Lipid Card"
             icon={<Flame className="h-6 w-6 text-primary" />}
         >
-            <TotalCholesterolCard isReadOnly={true} />
-            <LdlCard isReadOnly={true} />
-            <HdlCard isReadOnly={true} />
-            <TriglyceridesCard isReadOnly={true} />
+            <TotalCholesterolCard key="totalCholesterol" isReadOnly={true} />
+            <LdlCard key="ldl" isReadOnly={true} />
+            <HdlCard key="hdl" isReadOnly={true} />
+            <TriglyceridesCard key="triglycerides" isReadOnly={true} />
         </DiseaseCardLayout>
     );
 }

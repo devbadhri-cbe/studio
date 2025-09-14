@@ -15,8 +15,8 @@ export function DiabetesCard() {
             title="Diabetes Card"
             icon={<Droplet className="h-6 w-6 text-primary" />}
         >
-            <Hba1cCard isReadOnly />
-            <FastingBloodGlucoseCard isReadOnly />
+            <Hba1cCard key="hba1c" isReadOnly />
+            <FastingBloodGlucoseCard key="glucose" isReadOnly />
         </DiseaseCardLayout>
     );
 }
