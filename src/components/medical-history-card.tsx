@@ -2,7 +2,7 @@
 
 'use client';
 
-import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
+import { Stethoscope, PlusCircle, Loader2, Pill, Info, Trash2, Edit, X, Settings, ShieldAlert, AlertTriangle as AlertTriangleIcon, RefreshCw } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -242,7 +242,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                                 <div className="mt-1 space-y-0.5 text-xs text-muted-foreground">
                                     {showOriginalInput && <p>You entered as "{originalInput}"</p>}
                                     {icdCode && <p>ICD-11: {icdCode}</p>}
-                                    {date && <p>{formatDate(date)}</p>}
+                                    {date && <p>Diagnosed: {formatDate(date)}</p>}
                                 </div>
                             ) : (
                                 <>
@@ -310,6 +310,8 @@ export function MedicalHistoryCard() {
         const existingCondition = profile.presentMedicalConditions.find(c => c.icdCode && c.icdCode === result.icdCode && c.id !== tempId);
         if(existingCondition) {
             result.duplicateOf = existingCondition.condition;
+            (result as any).existingConditionId = existingCondition.id;
+            (result as any).existingConditionDate = existingCondition.date;
         }
       }
       
@@ -329,22 +331,44 @@ export function MedicalHistoryCard() {
   }
 
   const handleConfirmCondition = (confirmedData: { aiResult: MedicalConditionOutput, userInput: string, date: string }) => {
-    if (confirmedData.aiResult.duplicateOf) {
-        toast({
-            variant: 'destructive',
-            title: 'Duplicate Condition',
-            description: `This is a duplicate of an existing condition: ${confirmedData.aiResult.duplicateOf}`,
-        });
+    const { aiResult, userInput, date } = confirmedData;
+    
+    if (aiResult.duplicateOf && (aiResult as any).existingConditionId) {
+        const existingId = (aiResult as any).existingConditionId;
+        const existingDate = new Date((aiResult as any).existingConditionDate);
+        const newDate = new Date(date);
+
+        if (newDate > existingDate) {
+            // New date is more recent, so update the existing record
+            const updatedCondition: MedicalCondition = {
+                id: existingId,
+                userInput: userInput,
+                condition: aiResult.standardizedName!,
+                date: date,
+                icdCode: aiResult.icdCode,
+                synopsis: aiResult.synopsis,
+                status: 'processed',
+            };
+            updateMedicalCondition(updatedCondition);
+            toast({ title: "Condition Updated", description: `${updatedCondition.condition} has been updated with a more recent diagnosis date.` });
+        } else {
+            // New date is not more recent, so inform the user and do nothing
+            toast({
+                variant: 'destructive',
+                title: 'Duplicate Not Added',
+                description: `A record for ${aiResult.duplicateOf} with a more recent or same diagnosis date already exists.`,
+            });
+        }
         setReviewingCondition(null);
         return;
     }
     
     const newCondition: Omit<MedicalCondition, 'id'> = {
-        userInput: confirmedData.userInput,
-        condition: confirmedData.aiResult.standardizedName!,
-        date: confirmedData.date,
-        icdCode: confirmedData.aiResult.icdCode,
-        synopsis: confirmedData.aiResult.synopsis,
+        userInput: userInput,
+        condition: aiResult.standardizedName!,
+        date: date,
+        icdCode: aiResult.icdCode,
+        synopsis: aiResult.synopsis,
         status: 'processed',
     };
     addMedicalCondition(newCondition);

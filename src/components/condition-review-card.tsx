@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
-import { Check, Edit, Wand2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Check, Edit, Wand2, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 import type { MedicalConditionOutput } from '@/lib/ai-types';
 import { Alert, AlertDescription } from './ui/alert';
 import { Input } from './ui/input';
@@ -50,7 +50,7 @@ export function ConditionReviewCard({ userInput, date, aiResult, onConfirm, onRe
                     <Alert variant="destructive">
                         <AlertTriangle className="h-4 w-4" />
                         <AlertDescription>
-                           This appears to be a duplicate of an existing condition: <strong>{currentAiResult.duplicateOf}</strong>. If this is not correct, please edit your input below and reprocess.
+                           This appears to be a duplicate of <strong>{currentAiResult.duplicateOf}</strong>. If this is incorrect, you can edit your input below and reprocess. If the date of diagnosis is more recent, the existing entry will be updated.
                         </AlertDescription>
                     </Alert>
                 )}
