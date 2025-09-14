@@ -14,6 +14,7 @@ import { BloodPressureChart } from '@/components/blood-pressure-chart';
 import { WeightChart } from '@/components/weight-chart';
 import { LipidChart } from '@/components/lipid-chart';
 import { format } from 'date-fns';
+import { ActionIcon } from '@/components/ui/action-icon';
 
 export default function HealthReportPage() {
   const { patient, isClient } = useApp();
@@ -44,19 +45,21 @@ export default function HealthReportPage() {
 
   return (
     <div className="bg-background min-h-screen">
-       <header className="sticky top-0 z-10 bg-background/90 backdrop-blur-sm border-b no-print p-4">
+       <header className="sticky top-0 z-10 bg-background/90 backdrop-blur-sm border-b no-print p-2">
         <div className="container mx-auto flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => router.back()}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
+          <ActionIcon 
+            tooltip="Back to Dashboard"
+            icon={<ArrowLeft />}
+            onClick={() => router.back()}
+          />
           <div className="flex-1 text-center font-bold">
             Health Report
           </div>
-          <Button size="sm" onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" />
-            Print / Save as PDF
-          </Button>
+          <ActionIcon 
+            tooltip="Print / Save as PDF"
+            icon={<Printer />}
+            onClick={handlePrint}
+          />
         </div>
       </header>
 
