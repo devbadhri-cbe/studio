@@ -4,12 +4,18 @@ import * as React from 'react';
 import { useApp } from '@/context/app-context';
 import { UploadRecordDialog } from './upload-record-dialog';
 import { Button } from './ui/button';
-import { UploadCloud } from 'lucide-react';
+import { UploadCloud, Share2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export function PatientHeader() {
   const { patient } = useApp();
+  const router = useRouter();
 
   const pageTitle = `Welcome, ${patient?.name || ''}!`;
+
+  const handleShare = () => {
+    router.push('/patient/report');
+  };
   
   return (
     <>
@@ -21,8 +27,12 @@ export function PatientHeader() {
           Your health overview. Consult your doctor before making any decisions.
       </p>
     </div>
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
         <UploadRecordDialog />
+        <Button size="sm" variant="outline" onClick={handleShare}>
+            <Share2 className="mr-2 h-4 w-4" />
+            Share Report
+        </Button>
       </div>
     </>
   );
