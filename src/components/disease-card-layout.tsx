@@ -72,14 +72,14 @@ export function DiseaseCardLayout({ value, title, subtitle, icon, children, isSi
   }
 
   return (
-    <AccordionItem value={value} className="border-red-500 border-2">
+    <AccordionItem value={value} className="border rounded-lg shadow-sm overflow-hidden">
        <div className="flex items-center w-full p-6">
             <AccordionTrigger className="p-0 border-blue-500 border-2">
                 <div className="flex items-center gap-3 text-left w-full cursor-pointer">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                         {icon}
                     </div>
-                    <div className="flex-1">
+                    <div>
                         <CardTitle>{title}</CardTitle>
                         {subtitle && <CardDescription className="mt-1">{subtitle}</CardDescription>}
                     </div>
