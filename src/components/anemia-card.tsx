@@ -15,7 +15,7 @@ export function AnemiaCard() {
             icon={<HeartCrack className="h-6 w-6 text-primary" />}
             isSingleAction={true}
         >
-            <HemoglobinCard isReadOnly />
+            <HemoglobinCard key="hemoglobin" isReadOnly />
         </DiseaseCardLayout>
     );
 }
