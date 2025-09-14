@@ -1,16 +1,15 @@
 
-
 'use client';
 
 import { useApp } from '@/context/app-context';
 import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears, differenceInDays } from 'date-fns';
-import { Bell, CheckCircle2, Heart, Sun, Activity, Zap } from 'lucide-react';
+import { Bell, CheckCircle2, Heart, Sun, Activity, Zap, Flame } from 'lucide-react';
 import { calculateAge } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { UniversalCard } from './universal-card';
 
 export function ReminderCard() {
-  const { fastingBloodGlucoseRecords, thyroidRecords, bloodPressureRecords, profile } = useApp();
+  const { fastingBloodGlucoseRecords, thyroidRecords, bloodPressureRecords, totalCholesterolRecords, profile } = useApp();
 
   if (!profile) return null;
 
@@ -164,6 +163,44 @@ export function ReminderCard() {
     }
   }
 
+  // Lipid Panel Logic
+  const sortedLipidRecords = [...(totalCholesterolRecords || [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const lastLipidRecord = sortedLipidRecords[0];
+  let lipidContent;
+
+  if (!lastLipidRecord) {
+      lipidContent = {
+          icon: <Flame className="h-5 w-5 text-yellow-500" />,
+          title: 'Time for your first Lipid Panel!',
+          description: 'Add a record to start tracking your cholesterol.',
+          color: 'bg-yellow-500/10',
+      };
+  } else {
+      const lastTestDate = new Date(lastLipidRecord.date);
+      // General guideline: every 4-6 years for low-risk adults.
+      // More often (e.g., 1-2 years) if high risk. We'll use 4 years as a general rule.
+      const retestYears = 4;
+      const yearsSinceLastTest = differenceInYears(new Date(), lastTestDate);
+      const nextTestDate = addYears(lastTestDate, retestYears);
+
+      if (yearsSinceLastTest >= retestYears) {
+          lipidContent = {
+              icon: <Flame className="h-5 w-5 text-destructive" />,
+              title: 'Lipid Panel Due',
+              description: `Last test was ${formatDistanceToNow(lastTestDate)} ago. Retesting is recommended.`,
+              color: 'bg-destructive/10',
+          };
+      } else {
+          lipidContent = {
+              icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+              title: 'Lipid Panel On Track',
+              description: `Next test is around ${format(nextTestDate, 'MMM yyyy')}.`,
+              color: 'bg-green-500/10',
+          };
+      }
+  }
+
+
   return (
     <UniversalCard
       icon={<Bell className="h-6 w-6 text-primary" />}
@@ -198,6 +235,16 @@ export function ReminderCard() {
                 <div>
                     <p className="font-semibold">{bloodPressureContent.title}</p>
                     <p className="text-sm text-muted-foreground">{bloodPressureContent.description}</p>
+                </div>
+            </div>
+            <Separator />
+            <div className="flex items-center gap-4">
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${lipidContent.color}`}>
+                    {lipidContent.icon}
+                </div>
+                <div>
+                    <p className="font-semibold">{lipidContent.title}</p>
+                    <p className="text-sm text-muted-foreground">{lipidContent.description}</p>
                 </div>
             </div>
         </div>
