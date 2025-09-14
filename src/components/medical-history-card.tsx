@@ -239,11 +239,11 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                     ) : (
                         <>
                             {type === 'condition' ? (
-                                <>
-                                    {showOriginalInput && <p className="text-muted-foreground text-xs mt-0.5">You entered as "{originalInput}"</p>}
-                                    {icdCode && <p className="text-xs text-muted-foreground mt-0.5">ICD-11: {icdCode}</p>}
-                                    {date && <p className="text-xs text-muted-foreground mt-0.5">{formatDate(date)}</p>}
-                                </>
+                                <div className="mt-1 space-y-0.5">
+                                    {showOriginalInput && <p className="text-muted-foreground text-xs">You entered as "{originalInput}"</p>}
+                                    {icdCode && <p className="text-xs text-muted-foreground">ICD-11: {icdCode}</p>}
+                                    {date && <p className="text-xs text-muted-foreground">{formatDate(date)}</p>}
+                                </div>
                             ) : (
                                 <>
                                     {showOriginalInput && <p className="text-muted-foreground text-xs italic mt-0.5">({originalInput})</p>}
@@ -320,6 +320,18 @@ export function MedicalHistoryCard() {
   }
 
   const handleConfirmCondition = (confirmedData: { aiResult: MedicalConditionOutput, userInput: string, date: string }) => {
+    const isDuplicate = profile.presentMedicalConditions.some(c => c.icdCode && c.icdCode === confirmedData.aiResult.icdCode);
+
+    if (isDuplicate) {
+        toast({
+            variant: 'destructive',
+            title: 'Duplicate Condition',
+            description: `This condition (${confirmedData.aiResult.standardizedName}) already exists.`,
+        });
+        setReviewingCondition(null);
+        return;
+    }
+    
     const newCondition: Omit<MedicalCondition, 'id'> = {
         userInput: confirmedData.userInput,
         condition: confirmedData.aiResult.standardizedName!,
