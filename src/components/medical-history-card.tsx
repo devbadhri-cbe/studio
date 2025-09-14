@@ -224,7 +224,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
         >
             <div className="flex items-start gap-2 w-full">
                 <div className="flex-1">
-                    <p className="font-semibold text-foreground text-sm">{title}</p>
+                     <p className="font-semibold text-foreground text-sm">{title}</p>
                      
                     {isPending ? (
                         <div className="flex items-center gap-1.5 mt-1">
@@ -305,9 +305,12 @@ export function MedicalHistoryCard() {
     try {
       const result = await processMedicalCondition({ condition: condition.userInput || '' });
       
-      const existingCondition = profile.presentMedicalConditions.find(c => c.icdCode && c.icdCode === result.icdCode);
-      if(existingCondition) {
-          result.duplicateOf = existingCondition.condition;
+      // Before showing review, check for duplicates
+      if (result.isValid && result.icdCode) {
+        const existingCondition = profile.presentMedicalConditions.find(c => c.icdCode && c.icdCode === result.icdCode && c.id !== tempId);
+        if(existingCondition) {
+            result.duplicateOf = existingCondition.condition;
+        }
       }
       
       if (result.isValid) {
@@ -347,6 +350,18 @@ export function MedicalHistoryCard() {
     addMedicalCondition(newCondition);
     toast({ title: "Condition Saved", description: `${newCondition.condition} has been added to your list.`});
     setReviewingCondition(null);
+  }
+
+  const handleReprocessCondition = ({ userInput, date }: { userInput: string, date: string }) => {
+      setReviewingCondition(null); // Close the current review card
+      // Start the process from scratch with the new user input
+      handleProcessCondition({
+          id: uuidv4(),
+          userInput,
+          date,
+          condition: '',
+          status: 'pending_review'
+      });
   }
   
   const handleProcessMedication = async (med: Medication) => {
@@ -438,6 +453,7 @@ export function MedicalHistoryCard() {
             date={reviewingCondition.date}
             aiResult={reviewingCondition.aiResult}
             onConfirm={handleConfirmCondition}
+            onReprocess={handleReprocessCondition}
             onCancel={() => setReviewingCondition(null)}
         />
       )}
