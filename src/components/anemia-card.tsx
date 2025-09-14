@@ -14,7 +14,7 @@ export function AnemiaCard() {
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <UniversalCard
-                title="Anemia Panel"
+                title="Anemia Card"
                 icon={<HeartCrack className="h-6 w-6 text-primary" />}
             >
                 <CollapsibleContent>

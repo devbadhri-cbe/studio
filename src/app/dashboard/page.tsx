@@ -1,3 +1,4 @@
+
 'use client';
 
 import { TitleBar } from '@/components/ui/title-bar';
@@ -24,11 +25,11 @@ export default function HomeDashboard() {
   const router = useRouter();
   const { isClient, setPatientData } = useApp();
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
-  const [diseasePanelSearchQuery, setDiseasePanelSearchQuery] = React.useState('');
+  const [diseaseCardSearchQuery, setDiseaseCardSearchQuery] = React.useState('');
   const [patientSearchQuery, setPatientSearchQuery] = React.useState('');
   
   const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
-  const [isDiseasePanelsOpen, setIsDiseasePanelsOpen] = React.useState(true);
+  const [isDiseaseCardsOpen, setIsDiseaseCardsOpen] = React.useState(true);
   const [isPatientPanelOpen, setIsPatientPanelOpen] = React.useState(true);
 
   if (!isClient) {
@@ -105,15 +106,15 @@ export default function HomeDashboard() {
                  </CollapsibleContent>
             </Collapsible>
           
-            <Collapsible open={isDiseasePanelsOpen} onOpenChange={setIsDiseasePanelsOpen}>
+            <Collapsible open={isDiseaseCardsOpen} onOpenChange={setIsDiseaseCardsOpen}>
                 <DashboardSectionToggle
-                    title="Disease Panels"
-                    subtitle="Manage high-level disease-specific panels"
+                    title="Disease Cards"
+                    subtitle="Manage high-level disease-specific cards"
                     icon={<Heart className="h-6 w-6 text-primary" />}
-                    isOpen={isDiseasePanelsOpen}
-                    searchQuery={diseasePanelSearchQuery}
-                    onSearchChange={setDiseasePanelSearchQuery}
-                    searchPlaceholder="Search disease panels..."
+                    isOpen={isDiseaseCardsOpen}
+                    searchQuery={diseaseCardSearchQuery}
+                    onSearchChange={setDiseaseCardSearchQuery}
+                    searchPlaceholder="Search disease cards..."
                 />
                 <CollapsibleContent>
                     <Card>

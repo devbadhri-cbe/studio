@@ -18,7 +18,7 @@ export function LipidPanelCard() {
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <UniversalCard
-                title="Lipid Panel"
+                title="Lipid Card"
                 icon={<Flame className="h-6 w-6 text-primary" />}
             >
                 <CollapsibleContent>

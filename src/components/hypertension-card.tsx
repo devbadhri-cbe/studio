@@ -14,7 +14,7 @@ export function HypertensionCard() {
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <UniversalCard
-                title="Hypertension Panel"
+                title="Hypertension Card"
                 icon={<Heart className="h-6 w-6 text-primary" />}
             >
                 <CollapsibleContent>

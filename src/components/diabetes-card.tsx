@@ -15,7 +15,7 @@ export function DiabetesCard() {
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <UniversalCard
-                title="Diabetes Panel"
+                title="Diabetes Card"
                 icon={<Droplet className="h-6 w-6 text-primary" />}
             >
                 <CollapsibleContent>
