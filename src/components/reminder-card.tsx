@@ -3,8 +3,8 @@
 
 import * as React from 'react';
 import { useApp } from '@/context/app-context';
-import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears, differenceInDays } from 'date-fns';
-import { Bell, CheckCircle2, Heart, Sun, Activity, Zap, Flame } from 'lucide-react';
+import { differenceInMonths, formatDistanceToNow, addMonths, format, differenceInYears, addYears } from 'date-fns';
+import { Bell, CheckCircle2, Heart, Activity, Zap, Flame } from 'lucide-react';
 import { calculateAge } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { UniversalCard } from './universal-card';
