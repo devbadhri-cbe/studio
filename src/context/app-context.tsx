@@ -31,7 +31,9 @@ interface AppContextType {
   isClient: boolean;
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  setPatientData: (data: Patient, isReadOnly: boolean) => void;
+  setPatientData: (data: Patient, isDeveloper: boolean) => void;
+  isDeveloperMode: boolean;
+  setIsDeveloperMode: (isDeveloper: boolean) => void;
   
   // Data modification functions
   addHba1cRecord: (record: Omit<Hba1cRecord, 'id'>) => string;
@@ -124,6 +126,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isClient, setIsClient] = React.useState(false);
   const [theme, setThemeState] = React.useState<Theme>('system');
+  const [isDeveloperMode, setIsDeveloperMode] = React.useState(false);
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -136,6 +139,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             localPatientData.diseasePanels = defaultDiseasePanelState;
         }
         setPatientState(localPatientData);
+        setIsDeveloperMode(false); // Default to user mode when loading from storage
       }
     } catch (e) {
       console.error("Failed to parse local patient data", e);
@@ -146,11 +150,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
   
   const setPatient: AppContextType['setPatient'] = (newPatient) => {
+    if (newPatient) {
+        // When setting a patient directly (likely after creation), we are in user mode.
+        setIsDeveloperMode(false);
+    }
     setPatientState(newPatient);
   };
 
   React.useEffect(() => {
-    if (isClient) {
+    if (isClient && !isDeveloperMode) { // Only persist to storage in user mode
       if (patient) {
         // Update BMI whenever patient data changes (e.g., height update or new weight record)
         const patientWithBmi = produce(patient, draft => {
@@ -163,11 +171,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('patientData');
       }
     }
-  }, [patient, isClient]);
+  }, [patient, isClient, isDeveloperMode]);
 
 
-  const setPatientData: AppContextType['setPatientData'] = (data, isReadOnly) => {
+  const setPatientData: AppContextType['setPatientData'] = (data, isDeveloper) => {
     setPatientState(data);
+    setIsDeveloperMode(isDeveloper);
   };
 
   React.useEffect(() => {
@@ -378,6 +387,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     theme,
     setTheme,
     setPatientData,
+    isDeveloperMode,
+    setIsDeveloperMode,
     addHba1cRecord,
     addWeightRecord,
     addFastingBloodGlucoseRecord,

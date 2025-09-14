@@ -23,7 +23,7 @@ import { ActionIcon } from '@/components/ui/action-icon';
 
 
 export default function PatientDashboardPage() {
-  const { isClient, patient, setPatientData, setPatient } = useApp();
+  const { isClient, patient, setPatient, isDeveloperMode, setIsDeveloperMode } = useApp();
   const isMobile = useIsMobile();
   const router = useRouter();
 
@@ -44,6 +44,7 @@ export default function PatientDashboardPage() {
   
   const handleBack = () => {
     setPatient(null); 
+    setIsDeveloperMode(false);
     router.push('/dashboard');
   }
 
@@ -67,11 +68,13 @@ export default function PatientDashboardPage() {
           title={['Health', 'Guardian', 'Lite']}
           subtitle={developerCredit}
           backButton={
-            <ActionIcon
-                tooltip="Back to Developer Dashboard"
-                icon={<ArrowLeft />}
-                onClick={handleBack}
-            />
+            isDeveloperMode && (
+                <ActionIcon
+                    tooltip="Back to Developer Dashboard"
+                    icon={<ArrowLeft />}
+                    onClick={handleBack}
+                />
+            )
           }
         />
         <main className="flex-1 p-4 md:p-6 pb-4">
