@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -27,7 +28,7 @@ export function PatientHeader() {
           Your health overview. Consult your doctor before making any decisions.
       </p>
     </div>
-      <div className="flex items-center gap-2">
+      <div className="flex justify-center items-center gap-2">
         <UploadRecordDialog />
         <Button size="sm" variant="outline" onClick={handleShare}>
             <Share2 className="mr-2 h-4 w-4" />
