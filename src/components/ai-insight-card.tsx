@@ -14,13 +14,13 @@ import { Alert, AlertDescription } from './ui/alert';
 const RATE_LIMIT_HOURS = 12; // Allow generation every 12 hours
 
 export function AiInsightCard() {
-  const { patient, setPatient } = useApp();
+  const { patient, setPatient, isDeveloperMode } = useApp();
   const [isLoading, setIsLoading] = React.useState(false);
 
   if (!patient) return null;
 
   const handleGenerateInsight = async () => {
-    if (patient.lastInsightTimestamp) {
+    if (!isDeveloperMode && patient.lastInsightTimestamp) {
       const hoursSinceLast = differenceInHours(new Date(), new Date(patient.lastInsightTimestamp));
       if (hoursSinceLast < RATE_LIMIT_HOURS) {
         toast({
