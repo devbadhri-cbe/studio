@@ -67,7 +67,6 @@ interface AppContextType {
   updateMedication: (medication: Medication) => void;
   approveMedicalCondition: (id: string) => void;
   dismissSuggestion: (id: string) => void;
-  toggleBiomarkerInPanel: (panel: keyof DiseasePanelState, biomarker: string) => void;
 
   deleteProfile: () => void;
   getFullPatientData: () => Patient | null;
@@ -294,20 +293,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setPatient(nextState);
   };
   
-  const toggleBiomarkerInPanel = (panel: keyof DiseasePanelState, biomarker: string) => {
-    if (!patient) return;
-    const nextState = produce(patient, draft => {
-      if (!draft.diseasePanels) {
-        draft.diseasePanels = defaultDiseasePanelState;
-      }
-      const currentPanel = draft.diseasePanels[panel];
-      if (currentPanel && biomarker in currentPanel) {
-        (currentPanel as any)[biomarker] = !(currentPanel as any)[biomarker];
-      }
-    });
-    setPatient(nextState);
-  }
-
   const deleteProfile = () => {
     setPatient(null);
   }
@@ -408,7 +393,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updateMedication,
     approveMedicalCondition,
     dismissSuggestion,
-    toggleBiomarkerInPanel,
     deleteProfile,
     getFullPatientData,
     profile,
