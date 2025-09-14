@@ -9,9 +9,16 @@
 import { ai } from '@/ai/genkit';
 import { MedicalConditionInputSchema, MedicalConditionOutputSchema, type MedicalConditionInput, type MedicalConditionOutput } from '@/lib/ai-types';
 import { gemini15Pro } from '@genkit-ai/googleai';
+import { getFromCache, storeInCache } from '@/lib/ai-cache';
 
 export async function processMedicalCondition(input: MedicalConditionInput): Promise<MedicalConditionOutput> {
-  return processMedicalConditionFlow(input);
+  const cached = await getFromCache<MedicalConditionOutput>('processMedicalConditionFlow', input);
+  if (cached) return cached;
+  
+  const result = await processMedicalConditionFlow(input);
+  
+  await storeInCache('processMedicalConditionFlow', input, result);
+  return result;
 }
 
 const prompt = ai.definePrompt({

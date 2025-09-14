@@ -8,9 +8,16 @@
 import { ai } from '@/ai/genkit';
 import { DrugInteractionInputSchema, DrugInteractionOutputSchema, type DrugInteractionInput, type DrugInteractionOutput } from '@/lib/ai-types';
 import { gemini15Pro } from '@genkit-ai/googleai';
+import { getFromCache, storeInCache } from '@/lib/ai-cache';
 
 export async function checkDrugInteractions(input: DrugInteractionInput): Promise<DrugInteractionOutput> {
-  return checkDrugInteractionsFlow(input);
+  const cached = await getFromCache<DrugInteractionOutput>('checkDrugInteractionsFlow', input);
+  if (cached) return cached;
+
+  const result = await checkDrugInteractionsFlow(input);
+  
+  await storeInCache('checkDrugInteractionsFlow', input, result);
+  return result;
 }
 
 const prompt = ai.definePrompt({

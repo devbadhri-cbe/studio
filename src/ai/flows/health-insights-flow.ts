@@ -8,9 +8,16 @@
 import { ai } from '@/ai/genkit';
 import { HealthInsightsInputSchema, HealthInsightsOutputSchema, type HealthInsightsInput, type HealthInsightsOutput } from '@/lib/ai-types';
 import { gemini15Pro } from '@genkit-ai/googleai';
+import { getFromCache, storeInCache } from '@/lib/ai-cache';
 
 export async function getHealthInsights(input: HealthInsightsInput): Promise<HealthInsightsOutput> {
-  return await getHealthInsightsFlow(input);
+  const cached = await getFromCache<HealthInsightsOutput>('getHealthInsightsFlow', input);
+  if (cached) return cached;
+
+  const result = await getHealthInsightsFlow(input);
+
+  await storeInCache('getHealthInsightsFlow', input, result);
+  return result;
 }
 
 const prompt = ai.definePrompt({
