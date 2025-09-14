@@ -74,7 +74,7 @@ export function DiseaseCardLayout({ value, title, subtitle, icon, children, isSi
   return (
     <AccordionItem value={value} className="border-red-500 border-2">
        <div className="flex items-center w-full p-6">
-            <AccordionTrigger className="p-0 flex-1 border-blue-500 border-2">
+            <AccordionTrigger className="p-0 border-blue-500 border-2">
                 <div className="flex items-center gap-3 text-left w-full cursor-pointer">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                         {icon}
@@ -85,17 +85,15 @@ export function DiseaseCardLayout({ value, title, subtitle, icon, children, isSi
                     </div>
                 </div>
             </AccordionTrigger>
-             {Actions && <div className="pl-4 border-purple-500 border-2" onClick={(e) => e.stopPropagation()}>{Actions}</div>}
+             <div className="flex-1 flex justify-end pl-4 border-purple-500 border-2" onClick={(e) => e.stopPropagation()}>{Actions}</div>
         </div>
         <AccordionContent>
             {activeDialogKey ? (
               <div className="px-6 pb-6 w-full">{renderActiveDialog()}</div>
             ) : (
-              <div className="px-6 pb-6 w-full">
+              <div className="space-y-4 px-6 pb-6">
                   <Separator className="mb-6" />
-                  <div className="space-y-4">
-                      {children}
-                  </div>
+                  {children}
               </div>
             )}
         </AccordionContent>
