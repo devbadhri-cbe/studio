@@ -297,8 +297,7 @@ export function MedicalHistoryCard() {
   const handleProcessCondition = async (condition: MedicalCondition) => {
     if (condition.status === 'processed') return; 
     
-    const tempId = condition.id || uuidv4();
-    updateMedicalCondition({ ...condition, id: tempId, status: 'pending_review' });
+    updateMedicalCondition({ ...condition, status: 'pending_review' });
 
     toast({ title: "Processing Condition...", description: `Asking AI about "${condition.userInput}"`});
     
@@ -307,7 +306,7 @@ export function MedicalHistoryCard() {
       
       // Before showing review, check for duplicates
       if (result.isValid && result.icdCode) {
-        const existingCondition = profile.presentMedicalConditions.find(c => c.icdCode && c.icdCode === result.icdCode && c.id !== tempId);
+        const existingCondition = profile.presentMedicalConditions.find(c => c.icdCode && c.icdCode === result.icdCode && c.id !== condition.id);
         if(existingCondition) {
             result.duplicateOf = existingCondition.condition;
             (result as any).existingConditionId = existingCondition.id;
@@ -318,7 +317,7 @@ export function MedicalHistoryCard() {
       if (result.isValid) {
         setReviewingCondition({ userInput: condition.userInput || '', date: condition.date, aiResult: result });
         // We remove the temporary pending item only if the AI returns a valid result that will be shown in the review card
-        removeMedicalCondition(tempId);
+        removeMedicalCondition(condition.id);
       } else {
         updateMedicalCondition(produce(condition, draft => { draft.status = 'failed' }));
         toast({ variant: 'destructive', title: 'Condition Not Recognized', description: `Please check spelling and try again.` });
@@ -326,7 +325,7 @@ export function MedicalHistoryCard() {
     } catch(e) {
       console.error(e);
       updateMedicalCondition(produce(condition, draft => { draft.status = 'failed' }));
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition.' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not process condition. Your entry has been saved. You can click on it to try again later.' });
     }
   }
 
@@ -334,7 +333,20 @@ export function MedicalHistoryCard() {
     const { aiResult, userInput, date } = confirmedData;
     
     if (aiResult.duplicateOf && (aiResult as any).existingConditionId) {
-        toast({ title: "Duplicate Condition", description: `"${aiResult.duplicateOf}" is already in your list. The existing entry has been preserved.` });
+        const existingDate = (aiResult as any).existingConditionDate;
+        const newDate = date;
+
+        // Keep the record with the older diagnosis date
+        if (new Date(existingDate) < new Date(newDate)) {
+            toast({ title: "Duplicate Condition", description: `"${aiResult.duplicateOf}" is already in your list with an earlier diagnosis date, so the existing record has been preserved.` });
+        } else {
+             toast({ title: "Duplicate Condition", description: `"${aiResult.duplicateOf}" is already in your list. The diagnosis date has been updated.` });
+            // Since we're keeping the existing record, we might need to update its date if the new one is older
+            const existingCondition = profile.presentMedicalConditions.find(c => c.id === (aiResult as any).existingConditionId);
+            if (existingCondition) {
+                updateMedicalCondition({ ...existingCondition, date: newDate });
+            }
+        }
         setReviewingCondition(null);
         return;
     }
@@ -355,13 +367,15 @@ export function MedicalHistoryCard() {
   const handleReprocessCondition = ({ userInput, date }: { userInput: string, date: string }) => {
       setReviewingCondition(null); // Close the current review card
       // Start the process from scratch with the new user input
-      handleProcessCondition({
+      const newCondition: MedicalCondition = {
           id: uuidv4(),
           userInput,
           date,
           condition: '',
           status: 'pending_review'
-      });
+      };
+      addMedicalCondition(newCondition);
+      handleProcessCondition(newCondition);
   }
   
   const handleProcessMedication = async (med: Medication) => {
@@ -379,6 +393,7 @@ export function MedicalHistoryCard() {
           condition: '', // No standard name yet
           status: 'pending_review',
       };
+      addMedicalCondition(newCondition);
       handleProcessCondition(newCondition);
   }
   
