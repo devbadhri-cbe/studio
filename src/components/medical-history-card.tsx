@@ -239,10 +239,10 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
                     ) : (
                         <>
                             {type === 'condition' ? (
-                                <div className="mt-1 space-y-0.5">
-                                    {showOriginalInput && <p className="text-muted-foreground text-xs">You entered as "{originalInput}"</p>}
-                                    {icdCode && <p className="text-xs text-muted-foreground">ICD-11: {icdCode}</p>}
-                                    {date && <p className="text-xs text-muted-foreground">{formatDate(date)}</p>}
+                                <div className="mt-1 space-y-0.5 text-xs text-muted-foreground">
+                                    {showOriginalInput && <p>You entered as "{originalInput}"</p>}
+                                    {icdCode && <p>ICD-11: {icdCode}</p>}
+                                    {date && <p>{formatDate(date)}</p>}
                                 </div>
                             ) : (
                                 <>
@@ -304,6 +304,12 @@ export function MedicalHistoryCard() {
     
     try {
       const result = await processMedicalCondition({ condition: condition.userInput || '' });
+      
+      const existingCondition = profile.presentMedicalConditions.find(c => c.icdCode && c.icdCode === result.icdCode);
+      if(existingCondition) {
+          result.duplicateOf = existingCondition.condition;
+      }
+      
       if (result.isValid) {
         setReviewingCondition({ userInput: condition.userInput || '', date: condition.date, aiResult: result });
         // We remove the temporary pending item only if the AI returns a valid result that will be shown in the review card
@@ -320,13 +326,11 @@ export function MedicalHistoryCard() {
   }
 
   const handleConfirmCondition = (confirmedData: { aiResult: MedicalConditionOutput, userInput: string, date: string }) => {
-    const isDuplicate = profile.presentMedicalConditions.some(c => c.icdCode && c.icdCode === confirmedData.aiResult.icdCode);
-
-    if (isDuplicate) {
+    if (confirmedData.aiResult.duplicateOf) {
         toast({
             variant: 'destructive',
             title: 'Duplicate Condition',
-            description: `This condition (${confirmedData.aiResult.standardizedName}) already exists.`,
+            description: `This is a duplicate of an existing condition: ${confirmedData.aiResult.duplicateOf}`,
         });
         setReviewingCondition(null);
         return;

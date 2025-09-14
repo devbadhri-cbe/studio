@@ -107,6 +107,7 @@ export const MedicalConditionOutputSchema = z.object({
     suggestion: z.string().optional().describe('A corrected name for the condition if a spelling or grammar mistake is suspected in the user input.'),
     icdCode: z.string().optional().describe('The ICD-11 code for the identified condition.'),
     synopsis: z.string().optional().describe('A brief, easy-to-understand synopsis of the condition.'),
+    duplicateOf: z.string().optional().describe('The name of an existing condition if the new one is a duplicate.'),
 });
 export type MedicalConditionOutput = z.infer<typeof MedicalConditionOutputSchema>;
 

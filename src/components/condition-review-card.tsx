@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
-import { Check, Edit, Wand2 } from 'lucide-react';
+import { Check, Edit, Wand2, AlertTriangle } from 'lucide-react';
 import type { MedicalConditionOutput } from '@/lib/ai-types';
 import { Alert, AlertDescription } from './ui/alert';
 
@@ -38,6 +38,14 @@ export function ConditionReviewCard({ userInput, date, aiResult, onConfirm, onCa
                 <CardDescription>Please confirm the condition identified by the AI.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+                {currentAiResult.duplicateOf && (
+                    <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription>
+                            This appears to be a duplicate of an existing condition: <strong>{currentAiResult.duplicateOf}</strong>. Saving this will create a redundant entry.
+                        </AlertDescription>
+                    </Alert>
+                )}
                 <div className="space-y-2 rounded-lg border bg-muted/30 p-4">
                     <h4 className="font-semibold text-sm">Your Input</h4>
                     <div className="flex justify-between text-sm">
