@@ -44,6 +44,10 @@ export function AiInsightCard() {
         hba1cRecords: patient.hba1cRecords,
         bloodPressureRecords: patient.bloodPressureRecords,
         fastingBloodGlucoseRecords: patient.fastingBloodGlucoseRecords,
+        totalCholesterolRecords: patient.totalCholesterolRecords,
+        ldlRecords: patient.ldlRecords,
+        hdlRecords: patient.hdlRecords,
+        triglyceridesRecords: patient.triglyceridesRecords,
       };
 
       const result = await generateInsights(insightInput);

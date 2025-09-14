@@ -60,6 +60,34 @@ const insightPrompt = ai.definePrompt({
     - {{this.value}} mg/dL on {{this.date}}
     {{/each}}
     {{/if}}
+
+    {{#if totalCholesterolRecords}}
+    Recent Total Cholesterol:
+    {{#each totalCholesterolRecords}}
+    - {{this.value}} mg/dL on {{this.date}}
+    {{/each}}
+    {{/if}}
+
+    {{#if ldlRecords}}
+    Recent LDL Cholesterol:
+    {{#each ldlRecords}}
+    - {{this.value}} mg/dL on {{this.date}}
+    {{/each}}
+    {{/if}}
+
+    {{#if hdlRecords}}
+    Recent HDL Cholesterol:
+    {{#each hdlRecords}}
+    - {{this.value}} mg/dL on {{this.date}}
+    {{/each}}
+    {{/if}}
+
+    {{#if triglyceridesRecords}}
+    Recent Triglycerides:
+    {{#each triglyceridesRecords}}
+    - {{this.value}} mg/dL on {{this.date}}
+    {{/each}}
+    {{/if}}
     `,
 });
 

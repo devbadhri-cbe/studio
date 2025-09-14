@@ -11,6 +11,10 @@ export const GenerateInsightsInputSchema = z.object({
   hba1cRecords: z.array(z.object({ value: z.number(), date: z.string() })).optional().describe("HbA1c records."),
   bloodPressureRecords: z.array(z.object({ systolic: z.number(), diastolic: z.number(), date: z.string() })).optional().describe("Blood pressure records."),
   fastingBloodGlucoseRecords: z.array(z.object({ value: z.number(), date: z.string() })).optional().describe("Fasting blood glucose records in mg/dL."),
+  totalCholesterolRecords: z.array(z.object({ value: z.number(), date: z.string() })).optional().describe("Total cholesterol records in mg/dL."),
+  ldlRecords: z.array(z.object({ value: z.number(), date: z.string() })).optional().describe("LDL cholesterol records in mg/dL."),
+  hdlRecords: z.array(z.object({ value: z.number(), date: z.string() })).optional().describe("HDL cholesterol records in mg/dL."),
+  triglyceridesRecords: z.array(z.object({ value: z.number(), date: z.string() })).optional().describe("Triglycerides records in mg/dL."),
 });
 export type GenerateInsightsInput = z.infer<typeof GenerateInsightsInputSchema>;
 
