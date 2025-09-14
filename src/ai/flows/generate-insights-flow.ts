@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Generates health insights for a patient using an AI model.
@@ -6,12 +7,14 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { GenerateInsightsInputSchema, GenerateInsightsOutputSchema, type GenerateInsightsInput, type GenerateInsightsOutput } from '@/lib/ai-types';
 
 
 // Define the prompt that will be sent to the AI model.
 const insightPrompt = ai.definePrompt({
     name: 'insightPrompt',
+    model: googleAI.model('gemini-2.5-flash-preview-001'),
     input: { schema: GenerateInsightsInputSchema },
     output: { schema: GenerateInsightsOutputSchema },
     prompt: `You are a health advisor. Based on the patient's age (derived from DOB) and gender, provide a list of recommended, age-appropriate screening tests.
