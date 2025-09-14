@@ -87,13 +87,24 @@ export const AddMedicationForm = React.forwardRef((props: AddMedicationFormProps
 
     } catch(e) {
       console.error(e);
+      const failedMed: Omit<Medication, 'id'> = {
+        name: data.userInput, // Use user input as name for failed entry
+        userInput: data.userInput,
+        dosage: '',
+        frequency: data.frequency,
+        foodInstructions: data.foodInstructions,
+        status: 'failed',
+      };
+
       if (reprocessingMed) {
         // If reprocessing fails, update status but keep existing data
-        updateMedication({ ...reprocessingMed, status: 'failed', ...aiResult });
+        updateMedication({ ...reprocessingMed, ...failedMed, status: 'failed' });
+      } else {
+        addMedication(failedMed);
       }
-      setStep('failed');
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not process medication. Please check the name and try again.' });
-       onCancel(); // Close form on failure
+      
+      toast({ variant: 'destructive', title: 'Processing Failed', description: 'The entry has been saved. Click on it later to retry.' });
+      onCancel(); // Close form
     } finally {
         setIsSubmitting(false);
     }

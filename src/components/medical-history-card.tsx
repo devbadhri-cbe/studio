@@ -191,7 +191,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
         icdCode = cond.icdCode;
     } else {
         const med = item as Medication;
-        title = isNilItem ? 'Nil - No medication taken' : med.name;
+        title = isNilItem ? 'Nil - No medication taken' : isFailed ? med.userInput : med.name;
         originalInput = med.userInput;
         if (!isNilItem && med.status !== 'failed') {
             details = [med.dosage, med.frequency, med.foodInstructions ? `${med.foodInstructions} food` : ''].filter(Boolean).join(', ');
@@ -206,7 +206,7 @@ function ListItem({ item, type, isEditing, isFormOpen, onRemove, onShowSynopsis,
         }
     }
     
-    const showOriginalInput = originalInput && title && originalInput.toLowerCase() !== title.toLowerCase() && !isNilItem;
+    const showOriginalInput = originalInput && title && originalInput.toLowerCase() !== title.toLowerCase() && !isNilItem && !isFailed;
 
     const itemBorderColor = isNilItem ? 'border-transparent' : isPending ? "border-yellow-500" : isFailed ? "border-destructive" : "border-primary";
     const itemCursor = (isFailed || isPending || (isMobile && !isNilItem)) ? "cursor-pointer" : "cursor-default";
