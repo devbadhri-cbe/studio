@@ -8,7 +8,6 @@
 
 import { ai } from '@/ai/genkit';
 import { MedicationInfoInputSchema, MedicationInfoOutputSchema, type MedicationInfoInput, type MedicationInfoOutput } from '@/lib/ai-types';
-import { googleAI } from '@genkit-ai/googleai';
 import { getFromCache, storeInCache } from '@/lib/ai-cache';
 
 export async function getMedicationInfo(input: MedicationInfoInput): Promise<MedicationInfoOutput> {
@@ -25,7 +24,6 @@ const prompt = ai.definePrompt({
   name: 'processMedicationPrompt',
   input: { schema: MedicationInfoInputSchema },
   output: { schema: MedicationInfoOutputSchema },
-  model: googleAI.model('gemini-pro'),
   prompt: `You are a pharmaceutical information expert. Your task is to identify the active pharmaceutical ingredient (API), standardize dosage, and validate food instructions for a given medication.
 
 User Input: "{{userInput}}"

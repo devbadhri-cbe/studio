@@ -8,7 +8,6 @@
 
 import { ai } from '@/ai/genkit';
 import { MedicalConditionInputSchema, MedicalConditionOutputSchema, type MedicalConditionInput, type MedicalConditionOutput } from '@/lib/ai-types';
-import { googleAI } from '@genkit-ai/googleai';
 import { getFromCache, storeInCache } from '@/lib/ai-cache';
 
 export async function processMedicalCondition(input: MedicalConditionInput): Promise<MedicalConditionOutput> {
@@ -25,7 +24,6 @@ const prompt = ai.definePrompt({
     name: 'processMedicalConditionPrompt',
     input: { schema: MedicalConditionInputSchema },
     output: { schema: MedicalConditionOutputSchema },
-    model: googleAI.model('gemini-pro'),
     prompt: `You are a medical data validation expert. Your task is to analyze, correct, and standardize a user-provided medical condition.
 
 User Input: "{{condition}}"

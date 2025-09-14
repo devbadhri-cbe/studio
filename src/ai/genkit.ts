@@ -16,6 +16,7 @@ const safetySettings = [
 
 const config: Partial<z.infer<typeof GenerationCommonConfigSchema>> = {
   safetySettings,
+  model: 'gemini-pro',
 };
 
 
@@ -25,5 +26,9 @@ export const ai = genkit({
             apiVersion: 'v1beta',
             safetySettings,
         }),
-    ]
+    ],
+    defaultModel: {
+      model: 'gemini-pro',
+      config,
+    },
 });

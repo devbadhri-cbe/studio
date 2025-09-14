@@ -7,7 +7,6 @@
  */
 import { ai } from '@/ai/genkit';
 import { ConditionSynopsisInputSchema, ConditionSynopsisOutputSchema, type ConditionSynopsisInput, type ConditionSynopsisOutput } from '@/lib/ai-types';
-import { googleAI } from '@genkit-ai/googleai';
 import { getFromCache, storeInCache } from '@/lib/ai-cache';
 
 export async function getConditionSynopsis(input: ConditionSynopsisInput): Promise<ConditionSynopsisOutput> {
@@ -24,7 +23,6 @@ const prompt = ai.definePrompt({
     name: 'getConditionSynopsisPrompt',
     input: { schema: ConditionSynopsisInputSchema },
     output: { schema: ConditionSynopsisOutputSchema },
-    model: googleAI.model('gemini-pro'),
     prompt: `You are a medical information expert. Your task is to provide a clear, easy-to-understand synopsis for a given medical condition.
 
 Condition: "{{conditionName}}"
