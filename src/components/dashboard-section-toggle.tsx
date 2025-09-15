@@ -31,23 +31,23 @@ export function DashboardSectionToggle({
   return (
     <Collapsible open={isOpen} onOpenChange={onOpenChange}>
         <Card className="shadow-md hover:shadow-lg transition-shadow">
-            <CollapsibleTrigger className="w-full text-left">
-                <CardHeader>
-                    <div className="flex items-start justify-between">
-                        <div className="flex items-center flex-1 gap-4">
-                            <div className="flex-shrink-0">{icon}</div>
-                            <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-base truncate">{title}</h3>
-                                <p className="text-sm text-muted-foreground truncate">{subtitle}</p>
-                            </div>
+            <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                    <CollapsibleTrigger className="flex items-center flex-1 gap-4 text-left">
+                        <div className="flex-shrink-0">{icon}</div>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-base truncate">{title}</h3>
+                            <p className="text-sm text-muted-foreground truncate">{subtitle}</p>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {actions}
-                          <ChevronDown className={cn("h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground", isOpen && "rotate-180")} />
-                        </div>
+                    </CollapsibleTrigger>
+                    <div className="flex items-center gap-2">
+                        {actions}
+                        <CollapsibleTrigger>
+                             <ChevronDown className={cn("h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground", isOpen && "rotate-180")} />
+                        </CollapsibleTrigger>
                     </div>
-                </CardHeader>
-            </CollapsibleTrigger>
+                </div>
+            </CardHeader>
             <CollapsibleContent>
                 <div className="px-6 pb-6">
                     <Separator className="mb-6" />
