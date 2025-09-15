@@ -138,29 +138,29 @@ export function BiomarkerCard<T extends Record>({
   ) : null;
 
   const RecordsList = (
-    <ScrollArea className="h-[150px]">
-        <ul className="space-y-1 mt-2">
+    <ScrollArea className="h-[150px] border-red-500 border-2 flex-1">
+        <ul className="space-y-2 p-1">
         {formattedRecords.map((record) => (
-            <li key={record.id} className="group flex text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                <div className="flex items-start gap-2 w-full">
-                    <div className="min-w-0">
+            <li key={record.id} className="group flex text-sm text-muted-foreground border border-transparent hover:border-primary/50 bg-muted/50 hover:bg-muted p-2 rounded-md transition-all">
+                <div className="flex items-center gap-2 w-full">
+                    <div className="flex-1 min-w-0">
                         <div className="flex items-baseline gap-2">
                             <span className="font-semibold text-foreground">{record.displayValue}</span>
-                            <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
+                            <span className="text-xs text-muted-foreground">on {formatDate(record.date)}</span>
                         </div>
                     </div>
-                    <div className="flex items-center shrink-0">
                     {isEditMode && !isReadOnly && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => onRemoveRecord(record.id)}>
-                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                            </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Delete record</TooltipContent>
-                        </Tooltip>
+                        <div className="flex items-center shrink-0">
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => onRemoveRecord(record.id)}>
+                                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Delete record</TooltipContent>
+                            </Tooltip>
+                        </div>
                     )}
-                    </div>
                 </div>
             </li>
             ))}
@@ -191,12 +191,11 @@ export function BiomarkerCard<T extends Record>({
     >
        {hasRecords ? (
           <div className="flex flex-col flex-1 h-full p-6 pt-0">
-            <div className="flex flex-row items-center rounded-lg">
-                <div className="flex items-center p-1 rounded-md">
+            <div className="flex flex-row items-center rounded-lg border-2 border-blue-500 gap-4">
+                <div className="flex items-center p-2 rounded-md flex-1">
                     {RecordsList}
                 </div>
-                <div className="flex-1"></div>
-                <div className="pl-2 flex flex-col justify-center items-center rounded-lg p-2">
+                <div className="pl-2 flex flex-col justify-center items-center rounded-lg p-2 flex-initial border-2 border-yellow-500">
                     <div className="p-1 rounded-md">
                         {statusContent}
                     </div>
@@ -205,8 +204,8 @@ export function BiomarkerCard<T extends Record>({
 
             <Separator className="my-4" />
             
-            <div className="flex-1 flex w-full p-2 rounded-lg">
-                <div className="flex-1 flex w-full min-h-[200px]">
+            <div className="flex-1 flex w-full p-2 rounded-lg border-2 border-purple-500">
+                <div className="flex-1 flex w-full min-h-[200px] border-2 border-red-500">
                     {chart}
                 </div>
             </div>
