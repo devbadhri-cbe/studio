@@ -13,6 +13,7 @@ export function DiabetesCard() {
         <DiseaseCardLayout
             value="diabetes"
             title="Diabetes Card"
+            subtitle="Monitor your glucose & HbA1c"
             icon={<Droplet className="h-6 w-6 text-primary" />}
         >
             <Hba1cCard key="hba1c" isReadOnly />

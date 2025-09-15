@@ -12,6 +12,7 @@ export function AnemiaCard() {
         <DiseaseCardLayout
             value="anemia"
             title="Anemia Card"
+            subtitle="Check your hemoglobin levels"
             icon={<HeartCrack className="h-6 w-6 text-primary" />}
             isSingleAction={true}
         >
