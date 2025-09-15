@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -64,7 +63,9 @@ export default function PatientDashboardPage() {
           <div className="flex flex-col border-2 border-red-500 max-w-3xl mx-auto">
             <div className="grid w-full gap-6">
               <PatientHeader />
-              <ProfileCard />
+              <div className="flex border-2 border-blue-500">
+                <ProfileCard />
+              </div>
               <AiInsightCard />
               <MedicalHistoryCard />
               <AddLabReportCard />
