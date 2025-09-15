@@ -13,14 +13,13 @@ import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
 import { ActionMenu } from './ui/action-menu';
-import { UniversalCard } from './universal-card';
 import { ScrollArea } from './ui/scroll-area';
 import { useDateFormatter } from '@/hooks/use-date-formatter';
 import { Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Separator } from './ui/separator';
 import { Button } from './ui/button';
-import { CardDescription, CardTitle } from './ui/card';
+import { Card, CardHeader, CardContent, CardTitle } from './ui/card';
 import { ActionIcon } from './ui/action-icon';
 
 interface Record {
@@ -48,12 +47,12 @@ interface BiomarkerCardProps<T extends Record> {
   title: string;
   icon: React.ReactNode;
   records: T[];
-  onRemoveRecord: (id: string) => void;
-  onUpdateRecord: (record: T) => void;
+  onRemoveRecord?: (id: string) => void;
+  onUpdateRecord?: (record: T) => void;
   getStatus: (record?: T) => { text: string; variant: 'destructive' | 'secondary' | 'outline' | 'default' } | React.ReactNode | null;
   formatRecord: (record: T) => FormattedRecord;
-  addRecordDialog: React.ReactNode;
-  chart: React.ReactNode;
+  addRecordDialog?: React.ReactNode;
+  chart?: React.ReactNode;
   unitSwitch?: UnitSwitchProps;
   isReadOnly?: boolean;
   editMenuItems?: React.ReactNode;
@@ -106,14 +105,14 @@ export function BiomarkerCard<T extends Record>({
     setEditingRecord(null);
   }
   
-  const recordForm = React.cloneElement(addRecordDialog as React.ReactElement, {
+  const recordForm = addRecordDialog ? React.cloneElement(addRecordDialog as React.ReactElement, {
       onCancel: handleCancel,
       onUpdate: (record: T) => {
-        onUpdateRecord(record);
+        onUpdateRecord?.(record);
         handleCancel();
       },
       initialData: editingRecord,
-  });
+  }) : null;
 
   const Actions = !isReadOnly ? (
     <ActionMenu 
@@ -122,14 +121,18 @@ export function BiomarkerCard<T extends Record>({
       open={isMenuOpen}
       onOpenChange={setIsMenuOpen}
     >
-      <DropdownMenuItem onSelect={() => setIsAdding(true)}>
-        <PlusCircle className="mr-2 h-4 w-4" />
-        Add New Record
-      </DropdownMenuItem>
-      <DropdownMenuItem onSelect={() => setIsEditMode((prev) => !prev)} disabled={sortedRecords.length === 0}>
-        <Edit className="mr-2 h-4 w-4" />
-        {isEditMode ? 'Done Editing' : 'Edit Records'}
-      </DropdownMenuItem>
+      {addRecordDialog && (
+        <DropdownMenuItem onSelect={() => setIsAdding(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add New Record
+        </DropdownMenuItem>
+      )}
+      {onRemoveRecord && (
+        <DropdownMenuItem onSelect={() => setIsEditMode((prev) => !prev)} disabled={sortedRecords.length === 0}>
+            <Edit className="mr-2 h-4 w-4" />
+            {isEditMode ? 'Done Editing' : 'Edit Records'}
+        </DropdownMenuItem>
+      )}
       {editMenuItems}
       {unitSwitch && (
         <>
@@ -161,14 +164,16 @@ export function BiomarkerCard<T extends Record>({
                             <span className="text-xs text-muted-foreground">on {formatDate(record.date)}</span>
                         </div>
                     </div>
-                    {isEditMode && !isReadOnly && (
+                    {isEditMode && !isReadOnly && onRemoveRecord && (
                         <div className="flex items-center shrink-0">
-                            <ActionIcon
-                                tooltip="Edit Record"
-                                icon={<Edit className="h-3.5 w-3.5" />}
-                                onClick={() => setEditingRecord(sortedRecords.find(r => r.id === record.id) || null)}
-                                className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                            />
+                            {onUpdateRecord && (
+                                <ActionIcon
+                                    tooltip="Edit Record"
+                                    icon={<Edit className="h-3.5 w-3.5" />}
+                                    onClick={() => setEditingRecord(sortedRecords.find(r => r.id === record.id) || null)}
+                                    className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                />
+                            )}
                              <ActionIcon
                                 tooltip="Delete Record"
                                 icon={<Trash2 className="h-3.5 w-3.5 text-destructive" />}
@@ -200,13 +205,17 @@ export function BiomarkerCard<T extends Record>({
   );
 
   return (
-    <UniversalCard
-      headerContent={headerContent}
-      actions={Actions}
-      contentClassName="p-0"
-    >
-       {hasRecords ? (
-          <div className="flex flex-col flex-1 h-full p-6 pt-0">
+    <Card className="w-full flex flex-col h-full shadow-md hover:shadow-lg transition-shadow bg-card">
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex-1 min-w-0">{headerContent}</div>
+          {Actions && <div className="flex items-center gap-1 shrink-0">{Actions}</div>}
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 flex flex-col p-6 pt-0">
+        <Separator className="mb-6" />
+        {hasRecords ? (
+          <div className="flex flex-col flex-1 h-full">
             <div className="flex flex-col rounded-lg">
                 <div className="flex items-center p-2 rounded-md flex-1">
                     {RecordsList}
@@ -220,16 +229,18 @@ export function BiomarkerCard<T extends Record>({
 
             <Separator className="my-4" />
             
-            <div className="flex-1 flex w-full p-2 rounded-lg">
-                <div className="flex-1 flex w-full min-h-[200px]">
-                    {chart}
-                </div>
-            </div>
+            {chart && (
+              <div className="flex-1 flex w-full p-2 rounded-lg">
+                  <div className="flex-1 flex w-full min-h-[200px]">
+                      {chart}
+                  </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px]">
               <p className="text-sm">No records yet.</p>
-              {!isReadOnly && (
+              {!isReadOnly && addRecordDialog && (
                 <Button variant="outline" size="sm" className="mt-4" onClick={() => setIsAdding(true)}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Add First Record
@@ -237,6 +248,7 @@ export function BiomarkerCard<T extends Record>({
               )}
           </div>
         )}
-    </UniversalCard>
+      </CardContent>
+    </Card>
   );
 }
