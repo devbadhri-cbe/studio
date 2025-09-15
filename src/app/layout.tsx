@@ -38,7 +38,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
-      <body>
+      <body className="border-4 border-blue-500 box-border">
         <TooltipProvider>
             <AppProvider>
               <div className="flex flex-col min-h-screen pt-[env(safe-area-inset-top)] pb-20">
