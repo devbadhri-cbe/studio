@@ -61,21 +61,23 @@ export default function PatientDashboardPage() {
           subtitle={developerCredit}
         />
         <main className="flex-1 px-4 md:px-6 pb-4">
-          <div className="mx-auto grid w-full max-w-xl gap-6">
-            <PatientHeader />
-            <ProfileCard />
-            <AiInsightCard />
-            <MedicalHistoryCard />
-            <AddLabReportCard />
-            <WeightRecordCard />
-            <div className="space-y-4">
-                <AnemiaCard />
-                <DiabetesCard />
-                <HypertensionCard />
-                <LipidPanelCard />
+          <div className="flex flex-col border-2 border-red-500">
+            <div className="mx-auto grid w-full max-w-xl gap-6">
+              <PatientHeader />
+              <ProfileCard />
+              <AiInsightCard />
+              <MedicalHistoryCard />
+              <AddLabReportCard />
+              <WeightRecordCard />
+              <div className="space-y-4">
+                  <AnemiaCard />
+                  <DiabetesCard />
+                  <HypertensionCard />
+                  <LipidPanelCard />
+              </div>
+              <ShareReportCard />
+              <ReminderCard />
             </div>
-            <ShareReportCard />
-            <ReminderCard />
           </div>
         </main>
       </div>
