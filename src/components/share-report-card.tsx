@@ -4,20 +4,20 @@
 import * as React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Share2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { ShareReportOptions } from './share-report-options';
 
 export function ShareReportCard() {
-    const router = useRouter();
+    const [isFormOpen, setIsFormOpen] = React.useState(false);
 
-    const handleShare = () => {
-        router.push('/patient/report');
-    };
+    if (isFormOpen) {
+        return <ShareReportOptions onCancel={() => setIsFormOpen(false)} />;
+    }
 
     return (
         <Card 
             className="shadow-sm hover:shadow-md transition-shadow cursor-pointer hover:bg-muted/50"
-            onClick={handleShare}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleShare(); }}
+            onClick={() => setIsFormOpen(true)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsFormOpen(true); }}
             role="button"
             tabIndex={0}
         >
@@ -26,7 +26,7 @@ export function ShareReportCard() {
                     <Share2 className="h-6 w-6 text-primary" />
                     <div>
                         <CardTitle>Share Health Report</CardTitle>
-                        <CardDescription>Generate a printable summary of your health data.</CardDescription>
+                        <CardDescription>Generate a QR code or a printable summary.</CardDescription>
                     </div>
                 </div>
             </CardHeader>
