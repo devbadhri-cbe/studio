@@ -18,7 +18,6 @@ export function LipidPanelCard() {
             title="Lipid Panel"
             subtitle="Manage your cholesterol & triglycerides"
             icon={<Flame className="h-6 w-6 text-primary" />}
-            isSingleAction={true}
         >
             <TotalCholesterolCard key="totalCholesterol" isReadOnly={true} />
             <LdlCard key="ldl" isReadOnly={true} />

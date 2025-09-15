@@ -14,7 +14,6 @@ export function HypertensionCard() {
             title="Hypertension Card"
             subtitle="Keep track of your blood pressure"
             icon={<Heart className="h-6 w-6 text-primary" />}
-            isSingleAction={true}
         >
             <BloodPressureCard key="bloodPressure" isReadOnly />
         </DiseaseCardLayout>
