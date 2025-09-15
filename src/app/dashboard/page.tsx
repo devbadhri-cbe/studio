@@ -34,11 +34,9 @@ export default function HomeDashboard() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <div className="flex border-2 border-blue-500">
-        <TitleBar
-          title={['Health', 'Guardian', 'Lite']}
-        />
-      </div>
+      <TitleBar
+        title={['Health', 'Guardian', 'Lite']}
+      />
       <main className="flex-1 px-4 md:px-6 pb-4">
         <div className="mx-auto grid w-full max-w-7xl gap-6">
            <Alert className="bg-primary/5 border-primary/20">
@@ -63,45 +61,35 @@ export default function HomeDashboard() {
                 </Button>
             </div>
           
-            <Collapsible open={isDiseaseCardsOpen} onOpenChange={setIsDiseaseCardsOpen}>
-                <DashboardSectionToggle
-                    title="Disease Cards Collection"
-                    subtitle="Manage high-level disease-specific cards"
-                    icon={<Heart className="h-6 w-6 text-primary" />}
-                    isOpen={isDiseaseCardsOpen}
-                    searchQuery={diseaseCardSearchQuery}
-                    onSearchChange={setDiseaseCardSearchQuery}
-                    searchPlaceholder="Search disease cards..."
-                />
-                <CollapsibleContent>
-                    <Card>
-                        <CardContent className="p-4">
-                            <Accordion type="single" collapsible className="w-full space-y-4">
-                                <div className="space-y-4">
-                                    <DiabetesCard />
-                                    <HypertensionCard />
-                                    <LipidPanelCard />
-                                </div>
-                             </Accordion>
-                        </CardContent>
-                    </Card>
-                </CollapsibleContent>
-            </Collapsible>
+            <DashboardSectionToggle
+                title="Disease Cards Collection"
+                subtitle="Manage high-level disease-specific cards"
+                icon={<Heart className="h-6 w-6 text-primary" />}
+                isOpen={isDiseaseCardsOpen}
+                onOpenChange={setIsDiseaseCardsOpen}
+                searchQuery={diseaseCardSearchQuery}
+                onSearchChange={setDiseaseCardSearchQuery}
+                searchPlaceholder="Search disease cards..."
+            >
+                <div className="space-y-4">
+                    <DiabetesCard />
+                    <HypertensionCard />
+                    <LipidPanelCard />
+                </div>
+            </DashboardSectionToggle>
 
-            <Collapsible open={isBiomarkersOpen} onOpenChange={setIsBiomarkersOpen}>
-                <DashboardSectionToggle
-                    title="Biomarker Cards Collection"
-                    subtitle="View and manage the complete collection of biomarker cards"
-                    icon={<Droplet className="h-6 w-6 text-primary" />}
-                    isOpen={isBiomarkersOpen}
-                    searchQuery={biomarkerSearchQuery}
-                    onSearchChange={setBiomarkerSearchQuery}
-                    searchPlaceholder="Search biomarkers..."
-                />
-                <CollapsibleContent>
-                    <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>
-                </CollapsibleContent>
-            </Collapsible>
+            <DashboardSectionToggle
+                title="Biomarker Cards Collection"
+                subtitle="View and manage the complete collection of biomarker cards"
+                icon={<Droplet className="h-6 w-6 text-primary" />}
+                isOpen={isBiomarkersOpen}
+                onOpenChange={setIsBiomarkersOpen}
+                searchQuery={biomarkerSearchQuery}
+                onSearchChange={setBiomarkerSearchQuery}
+                searchPlaceholder="Search biomarkers..."
+            >
+                <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>
+            </DashboardSectionToggle>
         </div>
       </main>
     </div>

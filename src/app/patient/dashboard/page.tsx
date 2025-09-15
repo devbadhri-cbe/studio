@@ -9,7 +9,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { PatientHeader } from '@/components/patient-header';
 import { ProfileCard } from '@/components/profile-card';
 import { WeightRecordCard } from '@/components/weight-record-card';
-import { BloodPressureCard } from '@/components/blood-pressure-card';
 import { ReminderCard } from '@/components/reminder-card';
 import { DiabetesCard } from '@/components/diabetes-card';
 import { LipidPanelCard } from '@/components/lipid-panel-card';
@@ -65,19 +64,17 @@ export default function PatientDashboardPage() {
   return (
     <>
       <div className="flex min-h-screen w-full flex-col bg-background">
-        <div className="flex border-2 border-blue-500">
-          <TitleBar
-            title={['Health', 'Guardian', 'Lite']}
-            subtitle={developerCredit}
-            backButton={
-                <ActionIcon
-                    tooltip="Back to Developer Dashboard"
-                    icon={<ArrowLeft />}
-                    onClick={handleBack}
-                />
-            }
-          />
-        </div>
+        <TitleBar
+          title={['Health', 'Guardian', 'Lite']}
+          subtitle={developerCredit}
+          backButton={
+              <ActionIcon
+                  tooltip="Back to Developer Dashboard"
+                  icon={<ArrowLeft />}
+                  onClick={handleBack}
+              />
+          }
+        />
         <main className="flex-1 px-4 md:px-6 pb-4">
           <div className="mx-auto grid w-full max-w-xl gap-6">
             <PatientHeader />
@@ -86,7 +83,6 @@ export default function PatientDashboardPage() {
             <MedicalHistoryCard />
             <AddLabReportCard />
             <WeightRecordCard />
-            <BloodPressureCard />
             <div className="space-y-4">
                 <AnemiaCard />
                 <DiabetesCard />
