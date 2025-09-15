@@ -138,32 +138,30 @@ export function BiomarkerCard<T extends Record>({
   ) : null;
 
   const RecordsList = (
-    <div className="flex border border-blue-500">
-        <ScrollArea className="h-[150px] w-full">
-            <ul className="flex flex-col justify-center h-full space-y-1 mt-2">
-            {formattedRecords.map((record) => (
-                <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                    <div className="flex-1 flex items-baseline gap-2">
-                        <span className="font-semibold text-foreground">{record.displayValue}</span>
-                        <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
-                    </div>
-                    <div className="flex items-center shrink-0">
-                    {isEditMode && !isReadOnly && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => onRemoveRecord(record.id)}>
-                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                            </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Delete record</TooltipContent>
-                        </Tooltip>
-                    )}
-                    </div>
-                </li>
-                ))}
-            </ul>
-        </ScrollArea>
-    </div>
+    <ScrollArea className="h-[150px] w-full">
+        <ul className="flex flex-col justify-center h-full space-y-1 mt-2">
+        {formattedRecords.map((record) => (
+            <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                <div className="flex-1 flex items-baseline gap-2">
+                    <span className="font-semibold text-foreground">{record.displayValue}</span>
+                    <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
+                </div>
+                <div className="flex items-center shrink-0">
+                {isEditMode && !isReadOnly && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => onRemoveRecord(record.id)}>
+                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Delete record</TooltipContent>
+                    </Tooltip>
+                )}
+                </div>
+            </li>
+            ))}
+        </ul>
+    </ScrollArea>
   );
 
   if (isAdding) {
@@ -190,10 +188,10 @@ export function BiomarkerCard<T extends Record>({
        {hasRecords ? (
           <div className="flex flex-col flex-1 h-full p-6 pt-0">
             <div className="flex flex-row items-stretch gap-4 border border-red-500 rounded-lg">
-                <div className="pr-2 border border-green-500 flex flex-1 rounded-lg">
+                <div className="flex flex-1 flex-col pr-2 border border-green-500 rounded-lg">
                     {RecordsList}
                 </div>
-                <div className="pl-2 border border-yellow-500 flex flex-1 flex-col justify-center items-center rounded-lg">
+                <div className="pl-2 border border-yellow-500 flex flex-col justify-center items-center rounded-lg">
                     {statusContent}
                 </div>
             </div>
