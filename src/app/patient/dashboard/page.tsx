@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { ActionIcon } from '@/components/ui/action-icon';
 import { Accordion } from '@/components/ui/accordion';
+import { AddLabReportCard } from '@/components/add-lab-report-card';
 
 
 export default function PatientDashboardPage() {
@@ -77,6 +78,7 @@ export default function PatientDashboardPage() {
         <main className="flex-1 px-4 md:px-6 pb-4">
           <div className="mx-auto grid w-full max-w-xl gap-6">
             <PatientHeader />
+            <AddLabReportCard />
             <ProfileCard />
             <AiInsightCard />
             <MedicalHistoryCard />
