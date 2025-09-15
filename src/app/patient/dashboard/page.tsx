@@ -23,7 +23,7 @@ import { HypertensionCard } from '@/components/hypertension-card';
 
 export default function PatientDashboardPage() {
   const { isClient, patient, setPatient, isDeveloperMode, setIsDeveloperMode } = useApp();
-  const isMobile = useIsIsMobile();
+  const isMobile = useIsMobile();
 
   if (!isClient) {
     return (
@@ -61,28 +61,25 @@ export default function PatientDashboardPage() {
           subtitle={developerCredit}
         />
         <main className="flex-1 px-4 md:px-6 pb-4">
-          <div className="flex flex-col max-w-3xl mx-auto">
-            <div className="w-full space-y-6">
-              <PatientHeader />
-              <div className="flex">
-                <ProfileCard />
-              </div>
-              <AiInsightCard />
-              <MedicalHistoryCard />
-              <AddLabReportCard />
-              <WeightRecordCard />
-              <div className="space-y-4">
-                  <AnemiaCard />
-                  <DiabetesCard />
-                  <HypertensionCard />
-                  <LipidPanelCard />
-              </div>
-              <ShareReportCard />
-              <ReminderCard />
+          <div className="flex flex-col max-w-3xl mx-auto space-y-6">
+            <PatientHeader />
+            <ProfileCard />
+            <AiInsightCard />
+            <MedicalHistoryCard />
+            <AddLabReportCard />
+            <WeightRecordCard />
+            <div className="space-y-4">
+                <AnemiaCard />
+                <DiabetesCard />
+                <HypertensionCard />
+                <LipidPanelCard />
             </div>
+            <ShareReportCard />
+            <ReminderCard />
           </div>
         </main>
       </div>
     </>
   );
 }
+
