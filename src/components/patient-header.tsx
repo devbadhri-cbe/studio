@@ -15,7 +15,7 @@ export function PatientHeader() {
   
   return (
     <>
-    <div className="flex-1">
+    <div className="flex-1 mt-5">
       <h1 className="text-2xl md:text-3xl font-semibold font-headline">
         {pageTitle}
       </h1>
