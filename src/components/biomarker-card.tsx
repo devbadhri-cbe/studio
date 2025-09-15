@@ -139,24 +139,26 @@ export function BiomarkerCard<T extends Record>({
 
   const RecordsList = (
     <ScrollArea className="h-[150px] w-full">
-        <ul className="flex flex-col justify-center h-full space-y-1 mt-2">
+        <ul className="space-y-1 mt-2">
         {formattedRecords.map((record) => (
-            <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                <div className="flex flex-1 items-baseline gap-2">
-                    <span className="font-semibold text-foreground">{record.displayValue}</span>
-                    <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
-                </div>
-                <div className="flex items-center shrink-0">
-                {isEditMode && !isReadOnly && (
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => onRemoveRecord(record.id)}>
-                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete record</TooltipContent>
-                    </Tooltip>
-                )}
+            <li key={record.id} className="group text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                <div className="flex border border-blue-500 p-1 rounded-md">
+                    <div className="flex flex-1 items-baseline gap-2">
+                        <span className="font-semibold text-foreground">{record.displayValue}</span>
+                        <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
+                    </div>
+                    <div className="flex items-center shrink-0">
+                    {isEditMode && !isReadOnly && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                            <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => onRemoveRecord(record.id)}>
+                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                            </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete record</TooltipContent>
+                        </Tooltip>
+                    )}
+                    </div>
                 </div>
             </li>
             ))}
