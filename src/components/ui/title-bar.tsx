@@ -66,7 +66,7 @@ export function TitleBar({ title, subtitle, children, rightChildren, backButton 
                     {backButton || children}
                 </div>
                 <div className="flex-1 flex justify-center min-w-0">
-                    <div className="flex flex-col items-center pb-[20px] pt-[20px]">
+                    <div className="flex flex-col items-center pt-[30px] pb-[20px]">
                         <div className="flex items-center justify-center gap-2">
                             <Logo className={cn(
                                 "text-primary transition-all duration-300",
