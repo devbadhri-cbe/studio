@@ -16,9 +16,6 @@ import { AnemiaCard } from '@/components/anemia-card';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { MedicalHistoryCard } from '@/components/medical-history-card';
 import { AiInsightCard } from '@/components/ai-insight-card';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
-import { ActionIcon } from '@/components/ui/action-icon';
 import { AddLabReportCard } from '@/components/add-lab-report-card';
 import { ShareReportCard } from '@/components/share-report-card';
 import { HypertensionCard } from '@/components/hypertension-card';
@@ -27,7 +24,6 @@ import { HypertensionCard } from '@/components/hypertension-card';
 export default function PatientDashboardPage() {
   const { isClient, patient, setPatient, isDeveloperMode, setIsDeveloperMode } = useApp();
   const isMobile = useIsMobile();
-  const router = useRouter();
 
   if (!isClient) {
     return (
@@ -44,10 +40,6 @@ export default function PatientDashboardPage() {
     return <PatientLoginPage />;
   }
   
-  const handleBack = () => {
-    router.push('/dashboard');
-  }
-
   const developerCredit = (
     <Tooltip>
         <TooltipTrigger asChild>
@@ -67,13 +59,6 @@ export default function PatientDashboardPage() {
         <TitleBar
           title={['Health', 'Guardian', 'Lite']}
           subtitle={developerCredit}
-          backButton={
-              <ActionIcon
-                  tooltip="Back to Developer Dashboard"
-                  icon={<ArrowLeft />}
-                  onClick={handleBack}
-              />
-          }
         />
         <main className="flex-1 px-4 md:px-6 pb-4">
           <div className="mx-auto grid w-full max-w-xl gap-6">
