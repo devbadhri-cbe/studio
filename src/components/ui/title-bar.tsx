@@ -55,7 +55,7 @@ export function TitleBar({ title, subtitle, children, rightChildren, backButton 
 
     return (
         <header className={cn(
-            "sticky top-0 z-50 border-b transition-all duration-300",
+            "sticky top-0 z-50 border-b transition-all duration-300 pointer-events-none",
             isScrolled 
                 ? "bg-background/90 backdrop-blur-sm shadow-md border-border" 
                 : "bg-background border-transparent",
