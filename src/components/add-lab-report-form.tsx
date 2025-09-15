@@ -93,7 +93,7 @@ export function AddLabReportForm({ onCancel }: AddLabReportFormProps) {
                 </div>
               
               <Separator />
-              <h4 className="text-sm font-medium">Cardiovascular</h4>
+              <h4 className="text-sm font-medium">Cardiovascular Panel</h4>
               <div className="grid grid-cols-2 gap-4">
                 <FormField control={formMethods.control} name="systolic" render={({ field }) => ( <FormItem><FormLabel>Systolic (mmHg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 120" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField control={formMethods.control} name="diastolic" render={({ field }) => ( <FormItem><FormLabel>Diastolic (mmHg)</FormLabel><FormControl><Input type="number" placeholder="e.g., 80" {...field} /></FormControl><FormMessage /></FormItem> )} />
