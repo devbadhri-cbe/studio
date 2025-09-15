@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,10 +19,9 @@ import { AiInsightCard } from '@/components/ai-insight-card';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { ActionIcon } from '@/components/ui/action-icon';
-import { Accordion } from '@/components/ui/accordion';
 import { AddLabReportCard } from '@/components/add-lab-report-card';
 import { ShareReportCard } from '@/components/share-report-card';
-import { Collapsible } from '@/components/ui/collapsible';
+import { HypertensionCard } from '@/components/hypertension-card';
 
 
 export default function PatientDashboardPage() {
@@ -86,11 +84,12 @@ export default function PatientDashboardPage() {
             <AddLabReportCard />
             <WeightRecordCard />
             <BloodPressureCard />
-            <AnemiaCard />
-            <Accordion type="single" collapsible className="w-full space-y-6">
-              <DiabetesCard />
-              <LipidPanelCard />
-            </Accordion>
+            <div className="space-y-4">
+                <AnemiaCard />
+                <DiabetesCard />
+                <HypertensionCard />
+                <LipidPanelCard />
+            </div>
             <ShareReportCard />
             <ReminderCard />
           </div>
@@ -99,4 +98,3 @@ export default function PatientDashboardPage() {
     </>
   );
 }
-
