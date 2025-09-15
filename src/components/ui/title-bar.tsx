@@ -55,9 +55,9 @@ export function TitleBar({ title, subtitle, children, rightChildren, backButton 
 
     return (
         <header className={cn(
-            "sticky top-0 z-50 border-b transition-all duration-300",
+            "sticky top-0 z-50 border-b transition-all duration-300 drop-shadow-md",
             isScrolled 
-                ? "bg-background/90 backdrop-blur-sm shadow-md border-border" 
+                ? "bg-background/90 backdrop-blur-sm border-border" 
                 : "bg-background border-transparent",
             "px-4 md:px-6"
         )}>
@@ -66,7 +66,7 @@ export function TitleBar({ title, subtitle, children, rightChildren, backButton 
                     {backButton || children}
                 </div>
                 <div className="flex-1 flex justify-center min-w-0">
-                    <div className="w-fit flex flex-col items-center pb-[20px] pt-[20px]">
+                    <div className="flex flex-col items-center pb-[20px] pt-[20px]">
                         <div className="flex items-center justify-center gap-2">
                             <Logo className={cn(
                                 "text-primary transition-all duration-300",
