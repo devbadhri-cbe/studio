@@ -94,7 +94,7 @@ export function BiomarkerCard<T extends Record>({
   }
 
 
-  const formattedRecords = sortedRecords.map(formatRecord);
+  const formattedRecords = sortedRecords.slice(0,5).map(formatRecord);
   const hasRecords = records && records.length > 0;
 
   const handleAddRecordCancel = () => setIsAdding(false);
