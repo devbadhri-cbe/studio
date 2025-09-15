@@ -141,9 +141,9 @@ export function BiomarkerCard<T extends Record>({
     <ScrollArea className="h-[150px] w-full">
         <ul className="space-y-1 mt-2">
         {formattedRecords.map((record) => (
-            <li key={record.id} className="group text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                <div className="flex border border-blue-500 p-1 rounded-md">
-                    <div className="items-baseline gap-2">
+            <li key={record.id} className="group flex text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-baseline gap-2">
                         <span className="font-semibold text-foreground">{record.displayValue}</span>
                         <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
                     </div>
