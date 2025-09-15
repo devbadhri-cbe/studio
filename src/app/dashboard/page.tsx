@@ -38,7 +38,7 @@ export default function HomeDashboard() {
         title={['Health', 'Guardian', 'Lite']}
       />
       <main className="flex-1 px-4 md:px-6 pb-4">
-        <div className="mx-auto grid w-full max-w-7xl gap-6">
+        <div className="flex flex-col max-w-3xl mx-auto w-full space-y-6">
            <Alert className="bg-primary/5 border-primary/20">
               <Info className="h-4 w-4" />
               <AlertTitle>Welcome, Developer!</AlertTitle>
@@ -67,9 +67,6 @@ export default function HomeDashboard() {
                 icon={<Heart className="h-6 w-6 text-primary" />}
                 isOpen={isDiseaseCardsOpen}
                 onOpenChange={setIsDiseaseCardsOpen}
-                searchQuery={diseaseCardSearchQuery}
-                onSearchChange={setDiseaseCardSearchQuery}
-                searchPlaceholder="Search disease cards..."
             >
                 <div className="space-y-4">
                     <DiabetesCard />
@@ -84,9 +81,6 @@ export default function HomeDashboard() {
                 icon={<Droplet className="h-6 w-6 text-primary" />}
                 isOpen={isBiomarkersOpen}
                 onOpenChange={setIsBiomarkersOpen}
-                searchQuery={biomarkerSearchQuery}
-                onSearchChange={setBiomarkerSearchQuery}
-                searchPlaceholder="Search biomarkers..."
             >
                 <BiomarkersPanel searchQuery={biomarkerSearchQuery}/>
             </DashboardSectionToggle>
