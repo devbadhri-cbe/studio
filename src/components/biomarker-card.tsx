@@ -139,7 +139,7 @@ export function BiomarkerCard<T extends Record>({
   ) : null;
 
   const RecordsList = (
-    <ScrollArea className="h-full max-h-[150px] w-full">
+    <ScrollArea className="h-full max-h-[150px] w-full border border-green-500">
         <ul className="space-y-1 mt-2">
           {formattedRecords.map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
@@ -176,6 +176,7 @@ export function BiomarkerCard<T extends Record>({
           </div>
           <div>
               <CardTitle>{title}</CardTitle>
+              <CardDescription>View and manage this biomarker.</CardDescription>
           </div>
       </div>
   );
@@ -187,21 +188,21 @@ export function BiomarkerCard<T extends Record>({
       contentClassName="p-0"
     >
        {hasRecords ? (
-          <div className="flex flex-col flex-1 h-full p-6 pt-0">
+          <div className="flex flex-col flex-1 h-full p-6 pt-0 border border-red-500">
             <div className="flex-1 flex flex-col justify-center">
-               <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col items-center gap-4">
                   <div className="text-center w-full">
                       {RecordsList}
                   </div>
-                  <div className="flex-1 w-full flex items-center justify-center mt-2">
+                  <div className="flex-1 w-full flex items-center justify-center mt-2 border border-yellow-500">
                       {statusContent}
                   </div>
               </div>
             </div>
 
             <Separator className="my-4" />
-
-            <div className="flex-1 flex w-full rounded-lg p-2 min-h-[200px]">
+            
+            <div className="flex-1 flex w-full rounded-lg p-2 min-h-[200px] border border-purple-500">
                 {chart}
             </div>
           </div>
