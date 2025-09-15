@@ -59,15 +59,14 @@ export function TitleBar({ title, subtitle, children, rightChildren, backButton 
             isScrolled 
                 ? "bg-background/90 backdrop-blur-sm shadow-md border-border" 
                 : "bg-background border-transparent",
-            "px-4 md:px-6",
-            "border-2 border-green-500"
+            "px-4 md:px-6"
         )}>
             <div className="mx-auto w-full max-w-7xl flex items-center justify-between pt-[env(safe-area-inset-top)]">
                  <div className="flex justify-start items-center gap-2 w-24">
                     {backButton || children}
                 </div>
                 <div className="flex-1 flex justify-center min-w-0">
-                    <div className="w-fit flex flex-col items-center border-2 border-red-500 pb-[20px] pt-[20px]">
+                    <div className="w-fit flex flex-col items-center pb-[20px] pt-[20px]">
                         <div className="flex items-center justify-center gap-2">
                             <Logo className={cn(
                                 "text-primary transition-all duration-300",
