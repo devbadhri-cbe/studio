@@ -41,7 +41,7 @@ export default function RootLayout({
       <body className="border-4 border-blue-500 box-border">
         <TooltipProvider>
             <AppProvider>
-              <div className="flex flex-col min-h-screen pt-[env(safe-area-inset-top)]">
+              <div className="flex flex-col min-h-screen">
                 {children}
               </div>
               <Toaster />

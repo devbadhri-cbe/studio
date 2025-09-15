@@ -59,10 +59,10 @@ export function TitleBar({ title, subtitle, children, rightChildren, backButton 
             isScrolled 
                 ? "bg-background/90 backdrop-blur-sm shadow-md border-border" 
                 : "bg-background border-transparent",
-            "p-4 md:p-6",
-            isScrolled && "py-2 md:py-3"
+            "px-4 md:px-6",
+            isScrolled ? "py-2 md:py-3" : "pb-4 md:pb-6"
         )}>
-            <div className="mx-auto w-full max-w-7xl flex items-center justify-between">
+            <div className="mx-auto w-full max-w-7xl flex items-center justify-between pt-[env(safe-area-inset-top)]">
                  <div className="flex justify-start items-center gap-2 w-24">
                     {backButton || children}
                 </div>
