@@ -21,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Separator } from './ui/separator';
 import { Button } from './ui/button';
 import { CardDescription, CardTitle } from './ui/card';
+import { ActionIcon } from './ui/action-icon';
 
 interface Record {
   id: string;
@@ -48,6 +49,7 @@ interface BiomarkerCardProps<T extends Record> {
   icon: React.ReactNode;
   records: T[];
   onRemoveRecord: (id: string) => void;
+  onUpdateRecord: (record: T) => void;
   getStatus: (record?: T) => { text: string; variant: 'destructive' | 'secondary' | 'outline' | 'default' } | React.ReactNode | null;
   formatRecord: (record: T) => FormattedRecord;
   addRecordDialog: React.ReactNode;
@@ -62,6 +64,7 @@ export function BiomarkerCard<T extends Record>({
   icon,
   records,
   onRemoveRecord,
+  onUpdateRecord,
   getStatus,
   formatRecord,
   addRecordDialog,
@@ -72,6 +75,7 @@ export function BiomarkerCard<T extends Record>({
 }: BiomarkerCardProps<T>) {
   const [isEditMode, setIsEditMode] = React.useState(false);
   const [isAdding, setIsAdding] = React.useState(false);
+  const [editingRecord, setEditingRecord] = React.useState<T | null>(null);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const formatDate = useDateFormatter();
@@ -97,10 +101,18 @@ export function BiomarkerCard<T extends Record>({
   const formattedRecords = sortedRecords.map(formatRecord);
   const hasRecords = records && records.length > 0;
 
-  const handleAddRecordCancel = () => setIsAdding(false);
+  const handleCancel = () => {
+    setIsAdding(false);
+    setEditingRecord(null);
+  }
   
-  const addRecordForm = React.cloneElement(addRecordDialog as React.ReactElement, {
-      onCancel: handleAddRecordCancel,
+  const recordForm = React.cloneElement(addRecordDialog as React.ReactElement, {
+      onCancel: handleCancel,
+      onUpdate: (record: T) => {
+        onUpdateRecord(record);
+        handleCancel();
+      },
+      initialData: editingRecord,
   });
 
   const Actions = !isReadOnly ? (
@@ -151,14 +163,18 @@ export function BiomarkerCard<T extends Record>({
                     </div>
                     {isEditMode && !isReadOnly && (
                         <div className="flex items-center shrink-0">
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => onRemoveRecord(record.id)}>
-                                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Delete record</TooltipContent>
-                            </Tooltip>
+                            <ActionIcon
+                                tooltip="Edit Record"
+                                icon={<Edit className="h-3.5 w-3.5" />}
+                                onClick={() => setEditingRecord(sortedRecords.find(r => r.id === record.id) || null)}
+                                className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            />
+                             <ActionIcon
+                                tooltip="Delete Record"
+                                icon={<Trash2 className="h-3.5 w-3.5 text-destructive" />}
+                                onClick={() => onRemoveRecord(record.id)}
+                                className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            />
                         </div>
                     )}
                 </div>
@@ -168,8 +184,8 @@ export function BiomarkerCard<T extends Record>({
     </ScrollArea>
   );
 
-  if (isAdding) {
-    return addRecordForm;
+  if (isAdding || editingRecord) {
+    return recordForm;
   }
   
   const headerContent = (
