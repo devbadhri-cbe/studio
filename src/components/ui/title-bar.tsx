@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Logo } from '@/components/logo';
@@ -60,7 +59,6 @@ export function TitleBar({ title, subtitle, children, rightChildren, backButton 
                 ? "bg-background/90 backdrop-blur-sm shadow-md border-border" 
                 : "bg-background border-transparent",
             "px-4 md:px-6",
-            isScrolled ? "pb-2 md:pb-3" : "pb-4 md:pb-6",
             "border-2 border-green-500",
             "pt-[40px] md:pt-[100px]"
         )}>
@@ -69,7 +67,7 @@ export function TitleBar({ title, subtitle, children, rightChildren, backButton 
                     {backButton || children}
                 </div>
                 <div className="flex-1 flex justify-center min-w-0">
-                    <div className="flex flex-col items-center">
+                    <div className="w-fit flex flex-col items-center border-2 border-red-500">
                         <div className="flex items-center justify-center gap-2">
                             <Logo className={cn(
                                 "text-primary transition-all duration-300",
