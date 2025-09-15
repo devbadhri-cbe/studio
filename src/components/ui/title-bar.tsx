@@ -62,7 +62,7 @@ export function TitleBar({ title, subtitle, children, rightChildren, backButton 
             "p-4 md:p-6",
             isScrolled && "py-2 md:py-3"
         )}>
-            <div className="mx-auto w-full max-w-7xl flex items-center justify-between border-2 border-blue-500">
+            <div className="mx-auto w-full max-w-7xl flex items-center justify-between">
                  <div className="flex justify-start items-center gap-2 w-24">
                     {backButton || children}
                 </div>
