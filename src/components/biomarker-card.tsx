@@ -94,7 +94,7 @@ export function BiomarkerCard<T extends Record>({
   }
 
 
-  const formattedRecords = sortedRecords.slice(0,5).map(formatRecord);
+  const formattedRecords = sortedRecords.map(formatRecord);
   const hasRecords = records && records.length > 0;
 
   const handleAddRecordCancel = () => setIsAdding(false);
@@ -138,7 +138,7 @@ export function BiomarkerCard<T extends Record>({
   ) : null;
 
   const RecordsList = (
-    <ScrollArea className="h-full max-h-[150px] w-full">
+    <ScrollArea className="h-[150px] w-full">
         <ul className="space-y-1 mt-2">
           {formattedRecords.map((record) => (
               <li key={record.id} className="group flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
