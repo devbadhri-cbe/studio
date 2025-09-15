@@ -96,7 +96,6 @@ export function BiomarkerCard<T extends Record>({
 
   const formattedRecords = sortedRecords.map(formatRecord);
   const hasRecords = records && records.length > 0;
-  const hasMultipleRecords = records && records.length > 1;
 
   const handleAddRecordCancel = () => setIsAdding(false);
   
@@ -189,10 +188,10 @@ export function BiomarkerCard<T extends Record>({
        {hasRecords ? (
           <div className="flex flex-col flex-1 h-full p-6 pt-0">
             <div className="flex flex-row items-center border border-red-500 gap-4">
-                <div className="flex-1 border border-green-500">
+                <div className="border border-green-500">
                     {RecordsList}
                 </div>
-                <div className="border border-yellow-500 px-4">
+                <div className="flex-1 border border-yellow-500 px-4">
                     {statusContent}
                 </div>
             </div>
@@ -206,10 +205,12 @@ export function BiomarkerCard<T extends Record>({
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground p-4 min-h-[200px]">
               <p className="text-sm">No records yet.</p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={() => setIsAdding(true)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add First Record
-              </Button>
+              {!isReadOnly && (
+                <Button variant="outline" size="sm" className="mt-4" onClick={() => setIsAdding(true)}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add First Record
+                </Button>
+              )}
           </div>
         )}
     </UniversalCard>
