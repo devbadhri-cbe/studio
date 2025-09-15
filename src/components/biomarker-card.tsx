@@ -196,7 +196,7 @@ export function BiomarkerCard<T extends Record>({
 
             <Separator className="my-4" />
             
-            <div className="flex-1 flex w-full rounded-lg p-2 min-h-[200px] border border-red-500">
+            <div className="flex-1 flex w-full p-2 min-h-[200px] border border-red-500">
                 {chart}
             </div>
           </div>
