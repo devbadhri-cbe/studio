@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -56,7 +57,7 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
 
   const getStatus = () => {
     return (
-        <div className="flex flex-col items-center justify-center gap-2 text-xs w-full">
+        <div className="flex items-center justify-around gap-2 text-xs w-full">
             <div className="text-center">
                 <div className="text-muted-foreground">Height</div>
                 <div className="font-semibold text-foreground">{heightDisplay}</div>
@@ -70,7 +71,7 @@ export function WeightRecordCard({ isReadOnly = false }: WeightRecordCardProps) 
             )}
              <div className="text-center">
                 <div className="text-muted-foreground">BMI</div>
-                <div className="font-semibold text-foreground">{profile.bmi || 'N/A'}</div>
+                <div className="font-semibold text-foreground">{profile.bmi?.toFixed(1) || 'N/A'}</div>
             </div>
         </div>
     );
