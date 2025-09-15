@@ -79,7 +79,6 @@ export default function PatientDashboardPage() {
         <main className="flex-1 px-4 md:px-6 pb-4">
           <div className="mx-auto grid w-full max-w-xl gap-6">
             <PatientHeader />
-            <ShareReportCard />
             <AddLabReportCard />
             <ProfileCard />
             <AiInsightCard />
@@ -91,6 +90,7 @@ export default function PatientDashboardPage() {
               <DiabetesCard />
               <LipidPanelCard />
             </Accordion>
+            <ShareReportCard />
             <ReminderCard />
           </div>
         </main>
