@@ -176,7 +176,6 @@ export function BiomarkerCard<T extends Record>({
           </div>
           <div>
               <CardTitle>{title}</CardTitle>
-              <CardDescription>View and manage this biomarker.</CardDescription>
           </div>
       </div>
   );
@@ -189,12 +188,12 @@ export function BiomarkerCard<T extends Record>({
     >
        {hasRecords ? (
           <div className="flex flex-col flex-1 h-full p-6 pt-0 border border-red-500">
-            <div className="flex-1 flex flex-col justify-center">
+            <div className="flex flex-col justify-center">
               <div className="flex flex-col items-center gap-4">
                   <div className="text-center w-full">
                       {RecordsList}
                   </div>
-                  <div className="flex-1 w-full flex items-center justify-center mt-2 border border-yellow-500">
+                  <div className="w-full flex items-center justify-center mt-2 border border-yellow-500">
                       {statusContent}
                   </div>
               </div>
