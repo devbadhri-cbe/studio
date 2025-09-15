@@ -188,7 +188,11 @@ export function BiomarkerCard<T extends Record>({
        {hasRecords ? (
           <div className="flex flex-col flex-1 h-full p-6 pt-0">
             <div className="flex flex-row items-center gap-4 border border-red-500">
-                <div className="flex-1 pr-2 border border-green-500">{RecordsList}</div>
+                <div className="flex-1 pr-2 border border-green-500">
+                    <ScrollArea className="h-[150px] w-full">
+                        {RecordsList}
+                    </ScrollArea>
+                </div>
                 <div className="pl-2 border border-yellow-500 flex flex-col justify-center items-center">
                     {statusContent}
                 </div>
@@ -196,8 +200,10 @@ export function BiomarkerCard<T extends Record>({
 
             <Separator className="my-4" />
             
-            <div className="flex-1 flex w-full p-2 min-h-[200px] border border-red-500">
-                {chart}
+            <div className="flex-1 flex w-full border border-red-500 p-2">
+                <div className="flex-1 flex w-full min-h-[200px] border border-purple-500">
+                    {chart}
+                </div>
             </div>
           </div>
         ) : (
