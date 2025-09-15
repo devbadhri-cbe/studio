@@ -79,10 +79,10 @@ export default function PatientDashboardPage() {
         <main className="flex-1 px-4 md:px-6 pb-4">
           <div className="mx-auto grid w-full max-w-xl gap-6">
             <PatientHeader />
-            <AddLabReportCard />
             <ProfileCard />
             <AiInsightCard />
             <MedicalHistoryCard />
+            <AddLabReportCard />
             <WeightRecordCard />
             <BloodPressureCard />
             <Accordion type="single" collapsible className="w-full space-y-6">
