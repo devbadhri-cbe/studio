@@ -12,10 +12,6 @@ export function PatientHeader() {
   const router = useRouter();
 
   const pageTitle = `Welcome, ${patient?.name || ''}!`;
-
-  const handleShare = () => {
-    router.push('/patient/report');
-  };
   
   return (
     <>
@@ -27,12 +23,6 @@ export function PatientHeader() {
           Your health overview. Consult your doctor before making any decisions.
       </p>
     </div>
-      <div className="flex justify-center items-center gap-2">
-        <Button size="sm" onClick={handleShare}>
-            <Share2 className="mr-2 h-4 w-4" />
-            Share Health Report
-        </Button>
-      </div>
     </>
   );
 }
