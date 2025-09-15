@@ -46,7 +46,7 @@ export const availableBiomarkerCards = {
   },
   anemia: {
     label: 'Anemia',
-    component: null,
+    component: <HemoglobinCard key="hemoglobin" isReadOnly />,
     addRecordLabel: 'New Hemoglobin Record',
     addRecordDialog: <AddHemoglobinRecordDialog />,
   },
@@ -58,7 +58,7 @@ export const availableBiomarkerCards = {
   },
   hypertension: {
     label: 'Hypertension',
-    component: null,
+    component: <BloodPressureCard key="bloodPressure" isReadOnly />,
     addRecordLabel: 'New Blood Pressure Record',
     addRecordDialog: <AddBloodPressureRecordDialog />,
   },
