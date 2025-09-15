@@ -33,7 +33,6 @@ export function LipidCard({ isReadOnly = false }: LipidCardProps) {
   return (
     <BiomarkerCard<LipidRecord>
       title="Lipid Panel (Full)"
-      description="All lipid values"
       icon={<Flame className="h-5 w-5 shrink-0 text-muted-foreground" />}
       records={lipidRecords}
       onRemoveRecord={removeLipidRecord}
