@@ -138,7 +138,7 @@ export function BiomarkerCard<T extends Record>({
   ) : null;
 
   const RecordsList = (
-    <ScrollArea className="h-[150px] border-red-500 border-2 flex-1">
+    <ScrollArea className="h-[150px] flex-1">
         <ul className="space-y-2 p-1">
         {formattedRecords.map((record) => (
             <li key={record.id} className="group flex text-sm text-muted-foreground border border-transparent hover:border-primary/50 bg-muted/50 hover:bg-muted p-2 rounded-md transition-all">
@@ -191,7 +191,7 @@ export function BiomarkerCard<T extends Record>({
     >
        {hasRecords ? (
           <div className="flex flex-col flex-1 h-full p-6 pt-0">
-            <div className="flex flex-row items-center rounded-lg border-2 border-blue-500">
+            <div className="flex flex-col items-center rounded-lg border-2 border-blue-500">
                 <div className="flex items-center p-2 rounded-md flex-1">
                     {RecordsList}
                 </div>
