@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -31,7 +32,7 @@ export function BloodPressureCard({ isReadOnly = false }: BloodPressureCardProps
   
   return (
     <BiomarkerCard<BloodPressureRecord>
-      title="Blood Pressure"
+      title="Blood Pressure (mmHg)"
       icon={<Heart className="h-5 w-5 shrink-0 text-muted-foreground" />}
       records={bloodPressureRecords}
       onRemoveRecord={removeBloodPressureRecord}
