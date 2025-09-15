@@ -30,7 +30,7 @@ export function PatientHeader() {
       <div className="flex justify-center items-center gap-2">
         <Button size="sm" onClick={handleShare}>
             <Share2 className="mr-2 h-4 w-4" />
-            Share Report
+            Share Health Report
         </Button>
       </div>
     </>
