@@ -23,6 +23,7 @@ import { ActionIcon } from '@/components/ui/action-icon';
 import { Accordion } from '@/components/ui/accordion';
 import { AddLabReportCard } from '@/components/add-lab-report-card';
 import { ShareReportCard } from '@/components/share-report-card';
+import { Collapsible } from '@/components/ui/collapsible';
 
 
 export default function PatientDashboardPage() {

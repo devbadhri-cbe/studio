@@ -4,18 +4,17 @@
 import * as React from 'react';
 import { HeartCrack } from 'lucide-react'; // Using HeartCrack as a placeholder
 import { HemoglobinCard } from './hemoglobin-card';
-import { cn } from '@/lib/utils';
-import { DiseaseCardLayout } from './disease-card-layout';
+import { StandaloneDiseaseCardLayout } from './standalone-disease-card-layout';
 
 export function AnemiaCard() {
     return (
-        <DiseaseCardLayout
+        <StandaloneDiseaseCardLayout
             value="anemia"
             title="Anemia Card"
             subtitle="Check your hemoglobin levels"
             icon={<HeartCrack className="h-6 w-6 text-primary" />}
         >
             <HemoglobinCard key="hemoglobin" isReadOnly />
-        </DiseaseCardLayout>
+        </StandaloneDiseaseCardLayout>
     );
 }
