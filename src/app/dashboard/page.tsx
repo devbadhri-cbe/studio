@@ -34,9 +34,11 @@ export default function HomeDashboard() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <TitleBar
-        title={['Health', 'Guardian', 'Lite']}
-      />
+      <div className="flex border-2 border-blue-500">
+        <TitleBar
+          title={['Health', 'Guardian', 'Lite']}
+        />
+      </div>
       <main className="flex-1 px-4 md:px-6 pb-4">
         <div className="mx-auto grid w-full max-w-7xl gap-6">
            <Alert className="bg-primary/5 border-primary/20">
