@@ -101,7 +101,7 @@ export function AddLabReportForm({ onCancel }: AddLabReportFormProps) {
                <FormField control={formMethods.control} name="heartRate" render={({ field }) => ( <FormItem><FormLabel>Heart Rate (bpm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 70" {...field} /></FormControl><FormMessage /></FormItem> )} />
 
               <Separator />
-              <h4 className="text-sm font-medium">Diabetes Markers</h4>
+              <h4 className="text-sm font-medium">Diabetes Panel</h4>
               <div className="grid grid-cols-2 gap-4">
                 <FormField control={formMethods.control} name="hba1c" render={({ field }) => ( <FormItem><FormLabel>HbA1c (%)</FormLabel><FormControl><Input type="number" step="0.1" placeholder="e.g., 5.7" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField control={formMethods.control} name="fastingBloodGlucose" render={({ field }) => ( <FormItem><FormLabel>Fasting Glucose ({glucoseUnit})</FormLabel><FormControl><Input type="number" step="any" placeholder={glucoseUnit === 'mg/dL' ? 'e.g., 95' : 'e.g., 5.3'} {...field} /></FormControl><FormMessage /></FormItem> )} />
