@@ -142,10 +142,12 @@ export function BiomarkerCard<T extends Record>({
         <ul className="space-y-1 mt-2">
         {formattedRecords.map((record) => (
             <li key={record.id} className="group flex text-xs text-muted-foreground border-l-2 border-primary pl-3 pr-2 py-1 hover:bg-muted/50 rounded-r-md">
-                <div className="flex items-center justify-between w-full">
-                    <div className="flex items-baseline gap-2">
-                        <span className="font-semibold text-foreground">{record.displayValue}</span>
-                        <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
+                <div className="flex items-start gap-2 w-full">
+                    <div className="min-w-0">
+                        <div className="flex items-baseline gap-2">
+                            <span className="font-semibold text-foreground">{record.displayValue}</span>
+                            <span className="text-xs text-muted-foreground"> on {formatDate(record.date)}</span>
+                        </div>
                     </div>
                     <div className="flex items-center shrink-0">
                     {isEditMode && !isReadOnly && (
@@ -189,7 +191,7 @@ export function BiomarkerCard<T extends Record>({
     >
        {hasRecords ? (
           <div className="flex flex-col flex-1 h-full p-6 pt-0">
-            <div className="flex flex-row items-stretch gap-4 rounded-lg">
+            <div className="border border-blue-500 flex flex-row items-stretch gap-4 rounded-lg">
                 <div className="border border-red-500 p-1 rounded-md flex items-center">
                     {RecordsList}
                 </div>
