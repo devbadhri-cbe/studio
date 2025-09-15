@@ -74,29 +74,31 @@ export function DiseaseCardLayout({ value, title, subtitle, icon, children, isSi
 
   return (
     <AccordionItem value={value} className="border rounded-lg shadow-sm overflow-hidden">
-        <div className="flex items-center p-6">
-            <AccordionTrigger className="p-0 flex-1">
-                <div className="flex items-center gap-3 text-left w-full cursor-pointer">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                        {icon}
-                    </div>
-                    <div>
-                        <CardTitle>{title}</CardTitle>
-                        {subtitle && <CardDescription className="mt-1">{subtitle}</CardDescription>}
-                    </div>
+        <AccordionTrigger className="p-6 hover:no-underline">
+            <div className="flex items-center gap-3 text-left w-full cursor-pointer">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    {icon}
                 </div>
-            </AccordionTrigger>
-             <div className="pl-4" onClick={(e) => e.stopPropagation()}>{Actions}</div>
-        </div>
+                <div>
+                    <CardTitle>{title}</CardTitle>
+                    {subtitle && <CardDescription className="mt-1">{subtitle}</CardDescription>}
+                </div>
+            </div>
+        </AccordionTrigger>
         <AccordionContent>
-            {activeDialogKey ? (
-              <div className="px-6 pb-6 w-full">{renderActiveDialog()}</div>
-            ) : (
-              <div className="space-y-4 px-6 pb-6">
-                  <Separator className="mb-6" />
-                  {children}
-              </div>
-            )}
+            <div className="px-6 pb-6">
+                <Separator className="mb-6" />
+                {activeDialogKey ? (
+                    renderActiveDialog()
+                ) : (
+                    <div className="space-y-4">
+                        <div className="flex justify-end">
+                            {Actions}
+                        </div>
+                        {children}
+                    </div>
+                )}
+            </div>
         </AccordionContent>
     </AccordionItem>
   );
