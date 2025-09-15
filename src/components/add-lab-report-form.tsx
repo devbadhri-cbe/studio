@@ -87,7 +87,10 @@ export function AddLabReportForm({ onCancel }: AddLabReportFormProps) {
         <FormProvider {...formMethods}>
           <form onSubmit={formMethods.handleSubmit(onSubmit)}>
             <div className="space-y-6">
-              <DateInput name="date" label="Test Date" fromYear={new Date().getFullYear() - 10} toYear={new Date().getFullYear()} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <DateInput name="date" label="Test Date" fromYear={new Date().getFullYear() - 10} toYear={new Date().getFullYear()} />
+                    <FormField control={formMethods.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Weight ({weightUnit})</FormLabel><FormControl><Input type="number" step="0.01" placeholder={isImperial ? "e.g., 154.5" : "e.g., 70.5"} {...field} /></FormControl><FormMessage /></FormItem> )} />
+                </div>
               
               <Separator />
               <h4 className="text-sm font-medium">Diabetes Markers</h4>
@@ -112,10 +115,6 @@ export function AddLabReportForm({ onCancel }: AddLabReportFormProps) {
                   <FormField control={formMethods.control} name="ldl" render={({ field }) => ( <FormItem><FormLabel>LDL Cholesterol</FormLabel><FormControl><Input type="number" step="0.1" placeholder="e.g., 100" {...field} /></FormControl><FormMessage /></FormItem> )} />
                   <FormField control={formMethods.control} name="hdl" render={({ field }) => ( <FormItem><FormLabel>HDL Cholesterol</FormLabel><FormControl><Input type="number" placeholder="e.g., 50" {...field} /></FormControl><FormMessage /></FormItem> )} />
               </div>
-
-              <Separator />
-              <h4 className="text-sm font-medium">Body Metrics</h4>
-              <FormField control={formMethods.control} name="weight" render={({ field }) => ( <FormItem><FormLabel>Weight ({weightUnit})</FormLabel><FormControl><Input type="number" step="0.01" placeholder={isImperial ? "e.g., 154.5" : "e.g., 70.5"} {...field} /></FormControl><FormMessage /></FormItem> )} />
             </div>
             <FormActions onCancel={onCancel} isSubmitting={isSubmitting} submitText="Save Lab Report" />
           </form>
