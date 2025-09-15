@@ -9,6 +9,7 @@ import QRCode from 'react-qr-code';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Separator } from './ui/separator';
+import { useApp } from '@/context/app-context';
 
 interface ShareReportOptionsProps {
     onCancel: () => void;
@@ -18,6 +19,7 @@ export function ShareReportOptions({ onCancel }: ShareReportOptionsProps) {
     const [reportUrl, setReportUrl] = React.useState('');
     const { toast } = useToast();
     const router = useRouter();
+    const { isClient } = useApp();
 
     React.useEffect(() => {
         // This ensures window is defined, so it only runs on the client.
@@ -47,7 +49,7 @@ export function ShareReportOptions({ onCancel }: ShareReportOptionsProps) {
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="flex items-center justify-center bg-white p-4 rounded-md shadow-inner">
-                    {reportUrl ? (
+                    {isClient && reportUrl ? (
                          <QRCode
                             size={256}
                             style={{ height: "auto", maxWidth: "100%", width: "160px" }}
@@ -60,7 +62,7 @@ export function ShareReportOptions({ onCancel }: ShareReportOptionsProps) {
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Button variant="outline" onClick={handleCopyLink}>
+                    <Button variant="outline" onClick={handleCopyLink} disabled={!reportUrl}>
                         <Copy className="mr-2 h-4 w-4" />
                         Copy Sharable Link
                     </Button>
