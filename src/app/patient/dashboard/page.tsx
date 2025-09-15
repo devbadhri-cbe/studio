@@ -85,8 +85,8 @@ export default function PatientDashboardPage() {
             <AddLabReportCard />
             <WeightRecordCard />
             <BloodPressureCard />
+            <AnemiaCard />
             <Accordion type="single" collapsible className="w-full space-y-6">
-              <AnemiaCard />
               <DiabetesCard />
               <LipidPanelCard />
             </Accordion>
@@ -98,3 +98,4 @@ export default function PatientDashboardPage() {
     </>
   );
 }
+
