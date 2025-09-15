@@ -67,7 +67,7 @@ export function BiomarkerCard<T extends Record>({
   addRecordDialog,
   chart,
   unitSwitch,
-  isReadOnly = false,
+  isReadOnly = true,
   editMenuItems,
 }: BiomarkerCardProps<T>) {
   const [isEditMode, setIsEditMode] = React.useState(false);
