@@ -187,11 +187,11 @@ export function BiomarkerCard<T extends Record>({
     >
        {hasRecords ? (
           <div className="flex flex-col flex-1 h-full p-6 pt-0">
-            <div className="flex flex-row items-center border border-red-500 gap-4">
-                <div className="border border-green-500">
+            <div className="flex flex-row items-stretch border border-red-500 gap-4">
+                <div className="w-1/2 border border-green-500">
                     {RecordsList}
                 </div>
-                <div className="flex-1 border border-yellow-500 px-4">
+                <div className="w-1/2 border border-yellow-500 px-4 flex items-center justify-center">
                     {statusContent}
                 </div>
             </div>
