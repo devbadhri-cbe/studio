@@ -188,7 +188,7 @@ export function BiomarkerCard<T extends Record>({
        {hasRecords ? (
           <div className="flex flex-col flex-1 h-full p-6 pt-0">
             <div className="flex flex-row items-center gap-4 border border-red-500">
-                <div className="flex-1 pr-2 border border-green-500">
+                <div className="flex-1 pr-2 border border-green-500 flex items-center">
                     <ScrollArea className="h-[150px] w-full">
                         {RecordsList}
                     </ScrollArea>
