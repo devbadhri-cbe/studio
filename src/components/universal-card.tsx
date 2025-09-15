@@ -24,7 +24,7 @@ export function UniversalCard({
   headerClassName,
 }: UniversalCardProps) {
   return (
-    <Card className={cn("w-full flex flex-col h-full shadow-xl border-accent", className)}>
+    <Card className={cn("w-full flex flex-col h-full shadow-xl bg-muted/20", className)}>
       {(headerContent || actions) && (
         <CardHeader className={cn(headerClassName)}>
             <div className="flex items-start justify-between">
