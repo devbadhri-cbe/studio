@@ -19,10 +19,12 @@ export function BiomarkersPanel({ searchQuery = '' }: BiomarkersPanelProps) {
         return [...new Set(allEnabled)];
     }, [profile?.enabledBiomarkers]);
     
-    const allCards = Object.entries(availableBiomarkerCards).map(([key, value]) => ({
-        key,
-        label: value.label.toLowerCase(),
-        component: React.cloneElement(value.component, { key, isReadOnly: false }),
+    const allCards = Object.entries(availableBiomarkerCards)
+        .filter(([key, value]) => value.component) // Filter out items with null component
+        .map(([key, value]) => ({
+            key,
+            label: value.label.toLowerCase(),
+            component: React.cloneElement(value.component!, { key, isReadOnly: false }),
     }));
     
     const sortedAndFilteredCards = React.useMemo(() => {
