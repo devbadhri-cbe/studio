@@ -25,8 +25,8 @@ export default function HomeDashboard() {
   const [biomarkerSearchQuery, setBiomarkerSearchQuery] = React.useState('');
   const [diseaseCardSearchQuery, setDiseaseCardSearchQuery] = React.useState('');
   
-  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(true);
-  const [isDiseaseCardsOpen, setIsDiseaseCardsOpen] = React.useState(true);
+  const [isBiomarkersOpen, setIsBiomarkersOpen] = React.useState(false);
+  const [isDiseaseCardsOpen, setIsDiseaseCardsOpen] = React.useState(false);
 
   if (!isClient) {
     return null; // or a loading skeleton
