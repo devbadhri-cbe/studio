@@ -60,8 +60,7 @@ export function TitleBar({ title, subtitle, children, rightChildren, backButton 
                 ? "bg-background/90 backdrop-blur-sm shadow-md border-border" 
                 : "bg-background border-transparent",
             "px-4 md:px-6",
-            "border-2 border-green-500",
-            "pt-[20px] md:pt-[40px]"
+            "border-2 border-green-500"
         )}>
             <div className="mx-auto w-full max-w-7xl flex items-center justify-between pt-[env(safe-area-inset-top)]">
                  <div className="flex justify-start items-center gap-2 w-24">
