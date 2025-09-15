@@ -56,13 +56,15 @@ export default function PatientDashboardPage() {
   return (
     <>
       <div className="flex min-h-screen w-full flex-col bg-background">
-        <TitleBar
-          title={['Health', 'Guardian', 'Lite']}
-          subtitle={developerCredit}
-        />
+        <div className="flex border-2 border-blue-500">
+          <TitleBar
+            title={['Health', 'Guardian', 'Lite']}
+            subtitle={developerCredit}
+          />
+        </div>
         <main className="flex-1 px-4 md:px-6 pb-4">
-          <div className="flex flex-col border-2 border-red-500">
-            <div className="mx-auto grid w-full max-w-xl gap-6">
+          <div className="flex flex-col border-2 border-red-500 max-w-3xl mx-auto">
+            <div className="grid w-full gap-6">
               <PatientHeader />
               <ProfileCard />
               <AiInsightCard />
